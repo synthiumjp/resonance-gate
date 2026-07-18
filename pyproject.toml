@@ -9,4 +9,4 @@ dependencies = ["numpy"]
 dev = ["pytest"]
 
 [tool.pytest.ini_options]
-testpaths = ["substrate"]
+testpaths = ["substrate", "gate"]
