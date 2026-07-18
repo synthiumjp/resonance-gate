@@ -292,3 +292,46 @@ outright; (ii) L2 exactness (AUC 1.0 flat) — expected direction, not
 expected perfection; (iii) the generalization baseline being this strong at
 lambda=0 means the encoder's correlation is doing real semantic work, which
 reframes whitening from "fix" to "trade".
+
+## Entry 7 — 2026-07-18 (planning-session decision on the E3.1 fork data)
+
+ADOPTED — the two-geometry design:
+(1) Interface layer: query terms and extracted strings resolve against the
+    entity/relation registry by RAW embedding cosine (semantic space; where
+    generalization and referential ambiguity live).
+(2) Substrate layer: item vectors use the WHITENED projection, lambda
+    chosen on envelope alone — semantics is not the projection's job,
+    separability is.
+(3) C3 is two-sourced: referential-d = registry top-2 margin in embedding
+    space ("which Tom?"); stored-d = L2 top-2 margin ("two facts on
+    file"). L1 margin is a fast-path hint only.
+(4) D stays 8192 — the D=16384 arm is dropped (correlation, not dimension,
+    is the constraint; kept as a finding).
+Fork (c) dead; fork (a) adopted; fork (b) adopted substrate-side only,
+where its generalization cost is void by construction.
+
+## Entry 8 — 2026-07-18 (E3.2 Part 0: decoupling verified — PASS)
+
+Built encoder/registry.py (interface layer: raw-cosine resolve + whitened
+substrate vectors per entry) and encoder/measure_part0.py; CSV at
+encoder/part0_verification.csv. Seeds: 775 (envelope), 825 (e2e).
+
+a. Registry generalization via resolve(): top1 0.927 / top2 0.982 vs
+   lambda=0 projected baseline 0.927/0.964 — top1 identical, top2 BETTER
+   (raw cosine sheds the sign-quantization noise). Interface number pinned.
+b. Substrate envelope (substrate-side only, full measured moments):
+   lambda | null_mu | k_max | paging | AUC@50/100/150
+   0.50   | 0.0379  | 455   | 227    | 1.0000/0.9997/0.9935
+   0.75   | 0.0339  | 559   | 280    | 1.0000/1.0000/0.9962
+   1.00   | 0.0337  | 560   | 280    | 1.0000/1.0000/0.9955
+   CHOSEN lambda = 0.75 (rule: smallest within 0.005 AUC and 10% k_max of
+   best; 0.5 loses 19% of k_max, 1.0 buys nothing over 0.75). The whitened
+   substrate envelope (paging 280) now EXCEEDS the synthetic-analytic one
+   (210) — whitening plus the hit-scale elevation is net-positive vs iid.
+c. Referential ambiguity: AUC(m_ref) = 0.9848 over 22 underspecified vs 24
+   specific queries (means 0.066 vs 0.315). Bar 0.90 cleared.
+d. End-to-end at lambda=0.75: hits 3/3 answer, misses 3/3 high-u, stored
+   collision m_l2 = 0.0000 with both objects surfaced, two-Toms
+   m_ref('Tom') = 0.018 vs 0.381 specific. All four routes correct.
+
+Registry LAMBDA_SUBSTRATE frozen at 0.75. Proceeding to Parts 1-4.
