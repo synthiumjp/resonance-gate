@@ -1,0 +1,12 @@
+[project]
+name = "rg"
+version = "0.1.0"
+description = "Resonance Gate: VSA memory substrate where retrieval and confidence are the same operation"
+requires-python = ">=3.10"
+dependencies = ["numpy"]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[tool.pytest.ini_options]
+testpaths = ["substrate"]
