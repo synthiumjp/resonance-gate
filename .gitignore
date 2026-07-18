@@ -5,3 +5,4 @@ __pycache__/
 *.egg-info/
 substrate/capacity_curves.csv
 .claude/settings.local.json
+gate/drift_comparison.csv
