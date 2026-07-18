@@ -20,21 +20,27 @@ PROJECTION_PATH = os.path.join(
 )
 
 _model = None
-_P = None
+_P = {}
 
 
-def projection(path=PROJECTION_PATH, d=D, e_dim=EMBED_DIM, seed=PROJECTION_SEED):
-    """The fixed random projection, drawn once and persisted (regenerable
-    bit-exactly from the seed, hence gitignored)."""
-    global _P
-    if _P is None:
+def projection_path(d=D, e_dim=EMBED_DIM):
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                        f"projection_{d}x{e_dim}.npy")
+
+
+def projection(d=D, e_dim=EMBED_DIM, seed=PROJECTION_SEED):
+    """The fixed random projection for dimension d, drawn once and persisted
+    (regenerable bit-exactly from the seed, hence gitignored). Same seed
+    policy at every d (E3.1 adds the D=16384 arm)."""
+    if d not in _P:
+        path = projection_path(d, e_dim)
         if os.path.exists(path):
-            _P = np.load(path)
-            assert _P.shape == (d, e_dim), f"stale projection file {path}"
+            _P[d] = np.load(path)
+            assert _P[d].shape == (d, e_dim), f"stale projection file {path}"
         else:
-            _P = np.random.default_rng(seed).standard_normal((d, e_dim)).astype(np.float32)
-            np.save(path, _P)
-    return _P
+            _P[d] = np.random.default_rng(seed).standard_normal((d, e_dim)).astype(np.float32)
+            np.save(path, _P[d])
+    return _P[d]
 
 
 def _get_model():
@@ -56,16 +62,19 @@ def embed_strings(strings, batch_size=256):
     )
 
 
-def encode_bipolar(strings):
-    """Strings -> bipolar int8 item vectors: sign(P @ embed(s)).
+def project_bipolar(e, d=D):
+    """Embeddings -> bipolar int8 item vectors: sign(P @ e).
     Exact zeros (measure-zero under the Gaussian projection) map to +1."""
-    e = embed_strings(strings)
-    x = e @ projection().T
-    v = np.where(x >= 0, 1, -1).astype(np.int8)
-    return v
+    x = np.asarray(e, dtype=np.float32) @ projection(d).T
+    return np.where(x >= 0, 1, -1).astype(np.int8)
 
 
-def build_codebook(names):
+def encode_bipolar(strings, d=D):
+    """Strings -> bipolar int8 item vectors via the embedding path."""
+    return project_bipolar(embed_strings(strings), d)
+
+
+def build_codebook(names, d=D):
     """Embedded codebook: cleanup/algebra identical to the synthetic path."""
     from map_ops import Codebook
-    return Codebook.from_matrix(names, encode_bipolar(names))
+    return Codebook.from_matrix(names, encode_bipolar(names, d))

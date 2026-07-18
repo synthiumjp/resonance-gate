@@ -216,3 +216,79 @@ WSL components + amdgpu-install --usecase=wsl,rocm to restore. E3 Part 1
 results are unaffected (CPU-only by design claim for the substrate;
 encoder/mouth speed only). CPU fallback remains the logged path until
 ROCm is restored.
+
+## Entry 6 — 2026-07-18 (E3.1: fork-decision data. Measurement only)
+
+Built (behind flags / standalone scripts, default gate behaviour unchanged):
+hit_moments support + calibrate_hit in gate/normalisation.py;
+gate/l2_ambiguity.py (L2Store, exact keys, opt-in) +
+gate/measure_l2_ambiguity.py; encoder/e31_common.py (disk-cached embeddings,
+D-parameterised projection); encoder/measure_measured_moments.py,
+measure_d16384.py, whitening.py, measure_whitening.py,
+test_generalization.py. Seeds: 771 (calibrations), 772 (D=16384), 773 (L2),
+774 (whitening), pools 660/661, dev sets hand-built. New exploratory
+tunables: C_L2=0.15, S_L2=0.08, BETA_L2=1.0 (placeholders — AUC-insensitive,
+calibrate before any confirmatory use); ZCA eps=1e-5.
+
+1. FULL MEASURED MOMENTS (D=8192): hit scale = 1.130 (embedded hits sit 13%
+   above sqrt(2/pi k)); hit sd 0.016-0.021 (1.5-1.9x synthetic). k_max
+   123 -> 158, paging 62 -> 79, k_sat 108. AUC at k=100 does NOT improve
+   (0.9002) — structurally cannot: AUC is invariant to moment choice
+   (entry 4). Same-theta acc k=100: 0.750 -> 0.775; k=200: 0.559 -> 0.581.
+   Full measurement buys calibration + correct flag boundaries, not ranking.
+
+2. D=16384 ARM: doubling REFUTED. Pairwise null sd is dimension-INVARIANT
+   (0.095 at both D — it is embedding correlation surviving sign()); only
+   the random-crosstalk component halves. Substrate null 0.0717 -> 0.0644,
+   sd ~0.0164 unchanged. Measured k_max 158 -> 198 (x1.25, not x2), paging
+   79 -> 99, k_sat 126. Ignorance AUC: 1.0000/0.9981/0.9214/0.7314 at
+   k=10/50/100/200. C3 (L1): 0.9674/0.8893/0.8962/0.7687/0.6341 at
+   k_eff=50/70/90/120/160. Verdict: dimension buys ~25%, correlation is
+   the binding constraint.
+
+3. L2 TOP-2 (fork a): *** AUC(d) = 1.0000 at EVERY load (k_eff 50/70/90/
+   120) *** while L1 degrades 0.896/0.862/0.686/0.647. Collision keys are
+   exactly identical in the store -> m_l2 = 0 exactly; clean singletons
+   keep m_l2 ~ 0.68-0.74. Load-invariance hypothesis CONFIRMED: ambiguity
+   is a fact about what is stored, not about bundle geometry. Caveat for
+   the decision: this measures STORED-fact collisions with exact-key
+   queries; underspecified queries hitting multiple near-keys ("Tom" when
+   two Toms exist) are a query-side phenomenon — related but distinct,
+   partially covered by the generalization measurement below.
+
+4. WHITENING FRONTIER (D=8192, C3 at E3-spec load k_eff=70, L1 margin):
+   lambda | null_sd | ign@50 | ign@100 | C3@70 | gen_top1 | gen_top2
+    0.00  | 0.0996  | 0.9967 | 0.8879  | 0.8387 | 0.927   | 0.964
+    0.25  | 0.0811  | 1.0000 | 0.9736  | 0.8971 | 0.909   | 0.945
+    0.50  | 0.0566  | 1.0000 | 0.9999  | 0.9974 | 0.891   | 0.927
+    0.75  | 0.0389  | 1.0000 | 1.0000  | 0.9996 | 0.873   | 0.927
+    1.00  | 0.0337  | 1.0000 | 1.0000  | 0.9964 | 0.745   | 0.800
+   (encoder/whitening_frontier.csv; ZCA fit once on 1766 pool embeddings.)
+   GENERALIZATION BASELINE (lambda=0, 55 hand-built queries): partial names
+   1.000/1.000, aliases 1.000/1.000, relation paraphrases 0.800/0.900,
+   overall 0.927/0.964 — NL queries DO land on codebook entries; the
+   correlation that costs the null floor is the same structure that buys
+   this. Full whitening (lambda=1) destroys it (0.745/0.800).
+
+SUMMARY TABLE (what each fork buys and costs, these numbers):
+- (a) L2 top-2: buys perfect, load-invariant stored-collision detection
+  (1.0000 everywhere); costs an O(store) key scan per query (no bundle
+  change, no encoder change); does not touch the ignorance envelope
+  (paging stays 79 at D=8192).
+- (c) D=16384: buys +25% envelope (paging 79 -> 99) and C3@70 0.84 -> 0.89;
+  costs 2x memory/compute; refutes its own rationale (correlation, not
+  dimension, binds).
+- (b) whitening lambda=0.5-0.75: buys near-synthetic geometry (ign@100
+  ~1.0, C3@70 ~0.997, null_sd 0.057 -> 0.039) inside the SAME D=8192
+  bundle; costs 3.6-5.4 points of top-1 generalization (0.927 -> 0.891/
+  0.873, top-2 0.964 -> 0.927) and an encoder-path change (re-run of Part 1
+  required, ZCA becomes a frozen artifact with the projection).
+No recommendation recorded — decision returns to planning per the session
+scope. Parts 2-4 remain blocked.
+
+Surprises: (i) the null pairwise sd's exact dimension-invariance is the
+cleanest single number in the stage — it kills the "just raise D" instinct
+outright; (ii) L2 exactness (AUC 1.0 flat) — expected direction, not
+expected perfection; (iii) the generalization baseline being this strong at
+lambda=0 means the encoder's correlation is doing real semantic work, which
+reframes whitening from "fix" to "trade".

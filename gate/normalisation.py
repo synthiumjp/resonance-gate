@@ -91,29 +91,81 @@ def _null_moments(N, D, null_moments=None):
     return float(mu_null(N, D)), sigma_null(D)
 
 
-def _crossing(k, N, D=DEFAULT_D, null_moments=None):
+def _hit_moments(k, D, hit_moments=None):
+    """ANALYTIC/E1-empirical hit moments by default. EMBEDDED full-measured
+    mode (E3.1): pass hit_moments=(scale, k_refs, sd_refs) from calibrate_hit —
+    mean model scale*sqrt(2/(pi*k)) (analytic shape scaled to fit), sd
+    interpolated over the measured reference loads."""
+    if hit_moments is None:
+        return mu_hit(k), sigma_hit(k, D)
+    scale, k_refs, sd_refs = hit_moments
+    return float(scale) * mu_hit(k), np.interp(k, k_refs, sd_refs)
+
+
+def _crossing(k, N, D=DEFAULT_D, null_moments=None, hit_moments=None):
     mn, sn = _null_moments(N, D, null_moments)
-    sh = sigma_hit(k, D)
-    return (mu_hit(k) * sn + mn * sh) / (sh + sn)
+    mh, sh = _hit_moments(k, D, hit_moments)
+    return (mh * sn + mn * sh) / (sh + sn)
 
 
-def z_resolution(a, k, N, D=DEFAULT_D, null_moments=None):
+def z_resolution(a, k, N, D=DEFAULT_D, null_moments=None, hit_moments=None):
     """Normalised resolution: 0 at the hit/null variance-weighted crossing,
     unit = pooled sigma. Positive → written-signal side, negative → null side.
     Load- and codebook-invariant by construction: the same threshold means the
     same thing at every (k, N)."""
     _, sn = _null_moments(N, D, null_moments)
-    s = 0.5 * (sigma_hit(k, D) + sn)
-    return (np.asarray(a, dtype=np.float64) - _crossing(k, N, D, null_moments)) / s
+    _, sh = _hit_moments(k, D, hit_moments)
+    s = 0.5 * (sh + sn)
+    return (np.asarray(a, dtype=np.float64)
+            - _crossing(k, N, D, null_moments, hit_moments)) / s
 
 
-def z_margin(m, k, N, D=DEFAULT_D, null_moments=None):
+def z_margin(m, k, N, D=DEFAULT_D, null_moments=None, hit_moments=None):
     """Normalised margin: 0 midway between the expected clean-singleton margin
     (mu_hit - mu_null) and the expected collision margin (~0). Positive →
     singleton-like, negative → ambiguity-like."""
     mn, _ = _null_moments(N, D, null_moments)
-    c = 0.5 * (mu_hit(k) - mn)
+    mh, _ = _hit_moments(k, D, hit_moments)
+    c = 0.5 * (mh - mn)
     return (np.asarray(m, dtype=np.float64) - c) / sigma_margin(k, D)
+
+
+def calibrate_hit(subj_matrix, rel_matrix, obj_codebook, k_refs=(25, 50, 100),
+                  trials=3, seed=98):
+    """EMBEDDED full-measured hit moments: plant known records at each
+    reference load, retrieve them, and fit scale in mu = scale*sqrt(2/(pi*k))
+    by least squares; sd measured per reference load (interpolate between,
+    clamp beyond). Recompute alongside calibrate_null when the codebook grows."""
+    from map_ops import bundle, encode_record
+
+    rng = np.random.default_rng(seed)
+    dim = obj_codebook.matrix.shape[1]
+    n_obj = len(obj_codebook)
+    means, sds = [], []
+    for k in k_refs:
+        a_all = []
+        for _ in range(trials):
+            subj_idx = rng.permutation(subj_matrix.shape[0])[:k]
+            rel_idx = rng.integers(rel_matrix.shape[0], size=k)
+            obj_idx = rng.integers(n_obj, size=k)
+            B = bundle(
+                [encode_record(subj_matrix[subj_idx[i]], rel_matrix[rel_idx[i]],
+                               obj_codebook.matrix[obj_idx[i]]) for i in range(k)],
+                seed=int(rng.integers(2**31)),
+            )
+            noisy = np.roll(
+                B.astype(np.int32) * subj_matrix[subj_idx].astype(np.int32)
+                * np.roll(rel_matrix[rel_idx].astype(np.int32), 1, axis=1),
+                -2, axis=1,
+            )
+            cos = (noisy.astype(np.float32) @ obj_codebook.matrix.T.astype(np.float32)) / dim
+            a_all.append(cos.max(axis=1).astype(np.float64))
+        a_all = np.concatenate(a_all)
+        means.append(a_all.mean())
+        sds.append(a_all.std(ddof=1))
+    mh = mu_hit(np.asarray(k_refs, dtype=np.float64))
+    scale = float(np.dot(means, mh) / np.dot(mh, mh))
+    return scale, np.asarray(k_refs, dtype=np.float64), np.asarray(sds)
 
 
 def calibrate_null(subj_matrix, rel_matrix, obj_codebook, k=100, trials=4, seed=99):
@@ -168,16 +220,18 @@ def paging_threshold(D, N, safety=0.5):
     return safety * k_max(D, N)
 
 
-def k_sat(D=DEFAULT_D, N=500, gamma=1.0, null_moments=None):
-    """Load beyond which mu_hit(k) is within gamma null-sd of the null floor:
-    solve sqrt(2/(pi*k)) = mu_null + gamma*sigma_null for k."""
+def k_sat(D=DEFAULT_D, N=500, gamma=1.0, null_moments=None, hit_moments=None):
+    """Load beyond which the expected hit signal is within gamma null-sd of
+    the null floor: solve scale*sqrt(2/(pi*k)) = mu_null + gamma*sigma_null."""
     mn, sn = _null_moments(N, D, null_moments)
+    scale = 1.0 if hit_moments is None else float(hit_moments[0])
     a_star = mn + gamma * sn
-    return 2.0 / (np.pi * a_star**2)
+    return 2.0 * scale**2 / (np.pi * a_star**2)
 
 
-def is_saturated(k, N, D=DEFAULT_D, gamma=1.0, null_moments=None):
+def is_saturated(k, N, D=DEFAULT_D, gamma=1.0, null_moments=None, hit_moments=None):
     """True when the expected hit signal at load k is within gamma null-sd of
     the null floor — the gate must flag this instead of emitting confident b."""
     mn, sn = _null_moments(N, D, null_moments)
-    return bool(mu_hit(k) <= mn + gamma * sn)
+    mh, _ = _hit_moments(k, D, hit_moments)
+    return bool(mh <= mn + gamma * sn)

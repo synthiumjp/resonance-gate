@@ -42,13 +42,13 @@ def sigmoid(x):
 
 
 def opinion(a, m, k, N, D=DEFAULT_D, theta=THETA, alpha=ALPHA, beta=BETA,
-            null_moments=None):
+            null_moments=None, hit_moments=None):
     """Map raw cleanup geometry (a = s1, m = s1 - s2) at known load k and
     codebook size N to a (b, d, u) opinion. Vectorises over a, m.
-    null_moments: EMBEDDED-mode measured (mu, sigma) of the null floor;
-    None = analytic (synthetic substrates)."""
-    z = z_resolution(a, k, N, D, null_moments)
-    m_z = z_margin(m, k, N, D, null_moments)
+    null_moments / hit_moments: EMBEDDED-mode measured calibrations
+    (calibrate_null / calibrate_hit); None = analytic + E1-empirical."""
+    z = z_resolution(a, k, N, D, null_moments, hit_moments)
+    m_z = z_margin(m, k, N, D, null_moments, hit_moments)
     u = 1.0 - sigmoid(alpha * (z - theta))
     pb = sigmoid(beta * m_z)
     b = (1.0 - u) * pb
