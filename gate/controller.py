@@ -40,3 +40,13 @@ def route(op: Opinion, saturated: bool, l2_available: bool = True) -> Action:
     if op.d > op.b:
         return Action.DELIBERATE
     return Action.ANSWER
+
+
+def route_tagged(op, saturated, l2_available=True):
+    """E3.2: same policy as route(), but DELIBERATE carries the d-source tag
+    ('referential' -> "which one do you mean?"; 'stored' -> "I have two
+    different facts about that"). Returns (Action, tag-or-None)."""
+    action = route(op, saturated, l2_available)
+    if action is Action.DELIBERATE:
+        return action, getattr(op, "tag", None)
+    return action, None

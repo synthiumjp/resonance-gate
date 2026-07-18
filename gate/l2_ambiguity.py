@@ -35,12 +35,26 @@ class L2Store:
         self.dim = dim
         self._keys = []
         self.objs = []
+        self.meta = []      # per-record metadata (e.g. provenance) — E3.2
+        self.active = []    # tombstone flags: False = retracted/superseded
         self._K = None
 
-    def append(self, subj_vec, rel_vec, obj_id):
+    def append(self, subj_vec, rel_vec, obj_id, meta=None):
         self._keys.append(bind(subj_vec, permute(rel_vec, 1)))
         self.objs.append(obj_id)
+        self.meta.append(meta)
+        self.active.append(True)
         self._K = None
+        return len(self.objs) - 1
+
+    def tombstone(self, idx):
+        """Mark a record inactive (retraction/supersede); append-only store,
+        the entry stays for provenance history."""
+        self.active[idx] = False
+        self._K = None
+
+    def n_active(self):
+        return int(sum(self.active))
 
     def _key_matrix(self):
         if self._K is None:
@@ -48,15 +62,20 @@ class L2Store:
         return self._K
 
     def top2_batch(self, subj_mat, rel_mat):
-        """Top-2 L2 key cosines for each query row. Returns (c1, c2, obj1,
-        obj2) arrays; c2/obj2 fall back to 0/-1 for a single-record store."""
+        """Top-2 L2 key cosines among ACTIVE records for each query row.
+        Returns (c1, c2, obj1, obj2); c2/obj2 fall back to 0/-1 when fewer
+        than two active records exist."""
         Q = (subj_mat.astype(np.int32)
              * np.roll(rel_mat.astype(np.int32), 1, axis=1)).astype(np.float32)
         cos = (Q @ self._key_matrix().T) / self.dim  # (n_queries, n_records)
-        if cos.shape[1] == 1:
-            c1 = cos[:, 0].astype(np.float64)
-            return c1, np.zeros_like(c1), np.array(self.objs)[np.zeros(len(c1), int)], \
-                np.full(len(c1), -1)
+        inactive = ~np.asarray(self.active, dtype=bool)
+        if inactive.any():
+            cos[:, inactive] = -np.inf
+        if self.n_active() < 2 or cos.shape[1] < 2:
+            best = np.argmax(cos, axis=1)
+            c1 = cos[np.arange(len(best)), best].astype(np.float64)
+            c1[~np.isfinite(c1)] = 0.0
+            return c1, np.zeros_like(c1), np.array(self.objs)[best], np.full(len(c1), -1)
         top2 = np.argpartition(-cos, 1, axis=1)[:, :2]
         rows = np.arange(cos.shape[0])
         pair = cos[rows[:, None], top2]

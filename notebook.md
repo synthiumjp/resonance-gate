@@ -335,3 +335,87 @@ d. End-to-end at lambda=0.75: hits 3/3 answer, misses 3/3 high-u, stored
    m_ref('Tom') = 0.018 vs 0.381 specific. All four routes correct.
 
 Registry LAMBDA_SUBSTRATE frozen at 0.75. Proceeding to Parts 1-4.
+
+### Entry 8 addendum — 2026-07-18 (ROCm restored)
+
+amdgpu-install --usecase=wsl,rocm (6.4.2) completed by JP: rocminfo now
+reports gfx1100 (Radeon RX 7900 GRE) alongside the Ryzen 5 7600. E3 results
+stand on CPU (accepted path). GPU adoption deferred to a llama-cpp-python
+hipBLAS rebuild + torch-rocm for the encoder — worth doing before E4's
+dress rehearsals; until then n_gpu_layers=0 remains pinned for
+reproducibility of everything measured today.
+
+## Entry 9 — 2026-07-18/19 (E3.2 Parts 1-4 complete: gate integration,
+mouth, write path, the loop)
+
+Built: two-source opinion (opinion_two_source, max of referential/stored
+d-sources, each z-normalised in its own space; C_REF=0.19, S_REF=0.08 from
+Part-0c) + route_tagged (DELIBERATE carries 'referential'|'stored');
+mouth/llm.py (SmolLM3-3B Q4_K_M pinned sha256 8334b850..., llama-cpp-python
+0.3.34); mouth/speak.py (template table for the 10 relations + fallback,
+provenance-aware rendering, two-tag deliberate_text, verify_leadin);
+substrate/write_path.py (Memory: L1 int64 accumulator + L2 store with
+provenance metadata and tombstones, echo-check with the sibling-collision
+rule, supersede/forget, LLM extraction with hedge post-guard and
+deterministic qualifier binding); rg_chat.py REPL; tests throughout.
+
+Hardware note: mid-session ROCm was restored (entry 8 addendum) and
+llama-cpp-python was rebuilt with hipBLAS for gfx1100. All E3.2 mouth
+measurements below ran GPU-side (backend logged per run; RG_CPU=1 gives
+the mandatory CPU fallback). The leak run on CPU took ~2.8h before being
+superseded; identical measurement on GPU: ~50s.
+
+LEAK (exit <= 2% ungrounded): with free lead-ins the mouth is grossly
+leaky: raw lead-ins flagged 92/100 grounded, 23/100 ungrounded. Hand-check
+of 30 grounded raws: ~15/30 genuine fabrications ("I heard about your trip
+to Salem", "David's moving soon", workplace attributed to the wrong
+person); rest are name-echo detector false-positives (detector precision
+~0.5, over-strict — the right direction for a filter). Fix: verify-then-
+speak applied to the mouth's OWN text (verify_leadin: no digits, no
+relation vocabulary, no proper nouns past token 1, <= 8 words; 171/200
+lead-ins rejected). EMITTED leak after verification: grounded 0/100,
+UNGROUNDED 0/100 = 0.000. PASS. The measured lesson, stated for the
+preprint: a 3B mouth cannot be trusted with echo freedom; the discipline
+must be structural.
+
+EXTRACTION (40-utterance hand-labelled dev set): precision 1.000, recall
+26/26 after three fixes, each logged as a finding:
+(i) parser bug — my triple regex forbade parens inside fields, rejecting
+    the prompt's own qualifier convention "(Tom (brother) | ...)";
+(ii) prompt shape — stacking NONE-examples at the end sent a 3B model
+    NONE-happy (recall 6/26), and rule-emphasis produced qualifier mania
+    ("Sarah Kim (manager)"); balanced interleaved examples fixed both;
+(iii) SmolLM3 copy glitch — quote-wrapped sentence-initial names decode as
+    "Eizabeth"; an "Utterance:" prefix eliminates it.
+Qualifier binding ("my colleague Tom" -> Tom (colleague)) is now a
+deterministic post-rule on the utterance, not a model behaviour. Hedge/
+negation post-guard drops model attempts to triple-ise non-assertions.
+
+ECHO-CHECK: 100/100 writes accepted (>= 99% bar). The one design case:
+read-back that resolves to a sibling record under the same (subj, rel) key
+is a PASS (it is a stored collision, DELIBERATE material, not a failed
+write).
+
+RETRACTION: deleted stays deleted (post-forget query u = 1.000, abstain);
+superseded resolves to successor (Geneva -> Vienna); subtracted bundle is
+bit-exact vs a memory that never saw the record (integer accumulator), k
+decrements. All green.
+
+20-TURN CONVERSATION (scripted, real loop end to end): 20/20 routes
+correct, including hit-answers, honest misses, BOTH ambiguity kinds with
+correct tags (referential two-Toms; stored 2pm/3pm collision without
+correction marker), correction-supersede, post-correction answer, forget,
+post-forget ignorance. k=7 live records, 16 registry entities at close.
+
+Tunables touched this session: C_REF/S_REF (0.19/0.08); WRITE_MERGE_COSINE
+0.95, REL_MERGE_COSINE 0.80 (rg_chat canonicalisation); verify_leadin
+constraints; extraction prompt (3 iterations, above). All exploratory.
+
+Surprises: (i) the leak measurement is the stage's best result — it
+converts "verify-then-speak" from doctrine into a measured necessity;
+(ii) the substrate/gate side was robust to every mouth failure (typo'd
+registry entries still resolved and answered) — every conversation-test
+failure was parser-side, none were geometry-side; (iii) GPU restore
+changed engineering economics (200-call measurement: 2.8h -> 50s) without
+touching any substrate number, exactly as the CPU-primary design claim
+requires.
