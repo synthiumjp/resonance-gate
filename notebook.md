@@ -203,3 +203,16 @@ most of it — two orders of magnitude of confusability (LOO max 0.58)
 compress to a 1.8x floor elevation at the substrate level. The substrate
 is doing real work; the encoder is the bottleneck, exactly as the
 stage-ordering assumed.
+
+### Entry 5 addendum — 2026-07-18 (hardware correction)
+
+The "no GPU in this WSL2 env — /dev/dri absent" note above is WRONG:
+/dev/dri is the wrong probe under WSL2. /dev/dxg exists (GPU paravirt
+active) and a prior working ROCm venv exists on this machine
+(~/chomsky_merge/neurosym-grammar/.venv, torch 2.4.1+rocm6.0). ROCm is
+currently non-functional system-side: no AMD HSA runtime in
+/usr/lib/wsl/lib (only d3d12/dxcore) and no /opt/rocm — needs Adrenalin
+WSL components + amdgpu-install --usecase=wsl,rocm to restore. E3 Part 1
+results are unaffected (CPU-only by design claim for the substrate;
+encoder/mouth speed only). CPU fallback remains the logged path until
+ROCm is restored.
