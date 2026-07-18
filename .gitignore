@@ -6,3 +6,7 @@ __pycache__/
 substrate/capacity_curves.csv
 .claude/settings.local.json
 gate/drift_comparison.csv
+mouth/models/
+encoder/projection_*.npy
+encoder/*.csv
+encoder/null_calibration.json

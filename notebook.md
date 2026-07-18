@@ -135,3 +135,71 @@ Surprises:
 - Saturated-load b is not merely unreliable, it is actively misleading
   (margin normalisation collapses as mu_hit -> mu_null), which is why the
   flag must gate routing rather than any b-threshold.
+
+## Entry 5 — 2026-07-18 (E3 Part 1: encoder-realism check — STOP RULE FIRED)
+
+Built: encoder/embed.py (MiniLM -> seeded Gaussian projection -> sign;
+model pinned: sentence-transformers/all-MiniLM-L6-v2 @ revision
+1110a243fdf4706b3f48f1d95db1a4f5529b4d41, projection seed 314, D=8192,
+projection saved to disk, gitignored/regenerable), encoder/entities.py
+(seeded confusable entity families), encoder/test_null_floor.py,
+encoder/test_embedded_gate.py; EMBEDDED mode added to gate/normalisation.py
+(null_moments override + calibrate_null measured on the actual codebook;
+analytic mode unchanged, both tested). Codebook.from_matrix added to
+substrate/map_ops.py (additive constructor; algebra untouched). Seeds: 550
+(null floor), 660 (embedded gate), 770 (diagnostics).
+
+Null-floor measurement (THE test of the stage), N in {200, 700, 2000}:
+- Pairwise cosines of projected non-identical entities: mean 0.156-0.186,
+  sd ~0.095 (analytic: mean 0, sd 0.011 — NINE times wider), p99 ~0.45-0.47,
+  max 0.71-0.81. The embedding geometry survives the sign(P@e) projection
+  essentially intact.
+- Leave-one-out max-over-codebook (nearest-neighbour confusability): mean
+  0.51 / 0.58 / 0.62 at N = 200/700/2000 — 117-141 analytic null-sd above
+  the analytic floor. i.i.d. control codebook sits on the analytic curve
+  (floor 0.0343 vs 0.0400 predicted), so the machinery is sound.
+- BUT binding scrambles most of it: the substrate-level miss statistic
+  (calibrate_null, actual unbind of never-written queries) is (0.0718,
+  0.0165) at N=500 vs analytic (0.0390, 0.0041) — floor x1.8, sd x4.
+  Displacement of the true floor from the analytic anchor: 7.1 sd.
+
+Embedded gate vs the E2 synthetic ceiling (same code, same theta, EMBEDDED
+null moments; encoder/embedded_vs_synthetic.csv):
+- Ignorance AUC(u): k=10: 1.0000 vs 1.0000 | k=50: 0.9945 vs 1.0000 |
+  k=100: 0.9002 vs 0.9998 | k=200: 0.6888 vs 0.9792.
+- The collapse is NOT anomalous — it is the E2 capacity law fed with the
+  MEASURED null moments: k_max drops 420 -> 123, paging 210 -> 62, k_sat
+  344 -> 82. Observed AUC dies exactly where the law predicts. The law
+  transfers; the constants shrink 3.4x.
+- mu_hit(k) still tracks sqrt(2/(pi*k)) on embedded hits (slightly
+  elevated: 0.156 vs 0.146 at k=30) but hit sd is ~1.7x the synthetic
+  value — the EMBEDDED mode currently only measures the null side; a
+  fully-measured mode (hit side too) is part of the fork discussion.
+- *** C3 SPLIT EMBEDDED: AUC(d) = 0.8374 at the E2-spec load k_eff=70
+  (synthetic ceiling 0.9988). STOP RULE FIRED (< 0.90). ***
+- C3 vs load (diagnostic, seed 770): 0.949 (k_eff=30), 0.944 (50),
+  0.827 (60), 0.829 (70), 0.724 (90). Within the embedded paging envelope
+  (k_eff <= 62) the split clears 0.90 but sits ~0.05 below the ceiling.
+
+Decision: E3 HALTED after Part 1 per the stage plan. Parts 2-4 (mouth,
+write path, loop) not built. The stop-rule test xfails with the measured
+number so a rerun can't silently pass. Design fork to decide (data above):
+  (a) L2 top-2 ambiguity detection instead of L1 margin — sidesteps the
+      margin's sensitivity to the widened null;
+  (b) decorrelating projection (whiten embeddings before sign) — attacks
+      the root cause (pairwise sd 9x analytic) and would recover envelope
+      AND margin at once, but changes the encoder path;
+  (c) accept the reduced envelope (page at ~62, C3 ~0.94) — no code
+      change, materially weaker headline.
+Prefetched for Part 2 whenever it unblocks: SmolLM3-Q4_K_M.gguf sha256
+8334b850b7bd46238c16b0c550df2138f0889bf433809008cc17a8b05761863e
+(ggml-org/SmolLM3-3B-GGUF), llama-cpp-python 0.3.34 CPU wheel (no GPU in
+this WSL2 env — /dev/dri absent; CPU fallback is the primary path, logged
+per the scope guard).
+
+Surprise worth flagging: the projection preserves embedding correlation
+almost perfectly (sign() does not decorrelate), yet MAP binding launders
+most of it — two orders of magnitude of confusability (LOO max 0.58)
+compress to a 1.8x floor elevation at the substrate level. The substrate
+is doing real work; the encoder is the bottleneck, exactly as the
+stage-ordering assumed.

@@ -23,6 +23,23 @@ class Codebook:
         self.matrix = (rng.integers(0, 2, size=(len(self.names), dim), dtype=np.int8) * 2 - 1).astype(np.int8)
         self._index = {n: i for i, n in enumerate(self.names)}
 
+    @classmethod
+    def from_matrix(cls, names, matrix):
+        """Codebook over externally built item vectors (e.g. the E3 embedding
+        path). Rows must be bipolar int8; cleanup/algebra are unchanged."""
+        cb = cls.__new__(cls)
+        cb.names = list(names)
+        if len(set(cb.names)) != len(cb.names):
+            raise ValueError("codebook names must be unique")
+        matrix = np.asarray(matrix, dtype=np.int8)
+        if not np.isin(matrix, (-1, 1)).all():
+            raise ValueError("codebook vectors must be bipolar")
+        cb.matrix = matrix
+        cb.dim = matrix.shape[1]
+        cb.seed = None
+        cb._index = {n: i for i, n in enumerate(cb.names)}
+        return cb
+
     def __getitem__(self, name):
         return self.matrix[self._index[name]]
 

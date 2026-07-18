@@ -7,6 +7,9 @@ dependencies = ["numpy"]
 
 [project.optional-dependencies]
 dev = ["pytest"]
+# the substrate itself stays numpy-only; these extras are for encoder/ and mouth/
+encoder = ["sentence-transformers", "torch"]
+mouth = ["llama-cpp-python"]
 
 [tool.pytest.ini_options]
-testpaths = ["substrate", "gate"]
+testpaths = ["substrate", "gate", "encoder", "mouth"]
