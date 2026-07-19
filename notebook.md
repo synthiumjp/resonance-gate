@@ -578,3 +578,18 @@ seed family, file the deviation on OSF, restart on fresh stimuli.
 Lesson recorded for the apparatus: constant-on-dev features are landmines
 in any frozen standardisation; the dress rehearsal could not catch it
 because dev and rehearsal shared the same k.
+
+## Entry 14 — 2026-07-19 (Deviation 1 executed as sanctioned)
+
+Patch: LogisticProbe drops zero-variance features (weight fixed 0);
+foil refit on the unchanged dev corpus: cross-fit 0.9750 (identical
+pre-patch — dropped features carried no dev signal), dev gap vs analytic
+1-u = 0.0183; head re-frozen sha256 702e789c... New confirmatory seed
+family (second block): 888000011-14; consumed block 777000001-4 never
+reused. Riders 1 (seen-results acknowledgment) and 2 (0.02 margin
+retained regardless of refit) incorporated verbatim in
+docs/deviation_log.md. Phase C rerun remains BLOCKED pending OSF
+deviation filing + registrant go. Instruments tests green (6/6);
+phase_c guard re-verified (refuses: it now demands the new head hash
+and the filed registration lines, both present, but the rerun gate is
+the registrant's go, enforced by process, not code — noted).

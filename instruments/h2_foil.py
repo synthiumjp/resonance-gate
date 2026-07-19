@@ -74,7 +74,8 @@ def main():
             "train_seed": TRAIN_SEED, "dev_corpus_seed": DEV_SEED,
             "n_train": n, "dev_auroc2_crossfit": float(dev_auc),
             "dev_auroc2_insample": float(auroc2(head.predict(X), y)),
-            "w": head.w.tolist(), "mu": head.mu.tolist(), "sd": head.sd.tolist()}
+            "w": head.w.tolist(), "mu": head.mu.tolist(), "sd": head.sd.tolist(),
+            "keep": head.keep.tolist()}
     with open(HEAD_PATH, "w") as f:
         json.dump(blob, f, indent=1)
     sha = hashlib.sha256(open(HEAD_PATH, "rb").read()).hexdigest()

@@ -122,32 +122,43 @@ def probe_features(subj, rel, answer):
 
 
 class LogisticProbe:
-    """Seeded numpy logistic regression (the trained foil's head)."""
+    """Seeded numpy logistic regression (the trained foil's head).
+
+    Deviation 1 patch (2026-07-19): features with ZERO variance on the
+    training sample are DROPPED (weight fixed at 0), never sd-floored — a
+    1e-9 floor made the frozen head degenerate the moment a constant-on-dev
+    feature (k) took a different constant on confirmatory data."""
 
     def __init__(self, seed=31):
         self.seed = seed
         self.w = None
         self.mu = None
         self.sd = None
+        self.keep = None  # zero-variance feature mask: False -> weight 0
+
+    def _norm(self, X):
+        X = np.asarray(X, dtype=np.float64)
+        Xn = np.where(self.keep, (X - self.mu) / np.where(self.keep, self.sd, 1.0), 0.0)
+        return np.hstack([Xn, np.ones((len(X), 1))])
 
     def fit(self, X, y, epochs=3000, lr=0.05, l2=1e-3):
         rng = np.random.default_rng(self.seed)
         X = np.asarray(X, dtype=np.float64)
         y = np.asarray(y, dtype=np.float64)
-        self.mu, self.sd = X.mean(0), X.std(0) + 1e-9
-        Xn = np.hstack([(X - self.mu) / self.sd, np.ones((len(X), 1))])
+        self.mu, self.sd = X.mean(0), X.std(0)
+        self.keep = self.sd > 0
+        Xn = self._norm(X)
         w = rng.normal(0, 0.01, Xn.shape[1])
         for _ in range(epochs):
             p = 1 / (1 + np.exp(-Xn @ w))
             g = Xn.T @ (p - y) / len(y) + l2 * w
             w -= lr * g
+        w[:-1] = np.where(self.keep, w[:-1], 0.0)  # dropped features: weight 0
         self.w = w
         return self
 
     def predict(self, X):
-        X = np.asarray(X, dtype=np.float64)
-        Xn = np.hstack([(X - self.mu) / self.sd, np.ones((len(X), 1))])
-        return 1 / (1 + np.exp(-Xn @ self.w))
+        return 1 / (1 + np.exp(-self._norm(X) @ self.w))
 
 
 def null_shuffle(gate_conf, correct, seed=97):

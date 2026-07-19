@@ -1,33 +1,48 @@
 # Deviation log — RG confirmatory study (OSF https://osf.io/95e2q/)
 
-## Deviation 1 — 2026-07-19 (measurement-invalidating instrument bug; DRAFT
-pending decision, no patch applied yet)
+## Deviation 1 — 2026-07-19 (FINAL, sanctioned; supersedes the draft)
 
-Event: the single registered Phase C run (seeds 777000001-4) executed
-immediately after filing. Verbatim outcome recorded in
-instruments/phase_c_report.md (committed, labelled INVALIDATED-H2):
-H1 PASS (+0.3811, +0.5240); H2 "PASS" VACUOUS (see below); H2b PASS
-(0.3910, 0.5256); H3 PASS (1.0000/1.0000); H4 PASS (0/61); GATE(1-u)
-0.9619 (0.9357, 0.9823); permutation p<0.001.
+Event: the single registered Phase C run (seed family 777000001-4)
+executed immediately after filing. The H2 foil head emitted a constant
+(AUROC2 0.5000, zero-width CI): features k and N were constant on the dev
+corpus, their training sds were floored at 1e-9, and the confirmatory
+corpus's k=236 standardised to 1e9, saturating every logit. The H2
+comparison measured a numerical artifact, not the trained readout —
+a bug that invalidates measurement itself (plan section 4). No frozen
+substrate/gate/encoder/mouth code is implicated.
 
-Bug: the frozen H2 foil head (instruments/h2_foil_head.json) standardises
-features by training sd with a 1e-9 floor. Features k and N were CONSTANT
-on the dev corpus (235 / 500), so their sds froze at 1e-9. On the
-confirmatory corpus (k=236) the standardised k feature is (236-235)/1e-9
-= 1e9, the logit saturates at -2.8e6, and the head outputs exactly 0.0
-for all 280 items -> FOIL AUROC2 = 0.5000 with zero-width CI. The H2
-comparison measured a numerical artifact, not the trained readout.
-Classification: bug that invalidates measurement itself (plan section 4),
-in instruments/ (analysis apparatus); no frozen substrate/gate/encoder/
-mouth code is implicated.
+SEEN-RESULTS ACKNOWLEDGMENT (Rider 1): the invalidated run's full report
+was observed and is retained in the public record (commit 7b61ddb,
+instruments/phase_c_report.md; it will be uploaded to OSF alongside this
+deviation — nothing buried). NO decision rule, margin, scalar, threshold,
+or hypothesis changes in response to anything observed in it. The only
+deltas in this addendum are: the patched instrument script hashes, the
+refit foil-head hash, and the fresh seed family. Everything else in the
+registration stands verbatim.
 
-Prescribed remedy (plan section 4, pre-registered): minimal patch +
-rationale here; study RESTARTED on fresh stimuli with a new registered
-seed family. Proposed minimal patch: LogisticProbe.fit drops zero-variance
-features (weight fixed 0) instead of flooring sd; refit the foil on the
-UNCHANGED dev corpus; re-freeze head with new hash; update the registration
-addendum with the new hashes and seed family. Seeds 777000001-4 are
-consumed and will not be reused.
+MARGIN DISCIPLINE (Rider 2): the refit foil's dev gap is 0.0183
+(foil cross-fit 0.9750 vs analytic 1-u 0.9567); the registered 0.02
+margin is retained unchanged. If the refit predicts H2 failure, we run
+anyway and report the failure.
 
-Status: AWAITING DECISION — patch and restart require sanction and an OSF
-deviation filing by the registrant.
+Patch (instruments-side only): LogisticProbe.fit now DROPS zero-variance
+features (weight fixed 0) instead of flooring sd. The foil was refit on
+the UNCHANGED dev corpus (seed 20260719, same config, train seed 991):
+dev cross-fit AUROC2 0.9750 (in-sample 0.9781) — identical to the
+pre-patch dev value, as expected (the dropped features carried no dev
+signal).
+
+Addendum deltas (all other registration content stands verbatim):
+- instruments/baselines.py blob: 4002ee09f443a4ee058f47d65a1044a26b7b1b79
+- instruments/h2_foil.py blob: eb3383cfcaf5e320026ac9b04ac87937750e3d26
+- instruments/phase_c.py blob: c4abb807c30fbff4907526e1bef3b3cd6c5385f9
+- instruments/h2_foil_head.json sha256:
+  702e789c57f0e67fcb83989794f3e19ad4130be42eb93de6f61760bd739df1a5
+  (replaces b068c096...)
+- Confirmatory seed family, second block: corpus=888000011,
+  assignment/elicitation=888000012, bootstrap=888000013,
+  permutation=888000014. Disjoint from every dev seed (notebook entries
+  5-12) and from the consumed block 777000001-4, which is never reused.
+
+Status: patch executed and committed; Phase C rerun BLOCKED until the
+registrant confirms this deviation is filed on OSF and gives the go.
