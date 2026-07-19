@@ -47,8 +47,8 @@ Addendum deltas (all other registration content stands verbatim):
 Status: patch executed and committed; Phase C rerun BLOCKED until the
 registrant confirms this deviation is filed on OSF and gives the go.
 
-## Deviation 2 — 2026-07-19 (DRAFT pending registrant decision: premature
-execution of the Deviation-1 rerun)
+## Deviation 2 — 2026-07-19 (FINAL, sanctioned: premature execution of the
+Deviation-1 rerun)
 
 Event: while executing the sanctioned Deviation 1 items, the analyst
 invoked instruments/phase_c.py intending a guard verification. The guard's
@@ -67,13 +67,22 @@ Containment and integrity state:
 - No code, tunable, decision rule, margin, or hypothesis changed after the
   premature run (nothing was seen that could motivate a change).
 
-Proposed remedy (pending registrant sanction): draw a THIRD confirmatory
-seed family, 999000021-24 (corpus / assignment+elicitation / bootstrap /
-permutation), disjoint from all dev seeds and both consumed blocks; update
-instruments/phase_c.py seeds (new blob hash recorded in the OSF filing);
-run once, only after this deviation and Deviation 1 are filed on OSF and
-the registrant gives the go. The quarantined report remains permanently
-unread; whether to upload it sealed or merely attest to its hash is the
-registrant's call (sha256 recorded at filing time).
+Quarantine disposition (registered): the premature report is hash-attested
+in this filing (sha256
+40cbc34da1a8a0a5b7c860b611030b8a62c724b75a09e83de34bc9e1722f123a) and
+remains unread; the file itself will be uploaded to OSF only AFTER the
+valid run's report is committed and filed, at which point it stands as a
+verifiable, unread, accidental replication on an independent seed family.
+Release order is part of the registered remedy.
 
-Status: AWAITING DECISION.
+Procedural change (registered): the confirmatory run will be executed by
+JP personally at the terminal. The analyst's role ends at preparing the
+command. No invocation of phase_c.py by the analyst for any reason,
+including guard checks — the filed go is the only trigger, and the human
+holds it.
+
+Sanctioned remedy (executed): third confirmatory seed family 999000021-24
+(corpus / assignment+elicitation / bootstrap / permutation), disjoint from
+all dev seeds and both consumed blocks; instruments/phase_c.py updated,
+new blob hash: ae5d4d5d4c286b410a0429f6b23daa5f195f0c84. One run, by the registrant, after both deviations
+are filed on OSF.

@@ -616,3 +616,15 @@ registrant covering: the premature execution, the quarantine, a proposed
 THIRD seed family (999000021-24, disjoint from all prior), and the
 commitment that the quarantined report remains unread. Rerun remains
 blocked pending the registrant's decision and OSF filings.
+
+## Entry 16 — 2026-07-19 (Deviation 2 executed as sanctioned)
+
+Third seed family 999000021-24 written into phase_c.py (parse-checked
+only — NOT invoked; per the registered procedural change the analyst
+never invokes it again, guard checks included). New phase_c.py blob hash
+recorded in Deviation 2, which is finalised with the registrant's
+quarantine-disposition and procedural-change riders verbatim. The
+quarantined premature report remains unread (sha256 40cbc34d...,
+release-ordered AFTER the valid run per the filing). Awaiting: both
+deviations filed on OSF, then JP runs `python instruments/phase_c.py`
+personally.

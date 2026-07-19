@@ -33,13 +33,15 @@ for _p in (_R, f"{_R}/substrate", f"{_R}/gate", f"{_R}/encoder", f"{_R}/mouth",
 
 import numpy as np
 
-# ---- registered confirmatory seed family, SECOND block (Deviation 1:
-# 777000001-4 were consumed by the invalidated run and are never reused).
-# Disjoint from every dev seed and from the consumed block.
-SEED_CORPUS = 888000011
-SEED_ASSIGN = 888000012
-SEED_BOOT = 888000013
-SEED_PERM = 888000014
+# ---- registered confirmatory seed family, THIRD block (Deviation 2:
+# 777000001-4 consumed by the invalidated run; 888000011-14 consumed by the
+# premature execution, quarantined unread). Disjoint from every dev seed and
+# from both consumed blocks. Executed by the registrant personally; the
+# analyst does not invoke this script for any reason.
+SEED_CORPUS = 999000021
+SEED_ASSIGN = 999000022
+SEED_BOOT = 999000023
+SEED_PERM = 999000024
 
 REGISTRATION = os.path.join(_R, "docs", "registration_final.md")
 HEAD_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
