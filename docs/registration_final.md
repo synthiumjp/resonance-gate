@@ -1,7 +1,7 @@
 # RG confirmatory study — registration (final; file on OSF, then fill the two lines below)
 
-OSF URL: PENDING
-Filed: PENDING
+OSF URL: https://osf.io/95e2q/
+Filed: 2026-07-19T16:16
 
 Artifact: tag rg-freeze-1.0 = commit 15be7513b32af89abe519a7b48e588565fee12d2 (tag object 7210edc71adbbd3d71f8a44908e6217f3c1ebdc4).
 Tunables inventory: docs/freeze_checklist.md (frozen with the tag).
