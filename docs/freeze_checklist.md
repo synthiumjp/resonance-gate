@@ -32,7 +32,7 @@ notebook entry where the value was set or last moved. Values current as of
 | Paging safety fraction | 0.5 (paging = 280 at lambda=0.75, N=500) | entry 4 (set), entry 8 (value) |
 | Saturation gamma | 1.0 null-sd | entry 4 |
 | C_REF / S_REF (referential d) | 0.19 / 0.08 | entry 9 (from Part-0c) |
-| C_L2 / S_L2 / BETA_L2 (stored d) | 0.15 / 0.08 / 1.0 | entry 6 (placeholders — CALIBRATE BEFORE FREEZE) |
+| C_L2 / S_L2 / BETA_L2 (stored d) | 0.4528 / 0.0342 / 1.0 | entry 12 (calibrated: instruments/calibrate_l2.py seed 880; collision margins exactly 0 by key identity, class-mean midpoint used) |
 | Controller U_IGNORANT / U_WEAK | 0.85 / 0.35 | entry 4 |
 | Two-source d combination | max of z-normalised sources; L1 margin fast-path only | entry 7 |
 
@@ -50,18 +50,29 @@ notebook entry where the value was set or last moved. Values current as of
 ## Instruments
 | tunable | value | last changed |
 |---|---|---|
-| GATE scalar (primary) | b (secondaries b/(b+d), 1-u logged) | entry 10 |
+| GATE scalar (primary) | 1-u (secondaries b, b/(b+d)) | entry 11 decision 3 |
 | Pseudo-2AFC / bootstrap | B=2000, seeds in report; AUROC2 rank-based | entry 10 |
 | meta-d' | response-conditional, single-interval, 4 quantile bins, window 0.55-0.95, Guggenmos d'<0.2 exclusion | entry 10 |
 | ECE bins | 10 equal-width | entry 10 |
 | Probe method | ADAPTATION: logistic head over answer-token logit features (docs/ method absent — reconcile before freeze if doc lands) | entry 10 |
 | Leak checker | claim-extraction + surface union, RESOLVE_SUPPORT=0.90; characterisation seed in report | entry 10 |
-| Corpus config | CorpusConfig defaults (500/160/120/120/20/20), seed 20260719 (dev) | entry 10 |
+| Corpus config | CorpusConfig dev mix 500/160/150/90/20/20, seed 20260719 (120/120 ID/OOD rejected by the meta-d eligibility window, entry 10) | entry 10 |
 
-## Known gaps to close before the freeze
-1. C_L2/S_L2/BETA_L2 are uncalibrated placeholders (AUC-insensitive, but the
-   freeze should record measured values).
-2. Probe method + type-2 apparatus implemented from literature, not the
-   Synthium docs (absent from docs/) — reconcile or record as v1-adapted.
-3. Confirmatory corpus generator must be run with a DISJOINT seed family
-   (registered at freeze; dev family is 20260719).
+## Gap closures (2026-07-19, freeze session)
+1. C_L2/S_L2 calibrated (see gate table above).
+2. Pseudo-2AFC / type-2 apparatus and probe method: literature-standard
+   implementations; Synthium docs absent from docs/ at freeze —
+   cross-programme comparability approximate; recorded in the registration
+   deviation section. Probe-on-mouth is now registered prediction H2b.
+3. Confirmatory seed family (used NOWHERE until Phase C):
+   corpus=777000001, assignment=777000002, bootstrap=777000003,
+   permutation=777000004 (instruments/phase_c.py).
+4. H2 foil head frozen: instruments/h2_foil_head.json sha256
+   b068c096dd6cf9f883138733c5fcecff7a74bfb256dd8cbe5b6a6961fe508b79,
+   logistic over (a, m_l1, m_l2, m_ref, k, N), l2=1e-3, train seed 991,
+   n_train=280 dev items, dev AUROC2 cross-fit 0.9750 (in-sample 0.9781).
+5. Registered null = full permutation test (entry 11 decision 1).
+6. No correctness-fit calibration mapping anywhere (entry 11 decision 4).
+
+## Artifact tag
+rg-freeze-1.0 — commit hash recorded below after tagging.

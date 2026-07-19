@@ -23,8 +23,12 @@ import numpy as np
 from map_ops import bind, permute
 from opinion import sigmoid
 
-C_L2 = 0.15   # midpoint between collision margin (0) and typical singleton margin
-S_L2 = 0.08   # spread of singleton margins under confusable neighbours
+# Calibrated at the freeze (instruments/calibrate_l2.py, seed 880, 4 trials,
+# 240 singletons / 60 collisions, lambda=0.75): singleton m_l2 0.9056+-0.0684,
+# collision m_l2 exactly 0 (identical keys -> zero variance, so the variance-
+# weighted crossing is degenerate; class-mean midpoint used instead).
+C_L2 = 0.4528
+S_L2 = 0.0342
 BETA_L2 = 1.0
 
 

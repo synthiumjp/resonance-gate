@@ -502,3 +502,61 @@ reconcile, disjoint confirmatory seed family) and docs/prereg_draft.md
 Surprises: the three apparatus findings above, plus how small the honest H1
 n is (18) — the dev gap is so large that H1 power is trivial; the real
 sample-size driver is everything else.
+
+## Entry 11 — 2026-07-19 (planning session: freeze decisions)
+
+DECIDED (attributed to planning session, verbatim):
+1. Registered null = full permutation test (strata-shuffle shown
+   AUROC2-invariant by construction; apparatus catch logged).
+2. H2 foil redefined: a supervised head (logistic) trained on the frozen
+   gate's retrieval features (a, m_l1, m_l2, m_ref, k, N) on DEV items
+   only, frozen before Phase C. H2 = untrained analytic mapping comes
+   within 0.02 AUROC2 of this trained readout. Probe-on-mouth PROMOTED to
+   registered architectural prediction H2b: probe AUROC2 CI contains 0.5
+   (the mouth never holds the facts; chance decoding is the thesis's own
+   prediction).
+3. Primary gate scalar = 1-u (semantic rationale: errors are dominated by
+   unresolved queries, which u measures; b penalises collisions whose
+   top-1 may be correct). Secondaries: b, b/(b+d). Chosen on dev, frozen
+   here.
+4. No correctness-fit calibration mapping exists or will exist anywhere in
+   the system (C2 discipline). ECE reported descriptively; the
+   registration states this trade explicitly.
+5. n = 200 confirmatory floor. H3 floors: referential AUC >= 0.90, stored
+   AUC >= 0.90 (dev showed 0.985 / 1.000; floors leave honest room). H4
+   unchanged: ungrounded leak <= 2% measured by the characterised leak_v2
+   checker (checker precision/recall reported alongside).
+
+## Entry 12 — 2026-07-19 (THE FREEZE: gap closures and tag)
+
+Gap closures per entry 11:
+- C_L2/S_L2 calibrated: instruments/calibrate_l2.py (seed 880, 4 trials,
+  240 singletons / 60 collisions): singleton m_l2 0.9056 +- 0.0684,
+  collision m_l2 EXACTLY 0 (identical keys -> zero variance; the variance-
+  weighted crossing is degenerate there, class-mean midpoint used and
+  logged). Frozen: C_L2=0.4528, S_L2=0.0342.
+- H2 foil trained and frozen: logistic over (a, m_l1, m_l2, m_ref, k, N),
+  DEV items only (n=280, train seed 991, l2=1e-3), dev AUROC2 cross-fit
+  0.9750 (in-sample 0.9781) vs analytic 1-u 0.9567 -> dev gap 0.018,
+  inside the 0.02 margin: H2 is a live test, not a formality.
+  instruments/h2_foil_head.json sha256 b068c096...
+- Confirmatory seed family drawn, documented, used nowhere:
+  777000001/2/3/4 (corpus / assignment+elicitation / bootstrap / perm).
+- Pseudo-2AFC + apparatus: Synthium docs still absent; recorded in
+  checklist and registration as literature-standard with approximate
+  cross-programme comparability.
+
+Registration: docs/registration_final.md (H1, H2, H2b, H3 both floors,
+H4 + checker disclosure, permutation null, exclusions incl. the M-ratio
+interpretation paragraph, no-calibration-fit statement, analysis-script
+blob hashes, seeds). Phase C: instruments/phase_c.py — refuses to run
+until OSF URL + filing timestamp are added to the registration; verifies
+the frozen foil-head hash.
+
+Final validation on the closed checklist: 42 passed + 1 xfailed (the E3
+stop-rule record, retained deliberately); dress rehearsal reproduces
+(GATE table unchanged on the registered primary; k=235, acc 0.625).
+
+Tagged rg-freeze-1.0. From this commit substrate/, gate/, encoder/,
+mouth/ are read-only; bugs follow the plan's measurement-invalidation
+rule only. Next: file on OSF, then `python instruments/phase_c.py`.

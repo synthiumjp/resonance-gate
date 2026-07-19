@@ -12,4 +12,4 @@ encoder = ["sentence-transformers", "torch"]
 mouth = ["llama-cpp-python"]
 
 [tool.pytest.ini_options]
-testpaths = ["substrate", "gate", "encoder", "mouth"]
+testpaths = ["substrate", "gate", "encoder", "mouth", "instruments"]
