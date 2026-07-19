@@ -1,0 +1,6 @@
+AUROC2 written-key oracle (0 params): 0.9412
+AUROC2 GATE(1-u) headline:            0.979
+GATE within written items: 0.9625 (n=190, n_incorrect=12)
+coll: n=20 labelled-correct=20 mean gate 1-u=0.887
+ref: n=20 labelled-correct=13 mean gate 1-u=0.680
+AUROC2 GATE under strict coll/ref scoring: 0.8299

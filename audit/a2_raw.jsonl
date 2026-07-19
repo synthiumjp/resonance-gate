@@ -1,0 +1,280 @@
+{"i": 0, "kind": "id", "correct": true, "answer": "Grace Barker is scheduled at Germantown.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 1, "kind": "id", "correct": true, "answer": "James (brother) lives in Summit Analytics.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 2, "kind": "coll", "correct": true, "answer": "Paul (cousin) lives in Max Fischer.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 3, "kind": "id", "correct": true, "answer": "Ella Ziegler lives in Ruth Park.", "raw": "75", "parsed": 75}
+{"i": 4, "kind": "ood", "correct": false, "answer": "Leo Ziegler is scheduled at Iris Fisher.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 5, "kind": "id", "correct": true, "answer": "Clara (friend from work) studied at Sofia Park.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 6, "kind": "coll", "correct": true, "answer": "Oscar Meyer manages Chris (friend from work).", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 7, "kind": "id", "correct": true, "answer": "Michael Sousa reports to Simon (manager).", "raw": "75", "parsed": 75}
+{"i": 8, "kind": "ood", "correct": false, "answer": "Ruth Diaz is married to Daniel Reyes.", "raw": "90", "parsed": 90}
+{"i": 9, "kind": "id", "correct": false, "answer": "Maria Olsen is scheduled at Grace Barker.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 10, "kind": "ood", "correct": false, "answer": "Anna Rios lives in Berlin.", "raw": "100", "parsed": 100}
+{"i": 11, "kind": "id", "correct": true, "answer": "Anna (brother) reports to Victor Lowe.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 12, "kind": "id", "correct": true, "answer": "Max (friend from the gym) studied at Nova Analytics.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 13, "kind": "ood", "correct": false, "answer": "Michael (colleague) studied at Peter Fischer.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 14, "kind": "id", "correct": true, "answer": "Grace Park was born in Clara Ziegler.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 15, "kind": "ood", "correct": false, "answer": "Sarah Schmitt studied at Lena Jones.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 16, "kind": "ood", "correct": false, "answer": "Fairview manages Chris Ziegler.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 17, "kind": "ood", "correct": false, "answer": "John (manager) reports to Ella Rios.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 18, "kind": "ood", "correct": false, "answer": "Simon (friend from the gym) studied at Apex Logistics.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 19, "kind": "id", "correct": true, "answer": "Maria (manager) studied at Oscar (cousin).", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 20, "kind": "ood", "correct": false, "answer": "Dublin reports to Vertex Energy.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 21, "kind": "ood", "correct": false, "answer": "David (sister-in-law) is married to Pioneer Media.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 22, "kind": "id", "correct": true, "answer": "Ella Wang was born in Laura Klein.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 23, "kind": "ood", "correct": false, "answer": "Meridian Consulting studied at Peter Evans.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 24, "kind": "id", "correct": true, "answer": "Cascade Labs is a sibling of Orion Systems.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 25, "kind": "ood", "correct": false, "answer": "Max Weber reports to Emma Sousa.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 26, "kind": "id", "correct": true, "answer": "Clara Yuan works at Vienna.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 27, "kind": "ref", "correct": true, "answer": "James (brother) was born in Meridian Energy.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 28, "kind": "ref", "correct": true, "answer": "John (brother) studied at Elena Meyer.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 29, "kind": "ood", "correct": false, "answer": "Ruth Ito studied at Sam Tran.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 30, "kind": "id", "correct": true, "answer": "Victor Kim studied at Michael Sousa.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 31, "kind": "coll", "correct": true, "answer": "Michael Lopez is married to Chris Johansson.", "raw": "75", "parsed": 75}
+{"i": 32, "kind": "id", "correct": true, "answer": "Alice Nguyen is scheduled at Quarry Energy.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 33, "kind": "id", "correct": true, "answer": "Orion Logistics lives in Nina Olsen.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 34, "kind": "id", "correct": true, "answer": "Hugo Park reports to Laura (colleague).", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 35, "kind": "id", "correct": true, "answer": "Summit Analytics studied at Quarry Foods.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 36, "kind": "ood", "correct": false, "answer": "Alice (sister-in-law) is scheduled at Nina Olsen.", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 37, "kind": "ref", "correct": true, "answer": "Robert (brother) is married to Paul Meier.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 38, "kind": "id", "correct": true, "answer": "Atlas Dynamics is a sibling of Delta Systems.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 39, "kind": "id", "correct": true, "answer": "Simon Quinn manages Ella Zheng.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 40, "kind": "id", "correct": true, "answer": "Laura (brother) is scheduled at Ridgemont.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 41, "kind": "ood", "correct": false, "answer": "Chris (friend from work) manages Julia (landlord).", "raw": "75", "parsed": 75}
+{"i": 42, "kind": "ood", "correct": false, "answer": "Max Hansen lives in Harbor Energy.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 43, "kind": "ood", "correct": false, "answer": "Tom Quinn reports to Nora Zheng.", "raw": "100", "parsed": 100}
+{"i": 44, "kind": "id", "correct": true, "answer": "Ruth Olson was born in Leo Kline.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 45, "kind": "id", "correct": true, "answer": "Anna Rios was born in Robert Silva.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 46, "kind": "id", "correct": true, "answer": "Sofia Park manages Grace (brother).", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 47, "kind": "coll", "correct": true, "answer": "Lena (neighbour) studied at Michael Vogel.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 48, "kind": "ood", "correct": false, "answer": "Elena Webber studied at Acme Foods.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 49, "kind": "id", "correct": true, "answer": "Lena Vogel was born in Elena Webber.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 50, "kind": "id", "correct": true, "answer": "Selma studied at Zoe Chang.", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 51, "kind": "ood", "correct": false, "answer": "Zoe Webber studied at Melton.", "raw": "75", "parsed": 75}
+{"i": 52, "kind": "id", "correct": true, "answer": "Cascade Consulting studied at Portland (ME).", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 53, "kind": "ood", "correct": false, "answer": "Ella (sister-in-law) works at Iris Diaz.", "raw": "75", "parsed": 75}
+{"i": 54, "kind": "id", "correct": true, "answer": "Adam Silva reports to Maria Nguyen.", "raw": "75", "parsed": 75}
+{"i": 55, "kind": "id", "correct": true, "answer": "Alice Nguyen is married to John (brother).", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 56, "kind": "ood", "correct": false, "answer": "John Chang lives in Ridgemont.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 57, "kind": "ood", "correct": false, "answer": "Sarah Fisher is married to Emma (colleague).", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 58, "kind": "coll", "correct": true, "answer": "Hugo Nguyen manages Anna Barker.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 59, "kind": "id", "correct": true, "answer": "Peter Fisher is scheduled at Max Silva.", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 60, "kind": "ood", "correct": false, "answer": "Zoe Silva lives in Anna Lopez.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 61, "kind": "id", "correct": true, "answer": "Delta Logistics is scheduled at Bristol.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 62, "kind": "id", "correct": true, "answer": "Felix Yang is married to Mark Wang.", "raw": "75", "parsed": 75}
+{"i": 63, "kind": "ref", "correct": true, "answer": "John (brother) is scheduled at Max Lopez.", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 64, "kind": "id", "correct": true, "answer": "Clara (dentist) was born in Mark Schmitt.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 65, "kind": "id", "correct": true, "answer": "Chris (dentist) reports to Nina Wong.", "raw": "75", "parsed": 75}
+{"i": 66, "kind": "ood", "correct": false, "answer": "Felix Yang manages Nora Fisher.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 67, "kind": "id", "correct": true, "answer": "Sam Vogel is a sibling of Ella Cheng.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 68, "kind": "ood", "correct": false, "answer": "Ella Webber reports to Springfield (IL).", "raw": "75", "parsed": 75}
+{"i": 69, "kind": "coll", "correct": true, "answer": "Quarry Dynamics reports to Maria Rios.", "raw": "75", "parsed": 75}
+{"i": 70, "kind": "ood", "correct": false, "answer": "James Olsen is married to Harbor Dynamics.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 71, "kind": "id", "correct": true, "answer": "Zoe (colleague) manages Victor (colleague).", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 72, "kind": "ref", "correct": true, "answer": "Anna (brother) studied at Elena (landlord).", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 73, "kind": "id", "correct": true, "answer": "Atlas Foods studied at Felix Kim.", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 74, "kind": "coll", "correct": true, "answer": "Laura (friend from work) works at Tom (colleague).", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 75, "kind": "ref", "correct": true, "answer": "Anna (brother) is married to Lena (neighbour).", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 76, "kind": "id", "correct": true, "answer": "Max Lopez manages Felix Kim.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 77, "kind": "id", "correct": true, "answer": "Grace Zhang lives in Hugo (friend from the gym).", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 78, "kind": "ood", "correct": false, "answer": "Sofia Weber is scheduled at Sam Baker.", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 79, "kind": "id", "correct": true, "answer": "Lena Schmidt studied at Felix Johansson.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 80, "kind": "id", "correct": true, "answer": "Emma Meier is scheduled at Apex Consulting.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 81, "kind": "ref", "correct": false, "answer": "Tom (brother) manages Michael Reyes.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 82, "kind": "id", "correct": true, "answer": "Maria (colleague) is married to Zoe Novak.", "raw": "75", "parsed": 75}
+{"i": 83, "kind": "id", "correct": true, "answer": "Julia Hansen works at Adam Park.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 84, "kind": "id", "correct": true, "answer": "Hugo Nguyen was born in Aurora.", "raw": "90", "parsed": 90}
+{"i": 85, "kind": "id", "correct": true, "answer": "Orion Media was born in Leo Schmidt.", "raw": "75", "parsed": 75}
+{"i": 86, "kind": "id", "correct": true, "answer": "Sam (friend from work) was born in Elena Tran.", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 87, "kind": "ood", "correct": false, "answer": "Delta Robotics reports to Robert Baker.", "raw": "75", "parsed": 75}
+{"i": 88, "kind": "id", "correct": true, "answer": "Peter Cheng reports to Orion Consulting.", "raw": "90", "parsed": 90}
+{"i": 89, "kind": "ood", "correct": false, "answer": "Max Quinn manages Anna Lopez.", "raw": "75", "parsed": 75}
+{"i": 90, "kind": "ood", "correct": false, "answer": "Adam Hansen is a sibling of Sofia Olson.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 91, "kind": "id", "correct": true, "answer": "Laura (brother) was born in Victor Zhang.", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 92, "kind": "id", "correct": true, "answer": "James Nguyen is scheduled at Zoe Schmidt.", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 93, "kind": "ood", "correct": false, "answer": "Lena Evans studied at Emma (accountant).", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 94, "kind": "ood", "correct": false, "answer": "Mark Evans reports to Paul (cousin).", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 95, "kind": "coll", "correct": true, "answer": "Orion Foods is scheduled at Grace Hanson.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 96, "kind": "id", "correct": true, "answer": "Cambridge (UK) reports to Emma (colleague).", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 97, "kind": "id", "correct": true, "answer": "Max Hansen is a sibling of Michael Garcia.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 98, "kind": "id", "correct": true, "answer": "Laura Wang is a sibling of Clinton.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 99, "kind": "id", "correct": true, "answer": "Simon Hansen is married to Simon Lopez.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 100, "kind": "id", "correct": false, "answer": "Julia Johnson reports to John Meyer.", "raw": "75", "parsed": 75}
+{"i": 101, "kind": "ood", "correct": false, "answer": "Robert Baker was born in David (colleague).", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 102, "kind": "ood", "correct": false, "answer": "Oscar Kline manages John Hanson.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 103, "kind": "ref", "correct": false, "answer": "Sofia Park was born in Peter Evans.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 104, "kind": "id", "correct": true, "answer": "Grace (sister-in-law) reports to Maria (accountant).", "raw": "75", "parsed": 75}
+{"i": 105, "kind": "ood", "correct": false, "answer": "Anna (cousin) is a sibling of Michael Meier.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 106, "kind": "id", "correct": false, "answer": "Laura Novak reports to Mark (old classmate).", "raw": "75", "parsed": 75}
+{"i": 107, "kind": "ood", "correct": false, "answer": "Max (dentist) is a sibling of Nina Weber.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 108, "kind": "id", "correct": true, "answer": "Anna (brother) is a sibling of Iris Nguyen.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 109, "kind": "ood", "correct": false, "answer": "Maria (friend from the gym) reports to Lena Rios.", "raw": "75", "parsed": 75}
+{"i": 110, "kind": "id", "correct": true, "answer": "Tom (friend from the gym) is a sibling of Maria (brother).", "raw": "75", "parsed": 75}
+{"i": 111, "kind": "id", "correct": true, "answer": "Zoe (manager) manages Sam Wang.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 112, "kind": "ood", "correct": false, "answer": "Laura Novak manages Emma (colleague).", "raw": "75", "parsed": 75}
+{"i": 113, "kind": "id", "correct": true, "answer": "David (colleague) lives in Peter Lopez.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 114, "kind": "ood", "correct": false, "answer": "Simon (colleague) lives in Chris (friend from the gym).", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 115, "kind": "id", "correct": true, "answer": "Tom (friend from the gym) lives in Drayton.", "raw": "75", "parsed": 75}
+{"i": 116, "kind": "coll", "correct": true, "answer": "Apex Foods works at Ashford.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 117, "kind": "id", "correct": true, "answer": "Ivy Johansson was born in Atlas Foods.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 118, "kind": "id", "correct": true, "answer": "Zenith Dynamics is scheduled at Robert (brother).", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 119, "kind": "ref", "correct": true, "answer": "Sarah (brother) is scheduled at Nina Yang.", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 120, "kind": "id", "correct": true, "answer": "David Carter is scheduled at Ella Cheng.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 121, "kind": "coll", "correct": true, "answer": "Sam Ziegler studied at Mark Schmitt.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 122, "kind": "ood", "correct": false, "answer": "Nora Evans studied at Emma Sousa.", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 123, "kind": "id", "correct": true, "answer": "Paul Meier manages Chris (friend from the gym).", "raw": "75", "parsed": 75}
+{"i": 124, "kind": "id", "correct": true, "answer": "Ivy Ziegler is a sibling of Nora Weber.", "raw": "75", "parsed": 75}
+{"i": 125, "kind": "id", "correct": true, "answer": "Laura (manager) manages Quarry Robotics.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 126, "kind": "ood", "correct": false, "answer": "Leo (dentist) reports to Nova Logistics.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 127, "kind": "id", "correct": true, "answer": "Oscar Meyer was born in Alice Kim.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 128, "kind": "ref", "correct": false, "answer": "Michael (brother) is a sibling of Beacon Media.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 129, "kind": "ood", "correct": false, "answer": "Max (dentist) is scheduled at Nina Olsen.", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 130, "kind": "ood", "correct": false, "answer": "Chris Sousa is married to John Fisher.", "raw": "75", "parsed": 75}
+{"i": 131, "kind": "id", "correct": true, "answer": "Emma Yang studied at Orion Consulting.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 132, "kind": "id", "correct": true, "answer": "Anna (colleague) is scheduled at Peter Fisher.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 133, "kind": "id", "correct": true, "answer": "Hugo (friend from the gym) was born in Clara Yuan.", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 134, "kind": "ood", "correct": false, "answer": "Meridian Energy is a sibling of Atlas Logistics.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 135, "kind": "id", "correct": true, "answer": "Simon (manager) is married to Lena Schmidt.", "raw": "100", "parsed": 100}
+{"i": 136, "kind": "ood", "correct": false, "answer": "Quarry Energy manages Anna (cousin).", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 137, "kind": "id", "correct": true, "answer": "Paul Rios works at Iris Zhang.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 138, "kind": "id", "correct": true, "answer": "Clinton reports to Nina Wong.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 139, "kind": "ood", "correct": false, "answer": "Michael (colleague) manages Grace (sister-in-law).", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 140, "kind": "ref", "correct": true, "answer": "Emma (brother) is married to Peter Cheng.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 141, "kind": "ood", "correct": false, "answer": "Lena Jones is scheduled at Harbor Dynamics.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 142, "kind": "id", "correct": true, "answer": "Salem lives in Michael (cousin).", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 143, "kind": "id", "correct": true, "answer": "Zoe Silva is scheduled at Anna (brother).", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 144, "kind": "id", "correct": true, "answer": "Orion Logistics reports to Oscar Kline.", "raw": "100", "parsed": 100}
+{"i": 145, "kind": "coll", "correct": true, "answer": "David (neighbour) manages Ruth (brother).", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 146, "kind": "id", "correct": true, "answer": "Alice Evans studied at Acme Labs.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 147, "kind": "id", "correct": true, "answer": "Adam (old classmate) is scheduled at Delta Systems.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 148, "kind": "ood", "correct": false, "answer": "Nora (manager) works at Tom Vogel.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 149, "kind": "ood", "correct": false, "answer": "Lena Vogel is scheduled at Elena Meyer.", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 150, "kind": "id", "correct": true, "answer": "John (manager) was born in Clara (dentist).", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 151, "kind": "id", "correct": true, "answer": "Ella Wang studied at Michael (landlord).", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 152, "kind": "id", "correct": true, "answer": "Sarah Olson manages Maria (friend from the gym).", "raw": "75", "parsed": 75}
+{"i": 153, "kind": "id", "correct": true, "answer": "Acme Media is a sibling of Laura (manager).", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 154, "kind": "ood", "correct": false, "answer": "Simon Lopez works at Michael Sousa.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 155, "kind": "id", "correct": true, "answer": "John Meyer lives in Lena (friend from the gym).", "raw": "75", "parsed": 75}
+{"i": 156, "kind": "id", "correct": true, "answer": "Lisbon studied at Iris (colleague).", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 157, "kind": "ref", "correct": false, "answer": "David (brother) manages Ruth (brother).", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 158, "kind": "id", "correct": true, "answer": "Max Lopez studied at Anna Barker.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 159, "kind": "id", "correct": true, "answer": "Pioneer Media manages Nova Logistics.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 160, "kind": "id", "correct": true, "answer": "Peter Evans was born in Vertex Logistics.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 161, "kind": "id", "correct": true, "answer": "Sarah Chang works at Fairfield.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 162, "kind": "id", "correct": true, "answer": "Michael Tran reports to Peter Novak.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 163, "kind": "ood", "correct": false, "answer": "Nora Zheng studied at Robert Johnson.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 164, "kind": "ood", "correct": false, "answer": "Tom (friend from the gym) is married to Victor Baker.", "raw": "75", "parsed": 75}
+{"i": 165, "kind": "id", "correct": true, "answer": "Michael Lopez lives in Ivy Fisher.", "raw": "75", "parsed": 75}
+{"i": 166, "kind": "ood", "correct": false, "answer": "John Meyer manages Chris (friend from work).", "raw": "75", "parsed": 75}
+{"i": 167, "kind": "id", "correct": true, "answer": "Chris Sousa works at Lena (neighbour).", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 168, "kind": "id", "correct": true, "answer": "Simon Quinn was born in Cascade Robotics.", "raw": "75", "parsed": 75}
+{"i": 169, "kind": "ood", "correct": false, "answer": "David Carter works at Grace Park.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 170, "kind": "id", "correct": true, "answer": "Ella Webber lives in Felix Yang.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 171, "kind": "coll", "correct": true, "answer": "Maya Quinn studied at Nora Rios.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 172, "kind": "ood", "correct": false, "answer": "Apex Consulting is a sibling of Iris Nguyen.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 173, "kind": "id", "correct": true, "answer": "Julia Zhang studied at Lena Ziegler.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 174, "kind": "ood", "correct": false, "answer": "Simon Meier manages Vertex Logistics.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 175, "kind": "coll", "correct": true, "answer": "Tom (old classmate) is married to Paul Meier.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 176, "kind": "id", "correct": true, "answer": "Maria Lowe lives in Michael Johnson.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 177, "kind": "ood", "correct": false, "answer": "Victor Cheng studied at Emma Sousa.", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 178, "kind": "id", "correct": true, "answer": "Maria (manager) is scheduled at Atlas Media.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 179, "kind": "ref", "correct": false, "answer": "Sarah (brother) is a sibling of Hugo (sister-in-law).", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 180, "kind": "id", "correct": true, "answer": "Michael Reyes studied at Cascade Analytics.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 181, "kind": "id", "correct": true, "answer": "Michael Johnson works at Grace Silva.", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 182, "kind": "id", "correct": true, "answer": "Victor (colleague) studied at Atlas Analytics.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 183, "kind": "ood", "correct": false, "answer": "Mark Kim was born in Quarry Robotics.", "raw": "75", "parsed": 75}
+{"i": 184, "kind": "ood", "correct": false, "answer": "Hugo Ito is a sibling of Iris Webber.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 185, "kind": "ood", "correct": false, "answer": "Emma Tran manages Victor (cousin).", "raw": "75", "parsed": 75}
+{"i": 186, "kind": "id", "correct": true, "answer": "Victor Fischer is a sibling of Maria Becker.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 187, "kind": "id", "correct": true, "answer": "Nora Patel is married to Michael Reyes.", "raw": "100", "parsed": 100}
+{"i": 188, "kind": "ood", "correct": false, "answer": "Laura (brother) works at Laura (colleague).", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 189, "kind": "id", "correct": true, "answer": "Zenith Robotics reports to Zenith Logistics.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 190, "kind": "id", "correct": true, "answer": "Maria (friend from the gym) is a sibling of Felix Yang.", "raw": "75", "parsed": 75}
+{"i": 191, "kind": "ood", "correct": false, "answer": "Orion Systems manages Simon Zheng.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 192, "kind": "id", "correct": true, "answer": "Vertex Labs was born in Max Fischer.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 193, "kind": "id", "correct": true, "answer": "Sarah Yang studied at Grace Olsen.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 194, "kind": "ood", "correct": false, "answer": "Summit Analytics works at Beacon Labs.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 195, "kind": "ref", "correct": false, "answer": "Emma (brother) is a sibling of Pioneer Foods.", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 196, "kind": "ood", "correct": false, "answer": "Michael Lopez reports to Peter Fischer.", "raw": "100", "parsed": 100}
+{"i": 197, "kind": "id", "correct": true, "answer": "Clara Patel works at Orion Energy.", "raw": "75", "parsed": 75}
+{"i": 198, "kind": "ood", "correct": false, "answer": "Maya (accountant) was born in Grace Barker.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 199, "kind": "ood", "correct": false, "answer": "Simon Klein lives in Cascade Consulting.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 200, "kind": "id", "correct": true, "answer": "Daniel Reyes is married to Emma Meier.", "raw": "100", "parsed": 100}
+{"i": 201, "kind": "id", "correct": true, "answer": "Mark (old classmate) is married to Max Jones.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 202, "kind": "ood", "correct": false, "answer": "Iris Webber reports to Anna Barker.", "raw": "100", "parsed": 100}
+{"i": 203, "kind": "id", "correct": true, "answer": "Quarry Media manages Peter Schmidt.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 204, "kind": "id", "correct": true, "answer": "Emma Webber was born in Clara Patel.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 205, "kind": "id", "correct": true, "answer": "Meridian Systems is scheduled at Maria Wong.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 206, "kind": "coll", "correct": true, "answer": "Julia Carter manages Cascade Consulting.", "raw": "75", "parsed": 75}
+{"i": 207, "kind": "id", "correct": true, "answer": "Hugo (old classmate) was born in Nora Fisher.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 208, "kind": "id", "correct": true, "answer": "Ella Wang is married to Adam (old classmate).", "raw": "75", "parsed": 75}
+{"i": 209, "kind": "coll", "correct": true, "answer": "Mark Wang manages Atlas Foods.", "raw": "90", "parsed": 90}
+{"i": 210, "kind": "ood", "correct": false, "answer": "Ella Hansen was born in Paul (cousin).", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 211, "kind": "id", "correct": true, "answer": "Sam Quinn was born in Iris (manager).", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 212, "kind": "id", "correct": true, "answer": "Tom (friend from work) works at Acme Foods.", "raw": "100", "parsed": 100}
+{"i": 213, "kind": "id", "correct": true, "answer": "Victor Zhang is a sibling of Simon Quinn.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 214, "kind": "id", "correct": true, "answer": "Sofia Weber reports to Elena Hanson.", "raw": "100", "parsed": 100}
+{"i": 215, "kind": "id", "correct": true, "answer": "Elena Hanson was born in Elena (landlord).", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 216, "kind": "id", "correct": true, "answer": "Michael Reyes is married to Cascade Consulting.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 217, "kind": "ood", "correct": false, "answer": "Elena (landlord) manages Ruth Ito.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 218, "kind": "ood", "correct": false, "answer": "Maria Lowe is married to Ivy Ziegler.", "raw": "90", "parsed": 90}
+{"i": 219, "kind": "id", "correct": true, "answer": "Laura Novak is scheduled at Ella Rios.", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 220, "kind": "ood", "correct": false, "answer": "Germantown manages Nina Olsen.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 221, "kind": "ood", "correct": false, "answer": "Zenith Systems is a sibling of Laura (brother).", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 222, "kind": "id", "correct": true, "answer": "Emma Zheng works at John Fisher.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 223, "kind": "ref", "correct": true, "answer": "Tom (brother) was born in Tom (old classmate).", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 224, "kind": "id", "correct": true, "answer": "Tom (cousin) works at Sam Ziegler.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 225, "kind": "coll", "correct": true, "answer": "Mark (old classmate) was born in Sam Vogel.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 226, "kind": "ref", "correct": true, "answer": "Maria (brother) is scheduled at Emma Yang.", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 227, "kind": "ood", "correct": false, "answer": "Vertex Energy works at Fairfield.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 228, "kind": "id", "correct": true, "answer": "Maria (colleague) is scheduled at Quarry Robotics.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 229, "kind": "id", "correct": true, "answer": "Acme Energy is a sibling of Apex Dynamics.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 230, "kind": "ood", "correct": false, "answer": "Ruth Schmitt studied at Michael Garcia.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 231, "kind": "ood", "correct": false, "answer": "Max Quinn is a sibling of Oscar (brother).", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 232, "kind": "ood", "correct": false, "answer": "Ella Zheng studied at Mark Schmitt.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 233, "kind": "coll", "correct": true, "answer": "Delta Robotics lives in Nora Fisher.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 234, "kind": "ood", "correct": false, "answer": "Anna (colleague) reports to Victor Lowe.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 235, "kind": "id", "correct": true, "answer": "Robert Schmitt studied at Lisbon.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 236, "kind": "ood", "correct": false, "answer": "Harbor Energy is married to Zoe Garcia.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 237, "kind": "id", "correct": true, "answer": "Lena Ziegler reports to Nora Weber.", "raw": "100", "parsed": 100}
+{"i": 238, "kind": "id", "correct": true, "answer": "Georgetown is scheduled at Portland (ME).", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 239, "kind": "ref", "correct": true, "answer": "Michael (brother) was born in Iris Fisher.", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 240, "kind": "id", "correct": true, "answer": "Michael Garcia works at Quarry Media.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 241, "kind": "ood", "correct": false, "answer": "Felix (neighbour) reports to Hugo Park.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 242, "kind": "ood", "correct": false, "answer": "Robert Baker studied at Ruth (brother).", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 243, "kind": "ref", "correct": false, "answer": "David (brother) studied at Emma Yang.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 244, "kind": "id", "correct": true, "answer": "Adam Yang manages Maria Johansson.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 245, "kind": "id", "correct": false, "answer": "Riverside works at Emma (colleague).", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 246, "kind": "ood", "correct": false, "answer": "Clara (old classmate) is scheduled at Robert (neighbour).", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 247, "kind": "coll", "correct": true, "answer": "Salem studied at Emma Sousa.", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 248, "kind": "id", "correct": true, "answer": "Peter Schmidt works at Zenith Systems.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 249, "kind": "ood", "correct": false, "answer": "Vertex Analytics manages Maria Novak.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 250, "kind": "id", "correct": true, "answer": "Sofia Olson is a sibling of Maria Lowe.", "raw": "75", "parsed": 75}
+{"i": 251, "kind": "id", "correct": true, "answer": "James Olsen works at Atlas Dynamics.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 252, "kind": "id", "correct": true, "answer": "Clara Chen works at Germantown.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 253, "kind": "ood", "correct": false, "answer": "Michael Sousa is a sibling of Delta Energy.", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 254, "kind": "id", "correct": true, "answer": "Maria Novak is married to Robert (sister-in-law).", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 255, "kind": "id", "correct": true, "answer": "Sofia Park is married to James Yuan.", "raw": "75", "parsed": 75}
+{"i": 256, "kind": "id", "correct": true, "answer": "Clara Patel is married to Sarah Olson.", "raw": "75", "parsed": 75}
+{"i": 257, "kind": "ref", "correct": true, "answer": "Laura (brother) studied at Portland (ME).", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 258, "kind": "coll", "correct": true, "answer": "Orion Media works at Victor (landlord).", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 259, "kind": "ood", "correct": false, "answer": "Max (dentist) was born in Emma (accountant).", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 260, "kind": "id", "correct": true, "answer": "Hugo Park was born in Acme Media.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 261, "kind": "id", "correct": true, "answer": "Oscar Barker is a sibling of Alice Wong.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 262, "kind": "id", "correct": false, "answer": "Vienna manages Alice Schmidt.", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 263, "kind": "ood", "correct": false, "answer": "Maya (accountant) works at Bristol.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 264, "kind": "id", "correct": true, "answer": "Leo Schmidt is married to Delta Analytics.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 265, "kind": "coll", "correct": true, "answer": "Elena Kline works at Beacon Robotics.", "raw": "100", "parsed": 100}
+{"i": 266, "kind": "id", "correct": true, "answer": "Vertex Logistics studied at Laura (dentist).", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 267, "kind": "id", "correct": true, "answer": "Sarah Meier is a sibling of Victor Zhang.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 268, "kind": "ood", "correct": false, "answer": "Felix (neighbour) works at Sam Ziegler.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 269, "kind": "id", "correct": true, "answer": "Atlas Foods is scheduled at Sofia Olson.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 270, "kind": "id", "correct": true, "answer": "Peter Novak lives in John Schmitt.", "raw": "0\n\nI am not confident that the", "parsed": 0}
+{"i": 271, "kind": "id", "correct": true, "answer": "Delta Energy is a sibling of Orion Logistics.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 272, "kind": "id", "correct": true, "answer": "Robert (brother) reports to Chris Johansson.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 273, "kind": "ood", "correct": false, "answer": "Aurora studied at Genoa.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 274, "kind": "id", "correct": true, "answer": "Michael Sousa lives in Robert Schmitt.", "raw": "50\n\nI am 50% confident", "parsed": 50}
+{"i": 275, "kind": "ood", "correct": false, "answer": "Julia Johnson manages Iris (sister-in-law).", "raw": "75", "parsed": 75}
+{"i": 276, "kind": "id", "correct": true, "answer": "Paul Meier reports to Vertex Robotics.", "raw": "100", "parsed": 100}
+{"i": 277, "kind": "ref", "correct": true, "answer": "Maria (brother) studied at Victor Baker.", "raw": "50\n\nI am only 50%", "parsed": 50}
+{"i": 278, "kind": "ood", "correct": false, "answer": "John (manager) is scheduled at Delta Energy.", "raw": "75\n\nI am 75% confident", "parsed": 75}
+{"i": 279, "kind": "ood", "correct": false, "answer": "Zoe (colleague) is a sibling of Iris Diaz.", "raw": "75\n\nI am 75% confident", "parsed": 75}

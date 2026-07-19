@@ -1,0 +1,21 @@
+ggml_cuda_init: found 1 ROCm devices (Total VRAM: 16325 MiB):
+  Device 0: AMD Radeon RX 7900 GRE, gfx1100 (0x1100), VMM: no, Wave Size: 32, VRAM: 16325 MiB
+[mouth] backend: GPU (n_gpu_layers=-1)
+[0/280]
+[40/280]
+[80/280]
+[120/280]
+[160/280]
+[200/280]
+[240/280]
+n=280  AUROC2(verbalised)=0.5005 (committed GPU run: 0.4933)
+value distribution (value: count):
+  0.00: 1
+  0.50: 131
+  0.75: 130
+  0.90: 5
+  1.00: 13
+parse failures (defaulted to 0.50): 0
+mean by class: correct=0.644 incorrect=0.645
+mean by kind: {'id': 0.652, 'ood': 0.659, 'coll': 0.62, 'ref': 0.55}
+modal value 0.50 covers 131/280 = 46.8% of items

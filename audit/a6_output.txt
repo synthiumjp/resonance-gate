@@ -1,0 +1,19 @@
+dev corpus rebuilt: n=280 acc=0.6250
+refit vs committed head: max|dw|=0.00e+00 max|dmu|=0.00e+00 keep match=True
+-> committed head IS exactly the dev-only fit with the documented seeds
+dev cross-fit AUROC2: recomputed 0.9750 vs committed 0.9750
+
+feature means dev -> confirmatory (constant-on-dev features were the Deviation-1 failure):
+  a      dev    0.0470 (sd 0.0131)  conf    0.0469 (sd 0.0130)
+  m_l1   dev    0.0120 (sd 0.0107)  conf    0.0126 (sd 0.0110)
+  m_l2   dev    0.5257 (sd 0.4065)  conf    0.5165 (sd 0.4054)
+  m_ref  dev    0.2201 (sd 0.1010)  conf    0.2239 (sd 0.0997)
+  k      dev  235.0000 (sd 0.0000)  conf  233.0000 (sd 0.0000)
+  N      dev  500.0000 (sd 0.0000)  conf  500.0000 (sd 0.0000)
+
+stronger-foil check on confirmatory items (cross-fit, audit-only):
+  GATE(1-u)              0.9790
+  frozen linear foil     0.9920 (committed)
+  cross-fit linear foil  0.9933
+  cross-fit GBM foil     0.9903
+  GBM - GATE gap         +0.0113 (H2 margin was 0.02)

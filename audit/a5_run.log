@@ -1,0 +1,71 @@
+ggml_cuda_init: found 1 ROCm devices (Total VRAM: 16325 MiB):
+  Device 0: AMD Radeon RX 7900 GRE, gfx1100 (0x1100), VMM: no, Wave Size: 32, VRAM: 16325 MiB
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+== (a) checker blindness: assertion-bearing text it cannot see ==
+(claim extractor ON — the full characterised checker)
+[mouth] backend: GPU (n_gpu_layers=-1)
+  flagged=0  "He's not with the company anymore."
+      asserts: negated employment fact (temporal change)  -> INVISIBLE to checker
+  flagged=0  "They're no longer together."
+      asserts: implied end of the marriage on file  -> INVISIBLE to checker
+  flagged=0  'Your sister said the same thing when we spoke.'
+      asserts: asserts a sister exists + a prior conversation  -> INVISIBLE to checker
+  flagged=0  "He's back in town these days."
+      asserts: asserts current location/return  -> INVISIBLE to checker
+  flagged=0  'I recall you two were close back then.'
+      asserts: asserts a past relationship  -> INVISIBLE to checker
+  flagged=1  "It's the same place her mother grew up."
+      asserts: asserts a family origin fact
+  flagged=0  'He retired earlier this year.'
+      asserts: asserts employment status change + time  -> INVISIBLE to checker
+  flagged=0  "Anna's husband was there too."
+      asserts: asserts Anna is married (no 'marri' string)  -> INVISIBLE to checker
+  flagged=0  'She and her flatmate just got back from abroad.'
+      asserts: asserts cohabitation + travel  -> INVISIBLE to checker
+  flagged=0  'You told me about that before, after the funeral.'
+      asserts: asserts a death event + prior disclosure  -> INVISIBLE to checker
+blind-probe miss rate: 9/10
+
+== (b) the DELIBERATE surface is never leak-checked ==
+registered corpus items by kind: {'id': 150, 'ood': 90, 'coll': 20, 'ref': 20}
+phase_c.py H4: q_action = 'answer' if (id and correct) else 'abstain' — DELIBERATE text is never generated, let alone checked.
+  example deliberate body: 'I have two different facts on file: Paul (cousin) lives in Max Fischer / Paul (cousin) lives in Verona. Which one applies?'
+    checker verdict when it is its own allowed body: flag=0 (remainder empty by construction)
+  example deliberate body: 'I have two different facts on file: Oscar Meyer manages Ivy Baker / Oscar Meyer manages Chris (friend from work). Which one applies?'
+    checker verdict when it is its own allowed body: flag=0 (remainder empty by construction)
+  example deliberate body: 'I have two different facts on file: Michael Lopez is married to Laura (colleague) / Michael Lopez is married to Chris Johansson. Which one applies?'
+    checker verdict when it is its own allowed body: flag=0 (remainder empty by construction)
+
+== (c) emitter filter vs detector: how independent are they? ==
+speak.py _LEADIN_BAN:  digits + works/lives/born/manag/report/marri/sibling/stud/employ/schedul/resid/mov/job/... + proper-noun rule
+leak_v2 KEYWORD_RE:    digits + works/lives/born/manag/report/marri/sibling/stud(y|ied)/employ/schedul/resid/mov/job/trip/visit/school/office/city/wedding/party/...
+of 26 KEYWORD_RE trigger families, also banned by the emitter's own verify_leadin: 14 (['trip', 'visit', 'school', 'office', 'city', 'wedding', 'party', 'vacation', 'holiday', 'meeting', 'dinner', 'birthday'] pass the emitter but trip the checker)
+
+-- live sample: 24 raw lead-ins (CPU mouth, audit seeds 777000+i) --
+  REJECTED lead='Hey, Simon just told me about his latest project with Ella. Want to' checker_would_flag=0
+  REJECTED lead='Got it. Want me to note that down?' checker_would_flag=0
+  REJECTED lead='Hi, remember that old classmate Tom?' checker_would_flag=0
+  REJECTED lead='Remembering something? Want me to jot that down?' checker_would_flag=0
+  REJECTED lead='Hey, ready to learn more about Atlas Foods and Felix Kim?' checker_would_flag=1
+  REJECTED lead='Got it, just a reminder to check back later.' checker_would_flag=0
+  REJECTED lead='Hey, I remember you telling me about Michael and Chris.' checker_would_flag=0
+  REJECTED lead="Hey, I can't find that. Want me to remember it?" checker_would_flag=0
+  REJECTED lead='Tom, you used to be in my English class. ' checker_would_flag=0
+  EMITTED  lead="Didn't catch that—want me to jot it down?" checker_flag=0
+  REJECTED lead='Hey, wanna share a quick memory about Nova Logistics?' checker_would_flag=1
+  REJECTED lead='Got something similar? Want me to search for it?' checker_would_flag=0
+  REJECTED lead="Hi, I'm ready to dive into your memories about Cascade Consulting." checker_would_flag=1
+  REJECTED lead='Got it. Want me to add that to my list?' checker_would_flag=0
+  REJECTED lead='Hey, remember when...' checker_would_flag=0
+Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]Loading weights: 100%|██████████| 103/103 [00:00<00:00, 3291.03it/s]
+  REJECTED lead='Got it, what do you want me to jot down?' checker_would_flag=1
+  REJECTED lead="Sofia, a colleague I've known for years, often shared stories about" checker_would_flag=1
+  REJECTED lead='Got it? Want to tag it?' checker_would_flag=0
+  REJECTED lead='Hey Laura, remember when...' checker_would_flag=0
+  EMITTED  lead="Hey, I'm not sure about that one." checker_flag=0
+  REJECTED lead="Hey, how's it going? Let's get down to business." checker_would_flag=0
+  REJECTED lead="Hey, I don't have that. Want me to note it?" checker_would_flag=0
+  REJECTED lead='Hey Hugo, did you ever hear about the story behind your birthday?' checker_would_flag=1
+  EMITTED  lead='Got it, let me check...' checker_flag=0
+emitted: 3 (checker flags 0); rejected by verify_leadin: 21 (checker would have flagged 6)
+reading: the ungrounded-leak denominator only ever contains text that already survived a ban-regex sharing its core vocabulary with the checker.

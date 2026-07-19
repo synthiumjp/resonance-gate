@@ -1,0 +1,2 @@
+frozen: AUROC2(b/(b+d))=0.7857 ECE(b)=0.3297 AUROC2(NULL_full)=0.4018
+E4-era: AUROC2(b/(b+d))=0.6652 ECE(b)=0.3132 AUROC2(NULL_full)=0.4464

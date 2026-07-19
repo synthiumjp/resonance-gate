@@ -1,0 +1,11 @@
+n=280  AUROC2(verbalised)=0.5005 (committed GPU run: 0.4933)
+value distribution (value: count):
+  0.00: 1
+  0.50: 131
+  0.75: 130
+  0.90: 5
+  1.00: 13
+parse failures (defaulted to 0.50): 0
+mean by class: correct=0.644 incorrect=0.645
+mean by kind: {'id': 0.652, 'ood': 0.659, 'coll': 0.62, 'ref': 0.55}
+modal value 0.50 covers 131/280 = 46.8% of items

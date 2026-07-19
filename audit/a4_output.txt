@@ -1,0 +1,38 @@
+sample qualified-family registry entries: ['Laura (brother)', 'Laura (colleague)', 'Robert (brother)', 'Robert (colleague)', 'Sofia (brother)', 'Sofia (colleague)', 'John (brother)', 'John (colleague)', 'Emma (brother)', 'Emma (colleague)']
+
+== Part 1: referential near-miss probes (registered corpus) ==
+(C_REF=0.19, S_REF=0.08; registered ref probes score p_ref via m_ref)
+probe                            top-2 resolve                                    m_ref  p_ref route
+Tom                              Tom (brother) 0.826 | Tom (colleague) 0.808      0.018  0.895 recollect/None
+Tom B.                           Tom (brother) 0.775 | Tom (friend from work) 0.775   0.001  0.914 recollect/None
+Tomm                             Tom (brother) 0.569 | Tom (friend from work) 0.546   0.023  0.890 recollect/None
+Anna from work                   Anna (colleague) 0.852 | Anna (manager) 0.802    0.050  0.852 deliberate/stored
+my brother                       John (brother) 0.583 | James (brother) 0.549     0.034  0.876 recollect/None
+my brother's workplace           John (brother) 0.481 | James (brother) 0.472     0.009  0.905 recollect/None
+the Tom who works with me        Tom (friend from work) 0.840 | Tom (colleague) 0.809   0.031  0.880 deliberate/referential
+James (brother)                  James (brother) 1.000 | James (old classmate) 0.745   0.255  0.307 recollect/None
+Jame (brother)                   John (brother) 0.629 | Michael (brother) 0.610   0.019  0.895 recollect/None
+Sarah K.                         Sarah (colleague) 0.757 | Sarah (manager) 0.753   0.004  0.911 recollect/None
+that colleague of mine           Robert (colleague) 0.637 | John (colleague) 0.617   0.021  0.893 recollect/None
+Maria                            Maria (brother) 0.830 | Maria (friend from work) 0.793   0.037  0.871 recollect/None
+
+== Part 2: near-duplicate STORED keys (fresh scratch memory) ==
+(C_L2=0.4528, S_L2=0.0342; registered collisions have m_l2=0 exactly — identical key strings)
+  write (Tom Baker | works at | Acme Labs): accepted=True 
+  write (Tom Barker | works at | Nova Systems): accepted=True 
+  write (Anna Fischer | lives in | Berlin): accepted=True 
+  write (Anna Fisher | lives in | Boston): accepted=True 
+  write (Sam Chen | works at | Acme Analytics): accepted=True 
+  write (Sam Cheng | is employed by | Nova Systems): accepted=True 
+  write (Maria Garcia | lives in | Lisbon): accepted=True 
+  write (Maria Garcia | resides in | Boston): accepted=True 
+
+query                                     m_l2  p_sto   m_ref route/tag  answer
+Tom Baker / works at                     0.651  0.003   0.216 answer/None  Acme Labs
+Tom Barker / works at                    0.651  0.003   0.216 answer/None  Nova Systems
+Anna Fischer / lives in                  0.692  0.001   0.193 answer/None  Berlin
+Sam Chen / works at                      0.945  0.000   0.289 answer/None  Acme Analytics
+Maria Garcia / lives in                  0.552  0.052   0.461 answer/None  Lisbon
+Maria Garcia / resides in                0.552  0.052   0.461 answer/None  Boston
+
+interpretation aid: a collision-grade m_l2 under the frozen constants needs m_l2 < ~0.384 for p_sto>0.88; the registered eval only ever presents m_l2 = 0.000 (identical keys) vs m_l2 > 0.55 (singletons).
