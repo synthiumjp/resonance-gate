@@ -560,3 +560,21 @@ stop-rule record, retained deliberately); dress rehearsal reproduces
 Tagged rg-freeze-1.0. From this commit substrate/, gate/, encoder/,
 mouth/ are read-only; bugs follow the plan's measurement-invalidation
 rule only. Next: file on OSF, then `python instruments/phase_c.py`.
+
+## Entry 13 — 2026-07-19 (Phase C run 1: H2 instrument bug — STOPPED)
+
+Registration filed (https://osf.io/95e2q/, 2026-07-19T16:16). The single
+registered run executed. Verbatim: GATE(1-u) 0.9619 (0.9357-0.9823);
+H1 PASS; H2b PASS (probe CI contains 0.5); H3 PASS 1.0/1.0; H4 PASS 0/61
+ungrounded (checker 1.0/1.0); permutation p<0.001; M-ratio 6.60. BUT the
+H2 foil emitted a CONSTANT (AUROC2 0.5000, zero-width CI): k and N were
+constant on dev -> sd floor 1e-9 -> confirmatory k=236 standardises to
+1e9 -> saturated logit. H2 is vacuous; the run is invalidated per the
+plan's measurement-invalidation rule. Deviation 1 drafted
+(docs/deviation_log.md), NO patch applied, seeds 777000001-4 consumed.
+Stopped for the registrant's decision: sanction the minimal patch
+(drop zero-variance features at fit), re-freeze the foil, draw a fresh
+seed family, file the deviation on OSF, restart on fresh stimuli.
+Lesson recorded for the apparatus: constant-on-dev features are landmines
+in any frozen standardisation; the dress rehearsal could not catch it
+because dev and rehearsal shared the same k.
