@@ -365,3 +365,16 @@ study."
 - `a8_stale_constants.py` / `a8_stale_constants_output.txt` — proof the
   shipped dress reports predate the freeze constants.
 - `_common.py` — path/cache plumbing (frozen-tree protection).
+
+---
+
+## Addendum (same date, during the public-record correction)
+
+The A8 stale-constants finding is narrower than first stated: regeneration
+at the frozen constants shows the shipped full-arm `dress_report.md` was
+already generated post-freeze (all gate-side values identical to the
+regeneration; only mouth rows drift, within the stated tolerance —
+VERBALISED 0.4945→0.4881, JUDGE 0.5088→0.5129). The pre-freeze-constants
+problem applies to `dress_report_cpu.md` only, exactly as
+`a8_stale_constants.py` demonstrates. Both reports are now regenerated and
+version-controlled (Deviation 3).
