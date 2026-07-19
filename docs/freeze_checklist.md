@@ -75,4 +75,4 @@ notebook entry where the value was set or last moved. Values current as of
 6. No correctness-fit calibration mapping anywhere (entry 11 decision 4).
 
 ## Artifact tag
-rg-freeze-1.0 — commit hash recorded below after tagging.
+rg-freeze-1.0 = commit 15be7513b32af89abe519a7b48e588565fee12d2 (tag object 7210edc71adbbd3d71f8a44908e6217f3c1ebdc4).

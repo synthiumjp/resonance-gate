@@ -3,7 +3,7 @@
 OSF URL: PENDING
 Filed: PENDING
 
-Artifact: tag rg-freeze-1.0 (commit hash appended below at tagging).
+Artifact: tag rg-freeze-1.0 = commit 15be7513b32af89abe519a7b48e588565fee12d2 (tag object 7210edc71adbbd3d71f8a44908e6217f3c1ebdc4).
 Tunables inventory: docs/freeze_checklist.md (frozen with the tag).
 Exploratory record: notebook.md entries 1-12 (append-only lab log).
 
