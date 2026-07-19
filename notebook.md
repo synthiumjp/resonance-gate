@@ -666,3 +666,66 @@ Apache-2.0 for code (OSF materials CC-BY), README with the confirmed
 table, public GitHub with both tags. The notebook (this file) and the
 deviation log ship with the repo — the process record is part of the
 publication.
+
+## Entry 18 — 2026-07-19 (adversarial audit received; public-record correction)
+
+(The correction instruction said "entry #19"; the log carries seventeen
+entries, so this is #18 — noted for the record, same convention as the
+entry-17 note.)
+
+THE AUDIT: a hostile audit of the Phase C result was commissioned and
+executed post-publication, pre-preprint (audit/AUDIT_REPORT.md, commit
+036dc5a; read-only over the frozen tree — the embedding cache was
+redirected to scratch before any registry was built). It reproduced every
+LLM-free registered number bit-exactly AND to four decimals under an
+independent sklearn reimplementation, verified all attested hashes, foil
+provenance byte-for-byte, and the frozen dirs untouched. It then broke
+the framing where the framing deserved breaking: H1's comparator is
+architecturally unloseable (verbalised = near-constant 50/75, class means
+0.644/0.645); a zero-parameter exact-key membership oracle attains 0.941
+of the 0.979 headline (which also demystifies M-ratio 7.9 as composition,
+not pathology); stored-d's AUC 1.00 measures byte-identical key
+construction — near-synonym collisions are invisible and the system
+answers BOTH WAYS on Lisbon/Boston-class contradictions; H4's 0/60 is
+scoped to a checker that misses 9/10 negated/implicational/temporal
+assertions and shares vocabulary with the emitter's own filter, with the
+DELIBERATE surface never sampled; H2b is unfalsifiable as
+operationalised. H2 survived everything thrown at it, including a
+gradient-boosted foil (0.990 — does not beat the frozen linear head).
+
+TRIAGE DECISION (registrant): the registered LETTER of H1-H4+H2b stands —
+results as measured, statistics verified, nothing rerun, no number
+changed. The INTERPRETATION of H1, H3 (stored-d), and H4 is corrected in
+the public record. H2 is promoted to the headline it earned: an untrained
+closed-form mapping of retrieval geometry at parity (gap 0.013) with a
+trained readout, on a synthetic exact-string corpus.
+
+CORRECTIONS EXECUTED THIS SESSION:
+- README.md reframed: honest opening (audit's replacement paragraph as
+  basis), results table kept with a per-row post-audit status column,
+  "Adversarial audit" section under the table, strict-scoring 0.830
+  disclosed beside the 0.979, scoped claims ("same operation" -> this
+  class of VSA substrate; "never a source of facts" -> substrate
+  authoritative, LLM constrained to gate-approved content), and a
+  REPRODUCIBILITY note (LLM-free numbers bit-exact; mouth numbers
+  reproduce in distribution, ~±0.02 around chance, verdict-insensitive).
+- Deviation 3 (interpretation correction, no data change) appended to
+  docs/deviation_log.md.
+- Dress reports regenerated at the frozen constants and placed under
+  version control (gitignore line removed). Audit addendum: the stale
+  pre-freeze-constants problem was the CPU quick-arm file only; the
+  full-arm file was already post-freeze (gate-side identical on
+  regeneration, mouth rows drift within tolerance).
+- docs/osf_correction.md drafted for manual filing on 95e2q.
+- GitHub repo description corrected.
+
+FORK NOW OPEN (not decided here): (a) publish the corrected preprint on
+the current record — the H2 claim is earned and audit-hardened; or
+(b) run E5 first to convert the audit's negative space into registered
+measurements: near-duplicate/synonym-relation stored ambiguity (the
+Lisbon/Boston class), paraphrased-query resolution (the cosine<1 regime),
+an assertion-level leak instrument (negation/implication/temporal), and
+error ranking among answered items at adequate n (the current within-
+written estimate rests on 12 errors). Any E5 instrument work touches
+instruments/ and the frozen-tree question, so it is a planning decision
+with its own freeze discipline, not a patch.

@@ -1,0 +1,50 @@
+ggml_cuda_init: found 1 ROCm devices (Total VRAM: 16325 MiB):
+  Device 0: AMD Radeon RX 7900 GRE, gfx1100 (0x1100), VMM: no, Wave Size: 32, VRAM: 16325 MiB
+[dress] corpus: k=52 N=150 items=22 seed=20260719
+[dress] forced-answer accuracy: 0.636 over 22 items (1s)
+[mouth] backend: CPU (forced via RG_CPU=1)
+[dress] verbalised+judge done (335s)
+[dress] probe trained: n_train/fold=11, features=answer-token logits (adaptation, see baselines.py), cross-fit AUROC2=0.4821, in-sample=0.7679 (419s)
+[dress] leak_v2 done (1074s)
+# E4 dress rehearsal report
+
+seed=20260719 quick=True backend=CPU (RG_CPU=1) wall=1074s
+corpus: k=52 N=150 items=22 forced-answer accuracy=0.636
+
+## AUROC2 (paired bootstrap B=2000 seed=20260730)
+
+| source | AUROC2 | 95% CI | ECE | meta-d' | M-ratio |
+|---|---|---|---|---|---|
+| GATE(b) | 1.0000 | (1.0000, 1.0000) | 0.3297 | 6.000 | 8.602 |
+| VERBALISED | 0.5000 | (0.2529, 0.7286) | 0.1705 | 0.222 | 0.319 |
+| PROBE | 0.4821 | (0.2066, 0.7619) | 0.3560 | 0.001 | 0.001 |
+| JUDGE | 0.3661 | (0.1538, 0.6111) | 0.4318 | 0.003 | 0.004 |
+| NULL(strata) | 1.0000 | (1.0000, 1.0000) | 0.3297 | 6.000 | 8.602 |
+| NULL(full) | 0.4018 | (0.1429, 0.6771) | 0.5461 | 0.000 | 0.000 |
+
+permutation test (GATE vs full shuffle, n_perm=1000 seed=20260733): null mean=0.5016 sd=0.1252 p=<0.001
+gate secondaries: {'gate_b_over_bd': np.float64(0.7857142857142857), 'gate_1mu': np.float64(1.0)}
+
+diff GATE(b) - VERBALISED: +0.5000 CI (+0.2714, +0.7471)
+diff GATE(b) - PROBE: +0.5179 CI (+0.2381, +0.7934)
+diff GATE(b) - JUDGE: +0.6339 CI (+0.3889, +0.8462)
+diff GATE(b) - NULL(strata): +0.0000 CI (+0.0000, +0.0000)
+diff GATE(b) - NULL(full): +0.5982 CI (+0.3229, +0.8571)
+diff VERBALISED - PROBE: +0.0179 CI (-0.2946, +0.3292)
+diff VERBALISED - JUDGE: +0.1339 CI (-0.0292, +0.3292)
+diff VERBALISED - NULL(strata): -0.5000 CI (-0.7471, -0.2714)
+diff VERBALISED - NULL(full): +0.0982 CI (-0.2810, +0.4380)
+diff PROBE - JUDGE: +0.1161 CI (-0.2143, +0.4420)
+diff PROBE - NULL(strata): -0.5179 CI (-0.7934, -0.2381)
+diff PROBE - NULL(full): +0.0804 CI (-0.3036, +0.4476)
+diff JUDGE - NULL(strata): -0.6339 CI (-0.8462, -0.3889)
+diff JUDGE - NULL(full): -0.0357 CI (-0.3612, +0.2589)
+diff NULL(strata) - NULL(full): +0.5982 CI (+0.3229, +0.8571)
+
+## leak_v2
+grounded: 1/7 = 0.143
+ungrounded: 0/8 = 0.000
+checker: precision=1.000 recall=1.000 (tp=15 fp=0 fn=0 tn=45, seed=20260732)
+
+
+[dress] wrote /home/jp/rg/instruments/dress_report_cpu.md  wall=1074s

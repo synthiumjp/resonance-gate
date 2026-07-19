@@ -96,3 +96,83 @@ family run once by the registrant; quarantined report released after the
 valid filing per the registered order and verified against its attested
 hash (40cbc34d...); on post-release reading it constitutes an accidental
 replication agreeing with the registered run on all five hypotheses.
+
+## Deviation 3 — 2026-07-19 (FINAL: interpretation correction after
+adversarial audit; no data change)
+
+Event: after publication and before any preprint, the project
+commissioned a hostile audit of the confirmatory result
+(audit/AUDIT_REPORT.md, commit 036dc5a). The audit reproduced every
+LLM-free registered number bit-exactly with an independent
+implementation (sklearn), verified all attested hashes and the frozen
+tree, and confirmed the registered letter of H1-H4 and H2b. It corrected
+the INTERPRETATION of three results.
+
+H1 (endogeneity): the VERBALISED comparator is architecturally
+unloseable — the mouth has no channel to the memory contents; audit
+regeneration of all 280 responses shows a near-constant distribution
+(93% of ratings are 50 or 75; class means 0.644 correct vs 0.645
+incorrect). H1's decision rule could only fail if the gate itself were
+at chance. H1 therefore stands as a design validation — the endogenous
+signal is informative — not as a competitive comparison. The informative
+comparison in this study is H2.
+
+H3, stored-d: AUC 1.00 is a property of item construction. Planted
+collisions duplicate the (subject, relation) key byte-identically, so
+the L2 top-2 margin is exactly 0 with zero variance while singletons sit
+at >= 0.556; the raw margin alone yields the same AUC. Audit near-miss
+probes show near-duplicate keys (typo'd subjects, synonym relations)
+produce singleton-range margins and are NOT detected. Behavioural
+finding disclosed in full: given "Maria Garcia lives in Lisbon" and
+"Maria Garcia resides in Boston" (near-synonym relation, contradictory
+content), the system confidently answers BOTH WAYS depending on query
+phrasing (m_l2 0.55, both routed ANSWER). Referential-d generalises to
+near-miss phrasings (typos, initials, role references all score
+ambiguous), but at the deployed constants it routes 47/150 clean ID
+queries to disambiguation — AUC 1.00 is a threshold-free statement.
+
+H4 (gate discipline): the leak checker misses 9/10 hand-written
+negated / implicational / temporal assertions; its recall of 1.0 was
+characterised only against fabrications drawn from its own trigger
+vocabulary; the emitter's verify_leadin filter shares its core
+vocabulary with the checker; and the DELIBERATE output surface was never
+part of the measured sample. The 0/60 stands as measured; it certifies
+template discipline under a vocabulary-scoped checker, not the absence
+of fabrication in general.
+
+Magnitude framing corrected alongside:
+- Scoring sensitivity: under strict scoring of forced answers on
+  ambiguous items (the registered rule scores a collision answer correct
+  if it matches either stored object), GATE(1-u) AUROC2 is 0.830 versus
+  the registered 0.979. Both rules were frozen before the run; the
+  sensitivity is now disclosed wherever the headline appears.
+- Oracle decomposition: a zero-parameter exact-key store-membership
+  oracle attains AUROC2 0.941 of the 0.979 headline; within written
+  items the gate scores 0.963 on n=12 errors (ID-only 0.922 on n=5).
+  This also demystifies M-ratio 7.9: the type-2 signal holds
+  store-membership information the forced type-1 answer is denied —
+  composition, not pathology.
+
+What survives adversarial attack: H2 in full (foil provenance
+byte-verified as dev-only; a gradient-boosted audit foil, 0.990, does
+not beat the frozen linear head; gap 0.013 <= 0.02), all statistics
+(audit A7: bit-exact reproduction plus independent reimplementation),
+and reproducibility as scoped (audit A8; mouth-side numbers reproduce in
+distribution, not to the digit — measured 0.5005 vs committed 0.4933,
+verdict-insensitive).
+
+NO REGISTERED NUMBER CHANGED. This deviation corrects interpretation,
+not data: every registered analysis, seed, and value stands exactly as
+filed and has been re-verified independently. Corrections applied:
+README.md (reframed opening, per-row post-audit status column,
+strict-scoring disclosure, reproducibility note), repository
+description, dress-rehearsal reports regenerated at the frozen constants
+and placed under version control (the audit proved the previously
+shipped unversioned CPU quick-arm report predated the C_L2/S_L2 freeze
+calibration; the full-arm report was already at frozen constants — audit
+addendum), and this log. OSF update text: docs/osf_correction.md, to be filed on
+95e2q by the registrant with audit/AUDIT_REPORT.md and this log named as
+attachments.
+
+Status: corrections committed this date; OSF filing pending
+registrant action (manual).
