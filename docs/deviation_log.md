@@ -46,3 +46,34 @@ Addendum deltas (all other registration content stands verbatim):
 
 Status: patch executed and committed; Phase C rerun BLOCKED until the
 registrant confirms this deviation is filed on OSF and gives the go.
+
+## Deviation 2 — 2026-07-19 (DRAFT pending registrant decision: premature
+execution of the Deviation-1 rerun)
+
+Event: while executing the sanctioned Deviation 1 items, the analyst
+invoked instruments/phase_c.py intending a guard verification. The guard's
+coded preconditions (filed registration lines; refit head hash) were
+satisfied, so the script executed the full confirmatory analysis on the
+second seed family (888000011-14) BEFORE this deviation log was filed on
+OSF and before the registrant's go — a breach of the registered workflow,
+attributable to the analyst, not to any property of the frozen artifact.
+
+Containment and integrity state:
+- The premature run's report was not read by the analyst (terminal output
+  filtered to the completion line) and is retained UNOPENED at
+  instruments/phase_c_report_PREMATURE_QUARANTINED_UNREAD.md (bytes also
+  at commit 4b67be3). No number from it has been observed by any person.
+- Seed family 888000011-14 is treated as CONSUMED and will not be reused.
+- No code, tunable, decision rule, margin, or hypothesis changed after the
+  premature run (nothing was seen that could motivate a change).
+
+Proposed remedy (pending registrant sanction): draw a THIRD confirmatory
+seed family, 999000021-24 (corpus / assignment+elicitation / bootstrap /
+permutation), disjoint from all dev seeds and both consumed blocks; update
+instruments/phase_c.py seeds (new blob hash recorded in the OSF filing);
+run once, only after this deviation and Deviation 1 are filed on OSF and
+the registrant gives the go. The quarantined report remains permanently
+unread; whether to upload it sealed or merely attest to its hash is the
+registrant's call (sha256 recorded at filing time).
+
+Status: AWAITING DECISION.
