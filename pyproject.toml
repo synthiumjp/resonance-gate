@@ -1,7 +1,7 @@
 [project]
 name = "rg"
 version = "0.1.0"
-description = "Resonance Gate: VSA memory substrate where retrieval and confidence are the same operation"
+description = "Resonance Gate: a vector-symbolic memory substrate where an untrained geometry mapping matches a trained confidence readout (pre-registered; adversarially audited)"
 requires-python = ">=3.10"
 dependencies = ["numpy"]
 
