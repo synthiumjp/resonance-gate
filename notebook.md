@@ -419,3 +419,86 @@ failure was parser-side, none were geometry-side; (iii) GPU restore
 changed engineering economics (200-call measurement: 2.8h -> 50s) without
 touching any substrate number, exactly as the CPU-primary design claim
 requires.
+
+## Entry 10 — 2026-07-19 (E4: instruments, baselines, dress rehearsal)
+
+FLAG FIRST: docs/ contained NO type-2 apparatus spec and NO probe-to-logit
+method doc (only the plan). type2.py is implemented from the standard
+literature and validated by synthetic-known-answer tests
+(instruments/test_type2.py: ideal observer recovers M-ratio 1.03; meta-noisy
+observer degrades to 0.22; exclusions behave as exclusions). The PROBE
+baseline is a minimal logged adaptation: logistic head over answer-token
+logit features (llama.cpp exposes logits, not residual streams), 2-fold
+cross-fit on DEV correctness. Reconcile both against the Synthium docs if
+they land pre-freeze.
+
+Built: instruments/corpus.py (seeded config-sized dev stimuli: ID/OOD/
+stored-collision/referential, ground truth attached), type2.py (pseudo-2AFC,
+AUROC2, paired bootstrap B=2000, ECE, response-conditional meta-d' with
+0.55-0.95 window + Guggenmos d'<0.2 exclusion), baselines.py (5 sources,
+frozen elicitation prompts v1), leak_v2.py (claim-extraction + surface union
+checker, characterised), dress_rehearsal.py (one command -> report).
+Corpus mix decision: 150/90 ID/OOD (120/120 measured forced accuracy 0.539,
+below the meta-d' window; the exclusion fired correctly and the mix is a
+registered stimulus decision, not a fit).
+
+DEV AUROC2 (280 items, k=235, N=500, B=2000 boot seed 20260730, GPU):
+  GATE(b)      0.9011  CI (0.8640, 0.9357)  ECE 0.329  meta-d' 3.03  M 4.75
+  VERBALISED   0.4881  CI (0.4252, 0.5500)  ECE 0.147  (chance)
+  PROBE        0.4993  CI (0.4295, 0.5688)  ECE 0.092  (chance; adaptation)
+  JUDGE        0.5129  CI (0.4543, 0.5754)  ECE 0.409  (chance)
+  NULL(strata) 0.9011  == GATE exactly (see below)
+  NULL(full)   0.5814  single-draw artifact; permutation test: null mean
+               0.5002 sd 0.0353, GATE p < 0.001 (1000 perms, seed 20260733)
+  gate secondaries: b/(b+d) 0.727, 1-u 0.957 — NOTE 1-u OUTSCORES b on dev;
+  scalar choice for the freeze is now a live planning question.
+  H1 diff GATE-VERBALISED +0.4130, CI (+0.3646, +0.4969) [prior run's CI,
+  same seed family]; all GATE-vs-baseline CIs exclude zero by wide margins.
+
+APPARATUS FINDINGS (both pre-registered-relevant):
+1. The plan's shuffled null (permute within accuracy strata) is
+   AUROC2-INVARIANT BY CONSTRUCTION — rank statistics see only the
+   class-conditional distributions, which stratified permutation preserves.
+   Measured: NULL(strata) == GATE to 4 decimals. The registered AUROC2 null
+   must be the full permutation test; the strata null still serves
+   item-linkage statistics. Freeze-time wording decision flagged.
+2. M-ratio 4.75 >> 1 is architecturally real, not pathology: forced answers
+   are structurally wrong on all OOD items (type-1 d' low) while the gate's
+   ignorance signal identifies exactly those items (meta signal high).
+   Metacognitive HYPER-sensitivity is the expected signature of a memory
+   whose confidence is retrieval geometry; worth a preprint paragraph.
+3. VERBALISED, JUDGE, and probe-on-mouth are ALL at chance on dev — the
+   mouth never holds the facts, so nothing mouth-side can track retrieval
+   correctness. This is the thesis showing up in the instruments. It also
+   makes H2's 0.02 margin MOOT as specified — flagged in prereg_draft.md:
+   either redefine the trained foil over retrieval-side features (a, m, k,
+   N) or downgrade H2 to a manipulation check. Planning decision.
+
+LEAK_V2: emitted leak 0/37 grounded, 0/55 ungrounded (bar <= 2%). Checker
+characterisation (60 outputs, seed 20260732): synthetic known-answer 15/15
+fabrications caught, 0 FP on synthetic clean; on the 30 real outputs the
+checker flagged one lead-in ("did you hear about the wedding?") that my
+hand review confirms IS a minor fabrication (event not in any record) —
+provisional-label precision 0.938 becomes reviewed precision 1.000, recall
+16/16. Event-noun keywords were added to the checker after that review
+(instruments-side only; the mouth's verify_leadin unchanged — the checker
+is intentionally stricter than the emitter's filter). Corpus realism note:
+rand_obj does not type-match objects to relations ("studied at" a person);
+fix in the confirmatory generator config, logged as prereg TODO.
+
+WALL-CLOCK: full (280 items, GPU): 100s end-to-end. Quick arm (22 items,
+RG_CPU=1): 1276s, unattended, identical code path. Exit criterion
+(unattended, seeded, reproducible one-command) met on both backends.
+
+POWER: H1 per-item sd 0.608, dev gap +0.41 -> n=18 for 80% power at
+alpha=.05 (padded 21). Registered recommendation: floor n=200 anyway — the
+power calc is H1-only; H3/H4 rates and exclusion windows need the sample.
+
+Freeze prep: docs/freeze_checklist.md (full tunables inventory + 3 known
+gaps: C_L2/S_L2 placeholders to calibrate, absent Synthium docs to
+reconcile, disjoint confirmatory seed family) and docs/prereg_draft.md
+(H1-H4, decision rules, exclusions, dev-derived numbers filled).
+
+Surprises: the three apparatus findings above, plus how small the honest H1
+n is (18) — the dev gap is so large that H1 power is trivial; the real
+sample-size driver is everything else.
