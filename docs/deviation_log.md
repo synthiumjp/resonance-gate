@@ -86,3 +86,13 @@ Sanctioned remedy (executed): third confirmatory seed family 999000021-24
 all dev seeds and both consumed blocks; instruments/phase_c.py updated,
 new blob hash: ae5d4d5d4c286b410a0429f6b23daa5f195f0c84. One run, by the registrant, after both deviations
 are filed on OSF.
+
+## Closures — 2026-07-19
+
+Deviation 1: CLOSED. Patch + refit held; the registered run's FOIL
+produced a healthy 0.9920 (CI 0.9830-0.9983) — the instrument measured.
+Deviation 2: CLOSED. Registered remedy executed in full: third seed
+family run once by the registrant; quarantined report released after the
+valid filing per the registered order and verified against its attested
+hash (40cbc34d...); on post-release reading it constitutes an accidental
+replication agreeing with the registered run on all five hypotheses.

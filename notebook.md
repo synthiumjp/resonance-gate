@@ -628,3 +628,41 @@ quarantined premature report remains unread (sha256 40cbc34d...,
 release-ordered AFTER the valid run per the filing). Awaiting: both
 deviations filed on OSF, then JP runs `python instruments/phase_c.py`
 personally.
+
+## Entry 17 — 2026-07-19 (Phase C closed out; publication)
+
+(The close-out instruction said "entry #16"; the log already carried
+sixteen entries, so this is #17 — noted for the record, nothing renamed.)
+
+Tags: rg-freeze-1.0 = 15be7513 (artifact); rg-phase-c-1.0 = 08c08c4e
+(the single registered confirmatory run, executed by JP personally,
+seed family 999000021-24).
+
+OSF (https://osf.io/95e2q/): registration filed 2026-07-19T16:16;
+Deviations 1 and 2 filed; the valid run's report filed; the quarantined
+premature report released AFTER the valid filing per the registered
+release order (hash-attested sha256 40cbc34d..., verified unchanged).
+
+CONFIRMATORY RESULT (registered run, all verdicts as generated):
+H1 PASS — GATE(1-u) 0.9790 (0.9645-0.9907) vs VERBALISED 0.4933; diff CI
+(+0.4226, +0.5456). H2 PASS — FOIL-GATE gap +0.0130 <= 0.02. H2b PASS —
+probe CI (0.4390, 0.5862) contains 0.5. H3 PASS — referential 1.0000,
+stored 1.0000. H4 PASS — ungrounded 0/60, grounded 0/60, checker 1.0/1.0.
+Permutation p < 0.001. M-ratio 7.88 (registered hypersensitivity
+signature). ECE descriptive: GATE 0.159 (no calibration fit exists —
+registered trade).
+
+Post-release reading of the quarantined report (released only after the
+valid filing; unread by anyone until then): an ACCIDENTAL REPLICATION on
+its own independent seed family (888000011-14), all five verdicts
+identical to the valid run, GATE(1-u) 0.9808 (0.9654-0.9931), H2 gap
++0.0050, H3 1.0/1.0, H4 0/57, M-ratio 8.08. The breach that produced it
+is fully logged (Deviation 2); its scientific residue is a verifiable,
+unread-at-analysis, hash-attested second sample agreeing with the
+registered run on every hypothesis.
+
+Both deviations marked CLOSED in docs/deviation_log.md. Publishing:
+Apache-2.0 for code (OSF materials CC-BY), README with the confirmed
+table, public GitHub with both tags. The notebook (this file) and the
+deviation log ship with the repo — the process record is part of the
+publication.
