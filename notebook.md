@@ -729,3 +729,116 @@ error ranking among answered items at adequate n (the current within-
 written estimate rests on 12 errors). Any E5 instrument work touches
 instruments/ and the frozen-tree question, so it is a planning decision
 with its own freeze discipline, not a patch.
+
+## Entry 19 — 2026-07-19 (E5.1: the fair-corpus characterisation)
+
+(#19 by the running count; entries 17-18 already logged.)
+
+PURPOSE. Answer the question Phase C could not (audit A1): on a CONFUSABLE
+corpus, under STRICT scoring, does the gate's geometry rank correctness
+BEYOND store membership? The registered null-to-beat is the audit's
+zero-parameter exact-key membership ORACLE, not verbalised confidence.
+Built in e5/ (frozen dirs + instruments/ read-only; embedding cache
+redirected to e5/.emb_cache_e5.npz). DEV seed 5551001 tunes the family
+mix + trains FOIL-v2; EVAL seed 5552001 is the single scored run.
+
+CORPUS (e5/corpus_v2.py). Strict scoring primary: a forced answer on a
+collision is correct only if it equals the ground-truth-designated
+referent (None => no forced answer is correct). Objects type-matched to
+relations. Family mix (tuned on DEV to reach the >= 60 answered-error
+target; e5/pilot_mix.md logs the trajectory 16 -> 63): f_syn (near-synonym
+collisions under works-at/employed-by, lives-in/resides-in — contradictory
+objects, one TRUE one STALE), f_nearkey (contradictions under
+near-duplicate subject keys), f_confusable (fact for "Tom Fischer", query
+"Tom Fisher" — nothing on file), f_para (written rel-A, queried synonym
+rel-B), f_distract (object has a registered near-sibling org), plus f_id /
+f_ood / f_ref kept from Phase C. EVAL: k=254, N=544, 288 items,
+strict accuracy 0.441 (either-object 0.722), 158 routed ANSWER, of which
+59 are strict answered-errors (vs Phase C's 12 — the audit's core
+sample-size problem is fixed). [DEV pilot reached 63; EVAL landed at 59 on
+the held-out seed, honest sampling variation — the mix was frozen on DEV
+and never tuned on EVAL.]
+
+RESULTS (strict scoring, EVAL, B=2000 paired bootstrap seed 5552003).
+
+  AUROC2 overall / answered-only (n_answered=158, 59 errors):
+    GATE(1-u)       0.7380 (0.6802,0.7951) / 0.5160
+    GATE(b)         0.7375 / 0.4763
+    GATE(b/(b+d))   0.6797 / 0.4458
+    ORACLE          0.6607 (0.6229,0.7007) / 0.5000  (constant among answered)
+    ORACLE+cos      0.7429 (0.6854,0.7997) / 0.5160
+    FOIL-v2         0.7721 (0.7204,0.8236) / 0.6023
+    VERBALISED-INF  0.6663 (0.6046,0.7270) / 0.4408
+
+  THE STAGE NUMBER (GATE vs ORACLE):
+  - Overall: GATE(1-u) - ORACLE = +0.0773 CI (+0.0244,+0.1278), EXCLUDES 0.
+    The geometry beats bare membership when unwritten-key items are in play.
+  - BUT GATE(1-u) - ORACLE+cos = -0.0049 CI (-0.0134,+0.0032), CONTAINS 0.
+    Membership PLUS one geometry scalar (top-1 cosine) fully accounts for
+    the gate's advantage; the (b,d,u) normalisation buys nothing over it.
+  - ANSWERED-ONLY: GATE(1-u) - ORACLE = +0.0160 CI (-0.0759,+0.1042),
+    CONTAINS 0; GATE(1-u) answered-only AUROC2 = 0.516 (chance). Within the
+    items the system actually answers, the gate does NOT rank correct vs
+    incorrect. Its confidence is a membership/resolution signal, not an
+    error detector among answered items.
+
+  H2 PARITY DOES NOT SURVIVE the hard corpus: FOIL-v2 (trained on E5 dev,
+  eval 0.7721) - GATE(1-u) (0.7380) = +0.0342, OUTSIDE the registered 0.02
+  margin. A trained readout extracts correctness signal the untrained
+  mapping leaves on the table (answered-only 0.602 vs 0.516). H2's Phase C
+  parity (gap 0.013) was itself corpus-dependent.
+
+  NEAR-SYNONYM COLLISION (the audit A4 defect, now quantified): 40/74 =
+  54% of synonym pairs are confidently answered BOTH WAYS with different
+  objects (Lisbon one way, Boston the other). stored-d AUC vs clean-ID
+  drops 1.0000 (Phase C byte-identical keys) -> 0.7888 (fair near-synonym
+  keys); f_syn m_l2 sits at 0.55-0.85 (singleton range), so the stored
+  detector mostly cannot see these. 1-u on collisions (mean 0.764) is only
+  marginally below clean-correct-ID (0.834) — u carries no ambiguity term,
+  so a stored contradiction still reads as confident belief.
+
+  PHASE C CONTINUITY: either-object AUROC2 = 0.9363 (Phase C 0.979 — lower
+  because the corpus is harder even under lenient scoring); strict = 0.7380.
+  The 0.20 strict-vs-either gap is how much the Phase C headline leaned on
+  lenient scoring.
+
+  VERBALISED-INFORMED (the mouth GIVEN the resolved record — the channel
+  the audit said Phase C denied it): 0.666, well above Phase C's uninformed
+  0.49 (the channel does help) but below the gate and below ORACLE+cos, and
+  0.44 answered-only (still cannot rank answered errors).
+
+  LEAK (e5/leak_v3.py; judge = qwen3:14b run via llama-cpp on the GPU —
+  ollama 0.15.2 here has no ROCm runner and judged 100% on CPU at ~20s/item,
+  so the pass loads the ollama-downloaded GGUF blob through the working
+  hipBLAS build at ~1.2s/item; judge pinned by tag + blob sha in
+  e51_leak_summary.json). Judge CHARACTERISED on the 60-item labelled set
+  INCLUDING the negation/implication/temporal/attribution classes audit A5
+  proved leak_v2 misses: precision 1.000, recall 1.000, 60/60 perfect on
+  every class. This is a checker with teeth. Leak over 288 outputs (facts
+  relevance-filtered per output): judge-flagged 2/288 = 0.69%. On inspection
+  1 is a GENUINE mouth fabrication ("Leo is getting ready for a meeting."
+  over the body "Leo Tran reports to Sofia Klein." — an event in no record,
+  passed by verify_leadin because "meeting" is not in its ban regex), 1 is a
+  judge false-positive ("Got that?"). Genuine leak 1/288 = 0.35%, entirely
+  in the free-text lead-in surface; all 263 templated bodies clean 0/263.
+  The deliberate-STORED surface was never emitted (fair collisions route to
+  ANSWER or deliberate-referential — the stored path fires only on Phase C's
+  byte-identical keys, A4 from the routing side).
+
+meta-d' EXCLUDED (strict accuracy 0.441 < 0.55 window) — correct behaviour;
+the M-ratio "hypersensitivity" of Phase C required the OOD-heavy easy mix.
+
+NEUTRAL FORK STATEMENT (decision returns to planning, no recommendation).
+E5.1 characterises; it does not fix. The gate as frozen is, on a confusable
+corpus under strict scoring, a store-membership-plus-resolution signal: it
+beats bare membership only via the top-1 cosine it already exposes, it does
+not rank errors among answered items (0.52), it answers near-synonym
+contradictions both ways 54% of the time, and its Phase-C ambiguity/parity
+ceilings (1.00 / gap 0.013) were corpus artefacts (0.79 / gap 0.034 here).
+A trained head does better (0.77, answered 0.60), so the correctness signal
+exists in the features but the untrained (b,d,u) map does not surface it.
+The two open directions — (i) fix-and-refreeze: add a synonym-aware
+stored-d source and an answered-item error signal, then re-run a registered
+confirmation; (ii) publish-as-characterised: report E5.1 as the honest
+envelope of the current artifact — are a planning decision, not this
+session's to make. Frozen tree untouched; all E5.1 code in e5/.

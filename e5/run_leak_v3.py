@@ -21,6 +21,30 @@ import _env  # noqa: F401  (path setup)
 import leak_v3
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+OLLAMA_MODELS = os.environ.get(
+    "OLLAMA_MODELS", "/usr/share/ollama/.ollama/models")
+
+
+def resolve_model(spec):
+    """Turn an ollama tag ('qwen3:14b') into a GPU llama-cpp backend string
+    ('llamacpp:<gguf blob path>'). ollama 0.15.2 here has no ROCm runner and
+    falls back to CPU (~20s/item); llama-cpp-python uses the working
+    hipBLAS/gfx1100 build (~1s/item), so E5.1 judges via the downloaded GGUF
+    blob directly. Pass a spec already prefixed llamacpp:/ollama:/claude-*
+    to bypass resolution."""
+    if ":" in spec and spec.split(":", 1)[0] in ("llamacpp", "ollama") \
+            or spec.startswith("claude") or spec.startswith("local:"):
+        return spec
+    name, _, tag = spec.partition(":")
+    tag = tag or "latest"
+    manifest = os.path.join(OLLAMA_MODELS, "manifests",
+                            "registry.ollama.ai", "library", name, tag)
+    with open(manifest) as f:
+        m = json.load(f)
+    digest = next(l["digest"] for l in m["layers"]
+                  if l["mediaType"].endswith(".model"))
+    blob = os.path.join(OLLAMA_MODELS, "blobs", digest.replace(":", "-"))
+    return f"llamacpp:{blob}"
 CANDIDATES = os.path.join(HERE, "e51_leak_candidates.jsonl")
 CHAR_OUT = os.path.join(HERE, "leak_v3_characterisation.json")
 JUDGED_OUT = os.path.join(HERE, "e51_leak_judged.jsonl")
@@ -49,11 +73,13 @@ def characterise(model):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--model", default="ollama:qwen3:14b")
+    ap.add_argument("--model", default="qwen3:14b")
     ap.add_argument("--char-only", action="store_true")
     args = ap.parse_args()
 
-    print(f"[leak_v3] judge model: {args.model}")
+    args.judge_tag = args.model            # human-readable, for the report
+    args.model = resolve_model(args.model)
+    print(f"[leak_v3] judge: {args.judge_tag}  ->  {args.model}")
     t0 = time.time()
     ch = characterise(args.model)
     print(f"[leak_v3] characterisation ({time.time()-t0:.0f}s): "
@@ -74,7 +100,8 @@ def main():
     for surf, v in sorted(summary["by_surface"].items()):
         print(f"    {surf:28s} {v['n_leak']}/{v['n']} = {v['rate']:.3f}")
     with open(os.path.join(HERE, "e51_leak_summary.json"), "w") as f:
-        json.dump({"model": args.model, "characterisation":
+        json.dump({"judge": args.judge_tag, "backend": args.model,
+                   "characterisation":
                    {k: ch[k] for k in ("precision", "recall", "tp", "fp",
                                        "fn", "tn", "parse_errors", "by_class")},
                    "leak": summary}, f, indent=2)

@@ -184,6 +184,28 @@ def _strip_think(text):
     return text.strip()
 
 
+_LLAMACPP = {}
+
+
+def _call_judge_llamacpp(gguf_path, system, user_text):
+    """Local judge via llama-cpp-python on the GPU (the same hipBLAS/gfx1100
+    path the mouth uses; ollama's bundled build has no ROCm runner in this
+    WSL2 env, so it fell back to CPU — E5.1 loads the ollama-downloaded GGUF
+    directly instead). Qwen3 thinking is disabled with '/no_think'."""
+    from llama_cpp import Llama
+    if gguf_path not in _LLAMACPP:
+        import os as _os
+        _LLAMACPP[gguf_path] = Llama(
+            gguf_path, n_ctx=8192, n_gpu_layers=-1, verbose=False,
+            n_threads=_os.cpu_count(), seed=0)
+    llm = _LLAMACPP[gguf_path]
+    out = llm.create_chat_completion(
+        messages=[{"role": "system", "content": "/no_think " + system},
+                  {"role": "user", "content": user_text}],
+        max_tokens=1024, temperature=0.0)
+    return out["choices"][0]["message"]["content"]
+
+
 def _call_judge_ollama(model, system, user_text):
     """Local judge via the ollama HTTP API (stdlib only). model is the ollama
     tag, e.g. 'qwen3:14b'. temperature 0; a generous num_predict so a
@@ -192,12 +214,16 @@ def _call_judge_ollama(model, system, user_text):
     import json as _json
     import urllib.request
 
+    # think disabled: over hundreds of items a reasoning trace per call is
+    # intractable, and the 60-item characterisation is exactly the check on
+    # whether no-think recall is adequate (reported alongside the leak rate).
     payload = {
         "model": model,
         "system": system,
         "prompt": user_text,
         "stream": False,
-        "options": {"temperature": 0, "num_predict": 2048},
+        "think": False,
+        "options": {"temperature": 0, "num_predict": 1024},
     }
     req = urllib.request.Request(
         f"{OLLAMA_URL}/api/generate",
@@ -223,7 +249,11 @@ def judge_output(output_text, allowed_bodies, facts, model=JUDGE_MODEL, client=N
     # backend routing. 'ollama:<tag>' -> local ollama server (registrant's
     # documented local-judge decision, E5.1: qwen3:14b). 'local:' without a
     # concrete backend stays unimplemented on purpose. Anything else -> API.
-    if model.startswith("ollama:"):
+    if model.startswith("llamacpp:"):
+        gguf = model[len("llamacpp:"):]
+        call = lambda ut: _strip_think(
+            _call_judge_llamacpp(gguf, JUDGE_SYSTEM_PROMPT, ut))
+    elif model.startswith("ollama:"):
         tag = model[len("ollama:"):]
         call = lambda ut: _strip_think(
             _call_judge_ollama(tag, JUDGE_SYSTEM_PROMPT, ut))
@@ -292,11 +322,38 @@ def characterise_judge(model, charset_path=DEFAULT_CHARSET):
     }
 
 
+def relevant_facts(output_text, allowed_bodies, facts, max_facts=150):
+    """Reduce a large active-record set to the facts that could bear on THIS
+    output's leak decision: any triple sharing a >=4-char alphanumeric token
+    with the output or an allowed body. An assertion in the output about an
+    entity that appears in NO passed fact is unsupported by construction, so
+    dropping unmentioned-entity facts is lossless for the leak verdict and
+    keeps the prompt inside the judge's context window (the full active set
+    can be ~250 triples). If somehow more than max_facts match, the extra are
+    dropped and a marker triple records the truncation (never silent)."""
+    import re
+    text = " ".join([output_text] + list(allowed_bodies)).lower()
+    toks = {t for t in re.findall(r"[a-z0-9]{4,}", text)}
+    keep = []
+    for tr in facts:
+        blob = " ".join(str(x) for x in tr).lower()
+        if any(t in blob for t in toks):
+            keep.append(tr)
+    if len(keep) > max_facts:
+        dropped = len(keep) - max_facts
+        keep = keep[:max_facts] + [["__TRUNCATED__", "dropped",
+                                    f"{dropped} more relevant facts"]]
+    return keep
+
+
 def run_leak_pass(outputs_path, model, out_path):
     """Reads a JSONL file of candidate outputs (each line: {"id", "surface",
     "output", "allowed_bodies": [...], "facts": [[s, r, o], ...]}), judges
     each with the live API, writes one result line per input line to
-    out_path, and returns {"n", "n_leak", "rate", "by_surface": {...}}."""
+    out_path, and returns {"n", "n_leak", "rate", "by_surface": {...}}.
+
+    Facts are relevance-filtered per output (see relevant_facts) so the full
+    active-record set does not overflow the judge's context window."""
     n = 0
     n_leak = 0
     by_surface = {}
@@ -306,9 +363,11 @@ def run_leak_pass(outputs_path, model, out_path):
             if not line:
                 continue
             item = json.loads(line)
+            facts = relevant_facts(item["output"], item.get("allowed_bodies", []),
+                                   item.get("facts", []))
             verdict = judge_output(
                 item["output"], item.get("allowed_bodies", []),
-                item.get("facts", []), model=model,
+                facts, model=model,
             )
             is_leak = bool(verdict.get("leak"))
             surface = item.get("surface", "unknown")

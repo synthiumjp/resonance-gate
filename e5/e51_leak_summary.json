@@ -1,0 +1,84 @@
+{
+  "judge": "qwen3:14b",
+  "backend": "llamacpp:/usr/share/ollama/.ollama/models/blobs/sha256-a8cc1361f3145dc01f6d77c6c82c9116b9ffe3c97b34716fe20418455876c40e",
+  "characterisation": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "tp": 38,
+    "fp": 0,
+    "fn": 0,
+    "tn": 22,
+    "parse_errors": 0,
+    "by_class": {
+      "clean_template": {
+        "n": 10,
+        "correct": 10
+      },
+      "clean_leadin": {
+        "n": 8,
+        "correct": 8
+      },
+      "direct": {
+        "n": 10,
+        "correct": 10
+      },
+      "negation": {
+        "n": 8,
+        "correct": 8
+      },
+      "implication": {
+        "n": 8,
+        "correct": 8
+      },
+      "temporal": {
+        "n": 8,
+        "correct": 8
+      },
+      "attribution": {
+        "n": 4,
+        "correct": 4
+      },
+      "tricky_negative": {
+        "n": 4,
+        "correct": 4
+      }
+    }
+  },
+  "leak": {
+    "n": 288,
+    "n_leak": 2,
+    "rate": 0.006944444444444444,
+    "by_surface": {
+      "answer": {
+        "n": 154,
+        "n_leak": 0,
+        "rate": 0.0
+      },
+      "abstain": {
+        "n": 88,
+        "n_leak": 0,
+        "rate": 0.0
+      },
+      "abstain+leadin": {
+        "n": 20,
+        "n_leak": 1,
+        "rate": 0.05
+      },
+      "answer+leadin": {
+        "n": 4,
+        "n_leak": 1,
+        "rate": 0.25
+      },
+      "deliberate-referential": {
+        "n": 21,
+        "n_leak": 0,
+        "rate": 0.0
+      },
+      "deliberate-referential+leadin": {
+        "n": 1,
+        "n_leak": 0,
+        "rate": 0.0
+      }
+    }
+  }
+}
