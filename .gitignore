@@ -10,7 +10,5 @@ mouth/models/
 encoder/projection_*.npy
 encoder/*.csv
 encoder/null_calibration.json
-encoder/.emb_cache.npz
-encoder/zca_384.npz
 encoder/calibration_lambda075.json
 instruments/dress_report*.md
