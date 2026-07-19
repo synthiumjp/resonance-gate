@@ -11,3 +11,5 @@ encoder/projection_*.npy
 encoder/*.csv
 encoder/null_calibration.json
 encoder/calibration_lambda075.json
+e5/*.log
+e5/__pycache__/
