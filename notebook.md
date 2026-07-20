@@ -1635,3 +1635,72 @@ alarms are worse than misses. No experiment has yet touched extraction. That
 measurement needs real transcripts.
 
 Artifacts: experiments/cardinality/infer.py, cardinality.json.
+
+### Entry 24 CORRECTION — 2026-07-20 (E7 was not void; it tested a hypothesis the source never made)
+
+Entry 24 declared E7 "VOID as a test of that mechanism" because COND-0 did not
+reproduce a degree-specific degradation. The source has now been retrieved and
+read directly, and the correction is that the DEGREE FRAMING WAS NOT THE
+SOURCE'S. Logged in full because the conclusion I recorded was wrong in a way
+that matters.
+
+SOURCE, verified: Randhir Kumar, "Holographic Memory for Zero-Shot
+Compositional Reasoning in Knowledge Graphs: A Mechanistic Study of Where and
+Why It Fails", arXiv:2606.24948. Real paper, retrieved and read.
+
+WHAT KUMAR ACTUALLY CLAIMS:
+- HRR/FHRR are competitive on single-hop retrieval (MRR 0.358 / 0.350) but
+  "neither composes zero-shot: accuracy stays at chance".
+- Intermediate entity recovery is FINE (MRR 0.896) — composition still fails
+  despite correct intermediates.
+- Ground-truth second-hop facts recover at "0.26 to 0.48x average atomic
+  accuracy". This is the 0.26-0.48x figure the E7 brief carried.
+- MECHANISM, in his words: "facts compositional chains pass through are
+  intrinsically harder for the superposed memory to retrieve, a capacity and
+  interference effect" — explicitly a capacity/interference claim, NOT an
+  entity- or relation-degree claim.
+- Direction: "Fixing zero-shot composition requires improving retrieval
+  capacity under superposition, not just redesigning the cleanup."
+- Dataset: FB15k-237.
+
+CONSEQUENCE 1 — E7's status. E7 built a high-degree corpus and found degree
+does not drive degradation; only total load k does. That is CONCORDANT with
+Kumar, not a failure to reproduce him. E7 is void only as a test of the
+degree hypothesis, which was an artefact of how the brief characterised the
+source, not of the source. Entry 24's finding stands and is strengthened:
+degree-independence is now supported both by our controlled experiment and by
+the source's own mechanistic reading.
+
+CONSEQUENCE 2 — E6 concordance. Entry 23 concluded "the binding limit is LOAD,
+not hop count". That is Kumar's conclusion, reached independently on a
+different substrate and corpus.
+
+CONSEQUENCE 3 — A SHARP NEW HYPOTHESIS, from E8. Kumar attributes the
+0.26-0.48x to capacity and interference. E8 measured a different mechanism
+that produces numerically the same band: at a fan-out key of width F,
+specific-target accuracy is exactly 1/F (nine of nine cells, CI containing
+1/F), and the algebra-scrambled control at identical k and fact count showed
+this is NOT load. For F in [2, 4], 1/F = 0.50 to 0.25 — Kumar reports 0.26 to
+0.48. FB15k-237 is well known to be dense in 1-to-N relations, so the facts a
+compositional chain passes through are disproportionately multi-valued keys.
+  HYPOTHESIS: Kumar's second-hop degradation is UNDERDETERMINATION (shared-key
+  fan-out), not capacity. His own evidence is consistent with this and does not
+  distinguish the two: intact intermediate recovery (0.896) with collapsed
+  composition is exactly what fan-out predicts, since the intermediate is
+  recovered fine and the NEXT key is the multi-valued one.
+  FALSIFIABLE TEST, cheap: compute the per-(subject, relation) object-count
+  distribution over FB15k-237 restricted to facts on 2-hop chains, take
+  mean(1/F) over those facts, and compare to 0.26-0.48. If it lands in band,
+  the mechanism is underdetermination and the prescribed fix ("improve
+  retrieval capacity under superposition") would not help, because no capacity
+  increase recovers a uniquely-determined answer from a key that does not
+  determine one. NOT YET RUN — recorded as a hypothesis, not a result.
+
+VERIFICATION HYGIENE. The literature sweep also returned Leonhart,
+arXiv:2605.20919, cited as sweeping chain length and finding "100% accuracy
+through 2 hops collapsing to chance by 8 hops". The paper is real but is
+"Sutra: Tensor-Op RNNs as a Compilation Target for Vector Symbolic
+Architectures", and its k=8 is BUNDLE WIDTH, not hop count. The relayed claim
+was wrong. Agent-relayed citations in entries 26 and this one are to be
+treated as unverified unless explicitly marked retrieved-and-read; Kumar
+above is marked verified because it was fetched directly.
