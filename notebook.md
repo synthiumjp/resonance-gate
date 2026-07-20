@@ -2289,3 +2289,67 @@ observations; anaphora and semantic-scale equivalence ("ones"=="postcards")
 are out of reach of lexical tagging and owed to either coreference or the
 repeated-observation reliability estimate. Not shippable; failure is now
 granularity and data, not concept.
+
+## Entry 35 — 2026-07-21 (p2: the store-churn instrument — built, novel, and demonstrated on approximate data)
+
+Built ChurnMeter (experiments/p2/churn.py): the Reliable Change Index applied
+to the MEMORY STORE over time instead of to model versions. For each fact it
+tracks a strength trajectory across sessions, computes the per-fact delta
+between two session cut-points, and reports the reliable-change decomposition
+(reliably strengthened / weakened / stable) plus the "beyond the mean"
+headline — the net strength change and the opposing gross movements it is the
+residual of. Uses the exact split-half + Spearman-Brown reliability and
+S_diff = sqrt(SEM0^2+SEM1^2) form from arXiv:2604.27405.
+
+WHY IT MAY BE NOVEL. The RCI prior-art sweep (haiku agent, this session) found
+ZERO applications of RCI or RCI-formalism to stream change detection, sensor
+drift, KB revision or system monitoring; the "exceed the noise floor" idea is
+standard SPC (Shewhart/CUSUM) but the specific RCI port is Cacioli 2026, and
+applying it to a memory store over time is unclaimed beyond that. No field
+memory system reports item-level movement at all -- they report a store size
+and maybe an aggregate accuracy.
+
+RESULT on 7 haystack users (t0 = 25% of sessions, t1 = last):
+    reliably strengthened  7 (29%)
+    reliably weakened      5 (21%)
+    stable                12 (50%)
+    churn rate            50%
+    BEYOND THE MEAN: net strength change -15.2 = gross up +9.5 / gross down -29.1
+      -> 75% of gross movement is downward and invisible to the net
+  The instrument does exactly what it should: two stores could both post a
+  modest net decline while one decays quietly and one thrashes, and the net
+  hides that. Here the net (-15.2) understates the gross churn (38.6 total
+  movement) by 2.5x.
+
+TWO HONESTY CONSTRAINTS, both material -- what is demonstrated is the
+CAPABILITY and the SHAPE (net << gross), NOT specific numbers about how memory
+churns.
+1. THE MAGNITUDES ARE DRIVEN BY UNFITTED WEIGHTS. strength.py's
+   W_ACTIVATION=1.0 vs W_DORMANCY=0.15 were set by hand, never fitted. The 75%
+   downward figure is largely a statement about that ratio: a smaller dormancy
+   weight would flip the store to net-upward. So the decomposition is real but
+   its numbers are a property of the model's parameters, not a measured
+   property of memory.
+2. THE REPLAY IS APPROXIMATE AND THE RELIABILITY IS INFLATED. The haystack dump
+   does not store a per-session activation log, so the trajectory spreads a
+   fact's total activations evenly across its span -- an approximation, flagged
+   in-code. And sampling strength at every session produces an autocorrelated
+   decay curve, on which split-half reliability jumped to ~0.8; that is
+   measuring trajectory smoothness, not extraction reliability, so r_xx here is
+   not a valid instrument-reliability estimate. Both are owed: dump the real
+   per-session activation log, and estimate r_xx from repeated EXTRACTIONS of
+   the same span (entry 34's owed item) rather than from the strength curve.
+
+INHERITED RCI WEAKNESS, noted (from the prior-art sweep, criticisms UNVERIFIED
+against primary sources): classic RCI assumes equal measurement error at both
+timepoints. churn() already computes sd0 and sd1 separately, which is stricter
+than classic RCI, but regression-to-the-mean on extreme facts is not corrected
+and could inflate apparent movement of the strongest/weakest facts.
+
+WHERE THIS SITS. The store-churn instrument is the most plausibly-novel thing
+in p2: a memory-health readout with no prior art, that reports the item-level
+movement the field's aggregates hide. It is BUILT and produces the right
+decomposition. It is NOT yet a measurement of real memory dynamics, because the
+strength weights are unfitted and the replay is approximate. Turning it from a
+working instrument into a measured result needs fitted weights and a faithful
+per-session log -- both scoped, neither done.
