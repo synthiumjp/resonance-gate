@@ -1201,3 +1201,167 @@ Artifacts: experiments/multihop/{corpus,traverse,evaluate}.py, rows*.jsonl
 (per-chain, per-hop records), report*.json. Reproduce:
 `.venv/bin/python experiments/multihop/evaluate.py --regen` (k=200 primary),
 `--k 400 --worlds 5 --regen` / `--k 800 --worlds 5 --regen` (stress points).
+
+## Entry 24 — 2026-07-20 (E7: partitioning study — and a FAILED reproduction of the high-degree-interference mechanism)
+
+PURPOSE. Test whether partitioning the store (by relation, by entity, by
+both) pushes the multi-hop wall found in entry 23, in a corpus deliberately
+built to contain HIGH-DEGREE entities and relations so that chain-relevant
+facts are the high-contention ones. Four conditions over a byte-identical
+fact set; the only variable is how facts are split. Experiment only;
+rg-1.1's gate, cleanup and encoder reused verbatim; routing is pure symbolic
+dictionary lookup on the labels the fact was written with (no similarity, no
+inference, no learning). Frozen artifact untouched. Code experiments/partition/.
+
+DESIGN NOTES (choices decided with the registrant before implementation).
+- EMPTY CELLS are created lazily and PROBED, not short-circuited. Short-
+  circuiting would hand the partitioned conditions a free structural-
+  abstention channel COND-0 cannot have. The structural-miss rate is logged
+  separately, and it turned out to be the decisive diagnostic (below).
+- BACKGROUND LOAD attaches to hubs both subject-side and object-side, logged
+  separately, so "COND-E helped" can be told apart from "COND-E was handed
+  small cells by corpus construction".
+- KEYS ARE UNIQUE throughout. Two facts under one (subj, rel) key is
+  UNDERDETERMINATION, not interference; mixing the two would make any COND-0
+  failure uninterpretable and would stop COND-RE from ever reaching K=1.
+- WRITES USE echo=False so all four conditions hold the identical fact set;
+  at this load the frozen echo-check would have rejected 29% of writes
+  (logged as a diagnostic, not used to filter).
+
+DEV CALIBRATION (seed +7, disclosed). The first attempt used k_total=2000 at
+N~970 — 5.3x the capacity law k_max ~= D/(pi*ln N) ~= 379. COND-0 sat on the
+noise floor (high-degree 0.075, typical 0.090; 90% of facts failing echo
+read-back), i.e. BOTH fact classes were destroyed equally and no degree-
+specific effect could be detected in either direction. That first DEV corpus
+also had chain-relation degree 63 against cold 52 — no relation-degree
+contrast at all. Both defects were fixed before scoring: six chain relations
+instead of twelve, a dedicated chain-relation background block that raises
+relation degree while leaving entity degree at 1, a separate filler-relation
+band so hub out-degree does not drag cold-relation degree up with it, and
+k_total=400. EVAL seed 20260721, 17 worlds, held out.
+
+REGIME ACHIEVED (EVAL, per world): 414 facts, 346 entities, k just inside
+k_max ~= 446. Hub out-degree 7.5 (max 8) vs typical-fact subject out-degree
+1.2 — 6.1x. Chain-relation degree 31 vs cold-relation degree 4 — 7.8x.
+COND-0 typical-fact retrieval 0.716, well off the floor: the probe is
+informative in both directions.
+
+A. KUMAR PROBE (single-hop retrieval, high-degree vs typical, SAME store,
+same k and N).
+    COND-0   high 0.752 [0.700,0.797] n=306   typical 0.716 [0.687,0.743] n=1020   ratio 1.050
+    COND-R   1.000 / 1.000   ratio 1.000   (k per store 27.0 vs 4.9)
+    COND-E   1.000 / 1.000   ratio 1.000   (k per store  7.7 vs 1.2)
+    COND-RE  1.000 / 1.000   ratio 1.000   (k per store  1.0 vs 1.0)
+
+  THE REPRODUCTION FAILS. The registered expectation was a 0.26-0.48x
+  degradation of high-degree facts in COND-0. Measured 1.050, with the two
+  confidence intervals overlapping across n=1326 probes. High-degree facts
+  are if anything marginally BETTER retrieved, not worse.
+
+  LOAD SWEEP (COND-0 only, degree contrast pinned at 6.36x at every point by
+  drawing load filler exclusively from subjects no probe class uses):
+      k= 415  high 0.833  typical 0.717  ratio 1.163 [0.917, 1.406]
+      k= 715  high 0.389  typical 0.289  ratio 1.346 [0.753, 2.294]
+      k=1215  high 0.111  typical 0.144  ratio 0.769 [0.256, 2.208]
+      k=2015  high 0.074  typical 0.044  ratio 1.667 [0.342, 7.737]
+      k=3415  high 0.037  typical 0.017  ratio 2.222 [0.214,22.054]
+  Every ratio CI contains 1.0 across an 8x load range while BOTH classes
+  collapse together from 0.83/0.72 to 0.04/0.02. Degradation is a function of
+  total store load k and not of degree.
+
+  WHY, mechanically: in this substrate's MAP algebra a stored record
+  R' = s'(x)rho(r')(x)rho2(o') contributes, after unbinding with (s, r),
+  o'(x)rho^-2(s s' (x) rho(r r')). When s'=s and r'=r that is o' exactly — a
+  key collision. In every other case the carrier is a pseudo-random vector
+  uncorrelated with o'. Sharing ONLY a subject, or ONLY a relation, therefore
+  produces unstructured noise indistinguishable from any other record's. The
+  only structured interference available is exact (subj, rel) key collision,
+  which this corpus excludes by construction and which is a different
+  phenomenon (underdetermination) from the one under test. So the mechanism
+  has no route to act in this architecture, and the sweep confirms it does
+  not. This is an architecture-level negative result, not a corpus miss.
+
+  PER THE STOP RULE, the KUMAR-SPECIFIC reading of everything below is void:
+  the partitioned conditions cannot be said to "fix Kumar's mechanism",
+  because the mechanism was never present to fix. What remains interpretable
+  is the partitioning effect itself, which is large and real but has a
+  different and more mundane explanation — k reduction.
+
+B. MULTI-HOP ACCURACY vs CHANCE (intact chains, chance = random codebook
+entry of the correct type).
+    COND-0   L1 0.667 [0.571,0.751]  L2 0.569 [0.472,0.661]  L3 0.461 [0.367,0.557]
+    COND-R   L1 1.000  L2 1.000  L3 1.000
+    COND-E   L1 1.000  L2 1.000  L3 1.000
+    COND-RE  L1 1.000  L2 1.000  L3 1.000
+  Chance 0.0095 / 0.0046 / 0.0256. NO condition is at chance, COND-0 included
+  — the second half of the registered COND-0 failure criterion ("multi-hop
+  at/near chance") is also not met at this load. Partitioning takes 3-hop
+  accuracy from 0.461 to 1.000. CROSSOVER: COND-R alone is already sufficient;
+  the entity axis and the both-axes condition add nothing on top.
+
+C. CONFIDENCE HONESTY (chain confidence = min(1-u), chosen on the same
+grounds as entry 23).
+    COND-0   AUROC intact-vs-broken 0.937 / 0.937 / 0.873 (L1/L2/L3)
+             AUROC correct-vs-wrong 0.921 / 0.882 / 0.836
+             conf correct 0.730/0.643/0.544  WRONG 0.467/0.422/0.382 (n=34/44/55)
+             conf broken 0.433/0.352/0.355
+    COND-R   AUROC intact-vs-broken 1.000 / 1.000 / 0.999; conf correct 0.999,
+             conf broken 0.132/0.097/0.094; ZERO wrong answers
+    COND-E   AUROC 1.000 at every L; conf correct 1.000, conf broken 0.000
+    COND-RE  AUROC 1.000 at every L; conf correct 1.000, conf broken 0.000
+  Partitioning does not buy accuracy at the cost of confident-wrong: nothing
+  gets more confident when it is wrong. But the partitioned conditions
+  produce NO wrong answers at all, so "confidence on wrong answers" there is
+  UNDEFINED, not perfect. No claim about improved error-confidence is
+  available from this run; the errors were removed, not better flagged.
+
+D. HOW MUCH SUPERPOSITION SURVIVES — and the decisive diagnostic.
+    cond     stores  k mean  k med  k max  queries on multi-fact store  neg. chains caught by EMPTY CELL
+    COND-0        1   412.9    413    413                       1.000                             0.000
+    COND-R     43.6     9.5      5.9   47.5                     0.991                             0.000
+    COND-E      217     1.9      1      8                       0.372                             0.627
+    COND-RE     413     1.0      1      1                       0.000                             1.000
+
+  COND-RE is a hashmap. K=1 in every cell, zero queries doing superposition
+  work, and 100% of broken/distractor chains rejected because the dictionary
+  found no cell — its perfect AUROC is bookkeeping with no geometry in it.
+  COND-E is a hybrid: 37% of queries still superposed, but 63% of its
+  negative-arm detection is structural.
+  COND-R is the one that is still a VSA memory: 99.1% of queries land on a
+  multi-fact store (mean k 9.5, max 47), and ZERO of its 612 negative chains
+  were caught structurally — every one went through a populated store and was
+  separated by geometry alone (conf 0.116 vs 0.999 intact).
+
+VERDICT (no spin).
+(i) COND-0 does NOT reproduce the high-degree-interference failure, on either
+registered criterion: probe ratio 1.050 (target 0.26-0.48x) with overlapping
+CIs at n=1326, null across an 8x load sweep at fixed degree contrast, and
+multi-hop accuracy nowhere near chance. The algebra says why, and the sweep
+confirms it: only exact key collisions interfere structurally in MAP, so
+degree cannot be the mechanism here. The experiment is therefore VOID as a
+test of that mechanism and of any fix for it.
+(ii) Partitioning does restore retrieval — 0.752/0.716 to 1.000 — but the
+explanation is k reduction (413 -> 9.5 -> 1.9 -> 1.0), which entry 23 already
+identified as the binding constraint. Any intervention that cut k as much
+would do the same; nothing here is specific to partitioning by meaning.
+(iii) Multi-hop accuracy comes back fully (3-hop 0.461 -> 1.000) and the
+crossover is COND-R: relation-only partitioning is already sufficient and
+both-axes is unnecessary.
+(iv) Confidence stays honest everywhere, and in COND-0 it is honest without
+help (correct-vs-wrong AUROC 0.84-0.92, wrong answers at roughly half the
+confidence of correct ones). For the partitioned conditions the
+confidence-on-wrong question is undefined because there are no wrong answers.
+(v) In the winning condition COND-R, superposition is still doing real work:
+99.1% of queries hit a multi-fact store and 100% of its negative-arm
+rejection is geometric. COND-R is a VSA memory; COND-RE is a graph with a
+confidence signal bolted on and no geometry left.
+LIMIT ON (iii) AND (v): COND-R's per-store load IS relation degree. Here the
+busiest relation store holds 47 facts, far inside capacity, which is why it is
+perfect. A corpus dominated by one relation would push COND-R back toward
+COND-0. The result is contingent on the relation-degree distribution and must
+not be quoted as a general property of relation partitioning.
+
+Artifacts: experiments/partition/{corpus,stores,traverse,evaluate}.py,
+rows.jsonl, probes.jsonl, report.json, sweep.json, report_dev.json.
+Reproduce: `.venv/bin/python experiments/partition/evaluate.py --regen`
+(EVAL), `--dev --regen` (DEV calibration), `--sweep` (COND-0 load sweep).
