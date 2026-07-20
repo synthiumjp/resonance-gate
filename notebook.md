@@ -1704,3 +1704,80 @@ Architectures", and its k=8 is BUNDLE WIDTH, not hop count. The relayed claim
 was wrong. Agent-relayed citations in entries 26 and this one are to be
 treated as unverified unless explicitly marked retrieved-and-read; Kumar
 above is marked verified because it was fetched directly.
+
+## Entry 27 — 2026-07-20 (p2 Phase 0: the judge STOP RULE FIRED — protocol defect, diagnosed)
+
+Per docs/p2-instrument-note.md the SUPPORT judge had to reach precision >= 0.85
+AND recall >= 0.85 against human labels before any p2 claim could be
+registered. It did not. Reported as required, before any remediation.
+
+RESULT (qwen3:14b, pinned by blob sha; 193 pairs; 0 parse failures, 1 judge
+UNCLEAR).
+    ALL (A+B)   n=193  P=0.345  R=0.906  F1=0.500  acc=0.699
+    Source A    n=161  P=0.203  R=0.875  F1=0.329  acc=0.646
+    Source B    n= 32  P=1.000  R=0.938  F1=0.968  acc=0.969
+  STOP RULE: precision 0.345 FAIL / recall 0.906 PASS  =>  STOP.
+
+NO JUDGE SHOPPING. The instrument note forbids trying models until one passes,
+and no other model has been tried. The permitted branch is to repair the
+PROTOCOL, and the evidence says the protocol is where the defect is.
+
+DIAGNOSIS — the rubric conflated two constructs, and the judge applied the
+other one. On Source B (clean, unambiguous constructed spans) the judge scored
+P=1.000 / R=0.938: it is entirely capable. Precision collapses only on Source
+A, real conversational turns. Inspecting all 55 false positives, the dominant
+pattern is not incapacity but a different reading:
+
+  (I've been thinking about | taking | acting classes)
+     judge: "The span directly states the triple as a current thought."
+  (Sculptor | is thinking of | creating a series of sculptures)
+     judge: "The span explicitly states the sculptor is thinking of creating..."
+  (I'll | mention | that the antique tea set came from my cousin Rachel)
+     judge: "The span directly and explicitly states the triple as a current fact."
+
+The judge is verifying FAITHFULNESS — does the triple accurately represent
+what the span says. The rubric wanted FACTUALITY/STORABILITY — is what it
+represents a fact worth storing as a fact. A triple that faithfully encodes an
+intention ("X is thinking of Y") is faithful but not storable, and the rubric
+never said which of the two governs; it listed FUTURE/INTENTIONAL as
+NOT_SUPPORTED but gave no rule for the case where the intention is carried in
+the triple's own relation. Only 12 of 55 false positives are the separate
+malformed-relation issue. This is my defect, not the model's.
+
+WHY IT MATTERS BEYOND THE INSTRUMENT: the two constructs are exactly what the
+product must separate. Storing an intention as a fact ("thinking of moving to
+Boston" -> user lives in Boston) is precisely what manufactures a false
+contradiction later. FAITHFULNESS and STORABILITY have to be two gates, not one
+score.
+
+PRODUCT FINDING, standing regardless of the stop. Extractor support precision
+on real LongMemEval user turns, against human labels under the storable-fact
+reading:
+    Source A: 16/161 supported = 0.099  ->  90.1% junk
+    Source B: 16/32  supported = 0.500
+90.1% independently replicates the mem0 production audit's 97.8% junk (issue
+#4573) on a different extractor, a different corpus and a conservative
+extraction prompt. The C1 precondition — that the ungated arm be junk-heavy or
+the corpus is out of regime — is therefore met.
+
+TWO EXTRACTOR FAILURES LOGGED, not fixed (changing the extractor
+mid-characterisation would change the instrument):
+1. FEW-SHOT LEAKAGE. On a dairy-farming span the extractor emitted
+   (Dana | works at | Orion Foods), (Sarah Kim | manages | Daniel Diaz),
+   (Nina Vogel | was born in | Verona), (Tom (brother) | works at | Acme Labs)
+   — verbatim examples from its own prompt, as facts about the user. Recurs on
+   at least three unrelated spans. Worse than a hedge miss: these are
+   well-formed, plausible, wholly unsupported triples that no span-overlap
+   support check would catch.
+2. HEDGE-GUARD BYPASS. The post-guard regex needs "i think" adjacent within one
+   field; the extractor splits it across subject and relation
+   ("I | think | I'll opt for a more universal item"), so the guard never fires.
+
+STATUS: Phase 0 failed its stop rule. No p2 claims registered. Proposed repair
+— split SUPPORT into FAITHFUL and STORABLE and judge them separately — is a
+protocol revision made AFTER seeing results, so it requires registrant assent
+and gets logged as a deviation with this original result reported alongside,
+permanently. Not yet actioned.
+
+Artifacts: experiments/p2/{build_labelset,judge_support}.py,
+labelset_blind.jsonl, labelset_key.jsonl, labels_human.jsonl, judgements.jsonl.

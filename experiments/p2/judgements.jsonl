@@ -1,0 +1,193 @@
+{"id": "p2-0000", "label": "SUPPORTED", "reason": "The span directly states the triple as a current thought."}
+{"id": "p2-0001", "label": "SUPPORTED", "reason": "The span explicitly states the sculptor is thinking of creating a series of sculptures."}
+{"id": "p2-0002", "label": "SUPPORTED", "reason": "The span directly and explicitly states the triple as a current fact."}
+{"id": "p2-0003", "label": "SUPPORTED", "reason": "The span explicitly states that the speaker recently got a new airbrush compressor and some acrylic paints for use on models."}
+{"id": "p2-0004", "label": "SUPPORTED", "reason": "The span directly and explicitly states the triple as a current fact."}
+{"id": "p2-0005", "label": "NOT_SUPPORTED", "reason": "The span does not mention Dana or Orion Foods."}
+{"id": "p2-0006", "label": "NOT_SUPPORTED", "reason": "The triple is over-specific and not stated in the span."}
+{"id": "p2-0007", "label": "SUPPORTED", "reason": "The span directly states the desire for the cream to be light and fluffy but still hold its shape."}
+{"id": "p2-0008", "label": "SUPPORTED", "reason": "The span explicitly states that the speaker likes the mix of content themes and post types."}
+{"id": "p2-0009", "label": "NOT_SUPPORTED", "reason": "HEDGED: the span uses 'I think' and 'I want to make sure' which indicate uncertainty or intention rather than a current fact."}
+{"id": "p2-0010", "label": "NOT_SUPPORTED", "reason": "The span asks about the Nabataeans' beliefs but does not assert that they had punishment in the afterlife."}
+{"id": "p2-0011", "label": "NOT_SUPPORTED", "reason": "The triple is interrogative, not a current fact."}
+{"id": "p2-0012", "label": "NOT_SUPPORTED", "reason": "The span does not explicitly state that the subject reads 'news' from National Geographic."}
+{"id": "p2-0013", "label": "NOT_SUPPORTED", "reason": "The span does not attribute the suggestion to Sarah Kim."}
+{"id": "p2-0014", "label": "SUPPORTED", "reason": "The span explicitly states that the speaker is now in Madrid."}
+{"id": "p2-0015", "label": "NOT_SUPPORTED", "reason": "The span is future or intentional"}
+{"id": "p2-0016", "label": "NOT_SUPPORTED", "reason": "The span does not explicitly state the current location as Boston."}
+{"id": "p2-0017", "label": "NOT_SUPPORTED", "reason": "HEDGED"}
+{"id": "p2-0018", "label": "SUPPORTED", "reason": "The span explicitly states that Sarah now reports to Daniel."}
+{"id": "p2-0019", "label": "NOT_SUPPORTED", "reason": "The span does not directly assert the triple as a current fact."}
+{"id": "p2-0020", "label": "SUPPORTED", "reason": "The span directly and explicitly states the triple as a current fact."}
+{"id": "p2-0021", "label": "NOT_SUPPORTED", "reason": "The triple is interrogative, not a stated fact."}
+{"id": "p2-0022", "label": "NOT_SUPPORTED", "reason": "The span is hypothetical and not a current fact"}
+{"id": "p2-0023", "label": "NOT_SUPPORTED", "reason": "The triple is not directly asserted in the span."}
+{"id": "p2-0024", "label": "NOT_SUPPORTED", "reason": "The span does not mention Dana or her residence."}
+{"id": "p2-0025", "label": "SUPPORTED", "reason": "The span directly and explicitly states the action of checking trail conditions."}
+{"id": "p2-0026", "label": "NOT_SUPPORTED", "reason": "The span states Daniel now reports to Sarah, not the reverse."}
+{"id": "p2-0027", "label": "NOT_SUPPORTED", "reason": "The span does not assert the triple as a current fact."}
+{"id": "p2-0028", "label": "SUPPORTED", "reason": "The span explicitly states that the speaker likes the sample workout routine."}
+{"id": "p2-0029", "label": "SUPPORTED", "reason": "The span explicitly states that the eBird app is used to track sightings."}
+{"id": "p2-0030", "label": "SUPPORTED", "reason": "The span explicitly states the triple as a current fact."}
+{"id": "p2-0031", "label": "NOT_SUPPORTED", "reason": "The triple is not directly asserted as a fact by the speaker"}
+{"id": "p2-0032", "label": "SUPPORTED", "reason": "The span directly and explicitly states the triple as a current fact."}
+{"id": "p2-0033", "label": "SUPPORTED", "reason": "The span explicitly states that Instagram stories get a lot of views."}
+{"id": "p2-0034", "label": "SUPPORTED", "reason": "The span explicitly states the sculptor is considering incorporating found ocean objects."}
+{"id": "p2-0035", "label": "NOT_SUPPORTED", "reason": "The span mentions wanting to try namashirasu but does not explicitly state that Tsukiji Itadori Uogashi Nihon-Ichi is being checked out for that specific item."}
+{"id": "p2-0036", "label": "NOT_SUPPORTED", "reason": "The span is interrogative, not asserting a fact."}
+{"id": "p2-0037", "label": "SUPPORTED", "reason": "The span explicitly states the sculptor is considering using sea glass or beach stones."}
+{"id": "p2-0038", "label": "NOT_SUPPORTED", "reason": "The span expresses a future intention, not a current fact."}
+{"id": "p2-0039", "label": "SUPPORTED", "reason": "The span directly states 'This looks like a good starting point'"}
+{"id": "p2-0040", "label": "SUPPORTED", "reason": "The span explicitly states 'I'm really enjoying it'."}
+{"id": "p2-0041", "label": "SUPPORTED", "reason": "The span directly and explicitly asserts the triple as a current fact."}
+{"id": "p2-0042", "label": "SUPPORTED", "reason": "The span directly and explicitly asserts the triple as a current fact."}
+{"id": "p2-0043", "label": "NOT_SUPPORTED", "reason": "The triple is inferred but not directly stated"}
+{"id": "p2-0044", "label": "SUPPORTED", "reason": "The span directly and explicitly asserts the triple as a currently held fact."}
+{"id": "p2-0045", "label": "NOT_SUPPORTED", "reason": "The span does not explicitly assert that 'I've heard great things about' is a relation to 'YouTube channel'."}
+{"id": "p2-0046", "label": "NOT_SUPPORTED", "reason": "The span does not state a total savings goal"}
+{"id": "p2-0047", "label": "SUPPORTED", "reason": "The span directly asserts the triple as a current fact."}
+{"id": "p2-0048", "label": "NOT_SUPPORTED", "reason": "The triple is hedged with 'I think'"}
+{"id": "p2-0049", "label": "SUPPORTED", "reason": "The span directly states the action of buying 'them' by the container lately."}
+{"id": "p2-0050", "label": "SUPPORTED", "reason": "The span explicitly states that the eBird app has been helpful in keeping records organized."}
+{"id": "p2-0051", "label": "SUPPORTED", "reason": "The span directly and explicitly states 'I see what you mean'."}
+{"id": "p2-0052", "label": "NOT_SUPPORTED", "reason": "The triple is a request, not a fact"}
+{"id": "p2-0053", "label": "NOT_SUPPORTED", "reason": "The triple is not a fact stated in the span"}
+{"id": "p2-0054", "label": "NOT_SUPPORTED", "reason": "The span indicates a future intention, not a current fact."}
+{"id": "p2-0055", "label": "NOT_SUPPORTED", "reason": "The span asks about the festivals, not asserting knowledge of them."}
+{"id": "p2-0056", "label": "NOT_SUPPORTED", "reason": "The triple is a future intention, not a current fact."}
+{"id": "p2-0057", "label": "UNCLEAR", "reason": "The span does not explicitly state where Anna lives."}
+{"id": "p2-0058", "label": "SUPPORTED", "reason": "The span explicitly states the desired savings rate as 20% of income per month."}
+{"id": "p2-0059", "label": "NOT_SUPPORTED", "reason": "The span does not mention Dublin"}
+{"id": "p2-0060", "label": "NOT_SUPPORTED", "reason": "The triple is inferred but not stated"}
+{"id": "p2-0061", "label": "NOT_SUPPORTED", "reason": "The triple is a statement of intent, not a current fact."}
+{"id": "p2-0062", "label": "NOT_SUPPORTED", "reason": "The span does not mention Sarah Kim or Daniel Diaz."}
+{"id": "p2-0063", "label": "SUPPORTED", "reason": "The span explicitly states that Peter isn't married to Laura."}
+{"id": "p2-0064", "label": "NOT_SUPPORTED", "reason": "The triple is interrogative, not a fact"}
+{"id": "p2-0065", "label": "NOT_SUPPORTED", "reason": "The span refers to planning to fish from Illinois, not the act of fishing in Illinois."}
+{"id": "p2-0066", "label": "NOT_SUPPORTED", "reason": "The span asks about the idea, not asserting it as a current fact."}
+{"id": "p2-0067", "label": "NOT_SUPPORTED", "reason": "The triple is future-oriented and not a current fact."}
+{"id": "p2-0068", "label": "SUPPORTED", "reason": "The span explicitly states that the skin has been looking a bit dull lately."}
+{"id": "p2-0069", "label": "SUPPORTED", "reason": "The span explicitly states the speaker is excited to try out the airbrush on their models."}
+{"id": "p2-0070", "label": "NOT_SUPPORTED", "reason": "The span does not explicitly assert the triple as a currently held fact."}
+{"id": "p2-0071", "label": "NOT_SUPPORTED", "reason": "The triple is a request, not a fact"}
+{"id": "p2-0072", "label": "SUPPORTED", "reason": "The span explicitly asks for advice on growing Facebook following."}
+{"id": "p2-0073", "label": "NOT_SUPPORTED", "reason": "The triple is not directly asserted as a fact in the span."}
+{"id": "p2-0074", "label": "NOT_SUPPORTED", "reason": "The span asks about beliefs, not asserting them as a fact."}
+{"id": "p2-0075", "label": "SUPPORTED", "reason": "The span directly and explicitly states the triple as a current fact."}
+{"id": "p2-0076", "label": "NOT_SUPPORTED", "reason": "The triple is not directly asserted as a current fact in the span."}
+{"id": "p2-0077", "label": "SUPPORTED", "reason": "The span explicitly states the intention to check out Kanemasa for kanimeshi."}
+{"id": "p2-0078", "label": "NOT_SUPPORTED", "reason": "The triple is attributed to an external cause rather than being a direct assertion by the speaker."}
+{"id": "p2-0079", "label": "NOT_SUPPORTED", "reason": "The span does not mention Anna or her residence."}
+{"id": "p2-0080", "label": "SUPPORTED", "reason": "The span explicitly states the action of sharing stories and documents."}
+{"id": "p2-0081", "label": "NOT_SUPPORTED", "reason": "The span does not state that the 50mm prime lens carries a bag."}
+{"id": "p2-0082", "label": "NOT_SUPPORTED", "reason": "The span does not mention Anna or her cousin, nor does it state that anyone lives in Boston."}
+{"id": "p2-0083", "label": "NOT_SUPPORTED", "reason": "Attributed to another"}
+{"id": "p2-0084", "label": "SUPPORTED", "reason": "The span explicitly states 'I'm supposed to finish soon'."}
+{"id": "p2-0085", "label": "SUPPORTED", "reason": "The span directly and explicitly states the triple as a current fact."}
+{"id": "p2-0086", "label": "SUPPORTED", "reason": "The span explicitly states that the speaker finished their third issue of National Geographic."}
+{"id": "p2-0087", "label": "SUPPORTED", "reason": "The span explicitly states that the eBird app is used to submit data."}
+{"id": "p2-0088", "label": "NOT_SUPPORTED", "reason": "The triple is attributed to another (the user is asking for tips, not asserting they have them)."}
+{"id": "p2-0089", "label": "NOT_SUPPORTED", "reason": "The span does not mention Nina Vogel or her birthplace."}
+{"id": "p2-0090", "label": "NOT_SUPPORTED", "reason": "The triple is not directly asserted as a current fact"}
+{"id": "p2-0091", "label": "NOT_SUPPORTED", "reason": "The triple is not directly asserted as a fact in the span."}
+{"id": "p2-0092", "label": "NOT_SUPPORTED", "reason": "The span asks about the Nabataeans' beliefs but does not assert that they had a specific judgment."}
+{"id": "p2-0093", "label": "SUPPORTED", "reason": "The span directly and explicitly states the triple as a current fact."}
+{"id": "p2-0094", "label": "NOT_SUPPORTED", "reason": "The triple is hedged and not a direct assertion"}
+{"id": "p2-0095", "label": "SUPPORTED", "reason": "The span explicitly states that many teachers felt they lacked the necessary skills and knowledge."}
+{"id": "p2-0096", "label": "NOT_SUPPORTED", "reason": "Attributed to another"}
+{"id": "p2-0097", "label": "SUPPORTED", "reason": "The span directly and explicitly states the triple as a currently held fact."}
+{"id": "p2-0098", "label": "NOT_SUPPORTED", "reason": "The span is hypothetical and does not assert that the speaker currently lives in Boston."}
+{"id": "p2-0099", "label": "NOT_SUPPORTED", "reason": "HEDGED: the span uses 'I think' and 'want to make sure' which indicate uncertainty or intention rather than a current fact."}
+{"id": "p2-0100", "label": "SUPPORTED", "reason": "The span explicitly states 'my skin type is normal'."}
+{"id": "p2-0101", "label": "SUPPORTED", "reason": "The span directly states the triple as a current fact."}
+{"id": "p2-0102", "label": "SUPPORTED", "reason": "The span directly states the triple as a current thought."}
+{"id": "p2-0103", "label": "NOT_SUPPORTED", "reason": "The triple is a restatement of the span, not a fact asserted by the speaker."}
+{"id": "p2-0104", "label": "SUPPORTED", "reason": "The span directly states the triple as a current fact."}
+{"id": "p2-0105", "label": "NOT_SUPPORTED", "reason": "The span states a current observation, not a fact that Facebook has 800 followers."}
+{"id": "p2-0106", "label": "NOT_SUPPORTED", "reason": "HEDGED: the span hedges it with 'I think'"}
+{"id": "p2-0107", "label": "NOT_SUPPORTED", "reason": "The span does not explicitly state that new parents usually need baby washcloths."}
+{"id": "p2-0108", "label": "SUPPORTED", "reason": "The span directly states the triple as a current fact."}
+{"id": "p2-0109", "label": "NOT_SUPPORTED", "reason": "The triple is an expression of interest, not a current fact."}
+{"id": "p2-0110", "label": "SUPPORTED", "reason": "The span directly states the cost of the grain-free kibble as $50 a month."}
+{"id": "p2-0111", "label": "SUPPORTED", "reason": "The span directly and explicitly asserts the triple as a current fact."}
+{"id": "p2-0112", "label": "SUPPORTED", "reason": "The span explicitly states the speaker's assumption of 5% annual returns."}
+{"id": "p2-0113", "label": "NOT_SUPPORTED", "reason": "The span does not mention the landlord or their residence."}
+{"id": "p2-0114", "label": "SUPPORTED", "reason": "The span directly states the speaker's thought about opting for a more universal item."}
+{"id": "p2-0115", "label": "NOT_SUPPORTED", "reason": "The triple is a paraphrase of the span but not a fact asserted by the speaker."}
+{"id": "p2-0116", "label": "NOT_SUPPORTED", "reason": "The span does not attribute the thought to Sarah Kim"}
+{"id": "p2-0117", "label": "SUPPORTED", "reason": "The span directly and explicitly states the current income as $80,000 per year."}
+{"id": "p2-0118", "label": "SUPPORTED", "reason": "The span explicitly states the sculptor is exploring different techniques and materials."}
+{"id": "p2-0119", "label": "SUPPORTED", "reason": "The span explicitly states that the eBird app is used to track sightings."}
+{"id": "p2-0120", "label": "SUPPORTED", "reason": "The span directly and explicitly states the triple as a current fact."}
+{"id": "p2-0121", "label": "NOT_SUPPORTED", "reason": "The span explicitly negates the triple"}
+{"id": "p2-0122", "label": "NOT_SUPPORTED", "reason": "The triple is a future intention, not a current fact."}
+{"id": "p2-0123", "label": "NOT_SUPPORTED", "reason": "The triple is not directly asserted as a fact in the span."}
+{"id": "p2-0124", "label": "SUPPORTED", "reason": "The span directly states the action of trying the suggestions."}
+{"id": "p2-0125", "label": "SUPPORTED", "reason": "The span directly states the triple as a current fact."}
+{"id": "p2-0126", "label": "NOT_SUPPORTED", "reason": "The span does not mention Bob or Zenith Labs."}
+{"id": "p2-0127", "label": "NOT_SUPPORTED", "reason": "The triple is interrogative, not a fact"}
+{"id": "p2-0128", "label": "SUPPORTED", "reason": "The span directly and explicitly states that the speaker is taking antibiotics for pneumonia."}
+{"id": "p2-0129", "label": "NOT_SUPPORTED", "reason": "The triple is not directly asserted as a fact in the span."}
+{"id": "p2-0130", "label": "SUPPORTED", "reason": "The span explicitly states the interest in mythology and folklore from different cultures."}
+{"id": "p2-0131", "label": "NOT_SUPPORTED", "reason": "The triple is not directly asserted as a current fact in the span."}
+{"id": "p2-0132", "label": "SUPPORTED", "reason": "The span directly and explicitly states 'I've been thinking' as a current fact."}
+{"id": "p2-0133", "label": "NOT_SUPPORTED", "reason": "The triple is an interrogative, not a fact"}
+{"id": "p2-0134", "label": "NOT_SUPPORTED", "reason": "The span is interrogative, not a fact"}
+{"id": "p2-0135", "label": "NOT_SUPPORTED", "reason": "The span states that Sarah no longer manages Daniel"}
+{"id": "p2-0136", "label": "SUPPORTED", "reason": "The span explicitly states that the speaker has saved $50,000 for retirement."}
+{"id": "p2-0137", "label": "NOT_SUPPORTED", "reason": "The span does not explicitly state that the D5600 carries a bag."}
+{"id": "p2-0138", "label": "SUPPORTED", "reason": "The span explicitly states that Peter and Laura separated years ago."}
+{"id": "p2-0139", "label": "SUPPORTED", "reason": "The span directly and explicitly states the triple as a current fact."}
+{"id": "p2-0140", "label": "SUPPORTED", "reason": "The span explicitly states the retirement income needed as $60,000 per year."}
+{"id": "p2-0141", "label": "NOT_SUPPORTED", "reason": "The triple is hedged and not a direct assertion of fact."}
+{"id": "p2-0142", "label": "NOT_SUPPORTED", "reason": "The triple is an interrogative, not a stated fact."}
+{"id": "p2-0143", "label": "SUPPORTED", "reason": "The span explicitly states the plan to fish from Illinois."}
+{"id": "p2-0144", "label": "SUPPORTED", "reason": "The span directly states 'I suggested that educators and policymakers prioritize teacher professional development'"}
+{"id": "p2-0145", "label": "SUPPORTED", "reason": "The span explicitly states that the eBird app has been helpful in keeping records organized."}
+{"id": "p2-0146", "label": "NOT_SUPPORTED", "reason": "The span does not explicitly state that the sculptor is considering 'with clay' as a fact."}
+{"id": "p2-0147", "label": "NOT_SUPPORTED", "reason": "The triple is not a fact stated in the span."}
+{"id": "p2-0148", "label": "NOT_SUPPORTED", "reason": "The triple is redundant and not a fact"}
+{"id": "p2-0149", "label": "NOT_SUPPORTED", "reason": "The triple is reversed; the span states that the speaker attended SIFF, not that SIFF attended several festivals."}
+{"id": "p2-0150", "label": "NOT_SUPPORTED", "reason": "The span does not explicitly state that the bag protects the Nikon D5600."}
+{"id": "p2-0151", "label": "NOT_SUPPORTED", "reason": "The span is hypothetical and does not assert a current fact."}
+{"id": "p2-0152", "label": "NOT_SUPPORTED", "reason": "The triple is a future intention, not a current fact."}
+{"id": "p2-0153", "label": "SUPPORTED", "reason": "The span directly and explicitly states the triple as a fact."}
+{"id": "p2-0154", "label": "NOT_SUPPORTED", "reason": "The span does not mention Tom or Acme Labs."}
+{"id": "p2-0155", "label": "NOT_SUPPORTED", "reason": "The triple is a future intention, not a current fact."}
+{"id": "p2-0156", "label": "NOT_SUPPORTED", "reason": "The span mentions wanting to try grilled squid and possibly stopping by the Yokohama Central Market, but does not explicitly state that the market is being checked out for grilled squid."}
+{"id": "p2-0157", "label": "SUPPORTED", "reason": "The span directly and explicitly states the triple as a current fact."}
+{"id": "p2-0158", "label": "SUPPORTED", "reason": "The span explicitly states the triple as a current fact."}
+{"id": "p2-0159", "label": "NOT_SUPPORTED", "reason": "The triple is a future intention, not a current fact."}
+{"id": "p2-0160", "label": "SUPPORTED", "reason": "The span directly states the triple as a current fact."}
+{"id": "p2-0161", "label": "NOT_SUPPORTED", "reason": "The span is interrogative and does not assert the triple as a fact."}
+{"id": "p2-0162", "label": "SUPPORTED", "reason": "The span directly states the subject is thinking of taking the lens."}
+{"id": "p2-0163", "label": "NOT_SUPPORTED", "reason": "the span hedges it"}
+{"id": "p2-0164", "label": "NOT_SUPPORTED", "reason": "The subject in the triple is incorrectly identified as 'Dana (colleague)' instead of just 'Dana'."}
+{"id": "p2-0165", "label": "NOT_SUPPORTED", "reason": "The span asks about the Nabataeans' beliefs, not asserting them as a fact."}
+{"id": "p2-0166", "label": "SUPPORTED", "reason": "The span directly states the speaker likes the idea of framing it as a collaborative suggestion."}
+{"id": "p2-0167", "label": "NOT_SUPPORTED", "reason": "The triple is attributed to 'my LinkedIn' rather than the speaker."}
+{"id": "p2-0168", "label": "NOT_SUPPORTED", "reason": "The span asks for recommendations rather than asserting they are held."}
+{"id": "p2-0169", "label": "NOT_SUPPORTED", "reason": "The span mentions reading The New Yorker for fiction, not news."}
+{"id": "p2-0170", "label": "NOT_SUPPORTED", "reason": "The triple is a future intention, not a current fact."}
+{"id": "p2-0171", "label": "NOT_SUPPORTED", "reason": "The relation 'by the way' is not a valid relation between the subject and object in the triple."}
+{"id": "p2-0172", "label": "NOT_SUPPORTED", "reason": "The span attributes the visit to the speaker's family, not the speaker themselves."}
+{"id": "p2-0173", "label": "NOT_SUPPORTED", "reason": "The triple is not a fact but a repetition of the same phrase."}
+{"id": "p2-0174", "label": "NOT_SUPPORTED", "reason": "The triple is a future intention, not a current fact."}
+{"id": "p2-0175", "label": "SUPPORTED", "reason": "The span directly states the triple as a current fact."}
+{"id": "p2-0176", "label": "SUPPORTED", "reason": "The span explicitly states the inflation rate as 2.5%."}
+{"id": "p2-0177", "label": "SUPPORTED", "reason": "The span directly states 'I'm located in 12345'."}
+{"id": "p2-0178", "label": "NOT_SUPPORTED", "reason": "The span mentions reading The New York Times, but not as part of the 'news' category explicitly."}
+{"id": "p2-0179", "label": "SUPPORTED", "reason": "The span explicitly states the main concerns as fine lines and wrinkles."}
+{"id": "p2-0180", "label": "SUPPORTED", "reason": "The span directly and explicitly states the triple."}
+{"id": "p2-0181", "label": "SUPPORTED", "reason": "The span explicitly states the triple as a current fact."}
+{"id": "p2-0182", "label": "NOT_SUPPORTED", "reason": "The triple is a paraphrase of the span but not a fact asserted by the speaker."}
+{"id": "p2-0183", "label": "SUPPORTED", "reason": "The span directly states the triple as a current fact."}
+{"id": "p2-0184", "label": "SUPPORTED", "reason": "The span explicitly states the fact as a current assertion."}
+{"id": "p2-0185", "label": "SUPPORTED", "reason": "The span directly and explicitly asserts the triple as a currently held fact."}
+{"id": "p2-0186", "label": "NOT_SUPPORTED", "reason": "The subject of the triple is not the same as the subject in the span."}
+{"id": "p2-0187", "label": "NOT_SUPPORTED", "reason": "The triple is attributed to an action taken by someone else, not the speaker's own assertion."}
+{"id": "p2-0188", "label": "NOT_SUPPORTED", "reason": "The triple is not directly asserted as a current fact in the span."}
+{"id": "p2-0189", "label": "SUPPORTED", "reason": "The span directly and explicitly states the triple as a current fact."}
+{"id": "p2-0190", "label": "NOT_SUPPORTED", "reason": "The span mentions reading The Daily News regularly, but the triple uses 'I usually read' which is not directly stated."}
+{"id": "p2-0191", "label": "NOT_SUPPORTED", "reason": "The span does not explicitly state that the bag protects the 50mm prime lens."}
+{"id": "p2-0192", "label": "SUPPORTED", "reason": "The span directly and explicitly states the triple as a current interest of the speaker."}
