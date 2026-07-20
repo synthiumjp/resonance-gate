@@ -886,6 +886,25 @@ resource (or a relation-paraphrase embedding, which would make the relation
 axis a cosine test too). SUBJECT axis = spec-faithful; RELATION axis = the
 documented adaptation. TAU_COLLIDE tuned on E5.2 dev seed 6661001 ONLY.
 
+TAU_COLLIDE SWEEP (E5.2 dev seed 6661001; per-family detection rate =
+fraction of items with collision score >= tau; full run e5/collision_dev.md):
+  tau   collide_syn  collide_key  distinct(FP)  single(FP)
+  0.70    1.000        0.737         0.340         0.216
+  0.75    1.000        0.632         0.120         0.054
+  0.80    1.000        0.632         0.000         0.000
+  0.85    1.000        0.632         0.000         0.000
+  0.90    1.000        0.316         0.000         0.000
+  0.95    1.000        0.000         0.000         0.000
+Reading: collide_syn (the §5.4 near-synonym defect) = same subject exactly +
+synonym-class relation -> score 1.000, detected at EVERY tau with zero
+cross-subject leakage. False positives (distinct-attribute + clean-single)
+hit zero only at tau >= 0.80; the confusable-distinct-name ceiling is 0.784
+(Tom Baker/Barker). CHOSEN tau = 0.90 for margin: FP structurally zero
+(0.90 >> 0.784), collide_syn fully caught (cos 1.0), and the near-dup SUBJECT
+cases (collide_key, 0.316 at 0.90) are intentionally mostly dropped rather
+than risk a held-out confusable pair crossing a tighter threshold -- they go
+to canonicalization instead (below).
+
 DEFERRED (honest): near-duplicate SUBJECT surface forms ("Maria"/"Maria's",
 cos 0.85) fall below TAU_COLLIDE and are NOT detected -- no threshold
 separates them from confusable distinct surnames (measured above). These
