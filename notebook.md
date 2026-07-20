@@ -1874,3 +1874,69 @@ WHAT THIS IMPLIES FOR THE DESIGN.
 Phase 0 remains FAILED. Nothing above is a pass; it is a diagnosis plus an
 in-sample sanity check. The 0.345 precision and 0.342 kappa stand in the record
 permanently.
+
+## Entry 29 — 2026-07-20 (p2: the write gate, built by iteration; dev vs held-out)
+
+MODE CHANGE, logged. Registrant elected to stop pre-registering and iterate to
+a working gate. This entry is EXPLORATORY engineering, not a confirmatory
+result, and is labelled as such. The one discipline kept: the 193 labelled
+pairs were split 130 DEV / 63 HELD-OUT (seed 20260725, stratified by label x
+source) and the held-out slice was untouched until the gate was finished.
+
+THE GATE (experiments/p2/gate.py). Four stages, NO model call anywhere — the
+extractor already costs one call on the write path and this adds nothing.
+  1    WELL-FORMED  is this a coherent (subj, rel, obj) proposition?
+  1.5  GROUNDED     do the subject and object actually occur in the span?
+  2    MODALITY     ACTUAL / HEDGED / FUTURE / CONDITIONAL / NEGATED /
+                    QUESTION / ATTRIBUTED / PAST_ONLY, scoped to the SENTENCE
+                    the triple came from, not the whole span
+  3    TIER         SPAN / PROVISIONAL / PROMOTED
+
+Modality is RECORDED, not filtered. Every well-formed grounded triple is kept
+with its modality; only ACTUAL is eligible for promotion or for firing a
+contradiction alert. An intention stays retrievable as an intention, nothing is
+discarded, and a gate error is recoverable rather than lossy.
+
+ITERATION TRACE (dev only), each fix traceable to a named failure:
+  v1  stage 1 alone                      P=0.429 R=0.818 F1=0.562
+  v2  +leading adverbs ("just started at"), negated auxiliaries, first-person
+      subject normalisation, subject limit 5->6, PAST_ONLY suppressed when the
+      sentence re-asserts the present ("...until the reorg, NOW she reports")
+                                         P=0.667 R=0.909 F1=0.769
+  v3  +stage 1.5 grounding               P=0.800 R=0.909 F1=0.851
+  v4  +"i'd" as a clause subject         P=0.833 R=0.909 F1=0.870
+
+GROUNDING IS THE BEST SINGLE STAGE and it is worth recording why. It rejected
+11 dev triples and ALL 11 were human-NOT_SUPPORTED — zero false rejects. It is
+what catches the FEW-SHOT LEAKAGE recorded in entry 27: the extractor emitting
+its own prompt examples ((Dana | works at | Orion Foods) from a span about
+dairy farming). Those triples are perfectly well-formed and carry no modality
+cue, so stages 1 and 2 are blind to them, but their arguments occur nowhere in
+the text. Entry 27 speculated that "no span-overlap support check would catch"
+this; that was wrong, and cheaply so — a content-token occurrence test kills
+them outright.
+
+RESULT (held-out spent once, after the gate was frozen):
+                        n     base rate   P       R       F1
+    DEV (tuned on)      130   0.169       0.833   0.909   0.870
+    HELD-OUT            63    0.159       0.636   0.700   0.667
+
+  The gate generalises — precision 0.159 -> 0.636 on data it has never seen,
+  a 4x lift over storing everything — but DEV OVERSTATES IT BY ~0.20 F1. The
+  0.870 is an artefact of four rounds of fitting to 130 items and must not be
+  quoted. 0.667 is the number, and even that rests on only 10 supported items
+  in the held-out slice, so its interval is wide.
+
+  Against the earlier product argument (retained spans make recall cheap, false
+  assertion is expensive) 0.636 precision is well short of the ~0.90 that
+  argument called for. What makes that survivable rather than fatal is the
+  tiering: a wrong ACTUAL becomes a PROVISIONAL fact that cannot fire an alert
+  until corroborated, and the span is retained either way.
+
+STATUS AND WHAT IS NOT YET TESTED.
+  - THE HELD-OUT SET IS NOW SPENT. Any further tuning needs freshly labelled
+    pairs; re-using this slice would make it dev.
+  - Stage 3 (corroboration -> PROMOTED) is implemented but UNMEASURED. It needs
+    multi-session data where the same fact is independently restated;
+    LongMemEval's session structure supports this and it has not been run.
+  - Contradiction-alert precision, the actual product claim, is untouched.
