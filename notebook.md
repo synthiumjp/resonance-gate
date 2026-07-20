@@ -1781,3 +1781,96 @@ permanently. Not yet actioned.
 
 Artifacts: experiments/p2/{build_labelset,judge_support}.py,
 labelset_blind.jsonl, labelset_key.jsonl, labels_human.jsonl, judgements.jsonl.
+
+## Entry 28 — 2026-07-20 (p2 Phase 0 post-mortem: THREE constructs were conflated, not two — and the instrument is fine once the first is separated)
+
+Follows entry 27, where the judge stop rule fired at precision 0.345. Entry 27
+diagnosed a two-way conflation (FAITHFUL vs STORABLE). That diagnosis was
+incomplete. Literature sweep plus a re-analysis says there were THREE.
+
+LITERATURE — human agreement ceilings for this family of tasks.
+  AIS attribution (Rashkin et al., arXiv:2112.12870; title/authors/two-stage
+    design verified directly from the primary source; alpha values cited to
+    Table 7 via agent PDF extraction, NOT independently re-read):
+    Krippendorff alpha 0.69 / 0.76 / 0.79 / 0.74 (CNN-DM, QReCC, WoW, ToTTo),
+    with FIVE raters and majority-vote consensus.
+  FactBank (Sauri & Pustejovsky 2009): Cohen kappa 0.81-0.91.
+  CommitmentBank (de Marneffe et al. 2019): alpha 0.53 full set, 0.74 on the
+    high-agreement subset.
+  BioScope (Vincze et al. 2008): kappa 0.91-0.92 hedge, 0.90-0.96 negation.
+  CoNLL-2010 hedge task: best system F1 0.85 on hedge cues.
+  Rich ERE REALIS (ACTUAL/GENERIC/OTHER) and ACE modality: agreement
+    UNVERIFIED — the agent could not confirm from a primary source and said so.
+
+  STRUCTURE IN THOSE NUMBERS, which is the useful part: LEXICALLY MARKED
+  modality is easy and highly reliable (BioScope 0.90+). PRAGMATIC commitment
+  under projection is genuinely hard even for humans (CommitmentBank 0.53).
+  Attribution sits between (AIS 0.69-0.79).
+
+CONSEQUENCE 1 — my pre-registered bar was unachievable by construction. I set
+0.85 PRECISION for one LLM judge against ONE human rater. That is above the
+agreement five trained annotators reach with each other on attribution. This is
+a study-design error of mine, now evidenced rather than suspected.
+
+CONSEQUENCE 2 — but that alone does not explain the result. Re-scored as
+Cohen's kappa (the statistic the literature reports, which presumes neither
+rater is truth, unlike precision which presumes mine is):
+    ALL     n=193  observed 0.699  kappa 0.342
+    SourceA n=161  observed 0.646  kappa 0.200
+    SourceB n= 32  observed 0.969  kappa 0.938
+  Source B — clean constructed spans — is ABOVE the published human ceiling.
+  Source A is far below anything. A mis-set bar cannot produce that split.
+
+THE THIRD CONSTRUCT. Inspecting the disagreements: they are dominated not by
+modality but by WELL-FORMEDNESS. The extractor emits things like
+("I'll" | "mention" | "that the antique tea set came from my cousin Rachel")
+and ("I've been listening to" | "a lot of music" | "featuring the piano") —
+a clause in the subject slot, a noun phrase in the relation slot. I labelled
+these NOT_SUPPORTED under the rubric's "not a fact at all" clause; the judge
+read them charitably as representing span content. Neither reading is wrong;
+the rubric never said which governs. So the conflated constructs were:
+    1. WELL-FORMEDNESS  is this a coherent (subj, rel, obj) proposition at all?
+    2. ATTRIBUTION      does the span support that proposition?      (AIS)
+    3. FACTUALITY       does the speaker assert it as true?   (FactBank/REALIS)
+No published scheme addresses (1), because nobody else feeds triples this
+degraded into a support judge.
+
+TEST OF THE DIAGNOSIS. A stage-1 well-formedness filter — pure lexical, no
+model call, satisfying the p2 runtime constraint:
+    kills 122/161 = 75.8% of NOT_SUPPORTED
+    wrongly kills   5/32 = 15.6% of SUPPORTED
+    retained-set precision 0.409, up from 0.166 ungated
+  And the effect on the instrument:
+    judge-human kappa, all pairs        0.342
+    judge-human kappa, well-formed only 0.697   (n=66)
+    judge-human kappa, well-formed SrcA 0.518   (n=37)
+  0.697 lands INSIDE the AIS human-human band (0.69-0.79). Once the
+  well-formedness question is separated out, the judge agrees with the human
+  rater about as well as trained humans agree with each other on attribution.
+  The instrument was never the problem.
+
+HONESTY CONSTRAINT ON THE ABOVE, stated because it would otherwise be the
+inflation this project keeps catching: the stage-1 filter was written by me
+AFTER seeing which pairs disagreed. Its heuristics use only the surface form of
+the triple — never the labels or the judge output — but I chose them knowing
+what the failures looked like. The 75.8% / 15.6% / kappa 0.697 figures are
+therefore IN-SAMPLE and optimistic. They are suggestive, not established, and
+require pre-registered replication on held-out spans before any of them is
+quoted as a result.
+
+WHAT THIS IMPLIES FOR THE DESIGN.
+  (a) Three sequential gates, not one score. Stage 1 is lexical and free and
+      removes ~76% of the junk before any judgement is required.
+  (b) Report agreement (kappa) against a stated human ceiling, never precision
+      against my own labels.
+  (c) A revised target of kappa >= 0.65 per stage is defensible against these
+      ceilings; 0.85 was not.
+  (d) Do not FILTER modality — RECORD it. Store every well-formed, attributed
+      triple with a factuality/REALIS field, and let only ACTUAL/CT+ triples be
+      promoted or fire contradiction alerts. Nothing is discarded, an intention
+      stays retrievable as an intention, and a gate error becomes recoverable
+      rather than lossy.
+
+Phase 0 remains FAILED. Nothing above is a pass; it is a diagnosis plus an
+in-sample sanity check. The 0.345 precision and 0.342 kappa stand in the record
+permanently.
