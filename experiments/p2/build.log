@@ -1,0 +1,21 @@
+user turns available: 5479; sampling 260 (seed 20260724)
+ggml_cuda_init: found 1 ROCm devices (Total VRAM: 16325 MiB):
+  Device 0: AMD Radeon RX 7900 GRE, gfx1100 (0x1100), VMM: no, Wave Size: 32, VRAM: 16325 MiB
+[mouth] backend: GPU (n_gpu_layers=-1)
+  A: 25/260 turns -> 19 pairs (1.2s/turn)
+  A: 50/260 turns -> 24 pairs (0.9s/turn)
+  A: 75/260 turns -> 40 pairs (0.8s/turn)
+  A: 100/260 turns -> 48 pairs (0.8s/turn)
+  A: 125/260 turns -> 57 pairs (0.7s/turn)
+  A: 150/260 turns -> 75 pairs (0.7s/turn)
+  A: 175/260 turns -> 98 pairs (0.7s/turn)
+  A: 200/260 turns -> 107 pairs (0.7s/turn)
+  A: 225/260 turns -> 125 pairs (0.7s/turn)
+  A: 250/260 turns -> 153 pairs (0.7s/turn)
+Source A complete: 161 pairs from 260 turns
+Source B complete: 32 pairs from 28 spans
+
+TOTAL 193 pairs
+  by source: {'A': 161, 'B': 32}
+  by origin: {'extractor': 182, 'constructed': 11}
+  extractor emitted nothing for hard classes: 11
