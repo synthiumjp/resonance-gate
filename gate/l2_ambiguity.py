@@ -31,6 +31,95 @@ C_L2 = 0.4528
 S_L2 = 0.0342
 BETA_L2 = 1.0
 
+# ---------------------------------------------------------------------------
+# product-p0 / rg-1.1 SEMANTIC stored-collision detection (notebook E5.2).
+#
+# The frozen artifact detects stored collisions by KEY IDENTITY (identical
+# whitened (subj,rel) vectors -> L2 margin 0), so near-synonym contradictions
+# ("Maria lives in Lisbon" vs "Maria resides in Boston") are invisible and the
+# system answers both ways. The semantic detector fixes this. It compares two
+# stored (subject, relation) keys and calls them the SAME question iff:
+#   (i)  the subjects are near-duplicates by RAW registry-embedding cosine
+#        >= TAU_COLLIDE  (Maria/Maria's 0.85, Tom Fischer/Fisher 0.75; distinct
+#        people ~0.24 -- this axis separates cleanly, so it IS the embedding
+#        threshold the fix is built on), AND
+#   (ii) the relations are EQUIVALENT (identical, or same synonym class).
+#
+# Relation equivalence is NOT thresholded on embedding cosine, on purpose:
+# measured on the frozen MiniLM registry, raw relation cosine cannot separate
+# synonyms from merely-related relations -- "works at"/"is employed by" (true
+# synonyms) sit at 0.43, BELOW "studied at"/"works at" (distinct attributes)
+# at 0.56 and "lives in"/"was born in" at 0.52. No single cosine threshold
+# exists (E5.2 dev study, collision_dev.md). So relation synonymy uses an
+# explicit class table; in a product this table is populated from a paraphrase
+# resource, and swapping in a relation-paraphrase embedding would let (ii) also
+# be a cosine test. The SUBJECT axis is the raw-embedding mechanism the brief
+# specified; the relation axis is where the measurement forced an honest
+# adaptation (flagged in notebook E5.2 for the registrant's call).
+RELATION_SYNONYMS = [
+    frozenset({"works at", "is employed by"}),
+    frozenset({"lives in", "resides in"}),
+]
+TAU_COLLIDE = 0.90   # subject raw-embedding cosine threshold (E5.2 dev). Set
+                     # structurally ABOVE the measured confusable-distinct-name
+                     # ceiling (Tom Baker/Barker 0.78, Chen/Cheng 0.77, ...) so
+                     # cross-subject false collisions are excluded by
+                     # construction; genuine same-subject collisions sit at
+                     # cos 1.0. Near-dup SUBJECT surface forms ("Maria"/
+                     # "Maria's", 0.85) fall BELOW this and are deferred to
+                     # write-time canonicalization -- no threshold separates
+                     # them from confusable distinct surnames (E5.2).
+S_COLLIDE = 0.03     # sigmoid slope for the semantic stored d-source
+
+
+def relation_equiv(r_a, r_b):
+    """True iff two relation surfaces denote the same attribute (identical, or
+    members of one RELATION_SYNONYMS class)."""
+    if r_a == r_b:
+        return True
+    for cls in RELATION_SYNONYMS:
+        if r_a in cls and r_b in cls:
+            return True
+    return False
+
+
+def semantic_collision(store, ent_reg, rel_reg, subj, rel, tau=TAU_COLLIDE):
+    """Detect a stored collision for the resolved query key (subj, rel).
+
+    Scans ACTIVE L2 records; the 'primary' is the highest-subject-cosine
+    equivalent-relation record (the one the system would answer with). A
+    conflict is any active record whose relation is EQUIVALENT to rel, whose
+    subject raw-embedding cosine to subj is >= tau, and whose object differs
+    from the primary's. Returns:
+      score      float in [0,1] -- max subject cosine over equivalent-relation
+                 records carrying a DIFFERENT object (0 if none); the
+                 continuous collision signal (AUROC / gate d-source).
+      conflicts  [(triple, provenance, store_idx, subj_cos)] with subj_cos>=tau
+                 and object != primary, most-similar first.
+      primary    (triple, provenance, store_idx) or None.
+    """
+    import numpy as np
+    e_subj_q = ent_reg.raw_vector(subj)
+    cand = []
+    for i, meta in enumerate(store.meta):
+        if not (store.active[i] and meta):
+            continue
+        s_i, r_i, o_i = meta["triple"]
+        if not relation_equiv(rel, r_i):
+            continue
+        sc = float(np.dot(e_subj_q, ent_reg.raw_vector(s_i)))
+        cand.append((sc, i, (s_i, r_i, o_i), meta["provenance"]))
+    if not cand:
+        return 0.0, [], None
+    cand.sort(reverse=True, key=lambda x: x[0])
+    sc0, i0, tr0, pv0 = cand[0]
+    primary_obj = tr0[2]
+    diff = [(sc, i, tr, pv) for sc, i, tr, pv in cand if tr[2] != primary_obj]
+    score = max((sc for sc, *_ in diff), default=0.0)
+    conflicts = [(tr, pv, i, sc) for sc, i, tr, pv in diff if sc >= tau]
+    conflicts.sort(reverse=True, key=lambda x: x[3])
+    return score, conflicts, (tr0, pv0, i0)
+
 
 class L2Store:
     """Exact per-record store, measurement version (in-memory)."""

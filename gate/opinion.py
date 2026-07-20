@@ -72,26 +72,33 @@ def opinion(a, m, k, N, D=DEFAULT_D, theta=THETA, alpha=ALPHA, beta=BETA,
     return Opinion(b=b, d=d, u=u, z=z, m_z=m_z)
 
 
-def opinion_two_source(a, k, N, m_ref=None, m_l2=None, m_l1=None, D=DEFAULT_D,
-                       theta=THETA, alpha=ALPHA, beta=BETA,
+def opinion_two_source(a, k, N, m_ref=None, m_l2=None, m_l1=None, c_sem=None,
+                       D=DEFAULT_D, theta=THETA, alpha=ALPHA, beta=BETA,
                        null_moments=None, hit_moments=None):
     """E3.2 two-source (b, d, u): u from L1 resolution as always; the
     ambiguity split takes the MAXIMUM of the available d-sources, each
     z-normalised in its own space:
       - referential: registry top-2 raw-cosine margin m_ref ("which Tom?"),
-      - stored: L2 top-2 key margin m_l2 ("two facts on file"),
+      - stored: collision signal. SEMANTIC (product-p0/rg-1.1): if c_sem (a
+        semantic collision score in [0,1], gate/l2_ambiguity.semantic_collision)
+        is supplied it IS the stored source (sigmoid((c_sem-TAU)/S)), which
+        fires on near-synonym contradictions the frozen key-identity margin
+        m_l2 misses. If c_sem is None the frozen L2 top-2 key margin m_l2 is
+        used unchanged (the rg-freeze-1.0 behaviour, kept for the BEFORE arm).
       - l1-hint: the bundle margin, fast-path only, used when neither
         authoritative source is supplied.
     Scalar inputs only (the interactive path); returns Opinion2 with the
     winning source tag."""
-    from l2_ambiguity import C_L2, S_L2  # local import: avoids module cycle
+    from l2_ambiguity import C_L2, S_L2, TAU_COLLIDE, S_COLLIDE  # avoid cycle
 
     z = z_resolution(a, k, N, D, null_moments, hit_moments)
     u = float(1.0 - sigmoid(alpha * (z - theta)))
     sources = {}
     if m_ref is not None:
         sources["referential"] = float(1.0 - sigmoid((m_ref - C_REF) / S_REF))
-    if m_l2 is not None:
+    if c_sem is not None:
+        sources["stored"] = float(sigmoid((c_sem - TAU_COLLIDE) / S_COLLIDE))
+    elif m_l2 is not None:
         sources["stored"] = float(1.0 - sigmoid((m_l2 - C_L2) / S_L2))
     if not sources:
         if m_l1 is not None:

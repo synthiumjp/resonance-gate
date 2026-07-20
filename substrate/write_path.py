@@ -59,7 +59,8 @@ class WriteResult:
 
 class QueryResult:
     def __init__(self, action, tag, op, record=None, provenance=None,
-                 candidates=None, m_ref=None, m_l2=None):
+                 candidates=None, m_ref=None, m_l2=None, conflict=False,
+                 resolution_hint=None, c_sem=None):
         self.action = action          # controller Action
         self.tag = tag                # None | 'referential' | 'stored'
         self.op = op                  # Opinion2
@@ -68,10 +69,20 @@ class QueryResult:
         self.candidates = candidates  # referential entry names / stored records
         self.m_ref = m_ref
         self.m_l2 = m_l2
+        # product-p0 / rg-1.1 passive-collision contract: on a detected
+        # stored collision the server returns ALL disagreeing facts and does
+        # NOT choose. conflict=True flags it; resolution_hint offers
+        # {by_recency, by_resolution} the CALLER may apply or ignore. An
+        # explicit update()/supersede() is a different event and DOES resolve
+        # (frozen path, unchanged).
+        self.conflict = conflict
+        self.resolution_hint = resolution_hint
+        self.c_sem = c_sem            # semantic collision score (diagnostic)
 
 
 class Memory:
-    def __init__(self, ent_registry, rel_registry, calib=None):
+    def __init__(self, ent_registry, rel_registry, calib=None,
+                 collision_mode="semantic"):
         self.ent = ent_registry
         self.rel = rel_registry
         nm, hm = calib if calib is not None else default_calibration()
@@ -80,6 +91,11 @@ class Memory:
         self.store = L2Store(D)
         self.k = 0
         self._triple_index = {}  # (subj, rel, obj) -> store idx (active)
+        # 'semantic' (rg-1.1 default): near-synonym-aware stored-collision
+        # detection. 'key' reproduces rg-freeze-1.0 exactly (key-identity
+        # margin only) — kept for the E5.2 BEFORE arm and A/B comparison.
+        assert collision_mode in ("semantic", "key")
+        self.collision_mode = collision_mode
 
     # ---------------------------------------------------------- write side
 
@@ -170,25 +186,52 @@ class Memory:
         c1, c2, o1, o2 = self.store.top2_batch(self.ent.vector(subj)[None, :],
                                                self.rel.vector(rel)[None, :])
         m_l2 = float(c1[0] - c2[0])
+
+        # SEMANTIC stored-collision score (rg-1.1): near-synonym-aware. In
+        # 'key' mode c_sem stays None -> opinion falls back to the frozen m_l2
+        # margin (exact BEFORE reproduction).
+        c_sem = sem_conflicts = sem_primary = None
+        if self.collision_mode == "semantic":
+            from l2_ambiguity import semantic_collision
+            c_sem, sem_conflicts, sem_primary = semantic_collision(
+                self.store, self.ent, self.rel, subj, rel)
+
         op = opinion_two_source(a, self.k, len(self.ent), m_ref=m_ref, m_l2=m_l2,
-                                m_l1=m_l1, D=D, null_moments=self.nm,
+                                m_l1=m_l1, c_sem=c_sem, D=D, null_moments=self.nm,
                                 hit_moments=self.hm)
         saturated = nz.is_saturated(self.k, len(self.ent), D,
                                     null_moments=self.nm, hit_moments=self.hm)
         action, tag = route_tagged(op, saturated=saturated, l2_available=True)
 
         record = provenance = candidates = None
+        conflict, resolution_hint = False, None
         if tag == "referential":
             candidates = [n for n, _ in subj_res]
         elif tag == "stored":
-            recs = []
-            for obj_id in (o1[0], o2[0]):
-                for i, mrec in enumerate(self.store.meta):
-                    if (self.store.active[i] and mrec and mrec["triple"][0] == subj
-                            and mrec["triple"][1] == rel and mrec["triple"][2] == obj_id):
-                        recs.append((mrec["triple"], mrec["provenance"]))
-                        break
-            candidates = recs
+            if self.collision_mode == "semantic" and sem_conflicts:
+                # PASSIVE COLLISION: surface every disagreeing fact (primary +
+                # all conflicts), one per distinct object; the server does NOT
+                # pick one. resolution_hint is advisory only.
+                recs, seen = [], set()
+                pool = [(sem_primary[0], sem_primary[1])] + \
+                       [(tr, pv) for tr, pv, _, _ in sem_conflicts]
+                for tr, pv in pool:
+                    if tr[2] in seen:
+                        continue
+                    seen.add(tr[2])
+                    recs.append((tr, pv))
+                candidates = recs
+                conflict = len(recs) > 1
+                resolution_hint = self._resolution_hint(recs) if conflict else None
+            else:
+                recs = []
+                for obj_id in (o1[0], o2[0]):
+                    for i, mrec in enumerate(self.store.meta):
+                        if (self.store.active[i] and mrec and mrec["triple"][0] == subj
+                                and mrec["triple"][1] == rel and mrec["triple"][2] == obj_id):
+                            recs.append((mrec["triple"], mrec["provenance"]))
+                            break
+                candidates = recs
         if action.value == "answer":
             best_idx = self._triple_index.get((subj, rel, top1))
             if best_idx is not None:
@@ -198,7 +241,20 @@ class Memory:
                 record, provenance = (subj, rel, top1), "user-stated"
         return QueryResult(action.value, tag, op, record=record,
                            provenance=provenance, candidates=candidates,
-                           m_ref=m_ref, m_l2=m_l2)
+                           m_ref=m_ref, m_l2=m_l2, conflict=conflict,
+                           resolution_hint=resolution_hint, c_sem=c_sem)
+
+    def _resolution_hint(self, recs):
+        """Advisory tie-breakers for a passive collision (caller may ignore):
+        by_recency = latest-written record; by_resolution = record whose own
+        (subject, relation) key resolves to its object most strongly."""
+        scored = []
+        for tr, pv in recs:
+            idx = self._triple_index.get(tr, -1)
+            a_i = self._unbind(tr[0], tr[1])[0]
+            scored.append((tr, idx, a_i))
+        return {"by_recency": max(scored, key=lambda x: x[1])[0],
+                "by_resolution": max(scored, key=lambda x: x[2])[0]}
 
 
 # ------------------------------------------------------------- extraction

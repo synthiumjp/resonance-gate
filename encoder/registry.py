@@ -72,6 +72,14 @@ class Registry:
             return 1.0
         return r[0][1] - r[1][1]
 
+    def raw_vector(self, name):
+        """Unit RAW embedding (interface geometry) for a registered entry.
+        product-p0 addition (rg-1.1 collision fix): the semantic
+        stored-collision detector compares (subject, relation) keys by raw
+        embedding cosine, so it needs per-entry raw vectors without
+        re-embedding the surface string. Rows of _E are already unit."""
+        return self._E[self._index[name]]
+
     def vector(self, name):
         """Exact substrate item vector (whitened projection) for an entry."""
         return self._V[self._index[name]]
