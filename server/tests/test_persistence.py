@@ -3,7 +3,7 @@ rebuild from the same state dir (restart), recall must recover everything."""
 
 
 def test_restart_recovers_full_state(tmp_path):
-    from rg_memory.service import MemoryService
+    from sourcedrecall.service import MemoryService
     d = str(tmp_path / "state")
 
     s1 = MemoryService(d)
@@ -26,7 +26,7 @@ def test_restart_recovers_full_state(tmp_path):
 
 
 def test_supersede_survives_restart(tmp_path):
-    from rg_memory.service import MemoryService
+    from sourcedrecall.service import MemoryService
     d = str(tmp_path / "state")
     s1 = MemoryService(d)
     s1.remember("Maria Garcia", "lives in", "Lisbon")

@@ -1023,3 +1023,44 @@ relation-synonym table (v2: paraphrase-derived); near-dup SUBJECT surfaces
 
 Tag rg-product-0.1 on product-p1. Committed locally; NOT pushed (awaiting
 registrant go).
+
+## Entry 22 — 2026-07-20 (product rename: rg-memory -> sourcedrecall; product-p1)
+
+Package/identifier rename only. The GIT REPO stays resonance-gate; the
+RESEARCH artifact and paper keep the Resonance Gate name and tags
+(rg-freeze-1.0, rg-1.1 untouched, not re-tagged). The PRODUCT shipped from
+the substrate is now "sourcedrecall". Rationale: separate the product
+identity from the research artifact so the product can be marketed/installed
+under its own name while the Resonance Gate substrate remains the (cited,
+pre-registered) credibility anchor.
+
+Renamed (product-p1, server/ only):
+- Python package dir server/rg_memory -> server/sourcedrecall (git mv);
+  all imports rg_memory -> sourcedrecall.
+- pyproject: name rg-memory -> sourcedrecall; entry point
+  sourcedrecall = sourcedrecall.mcp_server:main; wheel package sourcedrecall.
+- MCP server identifier FastMCP("rg-memory") -> FastMCP("sourcedrecall");
+  the -m invocation is now `python -m sourcedrecall.mcp_server`.
+- Browser page <title>, <h1> header, and footer -> sourcedrecall.
+- README: title, prose, all install commands (uvx --from ... sourcedrecall;
+  python -m sourcedrecall.mcp_server) and all MCP config blocks (Claude
+  Desktop, Claude Code `claude mcp add sourcedrecall`, Cursor). Added one
+  line: built on the Resonance Gate substrate, with OSF 95e2q as the
+  credibility anchor (Zenodo DOI placeholder noted for when minted).
+
+Extended beyond the literal list for product coherence (flagged for the
+registrant): the product-facing env vars RG_MEMORY_STATE ->
+SOURCEDRECALL_STATE, RG_MEMORY_BROWSER_PORT -> SOURCEDRECALL_BROWSER_PORT,
+and the default state dir ~/.rg-memory -> ~/.sourcedrecall. RG_ROOT is KEPT
+(it names the Resonance Gate substrate repo root, not the product).
+
+Preserved verbatim: the honest-scope statement (explicit facts; no
+generative model in the request path; detects contradictory writes under
+synonymous keys — validated on synthetic pairs; honest no-match; surfaces
+conflicts) and the disciplined "does NOT claim 'never contradicts itself'"
+language. The rename did not loosen any claim. No LLM added — the encoder
+distinction (registry MiniLM, non-generative) is unchanged.
+
+Full server suite after rename: 14 passed. Committed on product-p1. NOT
+pushed and NOT re-tagged (rg-product-0.1 still points at the pre-rename
+commit) — awaiting registrant go on re-tag/push.

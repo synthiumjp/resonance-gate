@@ -1,28 +1,29 @@
-"""rg-memory MCP server (stdio). Exposes exactly four tools over the rg-1.1
-VSA substrate. NO language model in the request path — no mouth, no
-extractor, no judge. The registry's MiniLM encoder (string->vector) is the
-only model, loaded lazily for novel writes; it is non-generative.
+"""sourcedrecall MCP server (stdio). Exposes exactly four tools over the
+Resonance Gate rg-1.1 VSA substrate. NO language model in the request path —
+no mouth, no extractor, no judge. The registry's MiniLM encoder
+(string->vector) is the only model, loaded lazily for novel writes; it is
+non-generative.
 
 Env:
-  RG_MEMORY_STATE          state dir (default ~/.rg-memory)
-  RG_MEMORY_BROWSER_PORT   read-only browser port (default 7071; 0 disables)
-  RG_ROOT                  rg repo root (default: repo containing this file)
+  SOURCEDRECALL_STATE          state dir (default ~/.sourcedrecall)
+  SOURCEDRECALL_BROWSER_PORT   read-only browser port (default 7071; 0 disables)
+  RG_ROOT                      Resonance Gate repo root (default: repo containing this file)
 """
 
 import os
 
-from rg_memory import substrate_path  # noqa: F401 — sys.path + offline env
+from sourcedrecall import substrate_path  # noqa: F401 — sys.path + offline env
 from mcp.server.fastmcp import FastMCP
 
-from rg_memory.service import MemoryService
-from rg_memory.browser import start_browser
+from sourcedrecall.service import MemoryService
+from sourcedrecall.browser import start_browser
 
-STATE_DIR = os.environ.get("RG_MEMORY_STATE",
-                           os.path.expanduser("~/.rg-memory"))
-BROWSER_PORT = int(os.environ.get("RG_MEMORY_BROWSER_PORT", "7071"))
+STATE_DIR = os.environ.get("SOURCEDRECALL_STATE",
+                           os.path.expanduser("~/.sourcedrecall"))
+BROWSER_PORT = int(os.environ.get("SOURCEDRECALL_BROWSER_PORT", "7071"))
 
 service = MemoryService(STATE_DIR)
-mcp = FastMCP("rg-memory")
+mcp = FastMCP("sourcedrecall")
 
 
 @mcp.tool()

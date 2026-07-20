@@ -5,9 +5,9 @@ import asyncio
 
 
 def test_four_tools_registered_and_callable(tmp_path, monkeypatch):
-    monkeypatch.setenv("RG_MEMORY_STATE", str(tmp_path / "state"))
-    monkeypatch.setenv("RG_MEMORY_BROWSER_PORT", "0")
-    import rg_memory.mcp_server as srv
+    monkeypatch.setenv("SOURCEDRECALL_STATE", str(tmp_path / "state"))
+    monkeypatch.setenv("SOURCEDRECALL_BROWSER_PORT", "0")
+    import sourcedrecall.mcp_server as srv
 
     tools = asyncio.run(srv.mcp.list_tools())
     assert {t.name for t in tools} == {"remember", "recall", "update", "forget"}

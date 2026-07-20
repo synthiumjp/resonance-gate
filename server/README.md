@@ -1,8 +1,16 @@
-# rg-memory
+# sourcedrecall
 
-A local MCP memory server, LLM-free, over `rg` — a vector-symbolic (VSA)
-memory substrate. It stores explicit structured facts as
-`(subject, relation, object)` triples and answers queries against them.
+**sourcedrecall** is a local, LLM-free MCP memory server. It stores explicit
+structured facts as `(subject, relation, object)` triples and answers
+queries against them.
+
+It is built on the **Resonance Gate** substrate — a vector-symbolic (VSA)
+memory in which retrieval and confidence are the same operation, and whose
+near-synonym collision detection is measured, not asserted. Resonance Gate is
+a pre-registered study: [OSF 95e2q](https://osf.io/95e2q/) (registration,
+deviation log, and the collision-fix result; swap in the Zenodo DOI here once
+minted). sourcedrecall is the product shipped from that substrate; the
+research artifact and paper keep the Resonance Gate name.
 
 There is **no language model in the request path** — no mouth, no
 extractor, no judge. The only model anywhere in the server is the
@@ -99,7 +107,7 @@ signals a conflict; high `u` signals "not resolved".
 
 A read-only page at **http://127.0.0.1:7071** lists every stored record —
 subject, relation, object, source, confidence — with active conflicts
-highlighted. Port is `RG_MEMORY_BROWSER_PORT` (`0` disables it); it binds
+highlighted. Port is `SOURCEDRECALL_BROWSER_PORT` (`0` disables it); it binds
 loopback only. Writes never happen from the browser — they only ever go
 through the four MCP tools above, so provenance stays clean. This is a
 trust feature: you can *see* what the memory holds, in human-readable
@@ -108,7 +116,7 @@ triples, unlike embedding-only competitors.
 ## Persistence
 
 State is a local snapshot (`arrays.npz` + `state.json`) written after every
-mutation, in `RG_MEMORY_STATE` (default `~/.rg-memory`). A restart fully
+mutation, in `SOURCEDRECALL_STATE` (default `~/.sourcedrecall`). A restart fully
 recovers memory from disk.
 
 Everything is local: no network calls, no API keys, no telemetry. The
@@ -127,7 +135,7 @@ deliberately never imported by this server.
 ### (a) From the repo venv — simplest, works today
 
 ```bash
-/ABS/PATH/TO/rg/.venv/bin/python -m rg_memory.mcp_server
+/ABS/PATH/TO/rg/.venv/bin/python -m sourcedrecall.mcp_server
 ```
 
 with environment:
@@ -140,14 +148,14 @@ RG_ROOT=/ABS/PATH/TO/rg
 ### (b) uvx / pipx — distribution option
 
 ```bash
-uvx --from /ABS/PATH/TO/rg/server rg-memory
+uvx --from /ABS/PATH/TO/rg/server sourcedrecall
 ```
 
 or
 
 ```bash
 pipx install /ABS/PATH/TO/rg/server
-rg-memory
+sourcedrecall
 ```
 
 Either way, `RG_ROOT=/ABS/PATH/TO/rg` is **required** — even in an isolated
@@ -169,10 +177,10 @@ above and below.
 ### Claude Code
 
 ```bash
-claude mcp add rg-memory /ABS/PATH/TO/rg/.venv/bin/python \
+claude mcp add sourcedrecall /ABS/PATH/TO/rg/.venv/bin/python \
   -e PYTHONPATH=/ABS/PATH/TO/rg/server \
   -e RG_ROOT=/ABS/PATH/TO/rg \
-  -- -m rg_memory.mcp_server
+  -- -m sourcedrecall.mcp_server
 ```
 
 or as JSON (`.mcp.json` / `claude mcp add-json`):
@@ -180,9 +188,9 @@ or as JSON (`.mcp.json` / `claude mcp add-json`):
 ```json
 {
   "mcpServers": {
-    "rg-memory": {
+    "sourcedrecall": {
       "command": "/ABS/PATH/TO/rg/.venv/bin/python",
-      "args": ["-m", "rg_memory.mcp_server"],
+      "args": ["-m", "sourcedrecall.mcp_server"],
       "env": {
         "PYTHONPATH": "/ABS/PATH/TO/rg/server",
         "RG_ROOT": "/ABS/PATH/TO/rg"
@@ -197,9 +205,9 @@ or as JSON (`.mcp.json` / `claude mcp add-json`):
 ```json
 {
   "mcpServers": {
-    "rg-memory": {
+    "sourcedrecall": {
       "command": "/ABS/PATH/TO/rg/.venv/bin/python",
-      "args": ["-m", "rg_memory.mcp_server"],
+      "args": ["-m", "sourcedrecall.mcp_server"],
       "env": {
         "PYTHONPATH": "/ABS/PATH/TO/rg/server",
         "RG_ROOT": "/ABS/PATH/TO/rg"
@@ -214,9 +222,9 @@ or as JSON (`.mcp.json` / `claude mcp add-json`):
 ```json
 {
   "mcpServers": {
-    "rg-memory": {
+    "sourcedrecall": {
       "command": "/ABS/PATH/TO/rg/.venv/bin/python",
-      "args": ["-m", "rg_memory.mcp_server"],
+      "args": ["-m", "sourcedrecall.mcp_server"],
       "env": {
         "PYTHONPATH": "/ABS/PATH/TO/rg/server",
         "RG_ROOT": "/ABS/PATH/TO/rg"
@@ -227,7 +235,7 @@ or as JSON (`.mcp.json` / `claude mcp add-json`):
 ```
 
 The uvx distribution option (b) works the same way in any of the above:
-`"command": "uvx", "args": ["--from", "/ABS/PATH/TO/rg/server", "rg-memory"]`,
+`"command": "uvx", "args": ["--from", "/ABS/PATH/TO/rg/server", "sourcedrecall"]`,
 with `"env": {"RG_ROOT": "/ABS/PATH/TO/rg"}`.
 
 ## Quickstart: example calls

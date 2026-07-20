@@ -10,7 +10,7 @@ import json
 import os
 import threading
 
-from rg_memory import substrate_path  # noqa: F401 — sys.path + offline env
+from sourcedrecall import substrate_path  # noqa: F401 — sys.path + offline env
 
 import numpy as np
 

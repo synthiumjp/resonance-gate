@@ -35,7 +35,7 @@ def _install_guard(monkeypatch):
 
 
 def test_no_outbound_connections_on_write_and_recall(tmp_path, monkeypatch):
-    from rg_memory.service import MemoryService
+    from sourcedrecall.service import MemoryService
     attempts = _install_guard(monkeypatch)
     svc = MemoryService(str(tmp_path / "state"))
     # novel strings -> forces the MiniLM encoder to embed (from local cache)
@@ -51,6 +51,6 @@ def test_no_outbound_connections_on_write_and_recall(tmp_path, monkeypatch):
 
 def test_offline_env_is_set(tmp_path):
     import os
-    from rg_memory.service import MemoryService  # noqa: F401 (import sets env)
+    from sourcedrecall.service import MemoryService  # noqa: F401 (import sets env)
     assert os.environ.get("HF_HUB_OFFLINE") == "1"
     assert os.environ.get("TRANSFORMERS_OFFLINE") == "1"

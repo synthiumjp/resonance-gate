@@ -14,7 +14,7 @@ import json
 import threading
 
 FOOTER = (
-    "rg-memory stores explicit structured facts you write. It does NOT "
+    "sourcedrecall stores explicit structured facts you write. It does NOT "
     "extract facts from conversation (no language model inside — nothing to "
     "hallucinate). It detects contradictory writes under synonymous keys "
     "(validated on synthetic pairs; real-world validation pending), returns "
@@ -22,7 +22,7 @@ FOOTER = (
     "conflicts rather than silently picking.")
 
 PAGE = """<!doctype html><html><head><meta charset="utf-8">
-<title>rg-memory — stored records</title>
+<title>sourcedrecall — stored records</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
  body{{font:14px/1.5 system-ui,sans-serif;margin:0;background:#0f1115;color:#e6e6e6}}
@@ -38,7 +38,7 @@ PAGE = """<!doctype html><html><head><meta charset="utf-8">
  footer{{padding:16px 24px;color:#8b93a1;font-size:12px;border-top:1px solid #2a2e37;max-width:70ch}}
  .empty{{color:#8b93a1;padding:24px 0}}
 </style></head><body>
-<header><h1>rg-memory</h1>
+<header><h1>sourcedrecall</h1>
 <div class="sub">{n} active record(s){conflicts} · read-only ·
 <a href="/" style="color:#9db4ff">refresh</a></div></header>
 <main>{table}</main>
