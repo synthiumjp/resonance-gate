@@ -1,6 +1,36 @@
-# product-p2 pre-registration: the write-side confidence gate
+# product-p2 pre-registration: the write-side confidence gate — **DRAFT, SUPERSEDED IN PART**
 
-**Status:** registered before any p2 measurement is run. Committed to git prior
+> **AMENDMENT NOTICE (2026-07-20, before any p2 data was generated).**
+> This document is demoted from registration to DRAFT. Two defects were found
+> in it before anything was run:
+>
+> 1. **C5 tested the wrong construct.** It proposed measuring the existing
+>    read-side `(b,d,u)` gate's ability to rank supported vs. unsupported
+>    triples. That gate is computed from resolution geometry — `z(a)`,
+>    `m_ref`, `c_sem` — and **cannot see the source text at all**, so it is
+>    close to orthogonal to whether a triple is faithful to its span. Running
+>    it as written would have produced a null about a hypothesis the mechanism
+>    was never making — the same error corrected in entry 24. The write-gate
+>    must instead be a NEW span-support signal (lexical/embedding support,
+>    self-consistency across re-extraction, the existing hedge/negation guard).
+> 2. **The thresholds were the wrong shape.** AUROC >= 0.70 and "+20 points"
+>    are ranking/relative metrics that map to no decision the product makes;
+>    "+20 points" is meaningless without the baseline (0.30->0.50 and
+>    0.75->0.95 are both "+20", one is shippable). Replaced by operating
+>    points justified by loss asymmetry: retained spans make recall cheap,
+>    false assertion destroys trust.
+>
+> Order of work also corrected: **judge characterisation now precedes the
+> claims registration** (see `p2-instrument-note.md`), because it is instrument
+> validation rather than hypothesis testing, because a failed judge means there
+> is no study to register, and because the judge's measured reliability caps
+> what any downstream threshold can credibly assert.
+>
+> The successor registration will be written after the judge is characterised.
+> This draft is retained unedited below so the sequence is visible in git
+> rather than quietly rewritten.
+
+**Status:** superseded draft; originally written before any p2 measurement. Committed to git prior
 to Phase 0 so the timestamp is checkable.
 **Branch:** `product-p2`, cut from `product-p1`. `rg-freeze-1.0` and `rg-1.1`
 are untouched.
