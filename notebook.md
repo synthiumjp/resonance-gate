@@ -2176,3 +2176,71 @@ procedural hooks and Schank's "store only deviations from the canonical
 sequence" both point the same way as the von Restorff finding in entry 31:
 expectation violation should be an ENCODING trigger, not only a detection
 target.
+
+## Entry 33 — 2026-07-21 (p2: RCI for change detection — the commensurability gate carries it, not the noise threshold)
+
+Implemented the Reliable Change Index for the update/multi-value problem,
+using the exact form from Cacioli "Beyond the Mean" (arXiv:2604.27405) as it
+appears in that repo's run_btm_analysis.py: SEM = SD*sqrt(1-r_xx),
+S_diff = sqrt(SEM_a^2+SEM_b^2), reliable change at |RCI| > 1.96. Formulae
+copied from the source rather than reinvented (experiments/p2/rci.py).
+
+THE REFRAME. Entry 32's naive detector called every second-object-under-a-key
+a contradiction and hit 0.08 precision (1 genuine / 13 fired), and a
+relation-level prior could not separate update from multi-value because the
+SAME relation is exclusive in one instance and co-existing in another. RCI
+supplies the missing distinction as a property of the OBJECT PAIR, not the
+relation: a change requires a COMMON SCALE. "three -> four restaurants" is a
+scale; "road bike / mountain bike" is not, so RCI is undefined and the pair is
+MULTI_VALUE by construction, not by heuristic.
+
+RESULT on the same 39 knowledge-update instances (v2 extractions), classifying
+all within-key object pairs:
+    MULTI_VALUE       32   incommensurable -> correctly NOT a contradiction
+    CATEGORICAL_DIFF   3   same head noun, no numeric scale -> deferred
+    RELIABLE_CHANGE    3
+    WITHIN_NOISE       2
+  The naive detector flagged 13; RCI adjudicates only the 5 pairs that are
+  actually on a shared numeric scale and discards the 34 multi-value pairs the
+  naive version false-alarmed on. THE COMMENSURABILITY GATE is the mechanism
+  that fixes the 0.08 -- it is what removes 12 of the 13 naive false alarms.
+
+HONESTY ABOUT WHAT THE 1.96 THRESHOLD IS AND ISN'T DOING. With one observation
+per value there is no repeated-measurement spread to estimate reliability from,
+so S_diff falls back to a fixed per-scale quantisation (0.71 for integer
+counts) and the threshold is doing very little: a single +1 count
+(3 -> 4 restaurants) is WITHIN_NOISE, a large jump (17 -> 25 postcards,
+4 -> 12 films) is RELIABLE_CHANGE. That is arguably CORRECT behaviour -- one
++1 count IS weak evidence of a real change vs a mis-count -- but it means the
+RCI statistic proper is not yet earning its keep; the commensurability GATE is.
+The reliable-change test only bites once a fact has been observed several
+times, which is exactly the survival/activation history entry 31 builds but
+this 39-instance gold-span probe does not exercise.
+
+A REMAINING FALSE POSITIVE, unfixed and logged. Two of the three
+RELIABLE_CHANGE flags come from the same instance and are NOT changes:
+"4 MCU films" vs "12 films" and "12 films" vs "5 MCU films". These are two
+DIFFERENT COUNTS (all films vs MCU films) that my scale tag cannot separate,
+because it keys on the head noun "films" and cannot see the "MCU" qualifier.
+So on this probe the honest precision is roughly 1 genuine reliable change
+(postcards 17->25; possibly the MCU 5-films-later reading) out of 3 fired --
+better than 0.08 but not the clean win the first pass suggested, and limited by
+scale-tag granularity, not by RCI. Qualifier-aware scale typing is the next
+fix and is owed, not done.
+
+WHAT IS ADOPTED vs OWED.
+- ADOPTED and working: the commensurability gate, which is the RCI framing's
+  real contribution here and the thing that kills the multi-value false alarms.
+- OWED: (i) qualifier-aware scale tags (MCU films != films); (ii) a real
+  reliability estimate from repeated extractions of the same span, which is
+  what makes the 1.96 test meaningful and which the survival history can feed;
+  (iii) the categorical path for non-numeric exclusive change
+  ("Chicago -> the suburbs"), still deferred.
+
+BROADER NOTE (not built). The second, larger idea from "Beyond the Mean" --
+that an aggregate hides opposing item-level movements -- maps onto the memory
+STORE over time: facts strengthen, decay, get superseded, and two stores with
+equal aggregate accuracy can have very different churn. strength.py already
+makes per-fact movement observable, so RCI over the store between two
+timepoints is a memory-health instrument the field lacks. Recorded as a
+direction; not implemented.
