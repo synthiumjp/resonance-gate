@@ -1547,3 +1547,91 @@ relation at each hop; a symmetric chain reusing ONE relation would make
 Artifacts: experiments/relalg/{corpus,traverse,evaluate}.py, rows.jsonl,
 report.json, plus rows_k400.jsonl / report_k400.json (at-capacity stress
 point). Reproduce: `.venv/bin/python experiments/relalg/evaluate.py --regen`.
+
+## Entry 26 — 2026-07-20 (E9: inferring relation cardinality — adopted from PARIS, and where it breaks)
+
+CONTEXT. Product direction changed: the input is chat transcripts, notes and
+agent working memory, NOT explicit "remember this fact" calls. The blocking
+usability defect is that rg-1.1 collapses three different events into one
+"passive collision, return both": an UPDATE (functional relation, later value
+wins), a CONTRADICTION (functional relation, both asserted concurrently), and
+a legitimate MULTI-VALUE (non-functional relation). It therefore nags on every
+multi-valued fact and can never update.
+
+PRIOR ART (literature sweep, entry-26 agents). The statistic is not ours.
+PARIS (Suchanek et al., VLDB 2012) defines relation functionality
+fun(r) = #distinct subjects / #facts under r; AMIE/AMIE+ reuse it; TransH
+classifies 1-1/1-N/N-1/N-N by a fixed threshold. Bitemporal modelling (valid
+time vs transaction time) is settled since Snodgrass / SQL:2011. Zep/Graphiti
+implements exactly that shape (created_at/expired_at, valid_at/invalid_at).
+NOTE THE GAP WORTH OCCUPYING: per the sweep, Graphiti has NO persistent
+cardinality model — whether a new fact updates or coexists is decided per call
+by an LLM prompt. A data-derived persistent statistic is cheaper,
+deterministic and auditable. Also flagged: the PARIS/AMIE line never evaluates
+fun(r) as a standalone classifier, so no precision/recall for "is this
+relation functional" exists in that literature. (Citations relayed from the
+sweep and NOT yet independently verified.)
+
+MEASURED (experiments/cardinality/infer.py, on the E8 corpus where every
+relation's cardinality is known by construction).
+  1. Separation: functional relations fun=1.0000 (n=54), multi-valued
+     fun mean 0.2917, max 0.5000 (n=12). Margin +0.5000.
+  2. Classifier: precision 1.000 / recall 1.000 at EVERY threshold from 0.60
+     to 0.999.
+  3. Prediction: fun(r) vs E8's measured specific-answer accuracy across all
+     nine fan-out conditions — MAE 0.043, r=0.981. fun(r) = 1/F, and E8
+     measured specific accuracy = 1/F, so the store can predict its own
+     specific-answer accuracy per relation from an O(1) statistic without
+     touching the geometry.
+
+WHY RESULT 2 IS WORTHLESS, STATED PLAINLY. F1 = 1.000 at every threshold from
+0.60 to 0.999 is not a good classifier, it is a degenerate task: E8 gives every
+subject under a fan-out relation exactly F objects, so fun(r) takes only the
+values {1, 1/F} with nothing in between. This is the same construction
+artefact that inflated COND-E in entry 24's addendum. It is reported here only
+so it is not mistaken for evidence.
+
+THE REALISTIC CASE (§4, heterogeneous per-subject cardinality).
+    profile                      fun(r)   E[1/F_s]   Jensen gap   frac_multi
+    strictly functional           1.000      1.000       +0.000         0.00
+    mostly 1, 10% have 2          0.907      0.949       +0.042         0.10
+    mostly 1, 30% have 2-3        0.680      0.818       +0.138         0.31
+    geometric, mean~2             0.381      0.528       +0.147         0.76
+    zipf-ish, heavy tail          0.279      0.664       +0.385         0.48
+    uniform F=4                   0.250      0.250       +0.000         1.00
+    uniform F=8                   0.125      0.125       +0.000         1.00
+
+  Two failures, one structural. fun(r) = 1/mean(F_s) but query-weighted
+  specific accuracy is mean(1/F_s); by Jensen these are equal ONLY when F_s is
+  constant. So fun(r) systematically UNDER-predicts accuracy on heterogeneous
+  relations (+0.385 on the heavy-tailed profile), and E8's corpus is precisely
+  the degenerate case where the bias vanishes. Result 3's MAE of 0.043 is
+  therefore an upper bound on how good this looks, not a general figure.
+  Second, a single relation-level flag mislabels the majority: "mostly 1, 10%
+  have 2" scores fun=0.907, which any sensible functional threshold rejects,
+  yet 90% of subjects under that relation genuinely ARE functional and should
+  update.
+
+DESIGN CONCLUSION, which is the useful output of this entry.
+  (a) AT READ TIME no inference is needed at all. The L2 store is exact: count
+      the objects under the queried key. fun(r) is only ever a prior for a key
+      whose true cardinality is not yet observed.
+  (b) AT WRITE TIME, when a second value arrives under a key that held one,
+      the decision needs P(this relation is multi-valued), NOT the magnitude
+      of the fan-out. The correctly-shaped statistic is therefore
+      frac_multi(r) = fraction of subjects under r holding >1 object — 0.10 on
+      the "mostly 1" profile, where fun(r) reports 0.907 and conflates
+      "how often multi" with "how many when multi". PARIS's fun(r) is built
+      for rule mining, where the magnitude is what matters; it is the wrong
+      shape for the update-vs-multivalue decision.
+  (c) Adopt the bitemporal quint (subject, relation, object, valid_from,
+      valid_to) plus created_at/superseded_at rather than inventing anything.
+
+STILL UNMEASURED AND BLOCKING: all of the above assumes triples arriving with
+correct cardinality. With transcript input, extraction precision bounds the
+whole mechanism — a spurious triple from a hedged or hypothetical sentence
+manufactures a FALSE contradiction, and for a disclosure-first system false
+alarms are worse than misses. No experiment has yet touched extraction. That
+measurement needs real transcripts.
+
+Artifacts: experiments/cardinality/infer.py, cardinality.json.
