@@ -2411,3 +2411,44 @@ pending weight-fitting. The one thing still not demonstrated end-to-end is a
 CONTRADICTION alert at usable precision -- extraction now reaches it (33/39) but
 the numeric-scale granularity and lack of coreference cap it. Nothing here is
 shipped; everything is measured and the gaps are named.
+
+## Entry 37 — 2026-07-21 (p2: fitting the strength weights — the weights were not the lever)
+
+Fit the strength weights against real labels. Result is deflationary and worth
+recording as such: weight-fitting is not where the gains are.
+
+STATIC weights (form, grounded, actual) fit by balanced logistic regression on
+the 130-item dev support labels, tested on the 63 held-out:
+    fitted coefficients: grounded +2.75, actual +1.96, form +1.27, intercept -3.67
+                          hand-set       fitted
+    held-out d'            2.072          2.156
+    held-out AUROC         0.889          0.891
+  Negligible. The hand-set weights (1.0/1.5/1.5) were already near-optimal.
+
+TWO REAL TAKEAWAYS:
+- The fit reorders the features: GROUNDING is the dominant support signal
+  (+2.75), above modality (+1.96) and form (+1.27) -- more dominant than the
+  hand-set assumed. Adopted (W_GROUND 1.5 -> 2.2). Consistent with entry 29,
+  where grounding was the single stage with zero false rejects.
+- The DISCRIMINABILITY CEILING IS THE FEATURES, NOT THE WEIGHTS. Three binary
+  features cap held-out d' near 2.2 under any weighting. Raising support
+  discriminability needs GRADED features -- continuous grounding overlap,
+  graded modality confidence -- not re-weighting. That is the real next lever
+  and it is named, not done.
+
+DYNAMIC weights (activation / contradiction / dormancy) NOT fitted. The only
+per-fact utility label with survival history is from_gold_span, and it has 2
+positives across 156 facts. Fitting three weights to two positives would be
+fitting to noise; declined. Consequence: the store-churn MAGNITUDE (entry 36's
+95% downward, 22% churn) remains uncalibrated, as flagged there. Calibrating it
+needs a per-fact retention label at scale -- either many more users through the
+(now cached) pipeline, or a labelled retain/discard set -- which is the data
+bottleneck, not a modelling one.
+
+NET STATE. "Fit the weights" is done and the answer is that weights were not
+the constraint. The static support signal is confirmed sound and near its
+feature ceiling; the dynamic/churn magnitude is blocked on labels, not weights.
+The two named next levers are graded features (for support d') and a
+retention-labelled set at scale (for churn magnitude). Neither is a tuning
+problem; both are data/feature problems, which is a more honest place to be
+than believing another round of weight-tuning would help.

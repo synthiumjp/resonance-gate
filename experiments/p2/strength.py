@@ -52,9 +52,14 @@ from gate import wellformed, grounded, modality
 from ingest import fact_key
 
 # evidence weights -- deliberate, unfitted defaults
+# Static-evidence weights. The RELATIVE values are from a balanced logistic fit
+# on the 130-item dev support labels (entry 37): grounded > actual > form,
+# rescaled so form=1.0. Fitting barely moved held-out d' (2.07 hand-set ->
+# 2.16 fitted), confirming the hand-set were already near-optimal and that the
+# discriminability ceiling is the (three binary) FEATURES, not the weights.
 W_FORM = 1.0
-W_GROUND = 1.5
-W_ACTUAL = 1.5
+W_GROUND = 2.2      # dominant support signal (fit: +2.75 vs form +1.27)
+W_ACTUAL = 1.5      # fit: +1.96 vs form +1.27
 W_ACTIVATION = 1.0
 W_CONTRADICTION = 2.0
 W_DORMANCY = 0.15
