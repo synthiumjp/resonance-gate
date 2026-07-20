@@ -1365,3 +1365,57 @@ Artifacts: experiments/partition/{corpus,stores,traverse,evaluate}.py,
 rows.jsonl, probes.jsonl, report.json, sweep.json, report_dev.json.
 Reproduce: `.venv/bin/python experiments/partition/evaluate.py --regen`
 (EVAL), `--dev --regen` (DEV calibration), `--sweep` (COND-0 load sweep).
+
+### Entry 24 addendum — 2026-07-20 (E7 artifact controls; experiments/partition/controls.py)
+
+Three controls run against the stored EVAL rows, with per-entity degrees
+recomputed from the corpus (no substrate, no embeddings) and joined by
+(world, subject).
+
+C1a. RETRIEVAL vs SUBJECT OUT-DEGREE — the continuous version of the Kumar
+probe, not relying on the two pre-labelled classes:
+    COND-0   deg 1: 0.717 (n=833)   deg 2-3: 0.711 (n=187)   deg 6-8: 0.752 (n=306)
+    COND-R / COND-E / COND-RE: 1.000 in every bin.
+C1b. RETRIEVAL vs SUBJECT IN-DEGREE:
+    COND-0   0: 0.698 (n=745)   1: 0.764 (n=195)   2-3: 0.758 (n=120)   4-20: 0.752 (n=266)
+  COND-0 is FLAT on both degree axes — slightly rising if anything. The null
+  of entry 24 does not depend on how the two probe classes were labelled.
+
+C1c. THE COND-E CONTROL, AND WHAT IT CANNOT SETTLE. The question was whether
+entity partitioning won on high-out-degree bottleneck entities specifically
+or only on easy small cells. COND-E scores 1.000 at out-degree 6-8 (n=306)
+exactly as at out-degree 1 (n=833) — but its LARGEST cell holds 8 facts, so
+there were no hard cases for it to win. The control is therefore
+UNINFORMATIVE about bottleneck entities, and the reason is structural, not a
+sizing oversight: under the unique-key rule an entity's out-degree cannot
+exceed the size of the relation vocabulary (38 here), because each fact
+anchored on that entity needs a distinct relation. Subject partitioning in a
+unique-key corpus is GUARANTEED to produce small cells. COND-E's win is
+therefore substantially an artefact of construction, and no claim that entity
+partitioning "handles hub entities" is supported by this run. Testing that
+would need a corpus with either a very large relation vocabulary or deliberate
+key collisions — the latter being underdetermination, a different experiment.
+
+C2. CELL SIZE, per QUERY (size-weighted; the per-STORE means quoted in the
+main entry are the unweighted ones and are smaller):
+    COND-0   k>1 1.000   k>=5 1.000   mean 412.9  max 415
+    COND-R   k>1 0.991   k>=5 0.855   mean  24.9  max  54
+    COND-E   k>1 0.372   k>=5 0.309   mean   2.9  max   8
+    COND-RE  k>1 0.000   k>=5 0.000   mean   0.7  max   1
+
+C3. NEGATIVE-ARM REJECTION, structural (empty cell found by dictionary) vs
+geometric (populated cell separated by the gate):
+    COND-0   structural 0.000   geometric n=612   conf 0.394 vs intact 0.549
+    COND-R   structural 0.000   geometric n=612   conf 0.116 vs intact 0.999
+    COND-E   structural 0.627   geometric n=228   conf 0.155 vs intact 1.000
+    COND-RE  structural 1.000   geometric n=0     no geometry involved at all
+  COND-R's perfect intact-vs-broken AUROC is entirely geometric: not one of
+  its 612 negative chains was caught by an empty cell. COND-RE's is entirely
+  bookkeeping. COND-0's separation is real but much weaker (0.394 vs 0.549),
+  which is what its 0.87-0.94 AUROC reflects.
+
+CONSEQUENCE FOR THE ENTRY-24 VERDICT. Points (i)-(iv) stand unchanged. Point
+(v) is narrowed: COND-R remains a VSA memory on the evidence (99.1% of
+queries on multi-fact cells, 85.5% on cells of 5+, all negative-arm rejection
+geometric), but the COND-E half of the story is withdrawn — that condition
+was never tested on a hard cell and its result is a construction artefact.
