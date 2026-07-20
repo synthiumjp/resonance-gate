@@ -9,3 +9,7 @@ ggml_cuda_init: found 1 ROCm devices (Total VRAM: 16325 MiB):
   [6/10] inst 333 temporal-reasoning: 47 sessions, 233 turns -> 9 facts, 4 activated, 0 contradicted [17.1m]
   [7/10] inst 367 knowledge-update: 47 sessions, 232 turns -> 12 facts, 6 activated, 0 contradicted [20.3m]
   [8/10] inst 340 temporal-reasoning: 45 sessions, 213 turns -> 17 facts, 14 activated, 0 contradicted [22.9m]
+  [9/10] inst 216 multi-session: 54 sessions, 278 turns -> 29 facts, 13 activated, 1 contradicted [25.9m]
+  [10/10] inst 110 multi-session: 46 sessions, 237 turns -> 14 facts, 6 activated, 0 contradicted [28.4m]
+
+-> /home/jp/rg/experiments/p2/haystack_facts.jsonl

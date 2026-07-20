@@ -2087,3 +2087,92 @@ STILL OPEN.
 - d' with the dynamic (survival) term is still unmeasured — the prediction
   that d' RISES with exposure remains the falsifiable claim and the reason the
   mechanism was built this way.
+
+## Entry 32 — 2026-07-20 (p2: extractor v2 fixes the bottleneck; the contradiction detector would ship at 0.08 precision)
+
+TWO RESULTS. The first is a large win, the second says the product claim is
+not yet shippable and says exactly why.
+
+1. THE BOTTLENECK WAS EXTRACTION, AND IT IS FIXABLE.
+Entry 31 left contradiction undemonstrable. The diagnostic that isolated why:
+take the 39 usable LongMemEval knowledge-update instances, extract from the
+GOLD-EVIDENCE SPANS THEMSELVES (the turns that state the old and new value),
+and ask whether both sides are even extractable. Truncation was excluded first
+— 0 of 144 gold spans exceed the limit.
+
+  v1 (frozen write_path.EXTRACT_SYSTEM) produced NOTHING from most gold spans.
+  It cannot see "I set a personal best of 27:12", "I've tried four Korean
+  restaurants", "Rachel moved to the suburbs" — because its relation schema
+  ("works at, lives in, was born in, manages, reports to, is married to,
+  is a sibling of, studied at") is inherited from the synthetic E3/E5 corpus
+  and none of those are workplace, residence or kinship facts.
+
+  THE SAME NARROWNESS EXPLAINS THE FEW-SHOT LEAKAGE of entry 27. Given a span
+  it has no schema for, the extractor falls back on its own prompt examples —
+  which is why a dairy-farming conversation yielded (Dana | works at | Orion
+  Foods). Over-extraction of junk and under-extraction of real facts are ONE
+  bug, not two.
+
+  v2 (experiments/p2/extract_v2.py — new prompt, same pinned model; the frozen
+  path is untouched so v1/v2 are comparable and the artifact stays
+  reproducible). No closed relation list; explicit coverage of quantities,
+  counts, measurements, times, events, states, possessions, preferences and
+  third parties; a hard rule that every argument must be copied from the
+  utterance, aimed at the leak; hedge/question/negation conservatism KEPT
+  because the modality stage depends on it.
+
+      instances where any fact survives gate+scope   v1  5/39  ->  v2 33/39
+      2+ facts sharing a SUBJECT                     v1  3/39  ->  v2 19/39
+      2+ sharing SUBJECT AND RELATION                v1  2/39  ->  v2 13/39
+
+2. BUT THE MATCHES ARE MOSTLY FALSE. More extraction mechanically creates more
+chances of an accidental match, so the 13 were inspected rather than counted.
+Classifying each matched (subject, relation) pair by whether its objects are
+MUTUALLY EXCLUSIVE ALTERNATIVES (all carry a quantity and share a head noun)
+or CO-EXISTING MEMBERS:
+
+      mutually-exclusive alternatives (genuine)   1
+      co-existing multi-valued lists (false)     12
+      DETECTOR PRECISION IF SHIPPED AS-IS      0.08
+
+  The one genuine case:
+      (i | have tried) -> {three Korean restaurants, four Korean restaurants}
+  Representative false ones:
+      (i | have been using) -> {commuter bike, mountain bike, road bike}
+      (i | have heard of)   -> {Merrell, Teva}
+      (i | have)            -> {a marketing campaign, a report due next Friday}
+
+  For a product whose pitch is "we tell you when your memory disagrees with
+  itself", 12 false alarms in 13 is fatal — false alarms are the failure mode
+  that gets a feature switched off, and 0.08 is not meaningfully above BEAM's
+  reported best contradiction-resolution of ~0.05.
+
+THIS IS THE ENTRY-26 CARDINALITY PROBLEM, NOW BINDING. A second object under
+one key is an UPDATE, a CONTRADICTION or a legitimate MULTI-VALUE, and we are
+calling all three a contradiction. Entry 26 proposed frac_multi(r) as the
+discriminator and flagged that a relation-level statistic mislabels the
+majority case under heterogeneous cardinality. This data shows something
+worse: the SAME relation is contradictory in one instance and multi-valued in
+another — "have tried" is exclusive for {three, four} Korean restaurants and
+co-existing for {sleep environment, bedtime routine}. A relation-level prior
+cannot separate those.
+
+WHAT ACTUALLY SEPARATES THEM, on this evidence, is whether the objects are
+mutually exclusive ALTERNATIVES rather than members: quantities or
+measurements of the same head noun. That is implementable and model-free, and
+it recovers the counting/measurement updates that dominate LongMemEval's
+knowledge-update category. It is also plainly FITTED TO THIS DATA'S QUESTION
+DISTRIBUTION and would not catch "Rachel moved to Chicago -> the suburbs",
+which is exclusive without being numeric. Recorded as a known limit before it
+is built, not after.
+
+LITERATURE NOTE (frames/schema agent, mostly UNVERIFIED — Schank & Abelson,
+Rumelhart & Ortony and ACT-R could not be confirmed from primary sources this
+session). One item worth acting on if verified: ACT-R's base-level activation,
+B = ln(sum of t^-d) over past accesses, is a principled form of exactly what
+strength.py hand-rolls as log1p(activations) - W*dormancy. If it checks out,
+adopt the real equation rather than our approximation. Minsky's IF-ADDED
+procedural hooks and Schank's "store only deviations from the canonical
+sequence" both point the same way as the von Restorff finding in entry 31:
+expectation violation should be an ENCODING trigger, not only a detection
+target.
