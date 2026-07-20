@@ -89,6 +89,27 @@ def _content(x):
             if len(t) > 2 and t not in _STOP}
 
 
+_ROLE_QUAL = re.compile(r"\s*\([^)]*\)\s*$")
+_FIRST = re.compile(r"^\s*(i|we|my|our|me|myself)\b", re.I)
+
+
+def subject_contiguous(span, triple):
+    """A non-first-person subject must occur as a contiguous phrase in the span
+    (role qualifier stripped), else it is a fabricated nominalisation the
+    extractor assembled from scattered span tokens. First-person subjects are
+    exempt (never literal). Returns (ok, reason)."""
+    s = str(triple[0]).strip()
+    if _FIRST.match(s):
+        return True, "first-person subject"
+    core = _ROLE_QUAL.sub("", s).strip().lower()
+    if not core:
+        return False, "empty subject"
+    sp = re.sub(r"\s+", " ", str(span).lower())
+    if re.sub(r"\s+", " ", core) in sp:
+        return True, "contiguous"
+    return False, f"fabricated subject: {core!r} not contiguous in span"
+
+
 def grounded(span, triple):
     """Do the subject and object actually occur in the source span?
 
@@ -200,6 +221,10 @@ def assess(span, triple, corroborations=0):
     if not ok_g:
         return {"tier": SPAN, "modality": None, "wellformed": True,
                 "grounded": False, "why": why_g}
+    ok_c, why_c = subject_contiguous(span, triple)
+    if not ok_c:
+        return {"tier": SPAN, "modality": None, "wellformed": True,
+                "grounded": True, "structural": False, "why": why_c}
     mod, sent = modality(span, triple)
     if mod != "ACTUAL":
         return {"tier": PROVISIONAL, "modality": mod, "wellformed": True,

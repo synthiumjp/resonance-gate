@@ -2518,3 +2518,49 @@ scope NOT added to the support model. The disciplined read: stop tuning the
 support gate; the next real work is extraction structural-validity and
 coreference, both of which serve the contradiction claim that is still the
 undemonstrated differentiator.
+
+## Entry 39 — 2026-07-21 (p2: subject-contiguity structural check — the model-free half of the extraction fix)
+
+Added a structural-validity gate (gate.subject_contiguous): a non-first-person
+subject must appear as a CONTIGUOUS phrase in its span (trailing role qualifier
+like "(colleague)" stripped). First-person subjects are exempt. This catches
+the fabricated-subject nominalisations entry 38 identified -- "total savings
+goal", "retirement income needed", "desired savings rate" -- which token-
+grounding passes because their component words ARE in the span, scattered. No
+model call.
+
+Separation on the labelled set: SUPPORTED non-first-person subjects are 91%
+contiguous, UNSUPPORTED 66%. Pipeline effect (kept = well-formed + grounded +
+contiguous + ACTUAL):
+    DEV       P 0.833 -> 0.905  R 0.909 -> 0.864  (entry-29 baseline -> now)
+    HELD-OUT  P 0.636 -> 0.636  R 0.700 -> 0.700  (unchanged)
+  The single dev recall drop is "desired savings rate | is | 20%", which the
+  span states as "aim to save at least 20% of my income" -- "desired savings
+  rate" is itself a fabricated nominalisation and my SUPPORTED label was wrong
+  (more of entry 38's label conflation). So after qualifier stripping the check
+  has ZERO genuine false rejects; the recall "loss" is a label correction.
+  Held-out is flat because that sample happens to contain no fabricated-subject
+  cases -- no regression, but held-out did not independently validate the gain,
+  so it is demonstrated-on-dev, not-contradicted-on-held-out.
+
+WHAT IT DOES AND DOESN'T CATCH. Catches fabricated nominalisations (arguments
+scattered, subject phrase not contiguous). Does NOT catch role swaps
+("SIFF | attended | festivals" -- SIFF is contiguous), which need relational
+faithfulness (an entailment call, forbidden). So this is the model-free HALF of
+the extraction-quality fix from entry 38; the role-swap half is left to either
+better extraction or the deferred entailment option, and is logged unfixed.
+
+A NOTE ON A LINGUISTIC DEAD-END (raised in session). Is there a universal
+transformation turning a non-asserted statement into an asserted one? No.
+Commitment is not a strippable surface operator; it is the semantic-pragmatic
+status of the whole utterance (FactBank's thesis: factuality = f(source,
+modality, polarity)). The prejacent CAN be recovered mechanically ("might move"
+-> "move") but the prejacent is NOT an assertion, and treating it as one is
+exactly the "thinking of moving -> lives in Boston" bug. Only veridical/
+implicative verbs (Karttunen: "managed to X" |= X) carry commitment
+context-independently, and that is a finite verb table, not a transformation.
+Confirms the gate's design: RECORD modality, never normalise it away.
+
+Held-out has now been read 4x (entries 29, 37, 38, 39). It is worn as an
+unbiased estimator. The coreference work (next) will need a FRESH labelled
+eval drawn from the cached spans, and that is noted as a prerequisite there.
