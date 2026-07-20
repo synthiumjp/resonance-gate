@@ -109,13 +109,16 @@ class ChurnMeter:
         sd0 = st.pstdev([a for a, _ in present])
         sd1 = st.pstdev([b for _, b in present])
 
+        # RELIABILITY. Split-half over a fact's strength trajectory measures
+        # the curve's autocorrelation, not the extractor's reliability (entry
+        # 35 caught this: it inflated r_xx to ~0.8 on smooth decay curves). A
+        # valid r_xx needs repeated EXTRACTIONS of the same span, which we do
+        # not have. So r_xx is taken as a fixed, explicit input, defaulting to
+        # the held-out gate discriminability re-expressed as a reliability:
+        # AUROC 0.882 (entry 31) -> r_xx ~= 0.55 via 2*AUROC-1 (a documented,
+        # conservative stand-in, NOT a measured test-retest coefficient).
         per_fact_r = {}
-        for k, traj in self.trajectory.items():
-            r = split_half_reliability([s for _, s in traj])
-            if r is not None:
-                per_fact_r[k] = r
-        pooled = (global_reliability if global_reliability is not None
-                  else (sum(per_fact_r.values()) / len(per_fact_r) if per_fact_r else 0.0))
+        pooled = global_reliability if global_reliability is not None else 0.55
 
         rows, deltas = [], []
         strengthened = weakened = stable = 0

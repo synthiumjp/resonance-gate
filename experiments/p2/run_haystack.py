@@ -34,8 +34,31 @@ for _p in (_HERE, _R, f"{_R}/substrate", f"{_R}/gate", f"{_R}/encoder", f"{_R}/m
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
+import hashlib
 from ingest import Ingestor, fact_key
 from strength import SurvivalIndex, static_evidence
+
+_CACHE_PATH = os.path.join(_HERE, "extract_cache.jsonl")
+
+def _load_cache():
+    c = {}
+    if os.path.exists(_CACHE_PATH):
+        for line in open(_CACHE_PATH):
+            d = json.loads(line)
+            c[d["h"]] = [tuple(t) for t in d["t"]]
+    return c
+
+def cached_extractor(real_extractor, cache, cache_file):
+    def f(text):
+        h = hashlib.sha1(text.encode("utf-8")).hexdigest()
+        if h in cache:
+            return cache[h]
+        tr = [tuple(t) for t in real_extractor(text)]
+        cache[h] = tr
+        cache_file.write(json.dumps({"h": h, "t": [list(t) for t in tr]}) + "\n")
+        cache_file.flush()
+        return tr
+    return f
 
 DATA = os.path.join(_R, "data", "longmemeval_s")
 OUT = os.path.join(_HERE, "haystack_facts.jsonl")
@@ -51,11 +74,15 @@ def main():
     idx = list(range(len(d)))
     rng.shuffle(idx)
 
+    cache = _load_cache()
+    cache_file = open(_CACHE_PATH, "a")
+    extract = cached_extractor(extract_triples, cache, cache_file)
+    print(f"extraction cache: {len(cache)} spans preloaded")
     out = open(OUT, "w")
     t0 = time.time()
     for n, ii in enumerate(idx[:n_inst]):
         inst = d[ii]
-        ing = Ingestor(extractor=extract_triples)
+        ing = Ingestor(extractor=extract)
         surv = SurvivalIndex()
         gold_spans, n_turns = set(), 0
         n_sessions = len(inst["haystack_sessions"])
@@ -83,6 +110,8 @@ def main():
             rec = first_span.get(key)
             sc = surv.score(key, current_session=n_sessions - 1)
             out.write(json.dumps({
+                "activation_sessions": sorted(f["activations"]),
+                "contradiction_sessions": sorted(f["contradictions"]),
                 "instance": ii, "question_type": inst["question_type"],
                 "fact_key": list(key), "triple": list(f["triple"]),
                 "first_session": f["first_session"], "n_sessions": n_sessions,

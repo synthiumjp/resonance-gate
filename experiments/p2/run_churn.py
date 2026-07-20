@@ -24,39 +24,26 @@ from ingest import fact_key
 
 
 def replay_user(facts):
-    """Reconstruct a per-fact strength trajectory across sessions from the
-    dumped haystack records. Each record already carries the static evidence
-    and the activation/contradiction counts AS OF END of transcript; to get a
-    trajectory we recompute strength at each session using the activations that
-    had accrued by then. The dump does not store per-session activation, so we
-    approximate: a fact observed first at session f, with A total activations
-    spread over the sessions after f, accrues them linearly. This is an
-    APPROXIMATION and is labelled as such -- a faithful trajectory needs the
-    per-session activation log, which run_haystack does not yet dump."""
+    """Reconstruct a FAITHFUL per-fact strength trajectory from the real
+    per-session activation/contradiction log now dumped by run_haystack
+    (activation_sessions, contradiction_sessions). No approximation of the
+    activation schedule: strength at each session uses the activations and
+    contradictions that had actually accrued by then, with dormancy = sessions
+    since the last real activation."""
     meter = ChurnMeter()
     for r in facts:
         k = tuple(r["fact_key"])
         f0 = r["first_session"]
         nsess = r["n_sessions"]
-        A = r["activations"]
-        C = r["contradictions"]
         ev = r["ev"]
-        # sessions at which this fact is 'seen': first, then evenly spaced
-        # activation sessions across the remaining span
-        span = max(1, nsess - 1 - f0)
-        act_sessions = [f0]
-        for a in range(A):
-            act_sessions.append(min(nsess - 1, f0 + int((a + 1) * span / (A + 1))))
+        act_sessions = [f0] + list(r.get("activation_sessions", []))
+        con_sessions = list(r.get("contradiction_sessions", []))
         act_sessions = sorted(set(act_sessions))
-        # sample strength at EVERY session from first appearance to end, so a
-        # fact carries decay (dormancy since last activation) between the
-        # sparse sessions where it is actually revisited. This is what gives
-        # the store a downward force and makes churn two-sided.
         for sess in range(f0, nsess):
-            acts = sum(1 for s in act_sessions if s <= sess) - 1
+            acts = sum(1 for s in act_sessions if f0 < s <= sess)
+            cons = sum(1 for s in con_sessions if s <= sess)
             last_act = max([s for s in act_sessions if s <= sess], default=f0)
             dorm = sess - last_act
-            cons = C if sess >= act_sessions[-1] else 0     # contradiction lands late
             st = strength(ev, activations=acts, contradictions=cons, dormancy=dorm)
             meter.observe(k, sess, st)
     return meter

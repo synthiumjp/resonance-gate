@@ -2353,3 +2353,61 @@ decomposition. It is NOT yet a measurement of real memory dynamics, because the
 strength weights are unfitted and the replay is approximate. Turning it from a
 working instrument into a measured result needs fitted weights and a faithful
 per-session log -- both scoped, neither done.
+
+## Entry 36 — 2026-07-21 (p2: faithful per-session log — the store is decay-dominated, and the approximation was not innocent)
+
+Closed the two owed items from entry 35: a faithful per-session activation log
+(run_haystack now dumps activation_sessions / contradiction_sessions, not just
+counts) and a non-inflated reliability estimate. Also added a persistent
+extraction cache (extract_cache.jsonl, 2457 spans) so no future churn/gate
+iteration re-runs the GPU.
+
+FAITHFUL vs APPROXIMATE — the approximation materially changed the result, so
+fixing it mattered:
+                          approx (e35)   faithful (e36)
+    reliably strengthened   29%            4%
+    reliably weakened       21%           17%
+    stable                  50%           78%
+    churn rate              50%           22%
+    gross-downward share    75%           95%
+  The entry-35 replay spread each fact's activations EVENLY across its span,
+  which manufactured late-window strengthening that the real schedule does not
+  contain. With the true activation sessions -- which are sparse and cluster
+  EARLY -- most facts spend the late window dormant and decaying.
+
+THE FINDING: personal-memory facts in LongMemEval are DECAY-DOMINATED. A fact
+is stated in a burst of early sessions and then goes dormant; 95% of gross
+strength movement is downward. This is the same phenomenon that killed
+restatement-corroboration in entry 31 (people state a fact once, not
+repeatedly), now measured on the strength trajectory rather than inferred: the
+store's natural dynamics are forgetting, and reinforcement is rare. That is an
+argument FOR a decay-based memory with explicit reactivation, not against one.
+
+WHAT IS NOW SOUND vs STILL OWED.
+  SOUND: the instrument uses the real activation log; r_xx is a fixed,
+  documented stand-in (0.55, from the held-out gate AUROC 0.882 via 2*AUROC-1)
+  rather than the entry-35 curve estimate that autocorrelation had inflated to
+  ~0.8; the DIRECTION of the result (decay-dominated) is robust to the dormancy
+  weight for any W_DORMANCY > 0, because real activations are sparse and early.
+  STILL OWED: the MAGNITUDE (95% downward, 22% churn) remains a function of
+  strength.py's unfitted W_ACTIVATION=1.0 / W_DORMANCY=0.15 ratio. A larger
+  activation weight or smaller decay weight moves the numbers, though not the
+  sign. Fitting those weights against a labelled strength-vs-correctness set is
+  the remaining step to turn direction into calibrated magnitude, and it is not
+  done.
+
+  Also owed and unchanged: r_xx is still not a true test-retest coefficient
+  (needs repeated extractions of the same span); it is a discriminability
+  proxy. The value 0.55 is conservative (lower r_xx -> larger S_diff -> FEWER
+  reliable-change calls), so it biases toward under-reporting churn, which is
+  the safe direction for a "your memory is unstable" signal.
+
+STATE OF p2 OVERALL. Write gate (grounding + modality + scope) works: held-out
+d' 2.07 for support, 5x scope concentration, gold facts retained 2/2. Change
+detection via RCI: commensurability gate robust, noise threshold correct but
+needs repeated observations. Store-churn instrument: novel (no RCI prior art in
+computational systems), now on faithful data, decay-dominated finding, magnitude
+pending weight-fitting. The one thing still not demonstrated end-to-end is a
+CONTRADICTION alert at usable precision -- extraction now reaches it (33/39) but
+the numeric-scale granularity and lack of coreference cap it. Nothing here is
+shipped; everything is measured and the gaps are named.

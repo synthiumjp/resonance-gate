@@ -1,0 +1,16 @@
+ggml_cuda_init: found 1 ROCm devices (Total VRAM: 16325 MiB):
+  Device 0: AMD Radeon RX 7900 GRE, gfx1100 (0x1100), VMM: no, Wave Size: 32, VRAM: 16325 MiB
+extraction cache: 0 spans preloaded
+[mouth] backend: GPU (n_gpu_layers=-1)
+  [1/10] inst 442 knowledge-update: 47 sessions, 260 turns -> 18 facts, 7 activated, 0 contradicted [2.1m]
+  [2/10] inst 28 single-session-user: 57 sessions, 265 turns -> 12 facts, 8 activated, 0 contradicted [3.8m]
+  [3/10] inst 396 knowledge-update: 57 sessions, 258 turns -> 7 facts, 6 activated, 0 contradicted [5.5m]
+  [4/10] inst 345 temporal-reasoning: 52 sessions, 244 turns -> 16 facts, 11 activated, 0 contradicted [7.5m]
+  [5/10] inst 447 single-session-assistant: 53 sessions, 263 turns -> 18 facts, 8 activated, 0 contradicted [9.1m]
+  [6/10] inst 333 temporal-reasoning: 47 sessions, 233 turns -> 12 facts, 8 activated, 0 contradicted [10.5m]
+  [7/10] inst 367 knowledge-update: 47 sessions, 232 turns -> 11 facts, 4 activated, 0 contradicted [12.2m]
+  [8/10] inst 340 temporal-reasoning: 45 sessions, 213 turns -> 21 facts, 12 activated, 0 contradicted [13.9m]
+  [9/10] inst 216 multi-session: 54 sessions, 278 turns -> 26 facts, 11 activated, 0 contradicted [16.2m]
+  [10/10] inst 110 multi-session: 46 sessions, 237 turns -> 15 facts, 5 activated, 0 contradicted [18.0m]
+
+-> /home/jp/rg/experiments/p2/haystack_facts.jsonl
