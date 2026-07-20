@@ -94,11 +94,21 @@ class Ingestor:
     _by_key: dict = field(default_factory=lambda: defaultdict(list))
     _n_span: int = 0
 
+    MAX_SPAN_CHARS = 2400   # SmolLM3 ctx is 4096 tokens; long haystack turns
+                            # overflow it. Truncation is logged on the span so
+                            # a receipt never claims text the gate did not see.
+
     def _extract(self, text):
-        if self.extractor is not None:
-            return self.extractor(text)
-        from write_path import extract_triples
-        return extract_triples(text)
+        t = text[: self.MAX_SPAN_CHARS]
+        try:
+            if self.extractor is not None:
+                return self.extractor(t)
+            from write_path import extract_triples
+            return extract_triples(t)
+        except ValueError as e:          # context overflow -> drop, do not crash
+            if "context window" in str(e):
+                return []
+            raise
 
     def ingest(self, text, session_id=None, provenance="user-stated",
                span_id=None):
@@ -107,7 +117,8 @@ class Ingestor:
             span_id = f"s{self._n_span:06d}"
             self._n_span += 1
         self.spans[span_id] = {"text": text, "session_id": session_id,
-                               "provenance": provenance}
+                               "provenance": provenance,
+                               "truncated": len(text) > self.MAX_SPAN_CHARS}
 
         out = []
         for tr in self._extract(text):

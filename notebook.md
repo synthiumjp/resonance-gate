@@ -2008,3 +2008,82 @@ CORRECTIONS MADE TO OUR OWN RECORD
 
 NEXT: wire the gate into an ingest path, then measure corroboration ->
 PROMOTED, which is implemented but entirely unmeasured.
+
+## Entry 31 — 2026-07-20 (p2: survival fires, but the gate was filtering the wrong thing; scope is the salience signal)
+
+Three findings, in the order they arrived. The second invalidates a design
+decision from entry 29 and the third invalidates one I proposed an hour later.
+
+1. RESTATEMENT-BASED CORROBORATION IS DEAD. On the full haystack
+(longmemeval_s, ~50 sessions/user), facts independently RESTATED across
+sessions: 0 of 36 over 525 turns. People do not repeat facts in the same words
+months apart. The PROMOTED tier as specified in entry 29 would never fire and
+the system would assert nothing.
+
+2. SURVIVAL FIRES WHERE RESTATEMENT DOES NOT. Reframing the signal from
+"repeated" to "revisited" — a later session mentions the fact's OBJECT without
+contradicting it — activation rate went 0.00 -> 0.55 across 122 facts. The
+mechanism is the pruning half of an overproduce-then-eliminate lifecycle:
+extraction already overproduces (~90% junk, entry 27) and no memory system in
+the field implements the elimination, which is why mem0 accumulates 97.8% junk
+and amplified one hallucination into 808 copies.
+  ACTIVATION REQUIRES THE OBJECT, not the subject. Most facts have the speaker
+  as subject, so subject-only matching would activate every speaker fact on
+  every user turn and the term would be constant.
+
+3. THE GATE WAS SOLVING THE WRONG HALF — the important one.
+  Static write-time evidence (form + grounding + modality) as a continuous
+  strength, scored under SDT:
+      DEV       d'=4.116  AUROC=0.974
+      HELD-OUT  d'=2.072  AUROC=0.882
+  That is a real signal, and reframing it as d' rather than precision-at-a-
+  threshold matters: 0.636 precision was a statement about where I put the
+  criterion, not about the system's discriminability.
+  BUT: of 122 facts retained across 6 users, only 2 came from a gold-evidence
+  span. The retained population is dominated by TOPICS DISCUSSED, not facts
+  about the user — keanu reeves, napa valley, schrodinger equation, Heidegger,
+  anthropology, and a cast of story characters the user was writing
+  (Loki | is | the antagonist). The gate optimises FAITHFULNESS ("is this
+  triple true to the span", d' 2.07) and a memory needs UTILITY ("is this worth
+  remembering", 2/122). Those two constructs were registered as separate in the
+  p2 draft and then I optimised only the first. This independently reproduces
+  Kang et al. (arXiv:2606.10616), whose importance baseline sits at F1
+  0.020-0.027 against gold evidence.
+
+THE FIX, AND THE MISTAKE I NEARLY MADE. My first proposal was to restrict the
+RELATION vocabulary — drop contentless copulas (`is` 20, `has` 9, `have` 6 of
+105). Checking against the gold facts first showed this would have been a
+disaster: both gold-evidence facts are
+
+    (my current road bike | has | been used for 2,000 miles)
+
+relation `has`. Relation-type filtering destroys exactly the facts that matter.
+RELATION TYPE IS NOT THE SIGNAL; SCOPE IS.
+
+SCOPE FILTER (experiments/p2/schema.py). A personal memory is about the
+speaker, the people in their life, and what they own or are committed to —
+not about whatever they discussed. SELF / SELF_POSSESSIVE / ORBIT are in
+scope; TOPIC is not. Orbit membership is learned from the speaker's own stated
+relationships as the transcript proceeds. Deterministic, bounded, no model
+call — which matters because Kang shows a SCORER is not the answer.
+  RESULT: 122 facts -> 26 in scope (21.3%), a 4.7x concentration.
+          GOLD-EVIDENCE FACTS RETAINED 2/2 — the check that would have caught
+          the relation-filter mistake, and the reason it is run first.
+          activation rate 0.55 all -> 0.65 in-scope.
+
+BUGS FOUND AND FIXED WHILE MEASURING: the role-qualifier pattern matched any
+parenthetical, so "Burke et al. (2010)" was admitted as a person in the user's
+life; tightened to an explicit role vocabulary.
+
+STILL OPEN.
+- CONTRADICTIONS NEVER FIRE: 0 across 122 facts, including knowledge-update
+  instances which by construction contain changed facts. Diagnosis: the
+  detector needs two gated facts sharing an exactly-normalised
+  (subject, relation), and with a 46-relation vocabulary over 122 facts that
+  almost never happens. The gate that makes facts trustworthy also starves the
+  contradiction detector. Unresolved and it is the actual product claim.
+- The 2/122 gold overlap is too small a denominator to measure utility
+  properly. Needs either more users or labels on a sampled fact set.
+- d' with the dynamic (survival) term is still unmeasured — the prediction
+  that d' RISES with exposure remains the falsifiable claim and the reason the
+  mechanism was built this way.

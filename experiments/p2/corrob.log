@@ -1,0 +1,4 @@
+ggml_cuda_init: found 1 ROCm devices (Total VRAM: 16325 MiB):
+  Device 0: AMD Radeon RX 7900 GRE, gfx1100 (0x1100), VMM: no, Wave Size: 32, VRAM: 16325 MiB
+[mouth] backend: GPU (n_gpu_layers=-1)
+  [1/12] inst 442 (knowledge-update): 260 turns -> 16 records, 0/16 facts corroborated, 0 promoted  [3.1m]

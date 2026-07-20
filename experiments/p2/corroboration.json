@@ -1,0 +1,24 @@
+[
+ {
+  "instance": 442,
+  "question_type": "knowledge-update",
+  "n_sessions": 47,
+  "n_user_turns": 260,
+  "n_records": 16,
+  "n_distinct_facts": 16,
+  "n_gold_spans": 2,
+  "corroborated_facts": 0,
+  "promoted_records": 0,
+  "modality_counts": {
+   "ACTUAL": 10,
+   "ATTRIBUTED": 1,
+   "FUTURE": 2,
+   "QUESTION": 2,
+   "PAST_ONLY": 1
+  },
+  "gold_hits_all": 2,
+  "gold_hits_promoted": 0,
+  "gold_hits_provisional": 2,
+  "n_provisional": 16
+ }
+]
