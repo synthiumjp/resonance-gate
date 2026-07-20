@@ -73,15 +73,52 @@ def _content(x):
             if len(t) > 2 and t not in stop}
 
 
-def static_evidence(span, triple):
-    """Write-time evidence. No history required."""
+def _tok(x):
+    stop = {"the","a","an","of","in","at","to","for","and","or","my","your",
+            "his","her","their","our","its","this","that","is","was","are",
+            "were","be","been","new","some","any","one"}
+    return [t for t in re.findall(r"\w+", str(x).lower()) if len(t) > 2 and t not in stop]
+
+
+def _overlap(field, span_toks):
+    """Graded presence of an argument in the span: fraction of its content
+    tokens found, with a light fuzzy allowance for near-matches (plurals,
+    shared 4-prefixes) so 'restaurants'/'restaurant' and 'Fitbit'/'fitbits'
+    count. Continuous in [0,1] rather than the binary any-token-hits test."""
+    ft = _tok(field)
+    if not ft:
+        return 1.0            # nothing checkable -> not penalised
+    hit = 0
+    for t in ft:
+        if t in span_toks:
+            hit += 1
+        elif any(abs(len(t) - len(u)) <= 2 and (t[:4] == u[:4]) for u in span_toks):
+            hit += 0.5
+    return hit / len(ft)
+
+
+# graded modality: a soft confidence that the fact is asserted-as-true, rather
+# than the binary ACTUAL flag. Non-actual cue -> low; clean actual -> high.
+_MOD_CONF = {"ACTUAL": 1.0, "PAST_ONLY": 0.5, "ATTRIBUTED": 0.3,
+             "FUTURE": 0.15, "HEDGED": 0.1, "CONDITIONAL": 0.05,
+             "NEGATED": 0.0, "QUESTION": 0.0}
+
+
+def static_evidence(span, triple, graded=False):
+    """Write-time evidence. graded=True adds continuous grounding + modality."""
     form_ok, _ = wellformed(triple)
     ground_ok, _ = grounded(span, triple) if form_ok else (False, "")
     mod = modality(span, triple)[0] if form_ok else None
-    return {"form": 1.0 if form_ok else 0.0,
-            "grounded": 1.0 if ground_ok else 0.0,
-            "actual": 1.0 if mod == "ACTUAL" else 0.0,
-            "modality": mod}
+    out = {"form": 1.0 if form_ok else 0.0,
+           "grounded": 1.0 if ground_ok else 0.0,
+           "actual": 1.0 if mod == "ACTUAL" else 0.0,
+           "modality": mod}
+    if graded:
+        span_toks = set(_tok(span))
+        out["ground_frac"] = min(_overlap(triple[0], span_toks),
+                                 _overlap(triple[2], span_toks)) if form_ok else 0.0
+        out["mod_conf"] = _MOD_CONF.get(mod, 0.0) if form_ok else 0.0
+    return out
 
 
 def strength(ev, activations=0, contradictions=0, dormancy=0):

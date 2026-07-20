@@ -2452,3 +2452,69 @@ The two named next levers are graded features (for support d') and a
 retention-labelled set at scale (for churn magnitude). Neither is a tuning
 problem; both are data/feature problems, which is a more honest place to be
 than believing another round of weight-tuning would help.
+
+## Entry 38 — 2026-07-21 (p2: the support d' wall is extraction quality + label conflation, not a missing gate feature)
+
+Three rounds tried to raise the held-out support d' past ~2.2: weight-fitting
+(entry 37, 2.07->2.16), graded grounding + graded modality (2.16->2.20), and
+scope as a feature (2.20->2.13, WORSE). None broke the wall. Diagnosing the
+residual errors rather than trying a fourth tweak.
+
+THE RESIDUAL IS ALL FALSE POSITIVES, ZERO FALSE NEGATIVES. The support model
+never misses a genuinely supported fact (recall 1.0 on dev); every error is a
+non-supported triple scored high. Inspecting them, they are three EXTRACTION
+failures, none of which a token-grounding + modality gate can catch, because
+all three have their arguments present in the span:
+
+  1. FABRICATED-SUBJECT NOMINALISATION. "total savings goal | is | $60,000",
+     "retirement income needed | is | $60,000", "desired savings rate | is |
+     20%". The extractor invents a subject noun phrase out of span words;
+     grounding passes because "savings"/"retirement" ARE in the span.
+  2. ROLE SWAP. "SIFF | attended | several festivals" -- SIFF is a festival,
+     not the attendee. Both arguments grounded, the relation is backwards.
+  3. SCOPE / WRONG SUBJECT. "eBird app | tracks | bird sightings" -- faithful,
+     but the subject is an app the user uses, not the user; the intended fact
+     is "I | use | eBird app".
+
+Common cause: grounding verifies the ARGUMENTS are present; it does not verify
+that the span asserts THIS RELATION between them. That is relational
+faithfulness -- an entailment judgment -- and it is the one signal that would
+move the wall. It requires a model call, which violates the p2 no-extra-
+inference constraint. So the token-model ceiling near d' 2.2 / AUROC 0.89 is
+GENUINE for model-free features, and it is not raised by any reweighting or
+grounding-granularity change.
+
+SECOND CAUSE, my own: the SUPPORT labels partly conflate support with scope
+and triviality. "eBird app | tracks | bird sightings" is faithful to its span,
+and I labelled it NOT_SUPPORTED on scope/triviality grounds -- the exact
+three-construct conflation entry 28 diagnosed and never fully cleaned out of the
+label set. So part of the "wall" is irreducible label noise: the target itself
+mixes constructs, and no feature predicts an inconsistent target perfectly.
+
+WHY scope-as-a-feature HURT (0.889->0.851): confirms the separation. Scope does
+not predict support -- many faithfully-supported facts are out of scope and
+many in-scope facts are unsupported -- so adding it as a support feature injects
+noise. Support and scope are orthogonal gates and must be measured against their
+OWN labels, not one mixed label. This is a real methodological finding, not a
+tuning miss.
+
+CONCLUSION -- WHERE "SOLVING THIS" ACTUALLY LIVES. The support gate is
+solved-enough: perfect recall, AUROC 0.89 held-out, at its model-free feature
+ceiling. Further support gains require either (a) a relational-entailment model
+call (breaks the LLM-free-retrieval claim -- do NOT), or (b) cleaner extraction
+that does not emit fabricated-subject/role-swap triples (upstream, and the
+right place). The genuine frontier is unchanged and is NOT the support gate:
+  - EXTRACTION QUALITY: fabricated subjects and role swaps are extractor bugs
+    v2 reduced but did not remove; a light structural check (subject must be a
+    span-contiguous noun phrase, not a nominalisation assembled from scattered
+    tokens) is the model-free lever.
+  - COREFERENCE: "She moved to Chicago", "17 ones"=="postcards" -- blocks
+    contradiction detection (entry 34) AND the ORBIT scope rule (entry 31).
+    This is the single most-blocking missing capability for the PRODUCT claim.
+
+Graded features (ground_frac, mod_conf) kept in strength.py -- they do not
+raise d' but are better-shaped (continuous) for the churn strength score.
+scope NOT added to the support model. The disciplined read: stop tuning the
+support gate; the next real work is extraction structural-validity and
+coreference, both of which serve the contradiction claim that is still the
+undemonstrated differentiator.
