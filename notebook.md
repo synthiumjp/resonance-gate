@@ -1940,3 +1940,71 @@ STATUS AND WHAT IS NOT YET TESTED.
     multi-session data where the same fact is independently restated;
     LongMemEval's session structure supports this and it has not been run.
   - Contradiction-alert precision, the actual product claim, is untouched.
+
+## Entry 30 — 2026-07-20 (state of play: where the project actually is)
+
+Consolidated status. Entries 23-29 moved fast and in several directions; this
+records what is established, what is exploratory, and what is dead, so the next
+session does not have to reconstruct it.
+
+WHAT IS ESTABLISHED (measured, with comparators, survives scrutiny)
+- Multi-hop composition is LOAD-limited, not hop-limited. 3-hop accuracy 0.86
+  at k=200 falling to 0.10 at k=800 (entry 23). Concordant with Kumar
+  (arXiv:2606.24948), whose own reading is "a capacity and interference
+  effect" — entry 24's correction.
+- Entity/relation DEGREE does not drive degradation; total k does. Flat across
+  out-degree and in-degree bins, and a null across an 8x load sweep at fixed
+  6.36x degree contrast (entries 24 + addendum).
+- Fan-out is UNDERDETERMINATION and nothing more. Specific-target accuracy is
+  1/F in all nine cells, and the algebra-scrambled control at identical k and
+  fact count shows it is not load (entry 25). The gate reports it honestly:
+  d 0.274 -> 0.953 while u FALLS 0.094 -> 0.013, DELIBERATE on 100% of
+  underdetermined hops, 'stored' tag 1196/1196.
+- Partitioning restores retrieval by cutting k, not by fixing a degree effect.
+  COND-R keeps 99.1% of queries on multi-fact stores; COND-RE is a hashmap
+  (0% multi-fact, 100% of negative-arm rejection structural) (entry 24).
+- The extractor produces ~90% unsupported triples on real conversational turns,
+  independently replicating mem0's 97.8% production audit (entry 27).
+
+WHAT THE LITERATURE SETTLED (entries 26-28)
+- VSA never claims retrieval accuracy over an exact store. Our capacity law is
+  Plate 1994 (k ~ D/(3.16 ln m)); our pi is within 0.6% of his constant.
+  Confirmation, not discovery. => L1 is the paper, not the product.
+- Zep/Graphiti and mem0 both detect contradictions and both silently resolve.
+  Neither surfaces them. Graphiti has NO cardinality model and fetches
+  invalidation candidates by text search unscoped to the node pair, so
+  multi-valued facts are at structural risk. A user has asked for the missing
+  feature (graphiti#934).
+- Write-side precision is the unsolved problem: mem0 97.8% junk; Kang et al.
+  (arXiv:2606.10616) measure Generative-Agents-style retention at F1
+  0.020-0.027; MemOps (arXiv:2607.12893) says the field never isolates the
+  storage decision at all.
+- Human agreement ceilings: AIS attribution alpha 0.69-0.79 (five raters);
+  FactBank kappa 0.81-0.91; CommitmentBank alpha 0.53. Lexically-marked
+  modality is easy; pragmatic commitment is hard even for humans.
+
+WHAT IS EXPLORATORY (works, but iterated rather than confirmed)
+- The write gate, entry 29. Held-out P=0.636 R=0.700 F1=0.667 against an
+  ungated 0.159 base rate. Dev said 0.870 and overstates by ~0.20 F1.
+  Held-out slice is SPENT.
+
+WHAT DIED, AND WHY
+- p2 Phase 0 pre-registration. The judge stop rule fired at precision 0.345
+  (entry 27); post-mortem found three conflated constructs and a bar (0.85 vs
+  one rater) set above what five humans achieve with each other (entry 28).
+  Registrant then elected to iterate rather than re-register. The 0.345 and the
+  kappa 0.342 stand permanently.
+- L1 as a product component. Not refuted as research; simply not what makes
+  retrieval work, and the load ceiling makes it actively costly under automatic
+  ingestion.
+
+CORRECTIONS MADE TO OUR OWN RECORD
+- Entry 24 declared E7 void; the correction shows the degree framing was never
+  the source's claim, so E7 is concordant rather than failed.
+- Entry 24's COND-E result withdrawn: its largest cell held 8 facts, so it was
+  never tested on a hard case (entry 24 addendum).
+- Entry 27 predicted no span-overlap check could catch few-shot leakage. Wrong:
+  grounding catches all of it, zero false rejects (entry 29).
+
+NEXT: wire the gate into an ingest path, then measure corroboration ->
+PROMOTED, which is implemented but entirely unmeasured.
