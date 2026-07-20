@@ -1419,3 +1419,131 @@ CONSEQUENCE FOR THE ENTRY-24 VERDICT. Points (i)-(iv) stand unchanged. Point
 queries on multi-fact cells, 85.5% on cells of 5+, all negative-arm rejection
 geometric), but the COND-E half of the story is withdrawn — that condition
 was never tested on a hard cell and its result is a construction artefact.
+
+## Entry 25 — 2026-07-20 (E8: relation-algebra stratification — fan-out is underdetermination, cleanly localised and honestly reported)
+
+PURPOSE. Stratify 3-hop chains by the ALGEBRAIC TYPE of the relation at each
+hop, holding k constant and in-capacity, and ask whether a fan-out
+(one-to-many) hop breaks composition for a reason that is RELATION STRUCTURE
+rather than load. Experiment only; rg-1.1's gate, cleanup and encoder reused
+verbatim; frozen artifact untouched. Code experiments/relalg/.
+
+DESIGN. 24 conditions x 20 worlds x 5 chains = 100 chains per condition.
+Every store padded to EXACTLY k=150. Because k is constant by construction,
+the ALL-FUNCTIONAL condition IS the load-matched control. The ALGEBRA-
+SCRAMBLED control has the identical fact count, the identical relation and
+the identical k as its fan-out twin, but the F-1 sibling objects live under
+FRESH DISTINCT SUBJECTS, so nothing shares a key. An UNPADDED fan-out arm is
+kept to show the confounded comparison the controls remove. Decided with the
+registrant beforehand: all F siblings get full onward chains (so a hop-2
+mispick still resolves at hop 3 and the localisation signal is not smeared),
+and scrambling re-homes siblings to fresh subjects under the same relation.
+
+LOAD CALIBRATION, disclosed. The first scored run used k=400. That corpus
+runs N~500, so k_max ~= D/(pi*ln N) ~= 420 and k=400 is 95% of capacity: the
+FUNCTIONAL baseline itself fell to ~0.3 and every contrast was compressed by
+load. The brief specified in-capacity, and it was load-bearing. Re-run at
+k=150 (N~160-230, k_max ~480-516, ~30% of capacity). The k=400 run is kept as
+an at-capacity stress point in report_k400.json.
+
+A CORPUS ASSERTION EARNED ITS KEEP. validate() checks that every
+intended-path key carries exactly the cardinality its condition specifies. It
+caught three real bugs that would each have produced a confident wrong
+result: terminal objects drawn with replacement silently collapsing a fan-out
+key below F; the k-padding loop abandoning the pad when one entity type ran
+out (k=382 vs 400, reintroducing the very load confound the design exists to
+remove); and — the worst — symmetric chains, where the reverse edge makes a
+last-hop object into a SUBJECT, so two chains sharing a terminal person
+turned the symmetric condition into a fan-out condition and would have
+manufactured a "symmetry corrupts" finding.
+
+A. COMPOSITION FIDELITY (k=150 everywhere; chance ~0.034).
+                        specific            any-valid
+  functional            0.990 [0.95,1.00]   0.990
+  symmetric             1.000 [0.96,1.00]   1.000
+  symmetric_baseline    0.980 [0.93,0.99]   0.980
+  fanout_h1  F2/F4/F8   0.560 / 0.320 / 0.080     1.000 / 1.000 / 0.990
+  fanout_h2  F2/F4/F8   0.490 / 0.190 / 0.080     1.000 / 0.980 / 1.000
+  fanout_h3  F2/F4/F8   0.540 / 0.240 / 0.080     1.000 / 1.000 / 0.990
+  scrambled_h1 F2/F4/F8 0.990 / 0.990 / 1.000
+  scrambled_h2 F2/F4/F8 0.990 / 0.980 / 0.990
+  scrambled_h3 F2/F4/F8 0.980 / 0.960 / 0.990
+  unpadded_h2  F2/F4/F8 0.550 / 0.320 / 0.100  (k=25/45/85)
+
+  THE CONTROLS DO ISOLATE RELATION STRUCTURE. At identical k, identical fact
+  count and identical relation, the scrambled twin scores 0.96-1.00 while the
+  fan-out condition falls to 0.08-0.56. The failure is specifically that F
+  objects SHARE ONE KEY, not that fan-out adds facts and not that the store
+  is loaded. The unpadded arm lands on the same numbers as the padded one,
+  confirming load contributes nothing here at these sizes.
+
+  ANY-VALID stays ~1.00 in every fan-out condition. The substrate can
+  traverse a fan-out hop perfectly well; what it cannot do is pick the
+  intended branch.
+
+B. FAILURE LOCALISATION. Per-hop mean (b,d,u); * marks the underdetermined hop.
+  functional        hop0 b.58 d.31 u.11   hop1 b.68 d.20 u.12   hop2 b.54 d.34 u.12
+  fanout_h1 F8     *hop0 b.03 d.96 u.00   hop1 b.70 d.19 u.11   hop2 b.65 d.26 u.09
+  fanout_h2 F8      hop0 b.58 d.29 u.13  *hop1 b.03 d.96 u.00   hop2 b.59 d.32 u.09
+  fanout_h3 F8      hop0 b.60 d.29 u.11   hop1 b.69 d.19 u.12  *hop2 b.04 d.95 u.01
+  scrambled_* (all) no collapse at any hop; b .54-.73 throughout, like functional.
+  The collapse MOVES with the fan-out hop and appears at that hop only. Hops
+  before and after it are indistinguishable from the functional baseline —
+  the mispick does not propagate as a confidence failure, because siblings
+  carry full onward chains.
+
+C. (b,d,u) DECOMPOSITION.
+    underdetermined hops  n=1196  b=0.034  d=0.953  u=0.013
+                          actions: DELIBERATE 1196/1196 (never ANSWER)
+                          d-source tag: 'stored' 1196/1196
+    functional hops       n=6004  b=0.632  d=0.274  u=0.094
+                          actions: ANSWER 4668, DELIBERATE 1033, RECOLLECT 297
+  d RISES (0.274 -> 0.953) while u FALLS (0.094 -> 0.013). This is the honest
+  signature: the geometry reports "there is a conflict here", not "there is
+  nothing here", and the winning d-source is 'stored' in every single case —
+  the rg-1.1 semantic stored-collision detector (entry 20) firing correctly
+  mid-chain, which is the first evidence that it works in a composed query and
+  not only on a single lookup. The system never confidently answers at an
+  underdetermined hop.
+
+C'. DOSE-RESPONSE AT THE FAN-OUT HOP.
+    F=2  d=0.940  link-valid 1.000  link-intended 0.534   (1/F = 0.500)
+    F=4  d=0.956  link-valid 1.000  link-intended 0.269   (1/F = 0.250)
+    F=8  d=0.963  link-valid 1.000  link-intended 0.085   (1/F = 0.125)
+
+D. IS IT JUST UNDERDETERMINATION? YES — and quantitatively so. In all NINE
+fan-out cells (3 positions x 3 values of F) the 95% CI on specific-target
+accuracy CONTAINS 1/F:
+    h1: 0.560 [0.46,0.65] vs 0.500 | 0.320 [0.24,0.42] vs 0.250 | 0.080 [0.04,0.15] vs 0.125
+    h2: 0.490 [0.39,0.59] vs 0.500 | 0.190 [0.13,0.28] vs 0.250 | 0.080 [0.04,0.15] vs 0.125
+    h3: 0.540 [0.44,0.63] vs 0.500 | 0.240 [0.17,0.33] vs 0.250 | 0.080 [0.04,0.15] vs 0.125
+Selection among the F co-keyed objects is uniformly random, at every hop
+position and every fan-out width. There is NO residual structure beyond
+underdetermination to explain: no position effect, no interaction with F
+beyond 1/F, and any-valid traversal is unimpaired. The mechanism is exactly
+the (subj, rel)-collision the substrate has always had — the unbind returns a
+superposition of F equally-present object vectors and cleanup picks one at
+chance.
+
+VERDICT (no spin). The neurosym-style phenomenon-specificity framing IS
+licensed on the control evidence and only that far: the load-matched and
+algebra-scrambled controls do cleanly isolate relation structure from load
+(scrambled 0.96-1.00 vs fan-out 0.08-0.56 at identical k and fact count), and
+the confidence collapse is localised to the structural position that carries
+the fan-out, moving with it across all three hop positions. What is NOT
+licensed is calling this a new phenomenon. It is a finer, quantitative
+characterisation of the known underdetermination limit: specific-target
+accuracy is 1/F in all nine cells, which is what "the key does not determine
+the answer" predicts exactly. The genuinely new and positive finding is
+smaller and worth stating on its own: the gate reports this failure honestly
+and in the right place — d 0.95, u 0.01, DELIBERATE on 100% of underdetermined
+hops with the 'stored' tag — so a fan-out hop mid-chain is flagged as a
+conflict rather than answered confidently. Symmetric relations do NOT corrupt
+composition (1.000): reverse edges land on different keys and add load without
+adding ambiguity. That result is contingent on the chain using a DIFFERENT
+relation at each hop; a symmetric chain reusing ONE relation would make
+(b, r) carry both a and c and would reduce to the fan-out case by construction.
+
+Artifacts: experiments/relalg/{corpus,traverse,evaluate}.py, rows.jsonl,
+report.json, plus rows_k400.jsonl / report_k400.json (at-capacity stress
+point). Reproduce: `.venv/bin/python experiments/relalg/evaluate.py --regen`.
