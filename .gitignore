@@ -16,3 +16,6 @@ encoder/calibration_lambda075.json
 instruments/dress_report*.md
 e5/*.log
 e5/__pycache__/
+server/**/__pycache__/
+server/.pytest_cache/
+server/*.egg-info/

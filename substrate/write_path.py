@@ -23,7 +23,13 @@ from controller import route_tagged
 from l2_ambiguity import L2Store
 
 D = 8192
-PROVENANCE_ROLES = ("user-stated", "assistant-inferred", "tool-derived")
+# product-p1: the MCP layer exposes a caller-facing provenance vocabulary
+# (caller-stated default, plus user-stated / agent-inferred / tool-derived).
+# The frozen roles (user-stated / assistant-inferred / tool-derived) stay
+# valid; provenance is stored VERBATIM so the record says exactly what the
+# caller claimed.
+PROVENANCE_ROLES = ("caller-stated", "user-stated", "agent-inferred",
+                    "assistant-inferred", "tool-derived")
 NEW_ENTRY_COSINE = 0.85  # resolve below this -> the string is a new registry entry
 CALIB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                           "..", "encoder", "calibration_lambda075.json")

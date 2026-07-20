@@ -936,3 +936,90 @@ Tunables added: RELATION_SYNONYMS (2 classes: {works at, is employed by},
 {lives in, resides in}); TAU_COLLIDE=0.90; S_COLLIDE=0.03. All in
 gate/l2_ambiguity.py, logged here. docs/COLLISION_FIX.md written. Tagged
 rg-1.1 on product-p0.
+
+## Entry 21 — 2026-07-20 (P1 product: the LLM-free MCP memory server; branch product-p1, tag rg-product-0.1)
+
+BRANCH. product-p1 off product-p0 (rg-1.1). server/ holds a thin MCP server
+over the rg-1.1 substrate. The frozen research artifact and rg-1.1 are
+untouched conceptually; the only substrate touches are two additive
+product-branch changes (below).
+
+ARCHITECTURE PRINCIPLE HELD: no language model in the request path — no
+mouth, no extractor, no judge. Nothing generative can hallucinate. ONE
+nuance, flagged: the registry resolves strings via the MiniLM sentence-
+embedding ENCODER (deterministic string->vector, loaded lazily only for a
+novel write). It is non-generative — it cannot produce text or invent a
+fact — and the architecture principle explicitly lists "registry" as part of
+what the server IS. mouth/ is never imported. If the encoder itself is
+judged out of scope that is a registrant redirect; the substrate's semantic
+resolution and the rg-1.1 collision fix both require it.
+
+FOUR MCP TOOLS (structured JSON, never prose):
+  remember(subject, relation, object, source="caller-stated")
+    -> {stored, record_id, echo_ok}. Explicit structured write, NO
+    extraction; echo-checked (bad writes rejected, not silently kept).
+  recall(query, top_k=10)
+    -> {resolved, facts:[{subject,relation,object,source,record_id,
+    confidence:{b,d,u}}], conflict, resolution_hint?}. query resolves as a
+    subject. Nothing resolves -> resolved=false, facts=[] (honest empty, no
+    fabricated guess). Near-synonym collision -> conflict=true, BOTH facts
+    returned, resolution_hint {by_recency, by_resolution} ADVISORY; server
+    does NOT pick.
+  update(subject, relation, object, source="caller-stated")
+    -> {updated, new_record_id, superseded:[ids]}. Supersedes prior records
+    under the same/synonymous relation via the supersedes-chain. The ONLY
+    path that resolves a conflict by choosing (caller asked). Distinct event
+    from a passive collision.
+  forget(subject, relation?, object?) -> {forgotten:[ids]}.
+
+SUBSTRATE TOUCHES (product-branch, additive): (1) PROVENANCE_ROLES extended
+with caller-stated + agent-inferred (product vocabulary; stored verbatim);
+(2) Registry.from_state classmethod (reconstruct registry from persisted
+embeddings WITHOUT re-embedding, for restart recovery). Frozen substrate/
+gate/encoder suite still 33 passed 1 xfailed with these in.
+
+PERSISTENCE: full atomic snapshot (arrays.npz + state.json) after every
+mutation to RG_MEMORY_STATE (default ~/.rg-memory). Restart reconstructs the
+full memory — registries (from saved embeddings, no model needed), L2 store,
+tombstones/supersedes-chain, L1 accumulator, calibration. Tested: write ->
+drop instance -> rebuild -> recall recovers, conflict survives, supersede
+survives.
+
+LOCAL-ONLY: no network, no keys, no telemetry. substrate_path sets
+HF_HUB_OFFLINE=1 / TRANSFORMERS_OFFLINE=1 — the encoder runs from local cache
+only; an uncached model fails loudly rather than downloading. Zero-network
+test patches the socket layer and asserts no non-loopback connect during a
+full novel-write + recall cycle (which exercises the encoder).
+
+BROWSER: read-only page on 127.0.0.1:7071 (loopback only; RG_MEMORY_BROWSER_
+PORT, 0 disables) listing every record as a human-readable triple + source +
+confidence, conflicts highlighted. do_GET only — no write path from the
+browser; writes go through the audited tools so provenance stays clean.
+
+HONEST-SCOPE (README + browser footer, verbatim): "Stores explicit
+structured facts you write. Does NOT extract facts from conversation (no LLM
+inside — nothing to hallucinate). Detects contradictory writes under
+synonymous keys (validated on synthetic pairs; real-world validation
+pending). Returns honest 'no match' when nothing is stored. Surfaces
+conflicts rather than silently picking." NOT claimed anywhere: "never
+contradicts itself".
+
+TESTED (server/tests, 14 passed): per-tool units; collision surfaced-not-
+resolved; distinct-attribute NOT flagged; update supersede; forget variants;
+e2e scripted session; persistence/restart (x2); zero-network (x2); MCP layer
+(4 tools registered + round-trip).
+
+INSTALL: python-native. Runs from the repo venv (python -m
+rg_memory.mcp_server, PYTHONPATH=server, RG_ROOT=repo) or via uvx/pipx
+(--from server/, RG_ROOT required — the isolated env still reads the
+numpy-only substrate from the repo). MCP config blocks for Claude Desktop /
+Claude Code / Cursor in server/README.md.
+
+DEFERRED (named, not built — scope guard: no LLM, no extraction, no
+consolidation, no inference): fact extraction from text (opt-in v2);
+real-world tau_collide validation (synthetic-only today); the fixed 2-class
+relation-synonym table (v2: paraphrase-derived); near-dup SUBJECT surfaces
+(write-time canonicalization); a standalone wheel bundling the substrate.
+
+Tag rg-product-0.1 on product-p1. Committed locally; NOT pushed (awaiting
+registrant go).

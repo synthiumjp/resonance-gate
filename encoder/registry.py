@@ -72,6 +72,19 @@ class Registry:
             return 1.0
         return r[0][1] - r[1][1]
 
+    @classmethod
+    def from_state(cls, names, E, V, d=D, lam=LAMBDA_SUBSTRATE):
+        """Reconstruct a registry from persisted arrays WITHOUT re-embedding
+        (product-p1 restart recovery). E = raw unit embeddings (n,384), V =
+        whitened bipolar item vectors (n,d). The blend transform is still
+        loaded (from the committed ZCA file, no model) so later add()s work."""
+        r = cls([], d=d, lam=lam)
+        r.names = list(names)
+        r._E = np.asarray(E, dtype=np.float32).reshape(-1, 384)
+        r._V = np.asarray(V, dtype=np.int8).reshape(-1, d)
+        r._index = {n: i for i, n in enumerate(r.names)}
+        return r
+
     def raw_vector(self, name):
         """Unit RAW embedding (interface geometry) for a registered entry.
         product-p0 addition (rg-1.1 collision fix): the semantic
