@@ -2564,3 +2564,69 @@ Confirms the gate's design: RECORD modality, never normalise it away.
 Held-out has now been read 4x (entries 29, 37, 38, 39). It is worn as an
 unbiased estimator. The coreference work (next) will need a FRESH labelled
 eval drawn from the cached spans, and that is noted as a prerequisite there.
+
+## Entry 40 — 2026-07-21 (p2: the differentiator is blocked by MY GATE, not by coreference or extraction — two of my own claims corrected)
+
+Investigated why contradiction detection fires so rarely, expecting coreference
+to be the key (I had called it "the whole game"). Two measurements corrected
+two of my own claims in succession.
+
+CLAIM 1 CORRECTED — coreference is NOT the bottleneck. In the extracted-fact
+dump: 0 third-person pronoun subjects, 18% @speaker, and the shared-name
+"same-entity" candidates are almost all TOPICS the scope filter already drops
+(Nixon, Fujifilm, document titles). The one plausible personal case is
+fitbit/fitbit-inspire-hr; bike/road-bike are correctly DIFFERENT bikes. On the
+39 knowledge-update instances, of the pairs that fail to match, exactly ONE is
+a genuine cross-person case (my mom vs I); the rest are same-@speaker with
+relation/object variation. The comp-ling coreference recommendation (fastcoref
++ conservative entity linking) is sound but solves a problem THIS data barely
+has. My "coreference is the differentiator's key" was asserted, not measured,
+and it was wrong.
+
+CLAIM 2 CORRECTED — it is not extraction-model recall either. Of the 19
+update instances that lose a side, checking the RAW extractions (pre-gate):
+    LLM produced <2 facts (true extraction loss):        0
+    LLM produced >=2 but GATE/SCOPE killed them:        16
+The extractor DID produce both sides. My gate filtered them:
+    ['I','set a personal best time in','27:12']  -> killed: relation >4 words
+    ['You','have a long to-watch list','20 titles'] -> killed: clause relation
+    ['She','moved to','Chicago'] ['Rachel','moved back to','the suburbs']
+        -> She/=Rachel (coref) AND neither in scope
+So the write gate reached its 0.905 support precision PARTLY BY DROPPING every
+fact with a natural descriptive relation -- which is exactly the update facts
+the differentiator needs. The recall cost was invisible on the support-label
+set (short clean relations) and fatal on real updates.
+
+THE TRADE IS REAL, not a tuning miss. Relaxing the relation constraint
+(length cap 4->7, drop the known-predicate whitelist):
+    support precision  DEV 0.905 -> 0.475   HELD 0.636 -> 0.368
+    support recall     DEV 0.864 -> 0.864   HELD 0.700 -> 0.700
+Zero recall gain on support, precision halved. The whitelist genuinely
+protects support quality; it cannot simply be loosened.
+
+ARCHITECTURAL CONCLUSION. The support gate and the contradiction path have
+CONFLICTING requirements on the same relation-form knob. Support wants high
+precision (kill descriptive-relation junk like "I | have | a positive
+atmosphere"). Contradiction detection wants recall of COMPARABLE PAIRS, which
+requires keeping descriptive-relation facts ("set a personal best time in").
+One gate cannot serve both. The resolution is TWO PATHS from the same
+extractions:
+  - ASSERTION path (current gate): high-precision, for what the system will
+    state as fact. Descriptive-relation facts excluded -- correct there.
+  - COMPARISON path (new): higher-recall, keeps descriptive-relation facts as
+    contradiction CANDIDATES, with precision supplied downstream by the RCI
+    commensurability gate + provenance rather than by the write gate. A fact
+    can be a valid contradiction signal without being clean enough to assert
+    standalone.
+This is the design change the differentiator needs, and it is a genuine
+insight from the data, not another parameter. NOT yet built -- it is a
+branch point worth a decision rather than a reflex.
+
+NET HONESTY. This session I predicted the bottleneck twice (coreference, then
+extraction recall) and the data refuted both; the real blocker was a
+side-effect of my own support-optimised gate. Recording it plainly because the
+pattern -- confident architectural claim, then measurement reversal -- has now
+happened enough times (E7 void-then-not, COND-E, few-shot-leak prediction,
+graded-features, coreference) that the lesson is procedural: measure the
+bottleneck's magnitude BEFORE committing a build to it. The coreference agent
+was dispatched before that measurement; it should have come after.
