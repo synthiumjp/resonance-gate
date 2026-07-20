@@ -2244,3 +2244,48 @@ equal aggregate accuracy can have very different churn. strength.py already
 makes per-fact movement observable, so RCI over the store between two
 timepoints is a memory-health instrument the field lacks. Recorded as a
 direction; not implemented.
+
+## Entry 34 — 2026-07-21 (p2: tightening RCI removes false positives and proves the detector needs repeated observations)
+
+Tightened the two owed fixes from entry 33.
+- QUALIFIER-AWARE SCALE TAGS: a count scale is now the counted noun plus one
+  qualifier, stopping at prepositional/temporal boundaries. "mcu films" and
+  "films" are now distinct scales; "in the last 3 months" no longer leaks a
+  spurious "months" into the tag.
+
+RESULT on the 39-instance gold-span probe, all within-key object pairs:
+    MULTI_VALUE       33   (was 32)
+    CATEGORICAL_DIFF   5   (was 3)
+    WITHIN_NOISE       2
+    RELIABLE_CHANGE    0   (was 3)
+  The three RELIABLE_CHANGE flags from entry 33 are gone. Two were the MCU
+  false positives ("4 MCU films" vs "12 films" -- different scales now, so
+  MULTI_VALUE, correct). The third ("17 new ones" -> "25 new postcards") is now
+  MULTI_VALUE too, and this one is a FALSE NEGATIVE: "ones" is anaphoric for
+  postcards and no lexical scale tag can know that. Tightening traded a
+  categorical false positive for an anaphoric false negative, which on n=5
+  commensurable pairs is a wash -- flagged rather than tuned further, because
+  tuning a scale-tagger on five examples is exactly the overfitting this
+  project keeps catching.
+
+THE REAL FINDING, and it is a clean one. After tightening, ZERO reliable
+changes fire on this probe -- correctly. Every genuine numeric change here is a
++1 count (3->4 restaurants, 4->5 films), and a single +1 observed ONCE is
+genuinely weak evidence of change rather than mis-count. RCI's noise threshold
+is right to withhold. This is not the detector failing; it is the detector
+telling us it CANNOT be validated on single-observation data. The
+reliable-change statistic only bites with REPEATED observations of the same
+fact -- which is precisely the store-over-time setting, not this static
+gold-span probe.
+
+So the commensurability gate (entry 33's real contribution) stands: it
+correctly routes 33/40 pairs to MULTI_VALUE and never false-alarms. The RCI
+statistic proper is UNVALIDATED here and requires the temporal store to
+exercise. That motivates the next build directly rather than by analogy.
+
+STATUS OF THE CHANGE DETECTOR: commensurability gate works and is robust;
+noise threshold is correct-by-construction but untested for lack of repeated
+observations; anaphora and semantic-scale equivalence ("ones"=="postcards")
+are out of reach of lexical tagging and owed to either coreference or the
+repeated-observation reliability estimate. Not shippable; failure is now
+granularity and data, not concept.

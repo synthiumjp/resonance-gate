@@ -57,22 +57,43 @@ _WORDNUM = {"zero": 0, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
 _BARE = re.compile(r"\b(\d+(?:\.\d+)?)\b")
 
 
+_SKIP = {"a", "an", "the", "my", "of", "and", "different", "so", "far", "in",
+         "last", "past", "total", "new", "more", "only", "just", "about",
+         "around", "some", "few", "several", "other"}
+
+
+def _count_scale(text, after):
+    """The scale tag for a count: the counted noun PLUS any distinguishing
+    qualifier between the number and the noun, so 'MCU films' and 'films' are
+    DIFFERENT scales and are never compared as a change (entry-33 residual
+    false positive: '4 MCU films' vs '12 films' are two different counts)."""
+    t = text.lower()
+    m = re.search(re.escape(str(after).lower()) + r"\s+(.*)", t)
+    tail = m.group(1) if m else t
+    _BOUND = {"in", "for", "since", "over", "during", "within", "per", "on",
+              "at", "this", "last", "past", "each", "every", "ago"}
+    words = []
+    for w in re.findall(r"[a-z]+", tail):
+        if w in _BOUND:            # prepositional/temporal boundary: stop
+            break
+        if w in _SKIP:
+            continue
+        words.append(w)
+        if len(words) >= 2:        # qualifier + head noun is enough
+            break
+    return " ".join(words) if words else ""
+
+
 def _head_noun(text, after=None):
-    """The COUNTED noun: the first content word after the number, not the last
-    word of the phrase. '12 films in the last 3 months' counts films, not
-    months -- keying on the last word made two different counts look like one
-    scale (entry-33 bug)."""
+    """First content noun, qualifier-agnostic — used only for the categorical
+    fallback where we ask 'same kind of thing, different value?'."""
     t = text.lower()
     if after is not None:
-        m = re.search(re.escape(str(after)) + r"[^a-z]*([a-z]+(?:\s+[a-z]+)?)", t)
-        if m:
-            for w in m.group(1).split():
-                if w not in ("a", "an", "the", "my", "of", "and", "different",
-                             "so", "far", "in", "last", "past", "total", "mcu"):
-                    return w
-    words = [w for w in re.findall(r"[a-z]+", t)
-             if w not in ("a", "an", "the", "my", "of", "and")]
-    return words[0] if words else ""
+        m = re.search(re.escape(str(after).lower()) + r"[^a-z]*([a-z]+)", t)
+        if m and m.group(1) not in _SKIP:
+            return m.group(1)
+    words = [w for w in re.findall(r"[a-z]+", t) if w not in _SKIP]
+    return words[-1] if words else ""
 
 
 def to_scalar(text):
@@ -97,10 +118,10 @@ def to_scalar(text):
     # and "4 restaurants" are DIFFERENT scales, not a change from one to other
     for w, v in _WORDNUM.items():
         if re.search(rf"\b{w}\b", t):
-            return float(v), f"count:{_head_noun(t, after=w)}"
+            return float(v), f"count:{_count_scale(t, w)}"
     m = _BARE.search(t)
     if m:
-        return float(m.group(1)), f"count:{_head_noun(t, after=m.group(1))}"
+        return float(m.group(1)), f"count:{_count_scale(t, m.group(1))}"
     return None
 
 
