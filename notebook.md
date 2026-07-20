@@ -1064,3 +1064,140 @@ distinction (registry MiniLM, non-generative) is unchanged.
 Full server suite after rename: 14 passed. Committed on product-p1. NOT
 pushed and NOT re-tagged (rg-product-0.1 still points at the pre-rename
 commit) — awaiting registrant go on re-tag/push.
+
+## Entry 23 — 2026-07-20 (E6: multi-hop chain traversal — accuracy, and whether confidence tracks chain integrity)
+
+PURPOSE. Facts are stored as bound triples subj (x) rho1.rel (x) rho2.obj.
+A multi-hop query chains unbinds: resolve Maria->employer, then
+employer->founder, then founder->lives-in. Each hop is an unbind + cleanup
+and crosstalk compounds. Two questions: (A) how many hops before the answer
+is noise, and (B) does the confidence signal honestly track chain integrity
+— i.e. when the chain CANNOT resolve, does confidence collapse, or does the
+system produce confident nonsense? Experiment only; no product, no new gate
+machinery. rg-1.1's gate and cleanup reused verbatim (experiments/multihop/,
+frozen tree untouched).
+
+DESIGN. Three arms, because an accuracy-only test on intact chains would
+repeat exactly the H1 inflation the audit caught (entry 18).
+  INTACT      every link written; gold = the L-th object.
+  BROKEN      one MIDDLE link (hop j < L) never written — the chain cannot
+              resolve; correct behaviour is to NOT answer. At L=1 there is
+              no middle link, so this arm degenerates to "the single link is
+              absent" and is identical to DISTRACTOR at L=1. Logged, not
+              hidden.
+  DISTRACTOR  links 1..L-1 written and resolvable, FINAL link absent — a
+              valid partial chain that dead-ends.
+Chain template is typed: person -works at-> org -was founded by-> person
+-lives in-> city. The L-hop item is the length-L PREFIX of that template, so
+hop-length is the only thing varying. n = 100 chains per (arm, hop-length)
+at k=200 (10 seeded worlds x 10 chains/cell, seed 20260720); n = 50 at the
+k=400/800 stress points (5 worlds). Store load padded with filler to EXACTLY
+k facts in every world, so accuracy differences across L cannot be a
+capacity artefact. Chains are entity-disjoint and every (subj, rel) key is
+written at most once, so nothing here plants a stored collision. Entities
+are DISTINCT (the confusable qualified-first-name families are excluded) —
+this is deliberately the best-case corpus, isolating hop-compounding from
+the already-measured E5.1 confusability defect, which stacks on top.
+
+TRAVERSAL POLICY (decided with the registrant before implementation, not
+invented here). FORCE-CONTINUE: the next hop's subject term is always the
+top-1 cleanup result, whatever the gate routed. Halting at the first
+non-ANSWER would make the BROKEN arm tautological (the router refuses, so
+"confidence collapsed" by construction). Every hop's action IS logged, so
+the halt-at-first-non-ANSWER policy is recovered from the same run as a
+derived statistic.
+
+CHAIN CONFIDENCE. min and product over hops, of b and of (1-u); all four
+reported. CHOSEN: min(1-u). Why: highest intact-vs-broken AUROC at every
+hop-length and load; and it is scale-stable across L, whereas prod decays
+geometrically with L so a single prod threshold is not comparable between
+hop-lengths. b-based composition is worse because b is contaminated by the
+referential d-source — on a dense 440-name registry even an exact-string
+subject has a top-2 raw-cosine margin near C_REF=0.19, so DELIBERATE fires
+on hops that resolved correctly. (1-u), pure resolution, is the cleaner
+chain-integrity signal. Consistent with E5.1, where 1-u also outranked b.
+
+A. ACCURACY vs CHANCE (intact chains; chance = random codebook entry of the
+correct type; Wilson 95%).
+
+  k=200 (N=440; capacity law k_max ~= D/(pi*ln N) ~= 428, so comfortably in)
+    L=1  0.950 [0.888,0.978]  chance 0.0100 (org)     per-hop [0.95]
+    L=2  0.930 [0.863,0.966]  chance 0.0033 (person)  per-hop [0.98,0.93]
+    L=3  0.860 [0.779,0.915]  chance 0.0250 (city)    per-hop [0.94,0.91,0.86]
+  k=400 (at the capacity limit)
+    L=1  0.680 [0.542,0.792]  L=2  0.620 [0.482,0.741]  L=3  0.480 [0.348,0.615]
+  k=800 (past it)
+    L=1  0.440 [0.312,0.577]  L=2  0.260 [0.159,0.396]  L=3  0.100 [0.043,0.214]
+
+  NO condition tested reaches chance — even 3 hops at k=800 (0.100, CI lower
+  bound 0.043 > chance 0.025). So there is no "hops before it's noise"
+  number within 3 hops. But above-chance is not the same as usable: 3-hop at
+  k=800 is 10% correct. The binding limit is LOAD, not hop count. Hop count
+  costs roughly a constant per-hop factor (~0.95 at k=200, ~0.8 at k=400);
+  load moves the whole curve.
+
+B1. INTACT-vs-BROKEN AUROC, chain confidence = min(1-u).
+    L=1  0.979 (k=200)  0.945 (k=400)  0.857 (k=800)
+    L=2  0.983          0.935          0.797
+    L=3  0.990          0.910          0.820
+  Intact-vs-DISTRACTOR: 0.972 / 0.963 / 0.981 at k=200, falling to
+  0.871 / 0.734 / 0.768 at k=800.
+
+B2. CONFIDENCE ON WRONG ANSWERS — the critical number. Mean min(1-u):
+    k=200  L=1  correct 0.835  WRONG 0.584 (n=5)   broken 0.340
+           L=2  correct 0.745  WRONG 0.465 (n=7)   broken 0.285
+           L=3  correct 0.748  WRONG 0.400 (n=14)  broken 0.282
+    k=800  L=1  correct 0.761  WRONG 0.550 (n=28)  broken 0.542
+           L=3  correct 0.590  WRONG 0.465 (n=45)  broken 0.422
+  Confidence COLLAPSES on wrong answers at usable load: at k=200 a wrong
+  3-hop answer carries 0.400 against 0.748 for a correct one, and a broken
+  chain 0.282. Correct-vs-wrong AUROC 0.87 at every hop-length. Under
+  saturation (k=800) the collapse survives in rank order but the gap
+  narrows (0.590 vs 0.465) and broken chains rise to 0.42 — the signal
+  degrades with the geometry it is reading.
+
+B3. CALIBRATION (Spearman rho over 5 equal-count confidence bins, intact):
+  min(1-u) L1=0.894 L2=0.872 L3=0.600; min(b) 0.791/0.872/0.707. Positive
+  and broadly monotonic at every hop-length; weakest at L=3.
+
+B2b. ANSWERED-ONLY ERROR RANKING — NOT MEASURABLE, stated plainly. Among
+intact chains where every hop routed ANSWER: k=200 gives n=50/40/16 answered
+at L=1/2/3 with 1/1/2 errors. Accuracy given all-answered is 0.980/0.975/
+0.875. With 1-2 errors per cell nothing can be concluded about whether
+confidence ranks errors among answered items. E5.1's finding (answered-only
+AUROC 0.52, chance) is neither confirmed nor refuted here.
+
+DERIVED: HALT-AT-FIRST-NON-ANSWER. Halt rate at k=200: broken 1.00 at every
+L, distractor 0.96/0.98/1.00 — the negative arms are refused essentially
+always. But intact chains are ALSO refused 0.50/0.60/0.84, and at k=800
+intact halt rate is 1.00 at every L (the system answers nothing). The gate
+fails safe at a large and rising cost in recall; the dominant cause of
+false refusal is the referential d-source firing on a dense name registry,
+not the chain geometry.
+
+VERDICT (no positioning). At a store load inside the capacity law, chained
+unbinding survives three hops on a clean corpus: 0.86 final-answer accuracy
+at 3 hops against a 0.025 chance rate, degrading about 5 points per hop.
+Confidence does honestly track chain integrity in the sense that matters
+here — min(1-u) separates resolvable from unresolvable chains at AUROC
+0.98-0.99, wrong answers carry roughly half the confidence of correct ones,
+and the router refuses 100% of broken chains. What this does NOT permit
+claiming: (i) most of the intact-vs-broken separation is the store-
+MEMBERSHIP signal E5.1 already characterised — a broken chain's hop is an
+unwritten key, which this gate has always detected well — so it is not
+evidence of a new multi-hop-specific capability; (ii) the corpus is
+best-case by construction (distinct entities), and E5.1's near-synonym
+degradation stacks on top of every number above; (iii) the honest-failure
+behaviour is bought with a 50-84% false-refusal rate on chains that were
+perfectly resolvable, rising to 100% under saturation; (iv) whether
+confidence ranks errors AMONG ANSWERED chains is unmeasured, because the
+gate answers too few chains to generate errors. "Honest multi-hop" is
+supportable as: within capacity, on distinct entities, the substrate
+resolves 3-hop chains above chance and does not produce confident nonsense
+when the chain is broken — it produces refusal, often even when it
+shouldn't have.
+
+Artifacts: experiments/multihop/{corpus,traverse,evaluate}.py, rows*.jsonl
+(per-chain, per-hop records), report*.json. Reproduce:
+`.venv/bin/python experiments/multihop/evaluate.py --regen` (k=200 primary),
+`--k 400 --worlds 5 --regen` / `--k 800 --worlds 5 --regen` (stress points).
