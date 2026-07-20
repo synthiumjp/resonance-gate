@@ -2630,3 +2630,34 @@ happened enough times (E7 void-then-not, COND-E, few-shot-leak prediction,
 graded-features, coreference) that the lesson is procedural: measure the
 bottleneck's magnitude BEFORE committing a build to it. The coreference agent
 was dispatched before that measurement; it should have come after.
+
+### Entry 40 addendum — 2026-07-21 (coreference toolkit filed, NOT built)
+
+The coreference research (dispatched before entry 40's measurement showed
+coreference is ~1/39 on this data) returned a complete, sound, model-free
+design. Filed here for when cross-session ENTITY LINKING becomes the
+bottleneck (it is not now), so the work is not lost:
+
+- ARCHITECTURE: incremental entity linking (Mem0-style match-or-create), NOT
+  offline CDCR clustering. Three-way Fellegi-Sunter decision:
+  link / possible-link / no-link, with the middle bucket EXCLUDED from
+  contradiction detection until disambiguated. This directly encodes our
+  asymmetric cost (a false merge manufactures a false contradiction; a missed
+  link only drops a fact).
+- PRONOUNS: fastcoref (91M, CPU-viable, 78.5 F1) or a trimmed Stanford sieve,
+  gated by cheap high-precision vetoes -- Binding Theory Conditions A/B/C off a
+  spaCy dependency parse (near-100% precision, but only fires same-clause, so
+  rarely relevant to chat) and Centering Theory salience (subject>object,
+  recency, repetition) for the dominant cross-utterance case. Speaker/addressee
+  is a free deterministic lookup for I/you if turns are tagged.
+- BLOCKING CUES (hard veto, asymmetric weight): conflicting attribute /
+  relation-type / simultaneity -> no-link regardless of supporting cues.
+- PRECEDENTS: CogNIAC (Baldwin 1997) high-precision coref; Fellegi-Sunter 1969
+  record linkage; Centering (Grosz/Joshi/Weinstein 1995); Binding (Chomsky
+  1981, superseded as syntactic theory but valid as an engineering veto).
+
+NOT BUILT. Entry 40 measured the current blocker as the support gate
+over-filtering descriptive-relation facts, not coreference. This toolkit is the
+answer to a later problem and is recorded so a future session adopts rather
+than re-researches it. The full cue mechanism and binding/centering composition
+are in this session's coreference agent transcripts.
