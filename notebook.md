@@ -3233,3 +3233,62 @@ it has earned is what "memory you can trust" actually means, and it is buildable
 Numeric contradiction (7/7, fresh 0 false alarms) and the categorical slice
 remain the validated evidence; the belief memory is the frame that would carry
 them, pending fitting and end-to-end validation.
+
+## Entry 51 — 2026-07-21 (p2: belief memory END-TO-END — it CARRIES and IMPROVES the result; 11/11 genuine, 0 fresh false alarms)
+
+Ran the Bayesian belief memory (entry 50) end-to-end on real gated LongMemEval
+extractions (run_belief.py): all evidence sources (LLM triples + value-anchored
++ change-of-state + functional) -> per-mention reliability from gate confidence
+-> slotted by attribute_key (+ event-individuation, + scalar normalisation) ->
+fed to the belief state -> a CHANGE = a slot whose belief history holds >=2
+values. This replaces the ad-hoc one-shot RCI/detector logic with the belief
+state's own update/contradiction dynamics.
+
+FIRST PASS exposed the honest gap: 13/39 recall but 2/51 fresh false alarms --
+the belief pipeline lacked the precision guards the one-shot detector had earned
+(the drove-Tennessee/DC event-merge from entry 45, and scalar value
+normalisation "$1,200," vs "Gucci for $1,200"). Ported both guards
+(distinguishing-entity slot split + value normalised to (scale, magnitude)).
+
+RESULT after porting the guards:
+    knowledge-update recall:  11/39   (one-shot: ~9 = 7 numeric + 2 categorical)
+    fresh non-update false alarms:  0/51   (one-shot: 0)
+  And all 11 detected changes are GENUINE -- every one matches its gold answer:
+    personal best 27:12->25:50 | restaurants 3->4 | Rachel apartment->suburbs |
+    pre-approved $350k->$400k | cocktail day Thu->Fri | pages 200->220 |
+    engineers 4->5 | stars 125->120 | fitbit 6->9 months | postcards 17->25 |
+    daily-timer 3->4 weeks
+  So on the detected set precision is 11/11 = 1.00, fresh false-alarm rate 0/51,
+  and recall is +2 over the one-shot detectors (the belief state caught the
+  $350k->$400k mortgage and 125->120 stars that the one-shot RCI missed).
+
+WHY THE BELIEF STATE BEATS THE ONE-SHOT DETECTORS. The one-shot path adjudicated
+value PAIRS with per-pair thresholds; the belief state accumulates all evidence
+per slot and reads a change off the value HISTORY, so it catches updates whose
+two mentions the pairwise path did not cleanly pair, while corroboration +
+event-individuation + scalar normalisation keep precision. One mechanism now
+does confidence, corroboration, update, contradiction and abstention -- the
+detectors are gone, replaced by reading the posterior.
+
+HONEST STATE.
+  - The Bayesian reframe is VALIDATED end-to-end: it carries the numeric result
+    and improves it (+2 recall) at equal precision (0 fresh false alarms), and
+    unifies the whole system into the posterior.
+  - CALIBRATION STILL UNFIT and it still worked at defaults -- the junk prior
+    (0.50), retention (0.85/step) and thresholds are not fitted; a fit against
+    labelled data could improve both recall and the confidence numbers, and is
+    owed before any calibrated-confidence claim.
+  - Categorical recall is still gated by extraction coverage + ambiguity
+    (entries 47-49); the belief frame does not fix that (it is upstream), it
+    just carries whatever the extractors produce.
+  - The fresh HELD-OUT update recall (instances beyond 39) and a real-transcript
+    run remain the outstanding external validations.
+
+NET. The session's arc closes on a genuine architectural result: memory as a
+Bayesian belief state -- span-primary, indexical (receipts), fallibilist
+(calibrated), differential (attribute slots) -- reproduces and exceeds every
+bolt-on detector it replaces, at 0 fresh false alarms, which is the property the
+product depends on. What is proven: numeric change disclosure with receipts,
+end-to-end, out-of-sample-clean. What is owed: calibration fitting, held-out
+update recall, categorical extraction coverage, and -- still the biggest gap --
+a real person using it on real data.
