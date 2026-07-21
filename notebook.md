@@ -3914,3 +3914,42 @@ australia -> one fact, summed). Cached + resumable (cache in the quarantine, nev
 git); latency reported. Decision: if real facts rise to x10+ while junk stays x1
 and gets filtered, corroboration solves the ~50% junk WITHOUT a perfect extractor
 -- the architecture is validated realtime on real data. Run is the registrant's.
+
+## Entry 67 — 2026-07-21 (p2: FULL-STREAM VALIDATION. It works on real target-user data. Corroboration IS the noise filter.)
+
+Ran the LLM profile extractor over all 13,911 prose turns of the registrant's own
+history (realtime replay). The decision test PASSED.
+
+LATENCY: median 200 ms/turn, p90 533 ms, 13,911 calls -- realtime-viable confirmed
+(async per-turn extraction while the assistant replies).
+
+CORROBORATION AS THE NOISE FILTER (the thesis): 1,207 distinct clustered facts ->
+1,010 single-mention DROPPED, 197 corroborated (>=2) KEPT. The corroborated set is
+a recognisably ACCURATE portrait of the registrant: real name (x20), portfolio site
+(x10), city + suburbs (x41 + x13), "independent researcher" (x25), the actual top
+research projects at the very top (x57, x53), real tool stack (claude code x24,
+mlx_lm x22, python/zsh/powershell/github/git/torch/kaggle), plus income, work
+arrangement, hardware, qualification -- all corroborated. The entry-65 junk
+("friend: m3 ultra", one-off tasks, typos) fell to x1 and was filtered. Thesis
+confirmed: corroboration solves the ~50% extractor junk WITHOUT a perfect extractor.
+
+PRECISION ~70-80% on the corroborated set (vs ~10-15% model-free, entry 64). The
+residual ~20-30% is SYSTEMATIC and BOUNDED, not random:
+  - technical contexts misfiled as location: a computer name, file paths
+    (c:\users\..., wsl.localhost\...), "pc" -- paths/machine names as places.
+  - directory/project names as occupation.
+  - recurring transients that cleared x2 (a current_task restated across turns).
+  - occupation SPREAD (several roles) -- some the user, some third parties/context;
+    needs first-person disambiguation.
+All addressable by ONE bounded fix: a value-TYPE filter (reject file paths, machine
+names, directory tokens; keep place-like/org-like) + tightening stable-role
+extraction. Not whack-a-mole; a single category.
+
+VERDICT: the architecture is VALIDATED on real target-user data. LLM extraction ->
+the proven belief/commensurability machinery -> corroboration = an accurate,
+receipted, realtime profile. This is the first unambiguous "it works on real data"
+of the whole arc, and it lands exactly where the session's discipline pointed:
+sound machinery (entry 64) + the right extractor (entry 65) + corroboration as the
+trust surface (this entry). Owed next: the value-type filter for the residual;
+first-person disambiguation on multi-valued roles; and the registrant's own
+eyeball accuracy check (they are ground truth for their profile).
