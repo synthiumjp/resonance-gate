@@ -2893,3 +2893,69 @@ with itself, with both receipts, and we do not false-alarm" -- is now
 demonstrated end to end. The high-precision/perfect-no-false-alarm property has
 survived a 7x recall increase, which is the property that matters: a
 contradiction feature dies on false alarms, not on missed ones.
+
+## Entry 45 — 2026-07-21 (p2: STRESS TEST — the tuned 1.00 precision does NOT hold on fresh data; it is 0.75)
+
+Entries 41-44 iterated the contradiction detector on the FIRST 39
+knowledge-update instances to 7/7 = 1.00 precision. That number was measured on
+the tuning set and is optimistic. Stress-tested on data never seen, with
+INDEPENDENT adjudication so the precision is not the author's own call.
+
+DESIGN. Two fresh arms, gold-evidence spans only:
+  HELD-OUT UPDATES: the 31 knowledge-update instances beyond the tuned 39.
+  NON-UPDATE: 41 instances from temporal-reasoning / multi-session /
+    single-session categories -- conversations NOT about a changed fact, so the
+    detector should stay silent; any alert is a candidate false alarm.
+Every fired alert dumped with BOTH receipt spans, adjudicated by two
+independent LLM judges (one sonnet, one haiku) given only the two messages and
+a strict "same one attribute that changed" vs "two different things sharing a
+value type" criterion. The gold answer was NOT shown to the judges.
+
+RESULT.
+  held-out updates: 3 alerts / 31 instances -- all 3 GENUINE
+  non-update:       1 alert  / 41 instances -- 1 FALSE ALARM
+  FRESH-DATA PRECISION = 3 genuine / 4 total = 0.75   (NOT the tuned 1.00)
+  Inter-judge agreement: 4/4, both judges 3 GENUINE / 1 FALSE_ALARM, and both
+  named the same false alarm.
+
+THE FALSE ALARM, and it is instructive. Alert: "drove five hours -> six hours".
+  Receipt A: "...trip to the mountains in Tennessee - I drove for five hours..."
+  Receipt B: "...I drove for six hours to Washington D.C. recently..."
+These are TWO DIFFERENT TRIPS (Tennessee vs D.C.), not a changed value of one
+attribute. The attribute key (@speaker, {drove, hours, ...}) merged them
+because it captures the relation nouns but NOT the distinguishing entity -- the
+DESTINATION, which lives in the object/context and is what makes these separate
+events. FAILURE MODE, named: a quantity fact with a GENERIC action relation
+(drove/spent/travelled + duration) applied to DIFFERENT events/objects is
+merged into a spurious "change". This is the "one attribute that changed" vs
+"two different events" boundary, and the attribute key is currently on the
+wrong side of it for generic-action durations.
+
+WHAT THE STRESS TEST ESTABLISHES.
+  - On held-out UPDATE data the detector's precision holds (3/3), so the
+    mechanism generalises where it fires.
+  - On NON-update data it is NOT silent -- it false-alarms once in 41
+    instances, and the false alarm is the event-merging mode above. On a full
+    corpus that rate (~1 per 41 non-update conversations) is NOT negligible for
+    a feature whose entire value is not crying wolf.
+  - The honest precision is 0.75 on fresh data, not 1.00. The tuned number was
+    optimistic exactly as suspected; this is the correction.
+
+RECALL on held-out updates is low (3 fired / 31) but that is expected and not
+the point of this test: many held-out updates are CATEGORICAL ("moved to X",
+"switched from Y to Z"), which the numeric/count detector does not target at
+all -- a known scope limit, not a regression.
+
+FIX DIRECTION (scoped, NOT yet built, and deliberately not built here to avoid
+re-tuning on the stress set): the attribute key for a generic-action duration
+must include the distinguishing complement (destination/object), so
+"drove ... Tennessee" and "drove ... D.C." get DIFFERENT keys and never pair.
+More generally: two value candidates should only pair if their non-value
+context matches, not merely their value scale and verb. Validating that fix
+requires a SECOND fresh sample, not these 4 alerts.
+
+NET. The differentiator works and generalises in precision where it fires
+(held-out 3/3), but the product-critical "no false alarms" claim is 0.75 on
+fresh data, not 1.00, with one named, bounded failure mode. This is the honest
+headline, established by independent adjudication rather than author eyeballing
+-- which is the whole reason the stress test existed.
