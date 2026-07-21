@@ -38,7 +38,7 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, _HERE)
 
 from gate import (grounded, subject_contiguous, modality, _CLAUSE_SUBJ,
-                  _BAD_REL, _REL_PREFIX)
+                  _BAD_REL, _REL_PREFIX, _locate_sentence)
 from schema import Scope
 from rci import classify_pair, UPDATE, NOISE, MULTI_VALUE, CATEGORICAL
 from value_extract import extract_values
@@ -85,7 +85,8 @@ def comparison_candidate(span, triple):
     mod = modality(span, triple)[0]
     if mod != "ACTUAL":
         return None, f"modality={mod}"
-    return {"triple": tuple(triple), "modality": mod}, "candidate"
+    return {"triple": tuple(triple), "modality": mod,
+            "dist_ent": distinguishing_entities(span, triple)}, "candidate"
 
 
 # ------------------------------------------------- relation normalisation
@@ -115,6 +116,33 @@ _ATTR_STOP = {"a","an","the","my","our","your","his","her","their","its","i",
               "different","ones","been","doing","been"}
 
 
+# words that look like proper nouns but are not distinguishing entities
+_NOT_PROPER = {"I", "I'm", "I've", "I'd", "I'll", "By", "That", "Do", "Can",
+               "The", "A", "An", "My", "So", "And", "Oh", "Also", "Since",
+               "This", "It", "What", "How", "When", "Where", "Crash", "Course"}
+
+
+def distinguishing_entities(span, triple):
+    """Proper-noun tokens in the value's SENTENCE (not the whole span) -- named
+    places/things that identify a SPECIFIC event. "drove ... to Tennessee" vs
+    "... to Washington D.C." differ here, so they do not merge; a personal-best
+    time or a cumulative count carries no conflicting named entity in its value
+    sentence, so genuine same-attribute pairs are unaffected. Sentence-scoped so
+    incidental proper nouns elsewhere in a long span do not pollute the key.
+    Entry-45 false-alarm fix."""
+    import re as _re
+    sent = _locate_sentence(span, triple)
+    ents = set()
+    # proper noun(s) governed by a locative/temporal preposition = a specific
+    # destination/occasion that individuates the event
+    for m in _re.finditer(r"\b(?:to|in|at|from|near|around|on)\s+"
+                          r"((?:[A-Z][A-Za-z]{1,}\.?\s*){1,3})", sent):
+        for w in _re.findall(r"[A-Z][A-Za-z]{1,}", m.group(1)):
+            if w not in _NOT_PROPER:
+                ents.add(w.lower())
+    return frozenset(ents)
+
+
 def attribute_key(triple):
     """Canonical key for a VALUE-bearing fact: (subject-scope, attribute-noun-
     set). The attribute noun (personal-best-time, postcards, pages, engineers)
@@ -135,6 +163,9 @@ def attribute_key(triple):
     subj = "@speaker" if speaker else norm_subject(triple[0])
     nouns = set()
     for field in triple:
+        # lowercase the field first so capitalised attribute words (Negroni)
+        # are kept as ordinary nouns, consistent across mentions; the locative-
+        # destination split is handled separately by dist_ent
         for w in re.findall(r"[a-z]+", str(field).lower()):
             if w not in _ATTR_STOP and len(w) > 2 and not to_scalar(w):
                 nouns.add(w)
@@ -166,6 +197,8 @@ def detect_contradictions(candidates):
         # set), which is stable across phrasings and across the LLM/value
         # passes; non-value candidates keep the surface (subject, relation) key.
         ak = attribute_key(t) if to_scalar(t[2]) else None
+        if ak is not None:
+            ak = ak + (c.get("dist_ent", frozenset()),)   # split distinct events
         c["_akey"] = ak
         key = ak if ak else (norm_subject(t[0]), norm_relation(t[1]))
         by_key[key].append(c)
@@ -227,7 +260,8 @@ def run_two_path(spans, extractor):
             # matrix clause's modality, so a FUTURE/HEDGED/QUESTION veto on it is
             # overridden (the value is asserted even if the framing is not)
             if cand is None and presup and why and why.startswith("modality="):
-                cand = {"triple": tuple(tr), "modality": "PRESUPPOSED"}
+                cand = {"triple": tuple(tr), "modality": "PRESUPPOSED",
+                        "dist_ent": distinguishing_entities(text, tr)}
             if cand and sc.in_scope(tr[0]):
                 cand.update(span_id=span_id, session=session)
                 candidates.append(cand)
