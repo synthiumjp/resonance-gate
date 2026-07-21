@@ -3164,3 +3164,72 @@ The resolver is kept: it is the correct hybrid component, holds precision, and
 becomes useful the moment extraction coverage improves. Numeric updates remain
 the strong, fresh-validated result (7/7, 0 false alarms). Precision has never
 broken across any fresh test this session.
+
+## Entry 50 — 2026-07-21 (p2: the Bayesian reframe — a fact is a POSTERIOR, not a record; belief.py unifies the whole system)
+
+The registrant reframed the architecture: trust does not EXPOSE uncertainty, it
+REMOVES it. The memory should do the inference internally and assert only what
+it has resolved; the uncertainty is the engine, not the interface. And: this is
+NOT a database of growing facts -- maybe it needs to be Bayesian. It does.
+
+BUILT belief.py -- a Bayesian belief memory. Each (subject, attribute) slot holds
+a per-value log-odds of being the TRUE CURRENT value; a mention is EVIDENCE that
+updates it (weight of evidence, Good 1950: independent mentions ADD in log-odds).
+The state CONCENTRATES, it does not accumulate -- old evidence decays under a
+change-point term, so a genuinely changed value overtakes a stale one. This is
+a belief STATE of bounded size that gets sharper, not a growing log.
+
+IT UNIFIES EVERYTHING p2 BUILT PIECEMEAL, now as one object:
+  gate/extraction confidence  = the per-mention LIKELIHOOD (weight of evidence)
+  corroboration / survival    = independent evidence -> belief concentrates
+  RCI change detection        = the change-point decay (old value fades)
+  commensurability            = what shares a slot vs counts as a rival value
+  calibrated confidence       = IS the posterior P(true-current)
+  abstention                  = P below assert threshold -> stay silent
+  contradiction disclosure    = two rivals BOTH above threshold, CONCURRENT
+  store churn                 = the posterior dynamics over time
+
+THE ARCHITECTURE, answering "how does it bolt onto an LLM". The LLM sits at the
+EDGES: extraction (Ashby requisite variety -- only a model has the variety to
+parse open-ended language into candidate evidence) and interface (phrasing).
+The BELIEF STATE sits BETWEEN them. Talk -> LLM proposes evidence -> belief
+updates -> on recall the memory returns only CONCENTRATED beliefs; the LLM
+speaks those. The LLM never holds the memory; it feeds and reads it.
+
+THE KILLER PROPERTY: the ~90% extraction junk becomes a LIKELIHOOD TERM, not a
+wall. Junk is low-confidence, isolated evidence -> its belief stays near the
+prior -> never asserted. A real fact accrues consistent gate-confident evidence
+-> belief concentrates -> asserted with EARNED confidence. The extraction ceiling
+stops being a hard wall and becomes noise the inference is designed to absorb.
+
+DEMONSTRATED (constructed scenarios, realistic gate confidences r~0.85 clean /
+~0.55 junk):
+  - a clean corroborated fact asserts; a weak one-off does NOT (junk prior).
+  - Acme->Google (later) = UPDATE: old decays, Google asserted, ZERO false
+    conflicts.
+  - concurrent Chicago/Boston = CONTRADICTION: both above threshold, flagged,
+    city WITHHELD from assertion (not silently resolved).
+  Belief scales with gate confidence: r=0.85 asserts in 1-2 mentions, r=0.60
+  needs ~3 -- corroboration requirement is grounded in evidence quality.
+
+HONEST STATE, flagged not hidden:
+  - The FRAMEWORK is correct and behaves right on constructed cases.
+  - The CALIBRATION is UNFIT: JUNK_PRIOR (0.50 post-gate), EVIDENCE_RETENTION
+    (0.85/step change-point), ASSERT/CONTRADICTION thresholds, and the mapping
+    from gate signals to per-mention reliability are all defensible defaults,
+    NOT fitted. Any calibration/performance claim requires fitting these against
+    a labelled update/no-update/junk set -- the docstring says so.
+  - NOT YET RUN end-to-end on LongMemEval: real gated extractions have not been
+    fed into the belief memory. That is the next validation and the point where
+    this either replaces the ad-hoc detectors or is shown not to.
+
+WHY THIS IS THE RIGHT REORGANISATION. Every prior p2 piece was a bolt-on
+detector over a record store. belief.py makes the RECORD STORE itself the wrong
+model and replaces it with a belief state, of which confidence, corroboration,
+update, contradiction and churn are all facets of ONE quantity (the posterior)
+rather than separate mechanisms. It is also the honest answer to "does it work
+for people": a memory that resolves uncertainty internally and asserts only what
+it has earned is what "memory you can trust" actually means, and it is buildable.
+Numeric contradiction (7/7, fresh 0 false alarms) and the categorical slice
+remain the validated evidence; the belief memory is the frame that would carry
+them, pending fitting and end-to-end validation.
