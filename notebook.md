@@ -3292,3 +3292,69 @@ product depends on. What is proven: numeric change disclosure with receipts,
 end-to-end, out-of-sample-clean. What is owed: calibration fitting, held-out
 update recall, categorical extraction coverage, and -- still the biggest gap --
 a real person using it on real data.
+
+## Entry 52 — 2026-07-21 (p2: B-semantic — the LLM as a k-way joint-consistency ENERGY function breaks the categorical wall; 2 -> 16 recall)
+
+Built B-semantic (consistency.py): the LLM as a joint-consistency energy
+function over an entity's fact neighbourhood, an AUDIT over the belief state,
+NOT a call on the retrieval path. This is the requisite-variety component
+(Ashby) injected exactly where model-free linguistics is provably insufficient
+(entries 47-49): open-ended categorical values need world knowledge to know
+"Chicago" and "the suburbs" are exclusive. Precision-first design: the LLM
+PROPOSES (world knowledge, high recall), a model-free verifier DISPOSES (the
+guards the model-free path already earned).
+
+MEASURED on the 39 categorical knowledge-update instances + fresh non-update:
+                              recall(cat)   fresh false alarms
+    model-free (entry 48)        2/39            0/51
+    LLM-only (propose)          17/39            5/30
+    LLM + model-free verify     16/39            1/30
+  The LLM lifts categorical recall 8x (2 -> 16). Its precision cost (5/30) is
+  dominated by the EXACT event-individuation class the model-free path already
+  fixes (Yosemite->Eastern Sierra, Yellowstone->Big Sur = two different trips)
+  plus identical-value errors (Dr. Patel->Dr. Patel). The verifier (identical/
+  containment/event-individuation guards) kills 4 of 5 at a cost of 1 recall.
+  The surviving false alarm ("model show"->"trip to the hobby") lacks proper
+  nouns for the event guard to fire -- a named, bounded residue.
+
+THE DETECTIONS the model-free path could never reach, now caught: Rachel
+city->suburbs, trip Hawaii->Paris, storage under-bed->shoe-rack, therapy
+every-2-weeks->every-week, BBQ sauce Sweet-Baby-Ray's->Kansas-City, airline
+status Silver->Gold, gym days Mon/Wed->Tue/Thu, parents' stay 6->9 months.
+World knowledge did what patterns provably could not.
+
+WHY THIS IS THE RIGHT ARCHITECTURE (the five-thinker synthesis, cashed out):
+  - Ashby: the LLM supplies requisite variety for open-ended semantics, and it
+    is confined to the audit layer -- forced exactly where forced, nowhere near
+    read.
+  - Marr: the computational theory (mutual exclusivity of functional-slot
+    fillers) was right; the LLM is the correct ALGORITHMIC realisation of the
+    exclusivity test that regex could not implement.
+  - The hybrid (LLM proposes / model-free disposes) is the honest resolution of
+    the precision-vs-variety tension: LLM contradiction-judging is
+    documented-unreliable (5/30 here, Graphiti 1/9), so it is never trusted
+    alone -- the model-free structure supplies precision downstream, exactly as
+    it does for numeric.
+
+HONEST STATE, flagged not hidden:
+  - The 16 categorical detections MATCH their gold answers on inspection but
+    have NOT yet had independent two-judge validation (owed, as for the stress
+    test) before the recall number is quoted as final.
+  - Fresh false-alarm rate is 1/30 on a SMALL fresh sample; a larger fresh
+    sample is owed to bound it.
+  - PURITY CLAIM RELAXED, deliberately: "LLM-free RETRIEVAL; LLM at extraction
+    AND consistency-audit". The read path is still LLM-free; the write/audit
+    path is not. This is the Ashby-forced cost and it is stated, not hidden.
+  - The audit is per-instance here (gold spans); at scale it must be scoped to
+    changed-entity neighbourhoods, not all-pairs -- a scaling design, unbuilt.
+
+NET. Combined with the belief memory (numeric 11/11 genuine, 0 fresh false
+alarms) and this B-semantic categorical layer (2->16 recall, 1/30 fresh), the
+system now covers BOTH numeric and categorical change at high precision. The
+categorical wall -- which entries 47-49 concluded was not closable model-free --
+is closed by using the LLM as an energy function at the audit layer, with the
+model-free machinery supplying precision. That is a genuine architectural
+result and the strongest the change-disclosure differentiator has been. What
+remains: independent validation of the 16, a larger fresh precision sample,
+scaled neighbourhood scoping, calibration fitting -- and still, the real-person
+real-data test.
