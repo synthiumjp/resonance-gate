@@ -21,6 +21,32 @@ import re
 
 from consistency import get_llm
 
+# canonical attribute synonyms so mentions MERGE into one slot and corroborate
+# ("residence"/"location"/"city" -> location). Unknown attrs pass through.
+_CANON_ATTR = {
+    "residence": "location", "location": "location", "live": "location",
+    "city": "location", "based": "location", "home": "location", "hometown": "location",
+    "employer": "occupation", "work": "occupation", "job": "occupation",
+    "occupation": "occupation", "role": "occupation", "profession": "occupation",
+    "career": "occupation", "title": "occupation",
+    "current_tool": "tool", "tool": "tool", "tools": "tool", "software": "tool",
+    "uses": "tool", "using": "tool", "tech_stack": "tool", "stack": "tool",
+    "education": "education", "degree": "education", "studying": "education",
+    "study": "education", "qualification": "education",
+    "ongoing_project": "project", "current_project": "project", "project": "project",
+    "building": "project", "working_on": "project", "startup": "project",
+    "relationship": "relationship", "family": "relationship", "partner": "relationship",
+    "spouse": "relationship", "kids": "relationship", "children": "relationship",
+    "possession": "possession", "possessions": "possession", "owns": "possession",
+    "device": "possession", "hardware": "possession",
+    "hobby": "hobby", "interest": "hobby", "interests": "hobby",
+    "social_media_platform": "social_media", "social_media": "social_media",
+}
+
+
+def canon_attr(a):
+    return _CANON_ATTR.get(str(a).lower().strip(), str(a).lower().strip())
+
 SYSTEM = """Extract STABLE personal facts the user states about THEIR OWN life from \
 one message. A stable fact is something that could go on their profile: where they \
 live, their job/role/employer, tools or software they regularly use, routines/habits, \

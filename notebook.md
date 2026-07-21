@@ -3901,3 +3901,16 @@ the keep_location/§7.4.1 junk gone) the architecture is validated on real data 
 the direction is LLM-extraction + the proven belief/commensurability machinery. If
 still noisy, the problem is deeper than extraction and we stop and rethink. Run is
 the registrant's (execution gated).
+
+## Entry 66 — 2026-07-21 (p2: full-stream corroboration test. Corroboration AS the noise filter.)
+
+Built the real trust test entry 65's sample could not show. Runs the LLM profile
+extractor over EVERY prose turn of the registrant's history (realtime replay), so
+corroboration accumulates: a stable fact climbs to x10+, a transient stays x1. No
+hard transient rule -- corroboration IS the filter (assert only >= N mentions).
+Three mechanisms so mentions actually merge: full stream; canon_attr (residence/
+location/city -> one slot); value CLUSTERING at readout (melbourne / melbourne
+australia -> one fact, summed). Cached + resumable (cache in the quarantine, never
+git); latency reported. Decision: if real facts rise to x10+ while junk stays x1
+and gets filtered, corroboration solves the ~50% junk WITHOUT a perfect extractor
+-- the architecture is validated realtime on real data. Run is the registrant's.
