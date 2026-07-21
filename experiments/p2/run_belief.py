@@ -146,15 +146,81 @@ def run_instance(inst):
     return mem
 
 
+# --- real-data change gates (entry 58 validation). changes() previously flagged
+# ANY slot with >=2 distinct values, bypassing all commensurability logic -- the
+# source of every numeric false alarm on real chat. These gates reject the named
+# false-alarm classes without touching genuine LongMemEval updates.
+_TEMPORAL_UNITS = {"year", "years", "yr", "yrs", "day", "days", "month", "months",
+                   "week", "weeks", "hour", "hours", "minute", "minutes",
+                   "second", "seconds", "time", "times", "age"}
+_GENERIC_VERBS = {"take", "takes", "took", "taking", "get", "got", "getting",
+                  "make", "made", "making", "do", "did", "doing", "give", "gave",
+                  "giving", "like", "put", "use", "used", "using", "spend",
+                  "spent", "go", "went"}
+_DWELLING = {"apartment", "apartments", "house", "home", "place", "room", "flat",
+             "condo", "dwelling", "unit", "housing"}
+_ADDITIVE = re.compile(r"\b(as well|also|too|in addition|plus)\b", re.I)
+
+
+def _num_parts(v):
+    """('count:days','2') if v is a numeric 'scale=mag' value, else (None,None)."""
+    if "=" in v:
+        sc, _, mag = v.rpartition("=")
+        if sc.startswith("count:") or sc in ("time_s", "money"):
+            return sc, mag
+    return None, None
+
+
+def _real_change(key, values):
+    """Commensurability + referent gate over a slot's distinct values."""
+    scales, cats = {}, []
+    for v in values:
+        sc, mag = _num_parts(v)
+        if sc is not None:
+            scales.setdefault(sc, set()).add(mag)
+        else:
+            cats.append(v)
+    if scales and not cats:                       # numeric-only slot
+        # (A) commensurability: two magnitudes must share ONE scale (a month-count
+        # and a repetition-count in one slot is not a change -- entry-58 A_12).
+        if not any(len(m) >= 2 for m in scales.values()):
+            return False
+        # (referent) a count whose slot names no CONCRETE referent -- only a bare
+        # temporal/filler noun -- is an untrustworthy collision (a duration vs an
+        # age; two different task durations -- entry-58 B_02/D_10).
+        nounset = key[0][1] if (isinstance(key[0], tuple) and len(key[0]) > 1
+                                and isinstance(key[0][1], frozenset)) else frozenset()
+        if not {n for n in nounset
+                if n not in _TEMPORAL_UNITS and n not in _GENERIC_VERBS}:
+            return False
+        return True
+    if scales and cats:                           # mixed -> incommensurable
+        return False
+    # categorical / cos / functional slot
+    # (B) additive marker -> an addition, not a replacement (entry-58 B_01)
+    if any(_ADDITIVE.search(v) for v in values):
+        return False
+    # (C) incommensurable location: a place vs a generic dwelling-type word
+    # (entry-58 C_01: a city read as changing into "apartment")
+    if any(v.lower().strip() in _DWELLING for v in values):
+        return False
+    return True
+
+
 def changes(mem):
     """Belief-native change signal: a slot whose belief history holds >=2
-    distinct values (one superseded another, or concurrent rivals)."""
+    distinct, COMMENSURABLE values with an identified referent (one superseded
+    another, or concurrent rivals). Commensurability gates added entry 58."""
     out = []
     for key, b in mem.slots.items():
-        vals = [v for v in b.posterior() if b.n_evidence[v] > 0]
-        if len(set(str(v).lower() for v in vals)) >= 2:
-            hist = mem.history(key[0], key[1])
-            out.append({"slot": key, "history": hist})
+        vals = [str(v) for v in b.posterior() if b.n_evidence[v] > 0]
+        uniq = list(dict.fromkeys(vals))
+        if len(set(u.lower() for u in uniq)) < 2:
+            continue
+        if not _real_change(key, uniq):
+            continue
+        hist = mem.history(key[0], key[1])
+        out.append({"slot": key, "history": hist})
     return out
 
 

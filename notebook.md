@@ -3661,3 +3661,41 @@ the honest baseline to improve from -- discipline held: real data corrected both
 the confidence AND the framing. Owed next: fix the numeric commensurability/
 collision bugs (or gate the numeric path out of real-chat change-alerts); test
 cross-session change on real multi-session data; larger genuine-change sample.
+
+## Entry 59 — 2026-07-21 (p2: numeric-path bug fixes. Corpus false-alarm 12.8% -> 2.1%, LongMemEval preserved. WITH an honest in-sample caveat.)
+
+Fixed the entry-58 belief-path false-alarm bugs at their root: changes() flagged
+ANY slot with >=2 distinct values, bypassing all commensurability logic. Added
+gates in _real_change():
+  (A) COMMENSURABILITY: a numeric slot's two magnitudes must share ONE scale
+      (a month-count and a repetition-count is not a change -- A_12).
+  (referent) a count whose slot names no CONCRETE referent, only a bare temporal/
+      filler noun, is an untrustworthy collision (a duration vs an age; two
+      different task durations -- B_02, D_10).
+  (B) ADDITIVE marker ("as well"/"also"/"too") -> an addition, not a replacement
+      (B_01: "meditate" + "journal as well" read as one change).
+  (C) incommensurable LOCATION: a place vs a generic dwelling-type word
+      ("apartment") -> not a relocation (C_01).
+
+MEASURED:
+  - LongMemEval: recall 11/39, fresh false alarms 0/51 -- IDENTICAL to pre-fix.
+    The gates cost zero benchmark recall/precision.
+  - Real corpus belief path: 5/47 false alarms -> 0/47. All five commensurability/
+    collision classes eliminated.
+  - Combined real-corpus false-alarm rate: 6/47 (12.8%) -> 1/47 (2.1%). The single
+    residual is the AUDIT-path case (D_01): a location where the user's FRIENDS are
+    vs the user's own city, plus a merely-PLANNED move -- a third-party/hypothetical
+    semantic confusion the model-free guards cannot catch. That is exactly the
+    construct the internal-signal probe (the Competence-Gate direction, entry 54/A)
+    is for; not fixable by a surface rule without fragility, so left as documented
+    residual rather than over-fitted.
+
+HONEST CAVEAT, stated not buried. These four gates were derived FROM the five
+observed false alarms, so 0/47 on the SAME corpus is partly in-sample -- the gates
+were fitted to exactly the failures they now catch. The trustworthy number needs a
+FRESH corpus the gates were not tuned on. What IS out-of-sample and real: LongMemEval
+is untouched (the gates did not distort the benchmark), and each gate is a principled
+constraint (commensurability, referent identity, addition-vs-replacement) not a
+lookup of the specific values -- so it should generalise, but that is a claim to
+TEST on fresh data, not assert. Owed: a held-out real corpus; the audit-path probe
+for the D_01 class; cross-session change (the axis that actually matters, entry 58).
