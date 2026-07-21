@@ -1,0 +1,185 @@
+"""WIRE layer acceptance tests: non-hallucination of the wiring, on synthetic
+ground truth (committable; the real-data run is the registrant's, gated).
+
+The acceptance criterion (HANDOVER §5): traversal must NEVER surface an
+unsupported link. Every edge must trace to real co-occurrence + receipts.
+"""
+
+import os
+import random
+import sys
+
+_HERE = os.path.dirname(os.path.abspath(__file__))
+_ROOT = os.path.dirname(os.path.dirname(_HERE))
+for p in (_HERE, _ROOT):
+    if p not in sys.path:
+        sys.path.insert(0, p)
+
+from wire import WireGraph, ResonanceIndex, MIN_COOC
+
+
+def _fact(n, attr, label, convs):
+    return (n, attr, label, [(f"2026-01-{(i % 28) + 1:02d}", c)
+                             for i, c in enumerate(convs)])
+
+
+def _convs(*idx):
+    return [f"c{i:02d}" for i in idx]
+
+
+def synthetic_graph():
+    """40 conversations. Planted structure:
+      A location=melbourne   convs 0-9         (hub)
+      B occupation=researcher convs 0-9        (always with A -> strong edge)
+      C tool=python          convs 0, 15       (1 shared with A -> gated OUT)
+      D hobby=chess          convs 20, 21      (no overlap with anything)
+      E project=rg           convs 8, 9, 22, 23 (2 shared with A,B -> edge)
+      F device=mac           convs 22, 23      (2 shared with E only -> 2-hop from A)
+    """
+    facts = [
+        _fact(41, "location", "melbourne", _convs(*range(10))),
+        _fact(25, "occupation", "researcher", _convs(*range(10))),
+        _fact(9, "tool", "python", _convs(0, 15)),
+        _fact(3, "hobby", "chess", _convs(20, 21)),
+        _fact(12, "project", "rg", _convs(8, 9, 22, 23)),
+        _fact(5, "device", "mac", _convs(22, 23)),
+    ]
+    return WireGraph.from_facts(facts, n_convs=40)
+
+
+def true_cooc(g, a, b):
+    return set(g.nodes[a]["convs"]) & set(g.nodes[b]["convs"])
+
+
+# ---------------- edges are real co-occurrence, receipted ----------------
+
+def test_supported_edges_exist_with_exact_receipts():
+    g = synthetic_graph()
+    ab = g.edges[("location=melbourne", "occupation=researcher")]
+    assert ab["cooc"] == 10
+    assert ab["convs"] == sorted(_convs(*range(10)))
+    ae = g.edges[("location=melbourne", "project=rg")]
+    assert ae["cooc"] == 2 and ae["convs"] == ["c08", "c09"]
+    ef = g.edges[("device=mac", "project=rg")]
+    assert ef["cooc"] == 2 and ef["convs"] == ["c22", "c23"]
+
+
+def test_single_cooccurrence_is_gated_out():
+    g = synthetic_graph()
+    assert ("location=melbourne", "tool=python") not in g.edges  # c=1: coincidence
+
+
+def test_no_edge_without_cooccurrence():
+    g = synthetic_graph()
+    for pair in g.edges:
+        assert len(true_cooc(g, *pair)) >= MIN_COOC
+    assert not g.adj["hobby=chess"]  # D overlaps nothing -> wired to nothing
+
+
+def test_audit_passes_and_catches_tampering():
+    g = synthetic_graph()
+    assert g.audit()["pass"]
+    # invent a receipt on a real edge -> audit must fail
+    g.edges[("location=melbourne", "project=rg")]["convs"].append("c39")
+    assert not g.audit()["pass"]
+    g = synthetic_graph()
+    # invent a whole edge (an unsupported link) -> audit must fail
+    fake = {"a": "hobby=chess", "b": "tool=python", "cooc": 2, "weight": 1.0,
+            "convs": ["c20", "c21"]}
+    g.edges[("hobby=chess", "tool=python")] = fake
+    g.adj["hobby=chess"]["tool=python"] = fake
+    g.adj["tool=python"]["hobby=chess"] = fake
+    assert not g.audit()["pass"]
+
+
+# ---------------- spreading activation: receipted paths or abstain ----------------
+
+def test_spread_returns_wired_neighbourhood_with_receipted_paths():
+    g = synthetic_graph()
+    r = g.spread("melbourne")
+    assert "abstain" not in r
+    assert r["seeds"][0]["id"] == "location=melbourne"
+    got = {d["node"]["id"]: d for d in r["neighbourhood"]}
+    assert "occupation=researcher" in got and "project=rg" in got
+    assert "hobby=chess" not in got and "tool=python" not in got
+    # EVERY edge on EVERY path is a stored, receipted edge with true receipts
+    for d in r["neighbourhood"]:
+        assert d["path"], "a neighbour must carry its evidence path"
+        for e in d["path"]:
+            key = tuple(sorted((e["a"], e["b"])))
+            assert key in g.edges
+            assert set(e["convs"]) == true_cooc(g, e["a"], e["b"])
+
+
+def test_two_hop_reaches_via_real_edges_only():
+    g = synthetic_graph()
+    got2 = {d["node"]["id"]: d for d in g.spread("melbourne", max_hops=2)["neighbourhood"]}
+    assert "device=mac" in got2 and got2["device=mac"]["hops"] == 2
+    assert [tuple(sorted((e["a"], e["b"]))) for e in got2["device=mac"]["path"]] == [
+        ("location=melbourne", "project=rg"), ("device=mac", "project=rg")]
+    got1 = {d["node"]["id"] for d in g.spread("melbourne", max_hops=1)["neighbourhood"]}
+    assert "device=mac" not in got1
+
+
+def test_full_sentence_query_matches_through_framing_words():
+    g = synthetic_graph()
+    r = g.spread("what is melbourne connected to")
+    assert "abstain" not in r
+    assert r["seeds"][0]["id"] == "location=melbourne"
+
+
+def test_abstention_on_unknown_queries():
+    g = synthetic_graph()
+    for q in ("tokyo", "i work at acme corp", "favourite colour",
+              "xyzzy plugh", "sister's birthday"):
+        r = g.spread(q)
+        assert r.get("abstain") is True, f"must abstain on {q!r}"
+        assert "neighbourhood" not in r  # abstain returns NOTHING, not a guess
+
+
+def test_unwired_node_returns_itself_with_empty_neighbourhood():
+    g = synthetic_graph()
+    r = g.spread("chess")
+    assert r["seeds"][0]["id"] == "hobby=chess"
+    assert r["neighbourhood"] == []  # honest: known fact, nothing wired yet
+
+
+# ---------------- VSA resonance: proposer gated by receipts ----------------
+
+def test_resonance_verified_is_subset_of_receipted_edges():
+    g = synthetic_graph()
+    ri = ResonanceIndex(g, dim=4096, seed=7)
+    r = ri.retrieve("location=melbourne")
+    ids = {d["node"]["id"] for d in r["verified"]}
+    assert "occupation=researcher" in ids
+    for d in r["verified"]:
+        assert tuple(sorted(("location=melbourne", d["node"]["id"]))) in g.edges
+    audit = ri.crosstalk_audit()
+    assert audit["pass"] and audit["leaked"] == 0
+
+
+# ---------------- fuzz: random streams, the invariants must hold ----------------
+
+def test_fuzz_random_graphs_never_wire_unsupported_links():
+    rng = random.Random(42)
+    for trial in range(10):
+        n_convs = rng.randint(10, 80)
+        facts = []
+        for f in range(rng.randint(5, 30)):
+            k = rng.randint(1, min(15, n_convs))
+            convs = [f"c{i:03d}" for i in rng.sample(range(n_convs), k)]
+            facts.append(_fact(k, f"attr{f % 7}", f"value{f}", convs))
+        g = WireGraph.from_facts(facts, n_convs=n_convs)
+        a = g.audit()
+        assert a["pass"], (trial, a["violations"][:3])
+        for nid in g.nodes:
+            r = g.spread(g.nodes[nid]["value"])
+            if r.get("abstain"):
+                continue
+            for d in r["neighbourhood"]:
+                for e in d["path"]:
+                    assert set(e["convs"]) == true_cooc(g, e["a"], e["b"])
+                    assert len(e["convs"]) >= MIN_COOC
+        if g.nodes:
+            ri = ResonanceIndex(g, dim=2048, seed=trial)
+            assert ri.crosstalk_audit()["pass"]

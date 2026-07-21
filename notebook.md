@@ -4029,3 +4029,65 @@ STEP (build the WIRE layer -- co-occurrence edges + spreading-activation retriev
 non-hallucination-tested); data/privacy state (artifacts preserved to ~/rg_private/,
 including the 45-min extraction cache); owed work; and conventions. Read HANDOVER.md +
 entries 53-69 to resume.
+
+## Entry 71 — 2026-07-21 (p2: WIRE layer BUILT. Receipted co-occurrence edges + spreading activation; non-hallucination audit PASSES on synthetic ground truth)
+
+Built the WIRE layer (HANDOVER §5): wire.py + run_wire.py + test_wire.py.
+
+DESIGN, keeping the structural non-hallucination guarantee at the edge level:
+  - NODES are the GROW layer's corroborated facts (attr=value clusters with
+    receipts). WIRE never creates a node.
+  - An EDGE is a receipted OBSERVATION, not an inference: two facts wire iff
+    their receipt conversation-sets share >= 2 conversations (the same
+    corroboration principle as nodes -- one co-occurrence is coincidence), and
+    the edge's receipt list IS that intersection BY CONSTRUCTION. Links cannot
+    be invented; they can only be counted.
+  - WEIGHT = weight of evidence for association (Good's WoE, the belief.py
+    framing): smoothed PMI = log-LR of co-occurrence vs independence at the
+    observed base rates over N conversations (Jeffreys s=0.5). w <= 0 (overlap
+    at/below chance -- two ubiquitous facts) -> no edge. A measured
+    association, not a raw count.
+  - RETRIEVAL = spreading activation: non-generative token-grounded query match
+    (no matching corroborated node -> ABSTAIN, never a guess); activation
+    propagates a * (1 - e^-w) * decay per hop; every returned neighbour carries
+    its full PATH of receipted edges. A known-but-unwired fact returns itself
+    with an honest empty neighbourhood (distinct from abstention).
+  - VSA SUBSTRATE (rg-1.1 map_ops) as PROPOSER, edge table as VERIFIER -- the
+    same shape as "LLM proposes, model-free verifies". Each node gets a Hebbian
+    wiring hypervector (bundle of neighbour item vectors, copies ~ edge
+    strength); cleanup PROPOSES associates by resonance; any proposal without a
+    receipted edge is BLOCKED and COUNTED. The crosstalk-blocked count is the
+    measured hallucination pressure the gate absorbs -- bundling crosstalk is
+    real (it appeared immediately even on a 4-node fixture) and the gate
+    turns it from a hallucination source into a statistic.
+
+ACCEPTANCE (the HANDOVER §5 criterion: does traversal ever surface an
+unsupported link?), tested three ways, all committable/synthetic (no PII):
+  1. graph.audit() -- EXHAUSTIVE over all node pairs: every edge's receipts must
+     EQUAL the true intersection of its endpoints' conversation sets, meet the
+     cooc gate, and recompute to the same weight; every non-edge pair must
+     genuinely fail a gate. Tampering tests confirm it catches an injected fake
+     receipt and an invented edge.
+  2. test_wire.py: 11/11 pass -- planted-structure recovery (strong pair wired
+     with exact receipts; single co-occurrence gated out; isolated fact wired to
+     nothing; 2-hop reached only via two real edges), abstention on 5 unknown
+     queries, full-sentence query matching, VSA crosstalk audit (0 leaked), and
+     a 10-trial random-graph fuzz: audit passes and every path edge equals true
+     co-occurrence on every trial.
+  3. run_wire.py end-to-end on a synthetic conversations.json + cache fixture
+     (the exact real-data code path, cache-only): audit PASS over all pairs,
+     crosstalk 1 proposal blocked / 0 leaked, 7/7 no-evidence probes ABSTAINED.
+
+One real bug found by the end-to-end run, fixed + regression-tested: the query
+matcher required a majority of QUERY tokens grounded, so a natural full-sentence
+query ("what is springfield connected to") abstained -- framing words diluted
+the score. Grounding is now scored over the smaller token set: framing words no
+longer dilute; a query sharing nothing with a node still cannot match.
+
+run_wire.py mirrors the run_profile_full privacy contract: cache-only rebuild of
+the corroborated facts (no LLM calls), REDACTED stdout, UNREDACTED
+wire_report.txt (edges + shared-conversation receipts + hub neighbourhoods +
+optional --query neighbourhood) written locally next to conversations.json.
+NOT yet run on real data (execution gated; the run is the registrant's). Owed
+next: the real-data run + eyeball check of the wired report; then the query
+contract / injection loop over the wired memory (HANDOVER §7).
