@@ -4152,3 +4152,47 @@ actually makes it legible: a junk fact wires straight back to the conversations
 that produced it. Suite: 16/16 tests. Owed next: registrant eyeballs the wired
 report (ground truth); third-party/roleplay extraction refinement + cache
 rebuild; then the injection/correction loop over the wired memory.
+
+## Entry 73 — 2026-07-21 (p2: QUERY CONTRACT + INJECTION LOOP. The memory now has the read interface an LLM connects to; A/B injection runs on real data)
+
+Built the read-side contract (memory_api.py) and the injection harness
+(run_inject.py) -- HANDOVER §7's "query contract" and "injection loop", the
+two pieces between the validated pipeline and a usable product.
+
+QUERY CONTRACT (memory_api.Memory -- no model call anywhere in the module):
+  recall(query) -> {asserted: corroborated facts, each with receipts;
+                    wired: neighbourhood facts, each with its edge path and
+                           shared-conversation counts;
+                    unconfirmed: labeled single-mentions}
+                   | {abstain: true, "never seen"} -- never a guess.
+  profile()     -> the corroborated profile, most-evidenced first, receipted.
+  context_block(query?) -> a VERBATIM receipted text block for prompt
+    injection. Non-generative by construction: every line is a stored fact
+    with its mention count; the block ends with the standing rule that
+    anything not listed is UNKNOWN and must be said so, and an abstained
+    topic yields an explicit do-not-invent block, never silence.
+Tests: 21/21 (contract shape, receipts on every fact, edge paths on every
+wired item, honest abstain, unconfirmed labeling, rule-bearing blocks).
+
+INJECTION LOOP (run_inject.py): the same local model (qwen3:14b, on-device --
+facts never leave the machine) answers each message WITH and WITHOUT the
+memory block; the difference is attributable to the memory alone. Stdout is
+aggregate-only; the unredacted A/B transcript goes to the quarantine for the
+owner's judge-by-feel.
+
+FIRST REAL RUN (160 corroborated facts + 904 provisional loaded): three probes
+-- broad ("what should I work on today"), topic ("how is my research going"),
+and a MUST-ABSTAIN ("remind me what my blood type is"). Mechanism behaviour
+(content stays in the quarantine): memory lines injected 15-17 per turn; the
+blood-type topic correctly ABSTAINED at recall; the with-memory reply used
+honest don't-know phrasing (checked boolean-only, no content surfaced) and was
+5x shorter than the generic no-memory reply. The felt-quality verdict ("does
+it know me?") is the owner's, from inject_report.txt.
+
+This closes the loop structurally: extraction -> belief -> corroboration ->
+wiring -> receipted recall -> injection, with abstention preserved end-to-end.
+Owed: the owner's judge-by-feel read; the correction flow (owner corrects a
+fact via receipts -> memory updates -> next injection reflects it); extractor
+v2 for the third-party/roleplay residue; wiring this contract into the
+sourcedrecall MCP server (the p1 server stores explicit triples; the p2
+memory should become its ingestion/read path).
