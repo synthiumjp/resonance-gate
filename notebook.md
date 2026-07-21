@@ -4014,3 +4014,18 @@ the ground truth.
 
 NOTE: profile specifics are deliberately kept OUT of this notebook/git (they are
 the owner's private data); only the methodological lesson is recorded.
+
+## Entry 70 — 2026-07-21 (p2: DEEP HANDOVER written. Vision crystallised: non-hallucinating memory an LLM connects to; GROW + WIRE.)
+
+Context was running low; wrote a comprehensive handover at experiments/p2/HANDOVER.md
+for the next session. Captures: the crystallised VISION (a memory an LLM connects to
+that doesn't hallucinate = non-generative + corroboration-gated + receipted + abstains;
+Bayesian nodes that GROW (built) + Hebbian edges that WIRE (next)); the load-bearing
+insight (corroboration IS the noise filter -- a noisy LLM extractor + corroboration =
+~75% precise, no perfect extractor needed); the honest through-line findings (rare
+changes, distribution shift, multi-role, receipts=trust, independent-validation
+discipline); the full pipeline/file inventory; validated numbers; the IMMEDIATE NEXT
+STEP (build the WIRE layer -- co-occurrence edges + spreading-activation retrieval,
+non-hallucination-tested); data/privacy state (artifacts preserved to ~/rg_private/,
+including the 45-min extraction cache); owed work; and conventions. Read HANDOVER.md +
+entries 53-69 to resume.
