@@ -3699,3 +3699,51 @@ constraint (commensurability, referent identity, addition-vs-replacement) not a
 lookup of the specific values -- so it should generalise, but that is a claim to
 TEST on fresh data, not assert. Owed: a held-out real corpus; the audit-path probe
 for the D_01 class; cross-session change (the axis that actually matters, entry 58).
+
+## Entry 60 — 2026-07-21 (p2: FIRST CROSS-SESSION test on the registrant's OWN 13-month history. It runs — and ~10/11 detections are false alarms. Distribution shift is the lesson.)
+
+Ran the belief memory over the registrant's own quarantined Claude export as one
+time-ordered cross-session stream: 15,186 first-person turns across 688
+conversations, 2025-06 .. 2026-07. Model-free extractors only (18k turns is too
+many for per-turn LLM). PRIVACY: input quarantined in scratchpad (never git);
+runner redacts identifiers even from stdout; nothing committed but generic code +
+this aggregate entry. This is the "does it work for people" test deferred all
+session -- finally run, on real personal cross-session data.
+
+RESULT: 36 belief changes, 11 spanning >=2 conversations. Of the 11, ~10 are FALSE
+ALARMS. Honest failure taxonomy (all NEW, none seen on curated ShareGPT):
+  1. TECHNICAL/PASTED CONTENT read as personal quantity facts -- pasted system
+     telemetry (vm_stat swapins/pageins/pageouts in the millions/billions), model-
+     name tokens with counts. The numeric_gate has no notion of "this is a pasted
+     command output, not a life fact".
+  2. cos:location MEGA-COLLISION at scale -- the goal-pattern ("moved to/now at X")
+     matched across hundreds of research conversations and collapsed into ONE
+     ('i','cos:location') slot holding dozens of NON-locations ("phase 5", "repo",
+     "appendix", "h4", "next seed"). span_id fixed WITHIN-conversation collision;
+     the goal-pattern across 688 sessions is unbounded.
+  3. METAPHORICAL keep-constructions -- "keep an eye on X", "keep Y running" read
+     as physical storage locations.
+  4. FILLER-NOUN counts -- count:while, count:more.
+Only ~1-2 are plausibly real, and both are weak: residence victoria->melbourne
+(CONTAINMENT -- Melbourne is in Victoria, granularity not a move) and current_pref
+claude-code -> github/kaggle (possibly an evolving preference, possibly multi-value).
+
+THE LESSON: DISTRIBUTION SHIFT. The 2.1% false-alarm rate (entry 59, curated
+ShareGPT personal chat) did NOT transfer. The registrant's data is RESEARCH/
+ENGINEERING chat -- pasted code, telemetry, model params -- a different
+distribution the extractors were never tuned on, and it exposes failure modes
+curated personal chat cannot. This is the sharpest instance of the session's
+recurring finding: every benchmark and curated corpus flattered the system; the
+FIRST contact with the actual target user's data broke it. "Does it work for
+people" on real data = NOT YET, with named, specific gaps.
+
+WHAT IT MAKES CONCRETE (owed, priority order):
+  1. CONTENT-TYPE gate: skip pasted code/terminal/telemetry blocks before
+     extraction (they are not first-person life facts). Biggest single win here.
+  2. cos:location scale fix: the goal-pattern needs a real place-type check on the
+     value, or entity-anchored scoping, or it collapses on any large stream.
+  3. metaphorical keep-construction + filler-noun guards.
+  4. THEN re-run on the same real data and measure the honest false-alarm rate.
+The categorical LLM audit (entity-scoped) was NOT run here (cost) -- but the
+model-free result already says the input-side content filter is the blocker before
+any categorical pass is worth running on this data.

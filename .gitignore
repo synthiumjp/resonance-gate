@@ -20,3 +20,6 @@ server/**/__pycache__/
 server/.pytest_cache/
 server/*.egg-info/
 experiments/p2/real/
+data-*batch*.zip
+*:Zone.Identifier
+private_chat/

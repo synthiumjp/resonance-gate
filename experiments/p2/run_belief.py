@@ -95,11 +95,12 @@ def _numeric_slot(triple, span):
     return (ak, f"{sv[1]}={sv[0]:g}")
 
 
-def evidence_from_span(text, sc, span_id=0):
+def evidence_from_span(text, sc, span_id=0, use_llm=True):
     """Yield (subject, attribute, value, reliability) for one span, from every
     evidence source. Reliability reflects the gate confidence of the source.
     span_id disambiguates SELF-CONTAINED changes so they do not collide across
-    spans (entry 55)."""
+    spans (entry 55). use_llm=False uses ONLY the model-free extractors (value/
+    cos/functional) -- fast enough for a whole cross-session history (entry 60)."""
     text = resolve_pronouns(text)
     ev = []
     # numeric: value-anchored (deterministic, high r) + LLM triples that gate
@@ -107,12 +108,13 @@ def evidence_from_span(text, sc, span_id=0):
         s = _numeric_slot(tr, text)
         if s:
             ev.append((s[0], s[1], 0.85))
-    for tr in cached(text):
-        cand, _ = comparison_candidate(text, tr)
-        if cand and sc.in_scope(tr[0]) and to_scalar(tr[2]):
-            s = _numeric_slot(tr, text)
-            if s:
-                ev.append((s[0], s[1], 0.80))
+    if use_llm:
+        for tr in cached(text):
+            cand, _ = comparison_candidate(text, tr)
+            if cand and sc.in_scope(tr[0]) and to_scalar(tr[2]):
+                s = _numeric_slot(tr, text)
+                if s:
+                    ev.append((s[0], s[1], 0.80))
     # categorical: change-of-state (marked, high r) + functional-attribute
     for subj, attr, val, role in extract_cos(text):
         # "from X to Y" / "used to P now Q" are SELF-CONTAINED changes: both
