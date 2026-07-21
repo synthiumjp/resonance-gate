@@ -3837,3 +3837,46 @@ in the CATEGORICAL changes model-free cannot see, so the honest next test is the
 entity-scoped LLM audit over this history -- the real measure of whether it
 captures meaningful evolution, not just the rare surface-fact flip. Precision is
 close to a deliverable; recall on meaningful change is the open product question.
+
+## Entry 64 — 2026-07-21 (p2: current-state profile is JUNK-dominated on real data. The ceiling is EXTRACTION, not the framing.)
+
+Added a current-state view to run_crosssession (what the belief memory asserts
+about the registrant at P>=0.70) to test entry-63's reframe: maybe the accurate
+RECEIPTED PORTRAIT, not the rare change events, is the product. Ran on the real
+13-month history.
+
+RESULT: junk-dominated. 22 named profile facts, of which ~1-3 are real:
+  - residence correctly identified (1 clearly-right fact).
+  - a tool-preference and a recurring-day fact (plausibly real).
+  - 15 of 22 are keep_location GARBAGE -- the "keep X in/on/at Y" pattern misfiring
+    on research/writing language: "keep building", "keep digging", "keep going
+    around in circles", "keep doing the research", "keep solving", metaphorical/
+    instructional uses read as physical object-storage.
+  - cos:employer/location capturing non-entities (a section reference "§7.4.1" as
+    an employer; abstract phrases as locations).
+  - 497 numeric "quantity" slots, essentially all noise.
+Profile precision ~10-15%. WORSE than the change view (which the gates walked to
+~2 weak false alarms).
+
+THE REAL FINDING, stated plainly. The reframe (current-state vs change) does NOT
+rescue the product, because the bottleneck was never the framing -- it is
+EXTRACTION QUALITY on real data. The same narrow model-free patterns that MISS the
+meaningful categorical changes also MANUFACTURE a junk profile; keep_location alone
+produces 15 false facts. The belief/commensurability MACHINERY is sound (it cleaned
+the change path 10 -> 2 at zero LongMemEval cost) -- but sound machinery on a junk
+INPUT yields a junk portrait. Model-free extraction works on clean personal-fact
+benchmarks (LongMemEval) and curated personal chat (ShareGPT, 2.1%) and FAILS on
+raw research/engineering chat: a distribution its ~30 hand-tuned patterns were never
+built for, and cannot be patched into without endless whack-a-mole.
+
+HONEST STRATEGIC CONCLUSION. The model-free extraction path has hit its ceiling on
+real target-user data. The route to a TRUSTWORTHY profile (or change signal) on
+real messy input is LLM-BASED extraction -- an extractor that knows "keep digging"
+is not a storage fact and "§7.4.1" is not an employer -- feeding the SAME belief +
+commensurability + place-type machinery, which is the proven-sound part. This
+relaxes the "LLM-free" line further (LLM at extraction AND audit; model-free only
+for the belief/commensurability layer) -- an honest, data-forced cost. The
+alternative is to SCOPE the product to clean/curated input, where model-free
+already works, and be explicit that raw research chat is out of scope. Either way,
+the session's real-data verdict is clear: good machinery, wrong extractor for the
+real distribution. That is the honest place to stop and decide direction.

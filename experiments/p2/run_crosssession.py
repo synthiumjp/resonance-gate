@@ -113,6 +113,29 @@ def main():
         print(f"  attr={redact(str(attr))[:50]}")
         print(f"     values over sessions: {vals}")
 
+    # ---- CURRENT-STATE picture: what the memory RELIABLY believes about you now.
+    # The likely real product surface (entry 63): an accurate receipted portrait,
+    # not the rare change events. Show named PROFILE facts (functional + cos)
+    # that crossed the belief threshold, with corroboration count as the trust
+    # signal. Numeric quantity slots are summarised, not listed (mostly counts).
+    import re as _re
+    asserts = mem.assertions(min_prob=0.70)
+    profile, numeric_ct = [], 0
+    for a in asserts:
+        slot = a["subject"]                       # the full slot key
+        attr = slot[1] if isinstance(slot, tuple) and len(slot) > 1 else slot
+        if isinstance(attr, frozenset):
+            numeric_ct += 1
+            continue
+        if _re.match(r"cos@\d+$", str(attr)):     # transient within-conversation
+            continue
+        profile.append((a["confidence"], a["n_evidence"], str(attr), a["value"]))
+    profile.sort(reverse=True)
+    print(f"\n=== CURRENT-STATE PROFILE (what the memory reliably believes about you) ===")
+    print(f"{len(profile)} named profile facts (P>=0.70), {numeric_ct} quantity slots\n")
+    for conf, n, attr, val in profile[:50]:
+        print(f"  [{conf:.2f} x{n} mentions] {redact(attr)[:26]:26s} : {redact(str(val))[:52]}")
+
 
 if __name__ == "__main__":
     main()
