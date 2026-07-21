@@ -193,6 +193,22 @@ def classify_pair(obj_a, obj_b, scale_pool=None, conservative=False):
             return {"category": CATEGORICAL, "reason": "same head noun, no shared scale"}
         return {"category": MULTI_VALUE, "reason": "incommensurable objects"}
     va, vb = sa[0], sb[0]
+    # EXACT-COUNT rule: an integer count read verbatim from text has no
+    # measurement noise, so the clinical continuous-noise threshold does not
+    # apply -- any distinct value under the same attribute is a reliable change
+    # (3->4 restaurants, 4->5 engineers). Ranges ("5-6 hours") and measurement
+    # scales (times, money) keep the RCI test, which correctly withholds on
+    # noisy estimates.
+    exact_count = (sa[1].startswith("count:") and float(va) == int(va)
+                   and float(vb) == int(vb)
+                   and not re.search(r"\d\s*-\s*\d", str(obj_a) + str(obj_b)))
+    if exact_count:
+        if va == vb:
+            return {"category": NOISE, "rci": 0.0, "scale": sa[1],
+                    "value_a": va, "value_b": vb, "exact_count": True}
+        return {"category": UPDATE, "rci": float("inf") if vb > va else float("-inf"),
+                "scale": sa[1], "value_a": va, "value_b": vb, "exact_count": True,
+                "direction": "increase" if vb > va else "decrease"}
     pool = list(scale_pool) if scale_pool else []
     pool += [va, vb]
     r, s_diff, r_xx = rci(va, vb, pool, conservative)

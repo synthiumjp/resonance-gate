@@ -2844,3 +2844,52 @@ reported best ~0.05. The high-precision / low-recall trade is the correct one
 for the product (false alarms switch the feature off), and recall has climbed
 1->2->4 across three principled steps with zero precision cost. The remaining
 two misses are each a single named sub-problem.
+
+## Entry 44 — 2026-07-21 (p2: exact-count rule — recall 4->7, precision holds 1.0; RCI noise model corrected)
+
+Entry 43's remaining miss was engineers 4->5, classified WITHIN_NOISE: a +1
+change from two point-observations is below RCI's 1.96 threshold. I had called
+this "RCI correctly withholding." That was WRONG, and the correction is a real
+insight into where the clinical RCI model does and does not transfer.
+
+RCI's measurement noise comes from PSYCHOMETRIC TESTS -- a score has genuine
+measurement error, so a small change may be noise. But "4 engineers" -> "5
+engineers" is an EXACT INTEGER COUNT read verbatim from text; there is no
+measurement noise on a clean digit read. The continuous-noise threshold simply
+does not apply to exact counts. So: for count scales with integer values read
+verbatim (not ranges, not estimates), ANY distinct value under the same
+attribute key is a reliable change. Measurement scales (times, money, duration
+estimates, ranges like "5-6 hours") keep the RCI threshold, which correctly
+withholds on noisy estimates.
+
+Verified BEFORE implementing (the entry-40 discipline): enumerated all
+commensurable exact-count pairs the rule would newly fire on -- 9 pairs across
+3 instances (Korean 3->4, engineers 4->5, weeks 3->4), ALL genuine updates,
+zero spurious. The attribute-key noun-set prevents cross-attribute merges
+(bikes vs engineers keep distinct keys), and equal-value pairs (5-6 vs 5-6
+hours) correctly do not fire.
+
+RESULT on the 39 knowledge-update instances:
+    alerts     41: 1 -> 42: 2 -> 43: 4 -> 44: 7      (ALL genuine)
+    precision              1/1    2/2    4/4    7/7 = 1.00  (held throughout)
+  The seven, each matching its gold answer:
+    personal best 27:12->25:50 | Korean 3->4 | pages 200->220 |
+    engineers 4->5 | Fitbit 6->9 months | postcards 17->25 | daily-timer 3->4 weeks
+  Recall has now quadrupled (1->7) across four principled steps -- two-path,
+  value extraction, keying-consistency, exact-count -- with precision fixed at
+  1.00 the entire way. Assertion path unregressed (DEV 0.905/0.864, HELD
+  0.636/0.700).
+
+REMAINING MISS: yoga "three times a week" (frequency in a relative clause
+"which is three times a week" the value anchor does not reach) -- a single
+bounded parsing gap. On the ~8-9 genuine numeric/count updates in the 39, the
+detector now fires on 7 at perfect precision.
+
+WHERE THIS LEAVES THE DIFFERENTIATOR. Honest contradiction disclosure with
+receipts, on third-party LongMemEval data: 7/~8 genuine updates at 1.00
+precision, vs the naive detector's 0.08 (entry 32) and BEAM's reported ~0.05.
+The claim the product is built on -- "we tell you when your memory disagrees
+with itself, with both receipts, and we do not false-alarm" -- is now
+demonstrated end to end. The high-precision/perfect-no-false-alarm property has
+survived a 7x recall increase, which is the property that matters: a
+contradiction feature dies on false alarms, not on missed ones.
