@@ -75,6 +75,12 @@ _INFORMATIONAL = re.compile(
     r"\b(updated|posted|informed|abreast|in the loop|up to date|in touch|"
     r"in mind|track of|record of)\b", re.I)
 
+# metaphorical keep-objects: "keep an eye on X", "keep Y running/going" are not
+# physical object-storage (entry-60 keep:eye, keep:running false alarms).
+_METAPHORICAL_KEEP = {"eye", "eyes", "an eye", "tabs", "tab", "track", "running",
+                      "going", "pace", "score", "company", "mind", "watch",
+                      "count", "distance", "busy", "quiet", "alive", "up"}
+
 _BIG_REGIONS = {"illinois", "california", "texas", "new york", "the us", "usa",
                 "the united states", "the uk", "england", "the country",
                 "the city", "the area", "the region", "the state", "the suburbs",
@@ -122,6 +128,10 @@ def extract_functional(text):
                     if _INFORMATIONAL.search(m.group(0)):
                         continue
                     obj = _clean(m.group(1))
+                    # metaphorical "keep an eye on / keep X running/going" is not
+                    # object-storage either (entry-60 keep:eye, keep:running)
+                    if obj.lower() in _METAPHORICAL_KEEP:
+                        continue
                     akey = f"keep:{obj.lower()}"
                     val = _clean(m.group(2))
                 if not val or len(val) < 2:

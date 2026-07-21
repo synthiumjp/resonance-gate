@@ -3747,3 +3747,28 @@ WHAT IT MAKES CONCRETE (owed, priority order):
 The categorical LLM audit (entity-scoped) was NOT run here (cost) -- but the
 model-free result already says the input-side content filter is the blocker before
 any categorical pass is worth running on this data.
+
+## Entry 61 — 2026-07-21 (p2: distribution-shift fixes for real cross-session data. Content-type gate + keep/filler guards; LongMemEval preserved.)
+
+Fixed the entry-60 real-data false-alarm classes at the input side, measured
+against LongMemEval (must not regress):
+  1. CONTENT-TYPE gate (_is_prose): skip turns dominated by pasted code/terminal/
+     telemetry before extraction -- a fenced block, or >40% of lines that are
+     symbol-heavy / digit-heavy / "label: number" telemetry. Removes the pasted
+     vm_stat / system-stat / model-token numeric false alarms (the biggest class).
+     Verified it KEEPS prose-with-a-big-number ("50000 Hilton points", "220 pages
+     ... 27:12") so genuine numeric facts survive.
+  2. FILLER-noun referent suppression: count:while / count:more etc. -- a bare
+     filler head is not a trackable referent.
+  3. METAPHORICAL keep-guard: "keep an eye on X", "keep Y running/going" are not
+     physical object-storage.
+MEASURED: LongMemEval recall 11/39, fresh false alarms 0/51 -- IDENTICAL. The
+input-side gate costs zero benchmark recall/precision and is unit-tested on the
+telemetry-vs-prose boundary. Expected to clear ~7 of the 10 entry-60 cross-session
+false alarms (all 3 telemetry + model-token + while/more + keep:eye/keep:running).
+RESIDUAL, stated: the cos:location MEGA-COLLISION is only PARTLY addressed (the
+technical-turn instances are now skipped, but the goal-pattern still collapses
+genuine-prose "moved to/now at X" across sessions into one slot) -- needs a
+place-type check on the value or entity-anchored scoping, owed. Re-run on the real
+export is by the registrant (the pipeline-over-personal-data execution is gated;
+the run is theirs to authorise).

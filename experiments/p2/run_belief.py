@@ -95,12 +95,39 @@ def _numeric_slot(triple, span):
     return (ak, f"{sv[1]}={sv[0]:g}")
 
 
+def _is_prose(text):
+    """False if the turn is dominated by pasted code/terminal/telemetry rather
+    than first-person prose. Real user data (entry 60) is full of pasted vm_stat/
+    logs/code that the extractors misread as personal facts; those turns carry no
+    life-fact and are skipped. Conversational prose (LongMemEval, personal chat)
+    passes untouched."""
+    if "```" in text:
+        return False
+    lines = [l for l in text.splitlines() if l.strip()]
+    if not lines:
+        return True
+    codey = 0
+    for ln in lines:
+        s = ln.strip()
+        nonalnum = sum(1 for c in s if not c.isalnum() and not c.isspace())
+        digits = sum(1 for c in s if c.isdigit())
+        L = max(1, len(s))
+        # symbol-heavy, digit-heavy, or a "label: number" telemetry/config line
+        # ("Swapins:  1245194", "pageins: 342...") -- command output, not prose.
+        if (nonalnum / L > 0.30 or digits / L > 0.22
+                or re.match(r"^[\w./+-]+\s*[:=]\s*[\d,]", s)):
+            codey += 1
+    return codey / len(lines) < 0.40
+
+
 def evidence_from_span(text, sc, span_id=0, use_llm=True):
     """Yield (subject, attribute, value, reliability) for one span, from every
     evidence source. Reliability reflects the gate confidence of the source.
     span_id disambiguates SELF-CONTAINED changes so they do not collide across
     spans (entry 55). use_llm=False uses ONLY the model-free extractors (value/
     cos/functional) -- fast enough for a whole cross-session history (entry 60)."""
+    if not _is_prose(text):                 # skip pasted code/terminal/telemetry
+        return []
     text = resolve_pronouns(text)
     ev = []
     # numeric: value-anchored (deterministic, high r) + LLM triples that gate
@@ -159,6 +186,11 @@ _GENERIC_VERBS = {"take", "takes", "took", "taking", "get", "got", "getting",
                   "make", "made", "making", "do", "did", "doing", "give", "gave",
                   "giving", "like", "put", "use", "used", "using", "spend",
                   "spent", "go", "went"}
+# bare filler nouns that are not a trackable referent (entry-60 count:while,
+# count:more collisions)
+_FILLER = {"while", "more", "lot", "lots", "bit", "couple", "few", "many", "some",
+           "thing", "things", "one", "ones", "way", "ways", "part", "parts",
+           "kind", "sort", "stuff"}
 _DWELLING = {"apartment", "apartments", "house", "home", "place", "room", "flat",
              "condo", "dwelling", "unit", "housing"}
 _ADDITIVE = re.compile(r"\b(as well|also|too|in addition|plus)\b", re.I)
@@ -192,8 +224,8 @@ def _real_change(key, values):
         # age; two different task durations -- entry-58 B_02/D_10).
         nounset = key[0][1] if (isinstance(key[0], tuple) and len(key[0]) > 1
                                 and isinstance(key[0][1], frozenset)) else frozenset()
-        if not {n for n in nounset
-                if n not in _TEMPORAL_UNITS and n not in _GENERIC_VERBS}:
+        if not {n for n in nounset if n not in _TEMPORAL_UNITS
+                and n not in _GENERIC_VERBS and n not in _FILLER}:
             return False
         return True
     if scales and cats:                           # mixed -> incommensurable
