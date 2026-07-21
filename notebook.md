@@ -2661,3 +2661,11 @@ over-filtering descriptive-relation facts, not coreference. This toolkit is the
 answer to a later problem and is recorded so a future session adopts rather
 than re-researches it. The full cue mechanism and binding/centering composition
 are in this session's coreference agent transcripts.
+
+REPO NOTE (from the sketch, worth keeping): the entity-linking primitive
+already EXISTS -- encoder/registry.py Registry.resolve(term, top=2) gives the
+raw-cosine nearest neighbours and m_ref(term) gives the top1-top2 margin, which
+IS the Fellegi-Sunter match/possible-match signal. So the linker is a thin
+ingest-side wrapper (cos >= threshold AND margin >= threshold -> link; small
+margin -> possible-match bucket), not new substrate machinery, and it keeps
+server/sourcedrecall/service.py's no-inference contract intact.
