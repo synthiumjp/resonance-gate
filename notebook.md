@@ -3060,3 +3060,56 @@ is therefore NOT "solved" -- it is partitioned into a solved-narrow piece
 next), and a piece that genuinely needs a knowledge base (open-domain bare-value
 incompatibility). Numeric updates remain the strong result (7/7 tuned, fresh-
 validated 0 false alarms).
+
+## Entry 48 — 2026-07-21 (p2: categorical via pattern-inferred functionality — validated but recall-limited; the wall is linguistic ambiguity, not engineering)
+
+Built the "pattern infers the knowledge" path (functional_extract.py) on the
+registrant's insight: you do not need a large KB, you need a small PATTERN TABLE
+mapping relation-patterns to (type, functional). "moved to X"/"trip to X" ->
+location; "class on X" -> day; the relations are functional (one home, one class
+day), so two different values = a change by the uniqueness presupposition,
+without proving the values incompatible and without enumerating them. Plus a
+tiny containment list (Chicago in Illinois -> not a relocation).
+
+FINAL after tightening (2 clean fixes; stopped before overfitting):
+  categorical recall: 2 / 39     false alarms: 0 / 51 (fresh non-update)
+  caught: Rachel location (COS "moved to"), cocktail class day (event_day).
+  Both high-precision, 0 false alarms. Combined with numeric: 7/7 numeric + 2
+  categorical, all at 0 fresh false alarms.
+
+THE INSIGHT IS VALIDATED but RECALL IS LOW, and the ceiling is LINGUISTIC, not
+engineering. Three walls, each measured:
+  1. AMBIGUITY the surface form cannot resolve. "my RECENT family trip to
+     Hawaii" -> "...to Paris" (genuine, one slot changed) is LINGUISTICALLY
+     IDENTICAL to "recent trip to Outer Banks" -> "...to Tennessee" (two
+     different trips). Only "MOST recent"/"latest" (true superlative) is
+     unique; bare "recent" is ambiguous, and this data uses "recent". So
+     trip_dest was restricted to true superlatives -- correct behaviour, but it
+     drops the Hawaii->Paris case because the spans lack the superlative. This
+     is not fixable by better patterns; the information is not in the text.
+  2. COREFERENCE. "She moved to Chicago" (she=Rachel), "keeping THEM under my
+     bed" (them=sneakers) -- the value or subject is a pronoun, so the mention
+     does not key to its attribute. The filed coreference toolkit (entry 40
+     addendum) would recover these; it is the specific unblock for categorical
+     recall, unlike the numeric case where it barely mattered.
+  3. OPEN-DOMAIN bare-value incompatibility (agent-2's finding) genuinely needs
+     a KB and is not model-free-reliable.
+
+HONEST BOTTOM LINE ON CATEGORICAL. The pattern approach is real and correct --
+it catches inherently-functional categorical changes (location-via-COS, day) at
+0 false alarms, which nothing before this session could do. But most categorical
+updates in this corpus are blocked by (1) surface ambiguity the text does not
+resolve or (2) coreference, and a smaller share by (3) open-domain values. So
+categorical is MEANINGFULLY ADVANCED (from 0 to a clean high-precision slice)
+but NOT solved; the remaining recall is gated by coreference (buildable, filed)
+and by genuine ambiguity (not buildable -- the information is absent).
+
+OVERALL p2 STATE (differentiator = honest, receipted contradiction/change
+disclosure, no false alarms):
+  - NUMERIC updates: 7/7, fresh-validated 0 false alarms. STRONG.
+  - CATEGORICAL updates: 2/39 at 0 false alarms; ceiling is coreference +
+    ambiguity, not the mechanism.
+  - Precision (no-cry-wolf) has held at 0 false alarms across every fresh test.
+  - Recall is the honest weakness, and it is now attributable to named,
+    bounded causes (coreference, extraction coverage, surface ambiguity), not
+    to the detector.

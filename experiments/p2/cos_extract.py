@@ -43,9 +43,7 @@ _COS_GOAL = [
     ("location", r"\b(?:moved?|moving|relocated?|relocating)\s+(?:to|into)\b"),
     ("location", r"\bnow\s+(?:live|living|based|staying)\s+(?:in|at)\b"),
     ("employer", r"\bnow\s+(?:work(?:ing)?|employed)\s+(?:at|for|with)\b"),
-    ("employer", r"\bnow\s+(?:with|at)\b"),
-    ("employer", r"\b(?:switched|started|joined)\s+(?:to|at|for|with)?\b"),
-    ("device",   r"\b(?:switched|upgraded|changed)\s+to\b"),
+    ("employer", r"\b(?:started|joined)\s+(?:at|for|with)\s+"),
 ]
 _COS_GOAL = [(a, re.compile(p, re.I)) for a, p in _COS_GOAL]
 
