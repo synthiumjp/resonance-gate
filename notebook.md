@@ -4248,3 +4248,35 @@ wire -> receipted recall/abstain -> inject -> owner corrects via receipts ->
 memory updates -> next injection reflects it. The v2 re-extraction is still
 running in the background (v2 prompt is longer, so per-turn latency is higher
 than v1's 200ms median); v1-vs-v2 real-data comparison lands next entry.
+
+## Entry 76 — 2026-07-21 (p2: v2 re-extraction COMPLETE. Realtime held at 200ms; occupation spread 22->16; denser graph; all audits PASS on both caches)
+
+The background v2 re-extraction finished: 13,911 fresh calls, median 200 ms,
+p90 553 ms -- the longer v2 prompt costs NO realtime budget (the early-run
+slowness was model warmup). Comparison through the IDENTICAL wire pipeline
+(same hygiene, same clustering, same gates), counts only:
+
+  v1: 160 corroborated + 902 provisional; 257 edges; 98 wired; median deg 1
+  v2: 177 corroborated + 923 provisional; 541 edges; 118 wired; median deg 2
+      (182 before two fresh canon gaps the histogram exposed -- v2 emits
+       tool_used/project_name; folded into tool/project at readout, instant)
+
+  Targeted classes moved the right way:
+  - occupation slots 22 -> 16 (the third-party/roleplay spread shrinking)
+  - 1 relationship-prefixed attribute appeared (a third-party fact correctly
+    attached to the relationship, not the owner)
+  - non-hallucination audit: PASS on BOTH caches (0 unsupported links over
+    all pairs; v2: 324/324 crosstalk blocked, 0 leaked; 0 fabricated
+    assertions on no-evidence probes; suite 23/23)
+
+  The graph is DENSER under v2 (edges 257 -> 541, median degree 1 -> 2):
+  a more consistent extractor corroborates more facts, which then co-occur
+  more -- wiring quality compounds from extraction quality.
+
+HONEST CAVEATS, entry-69 discipline: (a) occupation 22->16 is an AGGREGATE;
+whether the 6 dropped slots were junk or real roles needs the owner's receipts
+check (profile_report_v2.txt) before celebrating -- suppression of real
+multiplicity is the exact mistake entry 69 corrected. (b) tool slots rose
+50 -> 65; some may be commands-as-tools (a known residue class), owner check.
+v1 remains the DEFAULT cache until the owner's verdict; v2 is one env var
+away (RG_EXTRACT_V2=1), both artifact sets intact.
