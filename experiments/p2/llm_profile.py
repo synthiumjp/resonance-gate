@@ -26,9 +26,16 @@ from consistency import get_llm
 _CANON_ATTR = {
     "residence": "location", "location": "location", "live": "location",
     "city": "location", "based": "location", "home": "location", "hometown": "location",
+    # a person legitimately has MULTIPLE roles -- occupation is MULTI-VALUED, not
+    # single. Fold all role phrasings into one multi-valued slot; do NOT collapse
+    # to one. (entry 69: the registrant is an SES exec, clinical psychologist,
+    # independent researcher AND author -- all real, all kept.)
     "employer": "occupation", "work": "occupation", "job": "occupation",
     "occupation": "occupation", "role": "occupation", "profession": "occupation",
-    "career": "occupation", "title": "occupation",
+    "career": "occupation", "title": "occupation", "job_role": "occupation",
+    "current_role": "occupation", "current_position": "occupation",
+    "position": "occupation", "current_interest": "interest",
+    "research_interest": "interest", "interest": "interest",
     "current_tool": "tool", "tool": "tool", "tools": "tool", "software": "tool",
     "uses": "tool", "using": "tool", "tech_stack": "tool", "stack": "tool",
     "education": "education", "degree": "education", "studying": "education",

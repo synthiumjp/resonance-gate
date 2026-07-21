@@ -51,11 +51,13 @@ _DEVICE_WORDS = {"pc", "nas", "studio", "server", "host", "localhost", "laptop",
                  "desktop", "machine", "vm", "arc", "node", "box"}
 # 3. transient / technical ATTRIBUTES -- not stable profile facts (they recur, so
 #    corroboration alone does not drop them).
+# ONLY genuinely transient/technical attributes. NOT roles: current_role/
+# current_position hold REAL jobs (entry 69) and are canon'd to occupation, not
+# excluded. Collapsing a multi-role person to one job destroys the profile.
 _EXCLUDE_ATTR = {"current_task", "current_activity", "current_directory",
                  "file_modified", "work_directory", "virtual_environment",
-                 "model_path", "model_used", "project_phase", "current_position",
-                 "concern", "current_interest", "current_role", "current_value",
-                 "researcher_name", "research_field", "current_directory"}
+                 "model_path", "model_used", "project_phase", "concern",
+                 "current_value", "researcher_name", "research_field"}
 
 
 def _reject_value(attr, v):

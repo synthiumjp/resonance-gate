@@ -3984,3 +3984,33 @@ rebuild + re-verify.
 This is the product working as designed: the corroborated + receipted profile made
 its OWN errors legible enough for the user to correct in minutes -- the trust
 surface (receipts) is what turns a noisy extractor into a fixable system.
+
+## Entry 69 — 2026-07-21 (p2: CORRECTION. Roles are MULTI-VALUED; don't collapse identity. Requisite variety.)
+
+Entry 68 wrongly treated a multi-valued occupation as roleplay/third-party junk to
+be suppressed. Ground-truth correction (the profile owner, checking via receipts):
+the multiple role-values were ACCURATE -- a person legitimately holds several
+concurrent roles. The corroborated + receipted mechanism surfaced them correctly;
+the receipts let the owner confirm each one. The error was mine (a "one job per
+person" prior), not the system's.
+
+Two fixes:
+  1. DESIGN PRINCIPLE: occupation/roles are MULTI-VALUED. Fold all role phrasings
+     (role / current_role / current_position / job_role / position) into ONE
+     multi-valued slot; do NOT collapse to a single job. Collapsing destroys the
+     truest part of a profile.
+  2. BUG from entry 68: _EXCLUDE_ATTR excluded current_role/current_position --
+     real role slots -- which would have DELETED real facts. Removed from the
+     exclusion; they canon to occupation. Only genuinely transient/technical
+     attributes stay excluded (task/activity/directory/file/model_path/...).
+
+LESSON (requisite variety, again): identity has genuine multiplicity, and the
+memory needs the variety to HOLD it, not the parsimony to collapse it. The narrow
+REAL errors that remain are third-party attribution (a family member's fact
+extracted as the owner's) and one machine hostname extracted as the owner's
+username -- a small targeted extraction refinement, not a reason to suppress
+multi-role. Receipts are what made every error correctable by the person who knows
+the ground truth.
+
+NOTE: profile specifics are deliberately kept OUT of this notebook/git (they are
+the owner's private data); only the methodological lesson is recorded.
