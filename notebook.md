@@ -3604,3 +3604,60 @@ STATE after the noise-gate + scope work (both real-data-driven, this session):
 Owed next: entity-anchored neighbourhoods for true long-range; a larger real-data
 sample (n=1 conversation so far); the canonical typed fact schema the gates are
 converging toward.
+
+## Entry 58 — 2026-07-21 (p2: REAL-CORPUS validation, n=48. False-alarm rate ~11%, NOT trustworthy yet; and genuine in-conversation fact-changes are RARE)
+
+Ran the full spine (noise-gated numeric belief + scoped categorical audit) over a
+48-conversation ANONYMISED real-chat corpus (public ShareGPT, four shards, direct
+identifiers stripped, phones/emails scrubbed to 0 residual; QUARANTINED in
+scratchpad, never committed -- per the trust/PII discipline this session). 47
+no-change conversations (the false-alarm set) + 1 scraper-flagged change.
+Detections adjudicated by TWO independent blind judges (sonnet agent + local qwen),
+verdicts only, no PII surfaced.
+
+TWO SOBERING FINDINGS.
+
+1. GENUINE IN-CONVERSATION LIFE-FACT CHANGES ARE RARE. Three scraper agents swept
+   ~6k conversations each (~2k with >=6 human turns) and found ZERO genuine
+   mid-conversation life-fact changes; the fourth found one, which BOTH judges
+   ruled NOT a life change (a fictional character renamed during creative
+   brainstorming). So across ~8k personal-ish real conversations, ~0 genuine
+   "user stated X then changed to Y" within one conversation. The premise the
+   product detects barely occurs in single real conversations -- it is a
+   CROSS-SESSION phenomenon (LongMemEval simulates that; a lone real transcript
+   does not exercise it). This reframes the target.
+
+2. FALSE-ALARM RATE IS MATERIALLY NON-ZERO. Raw: 6/47 fired on no-change
+   conversations = 12.8%. Both-judge-confirmed false: 5/47 = 10.6% (inter-judge
+   agreement 5/6 = 0.83; the one split was an "as well" addition). This is NOT
+   "memory you can trust" yet -- ~1 in 9 clean conversations gets a spurious alert.
+   BY PATH:
+     - CATEGORICAL AUDIT (the spine): 1/47 = 2.1% (both-confirmed false). Stayed
+       silent on 46/47 real conversations -- the strong part.
+     - NUMERIC BELIEF path: ~5/47 ~= 10.6% -- the liability. Every numeric false
+       alarm is a specific, fixable bug, NOT irreducible:
+         * changes() does NOT check scale commensurability -> a month-count and a
+           repetition-count merged into one slot; a years-as-student count and an
+           age merged. (incommensurable values counted as a change)
+         * self-contained cos within a span pairs INCOMMENSURABLE values (a
+           city-name and a dwelling-type read as one move; an "X as well" addition
+           read as a replacement).
+     - The single audit false alarm was a third-party/hypothetical confusion: a
+       location where the user's FRIENDS are vs the user's own city, plus a merely
+       PLANNED (not executed) move -- read as a current-city change.
+
+RECALL: not measurable here (0 genuine positives in the corpus). The existence
+proof stands at the single earlier business-rename transcript (caught, entry 57);
+A_07 was correctly left SILENT by both paths (both judges: not a life change), so
+the raw 0/1 "miss" is actually correct behaviour.
+
+HONEST NET. The scoped audit spine is close to trustworthy on real chat (2.1%
+false alarm, silent on genuine no-change). The numeric belief path is NOT ready
+(~10.6% false alarm) and drags the combined rate to ~11%; its errors are a small
+set of named commensurability/collision bugs. AND the whole premise needs
+reframing: genuine change WITHIN a conversation is rare, so the value is
+cross-session. This is the first n>1 real-data number the project has, and it is
+the honest baseline to improve from -- discipline held: real data corrected both
+the confidence AND the framing. Owed next: fix the numeric commensurability/
+collision bugs (or gate the numeric path out of real-chat change-alerts); test
+cross-session change on real multi-session data; larger genuine-change sample.
