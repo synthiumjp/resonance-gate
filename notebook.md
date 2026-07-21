@@ -3567,3 +3567,40 @@ big-bang rewrite. It does NOT vindicate the maximally-compressed VSA form (the
 frozen artifact measured its capacity/honesty limits); the requisite-variety
 answer is the MIDDLE: the minimal typed structure that supports honest change-
 disclosure with receipts, matching the survey's executable/VERIFIABLE emphasis.
+
+## Entry 57 — 2026-07-21 (p2: SCOPED audit. The working path now RUNS at conversation scale and still catches the long-range change)
+
+Closed the entry-55 blocking gap: consistency.audit dumped all turns into one
+prompt and CRASHED on real length (206 turns = 9693 tokens > 8192). The audit is
+the path that WORKS on real categorical change, so this was blocking, not cosmetic.
+
+scope_audit.audit_scoped: neighbourhood-scoped windowing. Statements are packed
+into context-budgeted windows (~16k chars each, per-statement capped at 200) with
+34% OVERLAP; the audit runs per window; proposals are aggregated, grounding-
+verified against the full conversation, and deduped. Guarantees: always fits
+context; a change whose endpoints share a window is caught; bounded LLM calls
+(len / capacity), not one-per-anchor.
+
+MEASURED on the real transcript (full 206 turns, previously un-runnable):
+  206 statements -> 3 windows, max span 116 statements (34% overlap).
+  Result: ONE verified change -- the recruitment business rename (StartUpScout ->
+  The Code Concierge). Its two mentions (turns ~15 and ~51) sit inside one
+  116-statement window, so scoping did not split them. One clean proposal, deduped
+  across 3 overlapping windows, no over-fire across 200+ real turns.
+
+HONEST LIMITATION, logged: a change whose old/new mentions are farther apart than
+a window span (here 116 statements) can be split across windows and missed.
+Overlap widens the span; it is not infinite. True long-range change needs ENTITY-
+ANCHORED neighbourhoods (group by shared subject/noun regardless of distance) --
+named as next, not built. The window count and span are reported every run, so
+coverage is visible, never a silent truncation.
+
+STATE after the noise-gate + scope work (both real-data-driven, this session):
+  - NUMERIC belief path: real-chat noise gated (assertions 22->13, false changes
+    2->0), LongMemEval preserved (11/39 @ 0 false alarms).
+  - CATEGORICAL audit: now RUNS on full conversations and catches the real change
+    cleanly (1/1, no over-fire). This is the first end-to-end honest pass on real
+    data -- the working path is both correct AND runnable.
+Owed next: entity-anchored neighbourhoods for true long-range; a larger real-data
+sample (n=1 conversation so far); the canonical typed fact schema the gates are
+converging toward.

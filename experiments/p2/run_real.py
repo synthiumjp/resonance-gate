@@ -26,7 +26,7 @@ from belief import BeliefMemory
 from schema import Scope
 from resolve import resolve_pronouns
 from run_belief import evidence_from_span, changes
-from consistency import audit, verify
+from scope_audit import audit_scoped
 
 
 def load_user_turns(path):
@@ -90,19 +90,16 @@ def main():
         print(f"      receipts (value, P over time): {recs}")
 
     # ---- categorical path: the LLM-as-energy audit, grounding-verified
-    print(f"\n--- CONSISTENCY AUDIT (LLM proposes, grounding+model-free verify):")
-    # cap each statement so a long real conversation fits the audit context
-    # window (real chat overflows 8192 raw). This is the crude stand-in for the
-    # proper neighbourhood-scoping still owed -- but it lets the audit RUN.
-    audit_input = [t[:220] for t in user_turns]
+    print(f"\n--- CONSISTENCY AUDIT (scoped, LLM proposes, grounding+model-free verify):")
+    # neighbourhood-scoped windowing: always fits context, catches changes whose
+    # endpoints share a window (scope_audit.py). Replaces the crude global cap.
     try:
-        proposals = audit(audit_input)
-        verified = [c for c in proposals if verify(c, audit_input)]
-        print(f"   LLM proposed {len(proposals)}, {len(verified)} survived verification")
+        verified, info = audit_scoped(user_turns, log=lambda m: print(f"   {m}"))
+        print(f"   {len(verified)} change(s) survived verification:")
         for c in verified:
             print(f"      * {c.get('attribute')}: {c.get('old')!r} -> {c.get('new')!r}")
     except Exception as e:
-        print(f"   [audit skipped: {e}]")
+        print(f"   [audit failed: {e}]")
 
     print("\n(honest read: are the disclosed changes REAL in the transcript, with")
     print(" correct receipts? or noise? that judgement is the actual test.)")
