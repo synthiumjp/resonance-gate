@@ -3802,3 +3802,38 @@ principled input/commensurability gates rather than value lookups. The remaining
 signal is weak (few genuine cross-session life-changes even in 13 months) -- which
 re-confirms entry 58: real fact-change is rare, so PRECISION (near-zero false
 alarms) is the whole game, and it is now within reach on real data.
+
+## Entry 63 — 2026-07-21 (p2: CONFIRMED real-data endpoint. Cross-session false alarms 10 -> ~2 weak; precision reachable, but model-free recall is thin.)
+
+Re-run on the registrant's own history confirmed the entry-62 prediction:
+cross-session belief changes spanning >=2 conversations = 3 (from 11 at entry 60):
+  1. a RESIDENCE-granularity case (a state vs a city within it -> containment, not
+     a move; correctly identifies where they are, but not a "change").
+  2. a TOOL-PREFERENCE case (current_pref shifting across sessions) -- the one
+     plausibly-REAL cross-session signal, and it is weak (could be multi-value).
+  3. a technical residual (a model-name + number count, "N"->"1") a surface rule
+     cannot cleanly gate without over-fitting.
+So on 15,186 real turns / 688 conversations / 13 months: ~1 clear technical false
+alarm, 1 containment-weak case, 1 plausibly-real signal.
+
+HONEST DOUBLE CONCLUSION.
+  PRECISION is now reachable on real target-user data: 10 -> ~2 weak, every named
+  false-alarm class fixed at ZERO LongMemEval cost by principled input/
+  commensurability/place-type gates (not value lookups). "Memory you can trust"
+  (near-zero false alarms) is in reach.
+  RECALL is THIN, and this is the real limit: across 13 months the model-free path
+  surfaced essentially ONE plausibly-real change. Two compounding reasons -- (a)
+  genuine cross-session life-fact changes are RARE (entry 58, re-confirmed at
+  scale), and (b) the model-free extractors cover a NARROW fact vocabulary
+  (residence, preference, counts) and are BLIND to the meaningful categorical
+  changes in this user's life: research-direction pivots, what they are building,
+  plan reversals, belief updates. Those are exactly what the entity-scoped LLM
+  AUDIT is for -- not yet run on this data (cost + entity-anchored neighbourhoods
+  still owed).
+
+NET for the product: the model-free spine is now PRECISE but LOW-YIELD on real
+data. The value proposition ("memory that tracks how your context evolves") lives
+in the CATEGORICAL changes model-free cannot see, so the honest next test is the
+entity-scoped LLM audit over this history -- the real measure of whether it
+captures meaningful evolution, not just the rare surface-fact flip. Precision is
+close to a deliverable; recall on meaningful change is the open product question.
