@@ -1,0 +1,259 @@
+[
+ {
+  "id": 0,
+  "arm": "categorical_update",
+  "attribute": "location of Rachel",
+  "old": "city",
+  "new": "suburbs",
+  "statements": [
+   "I'm also thinking about visiting my friend Rachel who recently moved to a new apartment in the city. Do you know what the weather is like in the city this time of year?",
+   "She moved to Chicago.",
+   "Miami Beach sounds fun, but I've been there before. I'm thinking of somewhere more relaxed. My friend Rachel actually just moved back to the suburbs again, so I was thinking of somewhere not too far from a major city. Any suggestions?"
+  ]
+ },
+ {
+  "id": 1,
+  "arm": "categorical_update",
+  "attribute": "cocktail-making class day",
+  "old": "Thursday",
+  "new": "Fridays",
+  "statements": [
+   "I think I'll go with the grilled jerk chicken with mango salsa. I've been experimenting with jerk seasoning lately and I love the flavor it adds to chicken. Do you think I could serve it with some grilled asparagus and quinoa on the side? And by the way, I have a cocktail-making ",
+   "I'm looking for some inspiration for a new cocktail recipe. Do you have any ideas for a refreshing summer drink that incorporates tequila? By the way, I have a cocktail-making class on Fridays, so maybe something I can experiment with then."
+  ]
+ },
+ {
+  "id": 2,
+  "arm": "categorical_update",
+  "attribute": "storage location of old sneakers",
+  "old": "under my bed",
+  "new": "in a shoe rack in it",
+  "statements": [
+   "I've heard of Teva and Merrell, they're great brands. I'll check out their latest collections. By the way, I need to take care of my old sneakers, I've been keeping them under my bed for storage, and they're starting to smell.",
+   "I'm thinking of buying a new pair of sandals with better quality straps. Can you recommend some good brands or stores that offer durable sandals? By the way, I need to organize my closet this weekend, and I'm looking forward to get rid of some of my old sneakers in a shoe rack in"
+  ]
+ },
+ {
+  "id": 3,
+  "arm": "categorical_update",
+  "attribute": "therapy session frequency",
+  "old": "every two weeks",
+  "new": "every week",
+  "statements": [
+   "I've been trying to prioritize self-care activities like yoga and meditation, and it's been helping with my anxiety levels. Do you think these activities can also help with sleep quality? And by the way, I have a therapy session with Dr. Smith coming up soon - it's every two week",
+   "I see what you're doing here, but I think it's a bit too structured for me. I'd rather have some flexibility in my schedule. Can you help me come up with a more general plan to prioritize my tasks and set boundaries, rather than a strict schedule? And by the way, speaking of boun"
+  ]
+ },
+ {
+  "id": 4,
+  "arm": "categorical_update",
+  "attribute": "gym days",
+  "old": "Mondays, Wednesdays, and Fridays",
+  "new": "Tuesdays, Thursdays, and Saturdays",
+  "statements": [
+   "I think that's a good start. But I don't actually work out on Mondays, Wednesdays, and Fridays. I go to the gym on Tuesdays, Thursdays, and Saturdays.",
+   "I'm trying to plan out my week ahead. Can you suggest some healthy dinner recipes I can meal prep on Sunday? By the way, I'm thinking of rewarding myself with a post-workout smoothie on Saturday, since I've been consistent with my gym routine - four times a week, actually."
+  ]
+ },
+ {
+  "id": 5,
+  "arm": "categorical_update",
+  "attribute": "favorite BBQ sauce",
+  "old": "Sweet Baby Ray's",
+  "new": "Kansas City Masterpiece BBQ sauce",
+  "statements": [
+   "I love those suggestions! I'm definitely going to make the mac and cheese, it's a favorite of mine and my friends. Speaking of which, I need to stock up on my favorite BBQ sauce, Sweet Baby Ray's, to serve with the ribs. Do you have any recipes for smoked brisket that you can sha",
+   "I'm thinking of hosting another backyard BBQ soon and I want to try out some new recipes. Can you give me some tips on how to make smoked brisket? By the way, I've been loving my new Weber gas grill for quick weeknight dinners, and I'm currently obsessed with Kansas City Masterpi"
+  ]
+ },
+ {
+  "id": 6,
+  "arm": "categorical_update",
+  "attribute": "length of parents' stay",
+  "old": "six months",
+  "new": "nine months",
+  "statements": [
+   "My parents have been a big help while living with me in the US, especially with household chores, cooking, and even taking English language classes. We've been enjoying each other's company, and it's been great to have them around for the past six months. Anyway, back to the gree",
+   "I'm planning to apply for a green card soon and I'm not sure what documents I need to prepare. Can you guide me through the process? By the way, my parents have been a huge help in preparing all the paperwork, they've been staying with me for nine months now."
+  ]
+ },
+ {
+  "id": 7,
+  "arm": "categorical_update",
+  "attribute": "National Geographic issue",
+  "old": "fourth",
+  "new": "fifth",
+  "statements": [
+   "I usually read news, science, and entertainment magazines. For newspapers, I've been reading The New York Times and The Daily News regularly. I've been enjoying The New Yorker for their fiction and National Geographic for their in-depth articles on science and nature - I just fin",
+   "Can you help me fill in the National Geographic section of the spreadsheet? I remember finishing three issues and I'm currently on my fourth.",
+   "I've been reading about the Amazon rainforest and its indigenous communities in National Geographic, and I just finished my fifth issue. I'm really interested in learning more about their cultures and traditions. Can you recommend some documentaries or films that focus on the dai"
+  ]
+ },
+ {
+  "id": 8,
+  "arm": "categorical_update",
+  "attribute": "number of tops from H&M",
+  "old": "three",
+  "new": "five",
+  "statements": [
+   "I've already bought three tops from H&M, I'm really loving their summer collection. Do you know if they have a loyalty program or rewards card that I can sign up for?",
+   "I'm planning to go to the mall this weekend and was wondering if there are any sales or promotions going on at H&M or Sephora that I should know about. By the way, I've already got five tops from H&M so far, and I'm thinking of getting a few more."
+  ]
+ },
+ {
+  "id": 9,
+  "arm": "categorical_update",
+  "attribute": "United Airlines Status",
+  "old": "Premier Silver",
+  "new": "Premier Gold",
+  "statements": [
+   "I actually just hit 20,000 miles on United Airlines, which means I'm finally eligible for Premier Silver status. Can you tell me how many miles I need to book a one-way economy ticket to LA from DC?",
+   "I'm flying from DC, and I'm flexible with my travel dates. I'm looking for Economy tickets and my budget is around $400. Oh, and I do have a United Airlines MileagePlus account - I just reached Premier Gold status."
+  ]
+ },
+ {
+  "id": 10,
+  "arm": "categorical_update",
+  "attribute": "language exchange class day",
+  "old": "Wednesday evening",
+  "new": "Thursday",
+  "statements": [
+   "I had a language exchange class at a local language school, where I'm paired with a Colombian tutor named Juan. We meet every Wednesday evening, and he helps me with my Spanish pronunciation and grammar while I assist him with his English vocabulary. Now I remember! My language e",
+   "I'm actually meeting Maria on Thursday,. Could you help me with some common phrases for shopping in Colombia?"
+  ]
+ },
+ {
+  "id": 11,
+  "arm": "categorical_update",
+  "attribute": "Hilton points",
+  "old": "enough points for a single free night's stay",
+  "new": "enough points for two free night's stays",
+  "statements": [
+   "I've accumulated enough points for a single free night's stay at any Hilton property. Since Hilton Lake Las Vegas Resort is a Category 5 hotel, I'm good to redeem my points for a weekend getaway.",
+   "I'm planning a trip to Europe in November and considering hotels in Paris with an Eiffel Tower view. Can you help me find some options within my budget? By the way, I've accumulated enough points for two free night's stays at any Hilton property, so I might use that for a separat"
+  ]
+ },
+ {
+  "id": 12,
+  "arm": "categorical_update",
+  "attribute": "friend Alex's location",
+  "old": "Germany",
+  "new": "nowhere specified (implied to be elsewhere)",
+  "statements": [
+   "Actually, I'm also curious about the music festival where I met Alex. Do you have any recommendations for indie rock bands or musicians I should check out?",
+   "I'm planning a trip to Germany soon and was wondering if you could recommend some indie rock music venues in Berlin. By the way, speaking of Germany, I've got a friend Alex from there who I met at a music festival, and we've met up twice already - he's really cool."
+  ]
+ },
+ {
+  "id": 13,
+  "arm": "categorical_update",
+  "attribute": "coffee consumption",
+  "old": "one cup",
+  "new": "two cups",
+  "statements": [
+   "I'm trying to make my morning routine more efficient. Can you give me some tips on how to optimize my coffee brewing method? By the way, I've switched to a darker roast and cut back to just one cup in the morning, which has been really helping me feel more focused.",
+   "I'm trying to decide on a new coffee maker, can you recommend any good ones? I'm currently using a drip coffee maker, but I'm open to exploring other options. By the way, I'm thinking of changing my morning coffee limit to two cups, do you think that's a good idea?"
+  ]
+ },
+ {
+  "id": 14,
+  "arm": "categorical_update",
+  "attribute": "number of bikes",
+  "old": "three",
+  "new": "four",
+  "statements": [
+   "I'm actually thinking of doing a century ride soon, do you think my current road bike is ready for that distance, considering I've already done 2,000 miles on it? And by the way, I've been using it along with my other two bikes, a mountain bike and a commuter bike.",
+   "That sounds like an amazing itinerary! I'm really excited about the scenic routes and bike-friendly stops. Since I'll have four bikes with me, I'll make sure to book the accommodations with bike storage in advance to ensure they can accommodate all my bikes. By the way, speaking "
+  ]
+ },
+ {
+  "id": 15,
+  "arm": "categorical_update",
+  "attribute": "storage location of old sneakers",
+  "old": "under my bed",
+  "new": "in a shoe rack in it",
+  "statements": [
+   "I've heard of Teva and Merrell, they're great brands. I'll check out their latest collections. By the way, I need to take care of my old sneakers, I've been keeping them under my bed for storage, and they're starting to smell.",
+   "I'm thinking of buying a new pair of sandals with better quality straps. Can you recommend some good brands or stores that offer durable sandals? By the way, I need to organize my closet this weekend, and I'm looking forward to get rid of some of my old sneakers in a shoe rack in"
+  ]
+ },
+ {
+  "id": 16,
+  "arm": "fresh_nonupdate",
+  "attribute": "most-recent trip",
+  "old": "model show last weekend",
+  "new": "trip to the hobby store in late April",
+  "statements": [
+   "I'm looking for some tips on photo-etching for my new 1/72 scale B-29 bomber model kit. I've never tried it before, but I've seen some amazing results online. By the way, I just got this kit and a 1/24 scale '69 Camaro at a model show last weekend.",
+   "I'm looking for some tips on weathering techniques for my model kits. I've been getting back into model building and I recently finished a simple Revell F-15 Eagle kit that I picked up on a whim during a trip to the hobby store in late April.",
+   "I'm looking for some tips on weathering techniques for my model tanks. I've been using AK Interactive products, but I'm interested in trying out some new methods. By the way, I also started working on a diorama featuring a 1/16 scale German Tiger I tank, and I'm trying to get the",
+   "I'm looking for some advice on painting metal surfaces for a model kit. I recently finished a Tamiya 1/48 scale Spitfire Mk.V and had to learn some new techniques, but I'm still not entirely happy with the results. Do you have any tips or recommended products that could help me a",
+   "I'm thinking of trying out enamel washes on my next project, a 1/72 scale B-29 bomber. Do you have any recommendations for enamel washes that work well with acrylic paints?"
+  ]
+ },
+ {
+  "id": 17,
+  "arm": "fresh_nonupdate",
+  "attribute": "recent film festival participation",
+  "old": "Austin Film Festival (48-hour film challenge)",
+  "new": "Portland Film Festival (volunteering)",
+  "statements": [
+   "I'm looking for some recommendations for independent films that explore themes of social justice and identity. I've really been drawn to films like \"Parasite\" and \"The Farewell\" lately. By the way, I recently participated in the 48-hour film challenge at the Austin Film Festival,",
+   "I'd like to know more about the cinematography in \"Clemency\" and \"The Miseducation of Cameron Post\". How did the directors use camera techniques and lighting to convey the tone and atmosphere of the films? By the way, I got to discuss the unique narrative structure of \"The Weight",
+   "I'd like to know more about the casting process for both films. How did the directors and casting directors find the right actors to bring these complex characters to life? By the way, I recently participated in a 48-hour film challenge at the Austin Film Festival, where my team ",
+   "I'm looking for some film recommendations that explore themes of social justice and identity. I've recently been drawn to films like \"Parasite\" and \"The Farewell\", and I'd love to discover more. By the way, I've been pretty active in the film festival scene lately - I even volunt",
+   "I've been experimenting with different camera angles and lighting techniques, and I've noticed a big difference in the overall look and feel of my footage. I've also been playing around with editing software, trying to develop my own style and visual aesthetic.\n\nBy the way, speak",
+   "I'm interested in learning more about the film industry, especially when it comes to independent films and documentaries. Can you recommend some films that explore themes of social justice and identity, similar to \"Parasite\" and \"The Farewell\"? By the way, I just got back from AF"
+  ]
+ },
+ {
+  "id": 18,
+  "arm": "fresh_nonupdate",
+  "attribute": "recent film festival participation",
+  "old": "Portland Film Festival (volunteering)",
+  "new": "AFI Fest in LA",
+  "statements": [
+   "I'm looking for some recommendations for independent films that explore themes of social justice and identity. I've really been drawn to films like \"Parasite\" and \"The Farewell\" lately. By the way, I recently participated in the 48-hour film challenge at the Austin Film Festival,",
+   "I'd like to know more about the cinematography in \"Clemency\" and \"The Miseducation of Cameron Post\". How did the directors use camera techniques and lighting to convey the tone and atmosphere of the films? By the way, I got to discuss the unique narrative structure of \"The Weight",
+   "I'd like to know more about the casting process for both films. How did the directors and casting directors find the right actors to bring these complex characters to life? By the way, I recently participated in a 48-hour film challenge at the Austin Film Festival, where my team ",
+   "I'm looking for some film recommendations that explore themes of social justice and identity. I've recently been drawn to films like \"Parasite\" and \"The Farewell\", and I'd love to discover more. By the way, I've been pretty active in the film festival scene lately - I even volunt",
+   "I've been experimenting with different camera angles and lighting techniques, and I've noticed a big difference in the overall look and feel of my footage. I've also been playing around with editing software, trying to develop my own style and visual aesthetic.\n\nBy the way, speak",
+   "I'm interested in learning more about the film industry, especially when it comes to independent films and documentaries. Can you recommend some films that explore themes of social justice and identity, similar to \"Parasite\" and \"The Farewell\"? By the way, I just got back from AF"
+  ]
+ },
+ {
+  "id": 19,
+  "arm": "fresh_nonupdate",
+  "attribute": "tank size",
+  "old": "5-gallon",
+  "new": "20-gallon",
+  "statements": [
+   "I'm looking for some advice on live plants for my community tank. I've got an anacharis and a java moss, but I'm interested in adding some more variety. Do you have any recommendations for beginner-friendly plants that are easy to care for?",
+   "I'm having some issues with high nitrite levels in my tank. I've been doing partial water changes, but I'm not sure if I'm doing it correctly. Can you walk me through the process? By the way, I've had some experience with aquariums - I have a 5-gallon tank with a solitary betta f",
+   "I'm having some issues with the nitrite levels in my tank. I've been doing partial water changes, but I'm not sure if I'm doing it correctly. Can you give me some tips on how to lower nitrite levels in a freshwater tank? By the way, I've finally set up my 20-gallon freshwater com"
+  ]
+ },
+ {
+  "id": 20,
+  "arm": "fresh_nonupdate",
+  "attribute": "most-recent trip",
+  "old": "Target",
+  "new": "ShopRite",
+  "statements": [
+   "I'm planning a trip to Walmart this weekend and I'm looking for some deals on baby essentials. Do you have any info on their current sales or promotions on diapers? By the way, I used a Buy One Get One Free coupon on Luvs diapers at Walmart today, which was a great deal!",
+   "I'm planning a shopping trip to Target this weekend and I'm wondering if you have any info on their current sales and promotions. By the way, I just redeemed $12 cashback for a $10 Amazon gift card from Ibotta today, so I'm feeling pretty good about my savings so far!",
+   "I'm trying to plan my grocery shopping trip for this week. Can you help me find any good deals or sales on diapers and formula at ShopRite? By the way, I signed up for their rewards program today, so I'm hoping to maximize my points and savings."
+  ]
+ },
+ {
+  "id": 21,
+  "arm": "fresh_nonupdate",
+  "attribute": "grocery delivery service",
+  "old": "FarmFresh",
+  "new": "Instacart",
+  "statements": [
+   "I've been meaning to organize my pantry and kitchen cabinets for a while now, and your suggestions are super helpful. I'm excited to get started this weekend. By the way, I'm glad I cancelled my monthly grocery delivery subscription from FarmFresh, which I wasn't using frequently",
+   "I'm planning to make some new recipes this week and I need some inspiration. Can you suggest some healthy dinner ideas that incorporate chicken breasts and ground beef? By the way, I just did an online grocery order from Instacart and had it delivered to my doorstep, and spent ar"
+  ]
+ }
+]

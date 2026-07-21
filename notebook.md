@@ -3358,3 +3358,59 @@ result and the strongest the change-disclosure differentiator has been. What
 remains: independent validation of the 16, a larger fresh precision sample,
 scaled neighbourhood scoping, calibration fitting -- and still, the real-person
 real-data test.
+
+## Entry 53 — 2026-07-21 (p2: INDEPENDENT VALIDATION of B-semantic — the 16 was inflated; validated recall is 8/39, false-alarm rate 7.3%)
+
+Ran the two-independent-judge protocol (sonnet + haiku, blind to arm, strict
+"one attribute changed vs two different things" criterion) over all 22 B-semantic
+detections: 16 categorical-update + 6 fresh-non-update candidates. This is the
+validation entry 52 flagged as owed before quoting the recall as final.
+
+RESULT -- the raw number was inflated, exactly the risk independent judging exists
+to catch:
+    inter-judge agreement: 17/22 = 0.77  (in line with the ~0.7-0.8 human ceiling
+      for this task, entry 28)
+    CATEGORICAL recall: raw LLM claim 16 -> BOTH judges GENUINE on only 8/39
+      (judge1 8, judge2 10). ~50% of the LLM's detections were HALLUCINATED or
+      unsupported by the text -- it claimed changes the statements do not show
+      (e.g. "Thursday->Fridays" where only Fridays appears; "Germany->nowhere"
+      where the statement confirms Alex is STILL from Germany; a hypothetical
+      "thinking of two cups" reported as a realised change).
+    FRESH false alarms: BOTH judges FALSE_ALARM on 3/41 non-update instances =
+      7.3% (my own self-judged estimate had been ~1/30 -- independent judging
+      found more). The 3 confirmed are the event-individuation class again
+      (two different festivals / two different tanks / two different shopping
+      trips read as one change).
+
+HONEST VALIDATED STANDING OF B-SEMANTIC:
+  - It IS a real categorical lift: 2/39 (model-free) -> 8/39 (validated) = ~4x,
+    NOT the 8x (2->16) the raw number implied.
+  - It carries a REAL precision cost: 0 (model-free) -> 7.3% fresh false alarms.
+  - And it confirms, on our own data, the documented unreliability of LLM
+    contradiction-judging: it hallucinates ~half its detections, and only
+    independent adjudication surfaces that -- self-judging (mine at 1/30, the
+    LLM's own 16) systematically over-counts.
+
+WHAT THIS MEANS FOR THE ARCHITECTURE. The hybrid (LLM proposes, model-free
+verifies) is still the right shape and still lifts categorical 4x -- but the
+LLM-as-energy is a NOISY proposer whose output must be treated as a lead, not a
+finding, and whose numbers are only trustworthy after independent validation.
+The model-free NUMERIC result (belief memory, 11/11 genuine on inspection, 0
+fresh false alarms) remains the CLEANER, more trustworthy foundation; the
+categorical LLM layer is a real but modest, precision-costly extension.
+
+THE DISCIPLINE POINT, recorded because it is the through-line of the whole
+session. Independent/held-out validation has now corrected an over-optimistic
+in-house number THREE times: COND-E (entry 24 addendum, construction artefact),
+the trip false alarm (entry 45, stress test), and B-semantic recall here
+(16 -> 8). Every headline number this project can trust came AFTER out-of-sample
+or independent adjudication; every one measured only in-house was inflated. That
+is the single most reliable finding of the session, and it is a statement about
+method, not about any one mechanism.
+
+NET, honestly. Change disclosure now stands at: NUMERIC 11/11 genuine at 0 fresh
+false alarms (strong, clean); CATEGORICAL 8/39 validated recall at 7.3% fresh
+false alarms (real 4x lift over model-free, but noisy and precision-costly, and
+half the raw LLM proposals were hallucinated). The categorical wall is LOWERED,
+not cleanly closed. And the biggest gap of all is unchanged: no real person has
+used this on real data.
