@@ -61,7 +61,7 @@ def build_memory(user_turns):
             sc.observe(tr)
     # second pass: feed gated evidence into the belief state, in time order
     for si, txt in enumerate(resolved):
-        for slot, value, r in evidence_from_span(txt, sc):
+        for slot, value, r in evidence_from_span(txt, sc, span_id=si):
             mem.observe(slot, "_", value, si, reliability=r)
     return mem
 

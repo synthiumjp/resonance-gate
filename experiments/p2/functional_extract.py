@@ -68,6 +68,13 @@ _PATTERNS = [
 
 # tiny containment list for the location veto: a value naming a larger region
 # does not contradict a value naming a place within it (Chicago vs Illinois).
+# INFORMATIONAL-keep guard: "keep you updated / posted / in the loop / up to
+# date" is not physical object-storage -- it over-matched the keep_location
+# pattern on real chat and produced a false "storage location" slot (entry 55).
+_INFORMATIONAL = re.compile(
+    r"\b(updated|posted|informed|abreast|in the loop|up to date|in touch|"
+    r"in mind|track of|record of)\b", re.I)
+
 _BIG_REGIONS = {"illinois", "california", "texas", "new york", "the us", "usa",
                 "the united states", "the uk", "england", "the country",
                 "the city", "the area", "the region", "the state", "the suburbs",
@@ -110,6 +117,10 @@ def extract_functional(text):
                 # kept in two places pairs; value is the location
                 akey = attr
                 if attr == "keep_location" and len(m.groups()) >= 2:
+                    # informational "keep X updated/posted/in the loop" is not
+                    # physical storage -> not a trackable location attribute
+                    if _INFORMATIONAL.search(m.group(0)):
+                        continue
                     obj = _clean(m.group(1))
                     akey = f"keep:{obj.lower()}"
                     val = _clean(m.group(2))

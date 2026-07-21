@@ -3521,3 +3521,49 @@ WHAT THIS MAKES CONCRETE (was abstract "owed" work; now blocking, priority order
 This is the first test that told us something the benchmark could not, and it
 redirects the whole build: the categorical audit + scoping is the product spine;
 the numeric belief path needs a real-data noise gate before it is trustworthy.
+
+## Entry 56 — 2026-07-21 (p2: real-data NOISE GATE. False change-disclosures 2->0, noise assertions 22->13, LongMemEval recall preserved 11/39 @ 0 false alarms)
+
+Fixed the entry-55 real-transcript noise at its three sources, measured against
+BOTH LongMemEval (must not cost real facts) and the real transcript.
+
+1. NUMERIC TRACKABILITY GATE (numeric_gate.py). The numeric path treated every
+   number as a fact. New negative filter rejects incidental numbers on count
+   scales: YEAR values (1900-2099 read as a count), PROPER-NOUN counted nouns
+   (a label/ID that appears only Capitalised, e.g. a resume digit-string),
+   ENUMERATION nouns (ideas/apps/tips/... -- counts of listed items, usually the
+   assistant's), and bare-stopword heads. time_s/money kept; EMPTY counted noun
+   kept (rejecting it cost 2 genuine LME facts -- "three different ones",
+   "17 new" -- caught in regression and reverted). Tight list, measured:
+   points/tops/bikes/pages deliberately excluded (real LME nouns).
+
+2. SELF-CONTAINED CHANGE COLLISION (run_belief). "from X to Y" / "used to P now
+   Q" put both values in ONE span under a constant 'cos' key, so two UNRELATED
+   changes in different spans merged into one slot and fired a false change.
+   Fixed: key self-contained cos:change by span_id (pairs within a span, never
+   across). Goal-only cos:location/cos:employer stay cross-span (that is how
+   they legitimately detect an update across mentions).
+
+3. INFORMATIONAL keep-construction (functional_extract). "keep you updated / in
+   the loop / up to date" over-matched the physical-storage keep_location
+   pattern -> a false "storage location" slot. Guarded out informational
+   participles.
+
+MEASURED. LongMemEval: recall 11/39, fresh false alarms 0/51 -- IDENTICAL to
+pre-gate (the gate cost nothing after the empty-noun fix). Real transcript:
+belief assertions 22 -> 13 (incidental numbers gone), belief-native false
+changes 2 -> 0. The trust-critical failure (false disclosures on real chat) is
+closed without touching benchmark recall or precision.
+
+REPRESENTATION NOTE (arXiv:2605.18747 "Code as Agent Harness", + the user's
+question). Every fix here is the same move: impose a TYPE/IDENTITY constraint the
+raw-language representation lacked -- a value must be a trackable QUANTITY TYPE, a
+change must belong to an IDENTIFIED slot, a location must be PHYSICAL. The noise
+was a representation failure (facts kept as loose token bags), not merely a
+missing filter. This is the numeric-side down payment on a canonical typed fact
+schema (entity, attribute, typed value, functionality flag, provenance) -- the
+"more manageable representation" -- crystallising from the gates rather than a
+big-bang rewrite. It does NOT vindicate the maximally-compressed VSA form (the
+frozen artifact measured its capacity/honesty limits); the requisite-variety
+answer is the MIDDLE: the minimal typed structure that supports honest change-
+disclosure with receipts, matching the survey's executable/VERIFIABLE emphasis.

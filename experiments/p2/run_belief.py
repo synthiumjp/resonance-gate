@@ -45,6 +45,7 @@ from functional_extract import extract_functional, contains
 from rci import to_scalar
 from resolve import resolve_pronouns
 from schema import Scope
+from numeric_gate import trackable_numeric
 
 DATA = os.path.join(_R, "data", "longmemeval_s")
 CACHE = os.path.join(_HERE, "extract_cache.jsonl")
@@ -80,6 +81,11 @@ def _numeric_slot(triple, span):
     sv = to_scalar(triple[2])
     if sv is None:
         return None
+    # NOISE GATE (entry 55): reject incidental numbers -- years, ID digit-strings,
+    # enumeration counts -- that are not trackable personal facts. Keeps the
+    # numeric path from asserting resume phone numbers and "10 ideas" as facts.
+    if not trackable_numeric(sv[0], sv[1], span):
+        return None
     # event-individuation (entry 46): a locative-destination proper noun splits
     # distinct events ("drove ... Tennessee" vs "... D.C."), so they never share
     # a slot and cannot form a spurious change.
@@ -89,9 +95,11 @@ def _numeric_slot(triple, span):
     return (ak, f"{sv[1]}={sv[0]:g}")
 
 
-def evidence_from_span(text, sc):
+def evidence_from_span(text, sc, span_id=0):
     """Yield (subject, attribute, value, reliability) for one span, from every
-    evidence source. Reliability reflects the gate confidence of the source."""
+    evidence source. Reliability reflects the gate confidence of the source.
+    span_id disambiguates SELF-CONTAINED changes so they do not collide across
+    spans (entry 55)."""
     text = resolve_pronouns(text)
     ev = []
     # numeric: value-anchored (deterministic, high r) + LLM triples that gate
@@ -107,7 +115,15 @@ def evidence_from_span(text, sc):
                 ev.append((s[0], s[1], 0.80))
     # categorical: change-of-state (marked, high r) + functional-attribute
     for subj, attr, val, role in extract_cos(text):
-        akey = (subj.lower(), "cos" if attr.startswith("cos:change") else attr)
+        # "from X to Y" / "used to P now Q" are SELF-CONTAINED changes: both
+        # values are in ONE span, so they must pair WITHIN the span but never
+        # merge with a different span's change. Key them by span_id; the goal-
+        # only cos:location/cos:employer stay cross-span (that is how they detect
+        # an update across mentions).
+        if attr.startswith("cos:change"):
+            akey = (subj.lower(), f"cos@{span_id}")
+        else:
+            akey = (subj.lower(), attr)
         ev.append((akey, val.lower().strip(), 0.85))
     for subj, attr, val, vtype in extract_functional(text):
         ev.append(((subj.lower(), attr), val.lower().strip(), 0.80))
@@ -123,7 +139,7 @@ def run_instance(inst):
         for tr in cached(resolve_pronouns(txt)):
             sc.observe(tr)
     for si, txt in spans:
-        for slot, value, r in evidence_from_span(txt, sc):
+        for slot, value, r in evidence_from_span(txt, sc, span_id=si):
             # slot is the full (subject, attribute) key; pass it as subject with
             # a dummy attribute so the belief dict keys on the whole slot.
             mem.observe(slot, "_", value, si, reliability=r)
