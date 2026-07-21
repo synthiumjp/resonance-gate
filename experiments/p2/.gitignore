@@ -2,3 +2,4 @@ __pycache__/
 extract_cache.jsonl
 haystack_facts.jsonl
 *.log
+stress_alerts.jsonl

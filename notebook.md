@@ -3000,3 +3000,63 @@ REMAINING, and now the honest frontier is clear (see entry 47 planning):
     updates ARE categorical.
   - Still all LongMemEval (semi-synthetic); no real human transcripts.
   - Extraction ceiling (3B, ~90% junk) unaddressed.
+
+## Entry 47 — 2026-07-21 (p2: categorical change — the linguistic marking is mostly ABSENT; COS path is high-precision but narrow)
+
+Built the change-of-state (COS) categorical detector (cos_extract.py) on the
+change-of-state agent's inventory: a COS verb (moved/switched/joined/started/
+"now at"/"used to") lexically entails a prior different state (BECOME operator),
+so two different goals of the same COS verb about one subject are a reliable
+change WITHOUT taxonomic reasoning -- the verb supplies exclusivity. from-X-to-Y
+and "used to P now Q" give both values in one utterance. "still"/"not yet"
+suppress. Subject attribution handles third-party names ("Rachel who moved").
+
+MEASURED on the 39 categorical (non-numeric-answer) knowledge-update instances:
+  instances with a marked-change alert: 1 / 39
+  The one: Rachel "apartment in the city" -> "the suburbs" (ans the suburbs),
+  correct, via repeated "moved to" across sessions.
+
+THE FINDING, and it redirects the plan. Categorical change in this data is
+MOSTLY NOT LINGUISTICALLY MARKED. The majority are bare STATIVE divergence --
+two different values of the same attribute stated across sessions with NO
+change-of-state verb:
+    "recent family trip to Hawaii" ... "recent family trip to Paris"
+    "keeping my old sneakers under my bed" ... "in a shoe rack in my closet"
+    "cocktail-making class on [day]" ... "on Friday"
+There is no "moved/switched/now" to key on. Detecting these as CHANGES requires
+exactly the value-exclusivity reasoning the second agent established is
+UNRELIABLE without a knowledge base: embedding cosine actively fails on
+co-hyponymy (co-hyponyms score highest, Roller et al. 2014), reliable
+co-hyponymy needs supervision, and the containment exception (Chicago vs
+Illinois) needs a place gazetteer.
+
+SO CATEGORICAL SPLITS INTO TWO POPULATIONS:
+  (a) COS-MARKED (Rachel moved): high precision, model-free, but RARE here
+      (~1/39). The verb does the work.
+  (b) BARE-STATIVE (Hawaii->Paris, the majority): needs a functional-relation
+      registry + value taxonomy + place-containment table. Model-free/linguistic
+      methods alone are, per the agent, low-reliability on open-domain values.
+
+A PARTIAL LINGUISTIC PATH for (b) exists and is the honest next step:
+FUNCTIONALITY via DEFINITENESS/SUPERLATIVE. "my MOST RECENT trip", "where I
+CURRENTLY keep", "my CURRENT employer", "the day I take THE class" carry a
+uniqueness presupposition (agent-2 Factor A -- the primary reliable factor),
+so two different values of a functional attribute = a change WITHOUT needing to
+prove the values are incompatible (uniqueness already implies it). This does
+NOT need a taxonomy, only a functionality signal (superlative/definite/"current"
+adverbs + a small functional-relation registry), and it excludes the multi-
+valued cases (restaurants tried, bands liked) that must NOT fire. Whether it
+holds precision on fresh non-update data is the open question -- unbuilt, and it
+must be validated the same way (fresh sample + independent judges), not on the
+instances that motivated it.
+
+HONEST STATE OF CATEGORICAL. The COS path is committed and works at high
+precision on marked changes, but marked changes are the minority. The bare-
+stative majority is the genuinely hard part, and the linguistics says the
+reliable-without-a-KB slice of it is the FUNCTIONAL-ATTRIBUTE subset (definite/
+superlative uniqueness), not general value-incompatibility. Categorical change
+is therefore NOT "solved" -- it is partitioned into a solved-narrow piece
+(COS-marked), a plausibly-solvable piece (functional-attribute divergence,
+next), and a piece that genuinely needs a knowledge base (open-domain bare-value
+incompatibility). Numeric updates remain the strong result (7/7 tuned, fresh-
+validated 0 false alarms).
