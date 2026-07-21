@@ -52,7 +52,8 @@ def build_facts(path, min_mentions=2):
     run_profile_full readout (canon + hygiene + clustering). Returns
     (facts, provisional, n_convs, titles, n_uncached) -- provisional is the
     single-mention tail (kept for direct-match-only readout, the hybrid)."""
-    cache_path = os.path.join(os.path.dirname(path), "profile_cache.jsonl")
+    _sfx = "_v2" if os.environ.get("RG_EXTRACT_V2") else ""
+    cache_path = os.path.join(os.path.dirname(path), f"profile_cache{_sfx}.jsonl")
     cache = {}
     if os.path.exists(cache_path):
         for line in open(cache_path):

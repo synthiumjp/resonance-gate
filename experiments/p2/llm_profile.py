@@ -17,6 +17,7 @@ Output contract: a short JSON array of {attribute, value} STABLE self-facts.
 """
 
 import json
+import os
 import re
 
 from consistency import get_llm
@@ -51,6 +52,8 @@ _CANON_ATTR = {
     "software_used": "tool", "github_username": "username", "computer": "device",
     "computer_name": "device", "gpu": "device", "salary": "income",
     "current_salary": "income", "current_package": "income",
+    "annual_income": "income", "yearly_income": "income", "wage": "income",
+    "pay": "income", "earnings": "income",
 }
 
 
@@ -76,12 +79,35 @@ building", "going in circles" are NOT facts.
 - IGNORE hypotheticals, questions, and things they might do.
 - If the message states no stable personal fact, output exactly: []"""
 
+# v2 (entry 74): targets the entry-68/69 residue -- third-party attribution,
+# roleplay/persona framings, and tech identifiers read as personal facts.
+# OPT-IN via RG_EXTRACT_V2=1: changing the prompt invalidates the extraction
+# cache, so v1 stays the default until a deliberate rebuild.
+SYSTEM_V2 = SYSTEM.replace(
+    "- If the message states no stable personal fact, output exactly: []",
+    """- OTHER PEOPLE: a fact about someone else in the user's life (partner, \
+child, parent, sibling, friend, colleague, their boss) is NOT a fact about the \
+user. If it is a stable family fact worth keeping, the attribute MUST name the \
+relationship (e.g. "wife_occupation", "daughter_university", "brother_job"); \
+NEVER put someone else's job, device, income, or location under a bare user \
+attribute. If in doubt, skip it.
+- ROLEPLAY / PERSONA: if the message sets up a roleplay, persona, story, or \
+counterfactual ("pretend", "act as", "imagine I'm", "if I were", "in this \
+scenario/story"), extract NOTHING from inside that framing.
+- TECH IDENTIFIERS: usernames, hostnames, or emails inside commands, paths, \
+URLs, or code (e.g. ssh alice@host22) are NOT personal facts about the user.
+- If the message states no stable personal fact, output exactly: []""")
 
-def extract_profile_facts(text):
+
+def active_system():
+    return SYSTEM_V2 if os.environ.get("RG_EXTRACT_V2") else SYSTEM
+
+
+def extract_profile_facts(text, system=None):
     """[{attribute, value}] stable self-facts from ONE user turn. Realtime: single
     turn, no history, small output."""
     out = get_llm().create_chat_completion(
-        messages=[{"role": "system", "content": "/no_think " + SYSTEM},
+        messages=[{"role": "system", "content": "/no_think " + (system or active_system())},
                   {"role": "user", "content": text[:1600]}],
         max_tokens=200, temperature=0.0)
     txt = out["choices"][0]["message"]["content"]

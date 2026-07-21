@@ -124,7 +124,11 @@ def main():
     except Exception:
         pass
 
-    cache_path = os.path.join(os.path.dirname(path), "profile_cache.jsonl")
+    # v2 extraction (RG_EXTRACT_V2=1) uses its OWN cache + report: a prompt
+    # change invalidates a cache, and the v1 artifacts stay intact for rollback.
+    _sfx = "_v2" if os.environ.get("RG_EXTRACT_V2") else ""
+    cache_path = os.path.join(os.path.dirname(path), f"profile_cache{_sfx}.jsonl")
+    print(f"extractor prompt: {'v2' if _sfx else 'v1'}  (cache: {cache_path})")
     cache = {}
     if os.path.exists(cache_path):
         for line in open(cache_path):
@@ -186,7 +190,7 @@ def main():
         print(f"  [x{n:3d}] {redact(str(attr))[:20]:20s} : {redact(str(label))[:52]}")
 
     # UNREDACTED checkable report with receipts -> LOCAL file only
-    report = os.path.join(os.path.dirname(path), "profile_report.txt")
+    report = os.path.join(os.path.dirname(path), f"profile_report{_sfx}.txt")
     with open(report, "w") as f:
         f.write(f"CHECKABLE PROFILE REPORT  ({len(corr)} corroborated facts, "
                 f">= {min_mentions} mentions)\n")

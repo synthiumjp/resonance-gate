@@ -4196,3 +4196,32 @@ fact via receipts -> memory updates -> next injection reflects it); extractor
 v2 for the third-party/roleplay residue; wiring this contract into the
 sourcedrecall MCP server (the p1 server stores explicit triples; the p2
 memory should become its ingestion/read path).
+
+## Entry 74 — 2026-07-21 (p2: extractor v2 -- third-party/roleplay/tech-identifier rules. 19/19 on synthetic probe, no positive regressions; v2 rebuild launched)
+
+Built the entry-68/69 owed extraction refinement as SYSTEM_V2 (llm_profile.py),
+OPT-IN via RG_EXTRACT_V2=1 with its OWN cache/report files -- a prompt change
+invalidates the extraction cache, so v1 artifacts stay intact for rollback.
+Three added rules: (1) OTHER PEOPLE -- someone else's fact must carry a
+relationship-naming attribute (wife_occupation), never a bare user attribute;
+(2) ROLEPLAY/PERSONA/counterfactual framings extract nothing; (3) TECH
+IDENTIFIERS (usernames/hostnames/emails in commands, paths, URLs) are not
+personal facts.
+
+MEASURED before any rebuild, on a 19-case SYNTHETIC probe (probe_extractor.py,
+all invented content, committable): five third-party cases, four roleplay,
+two tech-identifier, one metaphor regression guard, seven positive controls
+including the entry-69 multi-role case and a shared "my wife and i live"
+location fact.
+  v1: 18/19 (neg 11/12, pos 7/7) -- its miss: a git remote username.
+  v2: 19/19 (neg 12/12, pos 7/7) -- fixes the identifier miss, keeps ALL
+      positives (multi-role preserved; the entry-69 lesson held).
+Probe scoring counts relationship-prefixed attributes as CORRECT for
+third-party facts (attach to the relationship, not the owner -- HANDOVER §7).
+One genuine canon gap found by the probe: annual_income was not folded into
+income; fixed in _CANON_ATTR (plus yearly_income/wage/pay/earnings).
+
+The full v2 re-extraction over the real history (13,911 turns, ~45-60 min,
+local GPU) is running in the background to profile_cache_v2.jsonl. Next entry:
+v1-vs-v2 comparison on the real corroborated profile + wire graph (does the
+occupation spread shrink; do real facts survive).
