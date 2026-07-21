@@ -3113,3 +3113,54 @@ disclosure, no false alarms):
   - Recall is the honest weakness, and it is now attributable to named,
     bounded causes (coreference, extraction coverage, surface ambiguity), not
     to the detector.
+
+## Entry 49 — 2026-07-21 (p2: hybrid within-span pronoun resolution — correct component, but categorical recall is gated by EXTRACTION COVERAGE, not coreference)
+
+Built the hybrid coreference core: within-span pronoun resolution (resolve.py),
+the deterministic high-precision half the agents recommended -- object pronouns
+(them/it) -> nearest prior agreeing common noun, subject pronouns (she/he) ->
+nearest prior name, conservative (leave unresolved when ambiguous). "keeping
+THEM under my bed" -> "keeping sneakers under my bed"; "She moved to Chicago"
+(with Rachel in-span) -> "Rachel moved to Chicago". Number-agreement hard filter;
+contraction guard (do not resolve inside "it'll").
+
+MEASURED. With resolution applied before extraction:
+  categorical recall: 2/39 (UNCHANGED)   fresh false alarms: 0/51 (HELD)
+  The resolver is correct and precision-safe, but it did NOT move categorical
+  recall on this data. Debugging the sneakers case (the archetypal them=sneakers
+  case) showed why: resolution correctly gives "keep:sneakers" for span 1
+  ("under my bed"), but the SECOND value ("shoe rack in my closet") is not
+  produced by any extraction pattern -- so there is no pair to detect. The
+  bottleneck for these cases is EXTRACTION PATTERN COVERAGE, not coreference.
+
+THE HONEST CEILING ON CATEGORICAL, now fully mapped across entries 47-49:
+  1. EXTRACTION COVERAGE. Each categorical phrasing ("keep in a shoe rack",
+     "hang in my bedroom", "obsessed with X") needs its own pattern. Covering
+     them all is either a large hand-tuned pattern library (overfitting to this
+     corpus, the trap this project keeps catching) or an LLM categorical-value
+     extractor (abandoning the model-free/linguistic purity).
+  2. SURFACE AMBIGUITY (entry 48). "recent trip to X->Y" is identical whether
+     one slot changed or two trips happened; unresolvable from text.
+  3. COREFERENCE. Within-span is now built and precision-safe but rarely the
+     sole blocker; cross-session salience (isolated "She moved to Chicago")
+     remains unbuilt.
+  None of these is a defect in the change-detection MECHANISM (RCI +
+  commensurability + functionality). The mechanism is sound; the input is the
+  ceiling.
+
+CONCLUSION -- WHERE THE MODEL-FREE LINGUISTIC APPROACH LANDS ON CATEGORICAL.
+It delivers a CLEAN HIGH-PRECISION SLICE (inherently-functional changes:
+location-via-COS, recurring-day) at 0 false alarms, which is genuinely new and
+which nothing before this session could do. It does NOT deliver high recall,
+and the honest reason is that categorical values are lexically open-ended --
+model-free patterns cannot cover the long tail without overfitting. To lift
+categorical recall materially, the next real lever is an LLM extraction pass
+SCOPED TO CATEGORICAL VALUE+RELATION (used only for extraction, with the
+existing model-free gate/RCI/functionality logic supplying precision
+downstream), which is a deliberate, bounded relaxation of the model-free claim
+for the extraction step only -- NOT a return to LLM-in-the-loop retrieval.
+
+The resolver is kept: it is the correct hybrid component, holds precision, and
+becomes useful the moment extraction coverage improves. Numeric updates remain
+the strong, fresh-validated result (7/7, 0 false alarms). Precision has never
+broken across any fresh test this session.
