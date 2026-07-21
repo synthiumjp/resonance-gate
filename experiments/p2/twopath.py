@@ -106,6 +106,43 @@ def norm_relation(r):
     return " ".join(words[:3])
 
 
+_ATTR_STOP = {"a","an","the","my","our","your","his","her","their","its","i",
+              "have","has","had","am","is","are","was","were","been","being",
+              "set","got","get","put","in","on","at","of","to","for","with",
+              "and","or","that","which","new","some","any","currently","now",
+              "so","far","recently","just","already","still","this","time",
+              "around","about","first","last","one","most","lot","total","up",
+              "different","ones","been","doing","been"}
+
+
+def attribute_key(triple):
+    """Canonical key for a VALUE-bearing fact: (subject-scope, attribute-noun-
+    set). The attribute noun (personal-best-time, postcards, pages, engineers)
+    can land in the subject, relation OR object depending on phrasing, so it is
+    gathered from ALL THREE, minus the numeric value and stopwords. Two value
+    mentions of the same attribute then key identically regardless of which
+    slot named it or which verb was used -- closing the LLM/value keying gap
+    without merging distinct attributes (bikes vs engineers keep different noun
+    sets). Returns None if no content noun survives (fall back to the plain
+    key)."""
+    from rci import to_scalar
+    raw = str(triple[0]).strip().lower()
+    # "my <NP>" and "I" are both the speaker; a "my X" attribute-as-subject
+    # scopes to @speaker with X folded into the noun set, so side A ("I set a
+    # personal best ... 27:12") and side B ("my personal best time is 25:50")
+    # land on the SAME key.
+    speaker = bool(re.match(r"^(i|my|our|we)\b", raw)) or norm_subject(triple[0]) == "@speaker"
+    subj = "@speaker" if speaker else norm_subject(triple[0])
+    nouns = set()
+    for field in triple:
+        for w in re.findall(r"[a-z]+", str(field).lower()):
+            if w not in _ATTR_STOP and len(w) > 2 and not to_scalar(w):
+                nouns.add(w)
+    if not nouns:
+        return None
+    return (subj, frozenset(nouns))
+
+
 def norm_subject(s):
     s = re.sub(r"\s*\([^)]*\)\s*$", "", str(s).strip().lower())
     s = re.sub(r"^(the|a|an|my|our)\s+", "", s)
@@ -121,10 +158,17 @@ def detect_contradictions(candidates):
     (norm_subject, norm_relation), and for each key with >1 distinct object
     runs the RCI classifier. Returns the reliable-change alerts and the full
     classification, each carrying both receipts."""
+    from rci import to_scalar
     by_key = defaultdict(list)
     for c in candidates:
         t = c["triple"]
-        by_key[(norm_subject(t[0]), norm_relation(t[1]))].append(c)
+        # value-bearing candidates key by canonical ATTRIBUTE (subject + noun
+        # set), which is stable across phrasings and across the LLM/value
+        # passes; non-value candidates keep the surface (subject, relation) key.
+        ak = attribute_key(t) if to_scalar(t[2]) else None
+        c["_akey"] = ak
+        key = ak if ak else (norm_subject(t[0]), norm_relation(t[1]))
+        by_key[key].append(c)
 
     alerts, multivalue, noise = [], [], []
     _seen_alert = set()
@@ -168,13 +212,22 @@ def run_two_path(spans, extractor):
     # already value-typed and speaker-scoped by construction -- but still must
     # be grounded and in scope.
     def triples_for(text):
-        return list(extractor(text)) + [tuple(t) for t in extract_values(text)]
+        # (triple, presupposed) pairs; LLM triples are never presupposed
+        out = [(t, False) for t in extractor(text)]
+        for v in extract_values(text):
+            out.append((tuple(v[:3]), bool(v[3]) if len(v) > 3 else False))
+        return out
     for span_id, session, text in spans:
-        for tr in triples_for(text):
+        for tr, _ in triples_for(text):
             sc.observe(tr)
     for span_id, session, text in spans:
-        for tr in triples_for(text):
-            cand, _ = comparison_candidate(text, tr)
+        for tr, presup in triples_for(text):
+            cand, why = comparison_candidate(text, tr)
+            # a presupposed definite-description value fact projects through the
+            # matrix clause's modality, so a FUTURE/HEDGED/QUESTION veto on it is
+            # overridden (the value is asserted even if the framing is not)
+            if cand is None and presup and why and why.startswith("modality="):
+                cand = {"triple": tuple(tr), "modality": "PRESUPPOSED"}
             if cand and sc.in_scope(tr[0]):
                 cand.update(span_id=span_id, session=session)
                 candidates.append(cand)

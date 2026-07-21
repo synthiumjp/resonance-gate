@@ -79,5 +79,9 @@ def extract_values(text, window=60):
         if key in seen:
             continue
         seen.add(key)
-        out.append((subj, rel, val))
+        # a definite-description ("my <NP>") value fact is PRESUPPOSED and
+        # projects through matrix-clause modality (hedge/future/question), so
+        # the comparison path may keep it despite a FUTURE veto.
+        presupposed = subj.lower().startswith("my ")
+        out.append((subj, rel, val, presupposed))
     return out

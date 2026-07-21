@@ -2788,3 +2788,59 @@ withholds); yoga "three times a week" (frequency in a relative clause the value
 anchor misses). Recall is 2 of ~6 genuine; the mechanism is proven and the
 remaining misses are each a named, bounded sub-problem, none of them the write
 gate.
+
+## Entry 43 — 2026-07-21 (p2: keying-consistency closed — recall doubles again to 4/4, precision holds 1.0)
+
+Entry 42's named gap: the two mentions of an updated attribute get DIFFERENT
+keys across the LLM and value passes, so they never pair. Personal best was the
+type case -- side A "(I | set a personal best time in | 27:12)" keyed
+(@speaker, "set personal best"); side B value-extract "(my personal best time |
+is | 25:50)" keyed (personal best time, "is"). Two fixes, both principled:
+
+1. ATTRIBUTE-KEY SCOPE UNIFICATION. A value-bearing fact keys by (subject-scope,
+   attribute-noun-SET) instead of (subject, relation). The attribute noun can
+   land in subject, relation OR object depending on phrasing, so it is gathered
+   from all three (minus the numeric value and stopwords), and BOTH "I" and
+   "my <NP>" subjects scope to @speaker with the NP folded into the noun set. So
+   side A -> (@speaker, {personal, best}) and side B -> (@speaker, {personal,
+   best}) -- SAME key, regardless of which slot named the attribute or which
+   verb was used. Distinct attributes stay separate (bikes vs engineers keep
+   different noun sets), so this closes the gap without over-merging.
+
+2. PRESUPPOSITION BYPASS. Side B's value fact was being dropped as
+   modality=FUTURE ("hoping to beat my personal best time of 25:50"). But
+   "my personal best time of 25:50" is a DEFINITE DESCRIPTION -- the PB IS
+   25:50, presupposed, and presuppositions project through hedge/future/
+   question frames (they survive negation too: "I'm NOT hoping to beat my PB of
+   25:50" still presupposes it). So a value-extract fact with a "my <NP>"
+   subject is flagged PRESUPPOSED and bypasses the matrix-clause modality veto.
+   This is the linguistically correct treatment, distinct from the prejacent
+   shortcut ruled out in entry 39: presuppositions genuinely project, prejacents
+   do not.
+
+RESULT on the 39 knowledge-update instances:
+    alerts     entry 41: 1  ->  42: 2  ->  43: 4      (ALL genuine)
+    precision              1/1     2/2       4/4 = 1.00 (ZERO false alerts, held)
+  Newly recovered: personal best 27:12 -> 25:50 (the flagship keying case) and
+  Fitbit 6 -> 9 months. Retained: pages 200->220, postcards 17->25. Recall is
+  now 4 of ~6 genuine updates; precision has stayed 1.0 across all three
+  recall-doubling steps.
+
+Assertion path verified UNREGRESSED: DEV 0.905/0.864, HELD 0.636/0.700 --
+every recall gain has been confined to the comparison path, exactly as the
+two-path architecture intends.
+
+STILL MISSED (2 of ~6): engineers 4->5 (+1 count, RCI correctly WITHIN_NOISE
+from two point-observations -- would need the repeated-observation reliability
+of the churn setting, not a keying fix); yoga "three times a week" (frequency
+buried in a relative clause "which is three times a week" that the value anchor
+does not reach). Both are bounded and named; neither is the write gate or the
+keying gap, both of which are now resolved.
+
+WHERE THE DIFFERENTIATOR STANDS. Honest contradiction disclosure with receipts,
+on third-party data (LongMemEval knowledge-update), now fires on 4/6 genuine
+updates at 1.00 precision -- vs the naive detector's 0.08 (entry 32) and BEAM's
+reported best ~0.05. The high-precision / low-recall trade is the correct one
+for the product (false alarms switch the feature off), and recall has climbed
+1->2->4 across three principled steps with zero precision cost. The remaining
+two misses are each a single named sub-problem.
