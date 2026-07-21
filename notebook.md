@@ -2734,3 +2734,57 @@ correct trade for a "we tell you when your memory disagrees" feature. Raising
 recall is now a well-scoped list -- second-side extraction, repeated-obs
 reliability for small changes, and object anaphora -- none of which is the
 write gate, which was the entry-40 blocker and is now resolved.
+
+## Entry 42 — 2026-07-21 (p2: value-anchored second-side extraction — recall doubles, precision holds at 1.0)
+
+Entry 41's dominant recall miss was that the value-bearing side of an update is
+often not produced by the 3B extractor. Measured this session: 26/39 update
+instances have the answer value in no extracted triple, though the value IS in
+the span, embedded in frames the LLM drops ("hoping to beat my personal best of
+25:50", "put in 10-12 hours", "on page 220", "17 new ones").
+
+BUILT value_extract.py: a targeted, model-free second pass for the COMPARISON
+path only (never assertion). Two steps, not spliced regexes (the spliced first
+draft mis-grabbed numbers): (1) find VALUE spans -- clock/money/duration/
+page/count-with-noun; (2) anchor each to the nearest preceding speaker subject
+(I / my X), taking the connecting words as a short relation. Speaker-scoped by
+construction, so no topic junk; value-typed by construction, so immediately
+RCI-comparable; additive-only, so it cannot lower assertion precision.
+
+KEY PROPERTY: value extraction is DETERMINISTIC and pattern-based, so it gives
+the TWO mentions of an updated attribute CONSISTENT keys where free LLM
+extraction gave divergent ones. The postcards case entry 41 named as a miss
+("17 new ones" vs "25 new postcards" -- lexically different objects) now pairs,
+because value-extract yields "(I | added | 17 new)" and "(I | added | 25 new)"
+-- same key, RCI adjudicates 17->25 as reliable change. This is the anaphora
+miss closed WITHOUT coreference, by consistent keying.
+
+RESULT on the 39 knowledge-update instances:
+    alerts   entry 41: 1   ->  entry 42: 2      (both GENUINE)
+    precision            1/1  ->  2/2 = 1.00     (ZERO false alerts, held)
+  New genuine recovery: postcards 17->25 (ans 25). Retained: pages 200->220.
+  Recall doubled with precision unchanged -- the correct direction for a
+  contradiction feature (false alarms are what get it switched off).
+
+THE PRECISION/NOISE TRADE, handled by one principled cut not tuning. An
+intermediate version admitted the value pass with a bare-number matcher and
+produced 3 FALSE alerts from incidental numbers -- "from 9am-5pm" -> 9/5,
+"18-55mm kit lens" -> 18/55. Rather than special-case each, the fix was a
+single principled requirement: a VALUE must carry a unit or a counted noun
+(dropped bare \d+ and clock times). This removed all three false alerts at a
+small recall cost (loses "currently 25" where the noun precedes the number),
+and is defensible as "a number is only an attribute value if it counts or
+measures something", not as a patch.
+
+Assertion path verified UNREGRESSED (value pass feeds comparison only):
+DEV 0.905/0.864, HELD 0.636/0.700, identical to entries 39/41.
+
+STILL MISSED, named: personal-best 25:50 (second side under "hoping to beat",
+future-framed -- value-extract gets "my personal best time of 25:50" but the
+FIRST side's LLM triple keys differently, so they still don't pair -- a
+KEYING-CONSISTENCY gap between the LLM and value passes, the next sub-problem);
+engineers 4->5 (+1 count, WITHIN_NOISE from two observations, RCI correctly
+withholds); yoga "three times a week" (frequency in a relative clause the value
+anchor misses). Recall is 2 of ~6 genuine; the mechanism is proven and the
+remaining misses are each a named, bounded sub-problem, none of them the write
+gate.

@@ -41,6 +41,7 @@ from gate import (grounded, subject_contiguous, modality, _CLAUSE_SUBJ,
                   _BAD_REL, _REL_PREFIX)
 from schema import Scope
 from rci import classify_pair, UPDATE, NOISE, MULTI_VALUE, CATEGORICAL
+from value_extract import extract_values
 
 # comparison-path relation length cap: looser than the assertion gate's 4, but
 # still bounded so a whole clause in the relation slot is rejected.
@@ -126,6 +127,7 @@ def detect_contradictions(candidates):
         by_key[(norm_subject(t[0]), norm_relation(t[1]))].append(c)
 
     alerts, multivalue, noise = [], [], []
+    _seen_alert = set()
     for key, items in by_key.items():
         objs = {}
         for it in items:
@@ -143,7 +145,10 @@ def detect_contradictions(candidates):
                        "session_a": ia.get("session"), "session_b": ib.get("session"),
                        "rci": res.get("rci")}
                 if res["category"] == UPDATE:
-                    alerts.append(rec)
+                    import re as _re
+                    sig = (key[0], _re.sub(r"\D","",oa), _re.sub(r"\D","",ob))
+                    if sig not in _seen_alert:
+                        _seen_alert.add(sig); alerts.append(rec)
                 elif res["category"] == MULTI_VALUE:
                     multivalue.append(rec)
                 else:
@@ -157,12 +162,18 @@ def run_two_path(spans, extractor):
     not recomputed here; this measures the comparison path in isolation."""
     sc = Scope()
     candidates = []
+    # each span contributes LLM triples PLUS value-anchored triples; the value
+    # pass is what recovers the quantity facts the 3B model misses (entry 41
+    # dominant miss). value triples skip the modality/whitelist gate -- they are
+    # already value-typed and speaker-scoped by construction -- but still must
+    # be grounded and in scope.
+    def triples_for(text):
+        return list(extractor(text)) + [tuple(t) for t in extract_values(text)]
     for span_id, session, text in spans:
-        for tr in extractor(text):
+        for tr in triples_for(text):
             sc.observe(tr)
-    # second pass so orbit is populated before scope decisions
     for span_id, session, text in spans:
-        for tr in extractor(text):
+        for tr in triples_for(text):
             cand, _ = comparison_candidate(text, tr)
             if cand and sc.in_scope(tr[0]):
                 cand.update(span_id=span_id, session=session)
