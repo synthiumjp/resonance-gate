@@ -2669,3 +2669,68 @@ IS the Fellegi-Sunter match/possible-match signal. So the linker is a thin
 ingest-side wrapper (cos >= threshold AND margin >= threshold -> link; small
 margin -> possible-match bucket), not new substrate machinery, and it keeps
 server/sourcedrecall/service.py's no-inference contract intact.
+
+## Entry 41 — 2026-07-21 (p2: two-path architecture built — the differentiator fires at 1/1 precision)
+
+Built the two-path architecture (experiments/p2/twopath.py) motivated by entry
+40: the support gate and contradiction detection have conflicting needs on the
+relation-form knob, so they get separate gates over the SAME extractions.
+
+  ASSERTION path (gate.assess, unchanged): high precision, what the system
+    STATES. Verified NOT regressed by this entry's changes -- DEV 0.905/0.864,
+    HELD 0.636/0.700, identical to entry 39.
+  COMPARISON path (new): relaxed gate -- structural checks + grounding +
+    subject-contiguity + scope + ACTUAL modality, but the known-predicate
+    relation WHITELIST DROPPED. Keeps "I | set a personal best time in | 27:12"
+    as a contradiction CANDIDATE. A candidate may not be asserted; its only job
+    is to enter RCI contradiction detection, where precision comes from the
+    commensurability gate + provenance, not the write gate.
+
+DESIGN CLAIM VALIDATED: a fact can be a valid contradiction signal without
+being clean enough to assert standalone. "I | am on | page 200" is not
+something to volunteer as a fact, but 200 -> 220 IS a legitimate change to
+surface WITH BOTH RECEIPTS.
+
+RESULT on the 39 knowledge-update instances (gold spans, cached extractions):
+  - candidacy UNBLOCKED: 20/39 instances now form >=2 comparison candidates,
+    vs near-zero through the strict assertion gate (entry 40).
+  - RELIABLE-CHANGE ALERTS: 1, and it is CORRECT -- "page 200" -> "page 220"
+    (RCI 28.3), matching gold answer 220. ZERO false alerts.
+  - precision 1/1 = 1.00, vs the naive detector's 0.08 (entry 32) and BEAM's
+    reported best ~0.05. The differentiator now fires WITHOUT false alarms,
+    which is the property the product needs (false alarms are what get a
+    contradiction feature switched off).
+
+THREE CUE BUGS FIXED en route, each was silently killing quantity updates:
+  1. Sentence-locator defaulted to the whole span when the object was
+     numeric-only ("27:12" tokenises to short tokens filtered out), so every
+     numeric-object fact inherited modality from an unrelated sentence -- the
+     5K fact got QUESTION from a trailing "Do you have tips?". Fixed: match the
+     object's digit literals.
+  2. Attribution cue matched bare "say", firing ATTRIBUTED on "I'm happy to
+     say that I..." (speaker asserting, not attributing). Fixed: match "says"/
+     "said" only, which require a real sayer.
+  3. Scale parser only found the counted noun AFTER the number, so "page 200"
+     had no scale and 200->220 fell to CATEGORICAL. Fixed: noun-before-number.
+
+RECALL IS LOW AND THE FAILURES ARE NAMED, not hidden. Of ~5-6 genuine updates
+in the 39, only 1 fires. The misses:
+  - SECOND-SIDE EXTRACTION LOSS: personal best 25:50 never extracted (it is
+    under "hoping to beat 25:50", future-framed, correctly dropped by modality
+    but the fact is real). The dominant miss.
+  - +1 COUNTS below the noise threshold: engineers 4->5 is WITHIN_NOISE. From
+    two point-observations a +1 is genuinely weak evidence; RCI is CORRECT to
+    withhold, and repeated observations (the churn setting) are what would make
+    it detectable.
+  - ANAPHORA: postcards "17 new ones" -> "25 new postcards" is MULTI_VALUE
+    because "ones" != "postcards" lexically. Needs coreference (the filed,
+    unbuilt toolkit) -- and note this is a case where the deferred coreference
+    WOULD help, unlike the subject-linking cases entry 40 found absent.
+
+NET. The two-path architecture works and the differentiator is demonstrated:
+high-precision contradiction disclosure with receipts, at 1/1 on this probe vs
+0.08 naive. It is high-precision / low-recall by construction, which is the
+correct trade for a "we tell you when your memory disagrees" feature. Raising
+recall is now a well-scoped list -- second-side extraction, repeated-obs
+reliability for small changes, and object anaphora -- none of which is the
+write gate, which was the entry-40 blocker and is now resolved.

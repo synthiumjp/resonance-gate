@@ -1,5 +1,4 @@
+__pycache__/
 extract_cache.jsonl
 haystack_facts.jsonl
-haystack*.log
-build.log
-corrob.log
+*.log

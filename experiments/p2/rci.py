@@ -121,7 +121,14 @@ def to_scalar(text):
             return float(v), f"count:{_count_scale(t, w)}"
     m = _BARE.search(t)
     if m:
-        return float(m.group(1)), f"count:{_count_scale(t, m.group(1))}"
+        scale = _count_scale(t, m.group(1))
+        if not scale:
+            # noun-before-number ("page 200", "chapter 5"): take the word
+            # immediately preceding the number as the counted noun
+            pre = re.search(r"([a-z]+)\s+" + re.escape(m.group(1)), t)
+            if pre and pre.group(1) not in _SKIP:
+                scale = pre.group(1)
+        return float(m.group(1)), f"count:{scale}"
     return None
 
 

@@ -145,7 +145,7 @@ _CUES = [
                               r"weren'?t|won'?t|never|no longer|not\b|any ?more)\b", re.I)),
     ("CONDITIONAL", re.compile(r"\b(if|suppose|supposing|unless|in case|were i|"
                                r"would (?:need|have|be))\b", re.I)),
-    ("ATTRIBUTED", re.compile(r"\b(says?|said|according to|i heard|i'?ve heard|"
+    ("ATTRIBUTED", re.compile(r"\b(says|said|according to|i heard|i'?ve heard|"
                               r"told me|apparently|supposedly)\b", re.I)),
     ("FUTURE",     re.compile(r"\b(thinking of|think i'?ll|planning to|plan to|"
                               r"going to|hoping to|hope to|considering|i'?ll\b|"
@@ -169,14 +169,22 @@ def _locate_sentence(span, triple):
         return span
     def toks(x):
         return {t for t in re.findall(r"\w+", str(x).lower()) if len(t) > 2}
-    want = toks(triple[2]) | toks(triple[0])
+    # numeric objects ("27:12", "4", "$350,000") tokenise to short/no word
+    # tokens and would leave `want` empty -> whole-span fallback -> spurious
+    # modality from an unrelated sentence. Match their digit literals instead.
+    nums = set(re.findall(r"\d[\d,:.]*", str(triple[2])))
+    want = toks(triple[2]) | toks(triple[0]) | nums
     if not want:
         return span
+    def sent_has(sent):
+        low = sent.lower()
+        return len(toks(triple[2]) & toks(sent)) + len(toks(triple[0]) & toks(sent)) \
+               + sum(1 for n in nums if n in sent)
     best, score = span, -1
-    for s in sents:
-        v = len(want & toks(s))
+    for sent in sents:
+        v = sent_has(sent)
         if v > score:
-            best, score = s, v
+            best, score = sent, v
     return best
 
 
