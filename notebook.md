@@ -3414,3 +3414,46 @@ false alarms (real 4x lift over model-free, but noisy and precision-costly, and
 half the raw LLM proposals were hallucinated). The categorical wall is LOWERED,
 not cleanly closed. And the biggest gap of all is unchanged: no real person has
 used this on real data.
+
+## Entry 54 — 2026-07-21 (p2: the judge is a VERBALIZED-output detector; the Competence Gate is the principled fix. Cheap grounding-construct probe applied)
+
+Reviewed how the LLM-as-judge (consistency.audit) is actually implemented against
+the registrant's Competence Gate (competence-gate-qwen3.5-4b: a LoRA that ROUTES
+by decoding an internal metacognitive signal -- layer-1 retrieval-appropriateness,
+layer-18 factual competence -- VRS-valid, within-band AUROC 0.868; key finding:
+"a probe validated for one construct carries no usable signal for the other").
+
+DIAGNOSIS. Our judge is the crude opposite of the gate: it trusts the model's
+VERBALIZED output. audit() prompts qwen3:14b, parses the emitted JSON, and takes
+it at face value. That is the exact antipattern the registrant's metacognition
+work names -- verbal confidence saturates; internal signals discriminate. The
+~50% hallucination (entry 53) is the cost of reading what the model SAYS, not
+what it KNOWS. And the hallucinations sort by CONSTRUCT, precisely as the gate's
+construct-specificity finding predicts:
+  - GROUNDING failures: proposed value not in the text ("Thursday->Fridays",
+    hypothetical "two cups"). Wrong construct = "is it stated".
+  - EXCLUSIVITY/TEMPORAL failures: values ARE in the text but do not constitute
+    one exclusive change ("still from Germany" read as a move). Different
+    construct = "did it change".
+One conflated prompt cannot be valid for both -- the gate's central claim.
+
+CHEAP APPLICATION (this entry, committed). Added _grounded_value to verify():
+each LLM-proposed old/new value must have a majority of its content tokens
+present in the source statements, else rejected. This is the GROUNDING construct,
+checked model-free -- the only construct we already have a reliable probe for.
+Effect: categorical raw 16 -> 14 (removed the pure token-absence hallucinations,
+cannot touch the 8 genuine ones whose values are all in-text); fresh false-alarm
+candidates 6 -> 5. It does NOT remove the exclusivity/temporal hallucinations,
+as expected -- wrong construct for that failure.
+
+THE PRINCIPLED FIX, stated honestly and NOT built here. The real lesson of the
+gate is architectural: read a CALIBRATED INTERNAL SIGNAL for the exclusivity/
+change construct instead of the verbalized claim -- an activation probe over
+qwen's hidden state, thresholded, the way the gate reads competence. That is the
+registrant's own PT-CSFT methodology and a real sub-project: it needs a labelled
+change/no-change set, a chosen layer, and VRS validation before any number is
+trustworthy. The two-judge protocol (entry 53) is the poor-man's, after-the-fact
+stand-in for exactly this internal probe -- expensive, but it caught the
+inflation the verbalized output hid. NET: judge downgraded from "trusted
+verbalizer" to "noisy proposer + model-free grounding gate"; the calibrated
+internal-signal probe is the named next step, not yet taken.

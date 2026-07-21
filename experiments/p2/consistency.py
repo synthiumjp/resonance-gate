@@ -74,8 +74,29 @@ _PROPER = _re.compile(r"\b([A-Z][a-z]{2,})\b")
 def _norm(v):
     return _re.sub(r"\s+"," ",str(v).lower()).strip(" .,!?'\"")
 
-def verify(change):
+_GSTOP = {"a","an","the","my","our","some","of","in","at","to","for","and","or",
+          "is","was","been","now","every","currently","most","recent"}
+
+def _grounded_value(value, statements):
+    """Is the value's content grounded in the source text? Content-token overlap;
+    a value whose informative tokens do not appear in any statement is a
+    hallucination (the 'Thursday not in text' class). This is the grounding
+    construct, checked model-free -- the Competence-Gate lesson that verbalized
+    output must be verified against an internal/grounded signal, not trusted."""
+    toks = [t for t in _re.findall(r"[a-z0-9]+", str(value).lower())
+            if len(t) > 2 and t not in _GSTOP]
+    if not toks:
+        return True                    # nothing checkable -> not penalised
+    blob = " ".join(statements).lower()
+    hit = sum(1 for t in toks if t in blob)
+    return hit / len(toks) >= 0.5      # majority of content tokens present
+
+
+def verify(change, statements=None):
     """True if a proposed {attribute,old,new} survives the model-free guards."""
+    if statements is not None:
+        if not _grounded_value(change.get("old",""), statements): return False
+        if not _grounded_value(change.get("new",""), statements): return False
     o, n = _norm(change.get("old","")), _norm(change.get("new",""))
     attr = str(change.get("attribute","")).lower()
     if not o or not n or o == n:                      # identical / empty
