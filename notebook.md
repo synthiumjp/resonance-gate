@@ -3953,3 +3953,34 @@ sound machinery (entry 64) + the right extractor (entry 65) + corroboration as t
 trust surface (this entry). Owed next: the value-type filter for the residual;
 first-person disambiguation on multi-valued roles; and the registrant's own
 eyeball accuracy check (they are ground truth for their profile).
+
+## Entry 68 — 2026-07-21 (p2: readout hygiene from the registrant's own error taxonomy. Instant, on the cache.)
+
+The registrant checked the corroborated profile against ground truth (receipts) and
+named the real error classes. Three are fixable at READOUT (no re-extraction), one
+is extraction-side.
+
+READOUT FIXES (applied to the existing cache, instant):
+  1. TECHNICAL VALUES rejected everywhere -- file paths, bare drive letters,
+     host paths (wsl.localhost, ~/), filenames (*.py/*.csv). These were landing as
+     location/project values.
+  2. DEVICE tokens rejected from LOCATION -- a machine name (the ssh box, pc, nas)
+     is not a place. Kept where correctly typed (device/possession).
+  3. TRANSIENT/TECHNICAL ATTRIBUTES excluded from the stable profile
+     (current_task/activity/directory, file_modified, work_directory,
+     virtual_environment, model_path, project_phase, current_position/role) --
+     they recur, so corroboration alone did not drop them.
+  Plus canonicalisation: software_used->tool, github_username->username,
+     computer_name/gpu->device, salary/current_salary->income.
+
+EXTRACTION-SIDE (needs a cache rebuild, ~45 min): the OCCUPATION SPREAD from
+ROLEPLAY and THIRD PARTIES -- a spouse's job, roles from "if I were..."
+conversations, an institution named as an employer, and a friend's SSH HOSTNAME
+extracted as the user's username. The per-turn prompt needs to reject hypothetical/
+roleplay framings and non-first-person facts (a fact about someone the user
+DISCUSSES is not a fact about the user). Flagged for the extractor prompt, then
+rebuild + re-verify.
+
+This is the product working as designed: the corroborated + receipted profile made
+its OWN errors legible enough for the user to correct in minutes -- the trust
+surface (receipts) is what turns a noisy extractor into a fixable system.

@@ -41,6 +41,9 @@ _CANON_ATTR = {
     "device": "possession", "hardware": "possession",
     "hobby": "hobby", "interest": "hobby", "interests": "hobby",
     "social_media_platform": "social_media", "social_media": "social_media",
+    "software_used": "tool", "github_username": "username", "computer": "device",
+    "computer_name": "device", "gpu": "device", "salary": "income",
+    "current_salary": "income", "current_package": "income",
 }
 
 
