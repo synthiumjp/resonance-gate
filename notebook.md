@@ -2959,3 +2959,44 @@ NET. The differentiator works and generalises in precision where it fires
 fresh data, not 1.00, with one named, bounded failure mode. This is the honest
 headline, established by independent adjudication rather than author eyeballing
 -- which is the whole reason the stress test existed.
+
+## Entry 46 — 2026-07-21 (p2: event-individuation fix VALIDATED on a fresh third sample — 0 false alarms in 40 unseen non-update instances)
+
+Entry 45's stress test found the false alarm: "drove five hours" (Tennessee)
+merged with "drove six hours" (D.C.) -- two different trips. Fixed by EVENT
+INDIVIDUATION via locative adjuncts: a proper noun governed by a locative/
+temporal preposition (to/in/at Tennessee) is a destination that identifies a
+SPECIFIC event, so two duration facts with DIFFERENT locative entities get
+different attribute keys and never pair. A direct-object proper noun (the
+Negroni being counted) is NOT locative-gated, so genuine cumulative counts
+still merge. Proper nouns also kept out of the attribute noun-set so extraction
+inconsistency does not split genuine pairs. This is linguistically motivated
+(locative adjuncts individuate events; direct objects name the attribute), not
+example-fitted.
+
+VALIDATION DISCIPLINE (the entry-29/45 lesson). The fix was TUNED against the
+stress examples (trip + Negroni), so its stress-set result is optimistic and
+was not trusted. Validated on a genuinely FRESH THIRD sample: 40 non-update
+instances (categories' instances 15-35, which neither the tuning nor the stress
+test ever touched).
+    FRESH non-update false alarms: 0 / 40      (before fix: 1 / 41)
+    held-out update precision:     3 / 3        (Negroni recovered)
+    tuning-set:                    7 / 7        (no regression)
+  The fix GENERALISES -- zero false alarms on unseen non-update conversations,
+  so the event-individuation rule is real, not fitted. Combined post-fix
+  non-update false-alarm rate: 0 / 81.
+
+STATE OF THE DIFFERENTIATOR. On numeric/count knowledge-updates, honest
+contradiction disclosure with receipts now runs at high precision that HOLDS on
+fresh, independently-relevant data, with the one stress-found failure mode
+closed and validated. This is the strongest the contradiction claim has been
+and the first time a precision number has survived out-of-sample validation.
+
+REMAINING, and now the honest frontier is clear (see entry 47 planning):
+  - CATEGORICAL change (works-at Acme -> Google; moved Chicago -> suburbs) is
+    NOT handled at all -- the detector is numeric-only. This is the majority of
+    real-world memory updates and the biggest single gap.
+  - Recall on held-out updates is low (3 fired / 31) because most held-out
+    updates ARE categorical.
+  - Still all LongMemEval (semi-synthetic); no real human transcripts.
+  - Extraction ceiling (3B, ~90% junk) unaddressed.
