@@ -209,6 +209,53 @@ def test_asserted_and_provisional_both_matched_are_separated():
     assert [p["node"]["id"] for p in r["provisional"]] == ["tool=opera"]
 
 
+# ---------------- fact-level owner corrections ----------------
+
+def test_correct_facts_deny_retype_confirm_and_merge():
+    from wire import correct_facts
+    facts = [
+        _fact(10, "occupation", "beekeeper", _convs(0, 1, 2)),
+        _fact(4, "occupation", "hive-tracker", _convs(3, 4)),   # a project, mistyped
+        _fact(3, "project", "hive-tracker", _convs(5, 6)),      # the real slot
+        _fact(2, "location", "house", _convs(7, 8)),            # junk
+        _fact(2, "location", "housefield lane", _convs(9, 10)), # must SURVIVE exact-deny
+    ]
+    prov = [_fact(1, "allergy", "penicillin", _convs(20))]
+    out_f, out_p, log = correct_facts(facts, prov, [
+        {"action": "deny", "attribute": "location", "value": "house", "exact": True},
+        {"action": "retype", "attribute": "occupation", "value": "hive-tracker",
+         "new_attribute": "project"},
+        {"action": "confirm", "attribute": "allergy", "value": "penicillin"},
+    ])
+    d = {(a, l): n for n, a, l, _, _ in out_f}
+    assert ("location", "house") not in d
+    assert ("location", "housefield lane") in d          # exact match protected it
+    assert ("occupation", "hive-tracker") not in d       # retyped away
+    assert d[("project", "hive-tracker")] == 7           # 4 + 3 merged
+    assert d[("allergy", "penicillin")] == 2             # promoted, +1 evidence
+    assert out_p == []
+    # receipts merged, never invented: project slot carries BOTH sources' convs
+    recs = next(r for n, a, l, r, _ in out_f if (a, l) == ("project", "hive-tracker"))
+    assert {c for _, c in recs} == set(_convs(3, 4, 5, 6))
+    acts = sorted(a for a, _ in log)
+    assert acts == ["confirmed", "denied", "retyped"]
+
+
+def test_corrected_facts_build_a_sound_graph():
+    from wire import correct_facts
+    facts = [
+        _fact(10, "location", "melbourne", _convs(*range(10))),
+        _fact(6, "occupation", "rg-project", _convs(*range(8, 14))),
+    ]
+    out_f, out_p, _ = correct_facts(facts, [], [
+        {"action": "retype", "attribute": "occupation", "value": "rg-project",
+         "new_attribute": "project"}])
+    g = WireGraph.from_facts(out_f, n_convs=40, provisional=out_p)
+    assert g.audit()["pass"]
+    e = g.edges[("location=melbourne", "project=rg-project")]
+    assert e["cooc"] == 2 and e["convs"] == ["c08", "c09"]
+
+
 # ---------------- VSA resonance: proposer gated by receipts ----------------
 
 def test_resonance_verified_is_subset_of_receipted_edges():

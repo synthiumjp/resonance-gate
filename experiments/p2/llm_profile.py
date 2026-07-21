@@ -42,6 +42,7 @@ _CANON_ATTR = {
     "education": "education", "degree": "education", "studying": "education",
     "study": "education", "qualification": "education",
     "ongoing_project": "project", "current_project": "project", "project": "project",
+    "active_project": "project",
     "building": "project", "working_on": "project", "startup": "project",
     "relationship": "relationship", "family": "relationship", "partner": "relationship",
     "spouse": "relationship", "kids": "relationship", "children": "relationship",

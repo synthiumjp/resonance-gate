@@ -44,6 +44,7 @@ _TECH_VALUE = re.compile(
     r"[\\/]"                                     # any slash -> a path
     r"|^[a-z]:$"                                 # bare drive letter  c:  d:
     r"|~/|\.localhost|wsl\."                     # home path / localhost / wsl host
+    r"|\.ts\.net"                                # tailscale machine address
     r"|\.(py|csv|json|txt|md|ipynb|sh|ya?ml|ini|cfg)$",  # a filename
     re.I)
 # 2. machine/device tokens are not a LOCATION (studio = the ssh box, pc, nas).
@@ -57,7 +58,12 @@ _DEVICE_WORDS = {"pc", "nas", "studio", "server", "host", "localhost", "laptop",
 _EXCLUDE_ATTR = {"current_task", "current_activity", "current_directory",
                  "file_modified", "work_directory", "virtual_environment",
                  "model_path", "model_used", "project_phase", "concern",
-                 "current_value", "researcher_name", "research_field"}
+                 "current_value", "researcher_name", "research_field",
+                 "current_issue"}
+# a bare dwelling-type word is not a place (entry 77 taxonomy: "house")
+_GENERIC_PLACE = {"house", "home", "apartment", "flat", "unit", "room"}
+# an occupation value must NAME the occupation, not restate having one
+_VACUOUS_OCC = {"day job", "job", "work", "full-time job", "full time job"}
 
 
 def _reject_value(attr, v):
@@ -65,7 +71,9 @@ def _reject_value(attr, v):
     v = v.strip().lower()
     if not v or _TECH_VALUE.search(v):
         return True
-    if attr == "location" and v in _DEVICE_WORDS:
+    if attr == "location" and (v in _DEVICE_WORDS or v in _GENERIC_PLACE):
+        return True
+    if attr == "occupation" and v in _VACUOUS_OCC:
         return True
     return False
 

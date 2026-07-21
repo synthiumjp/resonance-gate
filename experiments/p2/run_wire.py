@@ -37,7 +37,7 @@ from run_crosssession import redact
 from run_belief import _is_prose
 from llm_profile import canon_attr
 import run_profile_full as PF
-from wire import WireGraph, ResonanceIndex
+from wire import WireGraph, ResonanceIndex, correct_facts
 
 # queries with no corroborated evidence in ANY profile of this kind -- the
 # abstention probe must return ABSTAIN on every one, never a guess.
@@ -87,6 +87,16 @@ def build_facts(path, min_mentions=2):
             tgt.append((cl["n"], attr, cl["label"], cl["recs"], cl["toks"]))
     facts.sort(key=lambda f: -f[0])
     prov.sort(key=lambda f: -f[0])
+    # owner corrections (ground truth), applied before wiring so the graph,
+    # report and recall all rebuild consistently
+    corr_path = os.path.join(os.path.dirname(path), "corrections.jsonl")
+    if os.path.exists(corr_path):
+        corrections = [json.loads(l) for l in open(corr_path) if l.strip()]
+        facts, prov, log = correct_facts(facts, prov, corrections)
+        if log:
+            from collections import Counter
+            print("owner corrections applied:",
+                  dict(Counter(a for a, _ in log)))
     n_convs = len({u for _, u, _, _ in prose})
     return facts, prov, n_convs, titles, uncached
 

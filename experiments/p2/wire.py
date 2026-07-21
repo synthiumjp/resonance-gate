@@ -71,6 +71,67 @@ def strength(w):
     return 1.0 - math.exp(-max(w, 0.0))
 
 
+def correct_facts(facts, prov, corrections):
+    """OWNER CORRECTIONS at the fact level, applied BEFORE wiring (so edges,
+    audit, report and recall all rebuild consistently). The owner is ground
+    truth; corrections are data (an owner-edited file), never inference.
+
+    Each correction: {"action": "deny"|"confirm"|"retype",
+                      "attribute": <attr>, "value": <substring of the value>,
+                      "exact": true?          # value must match exactly
+                      "new_attribute": <attr> # retype only}
+      deny    -> the fact is wrong: dropped from both tiers.
+      confirm -> owner-vouched: a provisional fact is promoted; the
+                 confirmation IS the second piece of evidence (mentions += 1).
+      retype  -> right fact, wrong attribute (a project extracted as an
+                 occupation, hardware as a tool): the attribute is renamed;
+                 same-slot facts merge (mentions summed, receipts unioned).
+    Returns (facts, provisional, log)."""
+    def _match(c, attr, label):
+        if str(c.get("attribute", "")).lower().strip() != attr:
+            return False
+        sub = str(c.get("value", "")).lower().strip()
+        return label == sub if c.get("exact") else sub in label
+
+    out = {"asserted": [], "prov": []}
+    log = []
+    for tier, src in (("asserted", facts), ("prov", prov)):
+        for f in src:
+            n, attr, label, recs = f[0], f[1], f[2], f[3]
+            toks = set(f[4]) if len(f) > 4 and f[4] else _tokens(label)
+            dest, drop = tier, False
+            for c in corrections:
+                if not _match(c, attr, label.lower()):
+                    continue
+                act = c.get("action")
+                if act == "deny":
+                    drop = True
+                    log.append(("denied", f"{attr}={label}"))
+                    break
+                if act == "retype":
+                    new = str(c.get("new_attribute", "")).lower().strip()
+                    if new and new != attr:
+                        log.append(("retyped", f"{attr}={label} -> {new}"))
+                        attr = new
+                elif act == "confirm" and tier == "prov":
+                    n += 1                      # the confirmation is evidence
+                    dest = "asserted"
+                    log.append(("confirmed", f"{attr}={label}"))
+            if not drop:
+                out[dest].append((n, attr, label, recs, toks))
+    # merge facts that now share (attr, label) -- e.g. after a retype
+    merged = {}
+    for n, attr, label, recs, toks in out["asserted"]:
+        k = (attr, label)
+        if k in merged:
+            m = merged[k]
+            merged[k] = (m[0] + n, attr, label, m[3] + recs, m[4] | toks)
+        else:
+            merged[k] = (n, attr, label, recs, toks)
+    facts_out = sorted(merged.values(), key=lambda f: -f[0])
+    return facts_out, out["prov"], log
+
+
 class WireGraph:
     """Receipted co-occurrence graph over corroborated facts.
 

@@ -4280,3 +4280,40 @@ multiplicity is the exact mistake entry 69 corrected. (b) tool slots rose
 50 -> 65; some may be commands-as-tools (a known residue class), owner check.
 v1 remains the DEFAULT cache until the owner's verdict; v2 is one env var
 away (RG_EXTRACT_V2=1), both artifact sets intact.
+
+## Entry 77 — 2026-07-22 (p2: the correction loop EXERCISED on real ground truth. Owner's 17-verdict taxonomy applied; RETYPE added -- the dominant error class is wrong-TYPE, not invention)
+
+The owner eyeballed the v2 receipts (profile_report_v2.txt) and returned 17
+verdicts -- the correction loop running for real. THE KEY OBSERVATION: the
+dominant error class is RIGHT FACT, WRONG ATTRIBUTE -- real projects typed as
+occupations, hardware typed as a tool, an investment-property location typed
+as if residence, a folder name typed as occupation. The memory's real-data
+errors are TYPE errors and third-party attributions, NOT fabrications --
+consistent with the non-generative design (it cannot invent; it can only
+mis-file what was really said).
+
+So corrections gained a third action, RETYPE (wire.correct_facts), alongside
+deny/confirm: renames the attribute, merges same-slot facts (mentions summed,
+receipts unioned -- receipts never invented). Corrections now apply at the
+FACT level inside build_facts, BEFORE wiring, so the graph, report, recall
+and injection all rebuild consistently from one choke point; graph-level
+deny/confirm remains for runtime use. Suite 25/25.
+
+Generic hygiene the taxonomy exposed (committable, no personal values):
+tailscale machine addresses (.ts.net) are tech values; a bare dwelling word
+(house/home/flat...) is not a location; a vacuous occupation value ("day
+job") names nothing; current_issue excluded as transient; canon folds
+active_project->project. In-sample caveat (entry 59 discipline): these are
+fitted to the observed errors; principled but to be validated on fresh data.
+
+APPLIED on the real store: 5 retyped + 9 denied (3 further deny lines
+pre-empted by the new generic hygiene -- defence in depth). Corrected v2:
+164 asserted + 918 provisional; 505 edges; audits ALL PASS (0 unsupported
+links, 268/268 crosstalk blocked, 0 fabricated assertions).
+
+EXTRACTION-V3 residue, named for later (all third-party/identity classes the
+per-turn prompt still misses): a folder name as occupation; the owner's OWN
+name extracted as a collaborator; a third party's email/institution/
+conference attributed to the owner. And one judgement call recorded: OSF kept
+as a tool (the Open Science Framework is genuinely part of the owner's
+research stack).

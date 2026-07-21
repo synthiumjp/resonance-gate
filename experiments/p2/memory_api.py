@@ -45,19 +45,14 @@ class Memory:
     def load(cls, conversations_path, min_mentions=2):
         """Build from conversations.json + the extraction cache next to it
         (cache-only; no LLM calls). Owner corrections (corrections.jsonl in the
-        same quarantine dir) are applied last -- the owner is ground truth."""
+        same dir) are applied INSIDE build_facts, at the fact level, before
+        wiring -- so graph, report and recall stay consistent. The graph-level
+        apply_corrections below remains for runtime (in-session) deny/confirm."""
         from run_wire import build_facts
         facts, prov, n_convs, titles, _ = build_facts(conversations_path,
                                                       min_mentions)
         g = WireGraph.from_facts(facts, n_convs=n_convs, provisional=prov)
-        m = cls(g, titles)
-        corr = os.path.join(os.path.dirname(conversations_path),
-                            "corrections.jsonl")
-        if os.path.exists(corr):
-            import json
-            m.apply_corrections([json.loads(l) for l in open(corr)
-                                 if l.strip()])
-        return m
+        return cls(g, titles)
 
     def apply_corrections(self, corrections):
         """THE CORRECTION LOOP (owner-authored; the owner is ground truth).
