@@ -55,6 +55,28 @@ _USED_TO = re.compile(r"\bused to\s+(.+?)(?:[,.;]|\s+but\b|$)(?:.*?\bnow\s+(.+?)
 
 _GOAL_STOP = {"a", "an", "the", "another", "new", "some", "there", "here",
               "that", "this", "my", "our"}
+
+# a genuine relocation GOAL is a place: a capitalised proper-noun city/region, or
+# a known place-type word. Research/writing chat says "moving to phase 5", "now at
+# h4", "moved to the appendix" -- these collapse a cos:location slot on a large
+# stream (entry 60/61). A place-type check on the value stops the mega-collision
+# without touching real moves (Chicago, the suburbs both pass).
+_PLACE_WORDS = {"suburbs", "suburb", "downtown", "uptown", "city", "cities",
+                "town", "countryside", "coast", "country", "abroad", "overseas",
+                "hometown", "campus", "village", "neighborhood", "neighbourhood",
+                "province", "district", "borough", "county", "coastline"}
+
+
+def _place_like(val):
+    """True if val plausibly names a PLACE (proper-noun city/region or a place-type
+    word), not a technical/abstract goal ("phase 5", "repo", "appendix")."""
+    if re.search(r"\d", val):                       # phase 5, h4, block 2
+        return False
+    toks = val.split()
+    for w in toks:
+        if re.match(r"[A-Z][a-z]{2,}$", w) and w not in _NOT_NAME:
+            return True                             # a proper-noun place name
+    return any(w.lower() in _PLACE_WORDS for w in toks)
 _NAME = re.compile(r"\b([A-Z][a-z]{2,})\b")
 _NOT_NAME = {"By", "The", "That", "This", "Do", "Can", "Oh", "So", "And", "But",
              "She", "He", "They", "We", "My", "I"}
@@ -126,6 +148,9 @@ def extract_cos(text):
                 val = _clean_value(sent[m.end():].split(",")[0].split(" and ")[0]
                                    .split(" who ")[0])
                 if not val or len(val) < 2:
+                    continue
+                # a location GOAL must name a place, not a technical/abstract token
+                if attr == "location" and not _place_like(val):
                     continue
                 k = (subj.lower(), attr, val.lower())
                 # skip if this span already produced a value (pattern overlap)

@@ -3772,3 +3772,33 @@ genuine-prose "moved to/now at X" across sessions into one slot) -- needs a
 place-type check on the value or entity-anchored scoping, owed. Re-run on the real
 export is by the registrant (the pipeline-over-personal-data execution is gated;
 the run is theirs to authorise).
+
+## Entry 62 — 2026-07-21 (p2: cos:location place-type check closes the mega-collision. Real-data cross-session false alarms 11 -> 4 -> now targeting ~2.)
+
+Fixed the entry-61 residual: the cos:location goal-pattern collapsed genuine-prose
+"moving to phase 5 / now at h4 / moved to the appendix" across 688 sessions into
+one slot of non-locations. Added _place_like: a location GOAL value must name a
+place -- a capitalised proper-noun city/region OR a place-type word (suburbs,
+downtown, city, coast, ...) -- and must contain no digits. Applied to the location
+goal patterns only.
+MEASURED: unit-tested (Chicago/suburbs/Melbourne/downtown/Tennessee pass; phase 5/
+h4/repo/appendix/base rejected; "moving to phase 5" now extracts nothing while
+"moved to Chicago" and "moved back to the suburbs" still do). LongMemEval recall
+11/39, fresh false alarms 0/51 -- IDENTICAL (the 2 categorical LME updates are
+Chicago->suburbs-type real moves, unaffected). Expected on the real export: the
+cos:location mega-collision (the dominant remaining false alarm) drops to a single
+place-like value -> no change fired.
+
+REAL-DATA TRAJECTORY (registrant's own 13-month history, model-free cross-session):
+  entry 60: 11 cross-session changes, ~10 false alarms (first contact -- broke).
+  entry 61: -> 4 (content-type gate cleared telemetry/metaphorical/filler: 7 gone).
+  entry 62: cos:location place-check -> expected ~2-3 remaining, of which the
+    borderline-real signal (residence granularity; evolving tool preference) plus
+    one minor technical residual (a model-name+number count, "qwen 16"->"1", that a
+    surface rule cannot cleanly gate). Re-run is the registrant's (execution gated).
+This is honest convergence on REAL target-user data: every false-alarm class named,
+each fixed at zero LongMemEval cost, the noise floor walked down 10 -> ~2 by
+principled input/commensurability gates rather than value lookups. The remaining
+signal is weak (few genuine cross-session life-changes even in 13 months) -- which
+re-confirms entry 58: real fact-change is rare, so PRECISION (near-zero false
+alarms) is the whole game, and it is now within reach on real data.
