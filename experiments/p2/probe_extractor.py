@@ -15,7 +15,8 @@ import re
 import sys
 
 sys.path.insert(0, __file__.rsplit("/", 1)[0])
-from llm_profile import SYSTEM, SYSTEM_V2, extract_profile_facts, canon_attr
+from llm_profile import (SYSTEM, SYSTEM_V2, SYSTEM_V3, extract_profile_facts,
+                         canon_attr)
 
 # (text, kind, spec)
 #   kind "neg":  spec = attrs that must NOT appear as bare user facts
@@ -65,6 +66,20 @@ CASES = [
      [("possession", r"pc|computer")]),
 ]
 
+# WORLD cases (v3): the fact must be attributed to a NON-SELF subject.
+#   kind "wpos": spec = [(subject_rx, attr_rx, value_rx)] all must appear on a
+#   non-self subject, and NONE of those attrs may appear as a bare self fact.
+WORLD_CASES = [
+    ("(.venv) chrismarmo@studio jspace-metacog % python train.py crashed with "
+     "oom again", "neg", {"username", "email", "location", "device", "occupation"}),
+    ("my friend chris owns the mac studio i ssh into for the big jobs", "wpos",
+     [(r"chris|friend", r"possession|device", r"mac|studio")]),
+    ("my wife is doing her student placement in maternal and child health",
+     "wpos", [(r"wife", r"placement|occupation|education", r"maternal|child")]),
+    ("my old supervisor is over at swinburne university these days", "wpos",
+     [(r"supervisor", r".*", r"swinburne")]),
+]
+
 _REL = re.compile(r"^(wife|husband|partner|spouse|daughter|son|child|brother|"
                   r"sister|mother|father|parent|friend|boss|colleague|"
                   r"coworker|ex_boss|old_boss)_", re.I)
@@ -72,38 +87,60 @@ _REL = re.compile(r"^(wife|husband|partner|spouse|daughter|son|child|brother|"
 
 def judge(kind, spec, facts):
     canon = [(canon_attr(f["attribute"]), str(f["value"]).lower(),
-              str(f["attribute"]).lower()) for f in facts]
+              str(f["attribute"]).lower(), f.get("subject", "self"))
+             for f in facts]
     if kind == "neg":
-        # fail only if a FORBIDDEN attribute appears WITHOUT a relationship prefix
-        bad = [(a, v) for a, v, raw in canon if a in spec and not _REL.match(raw)]
+        # fail only if a FORBIDDEN attribute lands on the USER: bare attr,
+        # subject self. Relationship-prefixed (v2) or non-self subject (v3)
+        # is correct attribution, not a failure.
+        bad = [(a, v) for a, v, raw, s in canon
+               if a in spec and s == "self" and not _REL.match(raw)]
         return not bad, bad
+    if kind == "wpos":
+        missing = []
+        for s_rx, a_rx, v_rx in spec:
+            hit = any(re.search(s_rx, s) and re.search(a_rx, a) and
+                      re.search(v_rx, v)
+                      for a, v, _, s in canon if s != "self")
+            leak = any(re.fullmatch(a_rx, a) and re.search(v_rx, v)
+                       for a, v, raw, s in canon
+                       if s == "self" and not _REL.match(raw))
+            if not hit or leak:
+                missing.append((s_rx, a_rx, "missing" if not hit else "self-leak"))
+        return not missing, missing
     missing = [(want, rx) for want, rx in spec
-               if not any(a == want and re.search(rx, v) for a, v, _ in canon)]
+               if not any(a == want and re.search(rx, v)
+                          for a, v, _, s in canon if s == "self")]
     return not missing, missing
 
 
+ARMS = (("v2", SYSTEM_V2), ("v3", SYSTEM_V3))
+
+
 def main():
-    tally = {("v1", "neg"): 0, ("v1", "pos"): 0,
-             ("v2", "neg"): 0, ("v2", "pos"): 0}
-    for text, kind, spec in CASES:
+    all_cases = CASES + WORLD_CASES
+    tally = {(n, k): 0 for n, _ in ARMS for k in ("neg", "pos", "wpos")}
+    for text, kind, spec in all_cases:
         res = {}
-        for name, system in (("v1", SYSTEM), ("v2", SYSTEM_V2)):
+        for name, system in ARMS:
             facts = extract_profile_facts(text, system=system)
             ok, detail = judge(kind, spec, facts)
             tally[(name, kind)] += ok
             res[name] = (ok, detail, facts)
-        v1ok, v2ok = res["v1"][0], res["v2"][0]
-        mark = "==" if v1ok == v2ok else ("v2+" if v2ok else "v2-")
-        print(f"[{'ok' if v1ok else 'XX'}->{'ok' if v2ok else 'XX'} {mark:3s}] "
+        aok, bok = res[ARMS[0][0]][0], res[ARMS[1][0]][0]
+        mark = "==" if aok == bok else (f"{ARMS[1][0]}+" if bok else f"{ARMS[1][0]}-")
+        print(f"[{'ok' if aok else 'XX'}->{'ok' if bok else 'XX'} {mark:3s}] "
               f"({kind}) {text[:58]}")
-        if not v2ok:
-            print(f"         v2 detail: {res['v2'][1]} facts={res['v2'][2]}")
-    n_neg = sum(1 for _, k, _ in CASES if k == "neg")
-    n_pos = len(CASES) - n_neg
-    for name in ("v1", "v2"):
-        print(f"{name}: {tally[(name, 'neg')] + tally[(name, 'pos')]}"
-              f"/{len(CASES)}  (neg {tally[(name, 'neg')]}/{n_neg}, "
-              f"pos {tally[(name, 'pos')]}/{n_pos})")
+        if not bok:
+            print(f"         {ARMS[1][0]} detail: {res[ARMS[1][0]][1]} "
+                  f"facts={res[ARMS[1][0]][2]}")
+    counts = {k: sum(1 for _, kk, _ in all_cases if kk == k)
+              for k in ("neg", "pos", "wpos")}
+    for name, _ in ARMS:
+        tot = sum(tally[(name, k)] for k in counts)
+        print(f"{name}: {tot}/{len(all_cases)}  ("
+              + ", ".join(f"{k} {tally[(name, k)]}/{n}"
+                          for k, n in counts.items()) + ")")
 
 
 if __name__ == "__main__":

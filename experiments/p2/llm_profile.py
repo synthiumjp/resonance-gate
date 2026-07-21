@@ -101,7 +101,51 @@ URLs, or code (e.g. ssh alice@host22) are NOT personal facts about the user.
 - If the message states no stable personal fact, output exactly: []""")
 
 
+# v3 (entry 78): the WORLD reframe -- the memory holds the user's world, not
+# only the user. Facts get a SUBJECT: "self", a relationship role ("wife"),
+# a named person ("chris marmo"), an org, or a project. Third-party facts are
+# no longer rejected -- they are ATTRIBUTED. Terminal/technical identifiers
+# are facts about no one. OPT-IN via RG_EXTRACT_V3 (own cache/report).
+SYSTEM_V3 = """Extract STABLE facts about the user's WORLD from one message: \
+facts about the user themself, AND about the people, organisations and \
+projects in their life. A stable fact could go on a profile page: where \
+someone lives/works, what they own or use regularly, relationships, an \
+ongoing project, a routine.
+
+Output ONLY a JSON array, one object per fact:
+[{"subject": "self" OR the other person/org/project (e.g. "wife", "friend \
+chris", "tic tracker"), "attribute": "<short noun, e.g. residence, employer, \
+possession, current_tool, weekly_class>", "value": "<short>"}]
+
+STRICT rules -- when unsure, output fewer:
+- subject "self" ONLY for facts the user states about their OWN life.
+- A fact about someone/something else gets THAT subject: "my wife is doing a \
+nursing placement" -> {"subject": "wife", "attribute": "placement", "value": \
+"nursing"}. NEVER file another person's fact under subject "self".
+- IGNORE instructions to the assistant, quoted text, code, file paths, \
+section refs, numbers/metrics, and technical jargon.
+- TERMINAL/TECH identifiers are facts about NO ONE: usernames, hostnames, \
+IPs, emails, or prompts inside commands, paths, URLs, logs or pasted output \
+(e.g. "ssh alice@host22", "(.venv) alice@box dir %") -- extract nothing from \
+them.
+- IGNORE metaphors and progress-talk ("keep digging", "moving to phase 5").
+- IGNORE roleplay, personas, stories, counterfactuals ("pretend", "act as", \
+"imagine I'm", "if I were") -- extract NOTHING from inside that framing.
+- IGNORE hypotheticals, questions, and things people might do.
+- If the message states no stable fact, output exactly: []"""
+
+
+def canon_subject(s):
+    """Normalise a subject: lowercase, strip possessives/articles. 'my wife'
+    -> 'wife'; 'my friend chris' -> 'chris (friend)' stays as given otherwise."""
+    s = re.sub(r"\s+", " ", str(s).lower().strip())
+    s = re.sub(r"^(my|the|our)\s+", "", s)
+    return s or "self"
+
+
 def active_system():
+    if os.environ.get("RG_EXTRACT_V3"):
+        return SYSTEM_V3
     return SYSTEM_V2 if os.environ.get("RG_EXTRACT_V2") else SYSTEM
 
 
@@ -127,5 +171,10 @@ def extract_profile_facts(text, system=None):
             a = re.sub(r"\s+", "_", str(f["attribute"]).strip().lower())[:30]
             v = str(f["value"]).strip()[:80]
             if a and v:
-                facts.append({"attribute": a, "value": v})
+                fact = {"attribute": a, "value": v}
+                # v3: subject-typed world facts; absent (v1/v2) means self
+                subj = canon_subject(f.get("subject", "self"))
+                if subj != "self":
+                    fact["subject"] = subj[:40]
+                facts.append(fact)
     return facts

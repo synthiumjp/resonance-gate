@@ -4317,3 +4317,48 @@ name extracted as a collaborator; a third party's email/institution/
 conference attributed to the owner. And one judgement call recorded: OSF kept
 as a tool (the Open Science Framework is genuinely part of the owner's
 research stack).
+
+## Entry 78 — 2026-07-22 (p2: THE WORLD REFRAME. The memory holds the user's WORLD, not only the user. v3 subject-typed extraction: 23/23 probe; rebuild launched)
+
+Direction correction from the registrant: this is a LIVING MEMORY of the
+user's world -- the people, orgs and projects in their life -- not only a
+self-profile. Their own entry-77 taxonomy proves it: most "errors" we denied
+were TRUE facts about OTHER entities (a spouse's placement, a friend's
+machine, a supervisor's institution) that the one-subject schema could not
+hold. We were deleting the user's world to protect the user's profile.
+
+THE ARCHITECTURE ALREADY ANTICIPATED IT: belief slots were always (subject,
+attribute) -- we had hardcoded subject='i'. Wire, corroboration, receipts,
+abstention and the audits are all subject-agnostic; the non-hallucination
+guarantee survives the reframe untouched.
+
+REPRESENTATION CHOICE (deliberately minimal): the subject NAMESPACES the slot
+key ("wife:occupation", "chris marmo:possession") -- entity nodes emerge as
+namespaces; self-facts keep their plain keys; belief/wire/corrections/audit
+code paths unchanged. A dedicated entity layer can follow later if needed.
+
+EXTRACTION v3 (SYSTEM_V3, RG_EXTRACT_V3, own cache): facts get a SUBJECT --
+"self", a relationship role, a named person/org/project. The prompt's job
+flips from "reject third-party" to "ATTRIBUTE correctly"; terminal/tech
+identifiers (usernames, hostnames, IPs, pasted prompts) are facts about NO
+ONE. Probe extended with a real pasted-terminal-prompt case and three world-
+attribution cases:
+    v2: 20/23 (neg 13/13, pos 7/7, world 0/3 -- structurally impossible)
+    v3: 23/23 (neg 13/13, pos 7/7, world 3/3)
+One v3 draft regression (attribute/value inversion on a possession) traced to
+dropping the example attribute nouns from the prompt; restored, clean sweep.
+
+OWNER-STATED SEED FACTS: owner_facts.jsonl in the quarantine -- ground-truth
+world facts asserted directly (n=2) with an "owner-stated" receipt, merged
+with extractions by the (now unconditional) fact-level merge pass. First
+seeds: the registrant's worked example -- a friend who owns the mac studio
+the registrant ssh'es into, which explains a whole cluster of prior junk
+(the friend's username/hostname/tailscale address landing in the owner's
+profile as username/location/email).
+
+OWED + NAMED: entity RESOLUTION (is "chris" the same node as "chris marmo"?)
+is where hallucination could re-enter -- merging two different people would
+FABRICATE a person. Discipline: merge only on corroborated evidence with
+receipts; unsure -> keep separate nodes (abstention generalised to identity).
+NOT built yet; namespaces stay unmerged until then. The v3 full rebuild
+(13,911 turns) is running in the background; world-graph comparison next.

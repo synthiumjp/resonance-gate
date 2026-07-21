@@ -132,11 +132,12 @@ def main():
     except Exception:
         pass
 
-    # v2 extraction (RG_EXTRACT_V2=1) uses its OWN cache + report: a prompt
-    # change invalidates a cache, and the v1 artifacts stay intact for rollback.
-    _sfx = "_v2" if os.environ.get("RG_EXTRACT_V2") else ""
+    # v2/v3 extraction (RG_EXTRACT_V2/V3) use their OWN cache + report: a prompt
+    # change invalidates a cache, and older artifacts stay intact for rollback.
+    _sfx = ("_v3" if os.environ.get("RG_EXTRACT_V3")
+            else "_v2" if os.environ.get("RG_EXTRACT_V2") else "")
     cache_path = os.path.join(os.path.dirname(path), f"profile_cache{_sfx}.jsonl")
-    print(f"extractor prompt: {'v2' if _sfx else 'v1'}  (cache: {cache_path})")
+    print(f"extractor prompt: {_sfx.strip('_') or 'v1'}  (cache: {cache_path})")
     cache = {}
     if os.path.exists(cache_path):
         for line in open(cache_path):
@@ -168,8 +169,12 @@ def main():
             v = re.sub(r"\s+", " ", str(fct["value"]).strip().lower())
             if not v or a in _EXCLUDE_ATTR or _reject_value(a, v):
                 continue
-            slots[a][v]["n"] += 1
-            slots[a][v]["recs"].append((date, uuid))
+            # v3 world facts: the subject namespaces the slot ("wife:occupation");
+            # self-facts keep their plain key. Entity nodes emerge as namespaces.
+            subj = fct.get("subject")
+            key = f"{subj}:{a}" if subj else a
+            slots[key][v]["n"] += 1
+            slots[key][v]["recs"].append((date, uuid))
         if (i + 1) % 500 == 0:
             print(f"  ...{i+1}/{len(prose)} turns")
 

@@ -52,7 +52,8 @@ def build_facts(path, min_mentions=2):
     run_profile_full readout (canon + hygiene + clustering). Returns
     (facts, provisional, n_convs, titles, n_uncached) -- provisional is the
     single-mention tail (kept for direct-match-only readout, the hybrid)."""
-    _sfx = "_v2" if os.environ.get("RG_EXTRACT_V2") else ""
+    _sfx = ("_v3" if os.environ.get("RG_EXTRACT_V3")
+            else "_v2" if os.environ.get("RG_EXTRACT_V2") else "")
     cache_path = os.path.join(os.path.dirname(path), f"profile_cache{_sfx}.jsonl")
     cache = {}
     if os.path.exists(cache_path):
@@ -76,8 +77,10 @@ def build_facts(path, min_mentions=2):
             v = re.sub(r"\s+", " ", str(fct["value"]).strip().lower())
             if not v or a in PF._EXCLUDE_ATTR or PF._reject_value(a, v):
                 continue
-            slots[a][v]["n"] += 1
-            slots[a][v]["recs"].append((date, uuid))
+            subj = fct.get("subject")   # v3 world facts namespace the slot
+            key = f"{subj}:{a}" if subj else a
+            slots[key][v]["n"] += 1
+            slots[key][v]["recs"].append((date, uuid))
     facts, prov = [], []
     for attr, entries in slots.items():
         for cl in PF._cluster(entries):
@@ -87,16 +90,33 @@ def build_facts(path, min_mentions=2):
             tgt.append((cl["n"], attr, cl["label"], cl["recs"], cl["toks"]))
     facts.sort(key=lambda f: -f[0])
     prov.sort(key=lambda f: -f[0])
+    # OWNER-STATED seed facts (ground truth, e.g. entities in the user's world):
+    # asserted directly (n=2), receipted "owner-stated". Merged below.
+    owner_path = os.path.join(os.path.dirname(path), "owner_facts.jsonl")
+    if os.path.exists(owner_path):
+        n_seed = 0
+        for line in open(owner_path):
+            if not line.strip():
+                continue
+            d = json.loads(line)
+            subj = str(d.get("subject", "self")).lower().strip()
+            a = canon_attr(d["attribute"])
+            key = a if subj in ("", "self") else f"{subj}:{a}"
+            v = re.sub(r"\s+", " ", str(d["value"]).strip().lower())
+            facts.append((2, key, v, [(d.get("date", ""), "owner-stated")], None))
+            n_seed += 1
+        titles.setdefault("owner-stated", "(owner-stated fact)")
+        print(f"owner-stated seed facts: {n_seed}")
     # owner corrections (ground truth), applied before wiring so the graph,
-    # report and recall all rebuild consistently
+    # report and recall all rebuild consistently. Run unconditionally: the
+    # merge pass also unions duplicate slots (e.g. a seed + an extraction).
     corr_path = os.path.join(os.path.dirname(path), "corrections.jsonl")
-    if os.path.exists(corr_path):
-        corrections = [json.loads(l) for l in open(corr_path) if l.strip()]
-        facts, prov, log = correct_facts(facts, prov, corrections)
-        if log:
-            from collections import Counter
-            print("owner corrections applied:",
-                  dict(Counter(a for a, _ in log)))
+    corrections = ([json.loads(l) for l in open(corr_path) if l.strip()]
+                   if os.path.exists(corr_path) else [])
+    facts, prov, log = correct_facts(facts, prov, corrections)
+    if log:
+        from collections import Counter
+        print("owner corrections applied:", dict(Counter(a for a, _ in log)))
     n_convs = len({u for _, u, _, _ in prose})
     return facts, prov, n_convs, titles, uncached
 
