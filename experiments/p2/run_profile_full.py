@@ -1,21 +1,19 @@
-"""p2 FULL-STREAM corroboration test: the real trust test for LLM-extracted profile.
+"""p2 FULL-STREAM corroboration test + CHECKABLE report.
 
-Entry 65's sample under-measured the one thing that matters -- CORROBORATION -- by
-sampling every ~55th turn, so nothing was seen twice. This runs EVERY prose turn
-(what realtime would do incrementally), so a stable fact climbs to x10+ while a
-transient stays x1. Corroboration IS the noise filter: no hard transient rule, just
-a mention threshold.
+Entry 65's sample under-measured CORROBORATION. This runs EVERY prose turn
+(realtime replay) so a stable fact climbs to x10+ while a transient stays x1.
+Corroboration IS the noise filter (assert only >= N mentions); mentions merge via
+full stream + canon_attr + value clustering.
 
-Three mechanisms make corroboration accumulate:
-  1. FULL STREAM  -- every turn, not a sample.
-  2. canon_attr   -- attribute synonyms merge into one slot (residence/location/city).
-  3. value CLUSTERING at readout -- "melbourne" / "melbourne australia" count as one.
+CHECKABILITY (how the user verifies it is really them): writes an UNREDACTED report
+with RECEIPTS -- for every corroborated fact, the dates + conversation titles it was
+pulled from -- to <quarantine>/profile_report.txt, which the user opens locally. So
+each fact is traceable back to the conversations that support it. STDOUT stays
+REDACTED (safe for the shared session); the local report file is the ground-truth
+check.
 
-Cached + resumable (extraction is the cost); cache lives in the quarantine, never
-git. Reports the corroborated profile (>=2 mentions = the trust surface) vs the x1
-tail (filtered), plus latency.
-
-PRIVACY: quarantined input, redacted output, cache in scratchpad. Generic code only.
+Cached/resumable (cache in the quarantine, never git). PRIVACY: quarantined input,
+redacted stdout, unredacted report stays local. Generic code only.
 Usage: run_profile_full.py <conversations.json> [min_mentions=2]
 """
 
@@ -32,7 +30,7 @@ if _HERE not in sys.path:
     sys.path.insert(0, _HERE)
 
 import run_crosssession as RC
-from run_crosssession import load_stream, redact
+from run_crosssession import redact
 from run_belief import _is_prose
 from llm_profile import extract_profile_facts, canon_attr
 
@@ -40,24 +38,47 @@ _STOP = {"the", "a", "an", "my", "of", "and", "in", "at", "to", "for", "with",
          "is", "was", "i", "am", "me", "current", "currently", "new", "some"}
 
 
-def _cluster(value_counts):
-    """Merge values in one slot by content-token overlap; sum their mentions.
-    Returns [(label, total_mentions)] with the most-mentioned surface as label."""
-    items = sorted(value_counts.items(), key=lambda kv: -kv[1])
+def load_stream_and_titles(path):
+    """(stream, uuid->title). One load of conversations.json; stream is human
+    turns time-ordered as (step, uuid, date, text)."""
+    conv = json.load(open(path))
+    conv.sort(key=lambda c: c.get("created_at", ""))
+    titles, stream = {}, []
+    for i, c in enumerate(conv):
+        titles[c.get("uuid", "")] = c.get("name", "") or "(untitled)"
+        for m in (c.get("chat_messages") or []):
+            if (m.get("sender") or "").lower() != "human":
+                continue
+            txt = m.get("text") or m.get("content") or ""
+            if isinstance(txt, list):
+                txt = " ".join(str(x.get("text", "")) if isinstance(x, dict) else str(x)
+                               for x in txt)
+            if txt.strip():
+                stream.append((i, c.get("uuid", ""), c.get("created_at", "")[:10],
+                               txt.strip()[:1800]))
+    return stream, titles
+
+
+def _cluster(entries):
+    """Merge one slot's values by content-token overlap; sum mentions and receipts.
+    entries: {value: {"n": int, "recs": [(date, uuid)]}}. Returns list of dicts."""
+    items = sorted(entries.items(), key=lambda kv: -kv[1]["n"])
     clusters = []
-    for val, n in items:
+    for val, d in items:
         toks = {t for t in re.findall(r"[a-z0-9]+", val.lower())
                 if t not in _STOP and len(t) > 1}
         placed = False
         for cl in clusters:
             if toks & cl["toks"]:
-                cl["n"] += n
+                cl["n"] += d["n"]
                 cl["toks"] |= toks
+                cl["recs"].extend(d["recs"])
                 placed = True
                 break
         if not placed:
-            clusters.append({"label": val, "n": n, "toks": toks})
-    return [(c["label"], c["n"]) for c in clusters]
+            clusters.append({"label": val, "n": d["n"], "toks": toks,
+                             "recs": list(d["recs"])})
+    return clusters
 
 
 def main():
@@ -82,13 +103,11 @@ def main():
                 pass
     cf = open(cache_path, "a")
 
-    stream = load_stream(path)
+    stream, titles = load_stream_and_titles(path)
     prose = [s for s in stream if _is_prose(s[3])]
     print(f"full stream: {len(prose)} prose turns (every turn -- realtime replay)\n")
 
-    # slot -> {value: mentions}, over ALL turns (corroboration is a raw count,
-    # not decayed -- a stable fact stays true even if last said a while ago)
-    slots = defaultdict(lambda: defaultdict(int))
+    slots = defaultdict(lambda: defaultdict(lambda: {"n": 0, "recs": []}))
     lat = []
     for i, (step, uuid, date, text) in enumerate(prose):
         h = hashlib.sha1(text.encode("utf-8")).hexdigest()
@@ -104,7 +123,8 @@ def main():
             a = canon_attr(fct["attribute"])
             v = re.sub(r"\s+", " ", str(fct["value"]).strip().lower())
             if v:
-                slots[a][v] += 1
+                slots[a][v]["n"] += 1
+                slots[a][v]["recs"].append((date, uuid))
         if (i + 1) % 500 == 0:
             print(f"  ...{i+1}/{len(prose)} turns")
 
@@ -113,22 +133,51 @@ def main():
         print(f"\nlatency (fresh extractions): median {lat[len(lat)//2]*1000:.0f} ms, "
               f"p90 {lat[int(len(lat)*0.9)]*1000:.0f} ms, {len(lat)} calls")
     else:
-        print("\n(all extractions cache hits)")
+        print("\n(all extractions were cache hits -- instant)")
 
-    # corroborated profile: cluster values per slot, keep clusters >= min_mentions
-    corroborated, tail = [], 0
-    for attr, vc in slots.items():
-        for label, n in _cluster(vc):
-            if n >= min_mentions:
-                corroborated.append((n, attr, label))
+    # corroborated facts, with receipts
+    corr = []
+    tail = 0
+    for attr, entries in slots.items():
+        for cl in _cluster(entries):
+            if cl["n"] >= min_mentions:
+                corr.append((cl["n"], attr, cl["label"], cl["recs"]))
             else:
                 tail += 1
-    corroborated.sort(reverse=True)
+    corr.sort(reverse=True)
 
-    print(f"\n=== CORROBORATED PROFILE (>= {min_mentions} mentions = trust surface) ===")
-    print(f"{len(corroborated)} corroborated facts; {tail} single-mention (x1) filtered out\n")
-    for n, attr, label in corroborated[:70]:
-        print(f"  [x{n:3d}] {redact(str(attr))[:20]:20s} : {redact(str(label))[:56]}")
+    # redacted summary to stdout (safe for the shared session)
+    print(f"\n=== CORROBORATED PROFILE (>= {min_mentions} mentions) ===")
+    print(f"{len(corr)} corroborated facts; {tail} single-mention (x1) filtered\n")
+    for n, attr, label, recs in corr[:60]:
+        print(f"  [x{n:3d}] {redact(str(attr))[:20]:20s} : {redact(str(label))[:52]}")
+
+    # UNREDACTED checkable report with receipts -> LOCAL file only
+    report = os.path.join(os.path.dirname(path), "profile_report.txt")
+    with open(report, "w") as f:
+        f.write(f"CHECKABLE PROFILE REPORT  ({len(corr)} corroborated facts, "
+                f">= {min_mentions} mentions)\n")
+        f.write("For each fact: [xN mentions] attribute : value, then the dates + "
+                "conversation titles it was pulled from.\n")
+        f.write("Verify by opening those conversations; if a fact is wrong or is "
+                "about someone else, the receipts show where it came from.\n\n")
+        for n, attr, label, recs in corr:
+            f.write(f"[x{n}] {attr} : {label}\n")
+            seen, shown = set(), 0
+            for date, uuid in sorted(recs, reverse=True):
+                if uuid in seen:
+                    continue
+                seen.add(uuid)
+                f.write(f"     {date}  {titles.get(uuid, '')[:70]}\n")
+                shown += 1
+                if shown >= 6:
+                    extra = len(set(u for _, u in recs)) - shown
+                    if extra > 0:
+                        f.write(f"     (+{extra} more conversations)\n")
+                    break
+            f.write("\n")
+    print(f"\n>>> UNREDACTED checkable report (with receipts) written to:\n    {report}")
+    print("    Open it locally to verify each fact against your own conversations.")
 
 
 if __name__ == "__main__":
