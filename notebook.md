@@ -3880,3 +3880,24 @@ alternative is to SCOPE the product to clean/curated input, where model-free
 already works, and be explicit that raw research chat is out of scope. Either way,
 the session's real-data verdict is clear: good machinery, wrong extractor for the
 real distribution. That is the honest place to stop and decide direction.
+
+## Entry 65 — 2026-07-21 (p2: realtime LLM profile-extraction prototype. The decision test for entry 64.)
+
+Built the entry-64 decision test: does LLM extraction (feeding the SAME belief
+machinery) produce a CLEAN profile on real chat, and is it realtime-viable?
+  - llm_profile.extract_profile_facts(turn): ONE small-context LLM call per user
+    turn -> [{attribute,value}] stable self-facts, with a strict prompt that
+    rejects metaphors ("keep digging"), instructions, code, section refs, and
+    non-first-person content -- exactly the classes model-free manufactured.
+  - REALTIME by construction: no history in the prompt (single turn), so it runs
+    async while the assistant generates its reply; belief updates incrementally.
+    qwen3:14b is the QUALITY probe; runner measures per-turn LATENCY as the
+    realtime budget (a smaller model is the speed target if quality holds).
+  - run_profile_sample.py: samples the user's turns spread across the 13-month
+    timeline, extracts per-turn (timed), feeds belief, reports the corroborated
+    current-state profile + median/p90 latency.
+Decision rule: if the profile comes back CLEAN (real facts survive with receipts,
+the keep_location/§7.4.1 junk gone) the architecture is validated on real data and
+the direction is LLM-extraction + the proven belief/commensurability machinery. If
+still noisy, the problem is deeper than extraction and we stop and rethink. Run is
+the registrant's (execution gated).
