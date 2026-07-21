@@ -50,7 +50,8 @@ _ABSTAIN_PROBES = [
 def build_facts(path, min_mentions=2):
     """Corroborated facts with receipts, rebuilt from the cache exactly as
     run_profile_full readout (canon + hygiene + clustering). Returns
-    (facts, n_convs, titles, n_uncached)."""
+    (facts, provisional, n_convs, titles, n_uncached) -- provisional is the
+    single-mention tail (kept for direct-match-only readout, the hybrid)."""
     cache_path = os.path.join(os.path.dirname(path), "profile_cache.jsonl")
     cache = {}
     if os.path.exists(cache_path):
@@ -76,14 +77,17 @@ def build_facts(path, min_mentions=2):
                 continue
             slots[a][v]["n"] += 1
             slots[a][v]["recs"].append((date, uuid))
-    facts = []
+    facts, prov = [], []
     for attr, entries in slots.items():
         for cl in PF._cluster(entries):
-            if cl["n"] >= min_mentions:
-                facts.append((cl["n"], attr, cl["label"], cl["recs"]))
-    facts.sort(reverse=True)
+            tgt = facts if cl["n"] >= min_mentions else prov
+            # cl["toks"]: the cluster's merged-variant token union, so queries
+            # match any receipted variant, not just the winning label
+            tgt.append((cl["n"], attr, cl["label"], cl["recs"], cl["toks"]))
+    facts.sort(key=lambda f: -f[0])
+    prov.sort(key=lambda f: -f[0])
     n_convs = len({u for _, u, _, _ in prose})
-    return facts, n_convs, titles, uncached
+    return facts, prov, n_convs, titles, uncached
 
 
 def _edge_lines(f, g, e, titles, max_recs=4):
@@ -114,11 +118,12 @@ def main():
     except Exception:
         pass
 
-    facts, n_convs, titles, uncached = build_facts(path, min_mentions)
+    facts, prov, n_convs, titles, uncached = build_facts(path, min_mentions)
     print(f"corroborated facts (>= {min_mentions} mentions): {len(facts)}  "
+          f"+ {len(prov)} provisional (single-mention, direct-match only)  "
           f"over {n_convs} conversations  ({uncached} uncached turns skipped)")
 
-    g = WireGraph.from_facts(facts, n_convs=n_convs)
+    g = WireGraph.from_facts(facts, n_convs=n_convs, provisional=prov)
     degs = sorted((len(g.adj[n]) for n in g.nodes), reverse=True)
     wired = sum(1 for d in degs if d)
     print(f"\n=== WIRE GRAPH ===")
@@ -143,18 +148,32 @@ def main():
           f"proposals, {ct['blocked']} crosstalk BLOCKED by the receipt gate, "
           f"{ct['leaked']} leaked (must be 0)")
 
-    # 3. abstention probe: no corroborated evidence -> say nothing
-    abstained = sum(1 for q in _ABSTAIN_PROBES if g.spread(q).get("abstain"))
+    # 3. abstention probe: the memory must never ASSERT on a no-evidence query.
+    # Full abstain and provisional-only (a labeled single-mention quote) are both
+    # legal; a fabricated asserted seed is the failure.
+    full_abstain = prov_only = asserted_hits = 0
+    for q in _ABSTAIN_PROBES:
+        r = g.spread(q)
+        if r.get("abstain"):
+            full_abstain += 1
+        elif not r["seeds"]:
+            prov_only += 1
+        else:
+            asserted_hits += 1
     print(f"\n=== ABSTENTION PROBE ===")
-    print(f"{abstained}/{len(_ABSTAIN_PROBES)} no-evidence queries ABSTAINED "
-          f"({'PASS' if abstained == len(_ABSTAIN_PROBES) else 'FAIL'})")
+    print(f"{full_abstain} abstained, {prov_only} provisional-only (labeled), "
+          f"{asserted_hits} asserted on no-evidence queries "
+          f"({'PASS' if asserted_hits == 0 else 'FAIL'} -- asserted must be 0)")
 
-    # top edges, redacted, for the shared session
+    # top edges for the shared session: ATTRIBUTES ONLY. Values can hold
+    # third-party names the owner-token redaction cannot know about, so they
+    # stay in the local report and never reach stdout.
     top_edges = sorted(g.edges.values(), key=lambda e: -e["weight"])[:10]
-    print(f"\ntop wired associations (redacted):")
+    print(f"\ntop wired associations (attributes only; values in local report):")
     for e in top_edges:
+        a, b = e["a"].split("=", 1)[0], e["b"].split("=", 1)[0]
         print(f"  [{e['weight']:.2f} w, x{e['cooc']}] "
-              f"{redact(e['a'])[:38]:38s} <--> {redact(e['b'])[:38]}")
+              f"{redact(a)[:30]:30s} <--> {redact(b)[:30]}")
 
     # UNREDACTED wired report -> local file only
     report = os.path.join(os.path.dirname(path), "wire_report.txt")
@@ -178,11 +197,18 @@ def main():
                 f.write(f"   a={d['activation']:.2f} hop{d['hops']} "
                         f"{d['node']['id']}   via "
                         + " ; ".join(f"x{e['cooc']}" for e in d["path"]) + "\n")
+        f.write(f"\n== PROVISIONAL STORE ({len(g.provisional)} single-mention "
+                f"facts -- unconfirmed, direct-match only, one confirmation "
+                f"from promotion) ==\n")
+        for nd in sorted(g.provisional.values(), key=lambda d: d["id"]):
+            recs = list(nd["convs"].items())
+            cid, date = recs[0] if recs else ("?", "?")
+            f.write(f"   {nd['id']}   ({date}  {titles.get(cid, '')[:56]})\n")
         if query is not None:
             f.write(f"\n== QUERY: {query} ==\n")
             r = g.spread(query)
             if r.get("abstain"):
-                f.write("   ABSTAIN -- no corroborated fact matches.\n")
+                f.write("   ABSTAIN -- never seen.\n")
             else:
                 for s in r["seeds"]:
                     f.write(f"   seed: {s['id']}  (x{s['n_mentions']})\n")
@@ -193,13 +219,17 @@ def main():
                         f.write(f"      edge {e['a']} <-> {e['b']} "
                                 f"(x{e['cooc']}: {', '.join(e['convs'][:3])}"
                                 f"{'...' if len(e['convs']) > 3 else ''})\n")
+                for p in r.get("provisional", []):
+                    f.write(f"   UNCONFIRMED (seen once): {p['node']['id']}\n")
     print(f"\n>>> UNREDACTED wired report (edges + receipts) written to:\n    {report}")
     if query is not None:
         r = g.spread(query)
         print(f"\nquery (redacted): "
-              + ("ABSTAIN" if r.get("abstain") else
-                 f"{len(r['seeds'])} seed(s), {len(r['neighbourhood'])} wired "
-                 f"neighbours -- details in the local report"))
+              + ("ABSTAIN -- never seen" if r.get("abstain") else
+                 f"{len(r['seeds'])} asserted seed(s), "
+                 f"{len(r['neighbourhood'])} wired neighbours, "
+                 f"{len(r.get('provisional', []))} unconfirmed single-mention "
+                 f"-- details in the local report"))
 
 
 if __name__ == "__main__":

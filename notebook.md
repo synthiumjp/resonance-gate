@@ -4091,3 +4091,64 @@ optional --query neighbourhood) written locally next to conversations.json.
 NOT yet run on real data (execution gated; the run is the registrant's). Owed
 next: the real-data run + eyeball check of the wired report; then the query
 contract / injection loop over the wired memory (HANDOVER §7).
+
+## Entry 72 — 2026-07-21 (p2: WIRE validated on the real 13-month history; HYBRID single-mention tier added. 0 unsupported links over 12,720 pairs)
+
+Ran the WIRE layer on the registrant's own history (cache-only rebuild, no LLM
+calls, near-instant), with the registrant's authorisation, and added the HYBRID
+answer to the single-mention recall gap. Privacy: stdout aggregate/redacted;
+the unredacted wired report stays in the quarantine; NOTHING from the
+transcripts (values OR attribute names) is recorded here or committed.
+
+THE HYBRID (single-mention facts are no longer invisible). Corroboration still
+gates ASSERTION, but the 1,000-odd single-mention facts are kept as a
+PROVISIONAL tier: stored with their receipt, never volunteered, never wired (a
+1-conversation fact cannot meet the >= 2 shared-conversation edge gate), never
+in the profile. On a DIRECT query match they return as a labeled receipted
+quote -- "unconfirmed, seen once" -- never as an assertion. So ABSTAIN now
+means "never seen" (the honest meaning), and one user confirmation is the
+second piece of evidence that promotes a provisional fact through the normal
+GROW path. audit() gained the tier invariant (a provisional node in any edge =
+violation); the abstention criterion is now "0 fabricated ASSERTIONS"
+(provisional-only hits are legal and labeled).
+
+REAL-DATA RESULT (686 conversations, 13,911 cached turns, 0 uncached):
+  - 160 asserted nodes + 904 provisional; 256 receipted edges; 97/160 nodes
+    wired, max degree 32, median 1 -- a sparse graph, not a hairball.
+  - NON-HALLUCINATION AUDIT: PASS. All 12,720 node pairs checked exhaustively;
+    every edge's receipts == the true conversation-set intersection; 0
+    violations. Traversal cannot surface an unsupported link on this data.
+  - VSA CROSSTALK: 675 resonance proposals, 299 (44%) were crosstalk with NO
+    receipted edge -- ALL blocked by the receipt gate, 0 leaked. On real data
+    the substrate-as-proposer hallucinates nearly half its associations and the
+    receipt gate absorbs every one: the two-layer design (resonance proposes,
+    receipts verify) is not decorative, it is load-bearing.
+  - ABSTENTION PROBE: 7 no-evidence queries -> 6 abstained, 1 provisional-only
+    (correctly labeled unconfirmed), 0 fabricated assertions.
+  - QUERY of the top research project: 1 asserted seed + 20 wired receipted
+    neighbours + 1 provisional. Retrieval returns a connected, evidenced
+    neighbourhood on real data.
+
+TWO REAL BUGS the real-data run caught (the pattern of the whole project --
+real data finds what synthetic tests cannot):
+  1. PRIVACY: stdout "redaction" only masked the OWNER's name tokens, but fact
+     VALUES can contain third-party names (which owner-token redaction cannot
+     know). Edge lines briefly printed such values to the shared session.
+     Fixed: stdout now prints attribute names only; values never leave the
+     local report. Gap noted for the product: redaction must cover value
+     content, not just the owner's identifiers.
+  2. RECALL: querying the top project by its short alias ABSTAINED -- readout
+     clustering merges value variants but match() only saw the winning label's
+     tokens. Fixed: nodes carry the cluster's full token UNION (every variant
+     is a receipted real mention, so this stays non-generative grounding);
+     regression-tested.
+
+HONEST NOTES. Top-weighted edges are rare-rare x2 pairs (PMI behaviour --
+correct but worth knowing); several wire nodes that are themselves known
+extraction residue (occupation spread / third-party attribution, entry 68's
+owed refinement) -- the EDGES are true (those facts did co-occur; receipts
+prove it), the residue is a NODE-layer extraction issue, and the wiring
+actually makes it legible: a junk fact wires straight back to the conversations
+that produced it. Suite: 16/16 tests. Owed next: registrant eyeballs the wired
+report (ground truth); third-party/roleplay extraction refinement + cache
+rebuild; then the injection/correction loop over the wired memory.

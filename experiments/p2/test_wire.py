@@ -128,6 +128,17 @@ def test_full_sentence_query_matches_through_framing_words():
     assert r["seeds"][0]["id"] == "location=melbourne"
 
 
+def test_cluster_variant_tokens_are_matchable():
+    # a cluster whose label is one variant must match queries for ANY merged
+    # variant (all receipted mentions): label "resonance gate", variants "rg"
+    facts = [(10, "project", "resonance gate", [("2026-03-01", f"c{i:02d}")
+              for i in range(5)], {"resonance", "gate", "rg"})]
+    g = WireGraph.from_facts(facts, n_convs=10)
+    assert g.spread("rg")["seeds"][0]["id"] == "project=resonance gate"
+    assert g.spread("resonance gate")["seeds"][0]["id"] == "project=resonance gate"
+    assert g.spread("quantum knitting").get("abstain") is True
+
+
 def test_abstention_on_unknown_queries():
     g = synthetic_graph()
     for q in ("tokyo", "i work at acme corp", "favourite colour",
@@ -142,6 +153,60 @@ def test_unwired_node_returns_itself_with_empty_neighbourhood():
     r = g.spread("chess")
     assert r["seeds"][0]["id"] == "hobby=chess"
     assert r["neighbourhood"] == []  # honest: known fact, nothing wired yet
+
+
+# ---------------- the hybrid: provisional single-mention tier ----------------
+
+def synthetic_graph_with_provisional():
+    g_facts = [
+        _fact(41, "location", "melbourne", _convs(*range(10))),
+        _fact(25, "occupation", "researcher", _convs(*range(10))),
+    ]
+    prov = [
+        _fact(1, "allergy", "penicillin", _convs(30)),
+        _fact(1, "tool", "opera", _convs(31)),
+    ]
+    return WireGraph.from_facts(g_facts, n_convs=40, provisional=prov)
+
+
+def test_provisional_is_returned_on_direct_match_labeled_not_asserted():
+    g = synthetic_graph_with_provisional()
+    r = g.spread("am i allergic to penicillin")
+    assert r.get("abstain") is None
+    assert r["seeds"] == [] and r["neighbourhood"] == []
+    assert [p["node"]["id"] for p in r["provisional"]] == ["allergy=penicillin"]
+    assert r["provisional"][0]["node"]["tier"] == "provisional"
+    assert "unconfirmed" in r["note"]
+    # its single receipt is carried
+    assert list(r["provisional"][0]["node"]["convs"]) == ["c30"]
+
+
+def test_provisional_never_wired_never_volunteered():
+    g = synthetic_graph_with_provisional()
+    for a, b in g.edges:
+        assert a not in g.provisional and b not in g.provisional
+    # spreading from an asserted seed never surfaces provisional as neighbourhood
+    r = g.spread("melbourne")
+    assert all(d["node"]["tier"] == "asserted" for d in r["neighbourhood"])
+    assert r["provisional"] == []  # query didn't match them directly
+    assert g.audit()["pass"]
+    # tamper: wire a provisional node -> audit must fail
+    fake = {"a": "allergy=penicillin", "b": "location=melbourne", "cooc": 2,
+            "weight": 1.0, "convs": ["c00", "c01"]}
+    g.edges[("allergy=penicillin", "location=melbourne")] = fake
+    assert not g.audit()["pass"]
+
+
+def test_abstain_still_means_never_seen():
+    g = synthetic_graph_with_provisional()
+    assert g.spread("plays the bassoon").get("abstain") is True
+
+
+def test_asserted_and_provisional_both_matched_are_separated():
+    g = synthetic_graph_with_provisional()
+    r = g.spread("researcher who uses opera")
+    assert {s["id"] for s in r["seeds"]} == {"occupation=researcher"}
+    assert [p["node"]["id"] for p in r["provisional"]] == ["tool=opera"]
 
 
 # ---------------- VSA resonance: proposer gated by receipts ----------------

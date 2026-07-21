@@ -16,6 +16,15 @@ NON-HALLUCINATION, structurally (the same four properties as the node layer):
      receipt sets, by construction. audit() verifies this exhaustively.
   4. ABSTAINS -- no matching node, or no wired neighbourhood, is said plainly.
 
+THE HYBRID (single-mention facts). Corroboration gates ASSERTION, but a single
+mention is not deleted -- it is PROVISIONAL: stored with its receipt, never
+volunteered, never wired (an edge needs >= 2 shared conversations, which a
+1-conversation fact cannot have), never merged into the profile. On a DIRECT
+query match it is returned as a labeled, receipted quote ("seen once,
+unconfirmed"), never as an assertion. So ABSTAIN now means "never seen", the
+honest meaning; and one user confirmation is a second piece of evidence that
+promotes a provisional fact to asserted through the normal GROW path.
+
 EDGE WEIGHT (Good's weight of evidence, the same framing as belief.py). Over N
 conversations, facts a and b appear in k_a, k_b of them and share c. The weight is
 the log-likelihood ratio of association vs independence at the observed base rates
@@ -72,26 +81,41 @@ class WireGraph:
     def __init__(self, min_cooc=MIN_COOC):
         self.min_cooc = min_cooc
         self.n_convs = 1
-        self.nodes = {}
+        self.nodes = {}        # ASSERTED tier: corroborated, wired, volunteered
+        self.provisional = {}  # PROVISIONAL tier: single-mention, direct-match only
         self.edges = {}
         self.adj = defaultdict(dict)   # id -> {neighbour_id: edge}
+
+    @staticmethod
+    def _mk_node(n, attr, label, recs, tier, toks=None):
+        """toks: the value-cluster's token UNION (all merged variants -- each a
+        receipted real mention), so a query can match any variant, not just the
+        winning label. Still non-generative: tokens come from stored mentions."""
+        convs = {}
+        for date, cid in recs:
+            convs.setdefault(cid, date)
+        return {"id": f"{attr}={label}", "attr": attr, "value": label,
+                "n_mentions": int(n), "convs": convs, "tier": tier,
+                "toks": set(toks) if toks else _tokens(label)}
 
     # ---------------- construction ----------------
 
     @classmethod
-    def from_facts(cls, facts, n_convs, min_cooc=MIN_COOC):
+    def from_facts(cls, facts, n_convs, min_cooc=MIN_COOC, provisional=None):
         """facts: [(n_mentions, attr, value_label, receipts)] with receipts a list
         of (date, conv_id) -- exactly the GROW layer's corroborated readout.
-        n_convs: total conversations in the stream (the association base rate)."""
+        n_convs: total conversations in the stream (the association base rate).
+        provisional: same shape, the single-mention tail -- stored for direct
+        query match only, never wired, never volunteered."""
         g = cls(min_cooc)
         g.n_convs = max(int(n_convs), 1)
-        for n, attr, label, recs in facts:
-            nid = f"{attr}={label}"
-            convs = {}
-            for date, cid in recs:
-                convs.setdefault(cid, date)
-            g.nodes[nid] = {"id": nid, "attr": attr, "value": label,
-                            "n_mentions": int(n), "convs": convs}
+        for f in facts:
+            nd = cls._mk_node(*f[:4], "asserted", toks=f[4] if len(f) > 4 else None)
+            g.nodes[nd["id"]] = nd
+        for f in (provisional or []):
+            nd = cls._mk_node(*f[:4], "provisional", toks=f[4] if len(f) > 4 else None)
+            if nd["id"] not in g.nodes:
+                g.provisional[nd["id"]] = nd
         ids = sorted(g.nodes)
         for i, a in enumerate(ids):
             ca = g.nodes[a]["convs"]
@@ -116,19 +140,19 @@ class WireGraph:
 
     # ---------------- retrieval ----------------
 
-    def match(self, query):
+    def match(self, query, store=None):
         """Non-generative query resolution: token grounding between the query and
         a node's attr+value tokens, scored over the SMALLER token set so query
         framing words ("what is ... connected to") do not dilute a real match,
         while a query sharing nothing with a node can never match it.
-        Returns [(score, node_id)] best-first; [] means the memory has no
-        corroborated fact matching the query."""
+        Returns [(score, node_id)] best-first over `store` (default: the
+        asserted tier); [] means no stored fact matches the query."""
         q = _tokens(query)
         if not q:
             return []
         hits = []
-        for nid, nd in self.nodes.items():
-            nt = _tokens(nd["attr"] + " " + nd["value"])
+        for nid, nd in (self.nodes if store is None else store).items():
+            nt = _tokens(nd["attr"]) | nd["toks"]
             if not nt:
                 continue
             ov = len(q & nt) / min(len(q), len(nt))
@@ -145,11 +169,21 @@ class WireGraph:
             path: [edge...]}...]}
         Every neighbourhood item carries the full path of receipted edges that
         activated it. An empty neighbourhood is an honest 'nothing is wired to
-        this yet', with the seed's own receipts still returned."""
+        this yet', with the seed's own receipts still returned.
+
+        THE HYBRID: single-mention facts matching the query are returned under
+        "provisional" -- labeled, receipted quotes, never assertions, never
+        spread from. A provisional-only match is NOT abstention (the memory HAS
+        seen it, once); abstention means never seen at all."""
         seeds = self.match(query)
+        prov = [{"node": self.provisional[nid], "score": sc}
+                for sc, nid in self.match(query, store=self.provisional)]
         if not seeds:
+            if prov:
+                return {"seeds": [], "neighbourhood": [], "provisional": prov,
+                        "note": "unconfirmed: seen once, never corroborated"}
             return {"abstain": True, "query": query,
-                    "reason": "no corroborated fact matches the query"}
+                    "reason": "no stored fact matches the query"}
         act = {nid: sc for sc, nid in seeds}
         path = {nid: [] for _, nid in seeds}
         hops = {nid: 0 for _, nid in seeds}
@@ -171,7 +205,7 @@ class WireGraph:
                  for nid in act if nid not in seed_ids]
         neigh.sort(key=lambda d: -d["activation"])
         return {"seeds": [self.nodes[nid] for _, nid in seeds],
-                "neighbourhood": neigh[:top]}
+                "neighbourhood": neigh[:top], "provisional": prov}
 
     # ---------------- the acceptance test ----------------
 
@@ -206,9 +240,13 @@ class WireGraph:
                     if len(true_shared) >= self.min_cooc and \
                        self.assoc_weight(len(ca), len(cb), len(true_shared)) > 0:
                         v.append((a, b, "supported pair missing an edge"))
+        # tier invariant: the provisional (single-mention) store is never wired
+        for a, b in self.edges:
+            if a in self.provisional or b in self.provisional:
+                v.append((a, b, "provisional node appears in an edge"))
         return {"pass": not v, "violations": v,
-                "n_nodes": len(self.nodes), "n_edges": len(self.edges),
-                "n_pairs_checked": n_pairs}
+                "n_nodes": len(self.nodes), "n_provisional": len(self.provisional),
+                "n_edges": len(self.edges), "n_pairs_checked": n_pairs}
 
 
 class ResonanceIndex:
