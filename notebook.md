@@ -4225,3 +4225,26 @@ The full v2 re-extraction over the real history (13,911 turns, ~45-60 min,
 local GPU) is running in the background to profile_cache_v2.jsonl. Next entry:
 v1-vs-v2 comparison on the real corroborated profile + wire graph (does the
 occupation spread shrink; do real facts survive).
+
+## Entry 75 — 2026-07-21 (p2: CORRECTION LOOP. Owner deny/confirm over receipts -- deny removes fact+edges, confirm IS the promoting evidence)
+
+Closed the correction side of the trust surface (owed since entry 73). The
+owner (ground truth) edits corrections.jsonl in the quarantine; Memory.load
+applies it last:
+  deny    -> the fact leaves BOTH tiers and takes its edges with it (an edge
+             to a wrong fact is receipted noise); subsequent recall of that
+             topic honestly abstains; the graph audit still passes.
+  confirm -> a provisional (single-mention) fact is PROMOTED: the owner's
+             confirmation IS the second piece of evidence (mentions += 1,
+             status owner-confirmed) -- exactly the hybrid tier's designed
+             promotion path (entry 72). It then appears in recall, the
+             injected context block, and the profile.
+Corrections are DATA (an owner-edited local file), never inference; nothing
+generative touches the store. Tests 23/23 (deny->abstain + edge removal +
+audit-pass; confirm->promotion + block inclusion + audit-pass).
+
+With this, the full product loop exists end-to-end: extract -> corroborate ->
+wire -> receipted recall/abstain -> inject -> owner corrects via receipts ->
+memory updates -> next injection reflects it. The v2 re-extraction is still
+running in the background (v2 prompt is longer, so per-turn latency is higher
+than v1's 200ms median); v1-vs-v2 real-data comparison lands next entry.

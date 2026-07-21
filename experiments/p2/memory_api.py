@@ -44,12 +44,55 @@ class Memory:
     @classmethod
     def load(cls, conversations_path, min_mentions=2):
         """Build from conversations.json + the extraction cache next to it
-        (cache-only; no LLM calls)."""
+        (cache-only; no LLM calls). Owner corrections (corrections.jsonl in the
+        same quarantine dir) are applied last -- the owner is ground truth."""
         from run_wire import build_facts
         facts, prov, n_convs, titles, _ = build_facts(conversations_path,
                                                       min_mentions)
         g = WireGraph.from_facts(facts, n_convs=n_convs, provisional=prov)
-        return cls(g, titles)
+        m = cls(g, titles)
+        corr = os.path.join(os.path.dirname(conversations_path),
+                            "corrections.jsonl")
+        if os.path.exists(corr):
+            import json
+            m.apply_corrections([json.loads(l) for l in open(corr)
+                                 if l.strip()])
+        return m
+
+    def apply_corrections(self, corrections):
+        """THE CORRECTION LOOP (owner-authored; the owner is ground truth).
+        Each correction: {"action": "deny"|"confirm", "attribute": <canon attr>,
+        "value": <substring of the fact value>}.
+          deny    -> the fact is wrong: remove it from BOTH tiers, and remove
+                     its edges (an edge to a wrong fact is receipted noise).
+          confirm -> owner-vouched: a provisional fact is PROMOTED to asserted
+                     (the confirmation IS the second piece of evidence); an
+                     asserted fact is marked owner-confirmed.
+        Corrections are data (a local owner-edited file), never inference."""
+        applied = []
+        for c in corrections:
+            act = c.get("action")
+            attr = str(c.get("attribute", "")).lower().strip()
+            sub = str(c.get("value", "")).lower().strip()
+            for store in (self.g.nodes, self.g.provisional):
+                for nid in [k for k, d in store.items()
+                            if d["attr"] == attr and sub in d["value"].lower()]:
+                    if act == "deny":
+                        store.pop(nid)
+                        for pair in [p for p in self.g.edges if nid in p]:
+                            self.g.edges.pop(pair)
+                        self.g.adj.pop(nid, None)
+                        for nbrs in self.g.adj.values():
+                            nbrs.pop(nid, None)
+                        applied.append(("denied", nid))
+                    elif act == "confirm":
+                        nd = store.pop(nid)
+                        nd["tier"] = "asserted"
+                        nd["owner_confirmed"] = True
+                        nd["n_mentions"] += 1   # the confirmation is evidence
+                        self.g.nodes[nid] = nd
+                        applied.append(("confirmed", nid))
+        return applied
 
     # ---------------- the contract ----------------
 
@@ -79,9 +122,14 @@ class Memory:
 
     def _fact(self, nd, provisional=False):
         recs = sorted(nd["convs"].items(), key=lambda kv: kv[1], reverse=True)
+        if nd.get("owner_confirmed"):
+            status = "owner-confirmed"
+        elif nd["tier"] == "provisional" or provisional:
+            status = "unconfirmed-single-mention"
+        else:
+            status = "corroborated"
         return {"attribute": nd["attr"], "value": nd["value"],
-                "mentions": nd["n_mentions"],
-                "status": "unconfirmed-single-mention" if provisional else "corroborated",
+                "mentions": nd["n_mentions"], "status": status,
                 "receipts": [{"date": d, "conversation":
                               self.titles.get(c, c)[:60]} for c, d in recs[:3]]}
 

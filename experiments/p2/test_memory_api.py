@@ -61,6 +61,32 @@ def test_profile_is_most_evidenced_first():
     assert all(f["status"] == "corroborated" for f in p)
 
 
+def test_correction_deny_removes_fact_and_its_edges():
+    m = _memory()
+    assert m.recall("researcher")["found"]
+    applied = m.apply_corrections([
+        {"action": "deny", "attribute": "occupation", "value": "researcher"}])
+    assert applied == [("denied", "occupation=researcher")]
+    assert m.recall("researcher")["abstain"]          # gone from recall
+    for a, b in m.g.edges:                            # and from the wiring
+        assert "occupation=researcher" not in (a, b)
+    assert m.g.audit()["pass"]                        # graph still sound
+
+
+def test_correction_confirm_promotes_provisional():
+    m = _memory()
+    r = m.recall("penicillin")
+    assert r["asserted"] == [] and r["unconfirmed"]
+    m.apply_corrections([
+        {"action": "confirm", "attribute": "allergy", "value": "penicillin"}])
+    r = m.recall("penicillin")
+    assert r["asserted"][0]["status"] == "owner-confirmed"
+    assert r["asserted"][0]["mentions"] == 2          # confirmation is evidence
+    assert r["unconfirmed"] == []
+    assert "allergy: penicillin" in m.context_block(query="penicillin")
+    assert m.g.audit()["pass"]
+
+
 def test_context_block_is_verbatim_and_rule_bearing():
     m = _memory()
     b = m.context_block(query="melbourne")
