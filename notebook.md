@@ -3457,3 +3457,67 @@ stand-in for exactly this internal probe -- expensive, but it caught the
 inflation the verbalized output hid. NET: judge downgraded from "trusted
 verbalizer" to "noisy proposer + model-free grounding gate"; the calibrated
 internal-signal probe is the named next step, not yet taken.
+
+## Entry 55 — 2026-07-21 (p2: FIRST REAL-TRANSCRIPT TEST. Categorical audit WORKS on real chat; the numeric belief path DROWNS in noise. LongMemEval hid both.)
+
+Ran the whole pipeline (run_real.py) on a genuinely real scraped human
+conversation (public ShareGPT export; 206 user turns; a real person + spouse
+planning a recruiting business). NOT LongMemEval, NOT pre-segmented gold spans --
+raw messy chat. This is the "does it work for people" test deferred all session.
+[PII note: the transcript holds real names/DOB/a pasted resume; it is kept OUT of
+the repo (scratchpad only, experiments/p2/real/ gitignored) and NOT reproduced
+here. Only mechanism behaviour is recorded.]
+
+Ground truth in the wild: ONE clean categorical change -- the person names their
+recruiting company one value early, then explicitly "changed it to <other> instead
+of <first>" / "replace X with Y" later. A textbook single-attribute exclusive
+update with an explicit correction cue. Everything else across 206 turns is
+non-update chatter.
+
+RESULT, split cleanly by path:
+
+  CATEGORICAL AUDIT -- WORKS. Scoped/capped to fit context (each statement
+  truncated to 220 chars), the LLM-as-energy audit over the real conversation
+  proposed EXACTLY ONE change: the company rename, correct old->new, and it
+  survived grounding + model-free verification. One proposal, right answer, no
+  hallucinated extras across ~198 real turns. This is the first REAL-DATA evidence
+  that the categorical mechanism -- the thing model-free linguistics could not
+  close -- actually fires correctly and quietly on genuine messy chat. n=1, and
+  the audit's known hallucination risk (entry 53) still stands, but on this real
+  case it did NOT over-fire. Caveat: it CRASHED on raw input (206 turns = 9693
+  tokens > 8192) -- the "scaled neighbourhood scoping" owed since entry 52 is now
+  BLOCKING, not optional. The 220-char cap is a crude stand-in that sufficed here.
+
+  NUMERIC BELIEF PATH -- DROWNS IN NOISE. On real chat it asserted 22 "resolved
+  facts" (P>=0.60) that are mostly extraction garbage, and disclosed 2 "changes"
+  that are BOTH noise (incoherent slots, no real update). Failure modes, all
+  hidden by LongMemEval's one-fact gold spans:
+    - incidental numbers become facts: a digit-string from a pasted resume parsed
+      as a count; years-of-experience and a year (2020) parsed as counts and
+      conflated across unrelated contexts.
+    - malformed slot keys: attribute_key builds incoherent noun-set frozensets on
+      long/multi-clause real turns, so unrelated mentions collide or fragment.
+    - multi-valued non-facts asserted: "tried 4 Korean places" asserted as a
+      resolved fact (it is not functional -- exactly the class the functional
+      table was meant to exclude, but the numeric path has no such guard).
+  The 11/11-genuine numeric result (entry 53) was an artefact of pre-segmented,
+  answer-bearing gold spans. On raw chat the numeric noise floor is high enough to
+  bury any signal; its 2 disclosed "changes" are both false.
+
+HONEST HEADLINE. The session's scoreboard INVERTS on real data. The numeric path
+(strong on LongMemEval) is the one that fails in the wild; the categorical audit
+(the hard, unsolved one) is the one that works -- when given input handling it
+currently lacks. LongMemEval measured the wrong thing for both: it flattered the
+numeric path with clean spans and never let the categorical path run at
+conversation scale.
+
+WHAT THIS MAKES CONCRETE (was abstract "owed" work; now blocking, priority order):
+  1. NEIGHBOURHOOD SCOPING for the audit -- windowing so it runs on real length.
+     Non-optional; the audit is the working path and it currently crashes.
+  2. A NUMERIC-PATH GATE against incidental numbers (IDs, years, quantities in
+     pasted docs) and non-functional multi-valued mentions -- or the numeric path
+     is unusable on real chat regardless of its LongMemEval score.
+  3. Robust extraction on messy multi-clause turns (malformed slot keys).
+This is the first test that told us something the benchmark could not, and it
+redirects the whole build: the categorical audit + scoping is the product spine;
+the numeric belief path needs a real-data noise gate before it is trustworthy.
