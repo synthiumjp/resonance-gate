@@ -4639,3 +4639,46 @@ the real loader (cannot drift); suite 53/53 incl. a FastMCP dispatch
 round-trip. Remaining to usable-product (entry order stands): live
 ingestion; durable persistence; calibration session; safe alias merging;
 packaging/small-extractor fallback; N>1 beta users.
+
+## Entry 87 — 2026-07-23 (p2: FULL-BENCHMARK TWO-JUDGE VALIDATION. 0 confirmed hallucinations in 3,189 questions across 20 users)
+
+The complete HaluMem-Medium run (20 synthetic users, every question),
+validated by TWO independent LOCAL judges (qwen3:14b via llama-cpp;
+gemma3:12b via the localhost ollama daemon after the venv's llama-cpp
+predated gemma3 -- both zero-API, per the registrant's rule). n=3,189
+unique (user, question) pairs (3,467 rows deduped by key).
+
+THE HEADLINE: both-judge-confirmed HALLUCINATIONS = 0/3,189.
+  qwen flagged 1 (0.03%); gemma flagged 0; both-confirmed 0. Memory
+  Boundary: 548/550 correct under the STRICTER judge (550/550 under gemma).
+  The structural non-hallucination claim, measured at full benchmark scale,
+  under the same two-judge discipline that deflated entry 52's inflated 16.
+
+THE HONEST SPREAD on the correct/omission axis (judge-sensitive):
+  qwen  (strict):   63.5% correct / 36.5% omission
+  gemma (lenient):  83.3% correct / 16.7% omission
+  both-confirmed:   57.7% correct / 10.9% omission / 31.4% split
+  Inter-judge agreement 68.6% overall -- near-perfect on hallucination
+  (the class that matters), weak on correct-vs-omission (25.8% agreement on
+  omission): "do the returned facts CONTAIN the gold answer" is a paraphrase
+  judgment the two models weigh differently. The claim is therefore stated
+  as: hallucination 0.0% (both-confirmed; <=0.03% single-judge worst case),
+  correct 57.7-83.3% depending on judge strictness.
+
+FIELD CONTEXT (published, entry 79): best shipped system 67.23% correct at
+15.17% hallucination; all shipped systems 15-30% hallucination. On ANY
+reading of our judge spread, this system trades at-worst-competitive
+accuracy for a hallucination rate indistinguishable from zero.
+
+CAVEATS, stated not buried: (a) in-house judges, not the official HaluMem
+harness -- published-number comparability is approximate until the official
+eval runs; (b) the answer policy was iterated on user 0 during development
+(entries 83-85, fully documented; user 1-19 questions were never inspected
+before this run); (c) Dynamic Update stays the weakest true axis (qwen 68/180
+correct) -- the belief layer's update machinery is not yet exploited by the
+answer path; (d) events live in the provisional tier by design, which the
+strict judge sometimes reads as not-asserted -- part of the correct/omission
+split.
+
+Next: run the OFFICIAL HaluMem eval harness for apples-to-apples numbers;
+Dynamic Update answer-path work; then this goes in the paper.
