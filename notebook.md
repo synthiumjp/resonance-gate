@@ -4682,3 +4682,31 @@ split.
 
 Next: run the OFFICIAL HaluMem eval harness for apples-to-apples numbers;
 Dynamic Update answer-path work; then this goes in the paper.
+
+## Entry 88 — 2026-07-23 (p2: PRE-REGISTERED predictions for the official HaluMem harness run, written before any result is seen)
+
+Per the project discipline (every un-preregistered number has been inflated;
+entries 24, 45, 53), predictions BEFORE the official run:
+
+1. QA hallucination: 0-3%, most likely ~1%. Risk factor: their judge grades
+   natural-language ANSWERS; ours are labeled fact lists -- a strict judge
+   may read "related facts + UNCONFIRMED" as a wrong answer, not abstention.
+   Still far below the 15-30% field on any reading.
+2. QA accuracy: 55-70% (between our two judges); below MemOS's 67.23% more
+   likely than above, because of answer-format mismatch, not memory content.
+3. Extraction stage: our WORST table row. Integrity (gold recall) 20-35%
+   (semantic matching will beat our 4.4% token proxy but the ontology gap is
+   real); accuracy (precision of stored facts) HIGH, 70-90%.
+4. Update stage: middling correct rate, near-zero hallucination -- belief
+   decay handles updates internally but the answer path doesn't surface
+   them (the known Dynamic Update weakness, 68/180 strict).
+5. FMR (False Memory Resistance): NEAR-CEILING, >=90% (field best 80.78%) --
+   interference facts don't corroborate; this should be the standout metric.
+6. OPERATIONAL: the full official run may be infeasible in one night on a
+   local 14B judge (their judging volume is large); expect context-length
+   or runtime pain, possibly requiring staging.
+7. META: every new out-of-sample eval so far has surfaced exactly one new
+   unnamed failure class (identifiers, ontology, answer surface). Predict
+   one more; my guess: answer-FORMAT mismatch with their judge rubric.
+Falsification: if official hallucination lands >5%, the structural claim
+needs re-examination at the answer-surface level, not re-tuning of judges.
