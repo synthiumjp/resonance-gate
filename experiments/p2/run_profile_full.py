@@ -45,8 +45,23 @@ _TECH_VALUE = re.compile(
     r"|^[a-z]:$"                                 # bare drive letter  c:  d:
     r"|~/|\.localhost|wsl\."                     # home path / localhost / wsl host
     r"|\.ts\.net"                                # tailscale machine address
-    r"|\.(py|csv|json|txt|md|ipynb|sh|ya?ml|ini|cfg)$",  # a filename
-    re.I)
+    r"|\.(py|csv|jsonl?|txt|md|ipynb|sh|ya?ml|ini|cfg|gguf|safetensors|log|pth?)$",
+    re.I)                                        # a filename
+# model artifacts (gemma-3-12b-it, mistral-7b-instruct-v0.3, qwen3:14b) are
+# tech residue, not stable personal facts (entry 81: recurring transients
+# corroborate because the owner talks shop daily; value-typing must catch them)
+_MODEL_NAME = re.compile(r"(^|[^a-z0-9])\d+(\.\d+)?b(\b|[-_:])"
+                         r"|[-_](it|instruct|chat|base)\b|:\d+b\b", re.I)
+# a bare artifact word is not a fact value, whatever the attribute
+_VACUOUS_VALUE = {"venv", "file", "files", "folder", "directory", "repo",
+                  "script", "dataset", "checkpoint", "notebook", "terminal",
+                  "shell", "model", "code"}
+# an OS is not a place
+_OS_WORDS = {"ubuntu", "linux", "windows", "macos", "debian", "arch", "wsl",
+             "wsl2"}
+# transient/technical ATTRIBUTE patterns (current_venv, *_directory, ...)
+_EXCLUDE_ATTR_RX = re.compile(r"venv|directory|folder|path|filename|_file\b|"
+                              r"\bfile_", re.I)
 # 2. machine/device tokens are not a LOCATION (studio = the ssh box, pc, nas).
 _DEVICE_WORDS = {"pc", "nas", "studio", "server", "host", "localhost", "laptop",
                  "desktop", "machine", "vm", "arc", "node", "box"}
@@ -69,10 +84,16 @@ _VACUOUS_OCC = {"day job", "job", "work", "full-time job", "full time job"}
 def _reject_value(attr, v):
     """True if this (attr, value) is a technical/path/device artefact, not a fact."""
     v = v.strip().lower()
-    if not v or _TECH_VALUE.search(v):
+    if not v or _TECH_VALUE.search(v) or v in _VACUOUS_VALUE:
         return True
-    if attr == "location" and (v in _DEVICE_WORDS or v in _GENERIC_PLACE):
+    if _MODEL_NAME.search(v):
         return True
+    if attr == "location":
+        if v in _GENERIC_PLACE or v in _OS_WORDS:
+            return True
+        # any device-word token poisons a location ("studio jpwork")
+        if any(t in _DEVICE_WORDS for t in v.split()):
+            return True
     if attr == "occupation" and v in _VACUOUS_OCC:
         return True
     return False
@@ -167,7 +188,8 @@ def main():
         for fct in facts:
             a = canon_attr(fct["attribute"])
             v = re.sub(r"\s+", " ", str(fct["value"]).strip().lower())
-            if not v or a in _EXCLUDE_ATTR or _reject_value(a, v):
+            if (not v or a in _EXCLUDE_ATTR or _EXCLUDE_ATTR_RX.search(a)
+                    or _reject_value(a, v)):
                 continue
             # v3 world facts: the subject namespaces the slot ("wife:occupation");
             # self-facts keep their plain key. Entity nodes emerge as namespaces.
@@ -196,6 +218,20 @@ def main():
                 tail += 1
     corr.sort(reverse=True)
 
+    # owner corrections apply HERE too (entry 81: the checkable report must
+    # reflect them, not just the wire/recall path)
+    corr_path = os.path.join(os.path.dirname(path), "corrections.jsonl")
+    if os.path.exists(corr_path):
+        from wire import correct_facts
+        corrections = [json.loads(l) for l in open(corr_path) if l.strip()]
+        corrected, _, clog = correct_facts(corr, [], corrections)
+        if clog:
+            from collections import Counter
+            print("owner corrections applied:",
+                  dict(Counter(a for a, _ in clog)))
+        corr = [(n, a, l, r) for n, a, l, r, _ in corrected]
+        corr.sort(reverse=True)
+
     # redacted summary to stdout (safe for the shared session)
     print(f"\n=== CORROBORATED PROFILE (>= {min_mentions} mentions) ===")
     print(f"{len(corr)} corroborated facts; {tail} single-mention (x1) filtered\n")
@@ -207,21 +243,25 @@ def main():
     with open(report, "w") as f:
         f.write(f"CHECKABLE PROFILE REPORT  ({len(corr)} corroborated facts, "
                 f">= {min_mentions} mentions)\n")
-        f.write("For each fact: [xN mentions] attribute : value, then the dates + "
-                "conversation titles it was pulled from.\n")
-        f.write("Verify by opening those conversations; if a fact is wrong or is "
-                "about someone else, the receipts show where it came from.\n\n")
+        f.write("Section 1 is the DIGEST (one line per fact) -- skim this and "
+                "note anything wrong.\nSection 2 has the receipts (dates + "
+                "conversation titles) to verify against.\n")
+        f.write("Corrections: add deny/confirm/retype lines to "
+                "corrections.jsonl next to this file.\n\n")
+        f.write("== 1. DIGEST ==\n")
+        for n, attr, label, recs in corr:
+            f.write(f"[x{n:3d}] {attr} : {label}\n")
+        f.write("\n== 2. RECEIPTS ==\n\n")
         for n, attr, label, recs in corr:
             f.write(f"[x{n}] {attr} : {label}\n")
-            seen, shown = set(), 0
+            seen = set()
             for date, uuid in sorted(recs, reverse=True):
                 if uuid in seen:
                     continue
                 seen.add(uuid)
                 f.write(f"     {date}  {titles.get(uuid, '')[:70]}\n")
-                shown += 1
-                if shown >= 6:
-                    extra = len(set(u for _, u in recs)) - shown
+                if len(seen) >= 3:
+                    extra = len(set(u for _, u in recs)) - len(seen)
                     if extra > 0:
                         f.write(f"     (+{extra} more conversations)\n")
                     break

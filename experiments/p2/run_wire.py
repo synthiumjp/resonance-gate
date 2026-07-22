@@ -75,7 +75,8 @@ def build_facts(path, min_mentions=2):
         for fct in cache[h]:
             a = canon_attr(fct["attribute"])
             v = re.sub(r"\s+", " ", str(fct["value"]).strip().lower())
-            if not v or a in PF._EXCLUDE_ATTR or PF._reject_value(a, v):
+            if (not v or a in PF._EXCLUDE_ATTR or PF._EXCLUDE_ATTR_RX.search(a)
+                    or PF._reject_value(a, v)):
                 continue
             subj = fct.get("subject")   # v3 world facts namespace the slot
             key = f"{subj}:{a}" if subj else a
@@ -214,9 +215,11 @@ def main():
         f.write("An edge means: these two corroborated facts were asserted in the "
                 "same conversation >= 2 times.\nEvery edge lists the shared "
                 "conversations (its receipts). Verify by opening them.\n\n")
-        f.write("== EDGES (by association weight) ==\n")
-        for e in sorted(g.edges.values(), key=lambda e: -e["weight"]):
-            _edge_lines(f, g, e, titles)
+        top = sorted(g.edges.values(), key=lambda e: -e["weight"])[:250]
+        f.write(f"== EDGES (top {len(top)} of {len(g.edges)} by association "
+                f"weight) ==\n")
+        for e in top:
+            _edge_lines(f, g, e, titles, max_recs=2)
         f.write("\n== HUB NEIGHBOURHOODS (spreading activation, 2 hops) ==\n")
         hubs = sorted(g.nodes, key=lambda n: -len(g.adj[n]))[:5]
         for h in hubs:
@@ -230,11 +233,15 @@ def main():
                         + " ; ".join(f"x{e['cooc']}" for e in d["path"]) + "\n")
         f.write(f"\n== PROVISIONAL STORE ({len(g.provisional)} single-mention "
                 f"facts -- unconfirmed, direct-match only, one confirmation "
-                f"from promotion) ==\n")
-        for nd in sorted(g.provisional.values(), key=lambda d: d["id"]):
-            recs = list(nd["convs"].items())
-            cid, date = recs[0] if recs else ("?", "?")
-            f.write(f"   {nd['id']}   ({date}  {titles.get(cid, '')[:56]})\n")
+                f"from promotion; grouped by attribute) ==\n")
+        by_attr = defaultdict(list)
+        for nd in g.provisional.values():
+            by_attr[nd["attr"]].append(nd["value"])
+        for attr in sorted(by_attr, key=lambda a: -len(by_attr[a])):
+            vals = sorted(by_attr[attr])
+            line = " | ".join(vals[:12])
+            more = f"  (+{len(vals) - 12} more)" if len(vals) > 12 else ""
+            f.write(f"   {attr} ({len(vals)}): {line[:220]}{more}\n")
         if query is not None:
             f.write(f"\n== QUERY: {query} ==\n")
             r = g.spread(query)

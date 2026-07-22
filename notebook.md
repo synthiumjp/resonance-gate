@@ -4433,3 +4433,33 @@ HONEST FINDINGS, in order of importance:
      facts, which is exactly what entry 78 predicted.
   5. Self-facts also grew 177 -> 464: richer extraction or attr
      fragmentation -- owner receipts check owed (profile_report_v3.txt).
+
+## Entry 81 — 2026-07-22 (p2: recurring-transient hygiene + reports made reviewable. Owner's second taxonomy: all 9 classes cleared)
+
+The owner's second receipts-check of the v3 profile flagged a class
+corroboration CANNOT filter: RECURRING TRANSIENTS -- tech artifacts mentioned
+daily (model names x28, venv x27, filenames x15, an OS as location x6, a
+device+folder compound as location x9, current_venv as an attribute). The
+owner talks shop constantly, so shop-talk corroborates; only value/attribute
+TYPING catches it. Generic rules added (in-sample caveat as always):
+  - model-artifact values (NNb / -instruct / -it / :14b patterns) rejected
+    everywhere; filename extensions widened (jsonl/gguf/safetensors/log/pt);
+  - bare artifact words (venv/file/repo/dataset/...) are vacuous values;
+  - an OS is not a location; a device-word TOKEN poisons a location value
+    ("studio jpwork"); attribute-pattern exclusion (venv/directory/path/...).
+
+TWO STRUCTURAL FIXES the check exposed:
+  1. run_profile_full's checkable report never applied owner corrections --
+     the owner was reviewing a PRE-correction view (their tool:7900gre flag
+     was already retyped in the wire path). Corrections now apply in BOTH
+     paths from the same corrections.jsonl.
+  2. Reports were unreviewable at world scale (wire report 8,918 lines).
+     Now: profile report = DIGEST (one line per fact) + receipts capped at 3;
+     wire report = top-250 edges w/ 2 receipts + provisional grouped by
+     attribute. 636KB -> 138KB.
+
+MEASURED after hygiene: asserted 478 -> 457 (junk removed), edges 1,597 ->
+1,133 (junk was heavily wired -- shop-talk co-occurs with everything), all
+audits still PASS (0 unsupported links, 1,122/1,122 crosstalk blocked, 0
+fabricated assertions). All 9 owner-flagged classes verified absent from the
+regenerated report. Suite 25/25.
