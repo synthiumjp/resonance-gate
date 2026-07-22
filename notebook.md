@@ -4390,3 +4390,46 @@ experiments/p2/sota_positioning.md). Headlines:
     coverage, audited fabricated-link rate (0), crosstalk-block rate,
     abstention correctness.
 Next: a HaluMem adapter over Memory/belief (extract/update/answer maps 1:1).
+
+## Entry 80 — 2026-07-22 (p2: v3 WORLD GRAPH live on real data. Entities emerge; audits hold at 3x scale; entity corroboration is thin -- the honest finding)
+
+v3 full re-extraction complete (8,174 fresh calls, median 200 ms -- realtime
+held; the p90 spike was two racing processes sharing the GPU after the crash
+recovery, since killed). Wire pipeline on the v3 cache, with owner seeds +
+corrections applied:
+
+  478 asserted nodes (v2: 177) + 3,000 provisional (v2: 918);
+  1,597 receipted edges; 302 wired; ALL AUDITS PASS at 3x scale:
+  0 unsupported links over all pairs; 1,075/1,075 VSA crosstalk proposals
+  blocked (44% crosstalk rate again -- the proposer/verifier split is
+  scale-stable); 0 fabricated assertions on no-evidence probes.
+
+THE WORLD APPEARED: 9 entity namespaces with 14 corroborated entity facts;
+the worked-example query ("who is X" for the owner's named friend) returns
+6 asserted seeds + 20 wired neighbours + 27 provisional -- a receipted
+neighbourhood for a person who is not the owner. The reframe works
+end-to-end.
+
+HONEST FINDINGS, in order of importance:
+  1. ENTITY CORROBORATION IS THIN: 14 corroborated vs ~3,000 provisional.
+     Third-party facts rarely repeat across conversations, so corroboration
+     (correctly) holds most of the world in the unconfirmed tier. The world
+     tier will need either owner confirms (the promotion loop), longer
+     accumulation, or within-conversation corroboration policy -- a real
+     design question, not a bug.
+  2. SUBJECT-LEVEL DISTRIBUTION SHIFT: some namespaces are datasets/papers
+     ("a QA corpus", "a citation key", "document") -- research-chat artifacts
+     now appearing as subjects. The junk moved up a level with the schema.
+     Needs a subject-type gate (person/org/project whitelist-ish) or owner
+     denies.
+  3. ENTITY RESOLUTION, CONCRETE INSTANCE: the owner's own full name emerged
+     as a separate third-person entity -- self-aliasing is the first
+     resolution case to solve (safe: owner confirms the alias; merge only
+     with receipts).
+  4. Correction semantics under the reframe: only 2 of the 9 old denies
+     matched -- several previously-denied facts re-entered correctly
+     ATTRIBUTED to entities (a supervisor's institution under the
+     supervisor's namespace is TRUE). The reframe converted errors into
+     facts, which is exactly what entry 78 predicted.
+  5. Self-facts also grew 177 -> 464: richer extraction or attr
+     fragmentation -- owner receipts check owed (profile_report_v3.txt).
