@@ -4542,3 +4542,39 @@ ontology + lexical-retrieval gap, NOT a trust gap. Levers, in order:
 Then the full 20-user run + two-judge validation. Hygiene pack note: nothing
 in the owner-fitted hygiene ate persona facts (the 4.4% is extractor scope,
 not hygiene) -- layer-3 overfit did not materialise on this stream.
+
+## Entry 84 — 2026-07-22 (p2: the four HaluMem levers built (sonnet-coded, orchestrated). v4 probe 27/27; suite 30/30; re-pilot running)
+
+The entry-83 levers, implemented by two sonnet coding agents in parallel
+(disjoint files, no GPU, no commits; orchestrator reviewed, fixed, probed):
+
+1. EXTRACTION v4 (SYSTEM_V4, RG_EXTRACT_V4, own caches): events ("attended a
+   pottery workshop on jan 6 2026" -> attribute event, date kept in value)
+   and concrete PLANS as the ONLY exceptions to the might-do ban; wishes
+   ("maybe i should learn piano someday") still extract nothing; routines
+   stay routines. PROBE (v3 vs v4, 27 cases incl. 4 new event/plan): first
+   pass 26/27 -- v4's event eagerness re-opened the git-remote hole
+   (org token in git@host:org/repo.git read as employer); added an explicit
+   repo-org rule; SECOND PASS 27/27, v3's three event misses gained, zero
+   regressions.
+2. QUERY SYNONYM BRIDGE (wire.match): static table question-word ->
+   canonical attribute ("work"->occupation). ORCHESTRATOR GUARD added after
+   a caught regression: the agent's version let ANY query containing "work"
+   match every occupation node, breaking abstention ("i work at acme corp"
+   surfaced the stored occupation). Rule now: a synonym-ONLY match is legal
+   only when the query carries NO unexplained content tokens -- pure
+   attribute questions bridge; value-naming statements still abstain.
+3. DATE SCOPING (wire.extract_dates + answer policy): pure-regex date tokens
+   (years, months, month-day); a dated question filters facts to
+   date-matched receipts/values, and an off-date-only result says so
+   explicitly instead of presenting off-date facts as answers.
+4. VALUE-TYPE DISCLAIMER (answer policy): when returned facts do not cover
+   the asked attribute, the answer leads with "No stored fact answers the
+   asked attribute; related receipted facts:" -- the middle-name ambiguity
+   (10/11 of entry 83's residual flags) becomes explicit abstain-with-
+   context.
+
+Suite 30/30 (5 new retrieval/answer-policy tests). All changes
+non-generative: static tables, regexes, receipts -- nothing invents content.
+User-0 re-pilot (fresh v4 cache) running; the decision gate: omission must
+drop materially while hallucination stays ~0.

@@ -80,6 +80,22 @@ WORLD_CASES = [
      [(r"supervisor", r".*", r"swinburne")]),
 ]
 
+# v4 (HaluMem entry TBD): EVENT/PLAN probe cases -- v3's "things people might
+# do" ban also swallowed concrete EVENTS ("attended a pottery workshop"),
+# which HaluMem showed cost us most of our gold memory-point coverage. Same
+# (text, kind, spec) "pos"/"neg" shape as CASES. NOT wired into main() yet --
+# the orchestrator runs this arm against SYSTEM_V4 separately.
+EVENT_CASES = [
+    ("i went to a pottery workshop with my sister on january 6th", "pos",
+     [("event", r"pottery|workshop")]),
+    ("we're planning a trip to japan in november for our anniversary", "pos",
+     [("plan", r"japan|trip")]),
+    ("i finally ran the half marathon last saturday, finished in just over "
+     "two hours", "pos", [("event", r"marathon")]),
+    ("maybe i should learn the piano someday", "neg",
+     {"event", "plan", "hobby"}),
+]
+
 _REL = re.compile(r"^(wife|husband|partner|spouse|daughter|son|child|brother|"
                   r"sister|mother|father|parent|friend|boss|colleague|"
                   r"coworker|ex_boss|old_boss)_", re.I)

@@ -56,6 +56,8 @@ _CANON_ATTR = {
     "current_salary": "income", "current_package": "income",
     "annual_income": "income", "yearly_income": "income", "wage": "income",
     "pay": "income", "earnings": "income",
+    "events": "event", "experience": "event", "activity_event": "event",
+    "plans": "plan", "intention": "plan", "upcoming_event": "plan",
 }
 
 
@@ -135,6 +137,38 @@ them.
 - If the message states no stable fact, output exactly: []"""
 
 
+# v4 (HaluMem benchmark, entry TBD): v3's "IGNORE hypotheticals ... things
+# people might do" rule also swallows EVENT-type memories -- a concrete thing
+# that HAPPENED ("attended a pottery workshop on jan 6") isn't a stable
+# profile fact and isn't a hypothetical either, it just fell through the
+# cracks. Gold memory-point coverage on HaluMem was 4.4% because of this.
+# v4 keeps every v3 rule (subject typing, terminal/tech identifiers, roleplay,
+# first-person discipline) and carves two narrow exceptions out of the
+# "things people might do" ban: EVENTS (happened) and PLANS (concretely
+# stated intent, with timing). Pure wishes/hypotheticals still extract
+# nothing. OPT-IN via RG_EXTRACT_V4 (own cache/report).
+SYSTEM_V4 = SYSTEM_V3.replace(
+    "- IGNORE hypotheticals, questions, and things people might do.\n"
+    "- If the message states no stable fact, output exactly: []",
+    """- EVENTS: a concrete event or experience someone reports having \
+HAPPENED (not a routine) gets attribute "event"; value is a short \
+description INCLUDING any stated date/time (e.g. {"subject": "self", \
+"attribute": "event", "value": "attended a pottery workshop on jan 6 2026"}).
+- PLANS: a stated CONCRETE plan or intention gets attribute "plan"; value \
+likewise includes any stated timing (e.g. "trip to japan in november"). \
+This is the ONLY exception to ignoring things people might do -- the plan \
+must be explicitly stated, not a wish or hypothetical ("maybe i should \
+learn piano someday" is NOT a plan -- extract nothing from it).
+- Recurring/routine activities (a weekly class, a regular habit) stay under \
+their existing attribute (e.g. weekly_class) -- they are NOT events.
+- Org/team/repo tokens inside repository remotes or URLs (git@host:org/repo.git, \
+github.com/org/repo) are TECH identifiers, NOT employers, projects or teams -- \
+extract nothing from them.
+- IGNORE pure hypotheticals, wishes, questions, and things people MIGHT do \
+where no concrete plan is stated.
+- If the message states no stable fact, output exactly: []""")
+
+
 def canon_subject(s):
     """Normalise a subject: lowercase, strip possessives/articles. 'my wife'
     -> 'wife'; 'my friend chris' -> 'chris (friend)' stays as given otherwise."""
@@ -144,6 +178,8 @@ def canon_subject(s):
 
 
 def active_system():
+    if os.environ.get("RG_EXTRACT_V4"):
+        return SYSTEM_V4
     if os.environ.get("RG_EXTRACT_V3"):
         return SYSTEM_V3
     return SYSTEM_V2 if os.environ.get("RG_EXTRACT_V2") else SYSTEM

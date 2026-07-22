@@ -15,7 +15,7 @@ for p in (_HERE, _ROOT):
     if p not in sys.path:
         sys.path.insert(0, p)
 
-from wire import WireGraph, ResonanceIndex, MIN_COOC
+from wire import WireGraph, ResonanceIndex, MIN_COOC, extract_dates
 
 
 def _fact(n, attr, label, convs):
@@ -271,6 +271,73 @@ def test_resonance_verified_is_subset_of_receipted_edges():
 
 
 # ---------------- fuzz: random streams, the invariants must hold ----------------
+
+# ---------------- query-time synonym bridge (Fix 1) ----------------
+
+def test_query_synonym_bridge_widens_match_without_diluting():
+    facts = [
+        _fact(5, "occupation", "beekeeper", _convs(0, 1)),
+        _fact(5, "location", "melbourne", _convs(0, 1)),
+    ]
+    g = WireGraph.from_facts(facts, n_convs=10)
+    r1 = g.spread("what does he do for work")
+    assert r1.get("abstain") is None
+    assert r1["seeds"][0]["id"] == "occupation=beekeeper"
+    r2 = g.spread("where does she live")
+    assert r2.get("abstain") is None
+    assert r2["seeds"][0]["id"] == "location=melbourne"
+    # a query sharing nothing (not even via the synonym table) still abstains
+    assert g.spread("xyzzy plugh quantum knitting").get("abstain") is True
+
+
+# ---------------- date extraction (Fix 2) ----------------
+
+def test_extract_dates_years_months_and_month_day_pairs():
+    d1 = extract_dates("What did Martin do on Jan 06, 2026?")
+    assert d1 == {"2026", "jan", "jan-6"}
+    d2 = extract_dates("in november")
+    assert d2 == {"nov"}
+    d3 = extract_dates("no dates mentioned here at all")
+    assert d3 == set()
+
+
+# ---------------- answer_question policies (Fix 2 + Fix 3) ----------------
+
+def test_answer_question_date_mismatch_flags_off_date_facts():
+    from memory_api import Memory
+    from halumem_run import answer_question
+    facts = [(5, "event", "conference", [("2026-03-05", "c00")])]
+    g = WireGraph.from_facts(facts, n_convs=5)
+    mem = Memory(g)
+    ans = answer_question(mem, "what happened at the conference in january")
+    assert ans.startswith("No stored fact from the asked date")
+    assert "event: conference" in ans
+
+
+def test_answer_question_attribute_mismatch_flags_related_not_answering():
+    from memory_api import Memory
+    from halumem_run import answer_question
+    # returned fact matches on the subject/name token only; the question asks
+    # about a DIFFERENT attribute (occupation) that isn't stored
+    facts = [(5, "name", "martin", [("2026-03-05", "c00")])]
+    g = WireGraph.from_facts(facts, n_convs=5)
+    mem = Memory(g)
+    ans = answer_question(mem, "martin occupation")
+    assert ans.startswith("No stored fact answers the asked attribute")
+    assert "name: martin" in ans
+
+
+def test_answer_question_normal_match_keeps_stored_facts_prefix():
+    from memory_api import Memory
+    from halumem_run import answer_question
+    facts = [(10, "location", "melbourne",
+              [("2026-03-05", "c00"), ("2026-03-06", "c01")])]
+    g = WireGraph.from_facts(facts, n_convs=5)
+    mem = Memory(g)
+    ans = answer_question(mem, "melbourne")
+    assert ans.startswith("Stored facts:")
+    assert "location: melbourne" in ans
+
 
 def test_fuzz_random_graphs_never_wire_unsupported_links():
     rng = random.Random(42)

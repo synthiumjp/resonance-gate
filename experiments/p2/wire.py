@@ -59,6 +59,79 @@ MATCH_MIN = 0.5     # a query token-grounding score below this is no match
 _STOP = {"the", "a", "an", "my", "of", "and", "in", "at", "to", "for", "with",
          "is", "was", "i", "am", "me", "current", "currently", "new", "some"}
 
+# QUERY-TIME SYNONYM BRIDGE (Fix 1). A static lexical table, not semantic
+# search: common question words map to the canonical attribute token a stored
+# fact would actually carry ("work" question, "occupation" node). This is
+# non-generative by construction -- it only widens the set of tokens a query
+# is allowed to match against, from a fixed hand-authored table; it never
+# invents, scores, or embeds anything. See match() for how it is used: it may
+# only ADD candidate overlap, never dilute the match denominator.
+_QUERY_SYNONYMS = {
+    "work": "occupation", "job": "occupation", "career": "occupation",
+    "employed": "occupation", "profession": "occupation",
+    "live": "location", "lives": "location", "home": "location",
+    "city": "location", "where": "location", "reside": "location",
+    "married": "relationship", "wife": "relationship",
+    "husband": "relationship", "partner": "relationship",
+    "earn": "income", "salary": "income", "income": "income",
+    "paid": "income",
+    "use": "tool", "uses": "tool", "software": "tool", "app": "tool",
+    "studied": "education", "degree": "education",
+    "university": "education", "school": "education",
+    "own": "possession", "owns": "possession", "bought": "possession",
+    "called": "name", "name": "name",
+    "happened": "event", "attended": "event", "went": "event",
+    "visited": "event", "did": "event",
+    "planning": "plan", "plans": "plan", "will": "plan",
+}
+
+# question-framing words that never name a value; used by the synonym-only
+# match guard to decide whether a query token is genuinely UNEXPLAINED
+_QWORDS = {"what", "who", "when", "whats", "which", "how", "does", "do",
+           "did", "he", "she", "they", "his", "her", "their", "them", "it",
+           "its", "about", "tell", "know", "user", "you", "your"}
+
+# DATE SCOPING (Fix 2). Pure regex, no lookup beyond a fixed month table --
+# non-generative extraction of the dates a piece of text NAMES, used to keep
+# an answer scoped to the date actually asked about.
+_MONTHS = {
+    "jan": "jan", "january": "jan",
+    "feb": "feb", "february": "feb",
+    "mar": "mar", "march": "mar",
+    "apr": "apr", "april": "apr",
+    "may": "may",
+    "jun": "jun", "june": "jun",
+    "jul": "jul", "july": "jul",
+    "aug": "aug", "august": "aug",
+    "sep": "sep", "sept": "sep", "september": "sep",
+    "oct": "oct", "october": "oct",
+    "nov": "nov", "november": "nov",
+    "dec": "dec", "december": "dec",
+}
+_MONTH_ALT = "|".join(sorted(_MONTHS, key=len, reverse=True))
+_YEAR_RX = re.compile(r"\b(19\d{2}|20\d{2})\b")
+_MONTH_RX = re.compile(r"\b(" + _MONTH_ALT + r")\b", re.I)
+_MONTH_DAY_RX = re.compile(r"\b(" + _MONTH_ALT + r")\.?\s+(\d{1,2})\b", re.I)
+
+
+def extract_dates(text):
+    """Static regex extraction of the date tokens a piece of text NAMES --
+    NOT date arithmetic, NOT a calendar, nothing inferred. Returns a set of:
+      - 4-digit years in 1900-2099, as strings ("2026")
+      - month names, full or 3-letter, normalized to the 3-letter form
+        ("november" and "nov" both -> "nov")
+      - month-day pairs ("jan 06", "january 6") normalized to "mon-D" with
+        the day as an int (no leading zero): "jan-6"
+    Used to SCOPE which stored facts an answer draws on to the date actually
+    asked about; it never manufactures a date that wasn't in the text."""
+    s = str(text).lower()
+    out = set()
+    out.update(m.group(1) for m in _YEAR_RX.finditer(s))
+    out.update(_MONTHS[m.group(1)] for m in _MONTH_RX.finditer(s))
+    for m in _MONTH_DAY_RX.finditer(s):
+        out.add(f"{_MONTHS[m.group(1)]}-{int(m.group(2))}")
+    return out
+
 
 def _tokens(s):
     return {t for t in re.findall(r"[a-z0-9]+", str(s).lower())
@@ -206,17 +279,37 @@ class WireGraph:
         a node's attr+value tokens, scored over the SMALLER token set so query
         framing words ("what is ... connected to") do not dilute a real match,
         while a query sharing nothing with a node can never match it.
+
+        SYNONYM BRIDGE (Fix 1): a fixed table maps common question words to
+        the canonical attribute token a stored fact would carry ("work" ->
+        "occupation") -- a static lexical bridge, not semantic search;
+        non-generative by construction. GUARD: a synonym-ONLY match (no
+        direct token overlap with the node) is accepted ONLY when the query
+        carries no UNEXPLAINED content tokens -- "what does he do for work"
+        is a pure attribute question (match), while "i work at acme corp"
+        names a value (acme corp) the store does not hold, so it must still
+        abstain rather than surface an unrelated occupation fact.
+
         Returns [(score, node_id)] best-first over `store` (default: the
         asserted tier); [] means no stored fact matches the query."""
         q = _tokens(query)
         if not q:
             return []
+        syn_attrs = {_QUERY_SYNONYMS[t] for t in q if t in _QUERY_SYNONYMS}
         hits = []
         for nid, nd in (self.nodes if store is None else store).items():
             nt = _tokens(nd["attr"]) | nd["toks"]
             if not nt:
                 continue
             ov = len(q & nt) / min(len(q), len(nt))
+            if ov < MATCH_MIN and syn_attrs & _tokens(nd["attr"]):
+                # synonym-only path: every query content token must be
+                # accounted for by the node, the trigger words, or question
+                # framing -- an unexplained token means the query names
+                # something this node does not hold.
+                unexplained = (q - nt - set(_QUERY_SYNONYMS) - _QWORDS)
+                if not unexplained:
+                    ov = MATCH_MIN
             if ov >= MATCH_MIN:
                 hits.append((ov, nd["n_mentions"], nid))
         hits.sort(reverse=True)

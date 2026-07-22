@@ -31,9 +31,14 @@ if _HERE not in sys.path:
     sys.path.insert(0, _HERE)
 
 import run_profile_full as PF
-from llm_profile import SYSTEM_V3, canon_attr, extract_profile_facts
+from llm_profile import SYSTEM_V3, SYSTEM_V4, canon_attr, extract_profile_facts
+
+# v4 (events/plans) is the coverage lever measured in entry 83; opt in via
+# RG_EXTRACT_V4 so v3 pilot caches stay valid for comparison.
+_SYSTEM = SYSTEM_V4 if os.environ.get("RG_EXTRACT_V4") else SYSTEM_V3
+_CSFX = "_v4" if os.environ.get("RG_EXTRACT_V4") else ""
 from consistency import get_llm
-from wire import WireGraph, _tokens
+from wire import WireGraph, _tokens, extract_dates, _STOP
 from memory_api import Memory
 
 JUDGE = """You grade a memory system's answer to a question about a user.
@@ -93,7 +98,7 @@ def ingest_user(user, cache_path, min_mentions=2):
             if h in cache:
                 facts = cache[h]
             else:
-                facts = extract_profile_facts(text, system=SYSTEM_V3)
+                facts = extract_profile_facts(text, system=_SYSTEM)
                 cf.write(json.dumps({"h": h, "f": facts}) + "\n")
                 cf.flush()
                 cache[h] = facts
@@ -118,18 +123,78 @@ def ingest_user(user, cache_path, min_mentions=2):
     return Memory(g), n_turns
 
 
+def _fact_dates(f):
+    """All date tokens a returned fact carries: its value text, plus every
+    receipt's date string. Used only to SCOPE which stored facts an answer
+    draws on -- never to invent a date."""
+    d = extract_dates(f["value"])
+    for rec in f.get("receipts", []) or []:
+        d |= extract_dates(rec.get("date", ""))
+    return d
+
+
 def answer_question(mem, q):
-    """Non-generative answer: matched stored facts verbatim, or ABSTAIN."""
+    """Non-generative answer: matched stored facts verbatim, or ABSTAIN.
+
+    Two static, receipt-only refinements over the raw match (both measured
+    failure-mode fixes, neither generates content -- they only reorder/drop/
+    label the SAME retrieved facts):
+
+    DATE SCOPING (Fix 2): if the question names a date (extract_dates), facts
+    whose value or receipt dates share a token with the asked date are kept
+    (asserted/wired filtered down to just these); if the question names a
+    date but NO returned fact matches it, the answer is prefixed to say so
+    explicitly rather than presenting an off-date fact as if it answered the
+    question.
+
+    VALUE-TYPE DISCLAIMER (Fix 3): if the only thing the question shares with
+    the returned facts is the subject/name tokens already consumed by the
+    VALUE (not the actual attribute asked about -- e.g. a full-name fact
+    returned for a "what's the middle name" question), the answer says the
+    facts are related, not an answer, instead of the plain "Stored facts:"
+    lead-in that a grader could misread as answering the question."""
     r = mem.recall(q)
     if not r["found"]:
         return "ABSTAIN -- no stored fact matches (Unknown)."
-    parts = [f"{f['attribute']}: {f['value']}" for f in r["asserted"][:6]]
-    parts += [f"(linked) {w['fact']['attribute']}: {w['fact']['value']}"
-              for w in r["wired"][:4]]
+
+    asserted = r["asserted"][:6]
+    wired = [w["fact"] for w in r["wired"][:4]]
+    unconfirmed = r["unconfirmed"][:3]
+
+    q_dates = extract_dates(q)
+    date_scoped_empty = False
+    if q_dates:
+        a_hit = [f for f in asserted if _fact_dates(f) & q_dates]
+        w_hit = [f for f in wired if _fact_dates(f) & q_dates]
+        if a_hit or w_hit:
+            asserted, wired = a_hit, w_hit
+        else:
+            date_scoped_empty = True   # keep all facts, flag the mismatch
+
+    parts = [f"{f['attribute']}: {f['value']}" for f in asserted]
+    parts += [f"(linked) {f['attribute']}: {f['value']}" for f in wired]
     parts += [f"UNCONFIRMED (seen once): {f['attribute']}: {f['value']}"
-              for f in r["unconfirmed"][:3]]
-    return "Stored facts: " + "; ".join(parts) if parts else \
-        "ABSTAIN -- no stored fact matches (Unknown)."
+              for f in unconfirmed]
+    if not parts:
+        return "ABSTAIN -- no stored fact matches (Unknown)."
+    answer = "; ".join(parts)
+
+    if date_scoped_empty:
+        return ("No stored fact from the asked date; related facts from "
+                 "other dates: " + answer)
+
+    facts = asserted + wired + unconfirmed
+    value_toks = set()
+    attr_val_toks = set()
+    for f in facts:
+        value_toks |= _tokens(f["value"])
+        attr_val_toks |= _tokens(f["attribute"]) | _tokens(f["value"])
+    ask_toks = _tokens(q) - value_toks - _STOP
+    if ask_toks and not (ask_toks & attr_val_toks):
+        return ("No stored fact answers the asked attribute; related "
+                 "receipted facts: " + answer)
+
+    return "Stored facts: " + answer
 
 
 def extraction_proxy(mem, gold_mps):
@@ -154,7 +219,8 @@ def main():
     min_mentions = int(sys.argv[3]) if len(sys.argv) > 3 else 2
     users = [json.loads(l) for l in open(path)]
     user = users[uidx]
-    cache_path = os.path.join(os.path.dirname(path), f"cache_u{uidx}.jsonl")
+    cache_path = os.path.join(os.path.dirname(path),
+                              f"cache_u{uidx}{_CSFX}.jsonl")
 
     mem, n_turns = ingest_user(user, cache_path, min_mentions)
     print(f"user {uidx}: {len(user['sessions'])} sessions, {n_turns} user turns "
