@@ -126,7 +126,8 @@ class Memory:
         return {"attribute": nd["attr"], "value": nd["value"],
                 "mentions": nd["n_mentions"], "status": status,
                 "receipts": [{"date": d, "conversation":
-                              self.titles.get(c, c)[:60]} for c, d in recs[:3]]}
+                              self.titles.get(c, c)[:60],
+                              "conversation_id": c} for c, d in recs[:3]]}
 
     # ---------------- injection ----------------
 

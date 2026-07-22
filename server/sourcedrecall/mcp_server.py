@@ -1,9 +1,10 @@
 """sourcedrecall MCP server (stdio). Exposes four tools over the Resonance
-Gate rg-1.1 VSA substrate, plus four profile_* tools (dogfood-v1) that bridge
-the p2 world/profile memory (experiments/p2) in as a read+correct slice — see
-sourcedrecall/profile_memory.py. NO language model in the request path — no
-mouth, no extractor, no judge. The registry's MiniLM encoder (string->vector)
-is the only model, loaded lazily for novel writes; it is non-generative.
+Gate rg-1.1 VSA substrate, plus five profile_* tools (dogfood-v1) that bridge
+the p2 world/profile memory (experiments/p2) in as a read+correct+rehydrate
+slice — see sourcedrecall/profile_memory.py. NO language model in the
+request path — no mouth, no extractor, no judge. The registry's MiniLM
+encoder (string->vector) is the only model, loaded lazily for novel writes;
+it is non-generative.
 
 Env:
   SOURCEDRECALL_STATE          state dir (default ~/.sourcedrecall)
@@ -83,11 +84,13 @@ def profile_recall(query: str) -> dict:
     conversation history — cache-only, no LLM call in this request path).
     Returns Memory.recall()'s dict verbatim: {found, abstain, query,
     asserted:[...], wired:[...], unconfirmed:[...]} — each fact carries its
-    mention count, receipts (dates + conversation titles), and status
-    (corroborated / unconfirmed-single-mention / owner-confirmed); wired facts
-    also carry the receipted co-occurrence path that connects them. If
-    nothing corroborated matches, abstain=true — an honest "never seen", never
-    a guess. Plus source="rg-p2-memory"."""
+    mention count, receipts (dates + conversation titles + conversation_id),
+    and status (corroborated / unconfirmed-single-mention / owner-confirmed);
+    wired facts also carry the receipted co-occurrence path that connects
+    them. If nothing corroborated matches, abstain=true — an honest "never
+    seen", never a guess. Plus source="rg-p2-memory". Pass a receipt's
+    conversation_id to profile_rehydrate() to pull the verbatim source
+    conversation back into context."""
     return pmem.profile_recall(query)
 
 
@@ -124,6 +127,28 @@ def profile_status(reload: bool = False) -> dict:
     once and cached, not recomputed per call. Pass reload=True to rebuild from
     the cache + corrections.jsonl on disk first (picks up a pending retype)."""
     return pmem.profile_status(reload)
+
+
+@mcp.tool()
+def profile_rehydrate(conversation_id: str, max_turns: int = 40,
+                       include_assistant: bool = True) -> dict:
+    """Rehydrate a receipt into the verbatim conversation slice it points at
+    -- the page-fault half of the virtual context window (the p2 fact graph
+    is the page table; conversations.json, the raw export, is the backing
+    store). Intended loop: profile_recall -> take a fact's
+    receipts[].conversation_id -> profile_rehydrate(conversation_id) to pull
+    the exact source turns back into context, verbatim, instead of trusting
+    the compressed fact alone.
+
+    Returns {found, conversation_id, title, date, n_turns_total,
+    turns:[{role, text}], truncated}. turns is capped at max_turns (oldest-
+    first order as stored; truncated=true if the conversation has more);
+    include_assistant=False restricts to the human's own turns; each turn's
+    text is capped at 2000 chars. An unknown conversation_id is NEVER
+    guessed or fuzzy-matched -- returns {found: false, error: "no such
+    conversation in the backing store"}, the same non-hallucination contract
+    as profile_recall's abstain, one layer down."""
+    return pmem.rehydrate(conversation_id, max_turns, include_assistant)
 
 
 def main():

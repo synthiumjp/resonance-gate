@@ -4,9 +4,18 @@ new conversations into the extraction cache) is not in scope here; this module
 only ever REPLAYS an existing cache, so the request path stays LLM-free, same
 guarantee as the rest of this server.
 
-Four tools sit on top of experiments/p2's already-validated query contract
+Five tools sit on top of experiments/p2's already-validated query contract
 (memory_api.Memory): profile_recall, profile_context, profile_correct,
-profile_status. See mcp_server.py for the registered tool wrappers.
+profile_status, profile_rehydrate. See mcp_server.py for the registered tool
+wrappers.
+
+REHYDRATION (the "virtual context window"): the fact graph built by Memory is
+a page table -- corroborated, receipted, but deliberately compressed. The raw
+export (conversations.json) is the backing store. A receipt's date +
+conversation_id is a page-table entry; rehydrate() is the page fault that
+pages the verbatim conversation slice back in from the backing store, on
+demand, instead of the memory holding every transcript resident at all
+times.
 
 Env:
   RG_MEMORY_DIR   data dir containing conversations.json (+ profile_cache*.jsonl,
@@ -44,7 +53,7 @@ _SOURCE = "rg-p2-memory"
 
 _lock = threading.RLock()
 _state = {"mem": None, "audit_pass": None, "needs_reload": False,
-          "uncached_turns": None}
+          "uncached_turns": None, "transcripts": None}
 
 
 class MemoryNotConfigured(RuntimeError):
@@ -88,6 +97,7 @@ def _reload_locked():
     _state["uncached_turns"] = n_uncached
     _state["audit_pass"] = None      # stale after a rebuild; recompute lazily
     _state["needs_reload"] = False
+    _state["transcripts"] = None     # stale backing-store index; rebuilt lazily
     return mem
 
 
@@ -175,3 +185,87 @@ def profile_status(reload=False):
                 "needs_reload": _state["needs_reload"],
                 "uncached_turns": _state["uncached_turns"],
                 "data_dir": _data_dir()}
+
+
+def _build_transcript_index_locked():
+    """Parse conversations.json ONCE, in full, into an in-process
+    {uuid: {"title", "date", "turns": [{"role", "text"}]}} dict.
+
+    PERSISTENCE DEBT (dogfood-v1, deliberate): this is a full parse of the
+    backing store -- on the real export that's on the order of half a
+    gigabyte of JSON -- and every transcript it produces is held resident in
+    RAM for the remaining lifetime of the process. There is no eviction, no
+    on-disk index, no streaming re-read per call. That's acceptable for a
+    single-owner dogfood server where rehydrate() is called occasionally
+    against one export already fully loaded into a Memory graph in the same
+    process; it is NOT acceptable as the design for a multi-tenant or
+    memory-constrained deployment, where this needs to become a real index
+    (sqlite/offsets file) built once and queried, not parsed-and-held. Only
+    reload() (a fresh RG_MEMORY_DIR or an explicit rebuild) evicts this.
+    """
+    convs = json.load(open(_conversations_path()))
+    index = {}
+    for c in convs:
+        uuid = c.get("uuid", "")
+        if not uuid:
+            continue
+        turns = []
+        for m in (c.get("chat_messages") or []):
+            role = (m.get("sender") or "").lower()
+            if role not in ("human", "assistant"):
+                continue
+            txt = m.get("text") or m.get("content") or ""
+            if isinstance(txt, list):
+                # same block-list handling as run_profile_full.load_stream_and_titles
+                txt = " ".join(str(x.get("text", "")) if isinstance(x, dict)
+                               else str(x) for x in txt)
+            txt = txt.strip()
+            if txt:
+                turns.append({"role": role, "text": txt})
+        index[uuid] = {"title": c.get("name", "") or "(untitled)",
+                       "date": c.get("created_at", "")[:10],
+                       "turns": turns}
+    return index
+
+
+def _ensure_transcripts_locked():
+    if _state["transcripts"] is None:
+        _state["transcripts"] = _build_transcript_index_locked()
+    return _state["transcripts"]
+
+
+def rehydrate(conversation_id, max_turns=40, include_assistant=True):
+    """The page-fault half of the virtual context window: given a receipt's
+    conversation_id (as now returned by every fact's receipts, see
+    memory_api.Memory._fact), return the verbatim turns of that conversation
+    from the backing store (conversations.json) -- not a paraphrase, not a
+    summary, not a reconstruction from the fact graph.
+
+    Non-hallucination contract at this layer: an unknown conversation_id is
+    NEVER guessed at or fuzzy-matched to the nearest title -- it is reported
+    as not found, exactly like an honest recall abstain one layer up.
+
+    max_turns caps how many turns come back (truncated=True if the
+    conversation has more); include_assistant=False restricts to the human's
+    own turns. Each turn's text is capped at 2000 chars (marked with a
+    trailing "..." when cut) so one huge turn can't blow the response.
+    """
+    with _lock:
+        index = _ensure_transcripts_locked()
+        conv = index.get(conversation_id)
+        if conv is None:
+            return {"found": False,
+                    "error": "no such conversation in the backing store"}
+        turns = conv["turns"] if include_assistant else [
+            t for t in conv["turns"] if t["role"] == "human"]
+        n_total = len(turns)
+        out_turns = []
+        for t in turns[:max_turns]:
+            text = t["text"]
+            if len(text) > 2000:
+                text = text[:2000] + "..."
+            out_turns.append({"role": t["role"], "text": text})
+        return {"found": True, "conversation_id": conversation_id,
+                "title": conv["title"], "date": conv["date"],
+                "n_turns_total": n_total, "turns": out_turns,
+                "truncated": n_total > max_turns}

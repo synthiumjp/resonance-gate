@@ -10,16 +10,26 @@ import pytest
 
 
 def _write_fixture(tmp_path):
-    """A tiny synthetic export: 3 conversations, one human turn each. Facts
-    are pre-extracted into profile_cache.jsonl, keyed by sha1 of the exact
-    (stripped, 1800-char-truncated) turn text build_facts hashes -- computed
-    here via the loader itself so the hash can never drift from the real
-    truncation rule."""
+    """A tiny synthetic export: 3 conversations. c1 additionally carries an
+    assistant turn plus two more human turns (fenced in ``` so _is_prose
+    skips them -- no cache entry required, no effect on uncached_turns) so
+    rehydrate has something real to page in, truncate, and role-filter.
+    Facts are pre-extracted into profile_cache.jsonl, keyed by sha1 of the
+    exact (stripped, 1800-char-truncated) turn text build_facts hashes --
+    computed here via the loader itself so the hash can never drift from the
+    real truncation rule."""
     convs = [
         {"uuid": "c1", "name": "Chat about life",
          "created_at": "2026-01-01T00:00:00Z",
-         "chat_messages": [{"sender": "human",
-                             "text": "I live in Melbourne and work as a researcher."}]},
+         "chat_messages": [
+             {"sender": "human",
+              "text": "I live in Melbourne and work as a researcher."},
+             {"sender": "assistant",
+              "text": "Got it -- Melbourne, researcher. Anything else?"},
+             {"sender": "human", "text": "```\nnot prose, a code block\n```"},
+             {"sender": "assistant", "text": "Sure thing."},
+             {"sender": "human", "text": "```\nanother code block\n```"},
+         ]},
         {"uuid": "c2", "name": "Second chat",
          "created_at": "2026-01-02T00:00:00Z",
          "chat_messages": [{"sender": "human",
@@ -45,6 +55,11 @@ def _write_fixture(tmp_path):
              {"attribute": "occupation", "value": "Researcher"}],
         "I'm allergic to penicillin, just found out.":
             [{"attribute": "allergy", "value": "Penicillin"}],
+        # non-prose turns: never looked up (build_facts filters them before
+        # hashing), but the fixture-writing loop below still walks every
+        # human turn in the stream, so a key is needed to avoid a KeyError.
+        "```\nnot prose, a code block\n```": [],
+        "```\nanother code block\n```": [],
     }
     cache_path = tmp_path / "profile_cache.jsonl"
     with open(cache_path, "w") as f:
@@ -65,7 +80,8 @@ def pm(tmp_path, monkeypatch):
 
     def _reset():
         mod._state.update({"mem": None, "audit_pass": None,
-                            "needs_reload": False, "uncached_turns": None})
+                            "needs_reload": False, "uncached_turns": None,
+                            "transcripts": None})
 
     _reset()
     yield mod
@@ -165,10 +181,73 @@ def test_status_counts_and_audit_pass(pm):
     assert st["data_dir"] == str(pm._data_dir())
 
 
+def test_recall_receipts_carry_conversation_id(pm):
+    out = pm.profile_recall("Melbourne")
+    receipts = out["asserted"][0]["receipts"]
+    assert receipts
+    for r in receipts:
+        assert set(r) == {"date", "conversation", "conversation_id"}
+        assert r["conversation_id"] in ("c1", "c2")
+
+
+def test_rehydrate_round_trip_from_a_receipt(pm):
+    out = pm.profile_recall("Melbourne")
+    conv_id = out["asserted"][0]["receipts"][0]["conversation_id"]
+    r = pm.rehydrate(conv_id)
+    assert r["found"] is True
+    assert r["conversation_id"] == conv_id
+    texts = [t["text"] for t in r["turns"]]
+    fixture_sentence = ("I live in Melbourne and work as a researcher."
+                         if conv_id == "c1" else
+                         "Still in Melbourne, working as a researcher this week.")
+    assert fixture_sentence in texts
+
+
+def test_rehydrate_max_turns_truncates(pm):
+    full = pm.rehydrate("c1", max_turns=40)
+    assert full["found"] is True
+    assert full["n_turns_total"] == 5
+    assert len(full["turns"]) == 5
+    assert full["truncated"] is False
+
+    capped = pm.rehydrate("c1", max_turns=2)
+    assert capped["n_turns_total"] == 5      # total is honest, not the cap
+    assert len(capped["turns"]) == 2
+    assert capped["truncated"] is True
+
+
+def test_rehydrate_include_assistant_false_filters_to_human(pm):
+    r = pm.rehydrate("c1", max_turns=40, include_assistant=False)
+    assert all(t["role"] == "human" for t in r["turns"])
+    assert r["n_turns_total"] == 3            # 3 human turns in c1's fixture
+    assert len(r["turns"]) == 3
+    assert r["truncated"] is False
+
+
+def test_rehydrate_unknown_id_is_honest_not_a_guess(pm):
+    r = pm.rehydrate("no-such-conversation-uuid")
+    assert r == {"found": False,
+                 "error": "no such conversation in the backing store"}
+
+
+def test_rehydrate_survives_reload(pm):
+    r1 = pm.rehydrate("c1")
+    assert r1["found"] is True
+    assert pm._state["transcripts"] is not None
+
+    pm.reload()
+    assert pm._state["transcripts"] is None   # reload evicts the stale index
+
+    r2 = pm.rehydrate("c1")
+    assert r2["found"] is True
+    assert r2["turns"] == r1["turns"]
+
+
 def test_status_missing_env_raises_clearly(monkeypatch):
     monkeypatch.delenv("RG_MEMORY_DIR", raising=False)
     import sourcedrecall.profile_memory as mod
     mod._state.update({"mem": None, "audit_pass": None,
-                       "needs_reload": False, "uncached_turns": None})
+                       "needs_reload": False, "uncached_turns": None,
+                       "transcripts": None})
     with pytest.raises(mod.MemoryNotConfigured):
         mod.profile_status()

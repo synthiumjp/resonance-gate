@@ -1,11 +1,11 @@
-"""The MCP wiring: the four substrate tools plus the four profile_* (p2
+"""The MCP wiring: the four substrate tools plus the five profile_* (p2
 memory bridge) tools registered, and a call through the registered tool
 round-trips to the substrate."""
 
 import asyncio
 
 
-def test_eight_tools_registered_and_callable(tmp_path, monkeypatch):
+def test_nine_tools_registered_and_callable(tmp_path, monkeypatch):
     monkeypatch.setenv("SOURCEDRECALL_STATE", str(tmp_path / "state"))
     monkeypatch.setenv("SOURCEDRECALL_BROWSER_PORT", "0")
     import sourcedrecall.mcp_server as srv
@@ -13,7 +13,8 @@ def test_eight_tools_registered_and_callable(tmp_path, monkeypatch):
     tools = asyncio.run(srv.mcp.list_tools())
     assert {t.name for t in tools} == {
         "remember", "recall", "update", "forget",
-        "profile_recall", "profile_context", "profile_correct", "profile_status"}
+        "profile_recall", "profile_context", "profile_correct",
+        "profile_status", "profile_rehydrate"}
 
     # each tool advertises a description (shown to the calling model)
     assert all(t.description for t in tools)

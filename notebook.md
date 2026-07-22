@@ -4710,3 +4710,34 @@ entries 24, 45, 53), predictions BEFORE the official run:
    one more; my guess: answer-FORMAT mismatch with their judge rubric.
 Falsification: if official hallucination lands >5%, the structural claim
 needs re-examination at the answer-surface level, not re-tuning of judges.
+
+## Entry 89 — 2026-07-23 (p2: OFFICIAL harness running + REHYDRATION -- the memory becomes a virtual context window)
+
+OFFICIAL HALUMEM RUN: launched (detached) after the sonnet setup agent found
+the practical blocker -- ollama runs CPU-only in this session (~90s/judge
+call; 23,653 calls = ~25 days), while the project's llama-cpp stack has the
+GPU. Solution: llama-cpp OpenAI-compatible server on the 7900 GRE (0.16s
+steady-state on short calls; ~9s on their big integrity prompts), their
+harness pointed at it via OPENAI_BASE_URL. ETA ~2-2.5 days. Exact deviations
+from upstream (adapter file, /no_think prefix mode, frame registration, .env)
+preserved in experiments/p2/halumem_official/PATCHES.md; the one permanent
+caveat is the judge MODEL (local qwen3:14b, not their OpenAI judge).
+Registrant's M3-Ultra access noted for a judge-fidelity ablation afterwards
+(72B judge on the QA stage over tailscale) -- decode-heavy? no: these calls
+are PREFILL-bound, so the discrete GPU wins for same-size models; the Mac's
+value is model SIZE, not speed. Entry-88 predictions stand untouched.
+
+REHYDRATION (sonnet-coded): the piece that turns memory + receipts into a
+VIRTUAL CONTEXT WINDOW. Framing: the fact graph is a page table (small,
+always in context, provably never corrupted -- non-generative + audited);
+raw transcripts are the backing store; receipts are the page-fault
+mechanism. New: receipts now carry conversation_id; MCP tool
+profile_rehydrate(conversation_id, max_turns, include_assistant) returns the
+VERBATIM transcript slice, or an honest found:false for an unknown id --
+no fuzzy matching, the non-hallucination contract extended to the backing
+store. The loop: profile_recall -> receipts[].conversation_id ->
+profile_rehydrate. Effectively unbounded factual context (13 months
+~5-8M tokens indexed by ~500 corroborated facts) with exact wording
+recoverable on demand -- and unlike MemGPT-lineage virtual context, the
+page table itself cannot hallucinate. Suite 59/59. Persistence debt noted:
+transcript index = one full parse held in RAM, cleared on reload.
