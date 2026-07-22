@@ -53,31 +53,35 @@ ANSWERS_PATH = os.path.join(HALUMEM_DIR, "answers_v4.jsonl")
 N_USERS = 20
 MIN_MENTIONS = 2
 
-_GEMMA = None
+def _gemma_judge(question, gold, answer_text):
+    """gemma3:12b via the LOCAL ollama HTTP API (localhost only -- no paid
+    API, no network egress). The direct llama-cpp load of the gemma3 blob
+    failed: the venv's llama-cpp-python predates the gemma3 architecture.
+    ollama's own runtime handles it, so judge 2 goes through the daemon --
+    still a second, structurally different local model, which is the whole
+    point of the two-judge protocol."""
+    import urllib.request
+    body = json.dumps({
+        "model": "gemma3:12b",
+        "messages": [{"role": "system", "content": JUDGE},
+                     {"role": "user", "content":
+                      f"QUESTION: {question}\nGOLD: {gold}\nSYSTEM: {answer_text}"}],
+        "stream": False,
+        "options": {"temperature": 0.0, "num_predict": 10, "seed": 0},
+    }).encode()
+    req = urllib.request.Request("http://localhost:11434/api/chat", data=body,
+                                 headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=120) as resp:
+        txt = json.load(resp)["message"]["content"]
+    return _parse_verdict(txt)
 
 
-def get_gemma():
-    """Locate + load the gemma3:12b GGUF via the ollama manifest (no ollama
-    server call -- reads the manifest JSON straight off disk, same pattern
-    consistency.py uses for the pinned qwen blob, just resolved dynamically
-    since gemma's digest isn't pinned yet at write time). Second, structurally
-    different local model -- the whole point of the two-judge protocol is
-    that it is NOT the same model/weights as the qwen judge."""
-    global _GEMMA
-    if _GEMMA is None:
-        import llama_cpp
-        manifest_path = ("/usr/share/ollama/.ollama/models/manifests/"
-                          "registry.ollama.ai/library/gemma3/12b")
-        manifest = json.load(open(manifest_path))
-        layer = next(l for l in manifest["layers"]
-                     if "model" in l["mediaType"])
-        digest = layer["digest"]  # "sha256:XXXX..."
-        blob = digest.replace("sha256:", "sha256-")
-        gguf_path = os.path.join(
-            "/usr/share/ollama/.ollama/models/blobs", blob)
-        _GEMMA = llama_cpp.Llama(gguf_path, n_ctx=4096, n_gpu_layers=-1,
-                                  verbose=False, seed=0)
-    return _GEMMA
+def _parse_verdict(txt):
+    txt = re.sub(r"<think>.*?</think>", "", txt, flags=re.DOTALL).strip().lower()
+    for v in ("correct", "hallucination", "omission"):
+        if v in txt:
+            return v
+    return "omission"
 
 
 def _judge_text(llm, question, gold, answer_text, no_think):
@@ -85,6 +89,8 @@ def _judge_text(llm, question, gold, answer_text, no_think):
     SAME parsing (strip <think>, first matching word wins). /no_think is a
     qwen3-specific control token -- prepending it for gemma would just be
     inert-or-worse noise in the prompt, so it is qwen-only, per spec."""
+    if llm == "ollama-gemma":
+        return _gemma_judge(question, gold, answer_text)
     sys_content = ("/no_think " + JUDGE) if no_think else JUDGE
     out = llm.create_chat_completion(
         messages=[{"role": "system", "content": sys_content},
@@ -92,11 +98,7 @@ def _judge_text(llm, question, gold, answer_text, no_think):
                    f"QUESTION: {question}\nGOLD: {gold}\nSYSTEM: {answer_text}"}],
         max_tokens=10, temperature=0.0)
     txt = out["choices"][0]["message"]["content"]
-    txt = re.sub(r"<think>.*?</think>", "", txt, flags=re.DOTALL).strip().lower()
-    for v in ("correct", "hallucination", "omission"):
-        if v in txt:
-            return v
-    return "omission"
+    return _parse_verdict(txt)
 
 
 def cmd_answers(args):
@@ -160,9 +162,8 @@ def cmd_judge(args):
     if args.model == "qwen":
         judge_one = lambda r: HR.judge_answer(r["q"], r["gold"], r["ans"])
     else:
-        llm = get_gemma()
-        judge_one = lambda r: _judge_text(llm, r["q"], r["gold"], r["ans"],
-                                           no_think=False)
+        judge_one = lambda r: _judge_text("ollama-gemma", r["q"], r["gold"],
+                                           r["ans"], no_think=False)
 
     out = open(out_path, "a")
     for i, r in enumerate(todo):
