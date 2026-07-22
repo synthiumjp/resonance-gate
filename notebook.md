@@ -4463,3 +4463,39 @@ MEASURED after hygiene: asserted 478 -> 457 (junk removed), edges 1,597 ->
 audits still PASS (0 unsupported links, 1,122/1,122 crosstalk blocked, 0
 fabricated assertions). All 9 owner-flagged classes verified absent from the
 regenerated report. Suite 25/25.
+
+## Entry 82 — 2026-07-22 (p2: HaluMem adapter built + pilot launched; CALIBRATION-SESSION design recorded)
+
+GENERALIZATION + SOTA in one move: the owner asked the right question -- "are
+we hardcoding to me?" Honest inventory: the guarantees (corroboration,
+receipts, non-generative recall, abstention, audits) are user-agnostic; the
+owner's specifics are DATA (corrections/owner_facts in the quarantine); but
+the HYGIENE layer is an in-sample-fitted rule pack (one user, research chat,
+English, one extractor). Ruling from here: no new hygiene rules from the
+owner's data -- precision work now comes only from out-of-sample streams.
+
+HALUMEM ADAPTER (halumem_run.py): HaluMem-Medium = 20 synthetic personas,
+~65 sessions / ~1,400 user turns / ~700 gold memory points / ~160 questions
+each -- thousands of turns of NOT-the-owner, with gold labels. The benchmark
+even has Memory Boundary questions whose gold answer is "Unknown; not
+provided" -- abstention tests built in, our home turf. Pipeline: user turns
+-> v3 extraction (local, cached) -> hygiene -> corroboration (session =
+conversation) -> WireGraph/Memory -> NON-GENERATIVE QA (matched stored facts
+verbatim, or ABSTAIN -> "Unknown"). Scoring: local-judge pilot (flagged
+in-house; two-judge validation owed), plus a token-overlap extraction proxy.
+Pilot on user 0 running; full 20-user run after review.
+
+CALIBRATION SESSION (owner's UI idea, recorded as design): instead of report
+skims, the memory runs a DISSONANCE METER -- an aggregate of posterior
+entropy per slot, belief conflicts() (two values concurrently believed),
+provisional-tier pressure (unconfirmed facts that keep matching queries),
+and correction-rate history. When the meter crosses threshold, it launches a
+short calibration session: the top 5-10 slots ranked by EXPECTED INFORMATION
+GAIN x usage frequency, asked as confirm/deny/choose questions ("you
+mentioned X once -- still true?"). Every answer is evidence through the
+normal GROW path (confirm = corroboration; deny = removal; choose = decides
+a conflict), so the meter visibly drops as posteriors sharpen. This also
+answers the personalisation question structurally: fitting-to-individual
+happens ONLY through owner-answered data, never through code. All the raw
+signals already exist in belief.py/memory_api; the build is a ranking
+function + a question renderer. Owed after the HaluMem run.
