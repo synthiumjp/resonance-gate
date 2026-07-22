@@ -1,0 +1,177 @@
+"""profile_memory: bridges the p2 profile/world memory (experiments/p2) into
+this MCP server -- the dogfood-v1 READ + CORRECT slice. Live ingestion (turning
+new conversations into the extraction cache) is not in scope here; this module
+only ever REPLAYS an existing cache, so the request path stays LLM-free, same
+guarantee as the rest of this server.
+
+Four tools sit on top of experiments/p2's already-validated query contract
+(memory_api.Memory): profile_recall, profile_context, profile_correct,
+profile_status. See mcp_server.py for the registered tool wrappers.
+
+Env:
+  RG_MEMORY_DIR   data dir containing conversations.json (+ profile_cache*.jsonl,
+                  corrections.jsonl, owner_facts.jsonl). REQUIRED -- there is no
+                  default that falls back to a real home path, so a forgetful
+                  test run never touches a real user's data. Raises clearly the
+                  first time any tool is called with it unset.
+  RG_EXTRACT_V2 / RG_EXTRACT_V3 / RG_EXTRACT_V4
+                  pass through unchanged to run_wire.build_facts's cache-file
+                  selection (profile_cache_v2/_v3/_v4.jsonl vs the base cache).
+
+Loading is a LAZY module-level singleton: the first tool call builds Memory
+from the cache (can take tens of seconds on a big export) and keeps it in
+process; reload() rebuilds it (also reachable via profile_status(reload=True)).
+"""
+
+import json
+import os
+import sys
+import threading
+
+# Packaging debt (v1): experiments/p2 is a script directory, not an installed
+# package. Bridge it onto sys.path here, and only here, so the rest of the
+# server never has to know p2 isn't packaged yet.
+_P2_ROOT = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+    "experiments", "p2")
+if _P2_ROOT not in sys.path:
+    sys.path.insert(0, _P2_ROOT)
+
+from memory_api import Memory  # noqa: E402 -- after the sys.path bridge
+
+_VALID_ACTIONS = ("deny", "confirm", "retype")
+_SOURCE = "rg-p2-memory"
+
+_lock = threading.RLock()
+_state = {"mem": None, "audit_pass": None, "needs_reload": False,
+          "uncached_turns": None}
+
+
+class MemoryNotConfigured(RuntimeError):
+    """RG_MEMORY_DIR is unset. Raised, not swallowed -- a misconfigured data
+    dir is an operator error, distinct from an honest recall miss."""
+
+
+def _data_dir():
+    d = os.environ.get("RG_MEMORY_DIR")
+    if not d:
+        raise MemoryNotConfigured(
+            "RG_MEMORY_DIR is not set -- point it at the p2 data dir "
+            "(conversations.json + profile_cache*.jsonl + corrections.jsonl) "
+            "before calling a profile_* tool.")
+    return d
+
+
+def _conversations_path():
+    return os.path.join(_data_dir(), "conversations.json")
+
+
+def _corrections_path():
+    return os.path.join(_data_dir(), "corrections.jsonl")
+
+
+def _build():
+    """One cache-only build: facts -> WireGraph -> Memory. Mirrors
+    Memory.load's body exactly, except it keeps the uncached-turn count
+    (Memory.load discards it) so profile_status can surface it."""
+    from run_wire import build_facts  # local: needs the sys.path bridge above
+    from wire import WireGraph
+    facts, prov, n_convs, titles, n_uncached = build_facts(
+        _conversations_path(), min_mentions=2)
+    g = WireGraph.from_facts(facts, n_convs=n_convs, provisional=prov)
+    return Memory(g, titles), n_uncached
+
+
+def _reload_locked():
+    mem, n_uncached = _build()
+    _state["mem"] = mem
+    _state["uncached_turns"] = n_uncached
+    _state["audit_pass"] = None      # stale after a rebuild; recompute lazily
+    _state["needs_reload"] = False
+    return mem
+
+
+def reload():
+    """Rebuild Memory from the cache + corrections.jsonl on disk (picks up a
+    retype correction, which a live apply_corrections() cannot do at the fact
+    level). Also reachable via profile_status(reload=True)."""
+    with _lock:
+        return _reload_locked()
+
+
+def _ensure_loaded():
+    with _lock:
+        if _state["mem"] is None:
+            _reload_locked()
+        return _state["mem"]
+
+
+# --------------------------------------------------------------- the tools
+
+def profile_recall(query):
+    mem = _ensure_loaded()
+    with _lock:
+        out = mem.recall(query)
+    out["source"] = _SOURCE
+    return out
+
+
+def profile_context(query=None, max_facts=15):
+    mem = _ensure_loaded()
+    with _lock:
+        block = mem.context_block(query, max_facts)
+    return {"block": block}
+
+
+def profile_correct(action, attribute, value, new_attribute=None, exact=False):
+    """Append one correction to corrections.jsonl (owner-authored ground
+    truth, per wire.correct_facts). deny/confirm apply immediately to the live
+    graph (Memory.apply_corrections is node-level -- retype is not, it needs a
+    fact-level rebuild, see wire.correct_facts); retype only flags
+    needs_reload=True and is realized on the next reload()."""
+    if action not in _VALID_ACTIONS:
+        return {"written": None, "applied": None,
+                "error": f"action must be one of {list(_VALID_ACTIONS)}"}
+    if action == "retype" and not new_attribute:
+        return {"written": None, "applied": None,
+                "error": "retype requires new_attribute"}
+
+    correction = {"action": action, "attribute": attribute, "value": value}
+    if exact:
+        correction["exact"] = True
+    if action == "retype":
+        correction["new_attribute"] = new_attribute
+
+    with _lock:
+        data_dir = _data_dir()
+        os.makedirs(data_dir, exist_ok=True)
+        path = _corrections_path()
+        with open(path, "a") as f:
+            f.write(json.dumps(correction) + "\n")
+
+        if action == "retype":
+            _state["needs_reload"] = True
+            return {"written": correction, "applied": "on-reload",
+                    "needs_reload": True}
+
+        mem = _ensure_loaded()
+        log = mem.apply_corrections([correction])
+        _state["audit_pass"] = None   # graph just changed; recompute lazily
+        return {"written": correction, "applied": "live", "log": log}
+
+
+def profile_status(reload=False):
+    with _lock:
+        if reload or _state["mem"] is None:
+            _reload_locked()
+        mem = _state["mem"]
+        if _state["audit_pass"] is None:
+            _state["audit_pass"] = bool(mem.g.audit()["pass"])
+        return {"loaded": mem is not None,
+                "asserted": len(mem.g.nodes),
+                "provisional": len(mem.g.provisional),
+                "edges": len(mem.g.edges),
+                "audit_pass": _state["audit_pass"],
+                "needs_reload": _state["needs_reload"],
+                "uncached_turns": _state["uncached_turns"],
+                "data_dir": _data_dir()}

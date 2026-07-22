@@ -1,13 +1,15 @@
-"""sourcedrecall MCP server (stdio). Exposes exactly four tools over the
-Resonance Gate rg-1.1 VSA substrate. NO language model in the request path —
-no mouth, no extractor, no judge. The registry's MiniLM encoder
-(string->vector) is the only model, loaded lazily for novel writes; it is
-non-generative.
+"""sourcedrecall MCP server (stdio). Exposes four tools over the Resonance
+Gate rg-1.1 VSA substrate, plus four profile_* tools (dogfood-v1) that bridge
+the p2 world/profile memory (experiments/p2) in as a read+correct slice — see
+sourcedrecall/profile_memory.py. NO language model in the request path — no
+mouth, no extractor, no judge. The registry's MiniLM encoder (string->vector)
+is the only model, loaded lazily for novel writes; it is non-generative.
 
 Env:
   SOURCEDRECALL_STATE          state dir (default ~/.sourcedrecall)
   SOURCEDRECALL_BROWSER_PORT   read-only browser port (default 7071; 0 disables)
   RG_ROOT                      Resonance Gate repo root (default: repo containing this file)
+  RG_MEMORY_DIR                p2 data dir for the profile_* tools (see profile_memory.py)
 """
 
 import os
@@ -17,6 +19,7 @@ from mcp.server.fastmcp import FastMCP
 
 from sourcedrecall.service import MemoryService
 from sourcedrecall.browser import start_browser
+from sourcedrecall import profile_memory as pmem
 
 STATE_DIR = os.environ.get("SOURCEDRECALL_STATE",
                            os.path.expanduser("~/.sourcedrecall"))
@@ -71,6 +74,56 @@ def forget(subject: str, relation: str = None, object: str = None) -> dict:
     Records are subtracted and tombstoned (stays deleted). Returns
     {forgotten:[record_ids]}."""
     return service.forget(subject, relation, object)
+
+
+@mcp.tool()
+def profile_recall(query: str) -> dict:
+    """Recall from the p2 world/profile memory (a validated, non-hallucinating
+    LIVING memory built by replaying a cached extraction over the user's own
+    conversation history — cache-only, no LLM call in this request path).
+    Returns Memory.recall()'s dict verbatim: {found, abstain, query,
+    asserted:[...], wired:[...], unconfirmed:[...]} — each fact carries its
+    mention count, receipts (dates + conversation titles), and status
+    (corroborated / unconfirmed-single-mention / owner-confirmed); wired facts
+    also carry the receipted co-occurrence path that connects them. If
+    nothing corroborated matches, abstain=true — an honest "never seen", never
+    a guess. Plus source="rg-p2-memory"."""
+    return pmem.profile_recall(query)
+
+
+@mcp.tool()
+def profile_context(query: str = None, max_facts: int = 15) -> dict:
+    """The verbatim, receipted text block for prompt injection — every line is
+    a stored fact with its mention count, and the block carries the standing
+    instruction that anything about the user NOT listed is unknown and must
+    not be invented. With no query, the top of the corroborated profile;
+    with a query, that recall's neighbourhood. Returns {"block": <str>}."""
+    return pmem.profile_context(query, max_facts)
+
+
+@mcp.tool()
+def profile_correct(action: str, attribute: str, value: str,
+                     new_attribute: str = None, exact: bool = False) -> dict:
+    """Owner correction over the p2 memory: action is one of deny (the fact is
+    wrong — drop it and its edges), confirm (owner-vouched — promote a
+    single-mention fact to asserted), or retype (right fact, wrong attribute —
+    requires new_attribute). Always appended as one line to the data dir's
+    corrections.jsonl (ground truth, never inference). deny/confirm also apply
+    immediately to the live graph (applied="live"); retype needs a fact-level
+    rebuild and only takes effect on the next reload (applied="on-reload",
+    needs_reload=true — see profile_status(reload=True))."""
+    return pmem.profile_correct(action, attribute, value, new_attribute, exact)
+
+
+@mcp.tool()
+def profile_status(reload: bool = False) -> dict:
+    """Health/shape of the loaded p2 memory: {loaded, asserted, provisional,
+    edges, audit_pass, needs_reload, uncached_turns, data_dir}. audit_pass is
+    the non-hallucination graph audit (every edge = real receipted
+    co-occurrence, nothing more, nothing less); it's O(n^2) so it's computed
+    once and cached, not recomputed per call. Pass reload=True to rebuild from
+    the cache + corrections.jsonl on disk first (picks up a pending retype)."""
+    return pmem.profile_status(reload)
 
 
 def main():

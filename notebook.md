@@ -4615,3 +4615,27 @@ Coverage remains the open lever (omission 34%, concentrated in Basic Recall
 Full 20-user run launched detached (~3.5h GPU); then: two-judge validation
 (sonnet second judge on all flags + random sample), aggregate numbers, and
 the sota_positioning.md comparison table gets its measured row.
+
+## Entry 86 — 2026-07-22 (p2: MCP BRIDGE. The p2 memory is now a live tool surface -- recall/context/correct/status over MCP; dogfood-v1)
+
+The product gap closed one level (sonnet-coded, orchestrator-reviewed):
+server/sourcedrecall now exposes FOUR new tools alongside the original
+explicit-triple four (untouched):
+  profile_recall(query)   -> the validated query contract verbatim: asserted
+                             (receipted) + wired (edge paths) + unconfirmed
+                             (labeled) | honest abstain.
+  profile_context(query?) -> the verbatim do-not-invent injection block.
+  profile_correct(...)    -> IN-CONVERSATION correction: appends to the same
+                             corrections.jsonl the batch pipeline reads
+                             (deny/confirm applied live; retype flags
+                             needs_reload). "no, that's my wife's job" is now
+                             a tool call, not a file edit.
+  profile_status(reload?) -> counts, audit_pass (cached, invalidated on
+                             mutation), uncached_turns, needs_reload.
+Loading: lazy singleton from RG_MEMORY_DIR; read path cache-only (LLM-free,
+verified); sys.path bridge to experiments/p2 marked as packaging debt.
+Tests: 9 new over a synthetic fixture whose cache hashes are computed via
+the real loader (cannot drift); suite 53/53 incl. a FastMCP dispatch
+round-trip. Remaining to usable-product (entry order stands): live
+ingestion; durable persistence; calibration session; safe alias merging;
+packaging/small-extractor fallback; N>1 beta users.
