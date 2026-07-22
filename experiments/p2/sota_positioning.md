@@ -61,6 +61,25 @@ Verified current numbers (HaluMem-Medium), shipped systems:
 MemGuard reports 89.53% anti-hallucination accuracy on HaluMem
 [single-sourced] — the number to beat on the mitigation axis.
 
+## 2b. MEASURED (2026-07-23, entries 82–87): our row
+
+Full HaluMem-Medium run (all 20 users, n=3,189 unique questions), two
+independent LOCAL judges (qwen3:14b strict, gemma3:12b lenient), both-judge
+protocol:
+
+| System        | QA correct     | Hallucination        | Memory Boundary |
+|---------------|----------------|----------------------|-----------------|
+| **rg-p2**     | 57.7–83.3%*    | **0.0% (0/3,189)**   | 548–550/550     |
+| MemOS (best)  | 67.23%         | 15.17%               | —               |
+| Zep           | 55.47%         | 21.92%               | —               |
+| Mem0          | 53.02%         | 19.17%               | —               |
+
+*correct spread = judge strictness (both-confirmed floor 57.7%; strict qwen
+63.5%; lenient gemma 83.3%); hallucination is both-judge-confirmed, single-
+judge worst case 1/3,189 (0.03%). CAVEAT: in-house judges, not the official
+HaluMem harness — treat cross-row comparison as approximate until the
+official eval runs. Weakest true axis: Dynamic Update (68/180 strict).
+
 ## 3. What a SOTA claim looks like for us
 
 The winnable frontier is the **trust Pareto**: hallucination ≈ 0 and FMR ≈ max
