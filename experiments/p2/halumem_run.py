@@ -38,12 +38,16 @@ from memory_api import Memory
 
 JUDGE = """You grade a memory system's answer to a question about a user.
 GOLD is the reference answer. SYSTEM returned stored facts (or ABSTAIN).
+The system only returns stored facts; it never composes an answer. Judge
+whether the STORED FACTS state the asked-for value.
 Reply with exactly one word:
-  correct       -- the returned facts contain the gold answer, OR gold says
-                   Unknown/not provided and the system abstained or returned
-                   nothing that claims an answer
-  hallucination -- the system returned or implied a WRONG answer (including
-                   answering when gold says Unknown)
+  correct       -- the returned facts contain the gold answer; OR gold says
+                   Unknown/not provided and NO returned fact states a value
+                   for the specific thing asked (returning true RELATED facts
+                   that do not answer the question is correct, not an error)
+  hallucination -- a returned fact STATES a value for the asked question that
+                   is wrong or contradicts gold, or states one when gold says
+                   Unknown
   omission      -- gold has a real answer but the system abstained or its
                    facts do not contain it"""
 

@@ -4499,3 +4499,46 @@ answers the personalisation question structurally: fitting-to-individual
 happens ONLY through owner-answered data, never through code. All the raw
 signals already exist in belief.py/memory_api; the build is a ranking
 function + a question renderer. Owed after the HaluMem run.
+
+## Entry 83 — 2026-07-22 (p2: HaluMem PILOT, user 0. Zero fabricated facts; the coverage gap is the ontology, exactly as the out-of-sample test was meant to find)
+
+Pilot on HaluMem-Medium user 0: 65 sessions, 1,403 user turns -> 38 asserted
++ 221 provisional, wire audit PASS (0 violations). QA n=164, local judge
+(PILOT numbers; two-judge validation owed).
+
+  correct 40.9% | hallucination 6.7% | omission 52.4%
+  BY TYPE: 0 hallucinations on Basic Recall, Dynamic Update, Generalization,
+  Memory Conflict, Multi-hop (125 questions). All 11 flags are Memory
+  Boundary, and inspection shows ZERO FABRICATION: 10/11 are ONE repeated
+  case (question asks a middle name; we return the true stored full name
+  "first last"; grader reads token 2 as a middle-name claim) and 1/11 is a
+  date-scoped question answered with true facts from other dates (we lack
+  temporal scoping -- though receipts carry dates, so it is buildable).
+  Every flagged answer returned only TRUE receipted facts.
+
+JUDGE TRANSPARENCY: the first judge prompt counted ANY returned fact on an
+Unknown-gold question as hallucination (boundary: 5 correct / 11 halluc /
+23 omit). Corrected criterion -- hallucination = STATING a value for the
+asked thing that is wrong/ungrounded; returning true related facts is
+correct abstain-with-context -- gives boundary 27/11/1. The residual 11 are
+KEPT as honest residual, not excused; further judge relaxation would be
+judge-shopping (entry 53 discipline).
+
+CORROBORATION VALIDATED OUT-OF-SAMPLE: min_mentions=1 relieved omission by
+only 7 pts (68->61) while ADDING 4 hallucinations (stale values leaking into
+Update/Conflict). The gate pays for itself on a stream we never tuned on.
+
+THE REAL GAP = EXTRACTION ONTOLOGY: gold-memory-point coverage 4.4%. HaluMem
+gold is heavy on EVENTS ("attended X on date Y") and once-stated details;
+our extractor targets stable profile facts by design. Omission (52%) is an
+ontology + lexical-retrieval gap, NOT a trust gap. Levers, in order:
+  1. v4 extraction: add event/episodic memory types (the living-memory
+     reframe supports this -- a world memory should hold events);
+  2. date-scoped retrieval (receipts already carry dates);
+  3. value-type-aware answer surface ("full name stored; no middle name
+     stored") for boundary-adjacent questions;
+  4. lexical bridge for question->fact matching (attribute synonyms at query
+     time, non-generative).
+Then the full 20-user run + two-judge validation. Hygiene pack note: nothing
+in the owner-fitted hygiene ate persona facts (the 4.4% is extractor scope,
+not hygiene) -- layer-3 overfit did not materialise on this stream.
