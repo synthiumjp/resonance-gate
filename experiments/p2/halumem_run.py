@@ -38,7 +38,8 @@ from llm_profile import SYSTEM_V3, SYSTEM_V4, canon_attr, extract_profile_facts
 _SYSTEM = SYSTEM_V4 if os.environ.get("RG_EXTRACT_V4") else SYSTEM_V3
 _CSFX = "_v4" if os.environ.get("RG_EXTRACT_V4") else ""
 from consistency import get_llm
-from wire import WireGraph, _tokens, extract_dates, _STOP
+from wire import (WireGraph, _tokens, extract_dates, _STOP, _QWORDS,
+                  _QUERY_SYNONYMS)
 from memory_api import Memory
 
 JUDGE = """You grade a memory system's answer to a question about a user.
@@ -183,14 +184,21 @@ def answer_question(mem, q):
         return ("No stored fact from the asked date; related facts from "
                  "other dates: " + answer)
 
+    # the disclaimer fires when ANY asked content token stays UNCOVERED by
+    # the returned facts -- "middle name" vs a fact whose attribute is just
+    # "name": attribute overlap alone must not read as answered when the
+    # question's qualifier ("middle") appears nowhere in the facts. A
+    # synonym-trigger token ("work") counts as covered iff its mapped
+    # attribute actually appears among the returned facts.
     facts = asserted + wired + unconfirmed
-    value_toks = set()
     attr_val_toks = set()
+    attr_toks = set()
     for f in facts:
-        value_toks |= _tokens(f["value"])
         attr_val_toks |= _tokens(f["attribute"]) | _tokens(f["value"])
-    ask_toks = _tokens(q) - value_toks - _STOP
-    if ask_toks and not (ask_toks & attr_val_toks):
+        attr_toks |= _tokens(f["attribute"])
+    ask = _tokens(q) - attr_val_toks - _STOP - _QWORDS
+    ask = {t for t in ask if _QUERY_SYNONYMS.get(t) not in attr_toks}
+    if ask:
         return ("No stored fact answers the asked attribute; related "
                  "receipted facts: " + answer)
 

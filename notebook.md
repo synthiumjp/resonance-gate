@@ -4578,3 +4578,40 @@ Suite 30/30 (5 new retrieval/answer-policy tests). All changes
 non-generative: static tables, regexes, receipts -- nothing invents content.
 User-0 re-pilot (fresh v4 cache) running; the decision gate: omission must
 drop materially while hallucination stays ~0.
+
+## Entry 85 — 2026-07-22 (p2: user-0 GATE PASSED -- 65.9% correct at 0.0% hallucination, Memory Boundary 39/39. Full 20-user run launched)
+
+The entry-84 levers re-piloted on HaluMem user 0 (fresh v4 cache), plus one
+residual fix found by inspection: the value-type disclaimer did not fire on
+"middle name" questions because the fact's ATTRIBUTE ("name") overlapped the
+question -- attribute overlap alone must not read as answered when the
+question's qualifier ("middle") is uncovered. Inverted the test: the
+disclaimer fires when ANY asked content token stays uncovered by the
+returned facts (synonym triggers count as covered iff their mapped
+attribute is present). Suite 30/30.
+
+PROGRESSION on user 0 (n=164, local judge; two-judge validation owed):
+  v3 baseline:      40.9% correct |  6.7% halluc | 52.4% omit
+  v4 + fixes:       61.6%         |  1.8%        | 36.6%
+  + disclaimer fix: 65.9% correct |  0.0% halluc | 34.1% omit
+  Memory Boundary: 39/39 correct (was 27/39) -- the built-in abstention
+  tests are now perfect. Memory Conflict 11 -> 29 correct.
+
+CONTEXT (published numbers, entry 79): best shipped system on this
+benchmark: 67.23% correct at 15.17% hallucination. User 0 puts us at
+ACCURACY PARITY WITH ZERO HALLUCINATION -- the trust-Pareto claim made
+concrete, subject to: n=1 user, single local judge, our own answer-policy
+iteration (documented transparently in entries 83-85; every change was
+answer-surface honesty, never judge-shopping -- the one judge correction is
+recorded with before/after in entry 83).
+
+Interesting mechanism note: extraction-proxy coverage barely moved (4.4 ->
+4.2%) yet correct jumped 25 points -- the gains came from RETRIEVAL
+(synonym bridge) and ANSWER-SURFACE honesty (disclaimer, date scoping) over
+facts the store already held, plus events feeding the provisional tier.
+Coverage remains the open lever (omission 34%, concentrated in Basic Recall
+/ Dynamic Update / Multi-hop).
+
+Full 20-user run launched detached (~3.5h GPU); then: two-judge validation
+(sonnet second judge on all flags + random sample), aggregate numbers, and
+the sota_positioning.md comparison table gets its measured row.
