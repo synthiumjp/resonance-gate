@@ -4362,3 +4362,31 @@ FABRICATE a person. Discipline: merge only on corroborated evidence with
 receipts; unsure -> keep separate nodes (abstention generalised to identity).
 NOT built yet; namespaces stay unmerged until then. The v3 full rebuild
 (13,911 turns) is running in the background; world-graph comparison next.
+
+## Entry 79 — 2026-07-22 (p2: SOTA positioning. The gap is real, the benchmark exists (HaluMem), and the winnable claim is the trust Pareto)
+
+Research sweep (5 angles, 23 sources, 115 claims; the 3 decision-critical ones
+verified against primary sources; full positioning in
+experiments/p2/sota_positioning.md). Headlines:
+  - NO shipped system or paper offers structural non-hallucination,
+    corroboration gating, or memory-layer abstention. Zep is closest on
+    provenance (fact->episode links; vendor-claimed, unevaluated in their
+    paper); MemGuard (May 2026) is closest in spirit but statistical.
+  - The literature independently names our premise: HaluMem finds memory
+    hallucinations ORIGINATE in extraction/updating and propagate; MemGuard's
+    error analysis puts 97.7% of unverifiability errors at WRITE time; the
+    TACL abstention survey confirms verbalized confidence is uncalibrated
+    (our entry-53/54 finding) and structural memory-layer abstention is
+    absent from the field; an agent-hallucination taxonomy names
+    "Memorization Hallucinations" as an unfilled first-class failure type.
+  - THE BENCHMARK EXISTS: HaluMem (arXiv:2511.03506) scores extraction/
+    update/QA separately with hallucination, omission and False Memory
+    Resistance metrics. Verified numbers: best shipped QA 67.23% with 15.17%
+    hallucination (MemOS); FMR 44.94-80.78%. Nobody near zero fabrication.
+  - Winnable SOTA claim = the trust Pareto: fabrication ~0 by construction +
+    FMR near ceiling at competitive accuracy, with honest omission stated
+    (corroboration's known cost; HaluMem scores omission separately, which
+    suits the trade-off). Plus metrics nobody else can report: receipted-fact
+    coverage, audited fabricated-link rate (0), crosstalk-block rate,
+    abstention correctness.
+Next: a HaluMem adapter over Memory/belief (extract/update/answer maps 1:1).
