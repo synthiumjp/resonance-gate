@@ -4741,3 +4741,38 @@ profile_rehydrate. Effectively unbounded factual context (13 months
 recoverable on demand -- and unlike MemGPT-lineage virtual context, the
 page table itself cannot hallucinate. Suite 59/59. Persistence debt noted:
 transcript index = one full parse held in RAM, cleared on reload.
+
+## Entry 90 — 2026-07-23 (p2: SMALL-EXTRACTOR PROBE. qwen3:1.7b = 26/27 on CPU at 3.3s median -- the no-GPU tier exists)
+
+The GPU-dependence question, measured (probe_small.py, CPU-only ollama, all
+27 v4 probe cases, sonnet-coded):
+
+  qwen3:1.7b   26/27 (neg 13/13, pos 7/7, wpos 2/3, event 4/4)  3.3s med, 5.3s p90, 0 parse fails
+  llama3.2:3b  22/27 -- incl. a REAL roleplay leak (played the blacksmith
+               persona and extracted in-fiction facts) + attr-vocab drift
+  qwen3:0.6b   16/27 -- fast (0.6s) but COLLAPSES: cross-case bleed and
+               invented facts; the floor is found, and it is above 0.6B
+  gemma3:1b    13/27 -- 41% parse failures; not viable
+
+qwen3:1.7b's single miss is an UNDER-extraction (nothing emitted for one
+world case) -- the safe failure direction; junk would have been absorbed by
+corroboration, but this model barely produces any. 1.4GB download, sub-4s
+async per-turn on CPU: the product's no-GPU default tier is real. qwen3:14b
+stays the enthusiast tier (its CPU latency was unmeasurable mid-benchmark:
+loading it would have evicted the official run from the 15GB host RAM).
+
+Notes: (a) the qwen family follows the extraction discipline (roleplay/
+identifier bans) far better than same-size llama/gemma -- prompt-compliance,
+not raw capability, is the differentiator at small scale; (b) part of
+llama/gemma's deficit is canon-vocabulary drift ("ownership", "trip") that a
+canon extension could partially recover -- not needed given (a); (c) 0.6B's
+failure is coherence (cross-case contamination), which distillation likely
+cannot fix -- distillation's realistic target is upgrading 1.7b's fidelity
+using the 13,911-turn 14B cache as the training set, not resurrecting 0.6B.
+
+QUEUED (after the official eval frees the GPU + RAM): the DECOUPLING run --
+HaluMem user-0 end-to-end with the 1.7b extractor on CPU, judged as before.
+Prediction, pre-registered here: hallucination stays 0 (the guarantee never
+depended on the extractor), correct drops modestly (recall cost of noisier
+extraction), boundary stays perfect. If that holds, the paper gains the
+"trust is flat across extractor size" figure.

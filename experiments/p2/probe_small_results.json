@@ -1,0 +1,2095 @@
+{
+  "qwen3:1.7b": {
+    "model": "qwen3:1.7b",
+    "per_case": [
+      {
+        "text": "my wife works as a nurse at the children's hospital",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "employment",
+            "value": "nursing",
+            "subject": "wife"
+          }
+        ],
+        "latency": 3.3068872739968356,
+        "parse_failed": false
+      },
+      {
+        "text": "my brother just got promoted to store manager at the supermarket",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 0.8998202980001224,
+        "parse_failed": false
+      },
+      {
+        "text": "my friend finally got his m3 ultra, it's much faster than my setup",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 0.869216494000284,
+        "parse_failed": false
+      },
+      {
+        "text": "my daughter started studying medicine at the university this year",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "event",
+            "value": "my daughter started studying medicine at the university this year"
+          }
+        ],
+        "latency": 4.9597737199947005,
+        "parse_failed": false
+      },
+      {
+        "text": "my old boss maria now runs a bakery in the city",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "residence",
+            "value": "city",
+            "subject": "maria"
+          },
+          {
+            "attribute": "occupation",
+            "value": "bakery",
+            "subject": "maria"
+          }
+        ],
+        "latency": 5.919823370000813,
+        "parse_failed": false
+      },
+      {
+        "text": "pretend i'm a medieval blacksmith and describe my morning",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 0.6792885129980277,
+        "parse_failed": false
+      },
+      {
+        "text": "if i were a lawyer i'd have sued them already",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 0.7285291199950734,
+        "parse_failed": false
+      },
+      {
+        "text": "let's do a mock interview: i'll play a junior data analyst at a bank",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 0.7713006709964247,
+        "parse_failed": false
+      },
+      {
+        "text": "imagine i live on a space station, what would my day look like",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 0.8081918280076934,
+        "parse_failed": false
+      },
+      {
+        "text": "ssh kevin@stormnode02 keeps timing out on the second hop",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 0.7432031339994865,
+        "parse_failed": false
+      },
+      {
+        "text": "i pushed it to git@bitbucket:acmeteam/pipeline.git last night",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 0.8215718080027727,
+        "parse_failed": false
+      },
+      {
+        "text": "let's keep digging into these logs until we find it",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 0.7487930820061592,
+        "parse_failed": false
+      },
+      {
+        "text": "i work as a clinical psychologist and also do independent research",
+        "kind": "pos",
+        "source": "case",
+        "split": "pos",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "occupation",
+            "value": "clinical psychologist"
+          },
+          {
+            "attribute": "additional_occupation",
+            "value": "independent research"
+          }
+        ],
+        "latency": 5.973401177994674,
+        "parse_failed": false
+      },
+      {
+        "text": "i live in melbourne, out in the eastern suburbs",
+        "kind": "pos",
+        "source": "case",
+        "split": "pos",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "residence",
+            "value": "melbourne"
+          }
+        ],
+        "latency": 3.2312903109996114,
+        "parse_failed": false
+      },
+      {
+        "text": "i've been using claude code every day for my projects",
+        "kind": "pos",
+        "source": "case",
+        "split": "pos",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "current_tool",
+            "value": "claude"
+          }
+        ],
+        "latency": 3.919908577998285,
+        "parse_failed": false
+      },
+      {
+        "text": "i earn about 120k a year in my main role",
+        "kind": "pos",
+        "source": "case",
+        "split": "pos",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "income",
+            "value": "120k"
+          }
+        ],
+        "latency": 3.5293352250009775,
+        "parse_failed": false
+      },
+      {
+        "text": "i'm an emergency services executive during the week and i write fiction on weekends",
+        "kind": "pos",
+        "source": "case",
+        "split": "pos",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "occupation",
+            "value": "emergency services executive"
+          },
+          {
+            "attribute": "weekly_class",
+            "value": "fiction writing"
+          }
+        ],
+        "latency": 6.12242977200367,
+        "parse_failed": false
+      },
+      {
+        "text": "my wife and i live together in the eastern suburbs",
+        "kind": "pos",
+        "source": "case",
+        "split": "pos",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "residence",
+            "value": "eastern suburbs"
+          }
+        ],
+        "latency": 3.460090096006752,
+        "parse_failed": false
+      },
+      {
+        "text": "i own a gaming pc with an amd gpu in it",
+        "kind": "pos",
+        "source": "case",
+        "split": "pos",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "possession",
+            "value": "gaming pc with an amd gpu"
+          }
+        ],
+        "latency": 3.665183835008065,
+        "parse_failed": false
+      },
+      {
+        "text": "(.venv) chrismarmo@studio jspace-metacog % python train.py crashed with oom again",
+        "kind": "neg",
+        "source": "world",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 0.8237195709953085,
+        "parse_failed": false
+      },
+      {
+        "text": "my friend chris owns the mac studio i ssh into for the big jobs",
+        "kind": "wpos",
+        "source": "world",
+        "split": "wpos",
+        "ok": false,
+        "detail": [
+          [
+            "chris|friend",
+            "possession|device",
+            "missing"
+          ]
+        ],
+        "facts": [],
+        "latency": 0.8159558530023787,
+        "parse_failed": false
+      },
+      {
+        "text": "my wife is doing her student placement in maternal and child health",
+        "kind": "wpos",
+        "source": "world",
+        "split": "wpos",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "placement",
+            "value": "maternal and child health",
+            "subject": "wife"
+          }
+        ],
+        "latency": 3.469793413998559,
+        "parse_failed": false
+      },
+      {
+        "text": "my old supervisor is over at swinburne university these days",
+        "kind": "wpos",
+        "source": "world",
+        "split": "wpos",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "residence",
+            "value": "swinburne_university",
+            "subject": "old_supervisor"
+          }
+        ],
+        "latency": 4.171243695003795,
+        "parse_failed": false
+      },
+      {
+        "text": "i went to a pottery workshop with my sister on january 6th",
+        "kind": "pos",
+        "source": "event",
+        "split": "event",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "event",
+            "value": "attended a pottery workshop with my sister on january 6th"
+          }
+        ],
+        "latency": 4.387687256996287,
+        "parse_failed": false
+      },
+      {
+        "text": "we're planning a trip to japan in november for our anniversary",
+        "kind": "pos",
+        "source": "event",
+        "split": "event",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "plan",
+            "value": "trip to japan in november"
+          }
+        ],
+        "latency": 3.4917469649954,
+        "parse_failed": false
+      },
+      {
+        "text": "i finally ran the half marathon last saturday, finished in just over two hours",
+        "kind": "pos",
+        "source": "event",
+        "split": "event",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "event",
+            "value": "ran half marathon last saturday"
+          }
+        ],
+        "latency": 3.666847100990708,
+        "parse_failed": false
+      },
+      {
+        "text": "maybe i should learn the piano someday",
+        "kind": "neg",
+        "source": "event",
+        "split": "event",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 0.6641462510015117,
+        "parse_failed": false
+      }
+    ],
+    "latencies": [
+      3.3068872739968356,
+      0.8998202980001224,
+      0.869216494000284,
+      4.9597737199947005,
+      5.919823370000813,
+      0.6792885129980277,
+      0.7285291199950734,
+      0.7713006709964247,
+      0.8081918280076934,
+      0.7432031339994865,
+      0.8215718080027727,
+      0.7487930820061592,
+      5.973401177994674,
+      3.2312903109996114,
+      3.919908577998285,
+      3.5293352250009775,
+      6.12242977200367,
+      3.460090096006752,
+      3.665183835008065,
+      0.8237195709953085,
+      0.8159558530023787,
+      3.469793413998559,
+      4.171243695003795,
+      4.387687256996287,
+      3.4917469649954,
+      3.666847100990708,
+      0.6641462510015117
+    ],
+    "parse_failures": 0,
+    "aborted": false,
+    "n_run": 27,
+    "n_total": 27
+  },
+  "qwen3:0.6b": {
+    "model": "qwen3:0.6b",
+    "per_case": [
+      {
+        "text": "my wife works as a nurse at the children's hospital",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "placement",
+            "value": "nursing",
+            "subject": "wife"
+          }
+        ],
+        "latency": 3.5495782399957534,
+        "parse_failed": false
+      },
+      {
+        "text": "my brother just got promoted to store manager at the supermarket",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 0.5932270019984571,
+        "parse_failed": false
+      },
+      {
+        "text": "my friend finally got his m3 ultra, it's much faster than my setup",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 0.525896635997924,
+        "parse_failed": false
+      },
+      {
+        "text": "my daughter started studying medicine at the university this year",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 0.8138209540047683,
+        "parse_failed": false
+      },
+      {
+        "text": "my old boss maria now runs a bakery in the city",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": false,
+        "detail": [
+          [
+            "location",
+            "city"
+          ],
+          [
+            "occupation",
+            "maria"
+          ]
+        ],
+        "facts": [
+          {
+            "attribute": "residence",
+            "value": "city"
+          },
+          {
+            "attribute": "employer",
+            "value": "maria"
+          },
+          {
+            "attribute": "current_tool",
+            "value": "tic tracker"
+          },
+          {
+            "attribute": "weekly_class",
+            "value": "patience"
+          }
+        ],
+        "latency": 8.470938302998547,
+        "parse_failed": false
+      },
+      {
+        "text": "pretend i'm a medieval blacksmith and describe my morning",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 0.45477885399304796,
+        "parse_failed": false
+      },
+      {
+        "text": "if i were a lawyer i'd have sued them already",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 0.33185259299352765,
+        "parse_failed": false
+      },
+      {
+        "text": "let's do a mock interview: i'll play a junior data analyst at a bank",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 0.38778579600329977,
+        "parse_failed": false
+      },
+      {
+        "text": "imagine i live on a space station, what would my day look like",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 0.41989686799934134,
+        "parse_failed": false
+      },
+      {
+        "text": "ssh kevin@stormnode02 keeps timing out on the second hop",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 0.37966746000165585,
+        "parse_failed": false
+      },
+      {
+        "text": "i pushed it to git@bitbucket:acmeteam/pipeline.git last night",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 0.5298993109900039,
+        "parse_failed": false
+      },
+      {
+        "text": "let's keep digging into these logs until we find it",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 0.7517574399971636,
+        "parse_failed": false
+      },
+      {
+        "text": "i work as a clinical psychologist and also do independent research",
+        "kind": "pos",
+        "source": "case",
+        "split": "pos",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "employer",
+            "value": "clinical psychologist"
+          },
+          {
+            "attribute": "occupation",
+            "value": "clinical psychologist"
+          },
+          {
+            "attribute": "project",
+            "value": "independent research"
+          }
+        ],
+        "latency": 12.365040792996297,
+        "parse_failed": false
+      },
+      {
+        "text": "i live in melbourne, out in the eastern suburbs",
+        "kind": "pos",
+        "source": "case",
+        "split": "pos",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "residence",
+            "value": "melbourne"
+          }
+        ],
+        "latency": 4.148904560992378,
+        "parse_failed": false
+      },
+      {
+        "text": "i've been using claude code every day for my projects",
+        "kind": "pos",
+        "source": "case",
+        "split": "pos",
+        "ok": false,
+        "detail": [
+          [
+            "tool",
+            "claude"
+          ]
+        ],
+        "facts": [],
+        "latency": 0.745046388998162,
+        "parse_failed": false
+      },
+      {
+        "text": "i earn about 120k a year in my main role",
+        "kind": "pos",
+        "source": "case",
+        "split": "pos",
+        "ok": false,
+        "detail": [
+          [
+            "income",
+            "120"
+          ]
+        ],
+        "facts": [],
+        "latency": 0.5519658999983221,
+        "parse_failed": false
+      },
+      {
+        "text": "i'm an emergency services executive during the week and i write fiction on weekends",
+        "kind": "pos",
+        "source": "case",
+        "split": "pos",
+        "ok": false,
+        "detail": [
+          [
+            "occupation",
+            "executive|emergency|writer|fiction"
+          ]
+        ],
+        "facts": [],
+        "latency": 0.5242535629949998,
+        "parse_failed": false
+      },
+      {
+        "text": "my wife and i live together in the eastern suburbs",
+        "kind": "pos",
+        "source": "case",
+        "split": "pos",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "residence",
+            "value": "eastern suburbs"
+          },
+          {
+            "attribute": "event",
+            "value": "attended a pottery workshop on jan 6 2026"
+          }
+        ],
+        "latency": 19.782858267004485,
+        "parse_failed": false
+      },
+      {
+        "text": "i own a gaming pc with an amd gpu in it",
+        "kind": "pos",
+        "source": "case",
+        "split": "pos",
+        "ok": false,
+        "detail": [
+          [
+            "possession",
+            "pc|computer"
+          ]
+        ],
+        "facts": [],
+        "latency": 0.4652703810133971,
+        "parse_failed": false
+      },
+      {
+        "text": "(.venv) chrismarmo@studio jspace-metacog % python train.py crashed with oom again",
+        "kind": "neg",
+        "source": "world",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 0.7311911349970615,
+        "parse_failed": false
+      },
+      {
+        "text": "my friend chris owns the mac studio i ssh into for the big jobs",
+        "kind": "wpos",
+        "source": "world",
+        "split": "wpos",
+        "ok": false,
+        "detail": [
+          [
+            "chris|friend",
+            "possession|device",
+            "missing"
+          ]
+        ],
+        "facts": [
+          {
+            "attribute": "placement",
+            "value": "nursing",
+            "subject": "wife"
+          },
+          {
+            "attribute": "current_tool",
+            "value": "mac"
+          },
+          {
+            "attribute": "employer",
+            "value": "mac studio"
+          },
+          {
+            "attribute": "weekly_class",
+            "value": "ssh"
+          }
+        ],
+        "latency": 12.515997759008314,
+        "parse_failed": false
+      },
+      {
+        "text": "my wife is doing her student placement in maternal and child health",
+        "kind": "wpos",
+        "source": "world",
+        "split": "wpos",
+        "ok": false,
+        "detail": [
+          [
+            "wife",
+            "placement|occupation|education",
+            "missing"
+          ]
+        ],
+        "facts": [],
+        "latency": 0.6882592149922857,
+        "parse_failed": false
+      },
+      {
+        "text": "my old supervisor is over at swinburne university these days",
+        "kind": "wpos",
+        "source": "world",
+        "split": "wpos",
+        "ok": false,
+        "detail": [
+          [
+            "supervisor",
+            ".*",
+            "missing"
+          ]
+        ],
+        "facts": [],
+        "latency": 0.6409600439947098,
+        "parse_failed": false
+      },
+      {
+        "text": "i went to a pottery workshop with my sister on january 6th",
+        "kind": "pos",
+        "source": "event",
+        "split": "event",
+        "ok": false,
+        "detail": [
+          [
+            "event",
+            "pottery|workshop"
+          ]
+        ],
+        "facts": [],
+        "latency": 0.5737731910048751,
+        "parse_failed": false
+      },
+      {
+        "text": "we're planning a trip to japan in november for our anniversary",
+        "kind": "pos",
+        "source": "event",
+        "split": "event",
+        "ok": false,
+        "detail": [
+          [
+            "plan",
+            "japan|trip"
+          ]
+        ],
+        "facts": [],
+        "latency": 0.5204147439944791,
+        "parse_failed": false
+      },
+      {
+        "text": "i finally ran the half marathon last saturday, finished in just over two hours",
+        "kind": "pos",
+        "source": "event",
+        "split": "event",
+        "ok": false,
+        "detail": [
+          [
+            "event",
+            "marathon"
+          ]
+        ],
+        "facts": [],
+        "latency": 0.6664124349917984,
+        "parse_failed": false
+      },
+      {
+        "text": "maybe i should learn the piano someday",
+        "kind": "neg",
+        "source": "event",
+        "split": "event",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 0.48223937398870476,
+        "parse_failed": false
+      }
+    ],
+    "latencies": [
+      3.5495782399957534,
+      0.5932270019984571,
+      0.525896635997924,
+      0.8138209540047683,
+      8.470938302998547,
+      0.45477885399304796,
+      0.33185259299352765,
+      0.38778579600329977,
+      0.41989686799934134,
+      0.37966746000165585,
+      0.5298993109900039,
+      0.7517574399971636,
+      12.365040792996297,
+      4.148904560992378,
+      0.745046388998162,
+      0.5519658999983221,
+      0.5242535629949998,
+      19.782858267004485,
+      0.4652703810133971,
+      0.7311911349970615,
+      12.515997759008314,
+      0.6882592149922857,
+      0.6409600439947098,
+      0.5737731910048751,
+      0.5204147439944791,
+      0.6664124349917984,
+      0.48223937398870476
+    ],
+    "parse_failures": 0,
+    "aborted": false,
+    "n_run": 27,
+    "n_total": 27
+  },
+  "gemma3:1b": {
+    "model": "gemma3:1b",
+    "per_case": [
+      {
+        "text": "my wife works as a nurse at the children's hospital",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": false,
+        "detail": [
+          [
+            "occupation",
+            "nurse"
+          ]
+        ],
+        "facts": [
+          {
+            "attribute": "occupation",
+            "value": "nurse"
+          },
+          {
+            "attribute": "occupation",
+            "value": "nurse",
+            "subject": "wife"
+          },
+          {
+            "attribute": "location",
+            "value": "children's hospital",
+            "subject": "workplace"
+          }
+        ],
+        "latency": 12.190557706999243,
+        "parse_failed": false
+      },
+      {
+        "text": "my brother just got promoted to store manager at the supermarket",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "promotion",
+            "value": "store manager"
+          },
+          {
+            "attribute": "promotion",
+            "value": "store manager",
+            "subject": "brother"
+          },
+          {
+            "attribute": "supermarket",
+            "value": "name",
+            "subject": "organization"
+          }
+        ],
+        "latency": 11.644071652001003,
+        "parse_failed": false
+      },
+      {
+        "text": "my friend finally got his m3 ultra, it's much faster than my setup",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "new_device",
+            "value": "M3 Ultra"
+          },
+          {
+            "attribute": "new_device",
+            "value": "M3 Ultra",
+            "subject": "friend"
+          }
+        ],
+        "latency": 9.988961900002323,
+        "parse_failed": false
+      },
+      {
+        "text": "my daughter started studying medicine at the university this year",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "daughter",
+            "value": "studying medicine"
+          },
+          {
+            "attribute": "university",
+            "value": "university",
+            "subject": "daughter"
+          },
+          {
+            "attribute": "location",
+            "value": "university",
+            "subject": "daughter"
+          },
+          {
+            "attribute": "occupation",
+            "value": "student",
+            "subject": "daughter"
+          },
+          {
+            "attribute": "current_activity",
+            "value": "studying",
+            "subject": "daughter"
+          }
+        ],
+        "latency": 16.325472755997907,
+        "parse_failed": false
+      },
+      {
+        "text": "my old boss maria now runs a bakery in the city",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": false,
+        "detail": [
+          [
+            "occupation",
+            "maria"
+          ],
+          [
+            "occupation",
+            "baker"
+          ]
+        ],
+        "facts": [
+          {
+            "attribute": "employer",
+            "value": "Maria"
+          },
+          {
+            "attribute": "occupation",
+            "value": "Baker"
+          },
+          {
+            "attribute": "employer",
+            "value": "Maria",
+            "subject": "person"
+          },
+          {
+            "attribute": "occupation",
+            "value": "Owner",
+            "subject": "person"
+          },
+          {
+            "attribute": "location",
+            "value": "City",
+            "subject": "location"
+          },
+          {
+            "attribute": "time",
+            "value": "Unknown",
+            "subject": "time"
+          }
+        ],
+        "latency": 17.902750895998906,
+        "parse_failed": false
+      },
+      {
+        "text": "pretend i'm a medieval blacksmith and describe my morning",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 27.162579915006063,
+        "parse_failed": true
+      },
+      {
+        "text": "if i were a lawyer i'd have sued them already",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 14.214157531008823,
+        "parse_failed": true
+      },
+      {
+        "text": "let's do a mock interview: i'll play a junior data analyst at a bank",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 11.173621049994836,
+        "parse_failed": true
+      },
+      {
+        "text": "imagine i live on a space station, what would my day look like",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 26.646921151987044,
+        "parse_failed": true
+      },
+      {
+        "text": "ssh kevin@stormnode02 keeps timing out on the second hop",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "problem",
+            "value": "ssh timeout"
+          },
+          {
+            "attribute": "employer",
+            "value": "Kevin",
+            "subject": "person"
+          },
+          {
+            "attribute": "company",
+            "value": "StormNode",
+            "subject": "organization"
+          },
+          {
+            "attribute": "connection",
+            "value": "timeout",
+            "subject": "network"
+          },
+          {
+            "attribute": "hop",
+            "value": "second hop",
+            "subject": "network"
+          }
+        ],
+        "latency": 25.883806309007923,
+        "parse_failed": false
+      },
+      {
+        "text": "i pushed it to git@bitbucket:acmeteam/pipeline.git last night",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "push",
+            "value": "to git@bitbucket:acmeteam/pipeline.git"
+          }
+        ],
+        "latency": 8.727792849997059,
+        "parse_failed": false
+      },
+      {
+        "text": "let's keep digging into these logs until we find it",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 8.571056103988667,
+        "parse_failed": true
+      },
+      {
+        "text": "i work as a clinical psychologist and also do independent research",
+        "kind": "pos",
+        "source": "case",
+        "split": "pos",
+        "ok": false,
+        "detail": [
+          [
+            "occupation",
+            "psycholog|research"
+          ]
+        ],
+        "facts": [],
+        "latency": 5.360018267005216,
+        "parse_failed": true
+      },
+      {
+        "text": "i live in melbourne, out in the eastern suburbs",
+        "kind": "pos",
+        "source": "case",
+        "split": "pos",
+        "ok": false,
+        "detail": [
+          [
+            "location",
+            "melbourne|suburb"
+          ]
+        ],
+        "facts": [],
+        "latency": 28.74868259699724,
+        "parse_failed": true
+      },
+      {
+        "text": "i've been using claude code every day for my projects",
+        "kind": "pos",
+        "source": "case",
+        "split": "pos",
+        "ok": false,
+        "detail": [
+          [
+            "tool",
+            "claude"
+          ]
+        ],
+        "facts": [],
+        "latency": 26.011868161993334,
+        "parse_failed": true
+      },
+      {
+        "text": "i earn about 120k a year in my main role",
+        "kind": "pos",
+        "source": "case",
+        "split": "pos",
+        "ok": false,
+        "detail": [
+          [
+            "income",
+            "120"
+          ]
+        ],
+        "facts": [],
+        "latency": 18.809287198004313,
+        "parse_failed": true
+      },
+      {
+        "text": "i'm an emergency services executive during the week and i write fiction on weekends",
+        "kind": "pos",
+        "source": "case",
+        "split": "pos",
+        "ok": false,
+        "detail": [
+          [
+            "occupation",
+            "executive|emergency|writer|fiction"
+          ]
+        ],
+        "facts": [],
+        "latency": 5.651982301991666,
+        "parse_failed": true
+      },
+      {
+        "text": "my wife and i live together in the eastern suburbs",
+        "kind": "pos",
+        "source": "case",
+        "split": "pos",
+        "ok": false,
+        "detail": [
+          [
+            "location",
+            "suburb"
+          ]
+        ],
+        "facts": [
+          {
+            "attribute": "living_situation",
+            "value": "live together in the eastern suburbs"
+          },
+          {
+            "attribute": "relationship",
+            "value": "wife",
+            "subject": "relationship"
+          },
+          {
+            "attribute": "living_situation",
+            "value": "live together in the eastern suburbs",
+            "subject": "relationship"
+          }
+        ],
+        "latency": 13.013872739989893,
+        "parse_failed": false
+      },
+      {
+        "text": "i own a gaming pc with an amd gpu in it",
+        "kind": "pos",
+        "source": "case",
+        "split": "pos",
+        "ok": false,
+        "detail": [
+          [
+            "possession",
+            "pc|computer"
+          ]
+        ],
+        "facts": [
+          {
+            "attribute": "computer",
+            "value": "gaming pc"
+          },
+          {
+            "attribute": "hardware",
+            "value": "amd gpu"
+          }
+        ],
+        "latency": 10.22058821999235,
+        "parse_failed": false
+      },
+      {
+        "text": "(.venv) chrismarmo@studio jspace-metacog % python train.py crashed with oom again",
+        "kind": "neg",
+        "source": "world",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "crash",
+            "value": "train.py"
+          },
+          {
+            "attribute": "studio",
+            "value": "jspace-metacog",
+            "subject": "org"
+          }
+        ],
+        "latency": 9.695416091999505,
+        "parse_failed": false
+      },
+      {
+        "text": "my friend chris owns the mac studio i ssh into for the big jobs",
+        "kind": "wpos",
+        "source": "world",
+        "split": "wpos",
+        "ok": false,
+        "detail": [
+          [
+            "chris|friend",
+            "possession|device",
+            "missing"
+          ]
+        ],
+        "facts": [
+          {
+            "attribute": "owner",
+            "value": "mac studio"
+          },
+          {
+            "attribute": "owner",
+            "value": "mac studio",
+            "subject": "friend chris"
+          }
+        ],
+        "latency": 9.685177503008163,
+        "parse_failed": false
+      },
+      {
+        "text": "my wife is doing her student placement in maternal and child health",
+        "kind": "wpos",
+        "source": "world",
+        "split": "wpos",
+        "ok": false,
+        "detail": [
+          [
+            "wife",
+            "placement|occupation|education",
+            "missing"
+          ]
+        ],
+        "facts": [],
+        "latency": 5.724004092000541,
+        "parse_failed": true
+      },
+      {
+        "text": "my old supervisor is over at swinburne university these days",
+        "kind": "wpos",
+        "source": "world",
+        "split": "wpos",
+        "ok": false,
+        "detail": [
+          [
+            "supervisor",
+            ".*",
+            "missing"
+          ]
+        ],
+        "facts": [
+          {
+            "attribute": "supervisor",
+            "value": "old supervisor"
+          },
+          {
+            "attribute": "university",
+            "value": "Swinburne",
+            "subject": "organization"
+          },
+          {
+            "attribute": "swinburne",
+            "value": "Swinburne",
+            "subject": "location"
+          }
+        ],
+        "latency": 8.914373923005769,
+        "parse_failed": false
+      },
+      {
+        "text": "i went to a pottery workshop with my sister on january 6th",
+        "kind": "pos",
+        "source": "event",
+        "split": "event",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "event",
+            "value": "attended a pottery workshop on jan 6 2026"
+          }
+        ],
+        "latency": 6.846229980001226,
+        "parse_failed": false
+      },
+      {
+        "text": "we're planning a trip to japan in november for our anniversary",
+        "kind": "pos",
+        "source": "event",
+        "split": "event",
+        "ok": false,
+        "detail": [
+          [
+            "plan",
+            "japan|trip"
+          ]
+        ],
+        "facts": [
+          {
+            "attribute": "trip",
+            "value": "Japan"
+          },
+          {
+            "attribute": "trip",
+            "value": "anniversary trip",
+            "subject": "wife"
+          },
+          {
+            "attribute": "date",
+            "value": "November 2024"
+          }
+        ],
+        "latency": 13.80455770700064,
+        "parse_failed": false
+      },
+      {
+        "text": "i finally ran the half marathon last saturday, finished in just over two hours",
+        "kind": "pos",
+        "source": "event",
+        "split": "event",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "event",
+            "value": "half marathon completed"
+          },
+          {
+            "attribute": "achievement",
+            "value": "finished in just over two hours"
+          }
+        ],
+        "latency": 9.70694306200312,
+        "parse_failed": false
+      },
+      {
+        "text": "maybe i should learn the piano someday",
+        "kind": "neg",
+        "source": "event",
+        "split": "event",
+        "ok": false,
+        "detail": [
+          [
+            "hobby",
+            "piano"
+          ]
+        ],
+        "facts": [
+          {
+            "attribute": "hobby",
+            "value": "piano"
+          }
+        ],
+        "latency": 7.111597411989351,
+        "parse_failed": false
+      }
+    ],
+    "latencies": [
+      12.190557706999243,
+      11.644071652001003,
+      9.988961900002323,
+      16.325472755997907,
+      17.902750895998906,
+      27.162579915006063,
+      14.214157531008823,
+      11.173621049994836,
+      26.646921151987044,
+      25.883806309007923,
+      8.727792849997059,
+      8.571056103988667,
+      5.360018267005216,
+      28.74868259699724,
+      26.011868161993334,
+      18.809287198004313,
+      5.651982301991666,
+      13.013872739989893,
+      10.22058821999235,
+      9.695416091999505,
+      9.685177503008163,
+      5.724004092000541,
+      8.914373923005769,
+      6.846229980001226,
+      13.80455770700064,
+      9.70694306200312,
+      7.111597411989351
+    ],
+    "parse_failures": 11,
+    "aborted": false,
+    "n_run": 27,
+    "n_total": 27
+  },
+  "llama3.2:3b": {
+    "model": "llama3.2:3b",
+    "per_case": [
+      {
+        "text": "my wife works as a nurse at the children's hospital",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "employer",
+            "value": "children's hospital nurse",
+            "subject": "wife"
+          }
+        ],
+        "latency": 22.72285316399939,
+        "parse_failed": false
+      },
+      {
+        "text": "my brother just got promoted to store manager at the supermarket",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 0.716532960999757,
+        "parse_failed": false
+      },
+      {
+        "text": "my friend finally got his m3 ultra, it's much faster than my setup",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 0.8746566229965538,
+        "parse_failed": false
+      },
+      {
+        "text": "my daughter started studying medicine at the university this year",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "daughter",
+            "value": "studies medicine"
+          },
+          {
+            "attribute": "university",
+            "value": "medicine",
+            "subject": "daughter"
+          }
+        ],
+        "latency": 8.343734955997206,
+        "parse_failed": false
+      },
+      {
+        "text": "my old boss maria now runs a bakery in the city",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "bakery",
+            "value": "city",
+            "subject": "maria"
+          }
+        ],
+        "latency": 5.272976473992458,
+        "parse_failed": false
+      },
+      {
+        "text": "pretend i'm a medieval blacksmith and describe my morning",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": false,
+        "detail": [
+          [
+            "occupation",
+            "my lord, the local lord"
+          ]
+        ],
+        "facts": [
+          {
+            "attribute": "residence",
+            "value": "the forge"
+          },
+          {
+            "attribute": "employer",
+            "value": "my lord, the local lord"
+          },
+          {
+            "attribute": "possession",
+            "value": "my trusty hammer, Bertha"
+          },
+          {
+            "attribute": "routine",
+            "value": "daily forges iron and steel"
+          }
+        ],
+        "latency": 17.099879625995527,
+        "parse_failed": false
+      },
+      {
+        "text": "if i were a lawyer i'd have sued them already",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 0.7137317079905188,
+        "parse_failed": false
+      },
+      {
+        "text": "let's do a mock interview: i'll play a junior data analyst at a bank",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 20.229347173997667,
+        "parse_failed": true
+      },
+      {
+        "text": "imagine i live on a space station, what would my day look like",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 0.947363278013654,
+        "parse_failed": false
+      },
+      {
+        "text": "ssh kevin@stormnode02 keeps timing out on the second hop",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 0.8604160850081826,
+        "parse_failed": false
+      },
+      {
+        "text": "i pushed it to git@bitbucket:acmeteam/pipeline.git last night",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "pushed",
+            "value": "git"
+          },
+          {
+            "attribute": "location",
+            "value": "bitbucket"
+          },
+          {
+            "attribute": "project",
+            "value": "acmeteam"
+          },
+          {
+            "attribute": "repository",
+            "value": "pipeline"
+          }
+        ],
+        "latency": 12.463032783009112,
+        "parse_failed": false
+      },
+      {
+        "text": "let's keep digging into these logs until we find it",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 0.8372841509990394,
+        "parse_failed": false
+      },
+      {
+        "text": "i work as a clinical psychologist and also do independent research",
+        "kind": "pos",
+        "source": "case",
+        "split": "pos",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "employer",
+            "value": "clinical psychologist"
+          },
+          {
+            "attribute": "research",
+            "value": "independent"
+          }
+        ],
+        "latency": 6.64457096598926,
+        "parse_failed": false
+      },
+      {
+        "text": "i live in melbourne, out in the eastern suburbs",
+        "kind": "pos",
+        "source": "case",
+        "split": "pos",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "residence",
+            "value": "Melbourne"
+          }
+        ],
+        "latency": 3.432373215997359,
+        "parse_failed": false
+      },
+      {
+        "text": "i've been using claude code every day for my projects",
+        "kind": "pos",
+        "source": "case",
+        "split": "pos",
+        "ok": false,
+        "detail": [
+          [
+            "tool",
+            "claude"
+          ]
+        ],
+        "facts": [
+          {
+            "attribute": "employer",
+            "value": "claude"
+          },
+          {
+            "attribute": "possession",
+            "value": "code"
+          }
+        ],
+        "latency": 6.546696090008481,
+        "parse_failed": false
+      },
+      {
+        "text": "i earn about 120k a year in my main role",
+        "kind": "pos",
+        "source": "case",
+        "split": "pos",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "income",
+            "value": "120k"
+          }
+        ],
+        "latency": 3.297411331004696,
+        "parse_failed": false
+      },
+      {
+        "text": "i'm an emergency services executive during the week and i write fiction on weekends",
+        "kind": "pos",
+        "source": "case",
+        "split": "pos",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "employer",
+            "value": "emergency services"
+          },
+          {
+            "attribute": "hobby",
+            "value": "fiction writing"
+          }
+        ],
+        "latency": 6.950974463994498,
+        "parse_failed": false
+      },
+      {
+        "text": "my wife and i live together in the eastern suburbs",
+        "kind": "pos",
+        "source": "case",
+        "split": "pos",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "residence",
+            "value": "eastern suburbs"
+          },
+          {
+            "attribute": "residence",
+            "value": "eastern suburbs",
+            "subject": "wife"
+          }
+        ],
+        "latency": 7.338237229007063,
+        "parse_failed": false
+      },
+      {
+        "text": "i own a gaming pc with an amd gpu in it",
+        "kind": "pos",
+        "source": "case",
+        "split": "pos",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "possession",
+            "value": "gaming pc"
+          },
+          {
+            "attribute": "gpu",
+            "value": "amd"
+          }
+        ],
+        "latency": 6.539071528997738,
+        "parse_failed": false
+      },
+      {
+        "text": "(.venv) chrismarmo@studio jspace-metacog % python train.py crashed with oom again",
+        "kind": "neg",
+        "source": "world",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 1.070248795003863,
+        "parse_failed": false
+      },
+      {
+        "text": "my friend chris owns the mac studio i ssh into for the big jobs",
+        "kind": "wpos",
+        "source": "world",
+        "split": "wpos",
+        "ok": false,
+        "detail": [
+          [
+            "chris|friend",
+            "possession|device",
+            "missing"
+          ]
+        ],
+        "facts": [
+          {
+            "attribute": "ownership",
+            "value": "mac studio",
+            "subject": "friend chris"
+          },
+          {
+            "attribute": "connection_method",
+            "value": "ssh",
+            "subject": "friend chris"
+          }
+        ],
+        "latency": 8.022991496007307,
+        "parse_failed": false
+      },
+      {
+        "text": "my wife is doing her student placement in maternal and child health",
+        "kind": "wpos",
+        "source": "world",
+        "split": "wpos",
+        "ok": false,
+        "detail": [
+          [
+            "wife",
+            "placement|occupation|education",
+            "missing"
+          ]
+        ],
+        "facts": [],
+        "latency": 11.12363271099457,
+        "parse_failed": true
+      },
+      {
+        "text": "my old supervisor is over at swinburne university these days",
+        "kind": "wpos",
+        "source": "world",
+        "split": "wpos",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "university",
+            "value": "swinburne",
+            "subject": "supervisor"
+          },
+          {
+            "attribute": "relationship",
+            "value": "former"
+          }
+        ],
+        "latency": 7.735913980010082,
+        "parse_failed": false
+      },
+      {
+        "text": "i went to a pottery workshop with my sister on january 6th",
+        "kind": "pos",
+        "source": "event",
+        "split": "event",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "event",
+            "value": "pottery workshop"
+          },
+          {
+            "attribute": "placement",
+            "value": "pottery workshop",
+            "subject": "sister"
+          }
+        ],
+        "latency": 7.617585530009819,
+        "parse_failed": false
+      },
+      {
+        "text": "we're planning a trip to japan in november for our anniversary",
+        "kind": "pos",
+        "source": "event",
+        "split": "event",
+        "ok": false,
+        "detail": [
+          [
+            "plan",
+            "japan|trip"
+          ]
+        ],
+        "facts": [],
+        "latency": 0.7859941190108657,
+        "parse_failed": false
+      },
+      {
+        "text": "i finally ran the half marathon last saturday, finished in just over two hours",
+        "kind": "pos",
+        "source": "event",
+        "split": "event",
+        "ok": true,
+        "detail": [],
+        "facts": [
+          {
+            "attribute": "event",
+            "value": "half marathon"
+          },
+          {
+            "attribute": "time",
+            "value": "over 2 hours"
+          }
+        ],
+        "latency": 7.637419651990058,
+        "parse_failed": false
+      },
+      {
+        "text": "maybe i should learn the piano someday",
+        "kind": "neg",
+        "source": "event",
+        "split": "event",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": 0.6855482729879441,
+        "parse_failed": false
+      }
+    ],
+    "latencies": [
+      22.72285316399939,
+      0.716532960999757,
+      0.8746566229965538,
+      8.343734955997206,
+      5.272976473992458,
+      17.099879625995527,
+      0.7137317079905188,
+      20.229347173997667,
+      0.947363278013654,
+      0.8604160850081826,
+      12.463032783009112,
+      0.8372841509990394,
+      6.64457096598926,
+      3.432373215997359,
+      6.546696090008481,
+      3.297411331004696,
+      6.950974463994498,
+      7.338237229007063,
+      6.539071528997738,
+      1.070248795003863,
+      8.022991496007307,
+      11.12363271099457,
+      7.735913980010082,
+      7.617585530009819,
+      0.7859941190108657,
+      7.637419651990058,
+      0.6855482729879441
+    ],
+    "parse_failures": 2,
+    "aborted": false,
+    "n_run": 27,
+    "n_total": 27
+  },
+  "qwen3:14b": {
+    "model": "qwen3:14b",
+    "per_case": [
+      {
+        "text": "my wife works as a nurse at the children's hospital",
+        "kind": "neg",
+        "source": "case",
+        "split": "neg",
+        "ok": true,
+        "detail": [],
+        "facts": [],
+        "latency": null,
+        "parse_failed": true
+      },
+      {
+        "text": "i work as a clinical psychologist and also do independent research",
+        "kind": "pos",
+        "source": "case",
+        "split": "pos",
+        "ok": false,
+        "detail": [
+          [
+            "occupation",
+            "psycholog|research"
+          ]
+        ],
+        "facts": [],
+        "latency": null,
+        "parse_failed": true
+      },
+      {
+        "text": "i finally ran the half marathon last saturday, finished in just over two hours",
+        "kind": "pos",
+        "source": "event",
+        "split": "event",
+        "ok": false,
+        "detail": [
+          [
+            "event",
+            "marathon"
+          ]
+        ],
+        "facts": [],
+        "latency": null,
+        "parse_failed": true
+      }
+    ],
+    "latencies": [],
+    "parse_failures": 3,
+    "aborted": false,
+    "n_run": 3,
+    "n_total": 3
+  }
+}
