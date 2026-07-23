@@ -22,3 +22,12 @@ Runtime: llama-cpp OpenAI server on the 7900 GRE (all layers ROCm-offloaded),
 ~23,653 judge calls. ollama itself ran CPU-only in this session (its ROCm
 detection fails under WSL2 where llama-cpp's works), measured ~90s/call =
 ~25 days serial -- hence the server route.
+
+5. eval/evaluation.py: exposed their existing main(user_num=20) parameter as
+   a --user_num CLI flag (pure pass-through). The official run uses
+   --user_num 10 (first 10 users): the full-benchmark 0/3,189 two-judge
+   result already exists for discovery; the official harness run is for
+   method comparability, where 10 users (~1,700 officially-judged QA items)
+   retains ample power. Per-user variance measured from the 20-user fleet
+   (correct-count stdev/mean ~16%) supports subsetting; extension to 20 is
+   free later via their per-user tmp2/ checkpoints.
