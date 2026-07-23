@@ -4776,3 +4776,32 @@ Prediction, pre-registered here: hallucination stays 0 (the guarantee never
 depended on the extractor), correct drops modestly (recall cost of noisier
 extraction), boundary stays perfect. If that holds, the paper gains the
 "trust is flat across extractor size" figure.
+
+## Entry 91 — 2026-07-23 (p2: external competitive review absorbed. Claim narrowed; positioning adopted: "the evidence layer for agent memory")
+
+The registrant supplied an external competitive review (well-sourced;
+several citations post-date our sweep). Deltas adopted:
+
+1. CLAIM NARROWED, final form: extracted claims remain EVIDENCE until they
+   earn assertion; every assertion retains receipts; contradictions are
+   disclosed, never silently resolved; unsupported queries abstain. NOT
+   "the only non-hallucinating memory" -- provenance alone is commoditizing
+   (Cognee lineage, Graphiti episode links); the moat is lineage GOVERNING
+   what the system may claim. Tagline adopted: "LLMs may propose memories;
+   the memory decides what they are allowed to assert" -- which is the
+   propose/verify design law we measured three times, as positioning.
+2. NEW OWED ITEMS from the review's leadership list: MemOps benchmark
+   (operation-level traces; likely our best validation surface after
+   HaluMem -- VERIFY the paper exists first); head-to-head vs mem0/Graphiti/
+   Cognee/Hindsight with IDENTICAL extractor+answer models; belief-layer
+   calibration evidence (known debt since entry 50); multi-week multi-user
+   study (false-memory burden, correction burden, abstention frequency,
+   felt trust); publish the RECEIPTS PROTOCOL as a spec (standard-setting =
+   the strongest solo-researcher moat).
+3. UNVERIFIED citations flagged before paper use: MemOps (2607.x), Hindsight
+   numbers, OpenAI "Dreaming", and especially mem0 issue #4573 (224/10,134
+   memories surviving a production audit) -- the best motivating anecdote in
+   the doc IF it checks out; primary-source verification owed.
+4. Review confirms our sequencing: its "next work should be external and
+   comparative" is exactly the official HaluMem run now in flight (user
+   1/10) with entry-88 predictions pre-registered.
