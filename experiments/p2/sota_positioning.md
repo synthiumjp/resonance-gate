@@ -1,4 +1,11 @@
-# SOTA positioning — non-hallucinating memory (2026-07-22)
+# SOTA positioning — the evidence layer for agent memory (2026-07-22, rev 07-23)
+
+**Positioning (final form, entry 91):** LLMs may propose memories; the memory
+decides what they are allowed to assert. Extracted claims remain EVIDENCE
+until corroboration earns them assertion; every assertion retains receipts;
+contradictions are disclosed, never silently resolved; unsupported queries
+abstain. (Not "the only non-hallucinating memory" — provenance alone is
+commoditizing; the moat is lineage GOVERNING assertion.)
 
 Research sweep: 5 search angles → 23 sources → 115 extracted claims → top 25
 distilled. The 3 decision-critical claims below were directly verified against
