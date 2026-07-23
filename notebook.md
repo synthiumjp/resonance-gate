@@ -4805,3 +4805,34 @@ several citations post-date our sweep). Deltas adopted:
 4. Review confirms our sequencing: its "next work should be external and
    comparative" is exactly the official HaluMem run now in flight (user
    1/10) with entry-88 predictions pre-registered.
+
+## Entry 92 — 2026-07-23 (p2: official run round 1 -- prediction #7 CONFIRMED (answer-format mismatch); surface adapted, run restarted; one REAL selection bug found)
+
+User 1 completed under the official judge (10.9h): 45.1% omission, 20.7%
+"hallucination". INSPECTION of all flagged records: every one contains ONLY
+true stored facts, explicitly prefixed "no stored fact answers the asked
+attribute" -- abstain-with-context, which their rubric (built for composed
+natural answers) buckets as hallucination. Entry-88 prediction #7 scored
+CORRECT: the one new failure class is answer-FORMAT mismatch. The
+falsification line (official hallucination >5%) triggered exactly the
+prescribed response: re-examination at the ANSWER SURFACE, no judge
+touched.
+
+FIX (surface adaptation, not content change): answer_question grows a
+surface parameter. "labeled" (default, product/MCP voice) unchanged;
+"plain" (benchmark voice) speaks their IO contract -- the SAME selected
+stored values joined as a composed answer, and a bare "Unknown." whenever
+no stored fact covers the ask (uncovered ask-tokens or date mismatch).
+Nothing appears in either voice that is not a stored, receipted value; the
+adapter (eval_rgp2.py) passes surface="plain". Every other benchmarked
+system likewise composes benchmark-voice answers; their judge is untouched.
+
+REAL BUG the official run caught (its keep): the birth-date question had
+the answering fact IN the retrieved context, but tier caps selected
+higher-match-scoring name facts over the ask-covering fact. Fix: candidates
+are now ranked by ask-token coverage BEFORE per-tier caps (selection, not
+generation). This class was invisible to our judges because they graded
+returned-facts-vs-gold leniently on coverage.
+
+Restarted from user 1 with the uniform plain surface (10.9h tuition paid;
+a mixed-surface run would have been unpublishable). Suite 59/59.
