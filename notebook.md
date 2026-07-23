@@ -4836,3 +4836,25 @@ returned-facts-vs-gold leniently on coverage.
 
 Restarted from user 1 with the uniform plain surface (10.9h tuition paid;
 a mixed-surface run would have been unpublishable). Suite 59/59.
+
+## Entry 93 — 2026-07-23 (p2: REVISED pre-registration for official round 2, after seeing round-1 user-1 only)
+
+Revised predictions (information basis: round-1 user 1 + the surface/
+selection fixes; users 2-10 remain unseen):
+  - QA hallucination (their metric): 4-8%. NOT ~0, and the reason matters:
+    the plain surface composes stored values as answers, so STORED-BUT-WRONG
+    extractions (provisional junk that happens to cover the ask) now get
+    stated and fairly flagged. Their metric conflates fabricated content
+    with wrong stored values; our claim survives as "zero FABRICATED
+    content" -- every flag will trace via receipts to a real (mis)extraction.
+    Prediction: manual trace of every flagged item finds 0 invented facts.
+  - QA correct: 45-60% (plain surface + boundary conversions + the
+    selection fix, minus their stricter completeness judging on multi-part
+    golds). Likely BELOW MemOS's 67.23% on their aggregate.
+  - Omission: 35-45%. Boundary type: near-ceiling correct.
+  - Extraction integrity: still the worst row, 20-40%; accuracy 65-85%.
+  - Update: middling-low correct, low fabrication.
+OUTCOME SHAPE predicted: not a leaderboard win on accuracy; the honest
+headline is the three-way error split their own paper says matters --
+fabricated vs stored-but-wrong vs omitted -- where we predict 0 / some /
+many, receipts enabling the split as an analysis contribution.
