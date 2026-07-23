@@ -31,3 +31,8 @@ detection fails under WSL2 where llama-cpp's works), measured ~90s/call =
    retains ample power. Per-user variance measured from the 20-user fleet
    (correct-count stdev/mean ~16%) supports subsetting; extension to 20 is
    free later via their per-user tmp2/ checkpoints.
+
+6. eval/evaluation.py: max_workers default 10 -> 4 (infra only, no metric
+   effect: all judge calls serialize on the single local GPU inference slot;
+   10 forked workers were pure RAM pressure on a 15GB host that OOM-crashed
+   mid-run on 2026-07-23).
