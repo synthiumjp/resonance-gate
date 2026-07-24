@@ -4858,3 +4858,42 @@ OUTCOME SHAPE predicted: not a leaderboard win on accuracy; the honest
 headline is the three-way error split their own paper says matters --
 fabricated vs stored-but-wrong vs omitted -- where we predict 0 / some /
 many, receipts enabling the split as an analysis contribution.
+
+## Entry 94 — 2026-07-25 (p2: the surface detour ends at the real wall -- EXTRACTION COVERAGE. Oracle ceiling 43%; official run held; v5 = narrative ontology)
+
+A day of hard, useful negatives, in order:
+
+1. ROUND-2 SURFACE OVERCORRECTED: plain-surface answered "Unknown." on
+   163/164 of official user 1's questions (dev users: up to 188/188). The
+   entry-92 any-uncovered-token gate is unsatisfiable on real question
+   phrasing. Official run STOPPED at 4/10 (those checkpoints measure a
+   degenerate surface; discarded).
+2. THE DEV BASELINE WAS JUNK, twice over: the 1.7b dev judge blesses
+   "Unknown." leniently (59% "correct" on near-total abstention), and the
+   14B-vs-1.7b A/B was identical only because BOTH pipelines barely
+   answered. The "decoupling confirmed" of the baseline is VOID -- correct
+   conclusion, invalid evidence; redo after the surface works. Deterministic
+   instruments (composed-rate, gold-containment) replace the dev judge for
+   surface work.
+3. MAJORITY-COVERAGE surface (round 3 candidate) also fails: 13.9% composed,
+   5.5% gold-containment among composed, 76% of compositions on Unknown-gold
+   questions. LESSON, now measured three ways: token coverage of the
+   QUESTION cannot determine whether the store holds the ANSWER.
+4. THE ORACLE NUMBER that reframes everything: the store contains the gold
+   (>=50% token containment) for only 24.8% of real-gold dev questions ->
+   QA ceiling ~43% with a PERFECT surface. Extraction coverage is the
+   binding constraint; surface tuning was deck-chairs. (Caveat: containment
+   is stricter than the official semantic judge, so the true ceiling is
+   somewhat higher -- but not 2x higher.)
+5. TAXONOMY of missing golds (1,862 sampled, 3 users): Persona 1,145 /
+   Event 556 / Relationship 161 -- dominated by NARRATIVE memories:
+   motivations, reasons, values, reflections ("values solitude for
+   recharging"). Our ontology extracts terse attribute:value; theirs
+   remembers WHY. v5 = narrative extraction: keep reason clauses in values,
+   add motivation/belief/value/feeling attributes, extract relationship
+   dynamics; expect singles -> provisional tier carries them (answerable).
+
+PLAN: official stays PAUSED until v5 raises the oracle number materially on
+dev users (instant deterministic metric, no judge); then re-extract official
+users with v5, restart round 3 with a surface fixed against the oracle-
+informed reality. GPU server freed meanwhile.

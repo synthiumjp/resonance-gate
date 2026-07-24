@@ -83,11 +83,15 @@ _QUERY_SYNONYMS = {
     "happened": "event", "attended": "event", "went": "event",
     "visited": "event", "did": "event",
     "planning": "plan", "plans": "plan", "will": "plan",
+    "title": "occupation", "pet": "pet", "pets": "pet",
+    "cuisine": "food", "food": "food", "hobby": "hobby", "hobbies": "hobby",
+    "favorite": "preference", "favourite": "preference",
 }
 
 # question-framing words that never name a value; used by the synonym-only
 # match guard to decide whether a query token is genuinely UNEXPLAINED
 _QWORDS = {"what", "who", "when", "whats", "which", "how", "does", "do",
+           "type", "kind",
            "did", "he", "she", "they", "his", "her", "their", "them", "it",
            "its", "about", "tell", "know", "user", "you", "your"}
 

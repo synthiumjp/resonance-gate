@@ -38,7 +38,7 @@ from llm_profile import SYSTEM_V3, SYSTEM_V4, canon_attr, extract_profile_facts
 _SYSTEM = SYSTEM_V4 if os.environ.get("RG_EXTRACT_V4") else SYSTEM_V3
 _CSFX = "_v4" if os.environ.get("RG_EXTRACT_V4") else ""
 from consistency import get_llm
-from wire import (WireGraph, _tokens, extract_dates, _STOP, _QWORDS,
+from wire import (WireGraph, _tokens, extract_dates, _STOP, _QWORDS, _MONTHS,
                   _QUERY_SYNONYMS)
 from memory_api import Memory
 
@@ -229,7 +229,15 @@ def answer_question(mem, q, surface="labeled"):
     if surface == "plain":
         # benchmark voice: a composed answer or a bare Unknown -- the SAME
         # stored values, no scaffolding a grader can misread as claims.
-        if uncovered or date_scoped_empty:
+        # MAJORITY-COVERAGE gate (entry 94): round 1 composed on ANY overlap
+        # (20.7% misread as answering); round 2 abstained on ANY uncovered
+        # token (163/164 bare Unknown -- real questions always carry a few
+        # words no fact contains). Compose iff MOST of the ask is covered;
+        # date tokens are the date-scoper's job, not coverage's.
+        ask_all = {t for t in (_tokens(q) - _STOP - _QWORDS)
+                   if not t.isdigit() and t not in _MONTHS}
+        unc = {t for t in (uncovered & ask_all)}
+        if date_scoped_empty or (ask_all and 2 * len(unc) >= len(ask_all)):
             return "Unknown."
         return "; ".join(f["value"] for f in asserted + wired + unconfirmed)
 

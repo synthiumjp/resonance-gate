@@ -59,7 +59,11 @@ HALUMEM_PATH = os.path.expanduser("~/rg_private/halumem/HaluMem-Medium.jsonl")
 DEV_USER_IDX = list(range(10, 20))   # firewalled dev set; users 0-9 are official test
 
 
-def _cache_path(uidx):
+def _cache_path(uidx, template=None):
+    # template: full path pattern with {i} (decoupling A/B: score the SAME
+    # users from a different extractor's caches, judge held constant)
+    if template:
+        return os.path.expanduser(template.format(i=uidx))
     return os.path.join(DEV_DIR, f"cache_u{uidx}_17b.jsonl")
 
 
@@ -316,7 +320,7 @@ def cmd_score(args):
     results = []
     for uidx in user_indices:
         user = users[uidx]
-        cache_path = _cache_path(uidx)
+        cache_path = _cache_path(uidx, getattr(args, "cache_template", None))
         complete, have, total = _cache_complete(user, cache_path)
         if not complete:
             print(f"user {uidx}: cache incomplete ({have}/{total} turns) -- skipping "
@@ -361,7 +365,8 @@ def cmd_score(args):
         "per_user": results,
         "aggregate": aggregate,
     }
-    out_path = os.path.join(DEV_DIR, "dev_baseline_17b.json")
+    out_path = os.path.join(DEV_DIR, getattr(args, "out", None)
+                            or "dev_baseline_17b.json")
     with open(out_path, "w") as f:
         json.dump(out, f, indent=2)
 
@@ -442,6 +447,9 @@ def main():
 
     p_score = sub.add_parser("score", help="score dev users with a complete cache")
     p_score.add_argument("--users", default=None, help="e.g. '10-19' or '10,12,15' (default: all)")
+    p_score.add_argument("--cache-template", dest="cache_template", default=None,
+                         help="path pattern with {i}, e.g. '~/rg_private/halumem/cache_u{i}_v4.jsonl'")
+    p_score.add_argument("--out", default=None, help="output json filename (in dev dir)")
 
     sub.add_parser("dryrun", help="30-turn foreground smoke test on user 10, then stop")
 
