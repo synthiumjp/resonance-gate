@@ -512,12 +512,20 @@ def test_run_checks_healthy_path(tmp_path):
     assert all(r.ok for r in results), [r.line() for r in results]
 
 
-def test_print_report_and_exit_code(tmp_path, capsys):
+def test_print_report_and_exit_code(tmp_path, capsys, monkeypatch):
     halumem = tmp_path
     official = _mk_official(halumem)
     (official / ".OFFICIAL_PAUSED").write_text("")
     dev_dir = tmp_path / "dev"
     dev_dir.mkdir()
+    # hermetic: the REAL host may legitimately be running evaluation.py while
+    # this fixture plants a paused marker -- the process check would then
+    # (correctly) flag "paused but running" and fail this exit-code test for
+    # environmental reasons. Stub the process scan to an idle host.
+    monkeypatch.setattr(S, "find_running_targets",
+                        lambda exclude_pids=None: {"evaluation.py": False,
+                                                    "llama_cpp.server": False,
+                                                    "dev_set.py": False})
     paths = S.SentinelPaths(halumem_dir=str(halumem), official_dir=str(official),
                              dev_dir=str(dev_dir))
     code = S.cmd_report(paths)
