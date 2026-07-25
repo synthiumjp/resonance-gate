@@ -86,6 +86,21 @@ _QUERY_SYNONYMS = {
     "title": "occupation", "pet": "pet", "pets": "pet",
     "cuisine": "food", "food": "food", "hobby": "hobby", "hobbies": "hobby",
     "favorite": "preference", "favourite": "preference",
+    # narrow-bucket additions (entry: firewalled dev-set retrieval fix) --
+    # verified against the v5.1 extractor's own narrative-ontology attribute
+    # vocabulary; each maps to a LOW-count, unambiguous bucket (unlike the
+    # mega-buckets "preference"/"motivation"/"plan"/"belief"/"value" with
+    # hundreds of facts each, where an attribute bridge alone cannot
+    # discriminate one fact -- see halumem_run.py's plain-surface value
+    # fallback for that case).
+    "disease": "health_condition", "diagnosed": "health_condition",
+    "condition": "health_condition", "illness": "health_condition",
+    "medical": "health_condition", "chronic": "health_condition",
+    "birth": "birth_date", "birthday": "birth_date", "born": "birth_date",
+    "mental": "mental_health",
+    "gender": "gender",
+    "goal": "goal", "aim": "goal", "objective": "goal",
+    "field": "discipline", "discipline": "discipline",
 }
 
 # question-framing words that never name a value; used by the synonym-only
@@ -94,6 +109,12 @@ _QWORDS = {"what", "who", "when", "whats", "which", "how", "does", "do",
            "type", "kind",
            "did", "he", "she", "they", "his", "her", "their", "them", "it",
            "its", "about", "tell", "know", "user", "you", "your"}
+
+# date-framing prepositions ("as of <date>", "on <date>", "by <date>") --
+# carry no content of their own; forgiven the same way _QWORDS is in the
+# synonym-only match guard (Fix 1) so a question naming a date doesn't get
+# treated as having UNEXPLAINED content merely for including "as"/"on"/"by".
+_DATE_PREP = {"as", "on", "by"}
 
 # DATE SCOPING (Fix 2). Pure regex, no lookup beyond a fixed month table --
 # non-generative extraction of the dates a piece of text NAMES, used to keep
@@ -135,6 +156,18 @@ def extract_dates(text):
     for m in _MONTH_DAY_RX.finditer(s):
         out.add(f"{_MONTHS[m.group(1)]}-{int(m.group(2))}")
     return out
+
+
+_DATEISH_WORDS = set(_MONTHS) | set(_MONTHS.values())
+_YEAR_DAY_RX = re.compile(r"^(?:(?:19|20)\d{2}|\d{1,2})$")
+
+
+def _is_dateish(t):
+    """A single TOKEN (not a phrase) that names a year, a month, or a bare
+    1-2 digit day -- forgiven the same way _QWORDS is in match()'s
+    synonym-only guard, since these are handled by the SEPARATE date-scoping
+    mechanism (extract_dates + answer_question), not by attribute matching."""
+    return t in _DATEISH_WORDS or bool(_YEAR_DAY_RX.match(t))
 
 
 def _tokens(s):
@@ -278,11 +311,44 @@ class WireGraph:
 
     # ---------------- retrieval ----------------
 
+    def _persona_tokens(self):
+        """The user's OWN name tokens, derived from the store itself (never
+        from a query): the highest-mention subject-less attr=='name' fact's
+        value. Subject-less 'name' is, by this schema's own construction
+        (ingest_user: key = f"{subj}:{a}" if subj else a), specifically the
+        PRIMARY user's name -- someone else's name is always subject-prefixed
+        ("mentor:name"). Cached on the graph; empty (no-op) whenever no such
+        fact was ever extracted. Used by match() (Fix: persona-token
+        subtraction, entry: firewalled dev-set retrieval fix) so a query that
+        names its own subject ("What is Michelle Hernandez's job title?")
+        doesn't have that name token block a synonym-bridge match on the
+        actual attribute asked about, or spuriously win a perfect-overlap
+        direct match against the store's own name=<full name> fact."""
+        cached = getattr(self, "_persona_toks_cache", None)
+        if cached is not None:
+            return cached
+        cands = [nd for nd in list(self.nodes.values()) + list(self.provisional.values())
+                 if nd["attr"] == "name"]
+        toks = frozenset(_tokens(max(cands, key=lambda nd: nd["n_mentions"])["value"])
+                          if cands else set())
+        self._persona_toks_cache = toks
+        return toks
+
     def match(self, query, store=None):
         """Non-generative query resolution: token grounding between the query and
         a node's attr+value tokens, scored over the SMALLER token set so query
         framing words ("what is ... connected to") do not dilute a real match,
         while a query sharing nothing with a node can never match it.
+
+        PERSONA-TOKEN SUBTRACTION (entry: firewalled dev-set retrieval fix):
+        the query's own tokens are first reduced by the store's own persona
+        name (see _persona_tokens) -- every question about a specific person
+        tends to name them, and the raw name tokens were both winning a
+        false perfect-overlap match against the store's own name=<full name>
+        fact AND (worse) counting as UNEXPLAINED content that blocked the
+        synonym bridge from matching the actual attribute asked about. Never
+        lets the subtraction empty the query out (falls back to the raw
+        tokens) so a query that IS just the name still matches it.
 
         SYNONYM BRIDGE (Fix 1): a fixed table maps common question words to
         the canonical attribute token a stored fact would carry ("work" ->
@@ -292,26 +358,34 @@ class WireGraph:
         carries no UNEXPLAINED content tokens -- "what does he do for work"
         is a pure attribute question (match), while "i work at acme corp"
         names a value (acme corp) the store does not hold, so it must still
-        abstain rather than surface an unrelated occupation fact.
+        abstain rather than surface an unrelated occupation fact. Date-ish
+        tokens (a named year/month/day) and date-framing prepositions
+        ("as"/"on"/"by") are forgiven the same way question-framing words
+        are -- they are the separate date-scoping mechanism's job
+        (answer_question), not an attribute this node could ever hold.
 
         Returns [(score, node_id)] best-first over `store` (default: the
         asserted tier); [] means no stored fact matches the query."""
         q = _tokens(query)
         if not q:
             return []
-        syn_attrs = {_QUERY_SYNONYMS[t] for t in q if t in _QUERY_SYNONYMS}
+        persona = self._persona_tokens()
+        qeff = (q - persona) or q
+        syn_attrs = {_QUERY_SYNONYMS[t] for t in qeff if t in _QUERY_SYNONYMS}
         hits = []
         for nid, nd in (self.nodes if store is None else store).items():
             nt = _tokens(nd["attr"]) | nd["toks"]
             if not nt:
                 continue
-            ov = len(q & nt) / min(len(q), len(nt))
+            ov = len(qeff & nt) / min(len(qeff), len(nt))
             if ov < MATCH_MIN and syn_attrs & _tokens(nd["attr"]):
                 # synonym-only path: every query content token must be
-                # accounted for by the node, the trigger words, or question
-                # framing -- an unexplained token means the query names
-                # something this node does not hold.
-                unexplained = (q - nt - set(_QUERY_SYNONYMS) - _QWORDS)
+                # accounted for by the node, the trigger words, question
+                # framing, or a date the date-scoper's job -- an unexplained
+                # token means the query names something this node does not
+                # hold.
+                unexplained = qeff - nt - set(_QUERY_SYNONYMS) - _QWORDS - _DATE_PREP
+                unexplained = {t for t in unexplained if not _is_dateish(t)}
                 if not unexplained:
                     ov = MATCH_MIN
             if ov >= MATCH_MIN:

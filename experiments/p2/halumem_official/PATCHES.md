@@ -36,3 +36,6 @@ detection fails under WSL2 where llama-cpp's works), measured ~90s/call =
    effect: all judge calls serialize on the single local GPU inference slot;
    10 forked workers were pure RAM pressure on a 15GB host that OOM-crashed
    mid-run on 2026-07-23).
+
+7. eval/eval_rgp2.py: extraction-cache suffix now env-selected (_v5 when
+   RG_EXTRACT_V5 else _v4) -- round 3 uses the v5.1 narrative extractor.

@@ -4927,3 +4927,32 @@ work, not extraction) and residual matching.
 NEXT MEASUREMENT before any GPU-days: 14B x v5.1 x cluster-fix oracle on
 dev users (the official round-3 configuration). halumem_run gains
 RG_EXTRACT_V5. Suite 100/100.
+
+## Entry 96 — 2026-07-25 (p2: RETRIEVAL FIXED, dev-measured. DELIVERED 0.8% -> 40.5% of a 55.6% ceiling; round 3 preflight launched)
+
+The last broken layer (store->answer), fixed by instrumentation not
+guesswork (surface_lab.py, ~50 deterministic variants swept; sonnet-coded):
+ROOT CAUSE: every benchmark question names the persona; those name tokens
+(a) won false perfect matches against the store's own name fact and
+(b) blocked the synonym bridge as "unexplained content". Plus five
+compounding causes (provisional tier exempt from date scoping; other-
+subject facts leaking caps; generic narrative attributes defeating
+attribute bridging; as-of questions needing latest-valid resolution;
+topic-adjacency misread as answer possession).
+SHIPPED (plain surface only; product surface untouched except the shared
+persona-token match fix): subject filter, value-token fallback, as-of
+latest-valid resolution over receipt dates, specificity gate, wider caps,
+maximal compose gate.
+MEASURED (dev users 10-12, 14B v5.1 caches, deterministic; verified by
+orchestrator re-run): composed 14.5 -> 76.9%; DELIVERED (answer contains
+>=50% of gold tokens) 0.8 -> 40.5% [147/363] vs 55.6% oracle ceiling;
+composed-on-Unknown-gold 38.9 -> 11.5%. Suite 101/101.
+HONEST REMAINING GAP (~15 pts to ceiling): lexical synonymy the token
+arithmetic cannot bridge without embeddings ("beverage" vs "black coffee"),
+and boolean/contradiction questions whose correct answer requires words we
+refuse to generate ("No, actually..."). Named, bounded, accepted for round 3.
+
+ROUND 3 PREFLIGHT: officials 0-9 re-extraction with 14B x v5.1 (GPU,
+~3.5h) -> stage-1 answers regenerated -> degenerate round-2 checkpoints
+wiped -> resume. Sentinel watching from the first judge call. Adapter cache
+suffix now env-selected (PATCHES.md updated).

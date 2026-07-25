@@ -317,14 +317,44 @@ def test_answer_question_date_mismatch_flags_off_date_facts():
 def test_answer_question_attribute_mismatch_flags_related_not_answering():
     from memory_api import Memory
     from halumem_run import answer_question
-    # returned fact matches on the subject/name token only; the question asks
-    # about a DIFFERENT attribute (occupation) that isn't stored
-    facts = [(5, "name", "martin", [("2026-03-05", "c00")])]
+    # returned fact matches on a literal value token only; the question asks
+    # about a DIFFERENT attribute (occupation) that isn't stored. (Not a
+    # "name" fact -- since the persona-token subtraction fix, entry:
+    # firewalled dev-set retrieval fix, the store's own subject-less name is
+    # deliberately excluded from query matching; see
+    # test_persona_name_tokens_do_not_block_a_synonym_match_on_another_attribute
+    # below for that mechanism specifically.)
+    facts = [(5, "location", "paris", [("2026-03-05", "c00")])]
     g = WireGraph.from_facts(facts, n_convs=5)
     mem = Memory(g)
-    ans = answer_question(mem, "martin occupation")
+    ans = answer_question(mem, "paris occupation")
     assert ans.startswith("No stored fact answers the asked attribute")
-    assert "name: martin" in ans
+    assert "location: paris" in ans
+
+
+def test_persona_name_tokens_do_not_block_a_synonym_match_on_another_attribute():
+    """Fix (entry: firewalled dev-set retrieval fix): every HaluMem question
+    names the persona ("What is Michelle Hernandez's job title?"). Before
+    the fix, those name tokens were UNEXPLAINED content that blocked the
+    synonym bridge from ever matching the occupation fact -- match() came
+    back empty even though the store held the answer. The persona is
+    derived from the store's own subject-less attr=='name' fact, never from
+    the query."""
+    from memory_api import Memory
+    facts = [
+        (5, "name", "michelle hernandez", [("2026-01-01", "c00"), ("2026-01-02", "c01")]),
+        (5, "occupation", "data scientist", [("2026-01-01", "c00"), ("2026-01-02", "c01")]),
+    ]
+    g = WireGraph.from_facts(facts, n_convs=10)
+    mem = Memory(g)
+    r = mem.recall("What is Michelle Hernandez's job title?")
+    assert r["found"] is True
+    assert [f["attribute"] for f in r["asserted"]] == ["occupation"]
+    # the bare name, with nothing else asked, still matches itself (the
+    # subtraction never empties the query out)
+    r2 = mem.recall("Michelle Hernandez")
+    assert r2["found"] is True
+    assert any(f["attribute"] == "name" for f in r2["asserted"])
 
 
 def test_answer_question_normal_match_keeps_stored_facts_prefix():
