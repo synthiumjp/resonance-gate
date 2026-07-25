@@ -11,9 +11,9 @@
       }
     },
     "v5": {
-      "score": "24/27",
+      "score": "25/27",
       "splits": {
-        "neg": "12/13",
+        "neg": "13/13",
         "pos": "7/7",
         "wpos": "1/3",
         "event": "4/4"
@@ -35,7 +35,7 @@
             "subject": "wife"
           }
         ],
-        "latency": 1.3028920910001034,
+        "latency": 4.057357241996215,
         "parse_failed": false
       },
       "v5": {
@@ -43,12 +43,12 @@
         "detail": [],
         "facts": [
           {
-            "attribute": "employment",
-            "value": "nurse at children's hospital",
+            "attribute": "occupation",
+            "value": "nurse",
             "subject": "wife"
           }
         ],
-        "latency": 5.401592127003823,
+        "latency": 8.135029387995019,
         "parse_failed": false
       }
     },
@@ -60,14 +60,19 @@
         "ok": true,
         "detail": [],
         "facts": [],
-        "latency": 0.6049469340068754,
+        "latency": 3.363827127002878,
         "parse_failed": false
       },
       "v5": {
         "ok": true,
         "detail": [],
-        "facts": [],
-        "latency": 4.444463911000639,
+        "facts": [
+          {
+            "attribute": "event",
+            "value": "my brother was promoted to store manager at the supermarket"
+          }
+        ],
+        "latency": 8.605051638005534,
         "parse_failed": false
       }
     },
@@ -79,14 +84,14 @@
         "ok": true,
         "detail": [],
         "facts": [],
-        "latency": 0.6847222250071354,
+        "latency": 3.3665399710007478,
         "parse_failed": false
       },
       "v5": {
         "ok": true,
         "detail": [],
         "facts": [],
-        "latency": 4.4920881319994805,
+        "latency": 7.572223408991704,
         "parse_failed": false
       }
     },
@@ -103,7 +108,7 @@
             "value": "my daughter started studying medicine at the university this year"
           }
         ],
-        "latency": 1.5181899969902588,
+        "latency": 4.336269732011715,
         "parse_failed": false
       },
       "v5": {
@@ -115,7 +120,7 @@
             "value": "my daughter started studying medicine at the university this year"
           }
         ],
-        "latency": 5.428588349997881,
+        "latency": 8.45555058598984,
         "parse_failed": false
       }
     },
@@ -138,36 +143,20 @@
             "subject": "maria"
           }
         ],
-        "latency": 1.984903980002855,
+        "latency": 4.68560897099087,
         "parse_failed": false
       },
       "v5": {
-        "ok": false,
-        "detail": [
-          [
-            "location",
-            "city"
-          ],
-          [
-            "occupation",
-            "maria"
-          ]
-        ],
+        "ok": true,
+        "detail": [],
         "facts": [
           {
-            "attribute": "residence",
-            "value": "city"
-          },
-          {
-            "attribute": "employer",
-            "value": "maria"
-          },
-          {
-            "attribute": "current_tool",
-            "value": "bakery"
+            "attribute": "occupation",
+            "value": "runs a bakery",
+            "subject": "maria (old boss)"
           }
         ],
-        "latency": 6.552208263005014,
+        "latency": 8.41407247299503,
         "parse_failed": false
       }
     },
@@ -179,14 +168,14 @@
         "ok": true,
         "detail": [],
         "facts": [],
-        "latency": 0.6314984000055119,
+        "latency": 3.4253214269992895,
         "parse_failed": false
       },
       "v5": {
         "ok": true,
         "detail": [],
         "facts": [],
-        "latency": 4.467459387000417,
+        "latency": 7.520395200001076,
         "parse_failed": false
       }
     },
@@ -198,14 +187,14 @@
         "ok": true,
         "detail": [],
         "facts": [],
-        "latency": 0.6268402659916319,
+        "latency": 3.336545288999332,
         "parse_failed": false
       },
       "v5": {
         "ok": true,
         "detail": [],
         "facts": [],
-        "latency": 4.414494324999396,
+        "latency": 7.458687410995481,
         "parse_failed": false
       }
     },
@@ -217,14 +206,14 @@
         "ok": true,
         "detail": [],
         "facts": [],
-        "latency": 0.6535750150069362,
+        "latency": 3.410555430993554,
         "parse_failed": false
       },
       "v5": {
         "ok": true,
         "detail": [],
         "facts": [],
-        "latency": 4.462722278010915,
+        "latency": 7.55685991399514,
         "parse_failed": false
       }
     },
@@ -236,14 +225,14 @@
         "ok": true,
         "detail": [],
         "facts": [],
-        "latency": 0.6346228909969795,
+        "latency": 3.41287442400062,
         "parse_failed": false
       },
       "v5": {
         "ok": true,
         "detail": [],
         "facts": [],
-        "latency": 4.419040702996426,
+        "latency": 7.4708801779925125,
         "parse_failed": false
       }
     },
@@ -255,14 +244,14 @@
         "ok": true,
         "detail": [],
         "facts": [],
-        "latency": 0.6339913450065069,
+        "latency": 3.369620929006487,
         "parse_failed": false
       },
       "v5": {
         "ok": true,
         "detail": [],
         "facts": [],
-        "latency": 4.4265464170021005,
+        "latency": 7.481210395009839,
         "parse_failed": false
       }
     },
@@ -274,14 +263,14 @@
         "ok": true,
         "detail": [],
         "facts": [],
-        "latency": 0.656684289991972,
+        "latency": 3.4371169219957665,
         "parse_failed": false
       },
       "v5": {
         "ok": true,
         "detail": [],
         "facts": [],
-        "latency": 4.448554073998821,
+        "latency": 7.455140262012719,
         "parse_failed": false
       }
     },
@@ -293,14 +282,14 @@
         "ok": true,
         "detail": [],
         "facts": [],
-        "latency": 0.6179239979974227,
+        "latency": 3.428528089003521,
         "parse_failed": false
       },
       "v5": {
         "ok": true,
         "detail": [],
         "facts": [],
-        "latency": 4.43548644099792,
+        "latency": 7.353323285002261,
         "parse_failed": false
       }
     },
@@ -321,7 +310,7 @@
             "value": "independent research"
           }
         ],
-        "latency": 1.9590326100005768,
+        "latency": 4.7794848199991975,
         "parse_failed": false
       },
       "v5": {
@@ -337,7 +326,7 @@
             "value": "research"
           }
         ],
-        "latency": 5.871780244997353,
+        "latency": 9.416019918004167,
         "parse_failed": false
       }
     },
@@ -354,7 +343,7 @@
             "value": "melbourne"
           }
         ],
-        "latency": 1.313450618996285,
+        "latency": 4.0860869949974585,
         "parse_failed": false
       },
       "v5": {
@@ -366,7 +355,7 @@
             "value": "melbourne"
           }
         ],
-        "latency": 5.198898786009522,
+        "latency": 8.270551790003083,
         "parse_failed": false
       }
     },
@@ -383,7 +372,7 @@
             "value": "claude"
           }
         ],
-        "latency": 1.3561113049945561,
+        "latency": 4.044878799992148,
         "parse_failed": false
       },
       "v5": {
@@ -395,7 +384,7 @@
             "value": "claude code"
           }
         ],
-        "latency": 5.261626277002506,
+        "latency": 8.186087006994057,
         "parse_failed": false
       }
     },
@@ -412,7 +401,7 @@
             "value": "120k"
           }
         ],
-        "latency": 1.4327830529946368,
+        "latency": 4.0701737420022255,
         "parse_failed": false
       },
       "v5": {
@@ -421,10 +410,10 @@
         "facts": [
           {
             "attribute": "income",
-            "value": "120k"
+            "value": "120k a year"
           }
         ],
-        "latency": 5.215930593010853,
+        "latency": 8.315723453008104,
         "parse_failed": false
       }
     },
@@ -445,7 +434,7 @@
             "value": "fiction writing"
           }
         ],
-        "latency": 2.008928463998018,
+        "latency": 4.786779136993573,
         "parse_failed": false
       },
       "v5": {
@@ -457,11 +446,15 @@
             "value": "emergency services executive"
           },
           {
+            "attribute": "current_tool",
+            "value": "writing fiction"
+          },
+          {
             "attribute": "weekly_class",
             "value": "writing fiction"
           }
         ],
-        "latency": 6.014608768993639,
+        "latency": 9.718800422997447,
         "parse_failed": false
       }
     },
@@ -478,7 +471,7 @@
             "value": "eastern suburbs"
           }
         ],
-        "latency": 1.3078541820141254,
+        "latency": 4.090374498991878,
         "parse_failed": false
       },
       "v5": {
@@ -490,7 +483,7 @@
             "value": "eastern suburbs"
           }
         ],
-        "latency": 5.165190489991801,
+        "latency": 8.31964148300176,
         "parse_failed": false
       }
     },
@@ -507,7 +500,7 @@
             "value": "gaming pc with an amd gpu"
           }
         ],
-        "latency": 1.4770646819961257,
+        "latency": 4.169973609998124,
         "parse_failed": false
       },
       "v5": {
@@ -519,7 +512,7 @@
             "value": "gaming pc with an amd gpu"
           }
         ],
-        "latency": 5.348230611009058,
+        "latency": 8.34764951899706,
         "parse_failed": false
       }
     },
@@ -531,14 +524,14 @@
         "ok": true,
         "detail": [],
         "facts": [],
-        "latency": 0.6987333290016977,
+        "latency": 3.4107410589931533,
         "parse_failed": false
       },
       "v5": {
         "ok": true,
         "detail": [],
         "facts": [],
-        "latency": 4.576305109003442,
+        "latency": 7.558742990004248,
         "parse_failed": false
       }
     },
@@ -556,7 +549,7 @@
           ]
         ],
         "facts": [],
-        "latency": 0.6503196929988917,
+        "latency": 3.3337752310035285,
         "parse_failed": false
       },
       "v5": {
@@ -570,11 +563,11 @@
         ],
         "facts": [
           {
-            "attribute": "possession",
+            "attribute": "current_tool",
             "value": "mac studio"
           }
         ],
-        "latency": 5.1852589799964335,
+        "latency": 8.2022196270118,
         "parse_failed": false
       }
     },
@@ -592,7 +585,7 @@
             "subject": "wife"
           }
         ],
-        "latency": 1.3475117449997924,
+        "latency": 4.119618256998365,
         "parse_failed": false
       },
       "v5": {
@@ -605,7 +598,7 @@
             "subject": "wife"
           }
         ],
-        "latency": 5.22332628100412,
+        "latency": 8.417115521006053,
         "parse_failed": false
       }
     },
@@ -623,7 +616,7 @@
             "subject": "old_supervisor"
           }
         ],
-        "latency": 1.5343623180087889,
+        "latency": 4.304571845990722,
         "parse_failed": false
       },
       "v5": {
@@ -638,10 +631,11 @@
         "facts": [
           {
             "attribute": "residence",
-            "value": "swinburne university"
+            "value": "swinburne university",
+            "subject": "maria (old boss)"
           }
         ],
-        "latency": 5.307450637003058,
+        "latency": 8.428928141001961,
         "parse_failed": false
       }
     },
@@ -658,7 +652,7 @@
             "value": "attended a pottery workshop with my sister on january 6th"
           }
         ],
-        "latency": 1.6376073729916243,
+        "latency": 4.461678309002309,
         "parse_failed": false
       },
       "v5": {
@@ -667,10 +661,10 @@
         "facts": [
           {
             "attribute": "event",
-            "value": "attended a pottery workshop with my sister on jan 6 2026"
+            "value": "attended a pottery workshop on jan 6th"
           }
         ],
-        "latency": 5.750822538000648,
+        "latency": 8.48400016099913,
         "parse_failed": false
       }
     },
@@ -687,7 +681,7 @@
             "value": "trip to japan in november"
           }
         ],
-        "latency": 1.3839381340076216,
+        "latency": 4.123038153993548,
         "parse_failed": false
       },
       "v5": {
@@ -699,7 +693,7 @@
             "value": "trip to japan in november"
           }
         ],
-        "latency": 5.200559090997558,
+        "latency": 8.191823325003497,
         "parse_failed": false
       }
     },
@@ -716,7 +710,7 @@
             "value": "ran half marathon last saturday"
           }
         ],
-        "latency": 1.428247953997925,
+        "latency": 4.159079905002727,
         "parse_failed": false
       },
       "v5": {
@@ -725,10 +719,10 @@
         "facts": [
           {
             "attribute": "event",
-            "value": "ran half marathon last saturday"
+            "value": "ran a half marathon last saturday"
           }
         ],
-        "latency": 5.310614317000727,
+        "latency": 8.399189727002522,
         "parse_failed": false
       }
     },
@@ -740,14 +734,14 @@
         "ok": true,
         "detail": [],
         "facts": [],
-        "latency": 0.6164290539891226,
+        "latency": 3.293798283004435,
         "parse_failed": false
       },
       "v5": {
         "ok": true,
         "detail": [],
         "facts": [],
-        "latency": 4.448432967008557,
+        "latency": 7.432473286986351,
         "parse_failed": false
       }
     }

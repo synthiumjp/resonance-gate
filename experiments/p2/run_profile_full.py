@@ -122,7 +122,25 @@ def load_stream_and_titles(path):
 
 def _cluster(entries):
     """Merge one slot's values by content-token overlap; sum mentions and receipts.
-    entries: {value: {"n": int, "recs": [(date, uuid)]}}. Returns list of dicts."""
+    entries: {value: {"n": int, "recs": [(date, uuid)]}}. Returns list of dicts.
+
+    Merge criterion (fixed, see notebook entry 95): overlap must be a MAJORITY
+    of the SMALLER token set -- len(toks & cl["core"]) / min(len(toks),
+    len(cl["core"])) >= 0.5 -- not "any shared token". ANY-shared-token was
+    fine for short values ("melbourne" / "melbourne australia") but
+    destructive for v5's long narrative values (up to ~15 words): two
+    distinct facts sharing one generic tail token ("understanding", "focus")
+    collided and the absorbed fact's specific wording was discarded (measured
+    gold-answer loss). cl["core"] is the FIRST (highest-n) variant's token
+    set, used ONLY for the ratio test -- NOT cl["toks"], which keeps
+    accumulating the UNION of every merged variant for downstream query
+    matching (wire nodes read cl["toks"]; unchanged). Using the union as the
+    denominator-shrinking/overlap-inflating side would let clusters snowball:
+    each merge grows cl["toks"], making the NEXT candidate's overlap ratio
+    against it easier to clear, absorbing further unrelated values over
+    several iterations even though none individually shares half its tokens
+    with the cluster's ORIGINAL value. cl["core"] stays fixed at the first
+    variant, so every candidate is judged against the same original meaning."""
     items = sorted(entries.items(), key=lambda kv: -kv[1]["n"])
     clusters = []
     for val, d in items:
@@ -130,15 +148,21 @@ def _cluster(entries):
                 if t not in _STOP and len(t) > 1}
         placed = False
         for cl in clusters:
-            if toks & cl["toks"]:
+            smaller = min(len(toks), len(cl["core"])) or 1
+            if len(toks & cl["core"]) / smaller >= 0.5:
                 cl["n"] += d["n"]
                 cl["toks"] |= toks
                 cl["recs"].extend(d["recs"])
                 placed = True
                 break
         if not placed:
-            clusters.append({"label": val, "n": d["n"], "toks": toks,
-                             "recs": list(d["recs"])})
+            # "core" must be a SEPARATE set object from "toks" -- `cl["toks"]
+            # |= x` mutates a set IN PLACE, so if core and toks aliased the
+            # same object, the "fixed first-variant core" would silently
+            # grow with every merge (the exact snowball this fix exists to
+            # prevent). set(toks) copies.
+            clusters.append({"label": val, "n": d["n"], "toks": set(toks),
+                             "core": set(toks), "recs": list(d["recs"])})
     return clusters
 
 

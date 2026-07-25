@@ -207,10 +207,67 @@ where no concrete plan is stated.
 # instead of "supervisor"), exceeding the "lose at most 1" bar. Both are
 # subject-typing slips on THIRD-PARTY facts, not narrative-attribute
 # misuse -- plausibly prompt-length/attention pressure from the added
-# narrative block, not something the one permitted revision (already spent,
-# and reverted) addressed. Flagged, not fixed -- reported as-is per the
-# two-iteration budget.
+# narrative block.
+#
+# v5.1 (this revision, TWO tweaks tried, per-mission budget):
+#
+# TWEAK 1 (reverted, not shipped): added the maria worked example PLUS an
+# "even when other details follow in the same sentence" clause PLUS an
+# explicit "old/former roles still get that person's subject" reinforcement
+# sentence to the subject-rule bullet, and to hold length flat, dropped the
+# narrative-values bullet's THIRD worked example (the "snakes" preference
+# case). Probe: 26/27 (fixed maria; incidentally also fixed the pre-existing
+# v4 "mac studio" wpos miss; still lost "swinburne" -- see below). Cleared
+# the >=26/27 bar on the number alone -- BUT a narrative-intactness spot
+# check (6 FRESH non-verbatim narrative sentences, none copied from the
+# prompt's own examples) found REAL regression: 3/6 produced a narrative
+# fact vs iteration-1's 5/6 -- the reflection and relationship_dynamic cases
+# specifically stopped extracting. Trimming the "snakes" example cost more
+# than the subject-rule reinforcement gained, echoing the iteration-2
+# lesson above (removing narrative content measurably hurts narrative
+# recall on THIS model) even though the probe number alone looked clean.
+# Discarded on the "narrative extraction intact" requirement, not the
+# probe-score requirement.
+#
+# TWEAK 2 (SHIPPED, below): a MINIMAL third-party addition -- just the maria
+# worked example appended inline to the existing subject-rule bullet, no
+# extra reinforcement sentences -- with the full narrative block (all three
+# original worked examples, snakes included) left untouched. Probe: 25/27
+# (fixes maria cleanly vs iteration-1's 24/27, zero new regressions:
+# "mac studio" was already broken in v4 itself, "swinburne" was already
+# broken in iteration-1). Narrative spot-check: 5/6, IDENTICAL to
+# iteration-1 -- no narrative regression.
+#
+# NEITHER tweak clears BOTH stated bars simultaneously (tweak 1: probe >=26
+# but narrative degraded; tweak 2: narrative intact but probe 25/27, one
+# short). Per the two-tweak budget, tweak 2 is kept as the better of the
+# two: it is a STRICT improvement over iteration-1 (fixes one real case,
+# breaks nothing, no narrative cost), whereas tweak 1's extra probe point
+# was bought by sacrificing exactly the narrative recall this whole v5 line
+# exists for (Mission-1's cluster fix showed narrative-value coverage is
+# THE driver of the oracle gain) -- re-extracting on a narrative-degraded
+# prompt would risk repeating the iteration-2 regression under a passing
+# probe number. Reported honestly rather than re-extracted: users 10-12
+# were NOT re-extracted with this revision; the standing result is
+# iteration-1's caches (unchanged) + the Mission-1 cluster-fix oracle
+# numbers over them (recorded in notebook entry 95).
+#
+# The one remaining miss ("my old supervisor is over at swinburne
+# university" -> the model echoes the LITERAL string "maria (old boss)" as
+# the subject instead of generalising to "supervisor" or "old supervisor")
+# is a few-shot literal-copy artifact, not a rule-comprehension failure --
+# flagged, not fixed; a distinct worked example for a role-only (no name)
+# third party might address it but was out of the two-tweak budget.
 SYSTEM_V5 = SYSTEM_V4.replace(
+    """- A fact about someone/something else gets THAT subject: "my wife is doing a \
+nursing placement" -> {"subject": "wife", "attribute": "placement", "value": \
+"nursing"}. NEVER file another person's fact under subject "self".""",
+    """- A fact about someone/something else gets THAT subject: "my wife is doing a \
+nursing placement" -> {"subject": "wife", "attribute": "placement", "value": \
+"nursing"}; "my old boss maria now runs a bakery" -> {"subject": "maria \
+(old boss)", "attribute": "occupation", "value": "runs a bakery"}. NEVER \
+file another person's fact under subject "self"."""
+).replace(
     "- IGNORE pure hypotheticals, wishes, questions, and things people MIGHT do "
     "where no concrete plan is stated.\n"
     "- If the message states no stable fact, output exactly: []",

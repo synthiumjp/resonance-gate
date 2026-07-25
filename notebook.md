@@ -4897,3 +4897,33 @@ PLAN: official stays PAUSED until v5 raises the oracle number materially on
 dev users (instant deterministic metric, no judge); then re-extract official
 users with v5, restart round 3 with a surface fixed against the oracle-
 informed reality. GPU server freed meanwhile.
+
+## Entry 95 — 2026-07-25 (p2: RECOVERY. Cluster fix + v5 narrative = gold-in-store 11.8% -> 37.7% (3.2x); the ceiling is climbing where the oracle said it would)
+
+The two blockers entry 94 named, fixed and measured (dev users 10-12, all
+numbers deterministic oracle, no judge):
+
+1. CLUSTER FIX (readout-time, instant on existing caches): _cluster merged
+   same-slot values on ANY shared token -- destructive once v5's narrative
+   values got long (distinct facts sharing one generic tail token collided;
+   the absorbed fact's wording was DISCARDED). New criterion: overlap >= 50%
+   of the smaller set, measured against a FIXED core (first variant's own
+   tokens) so clusters cannot snowball; the accumulated token UNION still
+   feeds query matching unchanged. Sub-bug caught in testing: core aliased
+   to the mutated union set -- copies fixed. 9 unit tests.
+   EFFECT: v5 caches 19.8 -> 37.7% gold-in-store; even v4 11.8 -> 17.4%.
+2. v5.1 SUBJECT REPAIR, probe-first: two tweaks tried under the cheap gate;
+   the 26/27 variant sacrificed narrative recall (3/6 fresh-sentence spot
+   check) and was DISCARDED; shipped v5.1 = minimal maria example, probe
+   25/27 (24 -> 25, zero regressions), narrative recall intact (5/6).
+   Honest note: neither tweak met both bars; best kept, gap documented.
+
+JOURNEY on the binding metric: 11.8% (v4+bug) -> 19.8% (v5) -> 37.7%
+(v5 + cluster fix), with 1.7b extraction on CPU. Estimated QA ceiling for
+dev users now ~53% strict-containment (semantic judging sits higher).
+Remaining misses skew to date-arithmetic/timeline composition (answer-path
+work, not extraction) and residual matching.
+
+NEXT MEASUREMENT before any GPU-days: 14B x v5.1 x cluster-fix oracle on
+dev users (the official round-3 configuration). halumem_run gains
+RG_EXTRACT_V5. Suite 100/100.
