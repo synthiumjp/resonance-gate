@@ -153,10 +153,11 @@ def main():
     except Exception:
         pass
 
-    # v2/v3/v4 extraction (RG_EXTRACT_V2/V3/V4) use their OWN cache + report: a
-    # prompt change invalidates a cache, and older artifacts stay intact for
-    # rollback.
-    _sfx = ("_v4" if os.environ.get("RG_EXTRACT_V4")
+    # v2/v3/v4/v5 extraction (RG_EXTRACT_V2/V3/V4/V5) use their OWN cache +
+    # report: a prompt change invalidates a cache, and older artifacts stay
+    # intact for rollback.
+    _sfx = ("_v5" if os.environ.get("RG_EXTRACT_V5")
+            else "_v4" if os.environ.get("RG_EXTRACT_V4")
             else "_v3" if os.environ.get("RG_EXTRACT_V3")
             else "_v2" if os.environ.get("RG_EXTRACT_V2") else "")
     cache_path = os.path.join(os.path.dirname(path), f"profile_cache{_sfx}.jsonl")

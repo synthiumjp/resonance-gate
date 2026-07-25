@@ -169,6 +169,85 @@ where no concrete plan is stated.
 - If the message states no stable fact, output exactly: []""")
 
 
+# v5 (HaluMem entry 94: extraction coverage is the binding constraint --
+# oracle ceiling 43%, and the missing golds are dominated by NARRATIVE
+# memories -- motivations, reasons, values, feelings, reflections,
+# relationship dynamics -- that v4 has no ontology for. v4's attribute set
+# is terse attribute:value (occupation, location, event, plan...); it drops
+# the WHY. v5 keeps every v4 rule (subjects, events/plans, roleplay/
+# identifier bans, wish guard) and adds a NARRATIVE class of fact whose
+# value is allowed to carry the stated reason/qualifier verbatim-ish (up to
+# ~15 words, vs v4's short values) instead of being collapsed to a bare
+# noun. OPT-IN via RG_EXTRACT_V5 (own cache/report; checked BEFORE V4 in
+# active_system so it can be enabled without disturbing the v4 default).
+#
+# Dev-set iteration note: a revision was TRIED and REVERTED. Iteration-1
+# extraction (users 10-12, qwen3:1.7b/ollama) raised oracle gold-in-store
+# from v4's 11.8% to 19.8% (+8.0 pts, short of the +10 bar) -- but cache
+# inspection showed the EXTRACTION was already capturing the right narrative
+# facts with reasons (e.g. "immersive cultural experiences ... for
+# understanding human behavior" was extracted verbatim). The loss happens
+# DOWNSTREAM: run_profile_full._cluster (shared by halumem_run.ingest_user)
+# merges same-attribute values on ANY shared content token, so two distinct
+# narrative facts that both end in a similar generic reason tail collide and
+# one label's specific wording is discarded. A revision telling the model to
+# drop generic/repeated reason tails ("KEEP IT SPECIFIC") was tried to
+# reduce that collision risk; re-extracting with it measured WORSE
+# (17.4%, -2.4 pts vs iteration 1) -- the gold answers themselves often
+# needed that "generic" reason text, so suppressing it cost more than the
+# declustering gained. Reverted; SYSTEM_V5 below is iteration 1's text. The
+# real fix is downstream (attribute-aware/topic-aware clustering, not a
+# prompt change) and is out of this mission's scope -- flagged for follow-up.
+#
+# Regression probe (27-case suite, qwen3:1.7b/ollama, v4 vs this final v5):
+# v4 26/27, v5 24/27 -- v5 lost TWO cases (a third-party neg: "my old boss
+# maria now runs a bakery" got split into residence/employer/current_tool
+# facts instead of being filed under subject "maria"; a wpos: "my old
+# supervisor is over at swinburne university" landed as subject "self"
+# instead of "supervisor"), exceeding the "lose at most 1" bar. Both are
+# subject-typing slips on THIRD-PARTY facts, not narrative-attribute
+# misuse -- plausibly prompt-length/attention pressure from the added
+# narrative block, not something the one permitted revision (already spent,
+# and reverted) addressed. Flagged, not fixed -- reported as-is per the
+# two-iteration budget.
+SYSTEM_V5 = SYSTEM_V4.replace(
+    "- IGNORE pure hypotheticals, wishes, questions, and things people MIGHT do "
+    "where no concrete plan is stated.\n"
+    "- If the message states no stable fact, output exactly: []",
+    """- NARRATIVE facts are extractable, not commentary: a stated motivation, \
+belief, value, feeling, reflection, preference, or relationship dynamic is a \
+stable fact about someone's inner life just as much as their job or city. \
+Use attribute "motivation" (why they do or want something), "belief" \
+(something they hold to be true), "value" (something they prioritise or \
+care about), "feeling" (an emotion they report about something ongoing, \
+not a one-off reaction to this message), "reflection" (an insight or \
+realisation about themselves or their life), "preference" (something they \
+like/dislike, together with why), or "relationship_dynamic" (how a \
+relationship works or has changed, and why). Subject is "self" for the \
+user's own narrative, or the relevant person/relationship for someone \
+else's (e.g. "wife").
+- NARRATIVE VALUES KEEP THE REASON: when the message states a reason, \
+cause, or qualifier alongside the narrative, the value MUST include it, \
+verbatim-ish, up to about 15 words -- do not collapse it down to a bare \
+noun. Example: "she values her moments of solitude because they help her \
+recharge and think clearly" -> {"subject": "self", "attribute": "value", \
+"value": "solitude for recharging and gaining clarity"}, NOT \
+{"attribute": "value", "value": "solitude"}. Example: "i appreciate snakes \
+for how low-maintenance and fascinating they are" -> {"subject": "self", \
+"attribute": "preference", "value": "snakes for their low maintenance and \
+unique behaviors"}. Example: "working on projects together has really \
+brought my wife and me closer" -> {"subject": "wife", "attribute": \
+"relationship_dynamic", "value": "relationship enhanced by working on \
+collaborative projects together"}. If NO reason/qualifier is stated, keep \
+the value short (as any other v4 attribute) -- never invent a reason that \
+was not said.
+- Still IGNORE pure hypotheticals, wishes, questions, and things people \
+MIGHT do where no concrete plan is stated -- a narrative fact must be \
+stated as true of them, not a hypothetical feeling ("i'd probably love \
+gardening if i had a yard" is NOT a preference fact).
+- If the message states no stable fact, output exactly: []""")
+
+
 def canon_subject(s):
     """Normalise a subject: lowercase, strip possessives/articles. 'my wife'
     -> 'wife'; 'my friend chris' -> 'chris (friend)' stays as given otherwise."""
@@ -178,6 +257,8 @@ def canon_subject(s):
 
 
 def active_system():
+    if os.environ.get("RG_EXTRACT_V5"):
+        return SYSTEM_V5
     if os.environ.get("RG_EXTRACT_V4"):
         return SYSTEM_V4
     if os.environ.get("RG_EXTRACT_V3"):
@@ -205,7 +286,11 @@ def extract_profile_facts(text, system=None):
     for f in arr:
         if isinstance(f, dict) and f.get("attribute") and f.get("value"):
             a = re.sub(r"\s+", "_", str(f["attribute"]).strip().lower())[:30]
-            v = str(f["value"]).strip()[:80]
+            # 160 (was 80): v5 narrative values keep a stated reason clause
+            # verbatim-ish, up to ~15 words -- longer than v4's short values.
+            # Relaxing the cap only ever truncates less; v4-era short values
+            # are unaffected.
+            v = str(f["value"]).strip()[:160]
             if a and v:
                 fact = {"attribute": a, "value": v}
                 # v3: subject-typed world facts; absent (v1/v2) means self

@@ -45,7 +45,7 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 if _HERE not in sys.path:
     sys.path.insert(0, _HERE)
 
-from llm_profile import SYSTEM_V4, canon_subject
+from llm_profile import SYSTEM_V4, SYSTEM_V5, canon_subject
 import halumem_run as HR   # ingest_user, extraction_proxy, answer_question, JUDGE text
                             # -- NOT halumem_run.judge_answer or llm_profile.extract_profile_facts,
                             # both of which call the GPU consistency.get_llm(); see module docstring.
@@ -58,13 +58,19 @@ DEV_DIR = os.path.expanduser("~/rg_private/halumem/dev")
 HALUMEM_PATH = os.path.expanduser("~/rg_private/halumem/HaluMem-Medium.jsonl")
 DEV_USER_IDX = list(range(10, 20))   # firewalled dev set; users 0-9 are official test
 
+# v5 (entry 94 narrative ontology, see llm_profile.SYSTEM_V5): own cache/own
+# suffix, same pattern as v4's -- opt in via RG_EXTRACT_V5 so the v4 dev
+# caches (the ceiling baseline) stay untouched. Checked before v4.
+EXTRACT_SYSTEM = SYSTEM_V5 if os.environ.get("RG_EXTRACT_V5") else SYSTEM_V4
+_CSFX = "_v5" if os.environ.get("RG_EXTRACT_V5") else ""
+
 
 def _cache_path(uidx, template=None):
     # template: full path pattern with {i} (decoupling A/B: score the SAME
     # users from a different extractor's caches, judge held constant)
     if template:
         return os.path.expanduser(template.format(i=uidx))
-    return os.path.join(DEV_DIR, f"cache_u{uidx}_17b.jsonl")
+    return os.path.join(DEV_DIR, f"cache_u{uidx}{_CSFX}_17b.jsonl")
 
 
 def _load_users(path=HALUMEM_PATH):
@@ -148,7 +154,10 @@ def _parse_facts(txt):
     for f in arr:
         if isinstance(f, dict) and f.get("attribute") and f.get("value"):
             a = re.sub(r"\s+", "_", str(f["attribute"]).strip().lower())[:30]
-            v = str(f["value"]).strip()[:80]
+            # 160 (was 80): matches llm_profile.extract_profile_facts -- v5
+            # narrative values keep a stated reason clause verbatim-ish, up
+            # to ~15 words.
+            v = str(f["value"]).strip()[:160]
             if a and v:
                 fact = {"attribute": a, "value": v}
                 subj = canon_subject(f.get("subject", "self"))
@@ -240,6 +249,9 @@ def cmd_extract(args):
     os.makedirs(DEV_DIR, exist_ok=True)
     users = _load_users()
     user_indices = _parse_users_arg(args.users)
+    deadline = (time.monotonic() + args.time_budget) if args.time_budget else None
+    print(f"extractor: {'v5' if EXTRACT_SYSTEM is SYSTEM_V5 else 'v4'} "
+          f"(RG_EXTRACT_V5={'1' if os.environ.get('RG_EXTRACT_V5') else '0'})")
 
     for uidx in user_indices:
         user = users[uidx]
@@ -262,8 +274,9 @@ def cmd_extract(args):
         cf = open(cache_path, "a")
         t0 = time.monotonic()
         n_done = 0
+        stopped_early = False
         for h, text in todo:
-            facts, latency, failed = extract_via_ollama(text)
+            facts, latency, failed = extract_via_ollama(text, system=EXTRACT_SYSTEM)
             cf.write(json.dumps({"h": h, "f": facts}) + "\n")
             cf.flush()
             n_done += 1
@@ -275,7 +288,14 @@ def cmd_extract(args):
                 print(f"  user {uidx}: {n_done}/{len(todo)} done  "
                       f"rate={rate:.3f} turns/s  ETA={eta_s / 60:.1f} min"
                       f"{'  [parse_failed]' if failed else ''}")
+            if deadline is not None and time.monotonic() >= deadline:
+                print(f"  user {uidx}: time budget reached at {n_done}/{len(todo)} "
+                      f"-- stopping (resumable, re-run to continue)")
+                stopped_early = True
+                break
         cf.close()
+        if stopped_early:
+            return
         print(f"user {uidx}: extraction complete ({len(turns)} turns cached)")
 
 
@@ -444,6 +464,9 @@ def main():
     p_extract.add_argument("--users", default=None, help="e.g. '10-19' or '10,12,15' (default: all)")
     p_extract.add_argument("--limit", type=int, default=None,
                            help="cap total cached lines per user (testing only)")
+    p_extract.add_argument("--time-budget", dest="time_budget", type=float, default=None,
+                           help="stop (resumable) after this many seconds, for chunking "
+                                "a long extraction across foreground calls")
 
     p_score = sub.add_parser("score", help="score dev users with a complete cache")
     p_score.add_argument("--users", default=None, help="e.g. '10-19' or '10,12,15' (default: all)")
