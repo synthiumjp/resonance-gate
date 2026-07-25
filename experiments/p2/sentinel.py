@@ -163,6 +163,16 @@ def check_official_eval(
 
     with open(eval_log, "r", errors="replace") as f:
         content = f.read()
+    # scope to the CURRENT run segment: eval.log is appended-to across
+    # rounds, and "Finished user ... elapsed" lines from a PRIOR round's
+    # error-defaulting incident must not fire the fast-finish anomaly on a
+    # healthy new run (first real false alarm, 2026-07-26). Segment starts
+    # at the last resume/start banner if one exists.
+    for marker in ("=== resume ", "=== official evaluation start "):
+        idx = content.rfind(marker)
+        if idx != -1:
+            content = content[idx:]
+            break
     lines = content.split("\n")
     tail = lines[-RETRY_WINDOW_LINES:]
     retry_lines = sum(1 for l in tail if "Retrying" in l)
