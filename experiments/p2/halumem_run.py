@@ -385,7 +385,18 @@ def _answer_plain(mem, q, r):
     unc = uncovered & ask_all
     if ask_all and unc >= ask_all:   # abstain only if NOTHING asked is covered
         return "Unknown."
-    return "; ".join(f["value"] for f in facts)
+    # LENGTH-BUDGETED compose (sentinel catch, 2026-07-27): unbounded joins
+    # (median 742 chars, max ~2KB) made 26.8% of round-3 user-1 answers
+    # unjudgeable by the official LLM judge (None verdicts). Highest-ranked
+    # values first, stop before ~350 chars; always include at least one.
+    out, total = [], 0
+    for f in facts:
+        v = f["value"]
+        if out and total + len(v) + 2 > int(os.environ.get("RG_COMPOSE_BUDGET", "600")):
+            break
+        out.append(v)
+        total += len(v) + 2
+    return "; ".join(out)
 
 
 def answer_question(mem, q, surface="labeled"):

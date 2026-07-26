@@ -4973,3 +4973,27 @@ load-bearing citations verified directly:
     scope, state transition, supporting evidence) with gold operation
     traces + probes. Our receipted lifecycle maps onto its trace format
     almost natively -- benchmark #2 after HaluMem round 3 lands.
+
+## Entry 97 — 2026-07-27 (p2: sentinel's first REAL catch -- 26.8% unjudgeable answers; length-budgeted compose shipped; round 3 restarted)
+
+The sentinel fired ~20 min after user 1's round-3 checkpoint landed:
+result_type None on 26.8% of QA records (their judge failed to emit
+parseable verdicts). Diagnosis: None-verdicts correlate with ANSWER LENGTH
+(median 742 chars vs 304 for judged; max ~2KB) -- the maximal-compose gate
+produced value-lists too long for their qwen judge's JSON-verdict format.
+UNDERNEATH the failure, strong signal: of the 120 answers their judge COULD
+parse, 79 correct / 32 omission / 9 hallucination (66% correct).
+
+HONEST RECOGNITION: part of dev's 40.5% DELIVERED was shotgun effect --
+token-containment inside a 2KB blob is cheap; those same blobs are exactly
+what the judge cannot grade. Length-budget sweep on the real surface:
+350ch->19.8%, 500->25.3%, 600->29.2%, 700->30.3% delivered. Shipped 600
+(env-tunable RG_COMPOSE_BUDGET), below the ~740 None-cliff; answers
+regenerated (median 513, max 598). Judged-correct should exceed the 29.2%
+containment figure (the judge grades semantically, and 66% of parseable
+round-3 answers were correct).
+
+Round 3 restarted (third clean start; user-1's 21h checkpoint was 27%
+unjudgeable = unusable). Sentinel re-armed. The watchdog did precisely what
+entry 94's process lesson demanded: caught in 20 minutes what round 2's
+version of us would have discovered after 4 days.
