@@ -4956,3 +4956,20 @@ ROUND 3 PREFLIGHT: officials 0-9 re-extraction with 14B x v5.1 (GPU,
 ~3.5h) -> stage-1 answers regenerated -> degenerate round-2 checkpoints
 wiped -> resume. Sentinel watching from the first judge call. Adapter cache
 suffix now env-selected (PATCHES.md updated).
+
+## Entry 96 addendum — 2026-07-26 (citations verified at primary source; round 3 paused by registrant)
+
+While round 3 is paused (registrant's GPU): the external review's two
+load-bearing citations verified directly:
+  - mem0 issue #4573 CONFIRMED, richer than quoted: 32-day production run,
+    224/10,134 memories survived audit (97.8% junk), only 38 usable as-is,
+    186 of the survivors needed rewriting; junk stayed dominant even after
+    switching to a frontier extractor for the final 12 days (boot-file
+    restating 52.7% of junk). Independent, real-world confirmation of the
+    write-gate thesis -- extraction quality alone cannot save an ungated
+    memory. Paper-ready motivating citation.
+  - MemOps CONFIRMED = arXiv:2607.12893 (my earlier ID guess was wrong):
+    lifecycle memory operations as structured traces (trigger, target,
+    scope, state transition, supporting evidence) with gold operation
+    traces + probes. Our receipted lifecycle maps onto its trace format
+    almost natively -- benchmark #2 after HaluMem round 3 lands.
