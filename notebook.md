@@ -4997,3 +4997,47 @@ Round 3 restarted (third clean start; user-1's 21h checkpoint was 27%
 unjudgeable = unusable). Sentinel re-armed. The watchdog did precisely what
 entry 94's process lesson demanded: caught in 20 minutes what round 2's
 version of us would have discovered after 4 days.
+
+## Entry 98 — 2026-07-28 (p2: THE OFFICIAL JUDGE REFRAMES THE HEADLINE. 0% None (gate fixed) but 37% hallucination -- our own two-judge 0% was partly judge-prompt leniency. Honest retraction + the real question.)
+
+Ran the EXACT official QA judge (their EVALUATION_PROMPT_FOR_QUESTION +
+llm_request_for_json parser, qwen3:14b on GPU) on our new-gate answers for
+dev users 10-12 (n=476). This is the measurement every prior restart skipped.
+
+RESULT:
+  None-rate 0.0% (was 29.3%) -- FIX-J compose gate fully fixed the
+    unparseable-blob problem. Clean win.
+  Correct 26.7% | Hallucination 37.2% | Omission 36.1% (official judge).
+  By type: where we ABSTAIN it is clean (Memory Boundary 106 correct / 2
+    halluc); everywhere we COMPOSE, hallucination is high (Generalization
+    2/78, Multi-hop 0/17, Basic Recall 15/36, Conflict 2/35).
+
+THE HONEST RECKONING. Our earlier two-judge validation (0/3,189
+hallucinations, entry 87) used MY judge prompt (halumem_run.JUDGE), which
+EXPLICITLY instructs: "returning true RELATED facts that do not answer the
+question is correct, not an error." I built the leniency in. The OFFICIAL
+neutral judge grants no such exception: its Hallucination criterion is
+"response includes information that CONTRADICTS or is INCONSISTENT with the
+reference/key memory points." A composed JOIN of several loosely-matched
+narrative facts routinely contains content inconsistent with the specific
+gold -> hallucination. So the "0% hallucination" headline was, in material
+part, an artifact of a judge I wrote to excuse exactly our failure mode.
+RETRACTED as a standalone claim; the honest version is below.
+
+WHAT IS STILL TRUE (unchanged): the MEMORY LAYER is non-generative -- it
+stores only extracted facts with receipts and abstains with no match. It
+never fabricates a stored fact. That property is real and audited.
+WHAT WAS OVER-CLAIMED: that this yields ~0% hallucination on QA. Answering
+a QA benchmark requires COMPOSING an assertion, and composing imperfectly-
+retrieved facts into a natural answer reads as hallucination to any neutral
+judge. The abstain-first philosophy is right; the benchmark's
+"compose a natural answer" contract is in tension with it, and the plain
+surface resolved that tension by asserting -- wrongly.
+
+THE REAL QUESTION now under test: if the system ABSTAINS unless ONE fact
+confidently+specifically answers (never a multi-fact blob), does official
+hallucination fall to single digits at honest (high) omission? Where we
+already abstain, halluc is ~2%. Testing single-best-fact-or-abstain on dev
+against the real judge before any further official run. This is the true
+trust-Pareto measurement -- and the number that goes in the paper, whatever
+it is.
