@@ -206,11 +206,51 @@ def _ask_tokens(q, facts):
 # candidate pool, and the compose gate is "any real content word covered"
 # (not majority) since FIX D/F/H/I now do the precision work that the
 # majority-coverage gate alone used to.
+#
+# FIX J (entry: compose-vs-abstain gate tightening -- gate_lab.py sweep,
+# dev users 10-12): the above selection made the plain surface loose enough
+# to FIND a stored fact for most questions -- but on questions where the
+# store has no fact that DIRECTLY answers (a confirm/deny "Did she..."
+# question, or a speculative "what might she try next" ask), the widened
+# candidate pool composes a long join of weakly-related narrative facts
+# instead of admitting it doesn't know. The official judge cannot parse
+# these ("None" verdict, ~29% of dev/test) -- worse than an honest
+# "Unknown.", which the judge grades correctly whenever gold agrees.
+# Two measured, narrowly-targeted additions, verified against this dev
+# set's own question_type labels (not guessed -- see gate_lab.py module
+# docstring for the full per-type hit-rate table):
+#   CONFLICT-LEAD ABSTAIN: a question starting with "did/is/was/does" is a
+#   yes/no CONFIRM-OR-DENY ask ("Did Michelle decide to keep eating
+#   sushi?") -- 92% of this dev set's "Memory Conflict" question type, 0-2%
+#   false-positive elsewhere. A join of stored VALUES can never express
+#   "no, actually..."; composing one is a category error regardless of
+#   whether the store holds the right underlying fact, so this abstains
+#   unconditionally, before any recall/selection work runs.
+#   TIGHTER COMPOSE BUDGET: measured on this dev set, DELIVERED (gold-token
+#   containment) and answer length are strongly correlated -- a long blob
+#   cheaply contains gold tokens by volume even when unparseable by a real
+#   judge. RG_COMPOSE_BUDGET's default drops from 600 to 360 (still
+#   env-overridable): the sweep found >350-char answers jump from ~9% to
+#   ~55% of composed answers crossing the 360->400 boundary, while
+#   DELIVERED only drops a few points in that same range -- 360 is the
+#   knee of that curve on this dev set.
+# NOT adopted (measured, rejected): a blanket abstain on ALL
+# modal/speculative phrasing ("might"/"could"/"would" -- "Generalization &
+# Application", 97% hit rate) cut DELIVERED roughly in half for little
+# further LEN-RISK gain once the budget above is in place, because many of
+# those speculative-phrased questions DO have a directly answering stored
+# fact (HaluMem often generates the speculative gold from a real narrative
+# turn) -- killing the whole class throws away real answers along with the
+# blobs. CONFLICT-LEAD alone isolates the one question shape (yes/no
+# confirm/deny) that is STRUCTURALLY unanswerable by any value-join.
 # ---------------------------------------------------------------------------
 
 _NUMERIC_TRIGGERS = {"salary", "amount", "number", "ranking", "score", "rank",
                       "many", "much", "cost", "price", "toppings", "count"}
 _NAME_TRIGGERS = {"name"}
+
+# FIX J: yes/no confirm-or-deny question lead -- see comment block above.
+_CONFLICT_LEAD_RX = re.compile(r"^\s*(did|is|was|does)\b", re.I)
 
 _MONTH_NUM = {m: i + 1 for i, m in enumerate(
     ["jan", "feb", "mar", "apr", "may", "jun",
@@ -318,7 +358,14 @@ def _answer_plain(mem, q, r):
     `r` is the already-`found` recall() result. Composes ONLY stored fact
     values (joined verbatim), never new words -- the same non-generative
     contract as the labeled path, just a looser, better-targeted selection
-    of which stored facts get to speak."""
+    of which stored facts get to speak.
+
+    FIX J (see module comment block above): a yes/no confirm-or-deny
+    question abstains unconditionally, before any recall/selection runs --
+    no join of stored values can ever express the "no, actually..." such a
+    question needs."""
+    if _CONFLICT_LEAD_RX.match(q):
+        return "Unknown."
     persona = mem.g._persona_tokens()
     q_toks_raw = _tokens(q)
     qc = q_toks_raw - persona - _QWORDS - _DATE_PREP
@@ -385,14 +432,18 @@ def _answer_plain(mem, q, r):
     unc = uncovered & ask_all
     if ask_all and unc >= ask_all:   # abstain only if NOTHING asked is covered
         return "Unknown."
-    # LENGTH-BUDGETED compose (sentinel catch, 2026-07-27): unbounded joins
-    # (median 742 chars, max ~2KB) made 26.8% of round-3 user-1 answers
-    # unjudgeable by the official LLM judge (None verdicts). Highest-ranked
-    # values first, stop before ~350 chars; always include at least one.
+    # LENGTH-BUDGETED compose (sentinel catch, 2026-07-27; budget tightened
+    # 600->360 by FIX J above, entry: compose-vs-abstain gate tightening):
+    # unbounded joins (median 742 chars, max ~2KB) made 26.8% of round-3
+    # user-1 answers unjudgeable by the official LLM judge (None verdicts);
+    # even the 600-char budget still left ~29% None on dev/test -- gate_lab's
+    # sweep found the >350-char fraction of composed answers climbs sharply
+    # past a ~360-char budget on this dev set. Highest-ranked values first,
+    # stop before the budget; always include at least one.
     out, total = [], 0
     for f in facts:
         v = f["value"]
-        if out and total + len(v) + 2 > int(os.environ.get("RG_COMPOSE_BUDGET", "600")):
+        if out and total + len(v) + 2 > int(os.environ.get("RG_COMPOSE_BUDGET", "360")):
             break
         out.append(v)
         total += len(v) + 2

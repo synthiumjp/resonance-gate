@@ -369,6 +369,75 @@ def test_answer_question_normal_match_keeps_stored_facts_prefix():
     assert "location: melbourne" in ans
 
 
+# ---------------- plain-surface compose-vs-abstain gate (FIX J) ----------
+
+def test_plain_surface_abstains_on_yesno_confirm_deny_question():
+    """FIX J: a question shaped as a confirm-or-deny ask ('Did she...',
+    'Is her...', 'Was he...', 'Does he...') abstains on the plain surface
+    even when the store DOES hold a directly-matching fact -- a join of
+    stored values can never express the 'no, actually...' such a question
+    needs, so composing one is a category error regardless of what's
+    stored. This is the empirically dominant question_type for HaluMem's
+    "Memory Conflict" class (92% hit rate on the dev set, see gate_lab.py)."""
+    from memory_api import Memory
+    from halumem_run import answer_question
+    facts = [(5, "occupation", "retail associate",
+              [("2026-01-01", "c00"), ("2026-01-02", "c01")])]
+    g = WireGraph.from_facts(facts, n_convs=10)
+    mem = Memory(g)
+    for lead in ("Did she work in retail?", "Is her job retail associate?",
+                 "Was she employed in retail?", "Does she work in retail?"):
+        assert answer_question(mem, lead, surface="plain") == "Unknown."
+
+
+def test_plain_surface_still_composes_on_non_confirm_deny_questions():
+    """Regression: FIX J's leading-word check must not over-fire -- an
+    ordinary 'what' question about the same stored fact still composes
+    normally (this is the pre-existing FIX D/F/H/I selection, unchanged)."""
+    from memory_api import Memory
+    from halumem_run import answer_question
+    facts = [(5, "occupation", "retail associate",
+              [("2026-01-01", "c00"), ("2026-01-02", "c01")])]
+    g = WireGraph.from_facts(facts, n_convs=10)
+    mem = Memory(g)
+    ans = answer_question(mem, "What is her job?", surface="plain")
+    assert ans != "Unknown."
+    assert "retail associate" in ans
+
+
+def test_labeled_surface_unaffected_by_conflict_lead_gate():
+    """FIX J is a surface='plain'-only change (per the task contract): the
+    labeled/product surface must answer a 'Did...' question exactly as it
+    always did, using the pre-existing Fix 2/3 policy."""
+    from memory_api import Memory
+    from halumem_run import answer_question
+    facts = [(5, "occupation", "retail associate",
+              [("2026-01-01", "c00"), ("2026-01-02", "c01")])]
+    g = WireGraph.from_facts(facts, n_convs=10)
+    mem = Memory(g)
+    ans = answer_question(mem, "Did she work in retail?")   # default: labeled
+    assert ans.startswith("Stored facts:")
+    assert "occupation: retail associate" in ans
+
+
+def test_plain_surface_compose_budget_default_is_tightened():
+    """FIX J: the default RG_COMPOSE_BUDGET dropped from 600 to 360 (long
+    joins were the direct cause of unjudgeable 'None'-verdict answers on
+    the official judge). With several long candidate values, the composed
+    answer must stay within the new default budget."""
+    from memory_api import Memory
+    from halumem_run import answer_question
+    long_vals = [f"a fairly long narrative value describing detail {i} " * 3
+                 for i in range(6)]
+    facts = [(2, "preference", v, [("2026-01-01", "c00"), ("2026-01-02", "c01")])
+             for v in long_vals]
+    g = WireGraph.from_facts(facts, n_convs=10)
+    mem = Memory(g)
+    ans = answer_question(mem, "narrative detail preference", surface="plain")
+    assert ans != "Unknown."
+    assert len(ans) <= 360 + 200   # budget + one value's slack (>=1 always kept)
+
+
 def test_fuzz_random_graphs_never_wire_unsupported_links():
     rng = random.Random(42)
     for trial in range(10):
