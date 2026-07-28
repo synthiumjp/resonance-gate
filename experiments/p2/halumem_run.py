@@ -353,6 +353,280 @@ def _asof_select(facts, q_date):
     return [f for d2, f in dated if d2 == best]
 
 
+# ---------------------------------------------------------------------------
+# FIX K: ENTITY+ATTRIBUTE ANCHORING (_answer_anchored, gated behind
+# RG_ANCHORED -- an A/B against the shipped _answer_plain, entry: the 31%
+# hallucination diagnosis).
+#
+# THE DIAGNOSIS (measured against the REAL official judge, not this file's
+# in-house proxy): every flagged plain-surface "hallucination" traced back
+# to a REAL stored fact that was WRONG FOR THE QUESTION, not a fabrication.
+# _answer_plain's selection (FIX B/D/F/H/I above) ranks candidates by VALUE
+# TOKEN overlap across the WHOLE store -- a question asking for the
+# person's job title can be answered by any fact whose VALUE happens to
+# share a word with the question, regardless of whether that fact's
+# ATTRIBUTE is occupation at all. This is the known graph/KG-QA fix
+# (HippoRAG-style entity+attribute anchoring): map the question to the
+# SPECIFIC attribute type it asks about FIRST, restrict candidates to that
+# attribute type, and only then rank by value-token overlap to disambiguate
+# within it. A question with no recognizable attribute-type mapping
+# abstains outright instead of falling back to the whole-store value
+# search.
+#
+# ATTR FOLD (measured off dev users 10-12's own store, RG_EXTRACT_V5's
+# narrative ontology): the v5.1 extractor mints many near-duplicate
+# ATTRIBUTE STRINGS for the same concept -- 182 distinct attribute strings
+# across 3 users, e.g. "monthly_income"/"financial_status"/"savings" all
+# meaning income, "health_status"/"physical_condition"/"chronic_diseases"
+# all meaning health_condition. Anchoring against the RAW attribute string
+# would silently miss most of the store; this folds the OBSERVED variants
+# of each canonical attribute named in the mission brief into one bucket,
+# for ANCHORING/ranking purposes only -- it does not touch ingest_user's
+# own slot keys, clustering, or the labeled surface.
+# ---------------------------------------------------------------------------
+
+_ATTR_FOLD = {
+    "occupation": {"occupation", "current_occupation", "previous_occupation",
+                   "occupation_background", "employment", "career_focus",
+                   "former_employer", "work_arrangement", "work_schedule",
+                   "work_environment", "role_evolution", "career_transition"},
+    "location": {"location"},
+    "birth_date": {"birth_date"},
+    "pet": {"pet", "pets"},
+    "education": {"education", "education_level", "major"},
+    "income": {"income", "monthly_income", "savings", "financial_status"},
+    "relationship": {"relationship", "support_network", "support",
+                      "collaboration", "network", "team", "mentorship",
+                      "guidance", "parental_relationship", "parents"},
+    "tool": {"tool"},
+    "event": {"event"},
+    "plan": {"plan", "current_plan"},
+    "motivation": {"motivation", "source_of_inspiration"},
+    "belief": {"belief", "values"},
+    "value": {"value"},
+    "preference": {"preference", "dislike", "style_preference",
+                   "approach_to_style"},
+    "feeling": {"feeling", "attitude", "reaction", "gratitude"},
+    "reflection": {"reflection", "understanding", "insight"},
+    "health_condition": {"health_condition", "health_status",
+                          "physical_condition", "chronic_diseases",
+                          "health_issue", "health_concern", "health_challenge",
+                          "health_management", "physical_health", "health",
+                          "physical_health_reason", "health_need"},
+    "mental_health": {"mental_health", "mental_health_status",
+                       "mental_health_issues", "mental_health_reason",
+                       "stress_level", "stress", "stress_management",
+                       "mental_challenges"},
+    "gender": {"gender"},
+    "goal": {"goal", "personal_goal", "career_goal", "life_goal", "mission",
+             "purpose", "ambition"},
+    "discipline": {"discipline"},
+    "hobby": {"hobby", "leisure_activity", "past_hobby"},
+    "possession": {"possession", "past_possession"},
+    "project": {"project", "project_type"},
+    "name": {"name"},
+    "age": {"age"},
+}
+_ATTR_FOLD_REV = {v: k for k, vs in _ATTR_FOLD.items() for v in vs}
+
+# mega-buckets: hundreds of facts share these attributes (the v5.1
+# extractor's narrative dump), so attribute anchoring alone cannot pick
+# ONE -- value-token ranking (below, same principle as FIX F) still does
+# the within-bucket disambiguation.
+_MEGA_ATTRS = {"motivation", "belief", "value", "preference", "plan",
+               "reflection", "feeling"}
+
+
+def _anchor_canon(attr):
+    """attr may be 'subj:base' (see _subject_of) or a bare base attribute --
+    fold the BASE to its canonical anchoring bucket; unrecognized strings
+    pass through unchanged (never invented, just not folded)."""
+    base = attr.split(":")[-1]
+    return _ATTR_FOLD_REV.get(base, base)
+
+
+# QUESTION -> ASKED ATTRIBUTE(S) router. A static, hand-authored lexical
+# table (same non-generative shape as wire.py's _QUERY_SYNONYMS) built by
+# inspecting the actual dev question phrasings (HaluMem-Medium.jsonl users
+# 10-12) and the store's actual attribute distribution above -- covering
+# the real phrasings this benchmark uses, not overfit to any one gold
+# answer. A token may map to several canonical attributes (e.g. "work" and
+# a category word can both legitimately point at more than one bucket);
+# the union is the CANDIDATE POOL, narrowed further by value-token ranking.
+_ASK_ATTR_WORDS = {
+    # occupation
+    "job": {"occupation"}, "role": {"occupation"}, "title": {"occupation"},
+    "profession": {"occupation"}, "work": {"occupation"},
+    "career": {"occupation"}, "employed": {"occupation"},
+    "employment": {"occupation"}, "employer": {"occupation"},
+    # birth
+    "born": {"birth_date"}, "birth": {"birth_date"},
+    "birthday": {"birth_date"},
+    # pet
+    "pet": {"pet"}, "pets": {"pet"}, "animal": {"pet"},
+    # location
+    "live": {"location"}, "lives": {"location"}, "city": {"location"},
+    "based": {"location"}, "reside": {"location"}, "resides": {"location"},
+    # education
+    "study": {"education"}, "studied": {"education"},
+    "degree": {"education"}, "major": {"education"},
+    "university": {"education"}, "college": {"education"},
+    # income
+    "earn": {"income"}, "salary": {"income"}, "income": {"income"},
+    "paid": {"income"}, "wage": {"income"}, "savings": {"income"},
+    # relationship
+    "married": {"relationship"}, "spouse": {"relationship"},
+    "wife": {"relationship"}, "husband": {"relationship"},
+    "partner": {"relationship"}, "kids": {"relationship"},
+    "children": {"relationship"}, "friend": {"relationship"},
+    "collaborating": {"relationship"}, "collaborator": {"relationship"},
+    "mentor": {"relationship"},
+    # tool
+    "use": {"tool"}, "uses": {"tool"}, "software": {"tool"},
+    "app": {"tool"}, "tool": {"tool"}, "tools": {"tool"},
+    # hobby
+    "hobby": {"hobby"}, "hobbies": {"hobby"}, "leisure": {"hobby"},
+    # health
+    "disease": {"health_condition"}, "diseases": {"health_condition"},
+    "diagnosed": {"health_condition"}, "condition": {"health_condition"},
+    "illness": {"health_condition"}, "medical": {"health_condition"},
+    "chronic": {"health_condition"}, "health": {"health_condition"},
+    "mental": {"mental_health"}, "stress": {"mental_health"},
+    "stressed": {"mental_health"},
+    # gender
+    "gender": {"gender"},
+    # goal
+    "goal": {"goal"}, "aim": {"goal"}, "objective": {"goal"},
+    "ambition": {"goal"},
+    # discipline
+    "field": {"discipline"}, "discipline": {"discipline"},
+    # narrative
+    "motivate": {"motivation"}, "motivation": {"motivation"},
+    "believe": {"belief"}, "belief": {"belief"}, "opinion": {"belief"},
+    "think": {"belief"},
+    "value": {"value"}, "values": {"value"}, "prioritize": {"value"},
+    "important": {"value"},
+    "feel": {"feeling"}, "feeling": {"feeling"}, "feelings": {"feeling"},
+    "sentiment": {"feeling"}, "emotion": {"feeling"}, "nostalgia": {"feeling"},
+    "enthusiasm": {"feeling"}, "excited": {"feeling"},
+    "realize": {"reflection"}, "reflect": {"reflection"},
+    "reflection": {"reflection"}, "insight": {"reflection"},
+    "learned": {"reflection"},
+    "prefer": {"preference"}, "prefers": {"preference"},
+    "preference": {"preference"}, "favorite": {"preference"},
+    "favourite": {"preference"}, "like": {"preference"},
+    "likes": {"preference"}, "enjoy": {"preference"}, "enjoys": {"preference"},
+    "dislike": {"preference"}, "dislikes": {"preference"},
+    "plan": {"plan"}, "plans": {"plan"}, "planning": {"plan"},
+    "intend": {"plan"}, "upcoming": {"plan"},
+    "event": {"event"}, "attended": {"event"}, "attend": {"event"},
+    "happened": {"event"}, "visited": {"event"}, "watch": {"event"},
+    "watched": {"event"}, "award": {"event"}, "received": {"event"},
+    "project": {"project"}, "possession": {"possession"},
+    "own": {"possession"}, "owns": {"possession"}, "bought": {"possession"},
+}
+
+# "type of <category>" / "<category> preference" phrasing -- the dev set's
+# dominant Basic Fact Recall shape ("What type of games...", "What
+# beverage...", "What genre of music..."). The v5.1 extractor files nearly
+# all of these under attribute "preference" (see distribution above); a
+# category word alone adds "preference" as a candidate bucket, narrowed by
+# value-token ranking below (the category word itself is strong ranking
+# signal: "beverage" tends to co-occur with the coffee/tea fact's value).
+_CATEGORY_WORDS = {"beverage", "drink", "coffee", "tea", "wine", "cuisine",
+                    "food", "game", "games", "movie", "movies", "film",
+                    "films", "cinema", "music", "song", "songs", "genre",
+                    "genres", "book", "books", "literature", "clothing",
+                    "wardrobe", "dress", "sport", "sports", "color", "colour"}
+
+
+def _asked_attrs(q):
+    """QUESTION -> ASKED ATTRIBUTE(S): the canonical attribute bucket(s) the
+    question's own words name, or an empty frozenset when the question
+    names none -- inference/application phrasing ("how might", "why do you
+    think") and conflict "did/is/was/does" asks never name a stored
+    attribute type; per FIX K's abstain rule this is UNKNOWN, not a
+    whole-store fallback search."""
+    attrs = set()
+    for t in _tokens(q):
+        attrs.update(_ASK_ATTR_WORDS.get(t, ()))
+        if t in _CATEGORY_WORDS:
+            attrs.add("preference")
+    return frozenset(attrs)
+
+
+def _answer_anchored(mem, q):
+    """ENTITY+ATTRIBUTE ANCHORING plain-surface policy (FIX K, RG_ANCHORED).
+    Non-generative: returns a single stored, receipted value, or "Unknown."
+    Steps (see module comment block above for the diagnosis):
+      1. asked = _asked_attrs(q) -- the attribute-type(s) the question names.
+         Empty -> abstain (no known attribute asked).
+      2. candidates = stored facts (asserted + provisional) whose folded
+         attribute is in `asked`, subject-scoped to the question (reuses
+         FIX D's _subject_ok so a third-party fact only answers a question
+         that actually names that person).
+      3. as-of-date resolution (FIX H, reused) narrows each attribute group
+         to its latest-valid fact when the question names a date.
+      4. rank by ask-token coverage (value+attribute tokens), then asserted
+         tier over provisional, then mention count; return the single best
+         value. No candidates after step 2 -> abstain."""
+    if _CONFLICT_LEAD_RX.match(q):
+        return "Unknown."
+    asked = _asked_attrs(q)
+    if not asked:
+        return "Unknown."
+
+    q_toks_raw = _tokens(q)
+    cands = []   # [(fact_dict, tier_rank, n_mentions)]
+    for nd in mem.g.nodes.values():
+        if _anchor_canon(nd["attr"]) in asked:
+            f = mem._fact(nd)
+            if _subject_ok(f, q_toks_raw):
+                cands.append((f, 0, nd["n_mentions"]))
+    for nd in mem.g.provisional.values():
+        if _anchor_canon(nd["attr"]) in asked:
+            f = mem._fact(nd, provisional=True)
+            if _subject_ok(f, q_toks_raw):
+                cands.append((f, 1, nd["n_mentions"]))
+
+    if not cands:
+        return "Unknown."
+
+    # FIX H reuse: as-of latest-valid-fact resolution, grouped by the
+    # CANONICAL (folded) attribute so a multi-attribute question keeps one
+    # latest-valid answer per asked attribute type. Same all-or-nothing
+    # replacement rule as _answer_plain: only if at least one group
+    # produced a dated pick do the (possibly attribute-dropping) picks
+    # replace the candidate set; otherwise every original candidate stays
+    # (a question naming a date that matches nothing never invents one).
+    q_date = _parse_query_date(q)
+    if q_date is not None:
+        groups = defaultdict(list)
+        for item in cands:
+            groups[_anchor_canon(item[0]["attribute"])].append(item)
+        kept, any_dated = [], False
+        for _attr, items in groups.items():
+            picked = _asof_select([f for f, _, _ in items], q_date)
+            if picked:
+                any_dated = True
+                picked_ids = {id(p) for p in picked}
+                kept.extend(it for it in items if id(it[0]) in picked_ids)
+        if any_dated:
+            cands = kept
+
+    persona = mem.g._persona_tokens()
+    ask = q_toks_raw - persona - _STOP - _QWORDS - _DATE_PREP
+    ask = {t for t in ask if not _is_dateish(t)}
+
+    def _key(item):
+        f, tier_rank, n = item
+        overlap = len((_tokens(f["attribute"]) | _tokens(f["value"])) & ask)
+        return (-overlap, tier_rank, -n)
+
+    cands.sort(key=_key)
+    return cands[0][0]["value"]
+
+
 def _answer_plain(mem, q, r):
     """The plain-surface selection/composition policy (FIX B/D/F/H/I above).
     `r` is the already-`found` recall() result. Composes ONLY stored fact
@@ -440,6 +714,14 @@ def _answer_plain(mem, q, r):
     # sweep found the >350-char fraction of composed answers climbs sharply
     # past a ~360-char budget on this dev set. Highest-ranked values first,
     # stop before the budget; always include at least one.
+    # RG_SINGLE_FACT (entry 98 test): the official neutral judge marks a
+    # multi-fact JOIN as Hallucination whenever any joined value is
+    # inconsistent with the specific gold. Test config: return ONLY the
+    # single highest-ranked fact (facts are pre-ranked by ask-coverage), so
+    # the answer asserts one thing or nothing -- minimizing contradiction
+    # surface. Measured against the real judge before shipping.
+    if os.environ.get("RG_SINGLE_FACT"):
+        return facts[0]["value"] if facts else "Unknown."
     out, total = [], 0
     for f in facts:
         v = f["value"]
@@ -491,8 +773,15 @@ def answer_question(mem, q, surface="labeled"):
     labeled/product surface keeps the tighter original policy unchanged.
     Surface adaptation, never content generation either way: nothing
     appears in either voice that is not a stored, receipted value."""
-    r = mem.recall(q)
     if surface == "plain":
+        # FIX K (RG_ANCHORED, entry: entity+attribute anchoring): an
+        # entirely separate retrieval path -- attribute-indexed lookup over
+        # the store directly, not match()/spread() -- so it does not need
+        # `r` at all. Env-gated A/B against the shipped _answer_plain; see
+        # that function's module comment block above for the diagnosis.
+        if os.environ.get("RG_ANCHORED"):
+            return _answer_anchored(mem, q)
+        r = mem.recall(q)
         # unlike the labeled path, a raw match() miss is not final here --
         # FIX F's value-token fallback (see _answer_plain) still gets a
         # chance to find a fact through literal value overlap alone, so an
@@ -500,6 +789,8 @@ def answer_question(mem, q, surface="labeled"):
         return _answer_plain(mem, q, r if r["found"] else
                              {"found": True, "asserted": [], "wired": [],
                               "unconfirmed": []})
+
+    r = mem.recall(q)
 
     if not r["found"]:
         return "ABSTAIN -- no stored fact matches (Unknown)."

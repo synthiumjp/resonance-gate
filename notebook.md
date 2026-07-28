@@ -5083,3 +5083,42 @@ trading halluc->omission for a low-halluc high-omission honest Pareto point
 mis-selection != fabrication, near-perfect abstention, receipts prove every
 error traces to a real fact -- and write it up rather than chase the
 leaderboard. Both are publishable; B is the honest headline either way.
+
+## Entry 100 — 2026-07-28 (p2: THE ARCHITECTURE PIVOT. RG is the EVIDENCE LAYER, not the answerer. Correct 25%->48% with the standard composer; abstention-grounded composer under test.)
+
+Systematically ruled out (all real official judge, dev n=476):
+  - Selection strategy: blob 27/37, single-fact 25/31, attribute-anchored
+    25/32. Graph/entity-anchoring (JP's lead, HippoRAG method) IMPLEMENTED,
+    did NOT move it. Selection is not the lever.
+  - Corroboration gating: gold-containment does NOT rise with mention count
+    (prov 20%, x5+ 15%). The "corroboration=trust" thesis holds for
+    recurring LIFE facts (JP's profile) but NOT for HaluMem's one-off
+    specific answers. A real boundary on the thesis.
+
+THE PIVOT (found by reading the competitors' adapter): every shipped system
+(mem0 etc.) does client.search()->retrieve memories->PROMPT_MEMZERO+llm_request
+COMPOSES the answer. Our eval_rgp2 made RG do retrieval AND non-generative
+answering -- we handicapped ourselves refusing the LLM composer everyone
+uses. RG is the MEMORY/EVIDENCE LAYER; the LLM composes. This is the external
+review's exact positioning ("evidence layer; LLMs compose, RG supplies
+receipted evidence") and the honest product architecture. The non-fabrication
+guarantee was always about RG's STORED evidence, never about forbidding the
+client LLM from phrasing.
+
+MEASURED (RG retrieves top-30 receipted facts as context -> IDENTICAL standard
+PROMPT_MEMZERO composer on our GPU qwen3:14b -> official judge):
+  Correct 48.1% (was 25% non-generative) | Halluc 28.8% | Omit 22.9% | None 0.2%
+  Correct NEARLY DOUBLED. Memory Conflict 2->67, Basic Recall 8->33,
+  Generalization 4->28 -- the composer does the semantic selection/reasoning
+  token-matching couldn't. Now COMPETITIVE with shipped (mem0 53/19, Zep
+  55/22, MemOS 67/15) -- mid-pack correct, high-side halluc.
+  The residual halluc is now COMPOSER confabulation, esp. Memory Boundary
+  103/2 (pure-abstain) -> 91/19 (composer guesses when memory lacks answer).
+
+NEXT (running): RG's abstain-over-guess principle applied to the COMPOSER --
+same evidence, prompt appended "answer ONLY from provided memories, else
+Unknown." Should recover boundary abstention + cut halluc. Report BOTH the
+standard-composer number (apples-to-apples vs competitors) AND the
+abstention-grounded number (RG's recommended config) -- honest disclosure of
+both. The claim is now correctly "evidence-constrained grounded answering,"
+not "structurally non-hallucinating QA."
