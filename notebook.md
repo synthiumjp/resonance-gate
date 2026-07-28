@@ -5305,3 +5305,47 @@ client is Claude/GPT-4o-class already. Options:
 RECOMMENDATION: (c) to measure the composer-capability slope locally, then
 (a) for the publishable row with the handicap documented. (b) only if JP
 wants a headline directly comparable to the leaderboard.
+
+## Entry 106 — 2026-07-29 (p2: research scan + BM25 measurement + a REPRODUCIBILITY ANOMALY that must be resolved before the official run)
+
+RESEARCH SCAN (recent work, JP's prompt):
+1. KARPATHY'S FRAMING (LLM Wiki, Apr 2026; "cognitive core"): memory=disk,
+   context=RAM, "context engineering"=the OS deciding what gets paged in.
+   Knowledge should be COMPILED over time like code, not retrieved ad hoc.
+   This is independently the exact architecture of entry 89 (fact graph =
+   page table, transcripts = backing store, receipts = page-fault handler)
+   and of our corroboration+correction loop (facts REFINED over time, not
+   re-derived). Karpathy's "less knowledge, better cognitive core" is our
+   corroboration gate. Convergent validation; also a citable framing.
+2. HYBRID RETRIEVAL IS THE 2026 CONSENSUS: BM25 (exact/rare terms) + dense
+   (paraphrase) + graph (relations) + reranking. Notably BM25 BEATS
+   text-embedding-3-large on several exact-match benchmarks -- our case
+   (named entities, specific attribute values) is exactly BM25's strength.
+   Implication: the embeddings lever is LESS attractive than assumed, and a
+   pure-python BM25 upgrade preserves the no-model/no-GPU product story.
+
+MEASURED (deterministic, dev users 10-12, identical context formatting):
+   current overlap ranking   recall@30 = 58.7%
+   BM25 (IDF + len-norm)     recall@30 = 61.7%   (+3.0)
+   hybrid overlap+0.5*BM25   recall@30 = 60.3%
+   => BM25 is a small, free, pure-python win. Worth taking, not a game-changer.
+
+THE ANOMALY (must resolve before spending official-run GPU): the STORED
+context file that produced our 53.6/17.2 champion measures 85% gold-recall
+(83% with tags stripped), but regenerating context with CURRENT code and the
+SAME ranking formula measures 58.7%. Inspection confirms genuinely different
+facts selected at the same rank (e.g. the gold "preference: black coffee for
+its alertness..." is rank-2 in the stored file, absent from top-30 fresh).
+wire.py/halumem_run.py show NO uncommitted diffs, so the delta is not an
+obvious edit. Possibilities: (a) the stored file was generated under a
+different _QUERY_SYNONYMS/_STOP state that was later committed over;
+(b) a subtle env-dependent path (RG_ANCHORED was exported in an earlier
+shell) changed selection; (c) my replication differs from gen_context_diff
+in a way not yet found.
+WHY IT MATTERS: if current code cannot reproduce the champion's retrieval,
+the 53.6/17.2 headline is NOT reproducible and must not be published until
+it is. This is exactly the class of error the discipline exists to catch.
+NEXT ACTION (before any further GPU spend): regenerate context with current
+code, re-run the judge, and either (i) confirm 53.6 reproduces -- anomaly was
+measurement error, or (ii) find the code state that produced 85% recall and
+pin it. Only then proceed to the 24B composer test (download 8.8/13.3 GB).
