@@ -5041,3 +5041,45 @@ already abstain, halluc is ~2%. Testing single-best-fact-or-abstain on dev
 against the real judge before any further official run. This is the true
 trust-Pareto measurement -- and the number that goes in the paper, whatever
 it is.
+
+## Entry 99 — 2026-07-28 (p2: single-fact result -- hallucination is MIS-SELECTION, not fabrication. The real scientific finding crystallises.)
+
+Single-best-fact-or-abstain, judged by the exact official judge on dev (n=476):
+  Correct 25.0% | Hallucination 30.7% | Omission 44.3% | None 0%
+  (vs multi-fact blob: 26.7 / 37.2 / 36.1) -- single-fact cut halluc only
+  6 pts. NOT the drop to single digits hoped for.
+
+By type, the diagnosis is unmissable:
+  Memory Boundary (we ABSTAIN):    103 correct / 4 halluc  = 96% precision
+  Basic Fact Recall (we ASSERT):     8 correct / 41 halluc = 16% precision
+  Generalization/Conflict/Multihop: near-zero correct, high halluc.
+
+THE FINDING (this is the honest core result, state it plainly):
+Every "hallucination" the official judge flags is a REAL STORED FACT WITH A
+RECEIPT -- it is the WRONG fact for the question, not an invented one. The
+memory never fabricates (auditable: all asserted values are stored). But
+selecting the ONE answering fact from ~1,000 stored facts by token overlap
+is imprecise, so asserting the top pick is wrong more often than right on
+most question types. This is MIS-SELECTION, categorically distinct from
+generative fabrication -- and the receipts are what let us prove the
+distinction.
+
+Corollary, equally important: the system's ABSTENTION is near-perfect (96%
+on boundary). Its honest operating mode is abstain-or-show-receipted-facts,
+NOT compose-a-confident-answer. The benchmark's "give a natural answer"
+contract forces it out of its honest mode into guess-the-answering-fact,
+where token retrieval's imprecision surfaces as apparent hallucination.
+
+Retrieval selection ceiling: oracle says gold-in-store = 55.6%, but correct
+= 25% -- the ~30pt gap is pure SELECTION failure (the answer is in the
+store; we assert the wrong fact). Closing it needs semantic selection
+(embeddings), which the non-generative/no-embedding constraint forbids;
+token overlap has a hard ceiling here.
+
+STRATEGIC FORK (for JP): (A) add a confidence-gated abstention -- assert
+only when one fact dominates AND specifically matches, else abstain --
+trading halluc->omission for a low-halluc high-omission honest Pareto point
+(one more measured dev+real-judge loop); or (B) declare this the result:
+mis-selection != fabrication, near-perfect abstention, receipts prove every
+error traces to a real fact -- and write it up rather than chase the
+leaderboard. Both are publishable; B is the honest headline either way.
