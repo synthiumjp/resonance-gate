@@ -19,10 +19,30 @@ from collections import Counter
 from wire import _tokens, _QUERY_SYNONYMS
 
 K1, B = 1.5, 0.75
+DEFAULT_K = 120          # measured knee: recall 87.6% @ ~3.1k tokens of context
+
+# Light suffix stripping so query and fact forms unify ("prefer" in a question
+# must match "preference" in a stored fact -- the measured cause of real
+# retrieval misses). Crude by design: no dictionary, no model, deterministic.
+# Measured on HaluMem dev users 10-12: recall@30 60.1% -> 66.1% with stemming;
+# with k=120 as well, 87.6%.
+_SUFFIXES = ("ences", "ence", "ances", "ance", "ings", "ing", "ions", "ion",
+             "ies", "ied", "ers", "er", "ed", "es", "s", "ly", "al")
+
+
+def _stem(w):
+    for suf in _SUFFIXES:
+        if len(w) - len(suf) >= 4 and w.endswith(suf):
+            return w[:-len(suf)]
+    return w
+
+
+def _stems(s):
+    return {_stem(t) for t in _tokens(s)}
 
 
 def _fact_tokens(d):
-    return _tokens(d["attr"]) | _tokens(d["value"])
+    return _stems(d["attr"]) | _stems(d["value"])
 
 
 def build_index(mem):
@@ -40,8 +60,9 @@ def build_index(mem):
 
 
 def query_tokens(question):
-    q = _tokens(question)
-    return q | {_QUERY_SYNONYMS[t] for t in q if t in _QUERY_SYNONYMS}
+    raw = _tokens(question)
+    return _stems(question) | {_stem(_QUERY_SYNONYMS[t]) for t in raw
+                                if t in _QUERY_SYNONYMS}
 
 
 def format_fact(d):
@@ -52,7 +73,7 @@ def format_fact(d):
     return f"[{tag}, {dt}] {d['attr'].replace(':', ' of ')}: {d['value']}"
 
 
-def retrieve(mem, question, k=30, index=None):
+def retrieve(mem, question, k=DEFAULT_K, index=None):
     """Top-k receipted facts as a context block for the composer."""
     facts, docs, idf, avgdl = index or build_index(mem)
     qt = query_tokens(question)
