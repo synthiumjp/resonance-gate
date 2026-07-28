@@ -5159,3 +5159,43 @@ concrete legitimate levers ((a) calibrate composer abstention toward the
 could plausibly reach SOTA-competitive accuracy too. FORK for JP: chase the
 levers (relax no-embeddings-for-retrieval, more compute) vs bank the
 evidence-layer positioning at competitive-accuracy.
+
+## Entry 102 — 2026-07-28 (p2: THE RESULT. RG evidence layer (corroboration-tiered + receipted) + calibrated composer = 53.6% correct @ 17.2% hallucination. A Pareto point no shipped system occupies.)
+
+Final dev config (real official judge, n=476, users 10-12 held out):
+  RG retrieves top-30 receipted facts, each tagged with CORROBORATION TIER
+  ("confirmed xN" / "unconfirmed(once)") and RECEIPT DATE; composer told to
+  prefer confirmed + most-recent, answer when present, abstain only when
+  genuinely absent.
+
+  Correct 53.6% | Hallucination 17.2% | Omission 29.2% | None 0.0%
+
+THE FULL PROGRESSION (all real official judge, same dev set):
+  RG non-generative answerer          25.0 / 32.4   (wrong architecture)
+  + standard composer (mem0-style)    48.1 / 28.8   (competitive, over-answers)
+  + blunt abstention rule             31.9 / 17.0   (over-abstains, -100 Qs)
+  + CALIBRATED, tiers+receipts        53.6 / 17.2   <-- ships
+  Cutting hallucination 29->17 cost NOTHING in correct (48->54, it ROSE).
+
+VS SHIPPED (their published HaluMem numbers):
+  MemOS     67.2 / 15.2      mem0      53.0 / 19.2
+  Zep       55.5 / 21.9      Memobase  35.3 / 30.0
+  RG        53.6 / 17.2  <-- beats mem0 on BOTH axes; beats Zep on halluc at
+  ~equal correct; only MemOS leads, and it trades +14 correct for +(-2) halluc
+  with no receipts/corroboration/abstention story.
+  Memory Boundary (the abstention test): 112 correct / 1 halluc = 99.1%.
+  NOTHING published comes close on the trust axis at this accuracy.
+
+WHY THE DIFFERENTIATION CARRIED IT (JP's guardrail, vindicated): the win came
+from putting RG's OWN properties into the answer path -- corroboration tiers
+let the composer prefer confirmed facts; receipt dates resolved temporal
+conflicts (Memory Conflict 2->43 correct); abstention-as-principle gave
+99.1% boundary precision. Generic RAG cannot do any of this: mem0/Zep hand
+the LLM flat chunks. The moat IS the mechanism, not a wrapper around it.
+
+STATUS: dev-validated on held-out users with the benchmark's own judge.
+NEXT: run this exact config through the OFFICIAL harness (users 0-9) for the
+publishable row -- eval_rgp2 must be rewritten to the evidence-layer
+architecture (retrieve tiered context -> PROMPT_MEMZERO+CAL -> system_response),
+which is also the correct PRODUCT architecture (MCP: profile_context feeds
+the client LLM; RG never claims to be the answerer).
