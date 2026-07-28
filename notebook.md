@@ -5349,3 +5349,33 @@ NEXT ACTION (before any further GPU spend): regenerate context with current
 code, re-run the judge, and either (i) confirm 53.6 reproduces -- anomaly was
 measurement error, or (ii) find the code state that produced 85% recall and
 pin it. Only then proceed to the 24B composer test (download 8.8/13.3 GB).
+
+## Entry 107 — 2026-07-29 (p2: GPU fell out of the ROCm stack; everything since ran 17x slower on CPU. Monitoring gap: no throughput check.)
+
+JP noticed "the GPU isn't spinning" -- correct. ggml_cuda_init: "failed to
+initialize ROCm: no ROCm-capable device is detected". ROCm is installed and
+WAS working earlier today (server log: "found 1 ROCm devices ... 16325 MiB").
+So: wedged WSL GPU passthrough (/dev/dxg), most plausibly caused by repeated
+pkill -9 of llama-cpp servers DURING model load/GPU allocation -- my own
+process churn. Effect: llama-cpp silently fell back to CPU. Measured
+136 s/request and 4.25 tok/s vs ~8 s/request on GPU (~17x slower), with the
+judge appearing "running" the whole time.
+
+MONITORING GAP (same class as entry 94's lesson, and it bit again): sentinel
+checks liveness, log growth, retry storms and output quality -- but NOT
+THROUGHPUT. A run that silently switches to CPU looks perfectly healthy by
+every existing check. FIX OWED: sentinel rule asserting judge-call latency /
+items-per-hour against an expected band, and a GPU-availability probe
+(ggml "found N ROCm devices") at server start that REFUSES to launch on CPU
+rather than silently degrading.
+
+RECOVERY: needs `wsl --shutdown` from Windows (VM-level GPU re-init), which
+also ends the Claude session. Resume script written:
+~/rg_private/halumem/dev/resume_after_wsl_restart.sh -- it VERIFIES ROCm is
+back before starting anything (refuses to run on CPU), then relaunches the
+context_v2 judge.
+
+NOTHING LOST: retrieve.py (BM25+stemming+k=120, dev gold-recall 61.7->87.6%)
+is committed (7e80a05); context_v2.jsonl, all extraction caches, the 24B
+composer GGUF (13.3GB on D:) are all on disk. Only the ~1h of CPU-speed
+judging is discarded.
