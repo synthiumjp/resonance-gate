@@ -5199,3 +5199,35 @@ publishable row -- eval_rgp2 must be rewritten to the evidence-layer
 architecture (retrieve tiered context -> PROMPT_MEMZERO+CAL -> system_response),
 which is also the correct PRODUCT architecture (MCP: profile_context feeds
 the client LLM; RG never claims to be the answerer).
+
+## Entry 103 — 2026-07-28 (p2: composer-lever sweep. Ceiling re-measured at 88%; noise-reduction dead; completeness trades correct for halluc; isolating the rule.)
+
+CEILING RE-MEASURED on the tiered context (the 59% in entry 101 was measured
+pre-tier and was WRONG): gold IS in the top-30 tiered context for 307/363 =
+85% of real-gold Qs. With 113 Unknown-gold Qs at 99% correct, the ceiling
+with CURRENT retrieval = 88%. We ship 53.6 -> the COMPOSER leaves ~35pts;
+retrieval misses cost only ~12. Embeddings-for-retrieval DEMOTED as a lever.
+Gold-bearing line ranks #1 (median rank 0), top-5 for 81% -- retrieval
+ordering is already excellent.
+
+LEVER SWEEP (all real official judge, dev n=476, same held-out users):
+  k=30 tiered + calibrated (champion)   53.6 / 17.2 / 29.2
+  k=15 focused context                  52.1 / 17.2 / 30.7  -> WASH; context
+    dilution is NOT the bottleneck. Noise-reduction lever DEAD.
+  length-normalized ranking             (recall 85->79%)    -> REJECTED
+  v2 completeness-calibrated            54.8 / 23.3 / 21.8  -> correct +1.2
+    but halluc +6.1: WORSE Pareto for a trust-positioned product.
+
+FAILURE INSPECTION (the useful part -- read 6 real failures where gold WAS in
+context): NONE were confabulation. All near-misses: terse/partial answers
+judged Omission ("Transforming predictive analytics" vs the full goal
+statement); yes/no answered without the supporting fact ("No." -> judged
+Hallucination); incomplete enumeration ("herbal teas" missing "and
+decaffeinated options"); over-abstention despite in-context evidence
+(diabetes -> "Unknown"). The gap is ANSWER COMPLETENESS, not trust/retrieval.
+
+v2 fixed exactly what it targeted (Memory Conflict 43->54 correct, omission
+29->22%) but its rule 4 ("search carefully before concluding absence") also
+pushed answering on thin evidence -> +6pt halluc. v3 under test: v2's
+completeness rules 1-3 with v1's STRICT absence rule restored. Hypothesis:
+recover the Conflict/omission gains without the halluc cost.
