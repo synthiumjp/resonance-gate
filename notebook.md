@@ -5265,3 +5265,43 @@ STRATEGIC NOTE: (a) is likely worth 10-20pts and costs nothing architecturally
 the product reality (RG feeds whatever LLM the user already runs). Testing
 the composer-capability hypothesis with the 30B local model if it fits, or by
 documenting the disadvantage explicitly in the writeup.
+
+## Entry 105 — 2026-07-29 (p2: THE HANDICAP CONFIRMED. Published HaluMem numbers use GPT-4o as composer+judge; we run local qwen3:14b for BOTH. Our 53.6/17.2 is not apples-to-apples -- it is apples-to-oranges IN OUR DISFAVOUR.)
+
+VERIFIED at source: HaluMem eval/.env-example sets OPENAI_MODEL=gpt-4o, and
+llms.py uses that single MODEL for BOTH the answer composition (each
+eval_<frame>.py) and the judging (eval_tools). So the published
+MemOS 67.2/15.2, Zep 55.5/21.9, mem0 53.0/19.2 are all
+  [vendor memory] + [GPT-4o composer] graded by [GPT-4o judge].
+Ours is
+  [RG memory] + [local qwen3:14b composer] graded by [local qwen3:14b judge].
+
+TWO DISTINCT DISADVANTAGES, both ours:
+  1. COMPOSER capability: a local 14B extracting a precise answer from 30
+     evidence lines vs GPT-4o doing it. Entry-104's sweep showed our residual
+     gap is composer capability, not prompt wording -- this is the same gap.
+  2. JUDGE strictness/parse: a 14B judge is harsher and noisier than GPT-4o
+     (it produced the None-verdict cliff we spent days on; GPT-4o would not).
+
+SO THE HONEST READING OF 53.6/17.2 IS: RG's evidence layer, with a
+7x-smaller local composer and a stricter local judge, lands between mem0 and
+Zep on correctness and BEST-IN-CLASS-adjacent on hallucination (17.2 vs
+MemOS 15.2, mem0 19.2, Zep 21.9) -- while running entirely on one consumer
+GPU with zero API spend, and carrying receipts/corroboration/abstention that
+none of them have. Memory Boundary 112/1 = 99.1%.
+
+WHAT THIS MEANS FOR "CAN WE DO BETTER" (JP): yes, and the biggest single
+lever is now unambiguous and NON-ARCHITECTURAL -- swap the composer. RG is
+the evidence layer; the composer is the CLIENT's LLM. In the product, the
+client is Claude/GPT-4o-class already. Options:
+  (a) HONEST DUAL REPORTING: run the official harness with our local stack
+      (zero-API, reproducible by anyone) AND note the composer handicap
+      explicitly. Defensible, cheap, no API spend -- fits the no-paid-API rule.
+  (b) ONE GPT-4o-composer run for apples-to-apples (~$5-15 of API, breaks the
+      no-API rule -- JP's call, and it is the ONLY way to compare like-for-like
+      with published numbers).
+  (c) Larger LOCAL composer (qwen3:30b+ / mixtral) on the 16GB GPU -- partial
+      closure, still local, no API. Needs a model pull + VRAM check.
+RECOMMENDATION: (c) to measure the composer-capability slope locally, then
+(a) for the publishable row with the handicap documented. (b) only if JP
+wants a headline directly comparable to the leaderboard.
