@@ -5231,3 +5231,37 @@ v2 fixed exactly what it targeted (Memory Conflict 43->54 correct, omission
 pushed answering on thin evidence -> +6pt halluc. v3 under test: v2's
 completeness rules 1-3 with v1's STRICT absence rule restored. Hypothesis:
 recover the Conflict/omission gains without the halluc cost.
+
+## Entry 104 — 2026-07-29 (p2: v3 falsifies the isolation hypothesis. Prompt-tuning frontier reached at 53.6/17.2; the composer plateau is real.)
+
+v3 (v2's completeness rules 1-3 + v1's STRICT absence rule): 51.9 / 22.5 / 25.6
+Hypothesis was: v2's +6pt halluc came from its relaxed absence rule; restore
+strict absence -> keep the completeness gains, lose the halluc. FALSIFIED --
+halluc stayed high (22.5 vs v2's 23.3) AND correct fell (51.9 vs 54.8).
+Therefore the halluc cost comes from the COMPLETENESS/YES-NO rules
+themselves: instructing "always state the supporting fact" makes the composer
+ASSERT on thin evidence (it manufactures a supporting fact to comply).
+
+FULL COMPOSER-PROMPT SWEEP, all real official judge, dev n=476:
+  v1 calibrated (SHIPS)      53.6 / 17.2 / 29.2   <-- best Pareto
+  v2 completeness            54.8 / 23.3 / 21.8   (+1.2 correct, +6.1 halluc)
+  v3 completeness+strict     51.9 / 22.5 / 25.6   (worse on both)
+  blunt abstention           31.9 / 17.0 / 51.1
+  standard (mem0-style)      48.1 / 28.8 / 22.9
+  k=15 context               52.1 / 17.2 / 30.7
+CONCLUSION: prompt-level composer tuning has hit its frontier at 53.6/17.2
+with this composer model. The residual ~35pt gap to the 88% ceiling is NOT
+addressable by prompt wording -- it is composer CAPABILITY (a local 14B
+extracting a precise answer from 30 evidence lines). Levers that remain are
+architectural, not textual:
+  (a) BIGGER/BETTER COMPOSER (the real one: every competitor's published
+      numbers use frontier API models as the composer; we use local qwen3:14b.
+      This is an apples-to-oranges disadvantage we have been absorbing
+      silently -- MemOS/mem0/Zep numbers are with GPT-4-class composers.)
+  (b) two-pass compose (focused first, wide fallback) -- untested, ~2x cost
+  (c) question-type routing to the wire graph for multi-hop -- untested
+STRATEGIC NOTE: (a) is likely worth 10-20pts and costs nothing architecturally
+-- it is the SAME evidence layer, just a stronger client LLM. It also matches
+the product reality (RG feeds whatever LLM the user already runs). Testing
+the composer-capability hypothesis with the 30B local model if it fits, or by
+documenting the disadvantage explicitly in the writeup.
