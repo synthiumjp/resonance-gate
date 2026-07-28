@@ -5122,3 +5122,40 @@ standard-composer number (apples-to-apples vs competitors) AND the
 abstention-grounded number (RG's recommended config) -- honest disclosure of
 both. The claim is now correctly "evidence-constrained grounded answering,"
 not "structurally non-hallucinating QA."
+
+## Entry 101 — 2026-07-28 (p2: the Pareto + the ceiling diagnosed. Two operating points; retrieval ceiling 59%; composer calibration is the gap. Clear path to SOTA-competitive.)
+
+RG-evidence-layer, two composer configs (real official judge, dev n=476):
+  standard composer:            Correct 48% | Halluc 29% | Omit 23%
+  abstention-grounded composer: Correct 32% | Halluc 17% | Omit 51%
+  (shipped ref: MemOS 67/15, mem0 53/19, Zep 55/22, Memobase 35/30)
+Abstention-grounding cut halluc 29->17 (near best-in-class) and restored
+boundary abstention (112/1), but OVER-corrected: abstained on ~100 questions
+whose gold was in the retrieved context.
+
+DETERMINISTIC DIAGNOSIS (no judge): of 363 real-gold dev questions, gold is
+IN our top-30 retrieved context for 59% (213), a retrieval MISS for 41%
+(150). So:
+  - RETRIEVAL CEILING = 59% (token-ranked top-30). Lifting it needs better
+    retrieval (embeddings for the retrieve->context step -- NOT a non-
+    hallucination violation: retrieval surfaces receipted facts, the composer
+    already is an LLM). This is a FOUNDING-CONSTRAINT decision (JP): relax
+    "no embeddings" for RETRIEVAL only.
+  - COMPOSER CALIBRATION is the current gap: with gold in-context for 213 Qs,
+    standard composer got ~138 right (over-answers -> boundary halluc);
+    abstention composer got only ~40 (over-abstains -> ~100 wasted). The
+    achievable frontier with CURRENT retrieval ~= (213 in-context answered +
+    ~110 boundary correct)/476 ~= 68% correct at near-0 halluc IF the composer
+    perfectly answers-in-context / abstains-otherwise. That would BEAT MemOS
+    (67/15). The gap to it is pure composer prompt calibration.
+
+HONEST STRATEGIC TRUTH: raw QA accuracy is dominated by extraction+retrieval+
+composer quality, where our local/non-generative/no-embedding constraints
+trade accuracy for cost+trust+auditability. RG's real moat is the evidence-
+layer properties (receipts, corroboration, correction, abstention), per the
+external review -- NOT leaderboard accuracy. BUT the diagnosis shows two
+concrete legitimate levers ((a) calibrate composer abstention toward the
+~55/15 frontier; (b) embeddings-for-retrieval to lift the 59% ceiling) that
+could plausibly reach SOTA-competitive accuracy too. FORK for JP: chase the
+levers (relax no-embeddings-for-retrieval, more compute) vs bank the
+evidence-layer positioning at competitive-accuracy.
