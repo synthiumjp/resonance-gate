@@ -5499,3 +5499,32 @@ sequential -- recite --half then current --half (~238 records each, real
 judge). Decision rule: >=5pt correct gain or >=4pt halluc drop on the screen
 -> full-set run of the winner; both null -> the composer-capability ladder
 (24B, then M3 70B) is the remaining lever, prompt/context tuning closed.
+
+## Entry 111 — 2026-07-29 (p2: both composer-structure screens NULL. Prompt/context tuning is closed at 51.7/22.5; the 24B composer-capability run launched.)
+
+Half-set screens vs the 51.7/22.5/25.8 full-set baseline (real judge, n=238):
+  recite-then-answer   50.8 / 23.9 / 25.2  -- NULL (-0.9 corr, +1.4 hall).
+    The +31pp literature gain (arXiv:2510.05381) did not transfer: it was
+    measured extracting relevant passages from raw PROSE; our context is
+    already structured, pre-ranked fact lines, so recitation adds a second
+    place to drop the right line and nothing else.
+  currency marking     52.9 / 24.8 / 22.3  -- NULL by decision rule
+    (+1.2 corr, +2.3 hall, -3.5 omit): the same completeness-for-trust
+    trade v2's rules made (entries 103-104), now produced by a DETERMINISTIC
+    mechanism instead of prompt wording. Confirms the trade lives in the
+    composer's assertion threshold, not in how currency information reaches
+    it. (Dynamic Update did improve 3/12 -> 3/6-scaled -- direction right,
+    n too small, cost too high.)
+
+CONCLUSION, now measured from three independent angles (wording sweep e104,
+recitation structure, deterministic pre-resolution): the 14B composer is the
+plateau. 51.7/22.5 is what qwen3:14b extracts from this evidence. Remaining
+lever = composer capability, exactly as the product architecture wants it
+(the client brings the composer).
+
+LAUNCHED: run_24b.sh -- graceful server swap (SIGTERM only, ROCm verified
+before EACH phase, refuses CPU) -> mistral-small-24b-q4km composes all 476
+context_v2 records (crash-resumable answers_24b.jsonl) -> swap back ->
+UNCHANGED official qwen3:14b judge grades them (vary only the composer
+axis, entry 105). Throughput sentinel armed. This is the composer-capability
+slope measurement; the M3 70B is the next rung if the slope is real.
