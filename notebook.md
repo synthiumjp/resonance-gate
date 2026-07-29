@@ -5468,3 +5468,34 @@ lexicographic date comparison marking a 2027 fact superseded by a 2025 one,
 plus generic-attr mega-slots, before any GPU was spent). --half flag for
 ~1h screening runs. Plan: screen recite + current on half-set, full-set the
 winner, then the 24B composer per the queue.
+
+## Entry 110 — 2026-07-29 (p2: THE HONEST REPRODUCIBLE NUMBER. context_v2 (committed retrieve.py, BM25+stem+k=120) + calibrated composer = 51.7 correct / 22.5 halluc / 25.8 omit. Variant screens launched.)
+
+The judge run the GPU wedge interrupted has landed (real official judge,
+n=476, dev users 10-12, everything generated from committed code 7e80a05):
+
+  Correct 51.7% | Hallucination 22.5% | Omission 25.8% | None 0.0%
+
+vs the RETRACTED-as-unreproducible champion 53.6/17.2: -1.9 correct,
++5.3 halluc. The irreproducible context was BETTER than what the committed
+path produces -- consistent with entry 106's inspection (its lost code state
+selected genuinely different, evidently more precise facts). The honest row
+stands: 51.7/22.5 beats Memobase (35.3/30.0), sits just under mem0
+(53.0/19.2), still with a 7x-smaller composer + stricter judge than every
+published number, zero API spend, and receipts none of them carry.
+
+By type (None/Corr/Omit/Hall): Boundary 0/111/0/2 (98.2% abstention
+precision, the moat metric, intact). Conflict 0/61/17/25 (61 correct is the
+best Conflict result of ANY config yet -- the k=120 context evidently feeds
+the date-preference rule better than k=30 did). Weakest: Dynamic Update
+0/3/5/12 and Multi-hop 0/6/9/13 -- precisely the classes the two prepped
+variants target (currency marking; recitation focus).
+
+Throughput sentinel behaved: 343 items/h on GPU (vs ~26/h the CPU-fallback
+day), one clean "ok" pass, exited on the DONE flag.
+
+LAUNCHED (GPU freed, server reused): compose_judge_variants.py screens,
+sequential -- recite --half then current --half (~238 records each, real
+judge). Decision rule: >=5pt correct gain or >=4pt halluc drop on the screen
+-> full-set run of the winner; both null -> the composer-capability ladder
+(24B, then M3 70B) is the remaining lever, prompt/context tuning closed.
