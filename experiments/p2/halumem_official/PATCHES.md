@@ -39,3 +39,22 @@ detection fails under WSL2 where llama-cpp's works), measured ~90s/call =
 
 7. eval/eval_rgp2.py: extraction-cache suffix now env-selected (_v5 when
    RG_EXTRACT_V5 else _v4) -- round 3 uses the v5.1 narrative extractor.
+
+## 2026-07-29 — eval_rgp2.py rewritten to the evidence-layer architecture (entry 114)
+
+The QA path no longer calls `answer_question(surface="plain")` (non-generative
+readout, the pre-pivot architecture). It now mirrors what every other frame's
+adapter does at QA time: retrieve memories, then one `llm_request` composes the
+answer. Ours retrieves via committed `experiments/p2/retrieve.py`
+(BM25+stemming, k=120, tiered+receipted lines) and composes under the CAL
+grounding rules — the exact config judged at 51.7/22.5 on dev (entry 110).
+`question["context"]` now records the actual evidence context.
+
+Composer endpoint comes from `OPENAI_BASE_URL` (+`RG_PREFIX_NO_THINK=1` for the
+qwen3:14b llama-cpp server) — same env mechanism the harness already uses for
+its own calls. `RG_TIMELINE=1` additionally appends a store-receipt-backed
+CHANGE HISTORY section (experiments/p2/timeline.py) + read rule; OFF by default
+pending an end-to-end judged screen.
+
+`retrieve.py` gained `retrieve_facts()` (pure refactor, verified byte-identical
+context output on dev user 10 before/after).

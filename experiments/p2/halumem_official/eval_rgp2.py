@@ -1,25 +1,28 @@
 """HaluMem adapter for the RG p2 memory system (github.com/MemTensor/HaluMem
-eval harness). Mirrors the contract of eval_memzero.py / eval_memos.py --
-same run-artifact shape consumed by evaluation.py -- but nothing here calls
-a vendor API: memory extraction is cache-replay (RG_EXTRACT_V4=1, per-turn
-extraction cache under ~/rg_private/halumem/cache_u{i}_v4.jsonl) and QA
-answering is pure python (non-generative recall). The only LLM calls in the
-whole rgp2 evaluation happen downstream, in evaluation.py's judge stage,
-against the local ollama endpoint configured in .env.
+eval harness) -- EVIDENCE-LAYER architecture (entry 100 pivot, dev-validated
+at 51.7/22.5 in entry 110): RG retrieves BM25-ranked, corroboration-tiered,
+receipted evidence lines (experiments/p2/retrieve.py, committed 7e80a05+)
+and a local composer LLM (the same class of call every other frame's adapter
+makes at QA time) phrases the answer under the calibrated grounding rules.
+Memory extraction stays cache-replay; retrieval stays pure python.
 
 Interface this file fills in, per the official contract:
   - "memory extraction" artifact per session: session["extracted_memories"],
-    a list[str] -- here the FULL final stored-fact set for the user (both
-    tiers), the same list repeated for every session (our system is not
-    session-incremental; see HANDOVER/report note on this).
+    facts NEW as of that session (session-incremental prefix re-ingest).
   - "memory update" artifact: for each gold memory_point with
     is_update=="True" and non-empty original_memories, attach
     memory_point["memories_from_system"] = list[str] (our mem.recall() over
     the memory_content as query).
-  - "QA" artifact: for each question, attach question["system_response"] =
-    our answer_question() output verbatim (no separate LLM composition step
-    -- our answers are already a stored-fact readout, so this IS the
-    system's final response).
+  - "QA" artifact: question["system_response"] = composer output over the
+    retrieved evidence context (PROMPT_MEMZERO + CAL, the exact config
+    judged in entry 110); question["context"] = that evidence context.
+
+Env:
+  OPENAI_BASE_URL / RG_PREFIX_NO_THINK -- composer endpoint (llms.py); use
+    the qwen3:14b llama-cpp server with RG_PREFIX_NO_THINK=1.
+  RG_TIMELINE=1 -- ALSO append timeline.change_history (store-receipt-backed
+    CHANGE HISTORY) + its read rule. OFF by default: screened but not yet
+    judged end-to-end; do not enable for an official run until it is.
 
 Usage (matches eval_memzero.py's __main__ shape):
     python eval_rgp2.py [--data_path PATH] [--version default]
@@ -30,6 +33,7 @@ import argparse
 import copy
 import json
 import os
+_SFX = "_v5" if os.environ.get("RG_EXTRACT_V5") else "_v4"
 import sys
 import time
 
@@ -45,9 +49,44 @@ if _P2 not in sys.path:
 os.environ.setdefault("RG_EXTRACT_V4", "1")
 
 import halumem_run as RG  # noqa: E402  (path/env setup must run first)
+import retrieve as RV     # noqa: E402
+import timeline as TL     # noqa: E402
+from llms import llm_request        # noqa: E402  (harness-local)
+from prompts import PROMPT_MEMZERO  # noqa: E402
 
 DEFAULT_DATA_PATH = os.path.expanduser("~/rg_private/halumem/HaluMem-Medium.jsonl")
 DEFAULT_CACHE_DIR = os.path.expanduser("~/rg_private/halumem")
+
+_TIMELINE = os.environ.get("RG_TIMELINE", "0") == "1"
+
+# The calibrated grounding rules judged at 51.7/22.5 (entry 110). Keep
+# byte-identical to compose_judge_v2ctx.py's CAL.
+CAL = ("\n\nGROUNDING RULES (follow exactly):\n"
+ "1. Use ONLY the memories above. Each memory is tagged 'confirmed xN' (corroborated N times) "
+ "or 'unconfirmed(once)'. When memories conflict, prefer confirmed and the most recent date.\n"
+ "2. If the memories DO contain the information asked, answer it concisely and directly.\n"
+ "3. Only if the specific information asked is genuinely NOT present in ANY memory, respond "
+ "with exactly: Unknown. Do not guess or use outside knowledge -- but do NOT answer 'Unknown' "
+ "when the answer is present in the memories.")
+
+
+def compose_answer(mem, question, index):
+    """Evidence-layer QA: retrieve tiered+receipted context, compose under
+    the calibrated rules. Returns (answer, context)."""
+    facts = RV.retrieve_facts(mem, question, index=index)
+    context = "\n".join(RV.format_fact(d) for d in facts) or "(no relevant memories)"
+    extra = ""
+    if _TIMELINE:
+        section = TL.change_history(mem, facts)
+        if section:
+            context = context + "\n" + section
+            extra = TL.TIMELINE_RULE
+    try:
+        answer = llm_request(PROMPT_MEMZERO.format(context=context,
+                                                   question=question) + CAL + extra)
+    except Exception:
+        answer = "Unknown."
+    return answer, context
 
 
 def _fact_str(nd):
@@ -82,7 +121,7 @@ def search_memories(mem, query, top=10):
 
 def process_user(idx, user_data, cache_dir=DEFAULT_CACHE_DIR):
     """idx: 0-based position of this user in the source jsonl -- selects the
-    matching per-user extraction cache (cache_u{idx}_v4.jsonl); ingestion is
+    cache_path = os.path.join(cache_dir, "cache_u{}{}.jsonl".format(idx, _SFX))
     pure cache replay, no model call. Returns a dict in the same shape
     eval_memzero.py's process_user produces (minus the tmp-file bookkeeping),
     ready to be JSON-lines'd into results/rgp2-<version>/rgp2_eval_results.jsonl
@@ -111,7 +150,7 @@ def process_user(idx, user_data, cache_dir=DEFAULT_CACHE_DIR):
     """
     uuid = user_data["uuid"]
     sessions = user_data["sessions"]
-    cache_path = os.path.join(cache_dir, f"cache_u{idx}_v4.jsonl")
+    cache_path = os.path.join(cache_dir, "cache_u{}{}.jsonl".format(idx, _SFX))
 
     new_user_data = {"uuid": uuid, "user_name": uuid, "sessions": []}
     prev_state = {}  # node id -> tier, as of the previous session
@@ -154,15 +193,16 @@ def process_user(idx, user_data, cache_dir=DEFAULT_CACHE_DIR):
             continue
 
         new_session["questions"] = []
+        index = RV.build_index(mem)   # one index per session-state
         for qa in session["questions"]:
             t1 = time.time()
-            answer = RG.answer_question(mem, qa["question"])
+            answer, context = compose_answer(mem, qa["question"], index)
             qa_dur = (time.time() - t1) * 1000
 
             new_qa = copy.deepcopy(qa)
-            new_qa["context"] = "\n".join(extracted_memories_for(mem)[:20])
+            new_qa["context"] = context
             new_qa["search_duration_ms"] = qa_dur
-            new_qa["system_response"] = answer  # non-generative: IS the answer
+            new_qa["system_response"] = answer
             new_qa["response_duration_ms"] = 0.0
             new_session["questions"].append(new_qa)
 

@@ -5603,3 +5603,33 @@ rewrite was already required for the official run; this gives it a second
 job. Multi-hop routing via the wire graph joins it there (needs live store
 too). The elegant path holds: 7-up-2-down came from structure alone, zero
 added model capability.
+
+## Entry 114 — 2026-07-29 (p2: HARNESS REWRITE SHIPPED. eval_rgp2 QA = evidence layer (retrieve.py + CAL composer); timeline.py store-backed chains behind RG_TIMELINE, screen pending.)
+
+eval_rgp2.py rewritten (repo mirror + PATCHES.md updated): QA now retrieves
+via committed retrieve.py and composes via llm_request(PROMPT_MEMZERO+CAL)
+-- the entry-110 config, byte-identical CAL. Session-incremental ingest,
+extraction/update artifacts, as-of semantics all unchanged. Smoke-run on a
+1-session slice of official user 0: correct abstention (middle name,
+fabricated event), correct answer (birth date), as-of context confirmed;
+RG_TIMELINE flag path also runs.
+
+timeline.py (committed): store-backed CHANGE HISTORY -- same-attr chains
+linked on node token UNIONS (all merged variant wordings) with receipts
+dated per conversation, narrative attrs excluded from chaining (the entry
+100/109/113 lesson, now a hard rule in code). vs line re-clustering:
+Dynamic Update gold-in-chain 2/20 -> 4/20; sections appear on 57% of dev
+questions (structure-triggered). The remaining Update misses split into a
+linking class (job-title chain failed to form) and a principled class
+(golds that are inferences, not slot values -- no chain can hold them).
+
+retrieve.py: retrieve_facts() split out for the adapter; refactor VERIFIED
+byte-identical on dev user 10 contexts before committing (the judged-config
+rule). Noted, not fixed: format_fact picks its display date by lexicographic
+max -- same bug class as entry 109's stemmer; fix only alongside the next
+judged retrieval change.
+
+GATE before any official run with RG_TIMELINE=1: judged dev screen of the
+store-backed timeline (temporal subset + a Memory Boundary sample -- the
+57% section coverage must not erode the 111/2 abstention moat). Without the
+flag, eval_rgp2 runs the measured 51.7/22.5 config as-is.

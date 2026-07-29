@@ -73,8 +73,10 @@ def format_fact(d):
     return f"[{tag}, {dt}] {d['attr'].replace(':', ' of ')}: {d['value']}"
 
 
-def retrieve(mem, question, k=DEFAULT_K, index=None):
-    """Top-k receipted facts as a context block for the composer."""
+def retrieve_facts(mem, question, k=DEFAULT_K, index=None):
+    """Top-k ranked fact nodes (behavior identical to retrieve(); split out so
+    the harness adapter can reach the nodes themselves, e.g. for
+    timeline.change_history)."""
     facts, docs, idf, avgdl = index or build_index(mem)
     qt = query_tokens(question)
     scored = []
@@ -87,5 +89,10 @@ def retrieve(mem, question, k=DEFAULT_K, index=None):
                 for x in inter)
         scored.append((s, facts[j]["n_mentions"], j))
     scored.sort(key=lambda z: (-z[0], -z[1]))
-    lines = [format_fact(facts[j]) for _, _, j in scored[:k]]
+    return [facts[j] for _, _, j in scored[:k]]
+
+
+def retrieve(mem, question, k=DEFAULT_K, index=None):
+    """Top-k receipted facts as a context block for the composer."""
+    lines = [format_fact(d) for d in retrieve_facts(mem, question, k, index)]
     return "\n".join(lines) or "(no relevant memories)"
