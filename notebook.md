@@ -5528,3 +5528,42 @@ context_v2 records (crash-resumable answers_24b.jsonl) -> swap back ->
 UNCHANGED official qwen3:14b judge grades them (vary only the composer
 axis, entry 105). Throughput sentinel armed. This is the composer-capability
 slope measurement; the M3 70B is the next rung if the slope is real.
+
+## Entry 112 — 2026-07-29 (p2: 24B COMPOSER RESULT -- WORSE. 38.0/33.0 vs 14B's 51.7/22.5. Composer capability is not a ladder across families; calibration is family-specific.)
+
+mistral-small-24b-q4km composed all 476 context_v2 records under the
+IDENTICAL calibrated prompt; the unchanged official qwen3:14b judge graded:
+
+  qwen3:14b composer   51.7 / 22.5 / 25.8
+  mistral-24b composer 38.0 / 33.0 / 29.0   (-13.7 correct, +10.5 halluc)
+
+Memory Boundary tells the story: 111/2 (qwen) -> 76/36 (mistral). The 24B
+guesses where the 14B abstains. Mechanically clean run (answers terse,
+median 13 chars; proper "Unknown." on clear boundary cases; zero context
+truncation in the server log) -- the failure is behavioral, not plumbing.
+
+READING: "swap in a bigger composer" (entry 104's lever (a)) is NOT a
+monotone ladder. The calibrated grounding prompt was calibrated against
+qwen3:14b's instruction-following; mistral-small does not honor the
+abstention contract under the same words. Two honest hypotheses, not
+mutually exclusive: (1) grounded-abstention compliance is model-family-
+specific -- a real product finding (RG's context works best with a
+calibration snippet per client-LLM family, or the client honors its own);
+(2) same-family confound: our judge IS qwen3:14b, so a qwen composer may
+benefit from family-aligned phrasing. NOTE the leaderboard shares this
+confound (GPT-4o composes AND judges the published numbers) -- ours mirrors
+it, it does not add a new asymmetry.
+
+IMPLICATION FOR THE MAC 70B TEST (queue #3): hold the family constant --
+run qwen3-32b (or larger qwen3) on the M3 Ultra, not an arbitrary 70B.
+That isolates CAPABILITY from FAMILY on the composer axis. A cross-family
+frontier model (via the client in the real product) remains the separate,
+honest apples-to-apples question.
+
+OPS: VRAM OOM x2 diagnosed (WSL shares the 16GB card with the Windows
+desktop; full 41-layer offload of 13.3GB weights leaves too little for a
+fixed 1.34GB runtime alloc) -> 36/41 layers, n_ctx 5632, flash-attn:
+stable at ~170-190 answers/h. 20 spurious dead-server "Unknown." answers
+were caught and trimmed before resume (crash-resumable jsonl + trim rule).
+Sentinel gained per-item granularity (ITEMFILE line count) after two
+quantization false alarms at 35-min windows.
