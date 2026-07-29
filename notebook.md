@@ -5659,3 +5659,17 @@ OFFICIAL RUN READINESS: eval_rgp2 (evidence-layer, entry-110 config) is
 committed, smoke-tested, and gated only on JP's go for the multi-day GPU
 spend. Config: RG_EXTRACT_V5=1, RG_PREFIX_NO_THINK=1, qwen3:14b composer
 on :8090, RG_TIMELINE unset.
+
+## Entry 116 — 2026-07-30 (p2: OFFICIAL ROUND 4 LAUNCHED -- evidence-layer architecture, users 0-9, fresh version tag.)
+
+JP's go. run_official_round4.sh: stage 1 = rewritten eval_rgp2 composes
+answers for users 0-9 (RG_EXTRACT_V5=1, qwen3:14b on :8090, entry-110
+config, RG_TIMELINE OFF per entry 115); stage 2 = official evaluation.py
+judges (version round4, per-user tmp2/ checkpoints; round-3 pre-pivot
+artifacts untouched). Three watchers armed from launch per the standing
+rule: throughput sentinel (per-25-question markers added to the adapter,
+mirror synced), sentinel.py quality watch on the round4 checkpoints
+(30-min passes -- the entry-97 None-verdict class), and a first-user
+health probe. Pre-registered expectation: dev said 51.7/22.5; officials
+0-9 are a different user split, so drift either way is information, not
+alarm -- but a Boundary collapse or a None-verdict storm is a stop signal.

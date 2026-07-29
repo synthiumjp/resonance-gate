@@ -194,7 +194,7 @@ def process_user(idx, user_data, cache_dir=DEFAULT_CACHE_DIR):
 
         new_session["questions"] = []
         index = RV.build_index(mem)   # one index per session-state
-        for qa in session["questions"]:
+        for qn, qa in enumerate(session["questions"]):
             t1 = time.time()
             answer, context = compose_answer(mem, qa["question"], index)
             qa_dur = (time.time() - t1) * 1000
@@ -205,6 +205,8 @@ def process_user(idx, user_data, cache_dir=DEFAULT_CACHE_DIR):
             new_qa["system_response"] = answer
             new_qa["response_duration_ms"] = 0.0
             new_session["questions"].append(new_qa)
+            if (qn + 1) % 25 == 0:   # throughput-sentinel progress marker
+                print(f"  ...{qn+1}/{len(session['questions'])}", flush=True)
 
         new_user_data["sessions"].append(new_session)
 
