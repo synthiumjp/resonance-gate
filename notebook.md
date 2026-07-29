@@ -5379,3 +5379,24 @@ NOTHING LOST: retrieve.py (BM25+stemming+k=120, dev gold-recall 61.7->87.6%)
 is committed (7e80a05); context_v2.jsonl, all extraction caches, the 24B
 composer GGUF (13.3GB on D:) are all on disk. Only the ~1h of CPU-speed
 judging is discarded.
+
+## Entry 108 — 2026-07-29 (p2: DEEP HANDOVER 2 written; session boundary)
+
+Context running low; wrote experiments/p2/HANDOVER2.md superseding the
+2026-07-21 handover. Captures: the ARCHITECTURE PIVOT (RG is the evidence
+layer, the client's LLM composes -- took correct 25->48%, and resolves JP's
+"big models make the product less usable" concern since RG never ships a
+composer); the full measured results table vs published comparators; the
+VERIFIED HANDICAP (published numbers use GPT-4o composer+judge, we use local
+qwen3:14b for both); the REPRODUCIBILITY CAVEAT on 53.6/17.2 (lost code
+state -- must not publish); RETRIEVAL v2 (retrieve.py, BM25+stemming+k=120,
+gold-recall 61.7->87.6%, ceiling 90%); the negative-results list so the next
+session does not redo dead levers; the queued work (judge context_v2 -> 24B
+composer -> M3 Ultra 70B -> official harness); the file map; and the
+hard-won process rules (only the real judge counts; never pkill -9 a
+llama-cpp server mid-load; verify patches by running them; watch throughput
+not just liveness).
+Project memory updated to point at HANDOVER2.md.
+IMMEDIATE NEXT ACTION for the new session: `wsl --shutdown` from Windows to
+un-wedge the GPU, then ~/rg_private/halumem/dev/resume_after_wsl_restart.sh,
+then read the judged number for context_v2.
