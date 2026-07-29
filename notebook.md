@@ -5633,3 +5633,29 @@ GATE before any official run with RG_TIMELINE=1: judged dev screen of the
 store-backed timeline (temporal subset + a Memory Boundary sample -- the
 57% section coverage must not erode the 111/2 abstention moat). Without the
 flag, eval_rgp2 runs the measured 51.7/22.5 config as-is.
+
+## Entry 115 — 2026-07-29 (p2: timeline gate screen -- moat PROVEN SAFE (boundary byte-identical), temporal +3.2/-3.2, still under the bar. Flag stays OFF for the official run; pre-registration honored.)
+
+Store-backed timeline (timeline.py via live dev stores), paired arms, real
+judge, n=178:
+
+  temporal (n=123): base 53.7/31.7 -> timeline 56.9/28.5 (+3.2 corr, -3.2
+    hall). Paired: Om->Corr x3, Hall->Corr x2, Hall->Om x2 (trust-positive),
+    Corr->Om x1. 5 up / 1 down / 2 sideways-good.
+  boundary (n=55): 53/2 BOTH ARMS, ZERO paired transitions -- the 57%
+    section coverage does not induce a single boundary guess. The main
+    risk of shipping timelines is measured away.
+
+DECISION: the pre-registered bar (>=5 corr or >=4 hall) was not met --
+RG_TIMELINE stays OFF for the official run. Both screens ran positive
+(line: 7up/2down; store: 5up/1down) and boundary-safe, so the mechanism is
+real but sub-threshold at current linking quality; the binding constraint
+is slot linking across reworded values (green tea->black coffee), which is
+the entity-resolution work already owed. Post-official-run, that is where
+the timeline gains compound from. Changing the decision rule after seeing
+the data is how this project earned its retractions; not doing that.
+
+OFFICIAL RUN READINESS: eval_rgp2 (evidence-layer, entry-110 config) is
+committed, smoke-tested, and gated only on JP's go for the multi-day GPU
+spend. Config: RG_EXTRACT_V5=1, RG_PREFIX_NO_THINK=1, qwen3:14b composer
+on :8090, RG_TIMELINE unset.
