@@ -5400,3 +5400,71 @@ Project memory updated to point at HANDOVER2.md.
 IMMEDIATE NEXT ACTION for the new session: `wsl --shutdown` from Windows to
 un-wedge the GPU, then ~/rg_private/halumem/dev/resume_after_wsl_restart.sh,
 then read the judged number for context_v2.
+
+## Entry 109 — 2026-07-29 (p2: research scan round 2 (3 sonnet agents) + the RECALL-CRITERION discovery -- 87.6% is UNION-recall; single-fact recall@120 is 46.8%. Composer variants prepped for GPU-free launch.)
+
+GPU recovered by JP's wsl --shutdown; context_v2 judge relaunched (verified
+"found 1 ROCm devices", 41/41 layers offloaded) with a NEW throughput
+sentinel (throughput_watch.sh -- entry 107's owed fix, minimal form: alerts
++ exits nonzero below 120 items/h or on missing-ROCm, so the wedge class is
+now caught in one pass interval, not at the end).
+
+THE HONEST MEASUREMENT FIRST: rebuilding the recall harness (recall_lab.py,
+committed) exposed that 7e80a05's "gold-recall 87.6%" is UNION-recall --
+gold tokens covered by the whole 120-line context block (union criterion
+measures 83.2-83.7% today; entry 106's "83% with tags stripped" matches).
+The stricter and more meaningful SINGLE-FACT criterion (one retrieved line
+contains >=50% of gold tokens -- what selection quality actually is) is
+44-47% at k=120, vs a store ceiling of ~55.6%. So retrieval has ~9pts of
+real single-fact headroom the union number hid. Misses decompose: 161/363
+gold-not-in-store (extraction, the dominant wall), 32 zero-overlap
+(question<->fact vocabulary gap: "beverage" vs "black coffee",
+"disease" vs "health_condition"), 10 in-store-but-ranked-deep.
+
+MEASURED DEAD (deterministic, dev 10-12, minutes each):
+  - BM25 k1/b sweep: recall pinned 44.1% across k1 in [0.5,2.0] x b in [0,1]
+    (set-based TF over near-uniform short facts -- the knobs have nothing to
+    grip). Literature agrees b~0 for uniform short docs; empirically a wash.
+  - Fixpoint stemming: found a REAL bug (stemmer not idempotent --
+    "prefer"->"pref" but "preference"->"prefer": the two words the stemmer
+    exists to unify STILL don't match) but fixing it moved nothing measurable
+    (44.4/44.4; union +0.2). Fix held back from retrieve.py until after the
+    pending judge run lands (the run measures committed 7e80a05 state --
+    changing the shipping path mid-measurement is the entry-106 trap).
+  - RM3 pseudo-relevance feedback: +0.8pt line-recall. PPR over a token
+    co-occurrence graph (TIGRAG-lite): +0.2pt. Both noise. Root cause: in a
+    ~1k-fact per-user corpus "beverage" never co-occurs with "coffee"
+    ANYWHERE, so corpus-internal expansion has nothing to bridge with. The
+    2026 literature's warning (blind PRF can collapse recall) did not bite,
+    but neither did the technique.
+
+RESEARCH SCAN (3 parallel sonnet agents; full reports in session transcript):
+  - Composer side (where ~35pts sit): recite-then-answer (arXiv:2510.05381,
+    +31pp for a 7B at ~3k-token contexts -- extract relevant lines verbatim,
+    answer from the recitation only); deterministic conflict pre-resolution
+    (arXiv:2606.01435 -- pick max(receipt date) among clashing facts BEFORE
+    the composer, +20-28pts over LLM-side freshness handling; we already
+    store everything it needs); HaluMem's own QA prompt expects "brief,
+    under 5-6 words" answers (Appendix D) -- our terse-answer omissions may
+    be partly judge-format mismatch, not completeness failure.
+  - Retrieval side: our zero-overlap class matches the literature's
+    strongest remaining lever = OFFLINE category/entity expansion of stored
+    facts (append "beverage drink" to coffee facts; one-time local-LLM pass,
+    extraction-stage change). Small CPU cross-encoder rerankers (MiniLM
+    class) are the evidence-backed synonymy bridge if we accept a model in
+    the retrieval path. Corroborating 2026 result: BM25 still beats
+    text-embedding-3-large on entity-heavy exact-match (arXiv:2604.01733).
+  - Memory-store side (product roadmap, not benchmark): Graphiti-style
+    bitemporal close-not-delete supersession; mem0's search-time recency
+    boost/dampen (pure metadata arithmetic); MemOps trace schema confirmed
+    near-native to our receipted lifecycle.
+
+PREPPED (launch when V2CTX_DONE): compose_judge_variants.py in the official
+eval dir -- variants 'recite' (two-pass) and 'current' (deterministic
+currency marking: within-attr value-overlap clusters >=50% on content
+tokens, latest date -> CURRENT, others -> "superseded DATE"; events excluded
+as episodic; dates PARSED not string-compared -- the dry run caught
+lexicographic date comparison marking a 2027 fact superseded by a 2025 one,
+plus generic-attr mega-slots, before any GPU was spent). --half flag for
+~1h screening runs. Plan: screen recite + current on half-set, full-set the
+winner, then the 24B composer per the queue.
