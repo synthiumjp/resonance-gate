@@ -5567,3 +5567,39 @@ stable at ~170-190 answers/h. 20 spurious dead-server "Unknown." answers
 were caught and trimmed before resume (crash-resumable jsonl + trim rule).
 Sentinel gained per-item granularity (ITEMFILE line count) after two
 quantization false alarms at 35-min windows.
+
+## Entry 113 — 2026-07-29 (p2: typed-routing screen -- timeline structure flips 7 up / 2 down on Conflict; Update starves on CLUSTER LINKING, which the live store already solves. The elegant path is real but lives in the harness rewrite.)
+
+JP's directive: stop chasing bigger composers, try winning by mechanism.
+Screen: temporal types only (Dynamic Update + Memory Conflict, n=123),
+paired arms on identical records/judge -- champion baseline vs baseline +
+deterministic CHANGE HISTORY section (within-attr >=50% value-token
+clusters, dated chains oldest->newest) + a read rule. Routing by benchmark
+labels to isolate the mechanism (a trivial keyword router measures only
+40/123 recall, 142 fp -- production needs better; reported, not used).
+
+  base    52.0 corr / 30.1 hall   (Conflict 61/25, Update 3/12)
+  routed  56.1 corr / 27.6 hall   (Conflict 66/22, Update 3/12 UNCHANGED)
+  paired: Omission->Correct x4, Halluc->Correct x3, Correct->Omission x2
+
+VERDICT vs the pre-registered bar (>=5 corr or >=4 hall): just under --
+suggestive, not passing (sign test ~7:2). Project-wide it would be only
++1.1 corr. NOT shipping as a context transform.
+
+THE DIAGNOSIS THAT MATTERS (deterministic): on Dynamic Update questions the
+gold is in the context union for 16/20 -- but reaches a CHANGE HISTORY chain
+for only 2/20. Line re-clustering cannot link changed values that share no
+tokens ("green tea" -> "black coffee"); attr drift ("preference" vs
+"habit") splits the rest. The LIVE STORE does not have this problem: slot
+evolution is receipted at ingest -- the change history EXISTS, it just
+cannot be reconstructed from formatted retrieval lines. The mechanism is
+validated where linking succeeds (Conflict +5/-3); it starves where
+linking must be reconstructed (Update).
+
+DECISION: fold timelines into the official-harness rewrite (queue #4),
+emitting per-slot history from TRUE receipts at retrieval time instead of
+re-clustering context lines -- same mechanism, ground-truth linking. That
+rewrite was already required for the official run; this gives it a second
+job. Multi-hop routing via the wire graph joins it there (needs live store
+too). The elegant path holds: 7-up-2-down came from structure alone, zero
+added model capability.
