@@ -5769,3 +5769,28 @@ restated as a label distribution. Training on that would be junk; rung 4
 queued (extract u13-19 with 32b on the studio after the A/B rung, rebuild
 gate_train). Mac pipeline now: 235B composer (running) -> extractor A/B
 u10-12 -> gate-user extraction u13-19 + dataset rebuild.
+
+## Entry 120 — 2026-07-31 (p2: LADDER COMPLETE -- 235B is WORSE than 14B (47.9/28.2). Composer scale is definitively not the lever; the evidence layer is the binding constraint, now proven with a 4-point ladder.)
+
+Qwen3-235B-A22B-Instruct-2507 6-bit (Chris's own mlx server on the studio;
+we only sent requests), same context_v2 evidence, same CAL words, same
+official local judge:
+
+  mistral-24b   38.0 / 33.0 / 29.0   (cross-family floor)
+  qwen3:14b     51.7 / 22.5 / 25.8   <- STILL the best Pareto point
+  qwen3:32b     53.2 / 28.8 / 18.1
+  qwen3:235B    47.9 / 28.2 / 23.9   (worse than 14b on BOTH axes)
+
+Boundary erodes MONOTONICALLY with scale: 111/2 -> 109/4 -> 107/6. Bigger
+composers guess more where evidence is absent, exactly the entry-118
+marginal-precision mechanism. (Caveats noted: 6-bit quant; 2507-Instruct
+tuning differs from the 14b's; calibration words fixed across all rungs by
+design -- that IS the experiment.)
+
+CONCLUSION for the writeup, now measured not argued: at current evidence
+quality, composer identity moves correct by ~±3 within-family; no
+composer scale recovers truth the store does not hold, and scale actively
+erodes abstention at fixed calibration. The levers that remain are the
+ones in flight: EXTRACTION quality (rung 3, firing now) and the
+EVIDENCE-SUFFICIENCY GATE (entry 119) that lets any composer attempt
+aggressively only when the evidence supports it.
