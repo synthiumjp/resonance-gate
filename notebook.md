@@ -5819,3 +5819,20 @@ greedy) -- smoke: 4.1s/turn on GPU vs ~13s CPU. Also: pkill patterns that
 match your own probing shell kill your own compound command (exit 144) --
 use exact pids and setsid for detached servers. Extraction of ~10k turns
 (u13-19) running; gate_train rebuild chained behind it.
+
+## Entry 122 — 2026-08-01 (p2: session boundary -- PC restart. Gate stage B in flight ON THE STUDIO (survives restart); one-command resume written.)
+
+State at boundary: official row banked (52.6/19.1, entry 117); composer
+ladder complete and negative (entry 120); extractor A/B negative (121);
+gate datasets built and distribution-matched (train 62.1% / eval 63.4%
+sufficient); hidden-state extraction (qwen3.5-4b-4bit MLX, all 32 layers,
+last token) running DETACHED on the studio -> ~/rg_gate/STATES_DONE.
+Nothing else is running anywhere; all results committed through 121.
+
+RESUME: ~/rg_private/halumem/dev/resume_after_pc_restart.sh -- waits for
+the studio flag, scps the arrays, trains per-layer probes (gate_probe.py,
+committed), prints the AUROC verdict + next-step instructions. Local GPU
+judge server relaunch command unchanged (resume_after_wsl_restart.sh).
+Remote-debug lessons banked this session: dunder __call__ patches must be
+class-level; MLX bf16 needs an mx-side cast before numpy; long-idle ssh
+foreground jobs die with the channel -- always nohup+disown remote work.
