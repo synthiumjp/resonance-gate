@@ -5740,3 +5740,32 @@ goalpost-moving, but it costs another judged pass.)
 72B rung (qwen2.5-72b bf16 via MLX from the NAS) auto-fires next; extractor
 A/B (the bigger pot) after that. Mac health monitor + throughput watchers
 green throughout the 32b run.
+
+## Entry 119 — 2026-07-31 (p2: EVIDENCE-SUFFICIENCY GATE started (JP's competence-gate method, grounding-signal sibling). Dataset built; v4-cache distribution mismatch found; Mac pipeline now 4 rungs.)
+
+WHY (from the 32b rung's arithmetic): the 32b's ~37 extra attempts landed
+~30 hallucinations / 7 correct -- 19% marginal precision, because the
+attempts fall where evidence is absent. The missing decision is EVIDENCE
+SUFFICIENCY, per-question, before the composer asserts. JP's
+competence-gate (HF: synthiumjp/competence-gate-qwen3.5-4b -- probe-
+targeted LoRA on qwen3.5-4b, Cacioli method) reads the WRONG signal for
+this (parametric competence; its own card: does not help grounded QA,
+can push toward answering on adversarial unanswerables = our Boundary).
+The plan is the sibling adapter its card itself points at: same method,
+GROUNDING signal. Literature: hidden-state answerability probes 0.97-0.99
+AUROC vs ~0.67 prompt-level (arXiv:2607.08456).
+
+STAGED: (A) gate_dataset.py (committed) -- deterministic labels
+(sufficient=1 iff real gold AND >=50% union containment in the k=120
+committed-config context; boundary golds = 0), train u13-19 / eval u10-12
+STRICTLY held out. (B) sklearn probe on hidden states, AUROC on 10-12; if
+strong, a POST-HOC gate (insufficient -> force Unknown) is judgeable on
+the real judge with no LoRA. (C) probe-targeted LoRA distillation -- needs
+JP's trainer (not in the HF repo; location owed by JP).
+
+FIRST MEASUREMENT (the dataset itself): train users' v4/1.7b caches yield
+10.8% sufficient vs eval users' v5/14b 63.4% -- the extraction-era gap
+restated as a label distribution. Training on that would be junk; rung 4
+queued (extract u13-19 with 32b on the studio after the A/B rung, rebuild
+gate_train). Mac pipeline now: 235B composer (running) -> extractor A/B
+u10-12 -> gate-user extraction u13-19 + dataset rebuild.
