@@ -5714,3 +5714,29 @@ official judge code, local qwen3:14b composer AND judge, users 0-9):
 NEXT: writeup row is banked. Remaining queued: M3 qwen3-32b slope run
 (JP's call), entity resolution (unlocks Update/Multi-hop + timeline
 gains), MemOps benchmark.
+
+## Entry 118 — 2026-07-31 (p2: composer ladder rung 2 -- qwen3:32b = 53.2/28.8/18.1. Within-family scaling converts omission to ATTEMPTS, not accuracy. Calibration is per-model even within family.)
+
+M3 Ultra (Chris's studio, over tailscale/SSH tunnel; ollama qwen3:32b,
+think off) composing the same context_v2 evidence, judged by the unchanged
+local official qwen3:14b:
+
+  qwen3:14b  51.7 / 22.5 / 25.8   <- still the best Pareto point
+  qwen3:32b  53.2 / 28.8 / 18.1   (+1.5 corr, +6.3 hall, -7.7 omit)
+  (mistral-24b 38.0/33.0 for reference -- cross-family remains worst)
+
+By type: Conflict 61->70 correct (real gain -- more capable date reasoning),
+Multi-hop 6->8, Boundary 111/2 -> 109/4 (slight erosion), but Basic Recall
+hall 27->41 and Generalization hall 28->47: the 32b ANSWERS where the 14b
+abstained/omitted, at poor precision. The CAL prompt's abstention threshold
+was calibrated on 14b behaviour; 32b under-abstains with the same words.
+Extends entry 112: calibration is per-MODEL, not just per-family. Product
+reading unchanged and sharpened: RG ships evidence + a calibration snippet
+tuned per client model; there is no free lunch from raw composer scale at
+fixed calibration. (One legitimate follow-up if wanted: recalibrate the
+absence rule FOR the 32b and remeasure -- that is product reality, not
+goalpost-moving, but it costs another judged pass.)
+
+72B rung (qwen2.5-72b bf16 via MLX from the NAS) auto-fires next; extractor
+A/B (the bigger pot) after that. Mac health monitor + throughput watchers
+green throughout the 32b run.
