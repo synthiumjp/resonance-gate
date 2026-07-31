@@ -5673,3 +5673,44 @@ mirror synced), sentinel.py quality watch on the round4 checkpoints
 health probe. Pre-registered expectation: dev said 51.7/22.5; officials
 0-9 are a different user split, so drift either way is information, not
 alarm -- but a Boundary collapse or a None-verdict storm is a stop signal.
+
+## Entry 117 — 2026-07-31 (p2: THE OFFICIAL ROW. Users 0-9, full official harness: QA 52.6 correct / 19.1 halluc / 28.3 omit, n=1,764, 0 invalid. Boundary 97.6%. Reproducible from committed code.)
+
+ROUND 4 COMPLETE. The publishable, reproducible row (official harness +
+official judge code, local qwen3:14b composer AND judge, users 0-9):
+
+  QA: Correct 52.55% | Hallucination 19.10% | Omission 28.34% (n=1764, 0 None)
+
+  vs published ([GPT-4o composer]+[GPT-4o judge], their numbers):
+    MemOS 67.2/15.2 · Zep 55.5/21.9 · mem0-graph 54.7/19.3 ·
+    Supermemory 54.1/22.2 · mem0 53.0/19.2 · Memobase 35.3/30.0
+  RG ties mem0 on correct (52.6 vs 53.0), edges it on halluc (19.1 vs
+  19.2), beats Zep/Supermemory on halluc by ~3pts -- with a 7x-smaller
+  composer, a stricter judge, zero API spend, on one consumer GPU.
+
+  BY TYPE: Memory Boundary 97.6%C/2.1%H (n=420) -- THE moat number, at
+  scale, on held-out official users. Conflict 52.6/17.4 (receipt dates
+  working). Weak: Dynamic Update 18.4C/51.5H and Multi-hop 19.0/32.0 --
+  exactly the classes entries 113/115 diagnosed (slot linking, graph
+  routing) with the mechanism already validated and gated for post-run.
+  Basic Recall 42.1 and Generalization 31.0/47.2-omit reflect extraction
+  coverage + the abstention-vs-speculation stance (defended, not chased).
+
+  HONEST FULL DISCLOSURE (non-QA columns, ours are weak): memory
+  extraction F1 0.28 (integrity recall 17.6% raw / 39.1% weighted;
+  accuracy target 70.2% / weighted 29.3%) -- our terse attr:value facts
+  vs their verbose gold memory-point phrasing; and the update-search task
+  2.9%C/91.8%O -- session-incremental recall() rarely returns their
+  expected memory strings. These go in the writeup as-is: RG's claim is
+  the QA trust Pareto + abstention + receipts, not memory-point mimicry.
+
+  OPS LOG: stage 1 ~2.6h (1,764 composed answers, 30-48% Unknown/user,
+  clean); stage 2 ~26h judging (~14k verdicts). One incident: llama-cpp
+  server leaked to 13.2GiB host RSS (~0.6MB/request over 19k requests);
+  sentinel.py caught the RAM crunch (its second real catch), fixed with
+  SIGSTOP-judge -> graceful server restart -> SIGCONT: zero lost or
+  contaminated verdicts (0 None end-to-end proves it).
+
+NEXT: writeup row is banked. Remaining queued: M3 qwen3-32b slope run
+(JP's call), entity resolution (unlocks Update/Multi-hop + timeline
+gains), MemOps benchmark.
