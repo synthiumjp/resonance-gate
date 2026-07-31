@@ -32,6 +32,32 @@ TEMPLATE = os.environ.get("RG_CACHE_TEMPLATE",
                           "~/rg_private/halumem/dev/cache_u{i}_v5_32b.jsonl")
 
 
+def extract_via_v1(text, model, system, timeout=120):
+    """OpenAI-/v1 variant for llama-cpp servers (ollama's ROCm detection is
+    broken in this WSL env -- entry 121). qwen3 thinking is suppressed with
+    the in-text /no_think switch, the mechanism every compose/judge run on
+    this server already uses. Same return contract as extract_via_ollama:
+    (facts, latency, parse_failed)."""
+    import time as _t
+    import urllib.request
+    body = json.dumps({
+        "model": model,
+        "messages": [{"role": "system", "content": "/no_think " + system},
+                     {"role": "user", "content": text}],
+        "temperature": 0.0, "max_tokens": 512,
+    }).encode()
+    req = urllib.request.Request(URL, data=body,
+                                 headers={"Content-Type": "application/json"})
+    t0 = _t.monotonic()
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        txt = json.load(resp)["choices"][0]["message"]["content"]
+    latency = _t.monotonic() - t0
+    facts = dev_set._parse_facts(txt)
+    if facts is None:
+        return [], latency, True
+    return facts, latency, False
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--users", default="10-12")
@@ -55,9 +81,13 @@ def main():
               f"{len(todo)} to extract -> {cache_path}", flush=True)
         cf = open(cache_path, "a")
         t0 = time.monotonic()
+        v1 = "/v1/" in URL
         for n, (h, text) in enumerate(todo, 1):
-            facts, latency, failed = dev_set.extract_via_ollama(
-                text, model=MODEL, system=SYSTEM_V5)
+            if v1:
+                facts, latency, failed = extract_via_v1(text, MODEL, SYSTEM_V5)
+            else:
+                facts, latency, failed = dev_set.extract_via_ollama(
+                    text, model=MODEL, system=SYSTEM_V5)
             cf.write(json.dumps({"h": h, "f": facts}) + "\n")
             cf.flush()
             if n % 25 == 0:

@@ -5794,3 +5794,28 @@ erodes abstention at fixed calibration. The levers that remain are the
 ones in flight: EXTRACTION quality (rung 3, firing now) and the
 EVIDENCE-SUFFICIENCY GATE (entry 119) that lets any composer attempt
 aggressively only when the evidence supports it.
+
+## Entry 121 — 2026-08-01 (p2: extractor A/B NEGATIVE -- 32b extraction WORSE (gold-in-store 50.7 vs 55.6%). Scale-at-fixed-prompt now dead on BOTH axes. Gate users re-extracting with 14B on the GPU.)
+
+Oracle verdict (deterministic, users 10-12): qwen3:32b extraction with the
+same v5.1 prompt stores FEWER facts (585-741 vs 766-868 provisional) and
+LOSES gold -- gold-in-store 50.7% vs 14B's 55.6%, mp-coverage down across
+every user. The bigger model is more selective; selectivity loses recall.
+Rhymes exactly with the composer ladder (entry 120): prompts calibrate to a
+model; raw scale transfers NOTHING at fixed prompt. Scale-at-fixed-
+calibration is now measured dead on BOTH the composer and extractor axes.
+(Untested and left open: per-scale prompt recalibration.)
+
+CONSEQUENCE: rung 4 redirected -- gate users 13-19 extract with 14B (the
+deployment extractor), template cache_u{i}_v5_14b.jsonl, matching the eval
+users exactly.
+
+OPS SAGA (cost ~1h, lessons banked): local ollama CANNOT see the ROCm GPU
+in this WSL env ("total vram=0 B" even on a fresh instance, while rocminfo
+AND llama-cpp allocate fine -- dev_set's extraction was in fact always
+CPU-ollama by design). Fix: extract_remote.py gained a /v1 path (llama-cpp
+server + in-text /no_think, same blob file ollama serves -> same quant,
+greedy) -- smoke: 4.1s/turn on GPU vs ~13s CPU. Also: pkill patterns that
+match your own probing shell kill your own compound command (exit 144) --
+use exact pids and setsid for detached servers. Extraction of ~10k turns
+(u13-19) running; gate_train rebuild chained behind it.
