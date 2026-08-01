@@ -22,11 +22,26 @@ def main():
     ap.add_argument("--train", required=True)
     ap.add_argument("--eval", dest="eval_", required=True)
     ap.add_argument("--out", default=None, help="save best probe (pkl) here")
+    ap.add_argument("--train-labels", default=None,
+                    help="judged jsonl: label = verdict=='Correct' (overrides "
+                         "the npz containment labels)")
+    ap.add_argument("--eval-labels", default=None)
     args = ap.parse_args()
     tr = np.load(args.train)
     ev = np.load(args.eval_)
     Xtr, ytr = tr["states"].astype(np.float32), tr["labels"]
     Xev, yev = ev["states"].astype(np.float32), ev["labels"]
+
+    def judged_labels(path):
+        import json
+        return np.array([int(json.loads(l)["verdict"] == "Correct")
+                         for l in open(path)])
+    if args.train_labels:
+        ytr = judged_labels(args.train_labels)
+        assert len(ytr) == len(Xtr), f"{len(ytr)} labels vs {len(Xtr)} states"
+    if args.eval_labels:
+        yev = judged_labels(args.eval_labels)
+        assert len(yev) == len(Xev), f"{len(yev)} labels vs {len(Xev)} states"
     n_layers = Xtr.shape[1]
     print(f"train {Xtr.shape} pos={ytr.mean():.2f}  eval {Xev.shape} pos={yev.mean():.2f}")
     best = (0.0, -1, None)

@@ -55,7 +55,8 @@ def rows_for(users, indices, template):
                     label = int(len(gt & u) / len(gt) >= 0.5)
                 yield {"user": uidx, "question": question, "context": context,
                        "label": label, "qtype": q.get("question_type", "?"),
-                       "gold": gold}
+                       "gold": gold, "answer": gold,
+                       "evidence": q.get("evidence", "")}
 
 
 def main():

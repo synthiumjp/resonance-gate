@@ -5858,3 +5858,27 @@ Ops: the studio kill was macOS memory pressure; chunked+cache-cleared
 version ran clean (rss stable). PC-restart wiped /tmp scratchpad -- the
 Mac copy was authoritative; probe_states.py now also mirrored to
 experiments/p2/ (committed).
+
+## Entry 124 — 2026-08-01 (p2: gated-32b NEGATIVE at containment labels (43.9/26.7) BUT Boundary 113/0 -- first zero-halluc boundary cell ever. Diagnosis: label mismatch. Judge-verdict label chain launched.)
+
+Post-hoc gate (probe v1, containment labels, threshold pre-registered from
+train) over the 32b answers, real judge, n=476:
+  32b ungated  53.2 / 28.8 / 18.1
+  32b gated    43.9 / 26.7 / 29.4   (-9.3 corr for -2.1 hall: NET LOSS)
+  ...except Memory Boundary: 109/4 -> 113/0. FIRST 0-hallucination
+  boundary cell of ANY config. The probe detects evidence ABSENCE
+  flawlessly; it fails on evidence ADEQUACY.
+
+DIAGNOSIS (precise): probe target was lexical union-containment; the judge
+is semantic. Questions answerable from evidence WITHOUT 50% token
+containment (dated Conflict lines above all: correct 70->38) are
+systematically mislabeled insufficient -- the gate amputates exactly the
+composer's semantic wins. AUROC 0.87 vs proxy labels does not transfer.
+
+FIX RUNNING (overnight chain, all local -- NAS off, not needed): compose+
+judge train users' 1,227 questions and eval's 476 with the champion 14B
+(per-item verdicts now SAVED -- compose_remote patched, the missing-
+verdicts gap that bit twice is closed); retrain probe on judge-Correct
+labels; re-gate BOTH 14B champion and 32b answers at the pre-registered
+threshold; judge both. Instruments committed: gate_apply.py, gate_probe
+--train-labels/--eval-labels, gate_dataset evidence fields.
