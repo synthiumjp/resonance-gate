@@ -64,7 +64,9 @@ def main():
     ap.add_argument("--train-users", default="13-19")
     ap.add_argument("--eval-users", default="10-12")
     ap.add_argument("--train-template",
-                    default="~/rg_private/halumem/dev/cache_u{i}_17b.jsonl")
+                    default="~/rg_private/halumem/dev/cache_u{i}_v5_14b.jsonl",
+                    help="deployment-config caches; the old v4 _17b caches "
+                         "produce junk stores (entry 125's silent-default bug)")
     ap.add_argument("--eval-template",
                     default="~/rg_private/halumem/dev/cache_u{i}_v5_14b.jsonl")
     args = ap.parse_args()

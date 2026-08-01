@@ -5882,3 +5882,23 @@ verdicts gap that bit twice is closed); retrain probe on judge-Correct
 labels; re-gate BOTH 14B champion and 32b answers at the pre-registered
 threshold; judge both. Instruments committed: gate_apply.py, gate_probe
 --train-labels/--eval-labels, gate_dataset evidence fields.
+
+## Entry 125 — 2026-08-01 (p2: SILENT-DEFAULT BUG caught before it poisoned the probe -- chain rebuilt gate_train from v4 caches; states/labels described different prompts. Fixed chain relaunched.)
+
+The overnight chain's step-1 rebuild called gate_dataset.py with NO
+--train-template; the default was the v4/1.7b caches -> train contexts
+median 660 chars (vs 13k eval), the 14B abstained on 84% at error-speed,
+and the judge labels would have described DIFFERENT prompts than the
+hidden states (built from the correct v5 contexts). Caught by timeline
+arithmetic (1,227 "composes" in 11 minutes is physically impossible), NOT
+by any watcher -- items/hour looked FINE because degenerate items are
+fast. Sentinel lesson: rate floors catch slowness; nothing yet catches
+implausible SPEED. A too-fast band is now on the sentinel wishlist.
+
+Fixes: gate_dataset --train-template default changed to the deployment
+caches (defaults must be the deployment config); the chain passes it
+explicitly AND fails hard if the rebuild log is absent; poisoned
+artifacts deleted (compose resume-skip would have silently kept them).
+Also re-learned x3: pkill patterns that appear in your own command line
+kill your own wrapper (exit 144) -- exact-pid loops only, no pattern
+kills, ever. Chain relaunched; eval leg unaffected (context_v2 source).
