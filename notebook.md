@@ -5836,3 +5836,25 @@ judge server relaunch command unchanged (resume_after_wsl_restart.sh).
 Remote-debug lessons banked this session: dunder __call__ patches must be
 class-level; MLX bf16 needs an mx-side cast before numpy; long-idle ssh
 foreground jobs die with the channel -- always nohup+disown remote work.
+
+## Entry 123 — 2026-08-01 (p2: SUFFICIENCY PROBE WORKS -- AUROC 0.870 on held-out users (layer 24, qwen3.5-4b-4bit states, sklearn logistic). Gate stage B verdict: signal real; judged post-hoc test next.)
+
+Per-layer probes on last-token hidden states of the 4B reading
+(k=120 evidence + question): best layer 24, eval AUROC 0.870 (train
+u13-19 n=1227, eval u10-12 n=476, labels = deterministic union-containment).
+Mid-late layers all ~0.85-0.87. Far above prompt-level (~0.67 lit ceiling);
+short of the 0.97-0.99 clean-benchmark results -- expected, our labels are
+noisy (containment != true answerability) and the reader is 4-bit.
+Parity note: JP's parametric competence gate measured 0.868 on ITS task --
+same method, same base, the grounding-signal sibling now exists.
+
+JUDGED TEST (running next): post-hoc gate over the SAVED 32b answers
+(answers_mac.jsonl -- the composer that over-attempts, 53.2/28.8).
+Threshold pre-registered from TRAIN split only (no eval peeking), one
+judged pass. Hypothesis: recovers the 32b's +6.3 halluc while keeping its
+omission gains -- "attempt aggressively, the gate holds the line."
+
+Ops: the studio kill was macOS memory pressure; chunked+cache-cleared
+version ran clean (rss stable). PC-restart wiped /tmp scratchpad -- the
+Mac copy was authoritative; probe_states.py now also mirrored to
+experiments/p2/ (committed).
