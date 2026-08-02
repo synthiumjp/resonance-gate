@@ -6045,3 +6045,42 @@ equivalent axis. Next build steps: (a) stage C -- head-to-logit route
 (b) wire the dial into the MCP surface; (c) official-harness re-run
 with the dial documented (gate trained only on dev users 13-19 --
 officials clean).
+
+## Entry 131 — 2026-08-03 (p2: research scan 3 (2 sonnet agents, May-Aug 2026 arXiv). New HaluMem SOTA is MOSAIC 73.1/10.2 (write-time structure). Three funded levers for us: validator-RETRY, tiny reranker, judge-format A/B.)
+
+LEADERBOARD MOVED: MOSAIC (arXiv:2607.16211, May 2026) beats MemOS:
+73.10/10.17/16.74 on Medium. Mechanism = WRITE-TIME: entity-typed graph
+nodes + conflict detection at ingest + LSH dual-path retrieval. No
+composer-side selection stage. Independently validates our entity-
+resolution/supersession direction as where the points are. (Also:
+PrecisionMemBench arXiv:2605.11325 -- typed/structured retrieval scoping
+was the largest single effect in their 13-config study, not embeddings.)
+
+THE THREE LEVERS THE EVIDENCE FUNDS:
+ 1. VALIDATOR-WITH-RETRY (MemFlow, arXiv:2605.03312, +7.7pp measured):
+    a small grounding judge between draft and final, RE-COMPOSING on
+    failure instead of surrendering. We already own the instrument (probe
+    v3) -- our gate FLIPS to Unknown (converts to omission); MemFlow says
+    RETRY with an extractive fallback. Same probe, different action.
+ 2. TINY CPU RERANKER (Ettin-17M: 267 pairs/s CPU, beats MiniLM-L12 by
+    +0.051 NDCG@10 at half size): targets the rank gap (gold in-context
+    85% union, single-fact top-5 ~20%). ~450ms/120 lines. For the 32
+    synonymy misses: only an externally-pretrained bi-encoder can bridge
+    (corpus-internal methods null BY CONSTRUCTION -- confirms entry 109);
+    literature SPLIT on dense at 1k-doc scale (2606.29652 dense wins;
+    2607.26497 dense loses) -> measure on our own 363, trust nothing.
+    Skip static embeddings and ColBERT-class (evidence: wrong scale).
+ 3. JUDGE-FORMAT A/B (Judge Circuits, arXiv:2605.16023): judges compute
+    quality in a shared latent circuit but emit through fragile format-
+    specific branches -- format shifts verdicts independent of substance.
+    We never A/B'd answer style. Cheap, legitimate, untested.
+
+Also noted: MemDelta (2606.29914) warns model-identity/refusal confounds
+dominate memory evals -- our fixed-judge fixed-composer discipline already
+controls this. Mem0's 2026 stack converged on BM25+dense+entity fusion
+(what we measured piecemeal); Zep ships no-LLM-at-retrieval, P95 300ms --
+our pure-python path is comparable.
+
+EXECUTION ORDER (cheapest-decisive first): retry (existing infra, ~30min
+GPU, splice-judge only changed rows) -> format A/B (one compose+judge) ->
+reranker/synonymy deterministic A/B (no judge until recall moves).
