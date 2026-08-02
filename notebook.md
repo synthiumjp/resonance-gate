@@ -5968,3 +5968,18 @@ REVISED LEVER RANKING (by pool size x plausibility):
 NEXT (pre-registered): screen champion+premise-rule vs champion, full
 eval, real judge, one pass. Bar: correct +3 with halluc +<=1. Then
 two-pass compose screen under the same bar.
+
+## Entry 128 — 2026-08-02 (p2: premise-rule screen NEGATIVE -- 51.7/25.0 vs 51.1/21.6 paired baseline. The assertiveness law holds a fourth time.)
+
+Premise-correction rule, full eval, real judge: +0.6 correct, +3.4 halluc,
+-4.0 omission vs the same-infrastructure baseline. FAILS the pre-registered
+bar (+3c at <=+1h). Conflict halluc went 24->32 -- the rule pushed
+premise-contradiction ATTEMPTS onto thin evidence, same as every
+completeness-flavored instruction before it. That is now FOUR independent
+prompt mechanisms (v2 completeness, v3, currency-marking, premise rule)
+converting omission->halluc at ~1:1. Composer-side law, stated plainly:
+AT THIS SCALE, INSTRUCTED ASSERTIVENESS BUYS ATTEMPTS, NOT ACCURACY --
+only evidence quality or selection mechanisms move the Pareto point.
+Two-pass compose (running next) is a different mechanism class: no new
+instruction, just narrower-first evidence -- the law does not pre-condemn
+it. v5.2 probe + extraction A/B behind it.
