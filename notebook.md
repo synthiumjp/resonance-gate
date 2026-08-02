@@ -6015,3 +6015,33 @@ now), distill with JP's probe-targeted trainer, and gate at a
 higher-precision threshold that trims only the worst attempts instead of
 half of them. Everything else measured this week says: hold the champion,
 ship the modes.
+
+## Entry 130 — 2026-08-02 (p2: THE DIAL. Probe v3 (soft labels, AUROC 0.841) + percentile gate = the first favorable halluc/correct exchange (1.8:1) and a measured 4-point Pareto frontier. This is the product mechanism.)
+
+Soft labels (3 composer votes/row: 539 rows 3/3-correct, 454 0/3, 19%
+disputed -- bimodal, high-anchor) + LogisticRegressionCV (regime-scale's
+fit_controller pattern): AUROC 0.796 -> 0.841, best layer 17.
+
+THE MEASURED FRONTIER (all real judge, n=476, same evidence+composer,
+one probe threshold apart; paired champion baseline 51.1/21.6/27.3):
+  champion (no gate)   51.1 / 21.6 / 27.3
+  surgical p2          49.2 / 17.2 / 33.6   (-1.9c for -4.4h, 2.3:1)
+  surgical p5          47.9 / 16.0 / 36.1   (-3.2c for -5.6h, 1.8:1)
+  trust p10 (v2 probe) 35.7 / 13.0 / 51.3   (with v3 would sit higher)
+  Boundary stays 110-113/0-2 across all points.
+
+EVERY prompt mechanism traded omission->halluc at ~1:1 or worse (six
+nulls, entries 103-129). The probe gate is the FIRST lever measured on
+the favorable side, and the exchange IMPROVES as the cut gets shallower
+(2.3:1 at p2). p2 lands at 49.2/17.2 -- halluc within 2pts of MemOS at
+zero API spend, correct within 4 of mem0, abstention untouched.
+
+WHAT THIS IS FOR THE PRODUCT: a per-request TRUST DIAL on the same
+evidence -- profile_context(trust=0..1) maps to a probe percentile;
+the sidecar (4B + 10KB probe) scores evidence sufficiency; the client
+composes only what clears the caller's bar. No competitor has an
+equivalent axis. Next build steps: (a) stage C -- head-to-logit route
+(regime-scale d3 machinery) so the sidecar EMITS the score in-pass;
+(b) wire the dial into the MCP surface; (c) official-harness re-run
+with the dial documented (gate trained only on dev users 13-19 --
+officials clean).
