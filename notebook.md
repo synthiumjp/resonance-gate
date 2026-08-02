@@ -5983,3 +5983,35 @@ only evidence quality or selection mechanisms move the Pareto point.
 Two-pass compose (running next) is a different mechanism class: no new
 instruction, just narrower-first evidence -- the law does not pre-condemn
 it. v5.2 probe + extraction A/B behind it.
+
+## Entry 129 — 2026-08-02 (p2: conversion queue verdicts -- two-pass NULL, v5.2 probe PASS but no measurable win on dev. The composer AND prompt-shape frontiers are now fully mapped; what remains is selection/evidence work with different instruments.)
+
+Queue results (all deterministic or real-judge, pre-registered bars):
+  1. TWO-PASS compose: 51.1/23.5/25.4 vs 51.1/21.6/27.3 paired baseline.
+     Correct UNCHANGED, omission->halluc ~1:1 again -- even with NO new
+     instruction, widening evidence on abstention converts marginal
+     attempts at the same poor precision. The law generalizes: it is not
+     the instruction, it is the ATTEMPT SELECTION. Composer-side levers
+     are now EXHAUSTED (wording, structure, routing, currency, premise,
+     two-pass -- six mechanisms, six nulls/negatives).
+  2. v5.2 probe PASS (supersession 5/5, no regression loss) -- the
+     extractor DOES capture "Y (previously X)" when told; 27 marked facts
+     stored vs v5's 3 on dev users.
+  3. ...but NO dev-level win: gold-in-store 53.4 vs 55.6 (-2.2, slight
+     coverage cost), Update gold-in-context 16/20 BOTH, gold-in-chain
+     4->3. Diagnosis: HaluMem's dev Update questions rarely hinge on
+     turns that STATE the change explicitly; the benchmark's update signal
+     lives across sessions, not within single turns. v5.2 is kept as a
+     PRODUCT feature (real chat streams DO say "switched from X to Y";
+     JP's own data is the test bed) but it does not move this benchmark.
+
+WHERE THE POINTS ACTUALLY ARE, after this week of mapping: the 134-question
+conversion pool fails not on instructions but on SELECTION -- and the one
+instrument that showed real selective power is the probe (boundary 113/0,
+composer-independent 36/13 trust mode). The gate arc's ceiling was LABELS
+(0.796 from 1.2k noisy rows), not signal. The forward path for accuracy is
+therefore: scale gate training data (every judged run banks free verdicts
+now), distill with JP's probe-targeted trainer, and gate at a
+higher-precision threshold that trims only the worst attempts instead of
+half of them. Everything else measured this week says: hold the champion,
+ship the modes.
