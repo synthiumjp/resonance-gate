@@ -5932,3 +5932,39 @@ Status: gate arc complete as an experiment cycle (three pre-registered
 judged tests, no post-hoc tuning). Improving it further = better labels
 (more train users) or JP's probe-targeted LoRA distillation (trainer
 location still owed). Writeup now has the complete arc.
+
+## Entry 127 — 2026-08-02 (p2: THE WALL RESHAPED. Joining oracle misses with judge verdicts: 39% of "extraction misses" are already answered CORRECT. The big pool is conversion (134 q with evidence stored but not converted), then trick-premise questions, then true gaps.)
+
+JP's directive: make the system better, not the paper. First measurement:
+miss taxonomy (deterministic) x champion per-item verdicts (now saved from
+entry 126's chain). n=476 eval:
+
+  oracle-MISS (161): 62 Correct (39%!) / 58 Om / 41 Hall
+    - negation-gold trick questions (75 of them): 44 already Correct --
+      the composer handles premise-correction from stored positive facts
+      far better than containment ever credited. Remaining: 19 Om/12 Hall.
+    - speculative/advice golds (41): mostly by-design unanswerable from
+      evidence; defended class, not chased.
+  oracle-HIT (315): 181 Correct (57%) / 72 Om / 62 Hall
+    -> 134 questions have evidence IN STORE but no credit. THIS is the
+       largest single pool (28% of the benchmark), not extraction.
+
+REVISED LEVER RANKING (by pool size x plausibility):
+  1. CONVERSION of stored evidence (134 q): remaining untested mechanisms
+     = two-pass compose (entry 104 lever b) and premise-correction rule
+     (below). Completeness rules already measured BAD (+1.2c/+6h).
+  2. PREMISE-CORRECTION rule (targets the 31 non-correct negation q +
+     some Conflict): explicit instruction -- "if the question asserts
+     something the memories contradict, answer No and state what the
+     memories actually say." Narrow, mechanical, does not touch absence
+     handling (the halluc-risk lever the v2/v3 sweep identified).
+  3. Entity resolution (Update 51.5% hall + timeline starvation) -- real,
+     unchanged.
+  4. True extraction gaps: numerics (8 q -- value_extract/numeric_gate
+     exist, unwired), change-over-time (5 q). Small pools, cheap fixes.
+  Extraction-coverage-as-the-wall is DEMOTED: the true unstored-and-
+  answerable pool is ~60-70 q (~14%), half of prior belief.
+
+NEXT (pre-registered): screen champion+premise-rule vs champion, full
+eval, real judge, one pass. Bar: correct +3 with halluc +<=1. Then
+two-pass compose screen under the same bar.
