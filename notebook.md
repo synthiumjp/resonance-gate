@@ -5902,3 +5902,33 @@ artifacts deleted (compose resume-skip would have silently kept them).
 Also re-learned x3: pkill patterns that appear in your own command line
 kill your own wrapper (exit 144) -- exact-pid loops only, no pattern
 kills, ever. Chain relaunched; eval leg unaffected (context_v2 source).
+
+## Entry 126 — 2026-08-02 (p2: judge-label probe verdict -- AUROC 0.796; the gate at the pre-registered threshold OVER-ABSTAINS as a primary config but DOMINATES the blunt-abstention rule: a legitimate trust-mode operating point.)
+
+Chain completed end-to-end (~4h). Results, real judge throughout:
+
+  probe v2 (judge-Correct labels): best layer 21, eval AUROC 0.796
+    (vs 0.870 on containment labels -- judge-truth is the harder, noisier
+    target; the clean-benchmark 0.97 was never realistic here).
+  ungated 14B rerun: 51.1/21.6/27.3 -- reproduces entry 110's 51.7/22.5
+    within noise. The champion config is STABLE across reruns.
+  gated14 (threshold 0.763, train-side, flipped 216/476):
+    35.7 / 13.0 / 51.3
+  gated32: 36.3 / 13.0 / 50.6 -- the two composers CONVERGE under the
+    gate (52->36 vs 38->36): it equalizes away composer risk.
+
+PRIMARY-CONFIG VERDICT: NEGATIVE. -15.4 correct for -8.6 halluc is a bad
+trade at this AUROC; 0.796 cannot carve at a 10%-loss threshold without
+amputating half the true positives.
+
+BUT THE PARETO FACT: gated14 35.7/13.0 DOMINATES the blunt-abstention
+rule 31.9/17.0 (entry 102) on BOTH axes -- +3.8 correct AND -4.0 halluc.
+Boundary 112/1. For trust-critical deployments that want minimum
+hallucination, the probe gate is the best low-halluc operating point ever
+measured here, and it is COMPOSER-INDEPENDENT. RG's mode story becomes:
+champion mode 51/22, trust mode 36/13, same evidence, flip a flag.
+
+Status: gate arc complete as an experiment cycle (three pre-registered
+judged tests, no post-hoc tuning). Improving it further = better labels
+(more train users) or JP's probe-targeted LoRA distillation (trainer
+location still owed). Writeup now has the complete arc.
