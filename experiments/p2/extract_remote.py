@@ -24,7 +24,8 @@ if _HERE not in sys.path:
     sys.path.insert(0, _HERE)
 
 import dev_set
-from llm_profile import SYSTEM_V5
+from llm_profile import active_system
+SYSTEM_V5 = active_system()   # respects RG_EXTRACT_V52/V5/V4 at process start
 
 URL = os.environ.get("RG_OLLAMA_URL", "http://localhost:11435/api/chat")
 MODEL = os.environ.get("RG_EXTRACT_MODEL", "qwen3:32b")

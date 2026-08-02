@@ -313,7 +313,28 @@ def canon_subject(s):
     return s or "self"
 
 
+# v5.2 (entry 128): SUPERSESSION CAPTURE. When a turn STATES a change, the
+# value records what it replaced -- slot linking becomes explicit at ingest
+# instead of unreconstructable downstream (the entry-113/115 timeline
+# starvation: "green tea" -> "black coffee" share no tokens, so no
+# after-the-fact linker can chain them; the turn that SAID "switched from
+# green tea to black coffee" could have). Opt-in via RG_EXTRACT_V52.
+SYSTEM_V52 = SYSTEM_V5.replace(
+    "- Still IGNORE pure hypotheticals, wishes, questions, and things people ",
+    """- CHANGES KEEP THE OLD VALUE: when the message states that something \
+CHANGED, REPLACED, or STOPPED ("i switched from X to Y", "no longer X, now \
+Y", "i quit X", "we moved from X to Y"), the value MUST name both: \
+"Y (previously X)" -- e.g. "i've switched from green tea to black coffee" \
+-> {"subject": "self", "attribute": "preference", "value": "black coffee \
+(previously green tea)"}; "i quit apple to join google" -> {"subject": \
+"self", "attribute": "employer", "value": "google (previously apple)"}. \
+Only when the change is STATED -- never infer one.
+- Still IGNORE pure hypotheticals, wishes, questions, and things people """)
+
+
 def active_system():
+    if os.environ.get("RG_EXTRACT_V52"):
+        return SYSTEM_V52
     if os.environ.get("RG_EXTRACT_V5"):
         return SYSTEM_V5
     if os.environ.get("RG_EXTRACT_V4"):
