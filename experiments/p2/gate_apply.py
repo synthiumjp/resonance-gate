@@ -24,16 +24,22 @@ def main():
     ap.add_argument("--eval-states", required=True)
     ap.add_argument("--answers", required=True)
     ap.add_argument("--out", required=True)
+    ap.add_argument("--percentile", type=float, default=10.0,
+                    help="flip attempts below this train-side percentile of "
+                         "the positive class (10=trust mode, 2-5=surgical)")
     args = ap.parse_args()
 
     probe = pickle.load(open(args.probe, "rb"))
     L, sc, clf = probe["layer"], probe["scaler"], probe["clf"]
 
     tr = np.load(args.train_states)
-    ytr = np.array([int(json.loads(l)["verdict"] == "Correct")
-                    for l in open(args.train_labels)])
+    votes=None
+    for path in args.train_labels.split(","):
+        v=np.array([int(json.loads(l)["verdict"]=="Correct") for l in open(path)],dtype=float)
+        votes = v if votes is None else votes+v
+    ytr=(votes/len(args.train_labels.split(","))>=0.5).astype(int)
     ptr = clf.predict_proba(sc.transform(tr["states"][:, L].astype(np.float32)))[:, 1]
-    thr = float(np.percentile(ptr[ytr == 1], 10))
+    thr = float(np.percentile(ptr[ytr == 1], args.percentile))
 
     ev = np.load(args.eval_states)
     pev = clf.predict_proba(sc.transform(ev["states"][:, L].astype(np.float32)))[:, 1]
@@ -47,7 +53,7 @@ def main():
                 r["response"] = "Unknown."
                 flipped += 1
             f.write(json.dumps(r) + "\n")
-    print(f"threshold {thr:.3f} (train 10th pct of Correct class); "
+    print(f"threshold {thr:.3f} (train p{args.percentile:g} of Correct class); "
           f"flipped {flipped}/{len(rows)}")
 
 

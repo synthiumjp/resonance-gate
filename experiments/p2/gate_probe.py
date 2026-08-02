@@ -32,10 +32,16 @@ def main():
     Xtr, ytr = tr["states"].astype(np.float32), tr["labels"]
     Xev, yev = ev["states"].astype(np.float32), ev["labels"]
 
-    def judged_labels(path):
+    def judged_labels(paths):
+        """Comma-separated judged jsonls -> per-row fraction-Correct (soft
+        label). One file reproduces the old binary behaviour."""
         import json
-        return np.array([int(json.loads(l)["verdict"] == "Correct")
-                         for l in open(path)])
+        votes = None
+        for path in paths.split(","):
+            v = np.array([int(json.loads(l)["verdict"] == "Correct")
+                          for l in open(path)], dtype=float)
+            votes = v if votes is None else votes + v
+        return votes / len(paths.split(","))
     if args.train_labels:
         ytr = judged_labels(args.train_labels)
         assert len(ytr) == len(Xtr), f"{len(ytr)} labels vs {len(Xtr)} states"
@@ -44,11 +50,24 @@ def main():
         assert len(yev) == len(Xev), f"{len(yev)} labels vs {len(Xev)} states"
     n_layers = Xtr.shape[1]
     print(f"train {Xtr.shape} pos={ytr.mean():.2f}  eval {Xev.shape} pos={yev.mean():.2f}")
+    # soft labels: train on sample-weighted binarized votes (a row correct
+    # under 2/3 composers enters both classes, weighted) -- keeps sklearn's
+    # logistic machinery while using the extra signal. Eval AUROC is scored
+    # against "champion-correct" (first eval file / binarized) for
+    # comparability with probe v2.
     best = (0.0, -1, None)
+    from sklearn.linear_model import LogisticRegressionCV
+    yev_bin = (yev >= 0.5).astype(int) if yev.dtype != int else yev
     for L in range(n_layers):
         sc = StandardScaler().fit(Xtr[:, L])
-        clf = LogisticRegression(max_iter=2000, C=0.1).fit(sc.transform(Xtr[:, L]), ytr)
-        auc = roc_auc_score(yev, clf.predict_proba(sc.transform(Xev[:, L]))[:, 1])
+        Xs = sc.transform(Xtr[:, L])
+        if np.array_equal(ytr, ytr.astype(int)):
+            clf = LogisticRegressionCV(max_iter=2000, cv=5).fit(Xs, ytr.astype(int))
+        else:
+            X2 = np.concatenate([Xs, Xs]); y2 = np.array([1]*len(Xs)+[0]*len(Xs))
+            w2 = np.concatenate([ytr, 1.0-ytr])
+            clf = LogisticRegressionCV(max_iter=2000, cv=5).fit(X2, y2, sample_weight=w2)
+        auc = roc_auc_score(yev_bin, clf.predict_proba(sc.transform(Xev[:, L]))[:, 1])
         marker = ""
         if auc > best[0]:
             best = (auc, L, (sc, clf))
