@@ -6500,3 +6500,64 @@ Also mined from the corpus, applicable and queued:
     models do first-order retrieval well and abstraction at chance --
     an independent explanation for entry 142's gist failure, and a reason
     not to retry it.
+
+## Entry 145 — 2026-08-03 (p2: JP's OWN METHODS TURNED ON US. Validity screen: the dial's signal is VALID (good). McNemar on every delta: retrieval v3's +4.2 is NOT RELIABLE (p=0.19, 116 gained / 96 lost). Our A/B methodology has been reading churn.)
+
+Two of JP's instruments applied to this project's data (validity.py,
+committed).
+
+1. VALIDITY SCREEN (arXiv:2604.17714 portable protocol, exact formulas and
+   cut scores from the repo). The protocol states that if a confidence
+   signal screens Invalid, then type-2 AUROC, risk-coverage curves and
+   selective-prediction/abstention systems built on it are unsafe to
+   interpret -- i.e. exactly the trust dial.
+     median split      L=0.240 Fp=0.251 RBS=-0.509 (CI-lo -0.586)  -> VALID
+     dial p5 threshold L=0.627 Fp=0.066 RBS=-0.308 (CI-lo -0.377)  -> VALID
+   RBS strongly negative at both cuts (inverted monitoring would be RBS>0).
+   The dial is now SCREENED rather than assumed. This is a real positive
+   and it should accompany any published dial claim.
+
+2. PAIRED CHANGE TESTS. "Beyond the Mean" (arXiv:2604.27405) shows greedy
+   single-shot comparison misses 42% of reliable changes and falsely flags
+   25% of stable items; its RCI needs K stochastic samples per item, which
+   we never collected (every RG screen ran greedy at T=0). So RCI is not
+   computable from what we hold -- McNemar's exact test on discordant pairs
+   is the honest instrument for paired binary verdicts. Results:
+
+     retrieval v3        +4.2pt  gained 116 lost  96  p=0.192  NOT RELIABLE
+     premise rule        +0.6pt  gained  26 lost  23  p=0.775  not reliable
+     style rule          +0.0pt  gained  34 lost  34  p=1.000  not reliable
+     two-pass            +0.0pt  gained  24 lost  24  p=1.000  not reliable
+     gate surgical p5    -3.2pt  gained   3 lost  18  p=0.002  RELIABLE (cost)
+     gate surgical p2    -1.9pt  gained   3 lost  12  p=0.035  RELIABLE (cost)
+     gate trust p10     -15.3pt  gained   2 lost  75  p<0.001  RELIABLE (cost)
+
+THE UNCOMFORTABLE PART: retrieval v3 is the week's headline win, the reason
+round 5 is running, and its +4.2pt aggregate is NOT distinguishable from
+churn at n=476 (116 items gained, 96 lost -- a net 20 inside enormous
+item-level turnover). Exactly the paper's thesis. Every negative we called
+is confirmed negative, and the gate's COSTS are reliable; what is not
+established is our biggest claimed gain.
+
+WHAT THIS DOES AND DOES NOT MEAN: v3 is not shown to be worse, and its
+deterministic retrieval gains (union 83.2->86.8, top-5 20.7->28.7) are
+measured on a different, non-judge instrument and stand. What fails is the
+inference from a +4.2 judged aggregate at n=476 to "v3 is better". Round 5
+(n=1764, 3.7x the sample) has the power to settle it: the same effect ratio
+at that n gives p~0.008. So round 5 changes from a formality into the test
+that decides whether v3 ships. Leave it running; judge it on its own
+McNemar against round 4, not on the aggregate.
+
+DEBTS RECORDED, not papered over:
+  - K-sampling debt: proper RCI needs K=10 samples/item/config. Every screen
+    this project ran is greedy single-shot -- the exact methodology "Beyond
+    the Mean" shows to be unsafe at these effect sizes. Future screens
+    either collect K samples or report McNemar and accept lower power.
+  - Missing per-item verdicts for the as-of screen (+1.4, ACCEPTED into the
+    frozen config) -- it spliced tallies without saving verdicts, so it
+    cannot be tested retrospectively. On these numbers a +1.4 at n=476 is
+    almost certainly inside churn too. The as-of rule stays in round 5
+    (it is already frozen and running) but is now an UNVERIFIED component.
+  - Underpowered dev screens generally: at n=476 with this churn rate, the
+    minimum reliably detectable effect is roughly +5-6pt. Every bar this
+    project pre-registered at ">=+5 correct" was, accidentally, about right.

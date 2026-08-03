@@ -182,9 +182,22 @@ premise correction, answer-format rules, and a validator-retry loop — each
 converted omissions into hallucinations at roughly 1:1. In this pipeline,
 instructing the composer to be more forthcoming did not improve the frontier.
 
-**Two interventions moved it.** Changing what the composer reads (retrieval
-v3: +4.2 correct at +0.5 hallucination) and filtering which attempts survive
-(the sufficiency probe, which produced the dial's operating points).
+**Two interventions moved it — with a reliability caveat.** Changing what the
+composer reads (retrieval v3: +4.2 correct at +0.5 hallucination on dev) and
+filtering which attempts survive (the sufficiency probe). Paired McNemar
+testing shows the retrieval-v3 aggregate is *not* statistically reliable at
+n=476 (116 items gained, 96 lost, p=0.19): the net gain sits inside
+substantial item-level churn. Its deterministic retrieval improvements (union
+recall 83.2%→86.8%, gold-in-top-5 20.7%→28.7%) are measured on a separate
+instrument and do stand. The official round 5 run (n=1,764) has the power to
+settle whether the judged gain is real; until it reports, retrieval v3 is a
+promising configuration rather than a demonstrated improvement.
+
+The confidence signal behind the trust dial has been screened with a portable
+validity protocol (arXiv:2604.17714) and classifies as **Valid** at both the
+median split and the operating threshold (RBS −0.51 and −0.31, both CIs
+excluding zero), which is the precondition for interpreting any
+selective-prediction system built on it.
 
 **Model scale did not predict performance here.** A 235B composer scored
 worse than the 14B (47.9 vs 51.1 correct) and a 32B extractor stored less
