@@ -50,6 +50,9 @@ os.environ.setdefault("RG_EXTRACT_V4", "1")
 
 import halumem_run as RG  # noqa: E402  (path/env setup must run first)
 import retrieve as RV     # noqa: E402
+_V3 = os.environ.get("RG_RETRIEVE_V3", "0") == "1"
+if _V3:
+    import retrieve_v3 as RV3   # noqa: E402  (opt-in accuracy tier)
 import timeline as TL     # noqa: E402
 from llms import llm_request        # noqa: E402  (harness-local)
 from prompts import PROMPT_MEMZERO  # noqa: E402
@@ -73,9 +76,14 @@ CAL = ("\n\nGROUNDING RULES (follow exactly):\n"
 def compose_answer(mem, question, index):
     """Evidence-layer QA: retrieve tiered+receipted context, compose under
     the calibrated rules. Returns (answer, context)."""
-    facts = RV.retrieve_facts(mem, question, index=index)
+    if _V3:
+        facts = RV3.retrieve_facts_v3(index, question)
+    else:
+        facts = RV.retrieve_facts(mem, question, index=index)
     context = "\n".join(RV.format_fact(d) for d in facts) or "(no relevant memories)"
     extra = ""
+    if _V3 and RV3.ANCHORED_RX.search(question):
+        extra += RV3.TEMPORAL_RULE
     if _TIMELINE:
         section = TL.change_history(mem, facts)
         if section:
@@ -193,7 +201,7 @@ def process_user(idx, user_data, cache_dir=DEFAULT_CACHE_DIR):
             continue
 
         new_session["questions"] = []
-        index = RV.build_index(mem)   # one index per session-state
+        index = RV3.IndexV3(mem) if _V3 else RV.build_index(mem)
         for qn, qa in enumerate(session["questions"]):
             t1 = time.time()
             answer, context = compose_answer(mem, qa["question"], index)
