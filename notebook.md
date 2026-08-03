@@ -6449,3 +6449,54 @@ CONSEQUENCE: the grounding contract is CLOSED to further assertion rules.
 Future prompt work must be selection-shaped or it does not get GPU time.
 U1 closed negative; roadmap advances to U2 (receipt operations, CPU-only,
 no assertion surface).
+
+## Entry 144 — 2026-08-03 (p2: PROBE VALIDITY AUDIT (JP's own Resonance-Gate method turned on ourselves): the 0.841 AUROC is largely an ANSWERABILITY detector, not an evidence-sufficiency signal. Real sufficiency signal is 0.72. Fix = factorised two-probe gate.)
+
+JP's corpus (synthiumjp.github.io) contains the exact audit that applies:
+"The Resonance Gate" (Zenodo 21446859) self-commissioned an adversarial
+audit and found its endogenous confidence signal was really STORE-MEMBERSHIP.
+Same test, run on our sufficiency probe v3:
+
+  AUROC vs judge-correct          0.841   <- the number we have been quoting
+  AUROC vs is-boundary-question   0.975   <- what it is ACTUALLY detecting
+  AUROC vs gold-in-context        0.230   (inverted: high score <-> boundary)
+  ANSWERABLE questions only (n=363)       0.723
+  GOLD-IN-CONTEXT only (n=302, containment held constant)  0.725
+
+READING: boundary questions are ~96% correct because abstention is correct
+there, so a probe trained on judge-correct learns "is this unanswerable?"
+almost perfectly and inherits its headline from that. On the cases where
+the gate has to do real work -- answerable questions -- discrimination is
+0.72, not 0.84. The measured dial frontier (49.2/17.2, 47.9/16.0, 35.7/13.0)
+stands: those are JUDGED outcomes, not probe metrics. What changes is the
+INTERPRETATION, and it explains the dial's failure mode: at p10 it flipped
+216 answers and cost 15 correct because it was partly gating on
+answerability, so once the threshold moved past the boundary cluster it cut
+answerable questions indiscriminately.
+
+THE FIX, and it is JP's own architecture: his competence gate ships a
+TWO-SIGNAL variant (adapters_qwen_twosignal), and arXiv:2607.08456
+(entry 119) reported correctness and answerability are separable axes with
+factorised abstention reaching 0.75 coverage at controlled risk vs 0.31 for
+single-signal thresholding. So: TWO probes -- answerability (already 0.975,
+essentially free) and sufficiency-given-answerable (the 0.72 one, trained
+ONLY on answerable rows so it stops learning the easy axis) -- gate on the
+conjunction. This is U2a, and it is cheap: same states, same labels,
+different training mask.
+
+Also mined from the corpus, applicable and queued:
+  - "Beyond the Mean" (arXiv:2604.27405) Reliable Change Index: our screens
+    routinely land at +-2pts and we have been eyeballing them. RCI gives a
+    principled per-item reliable-change test; we hold paired per-item
+    verdicts for ~8 configurations. This should audit every delta in the
+    notebook, including ones we accepted (as-of +1.4).
+  - Validity screening protocol (arXiv:2604.17714/17707): three-tier
+    Invalid/Indeterminate/Valid from a contingency table -- run it on the
+    dial before publishing any confidence claim.
+  - Type-2 SDT (arXiv:2603.25112, 2603.14893): the dial IS a criterion shift
+    on a type-2 signal; meta-d'/M-ratio/AUROC2 is the correct formalism and
+    replaces ad-hoc percentiles in the writeup.
+  - "Exemplar Retrieval Without Overhypothesis Induction" (arXiv:2604.05243):
+    models do first-order retrieval well and abstraction at chance --
+    an independent explanation for entry 142's gist failure, and a reason
+    not to retry it.
