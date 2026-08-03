@@ -115,6 +115,29 @@ class Memory:
         nodes = sorted(self.g.nodes.values(), key=lambda d: -d["n_mentions"])
         return [self._fact(nd) for nd in nodes[:top]]
 
+    def conflicts(self):
+        """Open slot conflicts (the acquisition frame's clarification hook,
+        entry 137): same-attr facts whose values link into an evolution chain
+        with >=2 distinct values and NO owner correction resolving them.
+        Returns [{attribute, values:[{value, dates, evidence}], ask}] --
+        `ask` is a ready-to-surface clarifying question. Deterministic."""
+        import timeline as TL
+        import spacing as SP
+        out = []
+        store = list(self.g.nodes.values()) + list(self.g.provisional.values())
+        for attr, chain in TL.slot_chains(store):
+            vals = [{"value": m["value"],
+                     "dates": sorted(set(m["convs"].values())),
+                     "evidence": SP.tag(m)} for m in chain]
+            out.append({
+                "attribute": attr,
+                "values": vals,
+                "ask": (f"I have {len(vals)} values for your {attr}: "
+                        + " / ".join(f"'{v['value']}'" for v in vals[-3:])
+                        + ". Which is current (or are both true)?"),
+            })
+        return out
+
     def _fact(self, nd, provisional=False):
         recs = sorted(nd["convs"].items(), key=lambda kv: kv[1], reverse=True)
         if nd.get("owner_confirmed"):
@@ -158,4 +181,13 @@ class Memory:
             for f in r["unconfirmed"][:3]:
                 lines.append(f"- UNCONFIRMED (seen once): {f['attribute']}: "
                              f"{f['value']}")
-        return head + "\n" + "\n".join(lines) + "\n" + _RULES
+        block = head + "\n" + "\n".join(lines)
+        cf = [c for c in self.conflicts()
+              if query is None or any(t in c["attribute"]
+                                      for t in str(query).lower().split())]
+        if cf:
+            block += ("\n[MEMORY CONFLICTS -- unresolved; if one becomes "
+                      "relevant, ASK the user instead of picking:]")
+            for c in cf[:3]:
+                block += f"\n- {c['ask']}"
+        return block + "\n" + _RULES

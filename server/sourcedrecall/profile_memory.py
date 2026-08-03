@@ -170,6 +170,13 @@ def profile_correct(action, attribute, value, new_attribute=None, exact=False):
         return {"written": correction, "applied": "live", "log": log}
 
 
+def profile_conflicts():
+    """Open slot conflicts from the live Memory (see memory_api.conflicts)."""
+    mem = _ensure_loaded()
+    with _lock:
+        return {"conflicts": mem.conflicts(), "source": _SOURCE}
+
+
 def profile_status(reload=False):
     with _lock:
         if reload or _state["mem"] is None:

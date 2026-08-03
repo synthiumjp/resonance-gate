@@ -6196,3 +6196,33 @@ the dominant new cost, est 6-9h for 10 users) -> stage 2 official judge
 56.7/22.5; round-4 baseline 52.6/19.1. Boundary risk: none expected
 (v3 left boundary intact on dev). Mac v3-state extraction still running
 for the dial transfer check, independent of this run.
+
+## Entry 137 — 2026-08-03 (p2: THE ACQUISITION FRAME BUILT (BabyLM reframe, JP's push): spacing.py + conflicts()/profile_conflicts + clarification in context_block. And a REAL finding: spaced repetition consolidates ERRORS too -- JP's denied facts skew SPACED.)
+
+The reframe (JP: "a new way of thinking from BabyLM"): a per-user memory
+corpus IS BabyLM-scale; competitors do internet-RAG-shrunk-down; RG is
+already an ACQUISITION system (provisional=fast mapping, corroboration=
+consolidation, correction=revision, supersession=development). Named and
+built:
+
+  spacing.py (committed): evidence_profile / consolidation / tag --
+    spaced (>=2 convs, >=7d) vs massed vs single, receipts-derived.
+  memory_api.conflicts() + context_block [MEMORY CONFLICTS] section +
+    MCP profile_conflicts: the clarification loop -- when stored values
+    for a slot diverge, ASK the user instead of picking. Live smoke on
+    JP's profile: 23 open conflicts, asks read well. 37 tests passing
+    inc. 2 new.
+
+THE FINDING (validation on JP's own data, corrections as ground truth,
+uncorrected store rebuilt): denied facts are 5/8 SPACED vs 12% baseline
+-- HYPOTHESIS INVERTED. Systematic extraction errors RECUR whenever the
+topic recurs, so spacing consolidates stable-extractor-behavior, which
+includes stable errors ("collaborator: jon-paul cacioli" = JP himself;
+"caltech undergrad" = someone else's fact). Consequences, adopted:
+(1) spacing ships as EVIDENCE METADATA, never a truth claim; (2) the
+missing acquisition mechanism is ERROR-CORRECTING INTERACTION -- which
+is exactly the clarification loop, now built; (3) the future
+corroboration signal is CONTEXT DIVERSITY (same fact from different
+conversational contexts -- systematic errors are context-locked).
+Benchmark path untouched (judged config frozen; round 5 running:
+user-0 composed clean, 33% Unknown).

@@ -101,3 +101,39 @@ def test_context_block_is_verbatim_and_rule_bearing():
     # profile block
     b4 = m.context_block()
     assert "corroborated profile" in b4 and "location: melbourne" in b4
+
+
+def test_conflicts_and_clarification():
+    """Acquisition-frame clarification hook (entry 137): same-slot evolving
+    values surface as an open conflict with an ask; context_block carries it."""
+    from wire import WireGraph
+    facts = [
+        (3, "employer", "apple", [("Jan 05, 2025", "s1"), ("Feb 10, 2025", "s2"),
+                                  ("Mar 01, 2025", "s3")]),
+        (2, "employer", "apple inc in cupertino", [("Mar 20, 2025", "s4"),
+                                                   ("Apr 02, 2025", "s5")]),
+        (2, "city", "melbourne", [("Jan 05, 2025", "s1"), ("Jun 01, 2025", "s6")]),
+    ]
+    g = WireGraph.from_facts(facts, n_convs=6)
+    m = Memory(g)
+    cf = m.conflicts()
+    attrs = {c["attribute"] for c in cf}
+    assert "employer" in attrs          # linked evolving values -> conflict
+    assert "city" not in attrs          # single value -> no conflict
+    emp = next(c for c in cf if c["attribute"] == "employer")
+    assert "Which is current" in emp["ask"]
+    assert any("consolidated" in v["evidence"] or "repeated" in v["evidence"]
+               for v in emp["values"])
+    block = m.context_block()
+    assert "MEMORY CONFLICTS" in block and "ASK the user" in block
+
+
+def test_spacing_evidence_profile():
+    import spacing as SP
+    nd = {"convs": {"s1": "Jan 05, 2025", "s2": "Mar 01, 2025"}, "n_mentions": 2}
+    p = SP.evidence_profile(nd)
+    assert p["spacing"] == "spaced" and p["span_days"] > 30
+    assert 0.3 < SP.consolidation(nd) <= 1.0
+    massed = {"convs": {"s1": "Jan 05, 2025", "s2": "Jan 06, 2025"}, "n_mentions": 2}
+    assert SP.evidence_profile(massed)["spacing"] == "massed"
+    assert SP.consolidation(massed) < SP.consolidation(nd)

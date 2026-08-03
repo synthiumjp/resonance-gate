@@ -78,6 +78,16 @@ def forget(subject: str, relation: str = None, object: str = None) -> dict:
 
 
 @mcp.tool()
+def profile_conflicts() -> dict:
+    """Open memory conflicts: slots where the user's stored values evolved or
+    disagree and no correction has resolved them. Each item carries a
+    ready-to-ask clarifying question -- when one is relevant to the current
+    conversation, ASK it rather than silently picking a value. Resolving a
+    conflict: call profile_correct with the outdated value."""
+    return pmem.profile_conflicts()
+
+
+@mcp.tool()
 def profile_recall(query: str) -> dict:
     """Recall from the p2 world/profile memory (a validated, non-hallucinating
     LIVING memory built by replaying a cached extraction over the user's own
