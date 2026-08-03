@@ -6167,3 +6167,18 @@ do. Selection is the only thing worth telling a composer.
 
 Config for round 5: retrieval v3 + focus + CAL + as-of(anchored).
 Pending pre-round-5: self-consistency screen; dial re-align on Mac.
+
+## Entry 135 — 2026-08-03 (p2: self-consistency NULL (54.6/22.7, only 16 consensus flips -- composer near-deterministic on this evidence). Mechanism inventory complete. Round-5 config FROZEN: v3 + focus + CAL + as-of = 56.7/22.5 dev.)
+
+The last untried mechanism closes null. Full mechanism ledger for the
+writeup, all real-judge measured: WORKS -- evidence quality (retrieval
+v3 +4.2c), selection instructions (tiers/receipts, as-of +1.4c),
+selection gating (probe dial, favorable trade). NULL/NEGATIVE -- six
+assertiveness instructions, recite, two-pass, retry, style, currency,
+premise, self-consistency, bigger composers (2 families), bigger
+extractor, WordNet expansion, PRF, PPR, k1/b.
+
+Round-5 config frozen. Remaining before launch: adapter wiring (v3
+retrieval path into eval_rgp2/retrieve.py productization + focus + as-of
+anchored-question detection), dial AUROC transfer check when Mac v3
+states land. Then JP's go.
