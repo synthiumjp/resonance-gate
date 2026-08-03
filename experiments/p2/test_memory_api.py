@@ -137,3 +137,34 @@ def test_spacing_evidence_profile():
     massed = {"convs": {"s1": "Jan 05, 2025", "s2": "Jan 06, 2025"}, "n_mentions": 2}
     assert SP.evidence_profile(massed)["spacing"] == "massed"
     assert SP.consolidation(massed) < SP.consolidation(nd)
+
+
+def test_consolidation_receipts_and_lability():
+    """Gist nodes must cite >=2 episodes (auditable abstraction) and a new
+    uncovered fact in the same slot must return the gist to a labile state."""
+    import consolidate as C
+    eps = [
+        {"id": "e1", "attr": "value", "value": "solitude for recharging",
+         "n_mentions": 2, "convs": {"s1": "Jan 05, 2025"}},
+        {"id": "e2", "attr": "value", "value": "quiet mornings to think clearly",
+         "n_mentions": 1, "convs": {"s2": "Feb 11, 2025"}},
+    ]
+    g = C.make_gist("value", eps, llm=lambda p: "Values quiet solitude for mental clarity.")
+    assert g and g["tier"] == "gist"
+    assert len(g["sources"]) == 2 and set(g["sources"]) == {"e1", "e2"}
+    assert "PATTERN from 2 memories" in C.format_gist(g)
+    # a single episode can never make a gist (no corroboration -> no abstraction)
+    assert C.make_gist("value", eps[:1], llm=lambda p: "Anything.") is None
+    # a model that finds no pattern must not produce one
+    assert C.make_gist("value", eps, llm=lambda p: "NONE") is None
+    # reconsolidation: prediction error, not contradiction detection.
+    # A fact the gist already predicts leaves it stable...
+    C.mark_labile([g], {"attr": "value", "value": "enjoys solitude to recharge"})
+    assert g["stale"] is False
+    # ...one it does not predict (novel OR contradictory) makes it labile.
+    C.mark_labile([g], {"attr": "value", "value": "thrives in loud open offices"})
+    assert g["stale"] is True
+    # different slot: untouched
+    g2 = dict(g, attr="city", stale=False)
+    C.mark_labile([g2], {"attr": "value", "value": "anything at all"})
+    assert g2["stale"] is False
