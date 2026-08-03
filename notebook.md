@@ -6115,3 +6115,31 @@ what it reads does.
 NEXT: (a) official round 5 with v3 (adapter wiring + JP's go on GPU-days);
 (b) re-extract probe states on v3 contexts (Mac) to re-align the dial;
 (c) write-time campaign (entity resolution) toward MOSAIC's 73.1.
+
+## Entry 133 — 2026-08-03 (p2: linguistic-engineering sweep (BabyLM/comp-ling lit + 2 deterministic A/Bs). FOCUS weighting +1.9 top5 kept; WordNet/gated-expansion/deriv all noise. The symbolic frontier is mined out; the residual synonymy gap is distributional.)
+
+JP's directive: GPU-free wins from the linguistics literature before round 5.
+Lit scan (sonnet agent; Voorhees 1994 caution, Pal 2014 gating, OEWN 2025,
+simplemma, Tayyar Madabushi & Lee 2016 97.2% rule-based question
+classification, NegEx + 7,604 WordNet antonym pairs, dateparser) + two
+deterministic A/Bs on dev 10-12:
+
+  ungated WordNet (hyper+deriv): zero-overlap recovery 16/46 vs dense 29/42;
+    union +1.1 but top5 DOWN (the dilution the literature predicted).
+  gated bundle (Pal co-occurrence gate + polysemy cap + deriv + focus):
+    focus alone        top5 20.4 -> 22.3 (+1.9, union flat)  <- KEPT
+    gated hyper        union +0.5, top5 -1.4                 <- null
+    deriv              nothing over suffix stemmer           <- null
+
+VERDICT: the deterministic-linguistics frontier for retrieval is mined
+out -- BM25+crude-stemming was already near the symbolic ceiling; the
+remaining synonymy gap is DISTRIBUTIONAL (WordNet holds "coffee->beverage"
+but not "manage chaos->resilience"), which is precisely what the 150MB
+dense tier encodes. Focus weighting folds into the v3 candidate stage and
+the pure-python default tier. Banked for later stages (not retrieval):
+NegEx+antonyms for trick-question analysis; dateparser+preposition rules
+for the entity-resolution campaign; rule-based question classification if
+type-routing ever returns.
+
+Recommendation to JP: GPU-free levers exhausted; official round 5 with
+v3+focus is the next real number.
