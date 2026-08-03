@@ -6285,3 +6285,49 @@ FIRST STEP (free, CPU, no GPU contention with round 5): measure the write
 gate deterministically -- semantic dedup within attr-family, then oracle
 gold-in-store + retrieval precision. If the store halves without losing
 gold, mechanism 1 ships on its own merits and mechanisms 2-3 build on it.
+
+## Entry 140 — 2026-08-03 (p2: LEARNING-RULE MEMORY shipped -- corrections induce WRITE POLICY (deny/retype/risk), 18/18 precision, quarantine-not-deletion. Plus the CROSSTALK AUDIT: receipts block 51.5% of vector-proposed associations, 0 leaked.)
+
+From JP's second table, one row earned a build: "memory in the RULES that
+shape plasticity". Motivated by entry 137's finding (denied facts skew
+SPACED -- systematic extraction errors recur, so correcting the FACT never
+stops them; the RULE must change).
+
+write_rules.py (committed): induce() turns corrections.jsonl into policy --
+DENY rules keyed on content-token sets (generalize across surface forms),
+RETYPE rules (learned slot repair), smoothed per-slot RISK. decide() runs
+at ingest inside run_wire.build_facts; blocked writes go to QUARANTINE
+(never destroyed) and are reviewable over MCP profile_quarantine.
+
+MEASURED on JP's real data (17 corrections -> 12 deny + 5 retype rules):
+  precision 18/18 -- every affected write audited by hand, zero collateral.
+    One correction ("collaborator: cacioli") caught 3 surface forms
+    (Jon-Paul Cacioli / JP Cacioli / dr jp cacioli); "tic tracker" caught
+    tic_tracker and tracker.
+  amplification 1.1x mean, but HETEROGENEOUS: top rules fire 5x/4x/4x/3x/2x
+    (the systematic recurring class) while most fire once. Retrospective
+    replay UNDERSTATES forward value -- a recurring error is blocked in
+    perpetuity, not 5 times.
+  build A/B: 25 writes quarantined; downstream fact-level corrections drop
+    from 12 patches to 1 -- corrections have moved UPSTREAM into the rule,
+    which is the entire point.
+  Risk accepted + mitigated: a rule can age badly (deny 'conference:
+    neurips' then attend NeurIPS). Hence quarantine + MCP review + reversal
+    by editing the correction. No silent destruction anywhere.
+
+ALSO (from JP's first table -- SDM/VSA rows are RG's own foundations, not a
+new direction): CROSSTALK AUDIT on the real profile, using the existing
+ResonanceIndex (dim=8192): the vector substrate proposed 615 associations,
+the receipt gate BLOCKED 317 (51.5%), leaked 0. Examples: 'age: 42' ~
+'income: 241k'; 'child_school_cost' ~ 'occupation: <employer>'; 'email' ~
+'tool: app'. Honest caveat for publication: our codebook is random, so this
+crosstalk is noise-floor; a semantic vector store's crosstalk would be
+PLAUSIBLE -- worse, because plausible false links are the ones nobody
+catches. Saved: ~/rg_private/crosstalk_audit.json.
+
+Assessment of the rest of both tables: SDM/HD = already ours; predictive/
+generative = built (entries 138-139); hardware + neuromorphic rows = wrong
+medium; fractal, topological, thermodynamic, category-theoretic = research
+programmes with no hook in our measured failure profile; stigmergic memory
+(ingest environment traces, not just chat) = a SCOPE question for the
+product, not an algorithm. Declined with reasons rather than deferred.
