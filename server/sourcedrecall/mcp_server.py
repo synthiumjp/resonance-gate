@@ -78,6 +78,15 @@ def forget(subject: str, relation: str = None, object: str = None) -> dict:
 
 
 @mcp.tool()
+def profile_quarantine() -> dict:
+    """Writes blocked at ingest by rules learned from the owner's own
+    corrections, each with the rule responsible. Use when the user asks why
+    something is missing from memory, or to review whether a learned rule has
+    aged badly (e.g. they denied a job title once but now hold it)."""
+    return pmem.profile_quarantine()
+
+
+@mcp.tool()
 def profile_conflicts() -> dict:
     """Open memory conflicts: slots where the user's stored values evolved or
     disagree and no correction has resolved them. Each item carries a

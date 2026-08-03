@@ -170,6 +170,20 @@ def profile_correct(action, attribute, value, new_attribute=None, exact=False):
         return {"written": correction, "applied": "live", "log": log}
 
 
+def profile_quarantine():
+    """Writes the LEARNED WRITE POLICY blocked at ingest (entry 140), with the
+    rule that blocked each. Reversible by design: delete or amend the
+    correction in corrections.jsonl and reload."""
+    _ensure_loaded()
+    import run_wire
+    import write_rules as WR
+    rules = WR.load(_corrections_path())
+    return {"quarantined": run_wire.quarantine(),
+            "rules": {"deny": len(rules["deny"]), "retype": len(rules["retype"]),
+                      "from_corrections": rules["n_corrections"]},
+            "source": _SOURCE}
+
+
 def profile_conflicts():
     """Open slot conflicts from the live Memory (see memory_api.conflicts)."""
     mem = _ensure_loaded()

@@ -20,6 +20,7 @@ Usage: run_wire.py <conversations.json> [min_mentions=2] [--query "..."]
 """
 
 import hashlib
+import write_rules as WR
 import json
 import os
 import re
@@ -47,6 +48,14 @@ _ABSTAIN_PROBES = [
 ]
 
 
+_QUARANTINE = []
+
+
+def quarantine():
+    """Writes the learned policy blocked this build (auditable, reversible)."""
+    return list(_QUARANTINE)
+
+
 def build_facts(path, min_mentions=2):
     """Corroborated facts with receipts, rebuilt from the cache exactly as
     run_profile_full readout (canon + hygiene + clustering). Returns
@@ -65,6 +74,13 @@ def build_facts(path, min_mentions=2):
                 cache[d["h"]] = d["f"]
             except Exception:
                 pass
+    global _WRITE_RULES
+    _QUARANTINE.clear()
+    _WRITE_RULES = None
+    if not os.environ.get("RG_NO_WRITE_RULES"):
+        _cpath = os.path.join(os.path.dirname(path), "corrections.jsonl")
+        _r = WR.load(_cpath)
+        _WRITE_RULES = _r if (_r["deny"] or _r["retype"]) else None
     stream, titles = PF.load_stream_and_titles(path)
     prose = [s for s in stream if _is_prose(s[3])]
     slots = defaultdict(lambda: defaultdict(lambda: {"n": 0, "recs": []}))
@@ -77,6 +93,19 @@ def build_facts(path, min_mentions=2):
         for fct in cache[h]:
             a = canon_attr(fct["attribute"])
             v = re.sub(r"\s+", " ", str(fct["value"]).strip().lower())
+            # LEARNED WRITE POLICY (entry 140): the owner's corrections shape
+            # the rule, not just the fact. Denied writes are QUARANTINED (kept
+            # with the rule that blocked them) -- never silently destroyed, so
+            # a rule that ages badly is reviewable and reversible.
+            if _WRITE_RULES is not None and v:
+                _act, _det = WR.decide(_WRITE_RULES, a, v)
+                if _act == "deny":
+                    _QUARANTINE.append({"attribute": a, "value": v,
+                                        "date": date, "conv": uuid,
+                                        "rule": _det["rule"]})
+                    continue
+                if _act == "retype":
+                    a = _det["new_attribute"]
             if (not v or a in PF._EXCLUDE_ATTR or PF._EXCLUDE_ATTR_RX.search(a)
                     or PF._reject_value(a, v)):
                 continue

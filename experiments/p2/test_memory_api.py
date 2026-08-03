@@ -168,3 +168,32 @@ def test_consolidation_receipts_and_lability():
     g2 = dict(g, attr="city", stale=False)
     C.mark_labile([g2], {"attr": "value", "value": "anything at all"})
     assert g2["stale"] is False
+
+
+def test_learned_write_rules():
+    """Corrections become write POLICY (entry 140): recurring errors are
+    blocked at ingest across surface variants, slot repairs are learned, and
+    every block is quarantined rather than destroyed."""
+    import write_rules as WR
+    corr = [
+        {"action": "deny", "attribute": "collaborator", "value": "cacioli"},
+        {"action": "retype", "attribute": "tool", "value": "tic tracker",
+         "new_attribute": "project"},
+    ]
+    rules = WR.induce(corr)
+    # generalizes across surface forms of the same error
+    for v in ("Jon-Paul Cacioli", "JP Cacioli", "dr jp cacioli"):
+        assert WR.decide(rules, "collaborator", v)[0] == "deny"
+    # slot repair is learned, not hard-coded
+    act, det = WR.decide(rules, "tool", "tic_tracker")
+    assert act == "retype" and det["new_attribute"] == "project"
+    # unrelated writes are untouched
+    assert WR.decide(rules, "collaborator", "ada lovelace")[0] == "allow"
+    assert WR.decide(rules, "tool", "ripgrep")[0] == "allow"
+    # a denied slot is riskier than an untouched one, but not condemned
+    assert WR.risk_score(rules, "collaborator") > WR.risk_score(rules, "city")
+    assert WR.risk_score(rules, "collaborator") < 1.0
+    # amplification: one rule, many blocked recurrences
+    recs = [{"f": [{"attribute": "collaborator", "value": "JP Cacioli"}]}] * 4
+    st = WR.apply_to_extractions(rules, recs)
+    assert st["blocked"] == 4
