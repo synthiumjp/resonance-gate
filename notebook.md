@@ -6143,3 +6143,27 @@ type-routing ever returns.
 
 Recommendation to JP: GPU-free levers exhausted; official round 5 with
 v3+focus is the next real number.
+
+## Entry 134 — 2026-08-03 (p2: v3 miss decomposition -> AS-OF temporal-selection rule +1.4c/-1.9o. Dev config now 56.7/22.5 -- above Zep's published correct. The law's boundary sharpened: selection-guidance instructions work; assertiveness instructions don't.)
+
+JP's "nothing else to try?" audit found three: (1) the v3 miss map (never
+rebuilt after the champion changed), (2) self-consistency voting (the one
+law-exempt untried mechanism), (3) dial re-alignment on v3.
+
+The map (v3 verdicts x in-context, deterministic): not-in-ctx down to 7%
+(v3 worked); battlefield = 176 in-ctx failures; boundary ~perfect. NEW
+CLASS exposed: as-of temporal misselection -- CAL's "prefer most recent"
+is RIGHT for present-tense and WRONG for as-of-past questions ("job title
+as of Sep 2025" answered with the later Google value). Our own rule, not
+model capability. 313/476 questions are date-anchored (67H/75O).
+
+Screen (targeted: rule added ONLY to anchored questions; 65 answers
+changed; splice-judged): 56.7/22.5/20.8 vs 55.3/22.1/22.7 -- +7 correct,
++2 halluc, -9 omission. KEPT. Refines the assertiveness law into its
+final form: instructions that change WHICH evidence answers (as-of
+selection: works; tiers/receipts prompt of entry 102: worked) move the
+frontier; instructions that change WHETHER to answer (six failures) never
+do. Selection is the only thing worth telling a composer.
+
+Config for round 5: retrieval v3 + focus + CAL + as-of(anchored).
+Pending pre-round-5: self-consistency screen; dial re-align on Mac.
