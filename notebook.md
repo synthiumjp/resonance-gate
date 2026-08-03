@@ -6413,3 +6413,39 @@ measured-negative retrieval augmentation. That is an honest yield.
 
 NEXT per roadmap, unblocked: U1 typed negation. Round 5 unaffected (the
 frozen config never included gists).
+
+## Entry 143 — 2026-08-03 (p2: U1 CLOSED NEGATIVE, twice over. Typed negation's premise falsified by diagnostic (facts present, not missing); the targeted yes/no rule then failed the bar. The law's real axis is SELECTION vs ASSERTION, not global vs targeted.)
+
+Step 1, the cheap diagnostic (minutes, saved ~2 GPU-h of re-extraction):
+of 91 negation-gold dev questions, 31 fail -- but 22/31 ALREADY have the
+corrective content in context and 19/31 were answered "Unknown". The
+anti-facts are not missing; the composer will not use a DIFFERENT stored
+value to contradict a question's premise. U1's premise (store anti-facts)
+is falsified before any build.
+
+Step 2, the redirect: yes/no premise questions are syntactically detectable
+at inference (98/476, 66.3% correct, 24% abstaining), so the entry-128
+premise rule could be aimed only where it belongs -- the as-of precedent
+(entry 134), where targeting rescued an instruction that failed globally.
+  baseline (ctxv3)     55.3 corr / 22.1 hall / 22.7 omit
+  + targeted yes/no    55.5 corr / 24.2 hall / 20.4 omit
+  = +0.2 correct, +2.1 halluc, -2.3 omission. Bar was >=+5c at <=+1h.
+  FAILED. 93 of 98 answers changed, so the rule was obeyed -- and the trade
+  is the same 1:1 omission->hallucination as every other time.
+
+THE LAW, REFINED (this is the useful output): targeting is NOT the variable.
+The axis is what the instruction changes.
+  SELECTION guidance -- "which stored fact answers this" (tiers+receipts,
+    entry 102; as-of dates, entry 134): moves the frontier. 2 for 2.
+  ASSERTION guidance -- "when to answer rather than abstain" (completeness
+    v2/v3, currency marking, premise, style, retry, two-pass, and now
+    targeted yes/no): converts omission to hallucination ~1:1. 0 for 7.
+The as-of rule worked because it told the composer WHICH memory to read,
+not WHETHER to speak. Every attempt to move the abstention threshold by
+instruction has failed; the only thing that moved it favourably is the
+probe gate, which does not instruct at all -- it filters.
+
+CONSEQUENCE: the grounding contract is CLOSED to further assertion rules.
+Future prompt work must be selection-shaped or it does not get GPU time.
+U1 closed negative; roadmap advances to U2 (receipt operations, CPU-only,
+no assertion surface).

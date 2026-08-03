@@ -18,7 +18,18 @@ deferred. Causal and temporal gists inherit the failure of plain gists.
 
 ---
 
-## U1 — Typed negation *(next build)*
+## U1 — Typed negation *(CLOSED NEGATIVE 2026-08-03)*
+
+**Result.** The premise was falsified before building: of 31 failing
+negation questions, 22 already had the corrective content in context and
+19 were answered "Unknown" — the anti-facts were not missing. A redirect
+to a *targeted* yes/no premise rule (98 detectable questions) then failed
+its bar: +0.2 correct for +2.1 hallucination. This refined the project's
+central law: the axis is **selection vs assertion**, not global vs
+targeted. Selection guidance is 2 for 2; assertion guidance is 0 for 7.
+The grounding contract is now closed to further assertion rules.
+
+*Original plan, for the record:*
 
 **Why first.** Largest measured pool with an unbuilt, well-evidenced
 mechanism. 75 dev questions carry negation golds ("Did she express
@@ -45,7 +56,7 @@ never inference from absence.
 
 ---
 
-## U2 — Receipt operations *(strongest of the architectural swings)*
+## U2 — Receipt operations *(NEXT BUILD)*
 
 **Why second.** Cheap — most of it assembles from `spacing.py` and existing
 receipt fields — and it is what makes the memory *behave* like memory rather
