@@ -6226,3 +6226,62 @@ corroboration signal is CONTEXT DIVERSITY (same fact from different
 conversational contexts -- systematic errors are context-locked).
 Benchmark path untouched (judged config frozen; round 5 running:
 user-0 composed clean, 33% Unknown).
+
+## Entry 138 — 2026-08-03 (p2: DEEP THINK on JP's three memory papers. The missing layer is CONSOLIDATION with a PREDICTION-ERROR WRITE GATE -- and receipts are what make generative consolidation safe. Diagnosis quantified.)
+
+Papers: Maguire 2014 (consolidation = REORGANIZATION, not transfer; gist
+and episode coexist; remote recall is reconstruction via pattern
+completion). Helfer & Shultz (systems consolidation + RECONSOLIDATION:
+reactivation makes a consolidated trace labile, modifiable, then
+re-stabilized). Spens & Burgess 2024 Nat Hum Behav (consolidation IS
+training a generative model by replay -- MHN teacher, VAE student;
+PREDICTION ERROR gates encoding: well-predicted elements need no detailed
+storage; the cost is schema distortion -- DRM false memories, boundary
+extension, prototypicality).
+
+OUR GAP, measured: the store is episodic sediment with a counter. Dev
+user 10 = 983 facts, 766 single-mention, 190 competing 'motivation'
+values, 163 'plan', 131 'belief'. No human holds 190 motivations; a
+consolidating system holds ~8 with episodes recoverable underneath. We
+accumulate and re-rank at read time; we never reorganize, never gate
+writes on novelty, never re-derive on contradiction.
+
+MAPS ONTO THE MEASURED FAILURE PROFILE (v3 champion by type):
+  Generalization & Application 33.9% on 112 q (24% of benchmark) -- these
+    questions ASK FOR THE GIST; the gist is not in the store, so we dump
+    120 fragments and hope the composer abstracts. No reranker fixes an
+    absent representation.
+  Basic Recall 39.0% -- gold line competes with near-duplicate sediment.
+  Dynamic Update 15.0%/50.0% halluc -- no reconsolidation.
+  (vs Conflict 64.1%, Boundary 96.5%: the parts we DID build mechanisms for.)
+
+THE BUILD (3 mechanisms, one per paper):
+ 1. PREDICTION-ERROR WRITE GATE (Spens/Burgess): at ingest, if a candidate
+    fact is already predicted by the store, store a RECEIPT not a node.
+    Kills restatement sediment; SHRINKS footprint (983 -> est ~150-250);
+    independently validates the mem0 #4573 finding (97.8% junk = no write
+    gate). CPU-cheap: bge-small similarity within attr-family.
+ 2. OFFLINE CONSOLIDATION (Maguire): idle-time pass abstracts episode
+    clusters into GIST nodes, each carrying receipts to >=2 source
+    episodes; gist = a third tier, never asserted bare. Dual retrieval:
+    gist for general/inference, episodes for specific/temporal.
+ 3. RECONSOLIDATION (Helfer/Shultz): contradiction marks a gist labile ->
+    re-derive from episodes + new evidence -> re-stabilize.
+
+WHY THIS IS OURS TO BUILD: Spens & Burgess's distortion results (schema
+bias, DRM lures, boundary extension) are a WARNING to everyone doing LLM
+memory summarization -- gist-based recall invents plausible detail. They
+are a SPEC for us: RG is the only system whose abstractions can cite
+dated episodes and be re-derived on challenge. Receipts make generative
+consolidation auditable; without them it is just summarization with
+extra steps.
+
+Also note the class difference from every failed lever this month: six
+prompt mechanisms, two rerankers, two model-scale swaps all RE-RANKED OR
+RE-PHRASED FIXED CONTENT. Consolidation CHANGES WHAT EXISTS TO BE READ --
+the same class as retrieval v3 (+4.2c, the only other real win).
+
+FIRST STEP (free, CPU, no GPU contention with round 5): measure the write
+gate deterministically -- semantic dedup within attr-family, then oracle
+gold-in-store + retrieval precision. If the store halves without losing
+gold, mechanism 1 ships on its own merits and mechanisms 2-3 build on it.
