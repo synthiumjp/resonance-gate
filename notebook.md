@@ -6331,3 +6331,45 @@ medium; fractal, topological, thermodynamic, category-theoretic = research
 programmes with no hook in our measured failure profile; stigmergic memory
 (ingest environment traces, not just chat) = a SCOPE question for the
 product, not an algorithm. Declined with reasons rather than deferred.
+
+## Entry 141 — 2026-08-03 (p2: external review absorbed. docs/OVERVIEW.md + docs/ROADMAP.md written: results separated official/dev/comparator, denominators inline, one factual correction to the review, upgrades sequenced by measured pool x evidence.)
+
+External review of the project summary (JP relayed). ACCEPTED: define RG
+before describing it; lead with the evidence-control thesis not the parts
+list; SEPARATE official from development results (my table let dev 56.7/22.5
+read as a successor to official 52.6/19.1 when it has HIGHER halluc on a
+different split -- the exact presentation error behind this project's earlier
+retractions); comparability warning adjacent to comparator rows, not below;
+scope strong claims to the experiments ("scale did not predict performance in
+our experiments", not "scale is dead"); operational definition of the dial.
+
+REJECTED, one item: the review's rewrite attributed mem0's 97.8% junk figure
+to "our mem0 audit". We ran no audit -- it is mem0's own issue #4573,
+verified at source in entry 96. Softening tone must not move provenance.
+OVERVIEW cites it correctly as first-party.
+
+DENOMINATORS now inline: correct/halluc = % of questions (476 dev / 1764
+official); 18/18 = affected WRITES hand-audited (17 rules, not 18); 51.5% and
+"zero leaked" = retrieval-CANDIDATE boundary (615 node-to-node proposals,
+top-8/node), no claim about composer output.
+
+ROADMAP (docs/ROADMAP.md), gated and pre-registered:
+  Gate 0: round 5 + gist screen. STOP RULE -- if gists fail, U3 is
+    CANCELLED not deferred (higher-order gists inherit the failure).
+  U1 typed negation (next): 75 negation-gold dev questions, ~31 failing;
+    NegEx + WordNet's 7,604 antonym pairs banked in entry 133, never built.
+    Bar >=+5 correct at <=+1 halluc on the subset; anti-facts require
+    explicit triggers (a false anti-fact is a hallucination WITH a receipt).
+  U2 receipt operations (strengthen/decay/merge/split/invalidate): cheap,
+    assembles from spacing.py, makes the store behave like memory.
+  U3 causal+temporal gists: conditional on Gate 0.
+  U4 event-typed facts: DEFERRED with arithmetic -- Dynamic Update is 20 dev
+    questions vs Generalization's 112; as-of already captured +1.4; costs
+    full re-extraction. Revisit if round 5 regresses Update.
+  U5 extended meta-memory: blocked on CORRECTION VOLUME (17), not design --
+    a dogfooding milestone.
+  Declined with reasons: evidence-graph rewrite (entry 100 null), per-attr
+    trust profiles (overfit risk on 1227 rows), cross-attr contradiction and
+    temporal conflict rules (already shipped), fractal/topological/
+    thermodynamic/categorical (no measured hook), stigmergic ingestion (a
+    product scope call, not an algorithm).
