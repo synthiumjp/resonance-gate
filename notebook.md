@@ -6182,3 +6182,17 @@ Round-5 config frozen. Remaining before launch: adapter wiring (v3
 retrieval path into eval_rgp2/retrieve.py productization + focus + as-of
 anchored-question detection), dial AUROC transfer check when Mac v3
 states land. Then JP's go.
+
+## Entry 136 — 2026-08-03 (p2: OFFICIAL ROUND 5 LAUNCHED -- frozen config (v3+focus+CAL+as-of), users 0-9, version round5.)
+
+retrieve_v3.py productized (IndexV3 per session-state; bge-small +
+ce-MiniLM cached; focus-weighted BM25 query; ANCHORED_RX + TEMPORAL_RULE)
+and wired into eval_rgp2 behind RG_RETRIEVE_V3=1. Smoke on user-0 slice:
+correct abstentions + birth date, 19s inc. model loads. sentence-
+transformers installed into the official venv. Chain: stage 1 compose
+(v3 contexts, per-session index embeds ~1k facts on CPU each state --
+the dominant new cost, est 6-9h for 10 users) -> stage 2 official judge
+(~26h). Watchers: request-rate + first-user probe. Dev projection:
+56.7/22.5; round-4 baseline 52.6/19.1. Boundary risk: none expected
+(v3 left boundary intact on dev). Mac v3-state extraction still running
+for the dial transfer check, independent of this run.
