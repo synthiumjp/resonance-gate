@@ -6084,3 +6084,34 @@ our pure-python path is comparable.
 EXECUTION ORDER (cheapest-decisive first): retry (existing infra, ~30min
 GPU, splice-judge only changed rows) -> format A/B (one compose+judge) ->
 reranker/synonymy deterministic A/B (no judge until recall moves).
+
+## Entry 132 — 2026-08-03 (p2: RETRIEVAL v3 IS THE WIN -- 55.3/22.1/22.7 (+4.2c/+0.5h), new champion. Retry null, style negative (5th law confirmation). Evidence moves the frontier; instructions never did.)
+
+Four verdicts today (all real judge, n=476, paired baseline 51.1/21.6/27.3):
+  validator-RETRY (p5, extractive re-compose): 50.4/21.0 -- NULL. The
+    probe flags rows whose EVIDENCE is thin; re-asking the same 14B with
+    a stricter prompt reproduces the failure. Filter stays the dial's
+    form; retry closed.
+  style rule: 51.1/28.8 -- NEGATIVE, law confirmation #5 ("never bare
+    yes/no" = assertiveness in disguise; omission->halluc 1:1 again).
+  RETRIEVAL v3 (BM25-120 ∪ bge-small-20, ce-MiniLM rerank, top-120):
+    deterministic: union 83.2->86.8%, gold-in-top5-lines 20.7->28.7%
+    judged:        55.3 / 22.1 / 22.7  (+4.2c, +0.5h)  <-- NEW CHAMPION
+    First correct gain since the calibrated composer; passed the
+    pre-registered bar. Dense first stage recovers 29/42 lexically-
+    unreachable golds (settles the split 2026 literature FOR our data);
+    ce rerank puts gold in the composer's first lines. Cost: bge-small +
+    ce-MiniLM, ~150MB, ~0.5s/query CPU -- ships as an OPT-IN tier above
+    the pure-python default.
+  vs published: above mem0 (53.0) and Supermemory (54.1), ~tied Zep
+    (55.5), halluc at mem0 level -- still local-everything, 14B composer.
+
+The week's law, now complete: six instruction mechanisms converted
+omission->halluc at ~1:1; the two levers that moved the Pareto point were
+EVIDENCE (retrieval v3, +4.2c free) and SELECTION (probe dial, favorable
+trade). Nothing that talks at the composer works; everything that changes
+what it reads does.
+
+NEXT: (a) official round 5 with v3 (adapter wiring + JP's go on GPU-days);
+(b) re-extract probe states on v3 contexts (Mac) to re-align the dial;
+(c) write-time campaign (entity resolution) toward MOSAIC's 73.1.
