@@ -10,7 +10,7 @@ because several proposals depend on tiers that are still being judged.
 | Run | Decides | ETA |
 |---|---|---|
 | Official round 5 | Whether retrieval v3 + as-of replaces the 52.6/19.1 headline | ~30 h |
-| Gist screen (Generalization, n=112) | Whether the gist tier survives at all | ~1 h |
+| Gist screen (Generalization, n=112) | Whether the gist tier survives at all | **RESOLVED 2026-08-03: FAILED** (33.9 → 29.5 correct; bar was ≥+5). Tier archived. |
 
 **Stop rule:** if the gist screen does not improve Generalization, the gist
 tier is archived, and every gist-dependent item below (U3) is cancelled — not
@@ -70,9 +70,13 @@ metadata rather than a truth signal.
 
 ---
 
-## U3 — Higher-order gists *(conditional on Gate 0)*
+## U3 — Higher-order gists *(CANCELLED 2026-08-03)*
 
-**Only if the gist screen passes.** Then: causal gists (cluster on the
+The gist screen failed its bar (Generalization 33.9 → 29.5 correct;
+hallucination flat, omission up — abstraction competed with the episodes
+rather than orienting the composer). Per the Gate 0 stop rule this is
+cancelled, not deferred: higher-order gists inherit the failure of plain
+ones. Archived for the record, the proposal was: causal gists (cluster on the
 *reason* clause our v5 extraction already preserves, not on the value) and
 temporal gists (cluster episodes by period → "X does Y during busy periods").
 Both keep the receipt requirement of ≥2 cited episodes.

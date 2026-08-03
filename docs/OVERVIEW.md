@@ -62,8 +62,10 @@ tier, and spacing metadata. Facts occupy one of three tiers:
 
 - **Provisional** — one observation
 - **Asserted** — corroborated
-- **Gist** — an abstraction citing at least two dated episodes *(under
-  evaluation; see Status)*
+- **Gist** — an abstraction citing at least two dated episodes. *Measured
+  and archived: adding gist lines to retrieval context lowered correct
+  answers on the class it targeted (33.9% → 29.5%), so the tier is not wired
+  into the answer path. The code remains for product use.*
 
 Spacing metadata distinguishes evidence repeated inside one sitting from
 evidence consolidated across months. It is reported as evidence metadata, not
@@ -197,8 +199,11 @@ model-specific and did not transfer.
 - **Official round 5** — the frozen configuration (retrieval v3 + focus
   weighting + as-of rule) running against the official harness. Round 4
   remains the headline until round 5 completes under official conditions.
-- **Gist tier** — under evaluation on the Generalization question class. It
-  costs ~10% context growth and must earn it.
+- **Gist tier** — evaluated and archived. It cost ~10% context growth and
+  did not earn it: correct answers on the Generalization class fell from
+  33.9% to 29.5%, with hallucination flat and omission up. Abstraction
+  competed with evidence for the composer's attention rather than orienting
+  it.
 
 ---
 

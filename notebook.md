@@ -6373,3 +6373,43 @@ ROADMAP (docs/ROADMAP.md), gated and pre-registered:
     temporal conflict rules (already shipped), fractal/topological/
     thermodynamic/categorical (no measured hook), stigmergic ingestion (a
     product scope call, not an algorithm).
+
+## Entry 142 — 2026-08-03 (p2: GIST TIER FAILS its pre-registered bar -- Generalization 33.9 -> 29.5 correct. Stop rule honored: tier archived, U3 CANCELLED. The failure mode is informative: abstraction COMPETES with evidence, it does not orient.)
+
+Gist screen, the class the whole consolidation argument targeted
+(Generalization & Application, n=112, paired against v3 verdicts):
+  v3 (episodes only)      33.9 corr / 33.0 hall / 33.0 omit
+  v4 (+6 PATTERN lines)   29.5 corr / 33.9 hall / 36.6 omit
+Bar was >=+5 correct at <=+1 halluc. Result -4.4 correct. FAILED.
+
+Per docs/ROADMAP.md Gate 0's stop rule, written BEFORE this result: the
+gist tier is archived and U3 (causal + temporal gists) is CANCELLED, not
+deferred. Higher-order abstractions inherit the failure of plain ones.
+
+THE FAILURE MODE IS THE FINDING: hallucination stayed FLAT (33.0->33.9)
+while OMISSION rose (33.0->36.6). Gists did not cause fabrication -- the
+receipt discipline held exactly as designed. They caused the composer to
+abstain MORE. Six pattern lines at the top of a 120-line context did not
+orient the composer toward the schema; they competed with the episodes for
+its attention and diluted the evidence. Abstraction is not free context.
+The deterministic pre-check had said as much (gold reachable ONLY via a
+gist: 1/363); I judged containment the wrong instrument for abstraction,
+and it was directionally right anyway. Recorded as a calibration error on
+my part, not just a mechanism failure.
+
+WHAT SURVIVES from the three-paper build (entries 137-140):
+  - write gate: measured REDUNDANT with existing token clustering -- a
+    positive finding about the architecture (it is why mem0's issue-#4573
+    accumulation does not happen here), not a new mechanism.
+  - clarification loop (conflicts()): product-side, live, 23 open on the
+    owner profile. Unmeasured on benchmark by design -- HaluMem has no
+    owner to ask.
+  - spacing.py + receipt metadata: feeds U2.
+  - reconsolidation/lability: untested; product-side only.
+  - consolidate.py stays in-tree, unwired from the answer path.
+The neuroscience synthesis produced one true architectural claim (we
+already gate writes), one product feature (clarification), and one
+measured-negative retrieval augmentation. That is an honest yield.
+
+NEXT per roadmap, unblocked: U1 typed negation. Round 5 unaffected (the
+frozen config never included gists).
