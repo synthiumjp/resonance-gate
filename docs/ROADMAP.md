@@ -56,7 +56,17 @@ never inference from absence.
 
 ---
 
-## U2 — Receipt operations *(NEXT BUILD)*
+## U2 — Receipt operations *(SHIPPED 2026-08-04, ranking half declined)*
+
+**Result.** Operations shipped non-destructively (strengthen / salience /
+merge / split / invalidate / dynamics) and exposed as MCP `profile_dynamics`.
+The retrieval-ranking half was measured and declined: salience-weighted BM25
+moved gold-in-top-5 by +1.1pt at best (19.8% → 20.9%), which is inside the
+churn band entry 145 established, so no judged screen was run and salience is
+not wired into the answer path. Prior held (entry 100: corroboration count
+carries no correctness signal on this benchmark).
+
+*Original plan:*
 
 **Why second.** Cheap — most of it assembles from `spacing.py` and existing
 receipt fields — and it is what makes the memory *behave* like memory rather
