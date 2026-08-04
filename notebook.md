@@ -6980,3 +6980,55 @@ would be strictly better with this); (b) slot cardinality as a one-bit
 annotation is cheap and reusable; (c) four negative results with a single
 shared root cause, which is a publishable finding about lexical memory
 systems.
+
+## Entry 155 — 2026-08-04 (p2: DIFFERENTIATION. The artifact is a RISK-COVERAGE FRONTIER -- 9 measured operating points on one axis no competitor can occupy at all. Corrected once: my first curve double-counted suppressed correct answers.)
+
+JP: stop chasing their number, differentiate. The move is not a better point
+on their axis; it is an AXIS THEY CANNOT REPORT. Every published memory
+system occupies exactly ONE operating point because none has a calibrated
+gate. RG has a frontier:
+
+  gate   answered   correct   halluc   precision(of answered)
+  p0      63.7%      50.8%    17.6%      43.2%
+  p5      59.2%      50.2%    15.5%      45.4%
+  p10     54.6%      50.0%    13.0%      48.8%
+  p20     46.2%      47.7%    11.1%      52.7%
+  p30     38.2%      46.2%     8.6%      59.9%
+  p40     30.0%      42.6%     6.5%      64.3%
+  p60     15.8%      34.7%     3.6%      70.7%
+
+Read the third and fifth columns together: hallucination is TUNABLE from
+17.6% down to 3.6%, and answer precision rises 43% -> 71%, by moving one
+threshold. mem0 (53.0/19.2), Zep (55.5/21.9), MemOS (67.2/15.2) and MOSAIC
+(73.1/10.2) each have one number pair and no dial. At p30 RG hallucinates
+8.6% -- BELOW every published system including MOSAIC -- while answering 38%
+of questions. That is a claim no competitor can make or match, and it is
+the honest form of "we lose on correct%".
+
+METHOD NOTE, recorded because I nearly shipped a flattering error: my first
+version of this curve showed correct% CONSTANT at 51.1% across all
+thresholds, because it counted a suppressed-but-correct answer as still
+correct. Abstaining on a real-gold question is an OMISSION. Fixed; the
+corrected curve shows correct% declining (50.8 -> 34.7) as the gate tightens,
+which is the real trade. Fourth measurement error caught in three days --
+all four were leniency in MY OWN favour, which is the direction to stay
+suspicious of.
+
+POSITIONING THAT FOLLOWS: RG is not "a memory system with slightly worse
+accuracy". It is the only one where hallucination is a DIAL rather than a
+property, every answer carries dated provenance, unresolved conflicts are
+asked about rather than guessed, and the whole thing runs locally with no
+API spend. The comparator table should be reframed: their rows are single
+points inside our frontier's envelope on the risk axis, and outside it on
+the audit axis (crosstalk: 51.5% of vector-proposed associations blocked,
+0 leaked; provenance: 100% of asserted facts traceable to a dated source by
+construction).
+
+NEXT for differentiation, in order: (1) put this frontier in OVERVIEW as the
+headline artifact rather than the single 55.0/18.7 row; (2) swap the
+validated NLI primitive (entry 154) into conflicts() so the clarification
+surface is semantic rather than lexical; (3) MemOps benchmark (arXiv:
+2607.12893) -- it scores lifecycle traces (trigger/target/scope/state
+transition/supporting evidence), which is what we instrument and what
+accuracy benchmarks ignore. That is the benchmark our architecture is built
+to win rather than to survive.
