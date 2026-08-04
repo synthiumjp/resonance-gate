@@ -197,3 +197,36 @@ def test_learned_write_rules():
     recs = [{"f": [{"attribute": "collaborator", "value": "JP Cacioli"}]}] * 4
     st = WR.apply_to_extractions(rules, recs)
     assert st["blocked"] == 4
+
+
+def test_receipt_operations_are_non_destructive():
+    """Receipts as first-class objects (entry 147): every operation retains
+    evidence -- decay changes weight, invalidate changes status, split keeps
+    both halves."""
+    import receipts as RC
+    from datetime import datetime
+    n = {"id": "x", "attr": "employer", "value": "google",
+         "n_mentions": 2, "convs": {"s1": "Jan 05, 2025", "s2": "Mar 01, 2025"}}
+    now = datetime(2026, 1, 5)
+    # strengthen: new receipt, value untouched, idempotent per conversation
+    RC.strengthen(n, "s3", "Jun 01, 2025")
+    assert n["n_mentions"] == 3 and n["value"] == "google"
+    RC.strengthen(n, "s3", "Jun 01, 2025")
+    assert n["n_mentions"] == 3          # same conversation cannot double-count
+    # salience: decays with age but never reaches zero, and more receipts win
+    s_now = RC.salience(n, now)
+    older = {"convs": {"s9": "Jan 05, 2020"}, "n_mentions": 1}
+    assert 0 < RC.salience(older, now) < s_now
+    # merge: receipts unioned, absorbed wording retained
+    m = RC.merge(n, {"id": "y", "attr": "employer", "value": "google inc",
+                     "n_mentions": 1, "convs": {"s4": "Jul 01, 2025"}})
+    assert len(m["convs"]) == 4 and "google inc" in m["variants"]
+    # split: partition preserves every receipt across both halves
+    hit, miss = RC.split(m, lambda c, d: d is not None and d.year == 2025)
+    assert len(hit["convs"]) + (len(miss["convs"]) if miss else 0) == 4
+    # invalidate: retained, flagged, receipts intact
+    inv = RC.invalidate(n, "owner denied")
+    assert inv["invalid"]["reason"] == "owner denied" and len(inv["convs"]) == 3
+    # dynamics: reports aging without changing the store
+    d = RC.dynamics([n, older])
+    assert d["facts"] == 2 and d["receipts"] == 4 and d["read_as_of"]

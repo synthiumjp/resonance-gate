@@ -6609,3 +6609,43 @@ vs published (GPT-4o composer AND judge, not comparable): MOSAIC 73.1/10.2,
 MemOS 67.2/15.2, Zep 55.5/21.9, mem0 53.0/19.2. RG at 55.0/18.7 now sits
 essentially level with Zep on correct with 3.3pts less hallucination, above
 mem0 on both axes, entirely local, zero API spend.
+
+## Entry 147 — 2026-08-04 (p2: U2 receipt operations SHIPPED as product mechanisms; salience-weighted retrieval measured NEUTRAL and NOT wired -- roadmap's own gate honored, zero GPU spent.)
+
+receipts.py (committed): receipts promoted from metadata to objects with
+operations, every one non-destructive by design --
+  strengthen  re-observation adds a receipt, value untouched, idempotent
+              per conversation (same conv cannot double-count)
+  salience    decay-weighted evidence mass, 365-day half-life, undated
+              receipts weigh 1.0 (we do not age what we cannot date)
+  merge       receipts unioned, absorbed wording retained as a variant
+  split       partition receipts by predicate -- the repair path for a
+              wrong merge; mention counts recomputed FROM receipts so a
+              split cannot silently lose evidence
+  invalidate  status change, node and receipts retained for audit
+  dynamics    store-level aging report
+The 'now' a store is read at is its own most recent receipt (anchor()), not
+wall clock -- HaluMem streams run on synthetic dates to 2038, so wall-clock
+recency is meaningless there.
+
+DETERMINISTIC A/B (the roadmap's gate): salience-weighted BM25 ranking,
+weights 0.0/0.2/0.5/1.0 -> gold-in-top5 19.8 / 20.4 / 20.9 / 20.4%, median
+gold rank 6 -> 7. NEUTRAL. Prior was correct (entry 100: corroboration count
+has no signal for correctness on HaluMem; decay-weighting it inherits that).
+Per the roadmap's pre-registered rule -- judged screen only if the
+deterministic pass is positive -- NO judged screen was run and salience is
+NOT wired into the retrieval path. +1.1pt is exactly the size entry 145
+showed we cannot distinguish from churn; declining to chase it is the
+lesson being applied rather than restated.
+
+SHIPPED INSTEAD (product surface): MCP profile_dynamics. Live on JP's
+profile: 1,102 facts / 1,585 receipts spanning 405 days, read as-of
+Jul 22 2026, 1,093 fresh / 0 faded / 0 invalidated, mean salience 1.10.
+Zero faded is itself informative -- a 405-day span against a 365-day
+half-life means this store is uniformly recent; decay will only start
+discriminating after a longer history, which is the honest read rather
+than a feature demo. 12 tests passing.
+
+U2 CLOSED: operations shipped, ranking half declined on measurement.
+Roadmap advances to U2a (factorised two-probe gate, entry 144's fix) as the
+next item with a measured hook.

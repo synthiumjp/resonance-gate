@@ -170,6 +170,18 @@ def profile_correct(action, attribute, value, new_attribute=None, exact=False):
         return {"written": correction, "applied": "live", "log": log}
 
 
+def profile_dynamics():
+    """How this memory is aging (entry 147): receipt counts, span, how many
+    facts are actively reinforced vs faded, and the date the store is read
+    as-of. Decay affects WEIGHT only -- no fact is removed, so a faded fact is
+    still recallable and still carries its receipts."""
+    mem = _ensure_loaded()
+    import receipts as RC
+    with _lock:
+        nodes = list(mem.g.nodes.values()) + list(mem.g.provisional.values())
+        return {"dynamics": RC.dynamics(nodes), "source": _SOURCE}
+
+
 def profile_quarantine():
     """Writes the LEARNED WRITE POLICY blocked at ingest (entry 140), with the
     rule that blocked each. Reversible by design: delete or amend the

@@ -78,6 +78,15 @@ def forget(subject: str, relation: str = None, object: str = None) -> dict:
 
 
 @mcp.tool()
+def profile_dynamics() -> dict:
+    """Memory-aging report: how many stored facts are actively reinforced,
+    how many have faded (retained, lower weight), total receipts, and the
+    span they cover. Use when the user asks how much the memory holds, how
+    current it is, or what it has stopped hearing about."""
+    return pmem.profile_dynamics()
+
+
+@mcp.tool()
 def profile_quarantine() -> dict:
     """Writes blocked at ingest by rules learned from the owner's own
     corrections, each with the rule responsible. Use when the user asks why
