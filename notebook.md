@@ -7120,3 +7120,51 @@ RUNNING: RG method over 25 conversations (adjacent setting) and their own
 session-level RAG baseline (the 0.845 arm) with the SAME local composer, so
 the internal comparison is apples-to-apples. Pilot scale, not a publishable
 row. Both then go through the official judge + post-checks.
+
+## Entry 158 — 2026-08-05 (p2: "what can we rip from mem0/Zep?" -- two imports probed, both DEAD on this data. Bitemporal solves a problem HaluMem does not have (0.2%); modality typing is real in the store (23% intention) but weighting on it HURTS.)
+
+JP asked what competitors do that we have not tried. Went through the 2026
+scans and picked the two with a plausible measured hook.
+
+1. ZEP/GRAPHITI BITEMPORAL (valid-time separate from ingestion-time). We
+   conflate them: one receipt date meaning both "when said" and "when true".
+   Probe over 4,383 dev user turns:
+     mention an explicit year            9 (0.2%)
+     mention a year != session's year    7 (0.2%)
+     past-tense markers                 32 (0.7%)
+   Verdict: DEAD for this benchmark. Valid-time == receipt-time almost
+   always, because these synthetic conversations are written in the present.
+   Worth keeping in mind for REAL chat ("back in 2019 I worked at...") where
+   the distinction is genuine, but there is no measurable win here and no
+   way to demonstrate one on this data.
+
+2. MEM0 MEMORY CATEGORIES (current / historical / future-plan / preference /
+   timeless). The same probe found the hook: 25.1% of user turns carry
+   future/plan markers, and the store is 23% intention (718 of 3,170) by a
+   deterministic attr+phrasing classifier. We conflate "works at Apple" with
+   "plans to move to Google", which is a genuine modelling gap.
+   Tested as a retrieval prior -- match the question's modality (future
+   wording -> favour intentions; present wording -> favour states), 0.4
+   penalty on mismatches:
+     baseline          plan-questions 14.0%   state-questions 22.1%
+     modality-weighted plan-questions 11.0%   state-questions 21.7%
+   Verdict: DEAD, and it HURT the class it was designed for (-3.0 on plan
+   questions). Diagnosis: HaluMem's "what might she do" golds are answered
+   from STATES, not from stored plans -- "what other health choices might
+   she explore" is answered by her existing preferences, not by a recorded
+   intention. Down-weighting states on those questions removes the evidence
+   that actually answers them.
+
+BOTH probes cost minutes and neither reached a judged run. That is the
+system working: the cheap deterministic gate is now catching bad ideas
+before they consume GPU, and it caught two in one sitting.
+
+STILL UNTRIED from the competitor set, honestly ranked: (a) mem0's
+search-time recency boost/dampen -- but we built exactly this in U2 (entry
+147) and measured it neutral; (b) MemOS MemScheduler-style per-query-type
+routing -- partially ours already, and the one instance we shipped (as-of
+rule) is the only prompt-side lever that ever worked; (c) Cognee's
+MinHash+LSH entity resolution -- a faster token-overlap, and token overlap
+is 0 for 4 on slot identity, so no. The competitor well is close to dry:
+what they have that we lack is not a mechanism, it is frontier-model write
+paths (MOSAIC) and scale.
