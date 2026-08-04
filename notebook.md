@@ -7207,3 +7207,50 @@ recall-mode/precision-mode split entry 148 already flagged.
 Feasible locally: mlx-lm LoRA on the studio (already installed, entry 122),
 ~1,420 examples, under an hour. Then re-extract dev, measure gold-in-store
 against the shuffled-gold null, and only then spend judge time.
+
+## Entry 160 — 2026-08-05 (p2: LITERATURE SWEEP part 1 -- the field has published the boundary condition we needed, and it says we have been benchmarking in the regime where our architecture CANNOT win.)
+
+Three findings, all third-party, all directly load-bearing.
+
+1. THE TENURE CROSSOVER (arXiv:2607.21962, 24 Jul 2026). Longitudinal
+   instrument, same users measured at 3 / 6 / 9 weeks:
+     week 3: full rendered history 97.9% ~ layered hybrid 96.8% > curated
+             map 94.2% > graph 93.2%   (raw/full context WINS)
+     week 9: rankings INVERT -- curated map decays 81.2 -> 78.4 while graph
+             rises 75.9 -> 90.4 and hybrid 80.2 -> 93.2
+     (graph - map) week9 minus week3 = +17.3pp, p=0.031 cross-family judge.
+   Mechanism: eviction. Budgeted stores lose early content; unbounded
+   structured stores accumulate and overtake. THE MODERATOR IS HISTORY
+   LENGTH x TOKEN BUDGET, not model capability.
+   CONSEQUENCE FOR US: HaluMem and MemOps are SHORT-horizon. We have spent
+   the entire project measuring in the regime the literature now says
+   favours raw retrieval, with a structured store carrying pure overhead.
+
+2. PRECISIONMEMBENCH (arXiv:2605.11325, rev 29 Jul 2026) supplies the OTHER
+   axis: precision and drift rather than recall. A structured belief-state
+   system scores precision 1.00 / drift 0.000 / 47.8ms; mem0, a vector
+   baseline, Supermemory and an open knowledge format cluster at precision
+   0.05-0.22 with drift 0.91-0.94 -- i.e. ~90% of what they retrieve is
+   off-topic pollution. Stated root cause: embedding similarity "preserves
+   broad subject-matter relevance without uniquely identifying the intended
+   belief", so raw retrieval cannot resolve identity conflicts, superseded
+   beliefs or scope leakage. That is precisely RG's mechanism set
+   (receipts, supersession, conflicts, corrections).
+
+3. MEMDELTA (arXiv:2606.29914, 29 Jun 2026) -- the methodological bomb, and
+   it damages everyone's numbers including the ones we have been chasing:
+   swapping ONLY the embedding model moves accuracy 6.2pp (p=0.004); mem0
+   beats MiniLM-RAG by +11pp but LOSES to cloud-embedding RAG by 1.2pp;
+   Sonnet gains +31pp from RAG while Gemini gains +14pp from full context
+   (Sonnet refuses 63% of full-context queries); on 2 of 6 tests, flipping
+   ONE pipeline variable flips the paper's conclusion. Verdicts in this
+   field are model- and embedding-pipeline-dependent, not
+   architecture-dependent. Our own discipline (composer and judge held
+   constant, paired McNemar) is better than the norm, but our comparisons
+   to PUBLISHED rows are weaker than even the composer-handicap caveat
+   admits.
+
+THE SYNTHESIS: RG's payoff case is long-horizon eviction resistance and
+precision/drift under conflicting beliefs. Both are measurable, both are
+now third-party-defined, and NEITHER is what HaluMem measures. We have been
+grading ourselves on the one axis where the literature predicts we lose.
