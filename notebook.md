@@ -6704,3 +6704,46 @@ failure mode). So this is plausibly a DUAL-MODE architecture -- recall mode
 for QA/benchmark, precision mode for a living personal profile -- not one
 setting. Next step is a judged screen of pass A + pass B unioned, with the
 write gate and corroboration tiers doing their normal job on top.
+
+## Entry 149 — 2026-08-04 (p2: AGENTIC PULL FAILS HARD -- 32.9->21.4 correct, 32.1->56.4 halluc. Searching for evidence produces COMMITMENT to it. The law's 8th confirmation, arriving through a door I predicted was safe. Confound in my design noted.)
+
+JP: "we have the llm coding, but do we have it pulling." We did not -- every
+config hands the composer a fixed k=120 dump; it cannot ask for anything.
+Built the pull loop (SEARCH:/ANSWER: text protocol, <=3 hops x 15 lines,
+same store, same 14B) and screened the two classes a fixed dump handicaps
+most (Multi-hop + Generalization, n=140, paired against v3 verdicts):
+
+  fixed dump  32.9 corr / 32.1 hall / 35.0 omit
+  agentic pull 21.4 corr / 56.4 hall / 22.1 omit
+  -11.5 correct, +24.3 hallucination. Mean 1.58 searches/question.
+
+MECHANISM (transitions): Omission->Hallucination 26, Correct->Hallucination
+21. Omission fell 35->22 while hallucination rose 32->56 -- the signature
+1:1-or-worse assertion trade, again. Hallucination rate was ~56% whether the
+model searched once or twice, so it is not "not enough hops": it SATISFICES
+-- issues a search, gets something plausible, and commits. Working for the
+evidence appears to produce commitment to it.
+
+WHY I GOT THE PREDICTION WRONG, recorded because it sharpens the law: I
+classified pull as SELECTION (the model chooses what to read -- 2 for 2) and
+predicted safety on that basis. Its BEHAVIOUR was assertion (now 0 for 8).
+The correct statement of the law is therefore about the composer's
+assertion threshold, whatever moves it: any change that makes the model feel
+better-resourced -- more instruction, more agency, more effort spent -- moves
+it toward asserting, and only the probe gate (which filters output rather
+than influencing the model) has ever moved it the other way.
+
+CONFOUND, my design error, stated plainly: pull saw ~24 lines (1.58 x 15)
+against the dump's 120 -- 20% of the evidence budget. So this measured
+"agency AND 5x less evidence", not agency alone. An equal-budget rerun
+(e.g. 40 lines/hop, or hops until 120 lines seen) would isolate it. Given
+the magnitude (-11.5/+24.3) and that hallucination did not differ between
+1- and 2-search questions, my prior on a rescue is low, but the test as run
+does not cleanly falsify agentic retrieval -- it falsifies THIS budget of it.
+
+COST FINDING, which survives the accuracy failure: at 1.58 searches the pull
+architecture processes ~1,100 tokens/question vs the dump's ~3,717 -- about
+30%. If an equal-budget variant were ever to work, it would do so at lower
+token cost, and query reformulation (observed: "career status change" ->
+"occupation change") could substitute for the 150MB dense tier. Filed as a
+property of the architecture, not a result.
