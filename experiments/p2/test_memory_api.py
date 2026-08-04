@@ -238,3 +238,41 @@ def test_receipt_operations_are_non_destructive():
     # dynamics: reports aging without changing the store
     d = RC.dynamics([n, older])
     assert d["facts"] == 2 and d["receipts"] == 4 and d["read_as_of"]
+
+
+def test_proposition_rendering():
+    """Facts render as natural-language propositions (entry 162): the form
+    every comparable system stores and the form HaluMem's gold uses."""
+    import propositions as P
+    owner = "michelle hernandez"
+    cases = [
+        ({"attr": "name", "value": "michelle hernandez"},
+         "The user's name is Michelle Hernandez"),
+        ({"attr": "birth_date", "value": "1980-04-20"},
+         "Michelle Hernandez's birth date is 1980-04-20"),
+        ({"attr": "location", "value": "san jose"},
+         "Michelle Hernandez lives in san jose"),
+        ({"attr": "employer", "value": "apple"},
+         "Michelle Hernandez works at apple"),
+        ({"attr": "preference", "value": "black coffee for alertness"},
+         "Michelle Hernandez prefers black coffee for alertness"),
+        # subject-prefixed attrs keep THEIR subject, not the owner's
+        ({"attr": "nguyen linh:contribution", "value": "innovative ideas"},
+         "Nguyen Linh's contribution is innovative ideas"),
+    ]
+    for fact, want in cases:
+        assert P.render(fact, owner=owner) == want, (fact, P.render(fact, owner=owner))
+    # "plans to to expand" must not double the infinitive
+    assert P.render({"attr": "plan", "value": "to expand the team"},
+                    owner=owner) == "Michelle Hernandez plans to expand the team"
+    # degenerate input yields nothing rather than malformed prose
+    assert P.render({"attr": "", "value": "x"}) == ""
+    assert P.render({"attr": "city", "value": ""}) == ""
+    # no owner known -> still well-formed
+    assert P.render({"attr": "city", "value": "hobart"}).startswith("The user lives in")
+    # owner discovery + tier annotation
+    facts = [{"attr": "name", "value": "jo blogs", "n_mentions": 3},
+             {"attr": "city", "value": "hobart", "n_mentions": 1}]
+    assert P.owner_name(facts) == "jo blogs"
+    out = P.render_all(facts, owner=P.owner_name(facts), with_tier=True)
+    assert out[0].endswith("(confirmed x3)") and out[1].endswith("(mentioned once)")

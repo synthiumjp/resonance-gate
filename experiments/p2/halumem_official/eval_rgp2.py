@@ -97,18 +97,36 @@ def compose_answer(mem, question, index):
     return answer, context
 
 
-def _fact_str(nd):
-    """Render one WireGraph node (asserted or provisional) as "attr: value
-    (tier)" -- the flat text form the official pipeline expects a memory
-    system's stored items to be in (a list[str])."""
-    return f"{nd['attr']}: {nd['value']} ({nd.get('tier', 'asserted')})"
+def _fact_str(nd, owner=None):
+    """Render one stored fact for the EXTRACTION artifact.
+
+    The harness compares these strings against gold "memory points", which are
+    written as natural-language propositions ("Michelle Hernandez's birth date
+    is 1980-04-20"). We store `attr: value` atoms; every comparable system
+    stores prose. Measured on dev users 10-12 (entry 162), rendering the SAME
+    facts as propositions moves gold-point coverage 14.8% -> 45.7% against a
+    shuffled-gold null of 4.6% -> 16.9% -- the signal nearly triples with
+    nothing extracted differently.
+
+    Scope: this affects the extraction artifact ONLY. The QA context format is
+    deliberately unchanged, because its current shape is what produced the
+    official round-5 row (55.0/18.7); altering both at once would make that
+    number unreproducible.
+    """
+    import propositions as PR
+    prop = PR.render(nd, owner=owner)
+    if not prop:
+        return f"{nd['attr']}: {nd['value']} ({nd.get('tier', 'asserted')})"
+    return f"{prop} ({nd.get('tier', 'asserted')})"
 
 
 def extracted_memories_for(mem):
     """All stored facts for this user, both tiers -- the "memory extraction"
     artifact per the task mapping (asserted + provisional, receipted)."""
-    return [_fact_str(nd) for nd in list(mem.g.nodes.values())] + \
-           [_fact_str(nd) for nd in list(mem.g.provisional.values())]
+    import propositions as PR
+    nodes = list(mem.g.nodes.values()) + list(mem.g.provisional.values())
+    owner = PR.owner_name(nodes)
+    return [_fact_str(nd, owner=owner) for nd in nodes]
 
 
 def search_memories(mem, query, top=10):
@@ -171,7 +189,9 @@ def process_user(idx, user_data, cache_dir=DEFAULT_CACHE_DIR):
 
         cur_items = list(mem.g.nodes.items()) + list(mem.g.provisional.items())
         cur_state = {nid: nd["tier"] for nid, nd in cur_items}
-        new_facts = [_fact_str(nd) for nid, nd in cur_items
+        import propositions as PR
+        _owner = PR.owner_name([nd for _, nd in cur_items])
+        new_facts = [_fact_str(nd, owner=_owner) for nid, nd in cur_items
                      if prev_state.get(nid) != nd["tier"]]
         prev_state = cur_state
 

@@ -7375,3 +7375,48 @@ ALSO BANKED from agent 3, ranked by fit:
     clean ablation isolating extraction-unit granularity holding extractor
     and retriever fixed." We have the harness, the null discipline and the
     benchmark to run exactly that.
+
+## Entry 163 — 2026-08-05 (p2: proposition rendering SHIPPED and verified. Extraction artifact now emits gold-form prose; QA path provably untouched so round 5 stays reproducible. 107 tests green.)
+
+propositions.py (committed): stored atoms -> natural-language propositions.
+Handles the real shapes in our stores, not a toy template --
+  subject-prefixed attrs ("nguyen linh:contribution") keep THEIR subject
+    rather than the owner's, which a naive template gets wrong on 50 of
+    983 facts in one dev user alone;
+  verbal attributes get verbs ("lives in", "works at", "prefers") instead
+    of a possessive that would read "Michelle's location is..." where the
+    gold reads "Michelle Hernandez lives in San Jose";
+  "plans to to expand" double-infinitive guarded;
+  degenerate input returns "" rather than malformed prose, and the caller
+    falls back to the atom form.
+owner_name() resolves the profile owner from an unprefixed `name` fact.
+
+MEASURED with the production renderer (not the probe template), dev 10-12,
+n=1,788 gold memory points, shuffled-gold null throughout:
+    attr: value       14.8%  (null  4.6%)  signal +10.1pt
+    NL proposition    45.7%  (null 16.9%)  signal +28.7pt
+Same facts, same store, different rendering; the signal nearly triples.
+
+WIRED, deliberately narrowly: eval_rgp2's extraction artifact only, in both
+places it is produced (whole-store and per-session-new). The QA CONTEXT
+FORMAT IS UNCHANGED and was verified so by smoke run -- context lines still
+read "[unconfirmed(once), Sep 04, 2025] name: martin mark". This matters:
+the official round-5 row (55.0/18.7) came from that exact context shape, and
+changing both artifacts at once would have made it unreproducible for a
+metric it does not even affect.
+
+Smoke on official user 0: artifact emits "The user's name is Martin Mark",
+"Martin Mark's birth date is 1996-08-02", "Martin Mark lives in columbus"
+against gold "User's name is Martin Mark". QA answers unchanged.
+
+SOLIDITY: 13 tests on the renderer alone (each real attribute shape, the
+double-infinitive case, empty input, missing owner, tier annotation, owner
+discovery); 82 tests green in experiments/p2; 107 green across p2 + audit +
+gate + instruments. Adapter mirrored to the repo copy.
+
+STILL OWED before claiming a number: the deterministic gain is a containment
+proxy. Real extraction F1 is LLM-judged, so it needs an official run to
+confirm -- and that is a stage-2-only rerun (the QA answers are unaffected),
+which is cheap. Open question deliberately NOT bundled: whether proposition
+form also helps the QA CONTEXT. That is a separate judged test with its own
+bar, and the law says evidence-shape changes are the class that can work.
