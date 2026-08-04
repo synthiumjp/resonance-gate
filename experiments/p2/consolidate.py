@@ -233,3 +233,49 @@ if __name__ == "__main__":       # tiny self-check, no model needed
     kept, absorbed = write_gate(facts, thr=0.90)
     print(json.dumps([{k: v for k, v in n.items() if k != "convs"}
                       for n in kept], indent=1)[:400])
+
+
+# ---- validated contradiction primitive (entry 154) --------------------------
+# NLI separates a genuine value substitution from a rewording, which neither
+# token overlap nor embedding cosine can do (measured: contradiction 1.00 on
+# every true substitution, 0.00 on every rewording; cosine gave 0.757 vs 0.769
+# -- rewordings scored HIGHER). 70MB, CPU, offline.
+_NLI = None
+SINGLE_VALUED = {"employer", "job_title", "occupation", "city", "location",
+                 "income", "monthly_income", "salary", "age", "birth_date",
+                 "health_condition", "relationship_status", "company", "role",
+                 "title", "residence", "school", "employment_status",
+                 "industry", "marital_status", "name", "email", "phone"}
+
+
+def _nli():
+    """Lazy-load; returns None if transformers is unavailable so callers can
+    fall back to the lexical path rather than failing."""
+    global _NLI
+    if _NLI is None:
+        try:
+            import warnings
+            warnings.filterwarnings("ignore")
+            from transformers import pipeline
+            _NLI = pipeline("text-classification",
+                            model="cross-encoder/nli-deberta-v3-xsmall",
+                            device=-1, top_k=None)
+        except Exception:
+            _NLI = False
+    return _NLI or None
+
+
+def contradicts(attr, value_a, value_b, min_score=0.9):
+    """True when two values of the same attribute cannot both hold."""
+    nli = _nli()
+    if nli is None:
+        return None                      # caller decides (no silent guessing)
+    label = attr.replace("_", " ")
+    try:
+        out = nli({"text": f"Their {label} is {value_a}.",
+                   "text_pair": f"Their {label} is {value_b}."})
+    except Exception:
+        return None
+    c = next((d["score"] for d in out
+              if d["label"].lower().startswith("contra")), 0.0)
+    return c >= min_score

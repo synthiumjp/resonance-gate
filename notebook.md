@@ -7032,3 +7032,47 @@ surface is semantic rather than lexical; (3) MemOps benchmark (arXiv:
 transition/supporting evidence), which is what we instrument and what
 accuracy benchmarks ignore. That is the benchmark our architecture is built
 to win rather than to survive.
+
+## Entry 156 — 2026-08-04 (p2: differentiation shipped -- frontier is the headline artifact; NLI conflict detection wired and it exposed a REAL PRODUCT BUG: we were blind to the canonical conflict class.)
+
+MOVE 1 -- OVERVIEW restructured: the risk-coverage frontier is now the lead
+result, above the single official row, with a "tunable risk?" column on the
+comparator table (every published system: no). The claim is no longer "we
+score 55.0"; it is "hallucination is a parameter here and a property
+everywhere else, and at p30 ours is 8.6% -- below every published figure".
+
+MOVE 2 -- NLI contradiction (entry 154's surviving primitive) wired into
+conflicts(). This surfaced a live bug worth more than the feature:
+  slot_chains("employer: apple", "employer: google") returned NOTHING.
+  Token-overlap chaining cannot pair values that share no tokens, so the
+  CANONICAL conflict -- a changed employer, city, job title -- was invisible
+  on the product surface. The 23 conflicts we were proudly reporting were
+  all lexical near-duplicates ("tool: python" / "py -3.12 -m venv").
+Fixed with dual candidate generation: single-valued slots enumerate
+within-slot pairs and let NLI judge; narrative slots keep lexical chaining.
+
+CALIBRATION, two rounds of it: naive pairwise gave 2,836 asks (extraction
+over-assigns single-valued slots -- our `location` holds cafes, an OS name
+and a username, all of which NLI correctly calls contradictory with the home
+city). Gating on corroboration (n_mentions>=2, top 6 values per slot) gives
+46 total / 31 single-valued.
+
+RESIDUAL IMPRECISION, stated: NLI has no world knowledge of containment, so
+"sunbury | victoria" and "melbourne | aus" score contradiction 1.00 -- the
+same as "apple | google". Entailment does not separate them (0.01 both).
+Filter unavailable; these remain in the surface as occasional silly asks.
+ACCEPTABLE, and arguably self-correcting: a false-positive conflict costs one
+user question, and the answer becomes a correction, which becomes write
+policy (entry 140). The clarification loop and the learning-rule loop close
+on each other -- that is the product working as designed rather than a
+blemish to hide.
+
+Test suite 12 passing. The fixture for test_conflicts_and_clarification was
+itself wrong -- it asserted that "apple" vs "apple inc in cupertino" IS a
+conflict, which the NLI-confirmed implementation correctly refused. Fixture
+corrected and a rewording case added as a positive assertion.
+
+MOVE 3 (next): MemOps (arXiv:2607.12893) -- lifecycle traces (trigger,
+target, scope, state transition, supporting evidence) are what RG
+instruments natively and what accuracy benchmarks ignore. The benchmark our
+architecture is built to win rather than survive.

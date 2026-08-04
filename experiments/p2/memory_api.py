@@ -121,11 +121,54 @@ class Memory:
         with >=2 distinct values and NO owner correction resolving them.
         Returns [{attribute, values:[{value, dates, evidence}], ask}] --
         `ask` is a ready-to-surface clarifying question. Deterministic."""
+        import consolidate as C
         import timeline as TL
         import spacing as SP
+        import itertools
         out = []
         store = list(self.g.nodes.values()) + list(self.g.provisional.values())
+
+        # Candidates come from TWO sources, because neither alone is adequate
+        # (entry 154, and a live bug this surfaced):
+        #  - SINGLE-VALUED slots: enumerate every within-slot pair and let NLI
+        #    judge. Lexical chaining MISSES real substitutions by construction
+        #    -- "employer: apple" and "employer: google" share no tokens, so
+        #    slot_chains() returned nothing and the canonical conflict was
+        #    invisible. These slots hold few values each, so pairs are cheap.
+        #  - everything else: lexical chains as before (recall-oriented), since
+        #    narrative slots accumulate rather than substitute.
+        chains = []
+        by_attr = {}
+        for n in store:
+            if n["attr"] in C.SINGLE_VALUED:
+                by_attr.setdefault(n["attr"], []).append(n)
+        for attr, nodes in by_attr.items():
+            # Only CORROBORATED values can raise a conflict. Without this the
+            # surface explodes (measured: 2,836 asks on the owner profile),
+            # because extraction over-assigns single-valued slots -- the
+            # `location` slot held cafes, an OS name and a username, each of
+            # which NLI correctly calls contradictory with the home city. A
+            # single unconfirmed mention is not evidence of a change; it is
+            # usually an extraction error, and the write-policy/quarantine
+            # path is where those belong.
+            nodes = [n for n in nodes if n.get("n_mentions", 1) >= 2]
+            nodes = sorted(nodes, key=lambda n: -n.get("n_mentions", 1))[:6]
+            seen = set()
+            for a, b in itertools.combinations(nodes, 2):
+                if a["value"] == b["value"]:
+                    continue
+                if C.contradicts(attr, a["value"], b["value"]) is not True:
+                    continue
+                key = tuple(sorted((a["value"], b["value"])))
+                if key in seen:
+                    continue
+                seen.add(key)
+                chains.append((attr, [a, b]))
         for attr, chain in TL.slot_chains(store):
+            if attr not in C.SINGLE_VALUED:
+                chains.append((attr, chain))
+
+        for attr, chain in chains:
             vals = [{"value": m["value"],
                      "dates": sorted(set(m["convs"].values())),
                      "evidence": SP.tag(m)} for m in chain]

@@ -107,11 +107,18 @@ def test_conflicts_and_clarification():
     """Acquisition-frame clarification hook (entry 137): same-slot evolving
     values surface as an open conflict with an ask; context_block carries it."""
     from wire import WireGraph
+    # A GENUINE substitution (apple -> google), a REWORDING that must not be
+    # reported as a conflict (entry 154: NLI distinguishes these; the previous
+    # version of this fixture used a rewording and asserted it WAS a conflict,
+    # which the NLI-confirmed implementation correctly refused), and a
+    # single-valued slot with one value.
     facts = [
         (3, "employer", "apple", [("Jan 05, 2025", "s1"), ("Feb 10, 2025", "s2"),
                                   ("Mar 01, 2025", "s3")]),
-        (2, "employer", "apple inc in cupertino", [("Mar 20, 2025", "s4"),
-                                                   ("Apr 02, 2025", "s5")]),
+        (2, "employer", "google", [("Mar 20, 2025", "s4"),
+                                   ("Apr 02, 2025", "s5")]),
+        (2, "school", "deakin university", [("Jan 05, 2025", "s1")]),
+        (2, "school", "deakin uni", [("Feb 01, 2025", "s7")]),
         (2, "city", "melbourne", [("Jan 05, 2025", "s1"), ("Jun 01, 2025", "s6")]),
     ]
     g = WireGraph.from_facts(facts, n_convs=6)
@@ -120,6 +127,7 @@ def test_conflicts_and_clarification():
     attrs = {c["attribute"] for c in cf}
     assert "employer" in attrs          # linked evolving values -> conflict
     assert "city" not in attrs          # single value -> no conflict
+    assert "school" not in attrs        # a rewording is not a conflict
     emp = next(c for c in cf if c["attribute"] == "employer")
     assert "Which is current" in emp["ask"]
     assert any("consolidated" in v["evidence"] or "repeated" in v["evidence"]
