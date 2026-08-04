@@ -6936,3 +6936,47 @@ proposing versions of it that are.
 METHOD: the shuffled-gold null has now caught three inflated results in two
 days (entries 151, 152, this). It costs one extra line per experiment. It is
 non-negotiable for every containment metric from here.
+
+## Entry 154 — 2026-08-04 (p2: delta synthesis v2 (NLI contradiction x single-valued slots) emits only 3 deltas and gains NOTHING. The mechanism is now precise and correctly finds that HaluMem's dev stores contain almost no true substitutions. Line of inquiry CLOSED, 0 for 4.)
+
+Chain of cheap probes, each killing the next-cheapest hypothesis:
+  token overlap (entry 153): pairs rewordings and unrelated neighbours,
+    misses real substitutions -- a change replaces its own tokens.
+  bge-small cosine (probe): true substitutions mean 0.757 vs REWORDINGS
+    0.769 -- higher. No threshold separates them. Dead before building.
+  NLI (cross-encoder/nli-deberta-v3-xsmall, 70MB CPU): contradiction 1.00 on
+    all 5 true substitutions, 0.00 on both rewordings -- the exact
+    distinction the other two could not make. But 0.98/0.89 false positives
+    on unrelated activity pairs, because "watches films" vs "took up
+    filmmaking" reads as mutually exclusive out of context.
+  + SLOT CARDINALITY (single-valued attributes only -- one employer, many
+    activities): removes those false positives by construction. This is the
+    Dewey idea in its useful minimal form: not a taxonomy, one bit per
+    attribute.
+
+RESULT of the combined, precise mechanism on dev users 10-12:
+  deltas emitted: 3   gold-in-store 55.6% -> 55.6%   real +0.00, null +0.00
+
+READ THIS CORRECTLY. The mechanism did not fail -- it worked, and reported
+that these stores contain essentially no true substitutions on single-valued
+slots. Its 3 emissions are mostly mis-slotted "occupation" values, an
+extraction problem it faithfully surfaced rather than an artifact it
+invented. HaluMem's Dynamic Update questions turn on changes stated ACROSS
+SESSIONS in narrative attributes (preferences, habits, feelings), which are
+exactly the multi-valued slots this mechanism correctly refuses to touch.
+
+CLOSED: write-time change synthesis, 0 for 4 (line re-clustering, v5.2,
+lexical deltas, NLI+cardinality deltas). Four implementations, and the final
+one is precise enough that its null result is INFORMATIVE rather than
+inconclusive: the changes the benchmark asks about are not single-slot value
+substitutions at all. MOSAIC's write-time conflict detection wins on a
+different distribution than this dev set presents, or with composite
+event-typed nodes we do not build.
+
+KEPT from the wreckage: (a) NLI contradiction detection at 70MB/CPU is a
+validated primitive with 1.00/0.00 separation -- the right tool for the
+PRODUCT's conflict surface (conflicts() currently uses token clustering and
+would be strictly better with this); (b) slot cardinality as a one-bit
+annotation is cheap and reusable; (c) four negative results with a single
+shared root cause, which is a publishable finding about lexical memory
+systems.
