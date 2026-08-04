@@ -7254,3 +7254,60 @@ THE SYNTHESIS: RG's payoff case is long-horizon eviction resistance and
 precision/drift under conflicting beliefs. Both are measurable, both are
 now third-party-defined, and NEITHER is what HaluMem measures. We have been
 grading ourselves on the one axis where the literature predicts we lose.
+
+## Entry 161 — 2026-08-05 (p2: LITERATURE SWEEP part 2 -- the accuracy leaderboard has NOT moved, but the field pivoted to RG's axes in the last six weeks and nobody is winning on them. We are early, not behind.)
+
+1. ACCURACY: nothing has beaten MOSAIC (73.1/10.2) since it posted three
+   weeks ago. We are not falling behind an advancing frontier; it is static.
+
+2. WHAT HAS MOVED, hard, since mid-June -- five NEW trust benchmarks, each
+   isolating one failure mode, and the reported result across them is that
+   NO SYSTEM DOES WELL ON MORE THAN ONE AXIS:
+     GateMem (2606.18829)      access control + active forgetting; explicit
+                               negative result: no method achieves utility,
+                               access control AND forgetting together
+     MemSyco-Bench (2607.01071) sycophancy: does memory override evidence
+     WhisperBench (2607.05189)  stealth memory-injection attack, 87.5%
+                               end-to-end success against a live agent
+     MemSecBench (2607.27080)   poisoning lifecycle: 84.2% persistence,
+                               only 56.1% successful repair
+     HopRefusalBench (2608.01358, Aug 2) abstention calibration on 889
+                               unanswerable multi-hop questions; BEST model
+                               42.9% target-aware correct halting
+   Plus AgentMemBench (2608.00009): fully local Qwen2.5-7B 4-bit, and the
+   only one putting TOKEN FOOTPRINT beside recall (300 vs 5,100 tokens).
+
+3. THREE FINDINGS THAT INDEPENDENTLY CONFIRM OUR OWN MEASUREMENTS:
+   - MemTrace (2606.17328): "evidence was retrievable-but-unused 10x more
+     often than actually missing" -- the bottleneck is evidence USE, not
+     retrieval. That is our 134-question conversion pool, measured by
+     someone else on other systems.
+   - Always-On Agents survey (2606.30306, 435 works): the field
+     "concentrates more heavily on accumulating and retrieving state than on
+     governing, recovering, or relinquishing it." RG is a govern/recover
+     system that has been graded on accumulate/retrieve.
+   - GovMem (2607.02579): governed promotion of claims into memory, false-
+     promotion 0.597 -> 0.040. That is our write gate, published, and they
+     honestly report weak generalisation to real traces.
+
+4. THE OPEN SLOT, stated by the scout: "I did not find any July/August paper
+   reporting a full risk-coverage curve for a general-purpose MEMORY system."
+   We built one two days ago (entry 155: 9 operating points, hallucination
+   tunable 17.6 -> 3.6%). We are not behind on this axis; we appear to be
+   first on it.
+
+5. CLOSEST COUSINS, worth reading and citing rather than re-deriving:
+   MemTX (2607.23929) -- evidence+permissions+provenance per record,
+   transactional writes, cascading repair on retraction, property-tested
+   over 5.5M states, reports ZERO DOWNSTREAM HARM and paired-McNemar wins.
+   TOKI (2606.06240) -- bitemporal algebra, contradicted facts preserved in
+   audit rows. Both locally reproducible.
+
+REVISED READ ON "WHAT ARE WE MISSING": not a mechanism. The field spent six
+weeks building the instruments that measure what RG already does, and no
+system has posted a good score across them. The gap is that we have not RUN
+those instruments. Ranked by fit and cost: AgentMemBench (local, 4-bit,
+footprint-vs-recall -- our exact story), HopRefusalBench (abstention; our
+boundary is 97.4% against a 42.9% best-in-class), GateMem (forgetting +
+access control; we have quarantine/invalidate/receipts), then MemOps
+(already integrated and running).
