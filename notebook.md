@@ -6747,3 +6747,56 @@ architecture processes ~1,100 tokens/question vs the dump's ~3,717 -- about
 token cost, and query reformulation (observed: "career status change" ->
 "occupation change") could substitute for the 150MB dense tier. Filed as a
 property of the architecture, not a result.
+
+## Entry 150 — 2026-08-04 (p2: THE DEWEY QUESTION, measured. Routing headroom is real (rank-1 3.5% -> 29%) and survives coarsening, BUT the premise is wrong -- we do NOT get all the info in (44% never stored), the router is 11.4% accurate, and precision is not what our composer lacks.)
+
+JP: "we get all the right info in but can't get it out -- is retrieval
+failing, or do we need a Dewey decimal system?" Three measurements.
+
+1. THE PREMISE, corrected. Of 363 answerable dev questions:
+     gold IS in store       202 (55.6%)
+     gold NEVER stored      161 (44.4%)
+   We do not get all the right info in. Nearly half never enters. That is
+   entry 148's finding restated: extraction targeting, not retrieval, is
+   the binding constraint.
+
+2. THE DEWEY CEILING (of the 202 whose gold IS stored):
+     current retrieval   rank-1  3.5%   top-5 33.2%
+     exact-attribute oracle      29.2%  top-5 50.5%
+   An 8x rank-1 improvement from knowing which drawer to open. Real
+   headroom, and it matches the external evidence (MOSAIC's typed nodes;
+   PrecisionMemBench found typed retrieval scoping was the largest single
+   effect in a 13-config study, larger than embeddings).
+
+   AND IT SURVIVES COARSENING -- which matters, because a controlled
+   vocabulary is the only kind we could actually impose:
+     exact attribute (127 classes)  29.2%
+     ~40 classes                    26.7%
+     ~15 classes                    25.2%
+   86% of the oracle gain at 15 classes. Note the implication though: the
+   buckets here are RANDOM hashes of attribute names, so the gain is
+   coming from POOL REDUCTION (excluding ~93% of the store), not from
+   semantic organisation. The first few bits of "where to look" carry
+   almost all the value; finer classification adds little.
+
+3. WHY IT IS NOT ACTIONABLE YET -- the router:
+     cheap predictor (question tokens vs attribute names): 11.4% correct
+   Hard routing with an 11.4% router is catastrophic: a wrong drawer means
+   ZERO recall for that question, whereas today's failure mode is merely a
+   bad rank inside a context the composer can still use. Our own history
+   compounds this: k=15 vs k=30 was a wash (entry 103) and the pull screen
+   (entry 149) showed the composer does WORSE on ~24 precise lines than on
+   120 loose ones. Precision is not what this composer lacks.
+
+VERDICT: Dewey identifies a real structural inefficiency -- we search 1,000
+facts when 8 would do -- but it optimises PRECISION, and every measurement
+we have says precision is not our binding constraint. If pursued, the safe
+form is SOFT routing (predicted class as a ranking boost) rather than hard
+filtering, so a wrong prediction costs rank rather than recall. The
+unavoidable prerequisite is a router materially better than 11.4%, which is
+a small-model classification task over a controlled vocabulary we do not
+yet have.
+
+RANKED HONESTLY against the alternatives: extraction targeting (entry 148,
++22% of misses recovered by a second pass, attacks the 44%) remains the
+larger and better-evidenced lever. Dewey is second, contingent on a router.
