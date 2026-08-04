@@ -6837,3 +6837,58 @@ be reported against a shuffled-gold null, or it is not evidence. That rule
 should be applied retrospectively to the union-recall numbers (83.2/86.8%)
 quoted in OVERVIEW -- they are union-over-120-lines, which is exactly the
 kind of measure this null would test. Owed.
+
+## Entry 152 — 2026-08-04 (p2: SECOND artifact caught, same class as entry 151 -- entry 148's "85% of missing gold sits in turns we read" was concatenation soup. The truth: 79% is in SOME single turn at >=50%, only 30% at >=70%, and raw-transcript BM25 finds the source turn 2% of the time.)
+
+Testing JP's "next level" idea (lazy query-triggered re-extraction: when
+recall fails, re-read the transcript) produced a decisive negative that
+then exposed an earlier error of mine.
+
+STEP 1 -- can BM25 over raw user turns even FIND the source turn for the 161
+missing golds? rank-1 1%, rank-2 1%, not in top-3: 98%. Decisive negative:
+lazy re-extraction cannot be targeted, because the retrieval step that would
+target it fails at the turn level exactly as it fails at the fact level.
+
+STEP 2 -- that contradicted entry 148 ("85% present in user turns"), so I
+checked, and entry 148 WAS WRONG in the same way entry 151 was: it measured
+containment against the CONCATENATION of ~1,300 user turns. Of course the
+gold's tokens appear somewhere in a 200k-token pool. Same token-soup
+artifact, same lenient-measure failure mode, second occurrence in two days.
+
+THE CORRECTED NUMBERS (best containment in ANY SINGLE turn, user or
+assistant, for the 161 missing golds):
+    >=70% in one turn:  49 (30%)
+    >=50% in one turn: 127 (79%)
+     <50%:               34 (21%)  -- no turn states it; inferential
+  Distribution peaks at 50-60% (49% of cases), i.e. HALF the gold's content
+  words appear in the best turn and half do not. Examples at <50%: "Her
+  birth date is 1980-04-20, and she is 45 in January 2025" (requires date
+  ARITHMETIC across a stated birth date and a question date); "No, she
+  expressed a growing disinterest in romance novels" (requires comparing
+  statements ACROSS sessions to detect a change).
+
+WHAT THIS ACTUALLY MEANS -- the honest revision of the extraction thesis:
+the missing 44% is not a pile of facts sitting in plain sight that a better
+extractor would grab. It is dominated by golds that are SYNTHESISED --
+across turns, across sessions, or by arithmetic over stated values. That is
+why exhaustive pass-B extraction recovered only 22% (entry 148): most of
+what it could see in one turn, it already got. And it is why HaluMem's own
+gold memory points have an extraction F1 ceiling we cannot reach with
+per-turn atomic extraction at all.
+
+CONSEQUENCE FOR THE ROADMAP: "better extraction" as a lever is DOWNGRADED,
+and per-turn extraction is at or near its ceiling. The remaining headroom
+in that 44% requires CROSS-TURN SYNTHESIS at write time -- comparing a
+statement to what is already stored and writing the delta ("no longer X",
+"changed from X to Y", "is 45 as of <date>"). That is a different operation
+from extraction and it is, notably, exactly what MOSAIC does with a
+frontier model (write-time conflict detection against stored knowledge) and
+what v5.2 supersession-capture attempted in miniature (entry 129, positive
+probe, no benchmark win because it only fires when a turn STATES the change).
+
+METHOD RULE, now twice-earned and applied retrospectively: every
+containment metric in this project must be reported against a shuffled null
+AND at the granularity it claims (single fact / single turn), never against
+a concatenated pool. Entry 148's headline is retracted; entry 151's rule is
+extended. The union-recall figures (83.2/86.8%) in OVERVIEW remain owed a
+null test.
