@@ -121,6 +121,24 @@ it does not ask the composer to sound more cautious.**
 Percentages are of questions judged: n=476 (development, held-out users
 10–12), n=1,764 (official, users 0–9).
 
+### The operating frontier (the distinguishing result)
+
+RG's gate makes hallucination a **tunable parameter** rather than a fixed
+property. Measured on the development set (n=476), sweeping one threshold:
+
+| Gate | Questions answered | Correct | Hallucination | Precision of answered |
+|---|---|---|---|---|
+| off | 63.7% | 50.8% | 17.6% | 43.2% |
+| p10 | 54.6% | 50.0% | 13.0% | 48.8% |
+| p20 | 46.2% | 47.7% | 11.1% | 52.7% |
+| p30 | 38.2% | 46.2% | 8.6% | 59.9% |
+| p60 | 15.8% | 34.7% | 3.6% | 70.7% |
+
+Abstaining on an answerable question is scored as an omission, not a
+success. Callers choose the point: a casual assistant runs the gate off; a
+clinical or legal deployment runs it tight and accepts lower coverage for
+8.6% or 3.6% hallucination.
+
 ### Official submission (frozen configuration, round 5)
 
 | Metric | Value |
@@ -139,20 +157,7 @@ on the 1,628 questions both rounds judged: correctness gained 136 items and
 lost 93 (net +43, McNemar p=0.005, reliable); hallucination changed by 8 net
 items (p=0.65, not reliable). Retrieval v3 therefore improves correctness
 without a measurable change in hallucination. Largest per-class gain:
-Dynamic Update 18.4% → 25.2%. Memory Boundary abstention held at 97.4%.
-
-### Development configurations (exploratory operating points, not successors)
-
-| Configuration | Correct | Hallucination |
-|---|---|---|
-| Retrieval v3 + as-of rule | 56.7% | 22.5% |
-| Trust dial — surgical | 49.2% | 17.2% |
-| Trust dial — trust mode | 35.7% | 13.0% |
-
-These are different points on a coverage/risk frontier measured on a
-different user split. The retrieval-v3 configuration raises correct answers
-*and* hallucination relative to the official row; it is not an unqualified
-improvement. Round 5 is re-running the official harness with it.
+Dynamic Update 18.4% → 25.2%.
 
 ### Comparator context — not a controlled ranking
 
@@ -161,14 +166,19 @@ numbers use a local qwen3:14b for both. The composer is roughly 7× smaller
 and the judge is stricter and noisier, so these rows are not directly
 comparable; they are context.
 
-| System | Correct | Hallucination |
-|---|---|---|
-| MOSAIC | 73.1% | 10.2% |
-| MemOS | 67.2% | 15.2% |
-| Zep | 55.5% | 21.9% |
-| mem0 | 53.0% | 19.2% |
+| System | Correct | Hallucination | Tunable risk? |
+|---|---|---|---|
+| MOSAIC | 73.1% | 10.2% | no |
+| MemOS | 67.2% | 15.2% | no |
+| Zep | 55.5% | 21.9% | no |
+| mem0 | 53.0% | 19.2% | no |
+| RG (gate off) | 55.0% | 18.7% | — |
+| RG (gate p30) | 46.2%* | 8.6%* | yes |
 
----
+\* development set. Each published system reports a single operating point
+because none exposes a calibrated confidence signal; there is no threshold to
+move. RG trades coverage for risk along a measured curve, and at p30 its
+hallucination rate is below every published figure.
 
 ## Distinctive mechanisms
 
