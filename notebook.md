@@ -7168,3 +7168,42 @@ MinHash+LSH entity resolution -- a faster token-overlap, and token overlap
 is 0 for 4 on slot identity, so no. The competitor well is close to dry:
 what they have that we lack is not a mechanism, it is frontier-model write
 paths (MOSAIC) and scale.
+
+## Entry 159 — 2026-08-05 (p2: the untried axis is PARAMETER space. We have written ~10 extraction prompts and swapped model scale twice; we have never TRAINED an extractor. 1,420 supervised pairs are available from dev users, and the gold FORMAT explains the F1 gap.)
+
+While the literature sweep runs, the gap in our own method space is visible:
+  prompt space   v2, v3, v4, v5, v5.1, v5.2, pass-B exhaustive, plus 8
+                 composer prompts -- exhaustively explored.
+  scale space    1.7b / 14B / 32b extractors, 14B / 24B / 32b / 235B
+                 composers -- explored, dead both axes.
+  PARAMETER space  never touched. Every extractor this project has run was
+                 PROMPTED. Not one was trained.
+
+SUPERVISION EXISTS, and legitimately: HaluMem ships gold memory_points per
+session. Aligning them to source turns on DEV users 10-19 only (officials
+0-9 stay untouched, so no contamination):
+  15,238 user turns, 6,206 gold memory points
+  1,420 pairs where one turn contains >=60% of a gold point's tokens
+That is a usable LoRA-scale training set.
+
+AND THE EXAMPLES EXPLAIN THE F1 GAP (0.282 vs MOSAIC's 0.868). Gold points
+read "User's name is Michelle Hernandez" / "Michelle Hernandez's gender is
+Female" / "Michelle Hernandez's birth date is 1980-04-20" -- composite
+sentences that NAME THE SUBJECT. We emit "name: michelle hernandez". Three
+differences, all learnable and none reachable by prompting harder:
+  1. FORMAT: composite sentence vs attr:value atom (this alone caps F1)
+  2. DENSITY: that single turn yields THREE gold points; we average 1.13
+  3. TARGETING: which facts are worth emitting at all (entry 148's finding
+     that we emit 2.7x the volume but not the right items)
+
+CAVEAT, stated before building: a HaluMem-trained extractor is
+benchmark-specific. JP's own chat data has no gold, so this does not
+transfer to the product unless the learned behaviour is general (be
+exhaustive on dense turns, name the subject, keep numbers with units).
+That is plausible and unproven. If built, it ships as a BENCHMARK-MODE
+extractor unless product-side evaluation says otherwise -- the same
+recall-mode/precision-mode split entry 148 already flagged.
+
+Feasible locally: mlx-lm LoRA on the studio (already installed, entry 122),
+~1,420 examples, under an hour. Then re-extract dev, measure gold-in-store
+against the shuffled-gold null, and only then spend judge time.
