@@ -7311,3 +7311,67 @@ footprint-vs-recall -- our exact story), HopRefusalBench (abstention; our
 boundary is 97.4% against a 42.9% best-in-class), GateMem (forgetting +
 access control; we have quarantine/invalidate/receipts), then MemOps
 (already integrated and running).
+
+## Entry 162 — 2026-08-05 (p2: LITERATURE SWEEP part 3 + the cheapest big win found all project. MOSAIC's memory UNIT is a typed NL proposition, not an atom -- and re-rendering our existing facts in that form takes gold coverage 14.8% -> 45.9%. Our extraction F1 is substantially a RENDERING artifact.)
+
+Agent 3 established what the leaders actually STORE:
+  MOSAIC (2607.16211)  {content: NL description, semantic_type:
+                        event|persona|relationship, embedding, confidence,
+                        timestamp} -- typed NL propositions in a graph. NOT
+                        triples, NOT attr:value. And crucially: NO
+                        cross-session synthesis mechanism reported. Its
+                        86.8% extraction F1 is therefore not bought with
+                        synthesis -- which is what we assumed we were
+                        missing.
+  Zep/Graphiti         edge-as-fact with bitemporal validity
+  mem0 2026            atomic statements ("User is vegetarian and
+                       dairy-free") -- gains were retrieval-side, not
+                       granularity
+  MemOS                MemCube = payload + metadata; orthogonal to shape
+  PlugMem (2603.03296) propositions + concepts + provenance edges;
+                       LongMemEval 75.1 vs Zep 71.2, 1-2 ORDERS of magnitude
+                       fewer tokens
+  RG                   attr: value  <- the outlier
+
+THE TEST (deterministic, null-controlled, minutes): take our EXISTING store
+and render each fact two ways -- our atom form vs the gold's own NL form
+("<subject>'s <attribute> is <value>") -- then measure coverage of HaluMem's
+gold memory points.
+    atom  14.8%  (null  4.6%)  signal +10.1pt
+    NL    45.9%  (null 16.9%)  signal +29.0pt
+  real gain +31.2pt against a +12.3pt null gain -- the signal nearly TRIPLES.
+Nothing was extracted differently. Same facts, same store, different
+rendering.
+
+READING: our reported extraction F1 of 0.282 is substantially a FORMAT
+artifact, not a knowledge deficit. We store the content and express it in a
+shape the metric cannot match, and every competitor stores NL propositions
+natively. Emitting "Michelle Hernandez's birth date is 1980-04-20" instead
+of "birth_date: 1980-04-20" is a faithful rendering of the same receipted
+fact, not gaming -- the harness asks for memories as list[str] and we have
+been handing it slot notation.
+CAVEAT: this is the containment proxy; real F1 is LLM-judged. Direction is
+strong, magnitude needs the judge.
+
+ALSO BANKED from agent 3, ranked by fit:
+  - AtomMem (2606.19847) ablation: flat atomic 37.03 F1 vs atoms + an
+    event-linking layer 42.50 -- +5.5pt from structure ABOVE atoms.
+  - TriMem (2605.19952): three COEXISTING layers (raw segments + atomic
+    facts + synthesised profiles) beats single-level. Note our gist attempt
+    (entry 142) failed as a SEPARATE COMPETING SECTION; TriMem's claim is
+    that they must coexist as layers, which is a different configuration.
+  - TSM (2601.07468): semantic timeline consolidating temporally continuous
+    related facts into "durative memory", up to +12.2% -- the closest
+    published mechanism to the synthesis gap entry 152 identified.
+  - NEMORI (2508.03341): semantic distillation gated by PREDICTION ERROR --
+    keep only what the model would otherwise get wrong. Spens & Burgess's
+    principle, implemented in a shipping memory system.
+  - Trained extractors DO exist: AtomMem-8B (SFT+GRPO, 8B, reproducible
+    locally) and Extract-0 (7B, LoRA+GRPO+semantic reward, beats GPT-4.1 on
+    document IE for $196 of training). Caution from a distillation study
+    (2607.08268): distillation helps GENERATIVE structuring more than
+    slot-accuracy -- relevant since our extraction is slot-shaped.
+  - THE PUBLISHABLE GAP the scout names: "nobody in 2026 has published a
+    clean ablation isolating extraction-unit granularity holding extractor
+    and retriever fixed." We have the harness, the null discipline and the
+    benchmark to run exactly that.
