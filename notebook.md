@@ -6892,3 +6892,47 @@ AND at the granularity it claims (single fact / single turn), never against
 a concatenated pool. Entry 148's headline is retracted; entry 151's rule is
 extended. The union-recall figures (83.2/86.8%) in OVERVIEW remain owed a
 null test.
+
+## Entry 153 — 2026-08-04 (p2: write-time delta synthesis FAILS -- null gain (+2.5pt) EXCEEDS real gain (+1.1pt). Third artifact caught by the null rule in two days. Lexical slot-identity is now 0 for 3; a genuine change replaces its own tokens.)
+
+DEBT PAID FIRST (entries 151/152 owed a null on the quoted recall figures):
+  union recall v2 83.2% vs null 36.4%; v3 86.8% vs null 34.4% -> SURVIVES,
+  the signal is real. Honest companion figure, now added to OVERVIEW:
+  SINGLE-LINE recall 46.8% (v2) -> 49.9% (v3). Both improve; both reported.
+
+THEN THE BUILD. Entry 152 said the missing gold is synthesised across turns,
+so synthesise it at write time: where a slot holds two dated values, emit one
+extra receipted fact naming the transition, as a NORMAL stored fact (not a
+separate CHANGE HISTORY section -- that shape failed twice, entries 115/142).
+69 delta facts across 3 users.
+
+  gold-in-store   baseline 55.6% (null 29.2%)
+                  + deltas 56.7% (null 31.7%)
+  real gain +1.1pt   NULL GAIN +2.5pt
+
+The null gain is LARGER than the real gain. Delta facts help RANDOM golds
+more than true ones: they are long concatenated strings that inflate token
+containment by chance. Worse than useless as written, and only visible
+because the null was run.
+
+WHY IT FAILED, and this is the transferable part -- read the deltas it
+produced: "visionary ai solutions -> chief visionary officer" (a company and
+a job title), "green tea for relaxation -> green tea's role..." (a rewording,
+not a change), "classic films -> documentary filmmaking" (unrelated topics).
+Meanwhile the real change the mechanism exists for -- green tea -> BLACK
+COFFEE -- is never paired, because those values share no tokens.
+  A GENUINE VALUE CHANGE REPLACES ITS OWN TOKENS. Token overlap therefore
+  selects against exactly the cases it is meant to catch: it pairs reworded
+  duplicates and unrelated neighbours, and misses real substitutions.
+
+LEXICAL SLOT IDENTITY IS NOW 0 FOR 3: line re-clustering (entry 113),
+v5.2 supersession capture (entry 129), write-time deltas (here). Three
+implementations, one root cause. The mechanism is not refuted -- MOSAIC wins
+on exactly this operation -- but it requires SEMANTIC slot identity
+(attribute match + embedding relatedness, which bge-small could supply) or a
+model at write time. It cannot be done with token overlap, and I should stop
+proposing versions of it that are.
+
+METHOD: the shuffled-gold null has now caught three inflated results in two
+days (entries 151, 152, this). It costs one extra line per experiment. It is
+non-negotiable for every containment metric from here.

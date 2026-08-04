@@ -80,8 +80,19 @@ does.
 single-digit milliseconds.
 
 **Accuracy tier (opt-in).** Adds bge-small dense retrieval and a MiniLM
-cross-encoder rerank: ~150 MB of weights, ~0.5 s per query. On dev it raised
-union recall from 83.2% to 86.8% and gold-in-top-5-lines from 20.7% to 28.7%.
+cross-encoder rerank: ~150 MB of weights, ~0.5 s per query.
+
+Measured on dev, with a shuffled-gold null reported alongside because
+containment metrics over a large store inflate easily:
+
+| Metric | Default tier | Accuracy tier | Null (chance) |
+|---|---|---|---|
+| Union recall over the retrieved block | 83.2% | 86.8% | ~35% |
+| Single-line recall (one line holds the gold) | 46.8% | 49.9% | — |
+| Gold in top-5 lines | 20.7% | 28.7% | — |
+
+Union recall is well above its null, so the signal is real, but single-line
+recall is the stricter and more honest companion figure.
 
 Retrieved evidence is emitted in auditable form:
 
