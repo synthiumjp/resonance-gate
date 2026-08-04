@@ -6561,3 +6561,51 @@ DEBTS RECORDED, not papered over:
   - Underpowered dev screens generally: at n=476 with this churn rate, the
     minimum reliably detectable effect is roughly +5-6pt. Every bar this
     project pre-registered at ">=+5 correct" was, accidentally, about right.
+
+## Entry 146 — 2026-08-04 (p2: ROUND 5 COMPLETE. Official 55.0 correct / 18.7 halluc (n=1,764) -- and the paired McNemar CONFIRMS retrieval v3: +43 net, p=0.005. The dev screen was underpowered, exactly as entry 145 predicted.)
+
+OFFICIAL ROUND 5 (full harness, users 0-9, frozen config = retrieval v3 +
+focus weighting + CAL + as-of):
+
+  Correct 54.99% | Hallucination 18.65% | Omission 26.36%  (n=1,764)
+  extraction F1 0.282 (unchanged -- v3 touches retrieval, not extraction)
+
+vs round 4 (52.55 / 19.10 / 28.34): +2.4 correct, -0.5 halluc.
+
+THE TEST THAT MATTERS (entry 145 set this up: judge round 5 by McNemar
+against round 4, not by the aggregate). Paired on the 1,628 questions both
+rounds judged:
+  round4  48.6 corr / 20.7 hall
+  round5  51.2 corr / 20.2 hall
+  CORRECT      gained 136, lost 93, net +43, p=0.0054  -> RELIABLE
+  HALLUC-FREE  gained 122, lost 114, net  +8, p=0.649  -> not reliable
+
+So: retrieval v3 reliably improves correctness and does NOT reliably change
+hallucination. That is the cleanest possible confirmation of the law --
+evidence quality buys correctness without the assertion tax that all seven
+instruction levers paid. And the entry-145 power analysis was right on the
+nose: same effect, n=476 -> p=0.19; n=1,628 -> p=0.005. The dev screen was
+underpowered, not wrong. Reliability tracking added mid-flight (via JP's own
+Beyond-the-Mean method) changed the conclusion from "unverified" to
+"confirmed" without changing a line of the system.
+
+BY TYPE (round4 -> round5 correct%): Dynamic Update 18.4 -> 25.2 (+6.8, the
+biggest single gain -- the as-of rule reaching the class it was built for on
+the official split), Multi-hop 19.0 -> 23.0, Conflict 52.6 -> 56.1, Basic
+Recall 42.1 -> 44.9, Generalization 31.0 -> 33.4, Boundary 97.6 -> 97.4
+(intact; the moat is undisturbed).
+
+STATUS OF CLAIMS after this run:
+  ESTABLISHED: official row 55.0/18.7 reproducible from committed code;
+    retrieval v3 improves correctness (paired, p=0.005); boundary abstention
+    97.4%; dial signal screens Valid; six instruction mechanisms and
+    bigger-model swaps measured negative.
+  STILL UNVERIFIED: the as-of rule's individual contribution (no per-item
+    verdicts saved; its class did move +6.8 on the official split, which is
+    suggestive but confounded with v3 in the same config).
+  DEBT: K-sampling for proper RCI on future screens.
+
+vs published (GPT-4o composer AND judge, not comparable): MOSAIC 73.1/10.2,
+MemOS 67.2/15.2, Zep 55.5/21.9, mem0 53.0/19.2. RG at 55.0/18.7 now sits
+essentially level with Zep on correct with 3.3pts less hallucination, above
+mem0 on both axes, entirely local, zero API spend.

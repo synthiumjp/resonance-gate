@@ -110,17 +110,25 @@ it does not ask the composer to sound more cautious.**
 Percentages are of questions judged: n=476 (development, held-out users
 10–12), n=1,764 (official, users 0–9).
 
-### Official submission (frozen configuration, round 4)
+### Official submission (frozen configuration, round 5)
 
 | Metric | Value |
 |---|---|
-| Correct | 52.6% |
-| Hallucination | 19.1% |
-| Omission | 28.3% |
+| Correct | 55.0% |
+| Hallucination | 18.7% |
+| Omission | 26.4% |
 | Invalid verdicts | 0 |
-| Memory Boundary abstention | 97.6% |
+| Memory Boundary abstention | 97.4% |
 
-Reproducible from committed code.
+n=1,764. Reproducible from committed code. Round 4 (BM25-only retrieval) was
+52.6 / 19.1 / 28.3.
+
+**Reliability.** The improvement was tested paired rather than in aggregate,
+on the 1,628 questions both rounds judged: correctness gained 136 items and
+lost 93 (net +43, McNemar p=0.005, reliable); hallucination changed by 8 net
+items (p=0.65, not reliable). Retrieval v3 therefore improves correctness
+without a measurable change in hallucination. Largest per-class gain:
+Dynamic Update 18.4% → 25.2%. Memory Boundary abstention held at 97.4%.
 
 ### Development configurations (exploratory operating points, not successors)
 
@@ -182,16 +190,19 @@ premise correction, answer-format rules, and a validator-retry loop — each
 converted omissions into hallucinations at roughly 1:1. In this pipeline,
 instructing the composer to be more forthcoming did not improve the frontier.
 
-**Two interventions moved it — with a reliability caveat.** Changing what the
-composer reads (retrieval v3: +4.2 correct at +0.5 hallucination on dev) and
-filtering which attempts survive (the sufficiency probe). Paired McNemar
-testing shows the retrieval-v3 aggregate is *not* statistically reliable at
-n=476 (116 items gained, 96 lost, p=0.19): the net gain sits inside
-substantial item-level churn. Its deterministic retrieval improvements (union
-recall 83.2%→86.8%, gold-in-top-5 20.7%→28.7%) are measured on a separate
-instrument and do stand. The official round 5 run (n=1,764) has the power to
-settle whether the judged gain is real; until it reports, retrieval v3 is a
-promising configuration rather than a demonstrated improvement.
+**Two interventions moved it.** Changing what the composer reads (retrieval
+v3) and filtering which attempts survive (the sufficiency probe). The
+retrieval change is confirmed on the official split by a paired test
+(p=0.005) and, notably, improves correctness *without* a reliable change in
+hallucination — unlike every instruction-side lever, each of which traded one
+for the other.
+
+A methodological note worth recording: the same retrieval effect was **not**
+statistically reliable on the 476-question development set (p=0.19, inside
+substantial item-level churn). The development screen was underpowered rather
+than wrong. Aggregate deltas below roughly 5 points are not distinguishable
+from churn at that sample size, so single-shot development screens should be
+read as directional only.
 
 The confidence signal behind the trust dial has been screened with a portable
 validity protocol (arXiv:2604.17714) and classifies as **Valid** at both the
