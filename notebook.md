@@ -6649,3 +6649,58 @@ than a feature demo. 12 tests passing.
 U2 CLOSED: operations shipped, ranking half declined on measurement.
 Roadmap advances to U2a (factorised two-probe gate, entry 144's fix) as the
 next item with a measured hook.
+
+## Entry 148 — 2026-08-04 (p2: "IS THIS THE END?" -- answered by measurement. The wall is extraction TARGETING, not scale/volume/hygiene. Double-pipe pass B (JP's idea) recovers 22% of missed golds at 3.8 facts/turn. Real headroom exists; it is smaller than the leaderboard gap.)
+
+Round 5 landed at 55.0/18.7 vs MOSAIC 73.1/10.2. JP: "there must be
+something we are missing." Four deterministic measurements, no speculation:
+
+1. WHERE the missing gold lives (161 answerable golds not in store):
+     128 (79.5%) present in BOTH user and assistant turns
+      18 (11.2%) assistant turns only -- we never read those BY DESIGN
+       8 ( 5.0%) user turns only
+       7 ( 4.3%) nowhere verbatim -- the true inferential ceiling
+   So ~85% of missing gold sits in text we ALREADY READ. Not a coverage
+   problem, not a role problem, and the ceiling is nearly 100%.
+
+2. WHY it is missing (tracing each miss through the pipeline):
+     146 (90.7%) the extractor NEVER EMITTED it
+      15 ( 9.3%) emitted, survived hygiene, lost in clustering/tiering
+       0 ( 0.0%) killed by hygiene filters (EXCLUDE_ATTR / reject_value)
+   Our own filters are clean. The store is not eating evidence. The
+   extractor simply does not produce these facts.
+
+3. IS IT VOLUME? No -- we emit 24.5 facts/session against 9.0 gold memory
+   points, 2.7x MORE than the benchmark's own density. 1.13 facts/turn,
+   18% of turns yield nothing. So the failure is TARGETING, not capacity.
+   This is why 32b extraction was worse (same target, more confidence) and
+   why v4->v5 was the biggest win in project history (different target).
+   Illustrative miss: a turn reading "I am currently Employed, working in
+   the consulting industry. I work at Apple as a Senior Data Scientist. My
+   monthly income is 8210 USD" -- five facts stated, ~one extracted.
+
+4. JP'S DOUBLE PIPE, tested (60 turns known to contain a missed gold):
+   pass B = exhaustive complementary extraction (every stated fact;
+   employment/employer/title/industry/numbers-with-units/decisions-and-what-
+   they-replaced/named-people/explicit-denials; infer nothing).
+     facts/turn 1.13 -> 3.8
+     golds recovered 13/60 = 22%
+   POSITIVE and cheap (same 14B, one extra pass, offline). Two passes with
+   DIFFERENT targets unioned into one receipted store beats one pass at any
+   scale -- consistent with every scale result we have.
+
+HONEST ARITHMETIC on what that buys: 22% of 161 dev misses ~ 35 questions
+~ +7pts of gold-in-store (55.6 -> ~63%), and we convert ~75% of in-store
+gold, so ~+5pts correct. That is real -- bigger than any single lever since
+the composer pivot -- and it does NOT close an 18-point gap to MOSAIC. Two
+or three such passes plus the assistant-turn class (11%) might reach ~65%.
+The remaining distance is their frontier-model write path (extraction F1
+86.8 vs our 28.2) against our 1.7b-on-CPU tier: a deliberate trade, not an
+oversight.
+
+PRODUCT TENSION, stated not fudged: exhaustive extraction is exactly what
+the write gate exists to suppress on JP's real profile (mem0's issue-#4573
+failure mode). So this is plausibly a DUAL-MODE architecture -- recall mode
+for QA/benchmark, precision mode for a living personal profile -- not one
+setting. Next step is a judged screen of pass A + pass B unioned, with the
+write gate and corroboration tiers doing their normal job on top.
