@@ -6800,3 +6800,40 @@ yet have.
 RANKED HONESTLY against the alternatives: extraction targeting (entry 148,
 +22% of misses recovered by a second pass, attacks the 44%) remains the
 larger and better-evidenced lever. Dewey is second, contingent on a router.
+
+## Entry 151 — 2026-08-04 (p2: "why was the gold never in the store" -- I found an appealing answer, tested the null, and KILLED IT. Composite-assembly is a token-soup artifact: chance level 76%. The 44% really is absent. Recorded because the near-miss is instructive.)
+
+JP asked the outside-the-box question. My hypothesis: our schema is ATOMIC
+(attr: value) while HaluMem golds are COMPOSITE, and oracle.gold_in_store
+tests containment against ONE fact's value -- so a gold assembled from two
+or three stored atoms scores as "never stored" even though the information
+is present. That would have made 44.4% of our headline miss rate a
+measurement artifact, and it would have explained extraction F1 0.282 as
+schema mismatch rather than coverage failure.
+
+The greedy 3-atom union covered 84% of the 161 misses. Very persuasive --
+until the examples were read: "employed at Apple in consulting" assembled
+from a COLLEAGUE'S consulting expertise plus a work-environment note; "she
+decided to remove sushi" assembled from "rethinking sushi consumption" plus
+"integrating technology into nature" plus "puzzle games". Token soup.
+
+TWO CONTROLS, both damning:
+  RANDOM golds (a gold from a different question, matched against the same
+  store): 76% "covered". Chance level. The real 84% is barely above it.
+  Atoms that were actually STATED TOGETHER (sharing a conversation receipt,
+  i.e. genuinely one composite fact): 0 of 136. Zero.
+
+VERDICT: hypothesis dead. With ~1,000 atoms and three free picks you can
+assemble almost any short gold's tokens by chance; the test measured token
+availability, which at this store size is nearly vacuous. The 44% is
+genuinely absent, oracle.gold_in_store is sound as written, and entry 148's
+diagnosis stands unchanged: the extractor does not emit these facts.
+
+WHY THIS IS RECORDED AS A FINDING, not deleted: it is the same failure mode
+as the project's earlier retractions (a lenient measure producing a
+flattering number), caught this time BEFORE it entered a claim. The general
+rule now explicit: any containment-style metric over a store this size must
+be reported against a shuffled-gold null, or it is not evidence. That rule
+should be applied retrospectively to the union-recall numbers (83.2/86.8%)
+quoted in OVERVIEW -- they are union-over-120-lines, which is exactly the
+kind of measure this null would test. Owed.
