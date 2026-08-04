@@ -7076,3 +7076,47 @@ MOVE 3 (next): MemOps (arXiv:2607.12893) -- lifecycle traces (trigger,
 target, scope, state transition, supporting evidence) are what RG
 instruments natively and what accuracy benchmarks ignore. The benchmark our
 architecture is built to win rather than survive.
+
+## Entry 157 — 2026-08-05 (p2: MEMOPS INTEGRATION. Harness is public and runs entirely on our local server; RG method built around the OPERATION LOG -- the field we lacked and can now record. Two arms running.)
+
+MemOps (arXiv:2607.12893) is public: github.com/MemTensor/MemOps, MIT, data
+SHIPPED in-repo (403 evidence conversations, 2,006 probe pairs, no download
+needed). Verified by cloning and running their own baseline end-to-end
+against our llama-cpp server -- LLM_BASE_URL makes the harness endpoint-
+agnostic, so the whole benchmark runs locally at zero API cost.
+
+CONTRACT (from build_operation_prompt, 5-test_operation_metrics.py): a system
+returns JSON with predicted_operations[] (type / target / old_value /
+new_value / state_after / provenance), answer, provenance. Rows carry it in
+the `hypothesis` field. Scoring = gpt-4.1-mini judge by default (we point it
+local) PLUS deterministic post-checks (apply_forget_postchecks etc.) that
+regex-audit leakage, over-forgetting and stale-value reuse -- judge plus code
+audit, not pure LLM judging. Published baselines: RAG session-level 0.845,
+MemOS 0.785, RAG turn-level 0.618, mem0 0.543. mem0/MemOS integrations are
+NOT in the repo; those rows were run externally.
+
+WHY THIS BENCHMARK: it scores exactly the five trace fields. Inventory of
+what RG already holds -- trigger (conversation + date): YES; target (node
+id): YES; supporting evidence (receipts, rehydratable to verbatim turn): YES;
+scope (attr + subject): PARTIAL; STATE TRANSITION: MISSING. We held current
+state and never logged how it got there.
+
+oplog.py (committed): append-only operation log -- CREATE / STRENGTHEN /
+PROMOTE / SUPERSEDE / INVALIDATE / QUARANTINE, each with trigger, target,
+before/after and its own evidence. Crucially this does NOT contradict entry
+154's 0-for-4 finding: that was RECONSTRUCTING transitions from a finished
+store, which is impossible because a substitution replaces its own tokens.
+At ingest the transition is OBSERVED, not inferred. build_from_store() states
+that limit in its docstring and refuses to emit SUPERSEDE retroactively.
+On JP's real profile: 1,757 operations over 1,115 items (1,102 CREATE,
+483 STRENGTHEN, 147 PROMOTE, 25 QUARANTINE, 0 SUPERSEDE -- honestly zero).
+
+memops_rg.py (committed): ingest MemOps dialogue -> store + live operation
+log -> answer probes from evidence lines PLUS the log. Every other method
+must INFER operations from retrieved text; RG reports them from a record.
+That is the falsifiable claim of this run.
+
+RUNNING: RG method over 25 conversations (adjacent setting) and their own
+session-level RAG baseline (the 0.845 arm) with the SAME local composer, so
+the internal comparison is apples-to-apples. Pilot scale, not a publishable
+row. Both then go through the official judge + post-checks.
