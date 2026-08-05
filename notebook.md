@@ -7514,3 +7514,49 @@ The larger value of Koriat stands where entry 164 put it: as the mechanism
 that explains eight failures and forecasts which future interventions are
 wasted. Its prescriptive yield is one small dominating gate point, not a
 new lever -- and knowing that quickly, for free, is the point.
+
+## Entry 166 — 2026-08-05 (p2: CUE FAMILIARITY (Metcalfe) is a free, PRE-RETRIEVAL answerability signal at AUROC 0.811 -- and it is at chance for correctness. The Koriat/Metcalfe division reproduces exactly: cue familiarity governs the fast don't-know, accessibility governs the answer attempt.)
+
+Second metacognitive construct tested, chosen because it is the theoretical
+counterpart to accessibility and is computable from the QUESTION ALONE,
+before any retrieval runs. Cue familiarity = how well the question's terms
+are represented in the store (coverage, and mean log document-frequency).
+
+  signal                    -> answerable   -> correct (answerable only)
+  coverage                       0.378            0.462
+  mean log-frequency             0.811            0.467
+  (reference: 4B hidden-state probe  0.975            0.723)
+
+THE DIVISION IS EXACTLY THE THEORETICAL ONE. Cue familiarity is a strong
+ANSWERABILITY detector (0.811) and carries NO information about whether an
+answerable question will be answered correctly (0.467, chance). Accessibility
+(entry 164) is the opposite: it drives the attempt. In the human literature
+this is the Metcalfe-vs-Koriat split, and it reproduces here without
+adjustment -- cue familiarity supports the rapid "don't know", accessibility
+supports the commitment.
+
+PRACTICAL FORM -- PRE-RETRIEVAL ABSTENTION, which is a new KIND of lever for
+this project because it saves work rather than reallocating it:
+  cut     skipped   truly unanswerable   correct   halluc
+  none      0.0%          -               51.1%    21.6%
+  p10      10.1%        15/48             48.5%    19.1%
+  p20      19.3%        38/92             47.5%    17.2%
+  p25      25.0%        56/119            46.8%    16.6%
+Skipped questions cost ZERO retrieval and ZERO composition. At p20 we do
+19% less work for -3.6 correct / -4.4 halluc. The precision of the skip is
+mediocre (38 of 92 skipped were genuinely unanswerable), so as an ACCURACY
+lever it is unremarkable -- it sits on the same trade curve as everything
+else. As a COST lever it is the first one we have: every other mechanism in
+this project spends compute to gain accuracy; this one declines to spend it.
+
+WHERE IT BELONGS: the no-model deployment tier. A pure-python RG with no
+sidecar can now refuse the clearly-unanswerable at 0.811 discrimination for
+free, before loading anything. That is the laptop story getting stronger,
+not the benchmark row.
+
+METHOD NOTE: both metacognitive constructs tested so far have transferred
+with their theoretical structure intact -- accessibility predicting
+commitment-not-accuracy, cue familiarity predicting answerability-not-
+accuracy. That is two for two on the theory making correct, falsifiable,
+non-obvious predictions about a system it was not written for, which is
+itself worth reporting.
