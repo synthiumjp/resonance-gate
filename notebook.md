@@ -7471,3 +7471,46 @@ data points into a mechanism with a named cognitive model and a measured
 signature, and it predicts which future interventions will fail --
 anything that increases accessible material without increasing convergence.
 That is a design rule and a paper section, not a feature.
+
+## Entry 165 — 2026-08-05 (p2: Koriat's PRESCRIPTIVE tests -- coherence-maximising retrieval is a wash, adaptive gating gives one dominating point (p5 a=0.05: same correct, -1.2 halluc, on a curve where every other move costs correct). Small, real, free.)
+
+The diagnosis (entry 164) prescribes two interventions. Both tested
+deterministically, no GPU.
+
+1. COHERENCE-MAXIMISING SELECTION (anti-MMR). Everyone maximises relevance
+   plus DIVERSITY; Koriat says this composer is misled by heterogeneous
+   evidence, so maximise mutual agreement instead. Greedy selection,
+   lambda mixing relevance with agreement:
+     baseline        top-5 recall 19.8%  (null 0.8%)  convergence 0.058
+     lambda=0.7      top-5 recall 20.7%  (null 0.8%)  convergence 0.066
+     lambda=0.5      top-5 recall 19.6%  (null 1.4%)  convergence 0.075
+   Convergence is genuinely raisable (+29%) without losing recall, but the
+   recall gain (+0.9pt) is inside the churn band, and the stronger setting
+   inflates the null. VERDICT: not worth judge time on its own. The
+   manipulation is also weak in absolute terms -- 0.058 to 0.075 are both
+   tiny, these lines simply do not overlap much.
+
+2. KORIAT-ADAPTIVE GATING. The dial uses ONE threshold for every question.
+   Accessibility theory says over-confidence peaks when a lot is accessible
+   and it does NOT cohere, so shift the threshold by convergence: gate
+   harder when clues disagree, relax where they converge. Same mean
+   threshold, so this is a pure reallocation.
+     fixed p5              59.2% answered  50.2% correct  15.5% halluc
+     adaptive p5 a=0.05    56.7% answered  50.4% correct  14.3% halluc
+   That point DOMINATES fixed p5: correct is +0.2 (not worse) while
+   hallucination falls 1.2pt. Everywhere else on the curve, cutting
+   hallucination costs correct -- this is the only free move found on the
+   frontier. At deeper gates the effect shrinks and reverses slightly
+   (p30 a=0.05: -0.4 correct for -0.2 halluc), so the gain is specific to
+   shallow gating, where the population of marginal attempts is largest.
+
+HONESTY ON MAGNITUDE: 1.2pt at n=476 is inside the churn band established
+in entry 145, so this is DIRECTIONAL, not established. It costs nothing to
+ship (a convergence term computed from lines we already retrieve, no model),
+and it is theory-predicted rather than fitted -- but it needs the official
+n=1,764 split to be called real, exactly as retrieval v3 did.
+
+The larger value of Koriat stands where entry 164 put it: as the mechanism
+that explains eight failures and forecasts which future interventions are
+wasted. Its prescriptive yield is one small dominating gate point, not a
+new lever -- and knowing that quickly, for free, is the point.
