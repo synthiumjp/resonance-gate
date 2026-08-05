@@ -1,0 +1,43 @@
+{
+  "n": 300,
+  "correct_pct": 50.0,
+  "halluc_pct": 23.333333333333332,
+  "omission_pct": 26.666666666666668,
+  "none_pct": 0.0,
+  "counts": {
+    "Correct": 150,
+    "Omission": 80,
+    "Hallucination": 70
+  },
+  "judge_model": "gemini-3.6-flash",
+  "items_total": 1764,
+  "complete": false,
+  "paired": {
+    "n": 300,
+    "agreement_pct": 79.33333333333333,
+    "mcnemar_correct": {
+      "gained": 0,
+      "lost": 29,
+      "net": -29,
+      "p": 3.725290298461914e-09,
+      "reliable": true
+    },
+    "mcnemar_hallucination": {
+      "gained": 30,
+      "lost": 9,
+      "net": 21,
+      "p": 0.0010650196345523,
+      "reliable": true
+    },
+    "local_pct": {
+      "Correct": 59.666666666666664,
+      "Hallucination": 16.333333333333332,
+      "Omission": 24.0
+    },
+    "frontier_pct": {
+      "Correct": 50.0,
+      "Hallucination": 23.333333333333332,
+      "Omission": 26.666666666666668
+    }
+  }
+}

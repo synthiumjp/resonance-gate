@@ -8013,3 +8013,116 @@ the real rate before committing the budget.
 Omissions flipped) is recovered at +9.7pt Correct, p=9e-14, with foreign ids
 rejected, parse errors excluded from the denominator, and duplicate checkpoint
 lines superseded by the later one. Test artifacts removed from the results dir.
+
+**Addendum (entry 175c) -- live on Kaggle: three bugs, and the real price.**
+Budget confirmed as $100/month capped at $10/day, free credit, so the run is
+affordable but a full pass is close to a whole day.
+
+Authenticated (`kaggle auth login`, then `kaggle b auth` writes MODEL_PROXY_URL
+/ MODEL_PROXY_API_KEY to ~/rg_private/kaggle.env, chmod 600, 1-hour life).
+Credentials never go near the repo.
+
+**Three bugs the live probe caught that the docs would not have.**
+1. `-> str` is not a registered kbench result type; 0.6.1 raises at decoration.
+   Must be `-> dict`. This would have failed the entire notebook run at import.
+2. `kbench.llms` is an empty dict at import -- it holds only already-loaded
+   models. The registry lookup is `kbench.kaggle.load_model(slug)`.
+3. Our own error field truncated the traceback HEAD, keeping stack frames and
+   discarding the exception line, which made the first 184 failures
+   undiagnosable. Now keeps the last meaningful line.
+Reading the SDK source beat reading the docs on every one of these.
+
+**Model availability is a real constraint.** There is NO GPT-4o on Kaggle; the
+OpenAI models are GPT-5.4/5.5/5.6. So the exact published condition cannot be
+reproduced, and the honest claim becomes "a strong independent judge", not
+"MOSAIC's judge". At probe time only gemini-3.6-flash was live: gemini-2.5-flash,
+gpt-5.4, gpt-5.4-mini, claude-haiku-4-5 and gpt-oss-120b all returned 503/429
+under load. Availability fluctuates, so the runner must tolerate it.
+
+**A Claude judge is deliberately avoided.** The pipeline was built with Claude
+in the loop; a Claude-judged headline invites exactly the selection question the
+measurement exists to remove. JP's call: use the GPT family.
+
+**Price discipline: smoke estimates run light.** A 3-item smoke on
+gemini-3.6-flash read $0.00399/item and projected $7.04 for the full set. The
+real 300-item stage came in at $0.00549/item -- ~$9.7 for 1,764, about 30%
+higher, because retries and longer prompts are not represented in a 3-item head
+slice. Budget from a stage, never from a smoke.
+
+**Stage 1 partial: 116/300 judged, ~$0.65 spent.** The other 184 failed to rate
+limiting at n_jobs=8; retry queued at n_jobs=4. The 116-item tally is NOT
+reported as a result: dropout was not random, so the subset cannot stand in for
+the full set. The paired contrast against the local judge on those same 116
+items would still be valid -- pairing controls for which items landed -- but
+publishing a partial number we would then have to restate is exactly the failure
+mode entries 148 and 153 were about.
+
+Verdict files are named per model, so switching judges cannot silently mix two
+judges' labels into one result set.
+
+## Entry 176 — 2026-08-06 (p2: THE JUDGE HYPOTHESIS IS DEAD, AND BACKWARDS. A frontier judge scores us ~10pt WORSE, not better. Our local judge was the lenient one.)
+
+**Pre-registered in entry 175**, so this cannot be rationalised after the fact:
+"if the frontier judge moves us materially toward 73/10, a large part of the gap
+is scorer strictness; if it moves us barely, the gap is real." It did neither.
+It moved us backwards.
+
+**Stage 1: 300 items, stratified by question type, gemini-3.6-flash, $0.94.**
+Paired against the local qwen3:14b verdicts on the SAME items.
+
+                     local    frontier   delta
+    Correct         59.67%     50.00%    -9.67
+    Hallucination   16.33%     23.33%    +7.00
+    Omission        24.00%     26.67%    +2.67
+    item agreement  79.3%
+    McNemar Correct        net -29, p=3.73e-09  SIGNIFICANT
+    McNemar Hallucination  net +21, p=0.00107   SIGNIFICANT
+
+Dominant flows: Omission -> Hallucination (24), Correct -> Omission (23),
+Hallucination -> Omission (9), Correct -> Hallucination (6).
+
+**What died.** The idea that our numbers were depressed by a strict local judge.
+Entry 105 called our judge "stricter and noisier"; on the strictness half that
+was simply wrong. Our published 57.6/18.0 is FLATTERING to us, not conservative.
+
+**What did NOT die, and matters more.** This is not "MOSAIC is even further
+ahead". MOSAIC's 73.1 was GPT-4o-judged, and we have just measured that swapping
+the judge moves the headline ~10pt. Theirs would move too. The finding is:
+ON THIS BENCHMARK THE JUDGE IS WORTH +/-10 POINTS, WHICH EXCEEDS THE DIFFERENCES
+BETWEEN THE SYSTEMS BEING COMPARED. Cross-paper leaderboard rows with different
+judges are not comparable in either direction -- including the row that made us
+look bad. That is a real result about the benchmark, not an excuse.
+
+**Per-type, and this is the product signal.** Under the harsher judge:
+  Memory Boundary               68 /  3 /  0   (n=71)  abstention holds up
+  Memory Conflict               35 /  3 / 27   (n=65)
+  Basic Fact Recall             34 / 19 / 13   (n=66)
+  Generalization & Application   6 / 30 / 27   (n=63)  collapses
+  Multi-hop Inference            3 /  7 /  7   (n=17)
+  Dynamic Update                 4 /  8 /  6   (n=18)
+Memory Boundary surviving a stricter judge means the abstention discipline is
+genuine and not an artifact of a lenient scorer -- that is the one thing we have
+consistently claimed, and it is the one thing that held. Generalization is a
+specific, addressable failure, not a diffuse deficit.
+
+**Caveat, stated plainly.** Neither judge is validated ground truth. Harsher is
+not automatically more correct. We have established judge VARIANCE, not judge
+CORRECTNESS. Establishing correctness needs human-labelled adjudication of the
+~20% disagreements, which we do not have.
+
+**Operational findings.**
+- Kaggle model availability is severe: 4 of 21 models reachable, and EVERY GPT
+  (5.4/5.5/5.6/oss) returned 503 -- a provider outage, not load. JP's preferred
+  GPT judge is queued for when it returns; at $100/mo we can afford both, and
+  two independent frontier judges is stronger than one.
+- The 184 stage-1 failures were pure rate limiting: n_jobs=8 failed 184/300,
+  n_jobs=3 completed 184/184. Concurrency, not model or prompt.
+- Real rate $0.00511/item -> ~$9.0 for the full 1,764. Stage 1 cost $0.94 and
+  the signal is already at p=3.7e-09, so the full run would refine precision,
+  not change the conclusion.
+
+**Next.** The full 1,764 for a headline number is optional now. The higher-value
+follow-ups are (a) the same 300 under a GPT judge when available, to separate
+"frontier judges are harsher" from "gemini specifically is harsher", and
+(b) Generalization & Application, which is where the harsher judge says our
+answers are actually fabricating.

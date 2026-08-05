@@ -14,8 +14,14 @@ stages rather than all at once:
   * --budget stops the loop BEFORE the cap, checked between chunks
   * re-running skips checkpointed items, so stage 2 only pays for the remainder
 
-Measured rate on gemini-3.6-flash: $0.00399/item, so ~$1.20 for 300 items and
-~$7.04 for all 1,764.
+Measured rates (live, not estimated). A 3-item smoke on gemini-3.6-flash read
+$0.00399/item; the real 300-item stage came in at $0.00549/item once retries
+and longer prompts were included, i.e. ~$9.7 for all 1,764 -- essentially a
+whole day's credit. Smoke estimates run ~30% light, so budget from a stage,
+not from a smoke.
+
+Verdict files are named per model, so switching judges cannot silently mix two
+judges' labels into one result set.
 
   set -a; . ~/rg_private/kaggle.env; LLM_DEFAULT=gemini-3.6-flash; set +a
   python kbench_judge_run.py --items <exported.jsonl> --n 300 --budget 1.50
@@ -28,6 +34,16 @@ import sys
 from collections import Counter, defaultdict
 
 JSON_RX = re.compile(r"```json\s*(\{.*?\})\s*```", re.DOTALL)
+
+
+def err_summary(text, limit=240):
+    """Last meaningful line of a traceback.
+
+    kbench hands back the whole formatted traceback; truncating its HEAD keeps
+    only stack frames and hides the exception itself, which made the first
+    stage-1 failures undiagnosable."""
+    lines = [l.strip() for l in str(text or "").splitlines() if l.strip()]
+    return (lines[-1] if lines else "no result")[:limit]
 
 
 def read_jsonl(path):
@@ -135,8 +151,9 @@ def main():
                         rec.update(payload)
                         n_new += 1
                     else:
-                        rec["error"] = str(getattr(run, "error_message", "") or
-                                           payload.get("verdict") or "no result")[:300]
+                        rec["error"] = err_summary(
+                            getattr(run, "error_message", "")
+                            or payload.get("verdict") or "no result")
                         if payload.get("raw"):
                             rec["raw"] = payload["raw"][:1000]
                     f.write(json.dumps(rec) + "\n")
