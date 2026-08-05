@@ -8224,3 +8224,67 @@ ever being registered as one. Nothing in the ledger recorded which reasoning
 mode a result came from, so 14 negative results inherited an unstated condition.
 Every future config flag that touches the model's computation gets recorded
 beside the result, not just in the launcher.
+
+## Entry 178 — 2026-08-06 (p2: AUDIT part 2 — the cross-encoder never FILTERS. One `k` does double duty, so we hand the composer a median of 77 facts and up to 120. Plus: proposition rendering was never applied to the QA path at all.)
+
+Continuing JP's "have we mis-implemented something". Two more, both on the QA
+path, both untested, both with strong prior evidence.
+
+**DEFECT 4: retrieve_v3's `k` does double duty, defeating the reranker.**
+    line 58: def retrieve_facts_v3(index, question, k=120, dense_k=20)
+    line 82: cand = [j for _, j in scored[:k]] + dense_top      # candidate POOL
+    line 87: return [index.facts[cand[i]] for i in argsort(-ces)[:k]]  # FINAL cut
+The same k=120 sets the BM25 candidate pool AND the post-rerank cutoff. So the
+cross-encoder -- the expensive precision component, the whole reason retrieval
+v3 exists -- only REORDERS the candidates and never removes any. Measured on
+round 5: median 77 facts per question, and 32.5% of questions hit the 120 cap
+(p75=p90=p99=120). For a third of questions the composer sifts 120 memory lines.
+
+**The ranking is good; the cutoff is missing.** Where a supporting fact is
+present in context, the reranker puts it at p50 rank 1, p75 rank 3, p90 rank 9.
+Truncation coverage: top_n=10 retains 91.7%, top_n=15 94.4%, top_n=25 95.4%.
+So ~95% of supporting evidence survives a top_n=20 cut that deletes 55-100
+distractor lines per question. This is a one-line fix (separate pool size from
+top_n) with a large expected effect on BOTH failure modes -- fewer wrong lines
+to grab (hallucination) and less haystack (omission).
+
+Honest caveat: the supporting fact was LOCATED for only 108/1344 answerable
+questions (8.0%) at >=0.5 token overlap, so the rank distribution above is
+measured on a lexically-friendly subset. The direction is solid; the exact
+percentages are not. Do not quote 94.4% as a recall guarantee.
+
+**Why the 8% is low is itself the next defect.**
+
+**DEFECT 5: proposition rendering was never applied to the QA context.**
+Entry 163 scoped it deliberately -- extraction artifact only, "QA path provably
+untouched so round 5 stays reproducible". That was correct discipline at the
+time and has now outlived its purpose. The consequence: our QA context still
+emits lowercase atoms
+    [unconfirmed(once), Sep 04, 2025] name: martin mark
+while the gold memory points, MOSAIC's nodes, mem0's statements and Zep's facts
+are all natural-language propositions ("Martin Mark's birth date is
+1996-08-02"). Rendering moved memory-integrity +25% relative and extraction F1
++21% (entries 173/174) on exactly this mismatch. The QA path -- the path that
+produces the number we compare against MOSAIC -- never got it. The low 8% match
+rate above is partly this same form mismatch showing up in a second measurement.
+
+**Ruled OUT this pass (recorded so it is not re-litigated):** the corroboration
+tier is NOT suppressing answers. 78.2% of evidence lines are 'unconfirmed(once)'
+and CAL rule 1 tells the composer to prefer confirmed, so the worry was that we
+stamp "do not trust" on most of our own evidence. But only 3.3% of contexts are
+100% unconfirmed, and those skew CORRECT (4.6% of Corrects vs 1.3% of
+Omissions). Hypothesis dead.
+
+**Where this leaves the MOSAIC comparison.** Four independent defects now sit
+between our measured number and our actual capability: reasoning disabled on the
+composer (177), reasoning disabled on the judge (177), no rerank cutoff (178),
+and atoms-not-propositions in QA (178). None was known when round 5 was frozen.
+Two are one-line changes. It is premature to conclude the memory layer is behind.
+
+**Test plan, in cost order (all need the GPU, currently held by the 177 judge
+test):**
+  1. top_n=20 cutoff -- one-line change, dev A/B, paired McNemar
+  2. propositions in QA context -- reuse propositions.render, dev A/B
+  3. reasoning ON for the composer -- expensive, but re-opens entry 135's ledger
+Each gets a shuffled-gold null where a containment metric is involved, per the
+standing rule from entries 151-153.
