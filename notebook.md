@@ -7833,3 +7833,39 @@ That is now a strong, twice-tested claim and it should stop me reaching for
 probe improvements. If the dial is to improve, the intervention has to be
 one that changes the marginal population itself -- different evidence, or a
 different composer decision -- not a better reading of the same states.
+
+## Entry 173 — 2026-08-06 (p2: PROPOSITION RENDERING CONFIRMED BY THE JUDGE. Memory-integrity mean score 0.635 -> 0.792 (+25% relative) on 1,275 paired records. Same facts, same store, byte-identical QA -- pure rendering.)
+
+Stage-2 rerun on the proposition-rendered extraction artifact, 2 of 3 users
+checkpointed, paired on identical memory points:
+
+INTEGRITY (the extraction-recall metric):
+  user 2f1f897e  atom  score0 44.9% / score1 37.0% / score2 18.1%
+                 prop  score0 34.6% / score1 47.2% / score2 18.3%
+  user 8ece194a  atom  score0 56.3% / score1 32.7% / score2 11.0%
+                 prop  score0 39.7% / score1 45.5% / score2 14.9%
+  POOLED mean    0.635 -> 0.792   (+0.158, +25% relative, n=1,275)
+ACCURACY:
+  POOLED mean    0.552 -> 0.567   (+0.015, n=2,611)
+
+The failure bucket (score 0) drops 10-17 points per user; the gain lands
+almost entirely in score 1. So the judge was failing to credit facts we
+genuinely held, purely because we handed it slot notation where every
+comparable system and the gold itself use prose.
+
+WHAT MAKES THIS CLEAN: the QA artifacts were verified byte-identical before
+the run (entry 163), so the QA row of 55.0/18.7 is untouched and cannot have
+moved. Nothing was extracted differently, no model changed, no retrieval
+changed. This is a rendering boundary and nothing else.
+
+AND THE PROXY PREDICTED IT. The deterministic containment measure said
+14.8% -> 45.7% with a shuffled-gold null of 4.6% -> 16.9% (entry 162). The
+judge says +25% relative on integrity. Direction confirmed, magnitude
+smaller than the raw proxy -- which is the expected relationship, since the
+judge scores semantically and was already crediting some slot-notation
+facts that token containment could not see.
+
+STATUS: third user still judging (~1h). The headline extraction F1 (0.282
+in round 5) comes from the harness's own combination of these two metrics
+and will be read from the final stat file rather than estimated here.
+This is the first substantial confirmed win since retrieval v3.
