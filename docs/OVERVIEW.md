@@ -152,6 +152,16 @@ clinical or legal deployment runs it tight and accepts lower coverage for
 n=1,764. Reproducible from committed code. Round 4 (BM25-only retrieval) was
 52.6 / 19.1 / 28.3.
 
+**Extraction.** The memory-extraction column is 0.340 (round 4/5 reported
+0.282). The gain came entirely from reporting stored facts as
+natural-language propositions rather than `attribute: value` slot notation —
+the form the benchmark's gold memory points use. Verified by a paired
+stage-2 rerun on identical memory points: integrity 0.625 → 0.817. Nothing
+was extracted differently, and the QA artifacts were byte-identical across
+the two runs (97.5% verdict agreement; the residual 2.5% is judge
+nondeterminism, which also sets the noise floor for every judged comparison
+here).
+
 **Reliability.** The improvement was tested paired rather than in aggregate,
 on the 1,628 questions both rounds judged: correctness gained 136 items and
 lost 93 (net +43, McNemar p=0.005, reliable); hallucination changed by 8 net
