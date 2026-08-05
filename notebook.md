@@ -7560,3 +7560,55 @@ commitment-not-accuracy, cue familiarity predicting answerability-not-
 accuracy. That is two for two on the theory making correct, falsifiable,
 non-obvious predictions about a system it was not written for, which is
 itself worth reporting.
+
+## Entry 167 — 2026-08-05 (p2: DELAYED-JOL TRANSFERS AND IT IS RELIABLE. Probing AFTER the draft answer beats probing before: answerable-only AUROC 0.686 -> 0.757, +7.1pt, bootstrap p=0.002. Third metacognitive construct to transfer with its structure intact.)
+
+Nelson & Dunlosky's delayed-JOL effect is one of the largest resolution
+improvements in metamemory (gamma ~.3-.5 immediate vs ~.9 delayed). The
+monitoring-dual-memories account: an immediate judgment is contaminated by
+transient surface activation; a delayed one must read the durable trace.
+Our probe reads hidden states of the reader given (evidence + question),
+BEFORE any answer exists -- the immediate condition. The delayed analogue is
+to probe AFTER the draft answer, so the state reflects what was actually
+integrated.
+
+Same 476 rows, same labels, same classifier, same layer, 5-fold CV both arms:
+                       all rows      answerable only
+  PRE-generation        0.810            0.686
+  POST-draft (delayed)  0.848            0.757
+  paired bootstrap      +0.037           +0.071
+                     CI [+.009,+.065]  CI [+.025,+.116]
+                        p=0.003          p=0.002
+Both reliable. The answerable-only figure is the one that matters -- that is
+where a gate has to work, and where entry 144 showed our headline was
+inflated by answerability detection.
+
+CONFOUND CHECKED before believing it: does the post-draft probe merely read
+"the draft said Unknown"? AUROC vs that indicator is 0.672, not ~1.0, so it
+is reading something beyond the abstention decision. (Stated because three
+of this project's four caught artifacts were exactly this class of
+shortcut.)
+
+ARCHITECTURAL COST: none that we were not already paying. The dial has
+always been a post-hoc output filter, so moving the probe read to after
+composition changes nothing about when it runs -- it changes only WHAT
+STATE it reads, at the same point in the pipeline.
+
+SCORE ON THE THEORY: three constructs tested, three transferred with their
+predicted structure --
+  accessibility (Koriat): drives commitment, anti-predicts correctness
+  cue familiarity (Metcalfe): predicts answerability, chance on correctness
+  delayed JOL (Nelson & Dunlosky): post-integration judgment resolves better
+None of these were fitted; each made a directional prediction before the
+measurement. The metacognition literature is behaving like a source of
+hypotheses about this system, which is not something the ML literature has
+done for us at anything like this hit rate.
+
+NEXT from the same source, ranked: (1) rebuild the trust dial on the
+post-draft probe and re-derive the frontier -- the dial's ceiling was signal
+quality and this is +7pt of it; (2) cost-weighted thresholds instead of a
+fixed percentile; (3) grounding-verification before attaching a receipt
+(source-monitoring predicts a confidently-dated WRONG source is worse than
+none, because it manufactures credibility); (4) semantic-entropy consistency
+across sampled answers -- distinct from entry 135's self-consistency, which
+used sampling to PICK an answer rather than to MEASURE confidence.
