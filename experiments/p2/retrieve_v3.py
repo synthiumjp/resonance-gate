@@ -8,6 +8,7 @@ Focus weighting (entry 133): persona-name and date tokens in the QUERY are
 scaffolding, weighted 0.25 (entry 96's lesson applied to the BM25 path).
 """
 import math
+import os
 import re
 
 from wire import _tokens, _QUERY_SYNONYMS
@@ -55,8 +56,23 @@ class IndexV3:
                 self.persona |= _tokens(d["value"])
 
 
-def retrieve_facts_v3(index, question, k=120, dense_k=20):
+def retrieve_facts_v3(index, question, k=120, dense_k=20, top_n=None):
+    """Retrieve evidence for one question.
+
+    `k` is the BM25 CANDIDATE POOL, `top_n` is how many survive the
+    cross-encoder. They were the same variable until entry 178, which meant the
+    reranker reordered the pool and never removed anything -- median 77 facts
+    reached the composer and 32.5% of questions hit the full 120. Measured on
+    round 5, a supporting fact that is present ranks p50=1 / p75=3 / p90=9, so
+    a small top_n keeps ~95% of it and drops 55-100 distractor lines.
+
+    top_n=None preserves the round-5 behaviour exactly, so that run stays
+    reproducible; RG_TOP_N switches the fix on for A/B.
+    """
     import numpy as np
+    if top_n is None:
+        env = os.environ.get("RG_TOP_N", "").strip()
+        top_n = int(env) if env.isdigit() and int(env) > 0 else k
     bi, ce = _models()
     raw = _tokens(question)
     allt = raw | {w for t in raw if t in _QUERY_SYNONYMS
@@ -84,7 +100,7 @@ def retrieve_facts_v3(index, question, k=120, dense_k=20):
         return []
     ces = ce.predict([(question, index.texts[j]) for j in cand],
                      show_progress_bar=False)
-    return [index.facts[cand[i]] for i in np.argsort(-ces)[:k]]
+    return [index.facts[cand[i]] for i in np.argsort(-ces)[:top_n]]
 
 
 # As-of rule (entry 134): appended for date-anchored questions only.
