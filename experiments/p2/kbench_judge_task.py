@@ -89,26 +89,31 @@ if done and not os.path.exists(CKPT):
         for r in done.values():
             f.write(json.dumps(r) + "\n")
 
-llm = kbench.llms[MODEL] if MODEL else kbench.llm
+# kbench.llms only holds already-loaded models (it is empty at import); the
+# registry lookup is kaggle.load_model(slug). Verified against 0.6.1.
+llm = kbench.kaggle.load_model(MODEL) if MODEL else kbench.llm
 print(f"judge model: {MODEL or '(default)'}   budget ${BUDGET_USD:.2f}")
 
 
 # %%
 @kbench.task(name="halumem-qa-judge")
-def halumem_qa_judge(llm, item_id: str, judge_prompt: str) -> str:
-    """One official QA judge call. Returns JSON text so the raw reply survives
-    into the checkpoint -- a verdict alone could not be re-audited later."""
+def halumem_qa_judge(llm, item_id: str, judge_prompt: str) -> dict:
+    """One official QA judge call.
+
+    Returns a dict, not a str: `str` is not a registered kbench result type
+    (0.6.1 raises at decoration time). The reasoning is carried through so a
+    verdict can be re-audited later -- a bare label could not be."""
     out = llm.prompt(judge_prompt)
     m = JSON_RX.search(out or "")
     if not m:
-        return json.dumps({"verdict": "ParseError", "raw": (out or "")[:4000]})
+        return {"verdict": "ParseError", "raw": (out or "")[:4000]}
     try:
         parsed = json.loads(m.group(1))
     except Exception as e:
-        return json.dumps({"verdict": "ParseError",
-                           "raw": (out or "")[:4000], "err": str(e)[:200]})
-    return json.dumps({"verdict": parsed.get("evaluation_result") or "None",
-                       "reasoning": str(parsed.get("reasoning", ""))[:1500]})
+        return {"verdict": "ParseError",
+                "raw": (out or "")[:4000], "err": str(e)[:200]}
+    return {"verdict": parsed.get("evaluation_result") or "None",
+            "reasoning": str(parsed.get("reasoning", ""))[:1500]}
 
 
 # %%
@@ -135,18 +140,20 @@ try:
                     continue
                 rec = {"item_id": iid, "model": MODEL or "default"}
                 res = getattr(run, "result", None)
-                try:
-                    payload = json.loads(res) if isinstance(res, str) else {}
-                except Exception:
-                    payload = {}
-                if payload.get("verdict"):
+                payload = res if isinstance(res, dict) else {}
+                if payload.get("verdict") and payload["verdict"] != "ParseError":
                     rec.update(payload)
                 else:
-                    # An errored run is recorded WITHOUT a verdict so the resume
-                    # logic retries it, instead of freezing a failure as a real
-                    # judgement (which would read as judge refusal).
+                    # An errored or unparseable run is recorded WITHOUT a
+                    # verdict, so the resume logic retries it rather than
+                    # freezing a failure as a real judgement (which would read
+                    # as judge refusal and depress the scores). The raw reply is
+                    # kept so a systematic formatting failure is diagnosable
+                    # instead of just looking like flakiness.
                     rec["error"] = str(getattr(run, "error_message", "") or
-                                       "no result")[:300]
+                                       payload.get("verdict") or "no result")[:300]
+                    if payload.get("raw"):
+                        rec["raw"] = payload["raw"][:1000]
                 f.write(json.dumps(rec) + "\n")
                 if rec.get("verdict"):
                     n_new += 1
