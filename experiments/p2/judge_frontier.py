@@ -125,6 +125,69 @@ def compare_paired(rows, local):
     return stat
 
 
+def import_verdicts(results, path, limit=0):
+    """Ingest verdicts judged elsewhere (Kaggle Benchmarks) and compare.
+
+    Kept in this module so a Kaggle-routed run and a direct-API run land in
+    exactly the same paired report -- the routing is an implementation detail,
+    the measurement is not."""
+    items = load_items(results)
+    if limit:
+        items = items[:limit]
+    by_id = {it["id"]: it for it in items}
+
+    recs = []
+    if path.endswith(".csv"):
+        import csv
+        with open(path, newline="") as f:
+            recs = list(csv.DictReader(f))
+    else:
+        for line in open(path):
+            try:
+                recs.append(json.loads(line))
+            except Exception:
+                pass
+
+    rows, unknown, novote = [], 0, 0
+    seen = set()
+    for r in recs:
+        iid = r.get("item_id") or r.get("id")
+        v = r.get("verdict")
+        if iid not in by_id:
+            unknown += 1
+            continue
+        if not v or v in ("ParseError", "None", "nan", ""):
+            novote += 1
+            continue
+        if iid in seen:            # later checkpoint lines supersede earlier
+            rows = [x for x in rows if x["id"] != iid]
+        seen.add(iid)
+        row = dict(by_id[iid])
+        row["verdict"] = v
+        row["judge_model"] = r.get("model", "?")
+        rows.append(row)
+
+    print(f"imported     : {len(rows)} verdicts from {path}")
+    if unknown:
+        print(f"  ! {unknown} rows had ids not in this results set (wrong export?)")
+    if novote:
+        print(f"  ! {novote} rows had no usable verdict (parse errors/retries pending)")
+    if not rows:
+        sys.exit("no usable verdicts imported")
+    model = rows[0].get("judge_model", "?")
+    stat = report(rows, f"FRONTIER JUDGE ({model})")
+    stat["judge_model"] = model
+    stat["items_total"] = len(items)
+    stat["complete"] = len(rows) >= len(items)
+    stat["paired"] = compare_paired(rows, load_local_verdicts(results, items))
+    sp = os.path.join(results, "frontier_judge_summary.json")
+    json.dump(stat, open(sp, "w"), indent=2)
+    print(f"\nwrote {sp}")
+    if not stat["complete"]:
+        print(f"PARTIAL: {len(rows)}/{len(items)} judged -- "
+              f"percentages are on the judged subset only.")
+
+
 def load_done(out_path):
     done = {}
     if os.path.exists(out_path):
@@ -180,7 +243,15 @@ def main():
                     help="stop after this many NEW calls (free daily cap headroom)")
     ap.add_argument("--limit", type=int, default=0,
                     help="only consider the first N items (smoke runs)")
+    ap.add_argument("--import-verdicts", default=None,
+                    help="ingest verdicts produced elsewhere (Kaggle "
+                         "Benchmarks .jsonl/.csv) and compare; makes no API calls")
     args = ap.parse_args()
+
+    if args.import_verdicts:
+        return import_verdicts(os.path.expanduser(args.results),
+                               os.path.expanduser(args.import_verdicts),
+                               args.limit)
 
     # These are qwen3-specific reroutes; leaving either on would silently send
     # a frontier judge down the ollama native path or prefix a nonsense token.

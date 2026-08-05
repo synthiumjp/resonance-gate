@@ -7970,3 +7970,46 @@ afterwards: if the frontier judge moves us materially toward 73/10, a large part
 of the "MOSAIC dominates" gap is scorer strictness, not memory quality. If it
 moves us barely, the gap is real and the evidence layer is genuinely behind.
 Either result is worth having; the second is the one we should expect to survive.
+
+**Addendum (entry 175b) -- routed through Kaggle Benchmarks instead.** JP already
+runs frontier models there (the Metacognitive Profile Atlas: 33 models, 198
+model-domain cells), so model access is already paid for -- ~$10/day of credit.
+This supersedes the "Kaggle is only GPU hours" reading above: Community
+Benchmarks is a *model-access* product, not a compute one, and it is the right
+route. The `.venv` at ~/rg_private/kaggle_venv has kbench 0.6.1; WSL is not
+authenticated (JP's credentials live elsewhere).
+
+Verified against the installed SDK rather than the docs: `llm.prompt()` defaults
+to temperature=0/seed=0 (deterministic), `evaluate(evaluation_data=df, n_jobs=,
+on_failure='continue')` runs a DataFrame, `Runs.as_dataframe()` returns
+item-level rows, and `run.chat.usage.total_cost_nanodollars` gives exact spend.
+That last one is what makes a hard budget possible.
+
+**Three pieces, split so the judge cannot drift.** Prompts are rendered LOCALLY
+from the official template (`kbench_judge_export.py`, 1,764 items, 2.0M input +
+0.21M output tokens, digest f37ce8d7); Kaggle only sends an opaque string and
+parses with upstream's own fenced-JSON regex; verdicts come home through
+`judge_frontier.py --import-verdicts` into the same paired report as the
+direct-API route. The local verdict and the retrieved context are deliberately
+NOT uploaded -- the first would leak the answer being re-measured, the second is
+not part of the official QA judge prompt.
+
+**Checkpointing, because $10/day can die mid-run.** Verdicts append per chunk
+with fsync; resume skips checkpointed ids and reads prior runs attached as input
+datasets, so a pass can cross days; spend is read after each chunk and the loop
+stops BEFORE the cap rather than discovering it by failing; errored runs are
+recorded WITHOUT a verdict so they retry instead of freezing as judge refusals;
+and nothing re-raises, because a crashed Kaggle notebook can lose /kaggle/working
+and throw away verdicts already paid for.
+
+**Cost math.** At ~2.2M tokens: Gemini-2.5-flash-class ~$1, GPT-4o-class ~$7,
+Opus-class ~$30. So the exact published condition (GPT-4o judge) fits inside a
+single day's credit, and a cheap flash run is available as a sanity check. The
+task prints projected-to-finish after every chunk, so a 25-item smoke settles
+the real rate before committing the budget.
+
+**Validated offline both ways.** Direct route: synthesised verdicts reproduce
+100% agreement, McNemar p=1. Import route: a simulated lenient judge (40% of
+Omissions flipped) is recovered at +9.7pt Correct, p=9e-14, with foreign ids
+rejected, parse errors excluded from the denominator, and duplicate checkpoint
+lines superseded by the later one. Test artifacts removed from the results dir.
