@@ -7692,3 +7692,59 @@ throughout -- if judged accuracy merely holds, this ships on footprint alone.
 Queued behind the F1 rerun: judged screen at th=0.25 and th=0.34, full eval,
 bar = accuracy not worse (this is primarily an efficiency claim) with
 hallucination as the upside to watch.
+
+## Entry 170 — 2026-08-05 (p2: hallucination-literature sweep + SURE-RAG sufficiency features tested = NULL (AUROC 0.45-0.53, chance). But the sweep's most valuable content is a warning that recalibrates every published number we have been comparing against.)
+
+JP asked whether the hallucination literature had anything. Swept it; two
+things came back that matter more than any single method.
+
+1. THE BENCHMARK WARNING, which changes how we read the whole field:
+   PARALLAX (arXiv:2605.17028, May 2026) audited 22 detectors across 6
+   corpora and found 4 of 6 LEAK THE ANSWER INTO THE PROMPT -- a pure
+   text-similarity baseline with no internal signal scores 0.98 AUROC on
+   HaluEval. Under a corrected protocol most published methods collapse to
+   0.49-0.62. Separately, Trivia++ (2605.11330): supervised detectors score
+   99.6% F1 on synthetic hallucinations but 66-69% on ORGANIC ones, and a
+   plain LLM judge beats most specialised detectors on organic data.
+   CONSEQUENCE FOR US: our 0.757 is measured on organic, judge-labelled
+   data. It is NOT the same quantity as the 0.85-0.99 figures in these
+   papers, and we should stop treating those as a bar we are under. Our
+   number is closer to the honest end of the field than it looked.
+   PARALLAX also reports that STACKING signal families did not beat the
+   best single component -- "signal quality, not combination, is the
+   bottleneck" -- which is a direct warning against the fusion instinct.
+
+2. SURE-RAG (arXiv:2605.03534, Jul 2026) was the one method purpose-built
+   for OUR dominant error class: sufficiency as a SET-level property
+   (a passage can mention the right entities yet fail to justify the
+   answer). Implemented its core: NLI-score the draft answer against each
+   of the top-10 evidence lines, aggregate into support/coverage/
+   contradiction features. On answered+answerable rows (n=301, where a gate
+   must work):
+     max entailment    0.490
+     mean entailment   0.488
+     n supporting      0.447
+     max contradiction 0.532
+   ALL AT CHANCE. NULL RESULT.
+   Honest caveats: our NLI is deberta-v3-XSMALL (22M) where SURE-RAG uses
+   BASE, and their aggregation is a trained logistic layer over richer
+   feature blocks rather than raw maxima. So this refutes the cheap version,
+   not the paper. But the cheap version is what was worth an hour, and the
+   entailment signal is not sitting there for free.
+
+WHAT THE SWEEP SAYS TO DO INSTEAD, ranked, none of it fusion:
+  - widen the probe's INPUT (more layers, more token positions) rather than
+    adding signal families -- multiple 2026 papers converge on this, and
+    arXiv:2604.06277 measured +11.4pt AUROC from probe capacity over a
+    richer hidden-state tensor while arXiv:2606.02628 found capacity over
+    the SAME narrow input buys nothing.
+  - first-block attention entropy: free, from a pass we already run,
+    reported complementary rather than redundant.
+  - GASP-style perturbation (drop the cited evidence line, see whether the
+    answer's likelihood collapses) -- the one test that mechanically
+    separates "grounded" from "asserted on thin support".
+DEFERRED with reasons: sampling/semantic-entropy features (PARALLAX shows
+the reported gains are largely artifact; a 0.541 cap reported where a good
+probe exists); ReDeEP/Lumina (they detect parametric override, which is NOT
+our failure mode -- flagged explicitly by the scout so we do not port them
+expecting a fit).
