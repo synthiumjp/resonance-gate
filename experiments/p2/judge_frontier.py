@@ -243,6 +243,9 @@ def main():
                     help="stop after this many NEW calls (free daily cap headroom)")
     ap.add_argument("--limit", type=int, default=0,
                     help="only consider the first N items (smoke runs)")
+    ap.add_argument("--only-ids-from", default=None,
+                    help="restrict to the item_ids present in this verdict "
+                         "file, so two judges are compared on the same items")
     ap.add_argument("--import-verdicts", default=None,
                     help="ingest verdicts produced elsewhere (Kaggle "
                          "Benchmarks .jsonl/.csv) and compare; makes no API calls")
@@ -273,6 +276,17 @@ def main():
     results = os.path.expanduser(args.results)
     out_path = args.out or os.path.join(results, "frontier_judge.jsonl")
     items = load_items(results)
+    if args.only_ids_from:
+        keep = set()
+        for line in open(os.path.expanduser(args.only_ids_from)):
+            try:
+                r = json.loads(line)
+            except Exception:
+                continue
+            if r.get("verdict"):
+                keep.add(r.get("item_id"))
+        items = [it for it in items if it["id"] in keep]
+        print(f"restricted to {len(items)} items from {args.only_ids_from}")
     if args.limit:
         items = items[:args.limit]
     done = load_done(out_path)

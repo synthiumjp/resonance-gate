@@ -8157,3 +8157,70 @@ the same defect proposition rendering (entries 173/174) was attacking from the
 storage side. It is also invisible to our own judge, which is why it survived
 this long -- 8 assertion-guidance interventions never targeted it because our
 scorer never flagged it.
+
+## Entry 177 — 2026-08-06 (p2: AUDIT — YES, WE MIS-IMPLEMENTED SOMETHING. Composer AND judge have run with qwen3's reasoning DISABLED for the entire project. A speed hack from the CPU era silently became a scientific confound.)
+
+JP asked whether we have mis-implemented something. We have, and it is
+systemic rather than local.
+
+**The finding.** run_official_round5.sh exports `RG_PREFIX_NO_THINK=1` on BOTH
+stages -- line 31 (composer, eval_rgp2.py) and line 37 (judge, evaluation.py).
+llms.py turns that into a literal '/no_think ' prefix on every prompt, which
+suppresses qwen3's reasoning pass. eval_rgp2.py:57/93 confirms the composer
+goes through the same llm_request. So every official number we have -- and
+every mechanism we ever ruled out -- was produced by a composer AND scored by a
+judge with reasoning switched off.
+
+**The justification is stale.** The .env comment says it plainly: "CPU-only
+local inference made judge calls take 3-5min+ each". That was true then. We have
+been on GPU since (llama_cpp.server --n_gpu_layers -1, pid 3490). The reason to
+disable reasoning expired and the flag stayed.
+
+**Why it matters for the judge.** The official QA rubric is multi-step --
+compare against key memory points, then against the reference answer, then
+classify under priority rules -- and the prompt explicitly asks for a
+"traceable evaluation rationale". Running that with reasoning off produces
+shallow surface matching, which is exactly the LENIENCE entry 176 measured. So
+entry 176's "frontier judge is harsher" may be substantially "a reasoning judge
+is harsher than a non-reasoning judge" -- a mode difference, not a model-family
+difference. Test running: same 300 items, same official prompt, same qwen3:14b,
+reasoning ON, on the 62 disagreements plus a 20-item agreement control.
+
+**Why it matters far more for the composer.** Entry 135 froze a ledger of
+NULL/NEGATIVE mechanisms: six assertiveness instructions, recite, two-pass,
+retry, style, currency, premise, self-consistency, bigger composers (2
+families), bigger extractor. EVERY ONE was measured with reasoning suppressed.
+Several are reasoning-dependent by construction:
+- SELF-CONSISTENCY (entry 135) works by sampling DIVERSE REASONING CHAINS. With
+  /no_think there are no chains to diversify. "Only 16 consensus flips,
+  composer near-deterministic on this evidence" is not a finding about the
+  evidence -- it is the mechanical consequence of testing self-consistency in
+  the one configuration where it cannot operate.
+- TWO-PASS and RECITE are likewise reasoning-mediated.
+- THE ASSERTION LAW's 8 confirmations are all instruction-following
+  interventions given to a model with no reasoning budget to act on them.
+- THE SCALE LADDER (24B 38.0 / 14B 51.7 / 32b 53.2 / 235B 47.9, entries
+  118/120/121) concluded "composer scale is definitively not the lever". Larger
+  models' advantage is disproportionately reasoning; suppress it and the ladder
+  flattens. Which is precisely what we observed.
+The laws may still hold. But they were established in a regime we did not
+intend and did not report, so they are unproven rather than proven.
+
+**Third defect: the .env misrepresents the config.** Line 32 is
+`SUPERMEMORY_API_KEY=xxxRG_PREFIX_NO_THINK=1` -- a missing newline swallowed the
+flag into another key's VALUE. dotenv confirms RG_PREFIX_NO_THINK is absent from
+.env entirely. Harmless in practice because the run scripts export it, but it
+means anyone reproducing from .env alone gets a DIFFERENT configuration than
+round 5 did. That is a reproducibility bug, and it is how the flag stayed
+invisible long enough to become load-bearing.
+
+**Cost of fixing.** Reasoning-on judging measures ~2 min/item locally, so a full
+1,764-item official re-judge is ~59 h. Not impossible (a weekend), but the
+staged read comes first: if the 82-item subset shows reasoning-on qwen moving
+toward gemini, the confound is real and the re-run is justified.
+
+**Standing lesson.** A performance flag became an experimental variable without
+ever being registered as one. Nothing in the ledger recorded which reasoning
+mode a result came from, so 14 negative results inherited an unstated condition.
+Every future config flag that touches the model's computation gets recorded
+beside the result, not just in the launcher.
