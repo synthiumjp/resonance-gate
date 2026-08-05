@@ -7653,3 +7653,42 @@ post-integration judgment resolves better, exactly as the delayed-JOL
 literature predicts, confirmed by paired bootstrap and confound-checked.
 It is a real result about where metacognitive signal lives in the pipeline.
 It is simply not, on this data, a lever for the dial.
+
+## Entry 169 — 2026-08-05 (p2: EFFICIENT CODING (JP's idea) finds 42% of the context is redundant, and gives a clean rate-distortion curve. The knee is th=0.25: 21% fewer tokens for 1.4pt of union recall, top-5 untouched. A cost lever with a Koriat-predicted accuracy upside.)
+
+Barlow's redundancy reduction applied to the retrieval context, combined
+with entry 164's finding that VOLUME drives false assertion: if much of the
+120-line context carries no new information, that volume is pure downside.
+
+MEASURED: 41.9% of context lines carry <34% new tokens relative to lines
+already present. Nearly half the context is restatement.
+
+RATE-DISTORTION SWEEP (keep a line only if it carries >= th new tokens):
+  th     lines   tokens   union recall   top-5 recall
+  0.00    100%    100%       86.8%          28.7%
+  0.15     90%     91%       86.5%          28.7%
+  0.25     78%     79%       85.4%          28.4%
+  0.34     58%     60%       82.6%          28.7%
+  0.50     36%     38%       70.0%          28.7%
+  0.65     18%     19%       51.5%          24.8%
+
+THE KNEE IS SHARP AND SITS AT th=0.25: 21% of tokens removed for 1.4pt of
+union recall, with top-5 recall UNCHANGED (28.4 vs 28.7). Beyond 0.34 the
+curve falls off a cliff (union 82.6 -> 70.0 for the next 22% of tokens).
+Note top-5 is flat across the entire range until 0.65 -- redundancy removal
+does not disturb the ranking at all, it only thins the tail.
+
+WHY THIS IS WORTH A JUDGED RUN, unlike the k=15 experiments that were a wash
+(entry 103) and the pull loop that was a disaster (entry 149): both of those
+cut context by RANK -- dropping the lowest-scoring lines. This cuts by
+REDUNDANCY, keeping informative lines wherever they rank. Different
+operation, and Koriat predicts the direction: same information, less
+accessible volume, therefore less volume-driven assertion.
+
+AND IT IS A COST WIN REGARDLESS. 21% fewer context tokens at th=0.25, or 40%
+at th=0.34, is a straight efficiency gain on the metric JP has prioritised
+throughout -- if judged accuracy merely holds, this ships on footprint alone.
+
+Queued behind the F1 rerun: judged screen at th=0.25 and th=0.34, full eval,
+bar = accuracy not worse (this is primarily an efficiency claim) with
+hallucination as the upside to watch.
