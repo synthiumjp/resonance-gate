@@ -7612,3 +7612,44 @@ fixed percentile; (3) grounding-verification before attaching a receipt
 none, because it manufactures credibility); (4) semantic-entropy consistency
 across sampled answers -- distinct from entry 135's self-consistency, which
 used sampling to PICK an answer rather than to MEASURE confidence.
+
+## Entry 168 — 2026-08-05 (p2: the +7.1pt AUROC gain does NOT convert to a better dial. Matched-coverage comparison shows the frontiers are indistinguishable. A caught inference error of my own, and a real lesson about AUROC.)
+
+Rebuilt the trust dial on the post-draft probe (entry 167's +7.1pt AUROC).
+FIRST ATTEMPT compared at matched PERCENTILE and appeared to show the new
+probe was worse -- but that is confounded: two probes have different score
+distributions, so the same percentile buys different coverage. Comparing
+p20-to-p20 was comparing 47.7% coverage against 50.6% coverage. Caught and
+redone at MATCHED COVERAGE, which is the only valid comparison:
+
+  coverage   PRE corr/hall     POST corr/hall    halluc delta
+    60.1%     50.4 / 16.2       50.6 / 16.4        +0.2pt
+    55.0%     49.8 / 14.3       49.6 / 14.7        +0.4pt
+    50.0%     48.5 / 12.4       47.7 / 13.2        +0.8pt
+    45.0%     47.3 / 11.1       46.4 / 11.6        +0.4pt
+    35.1%     42.9 /  9.0       43.5 /  8.6        -0.4pt
+
+VERDICT: indistinguishable. The frontiers overlap within noise at every
+operating point, and if anything the post-draft probe is fractionally worse
+in the middle of the curve. A +7.1pt AUROC improvement bought nothing.
+
+WHY -- and this is the lesson worth keeping: AUROC is a RANKING statistic
+over the whole population, while the gate only ever acts on the MARGIN
+(the rows near the threshold). The post-draft probe ranks the population
+better, largely by separating confident-correct from confident-wrong cases
+that are far from any threshold we use. Around the operating points the two
+probes disagree very little, so the curve does not move. AUROC gains are
+necessary but not sufficient for gate gains; the diagnostic that matters is
+discrimination LOCAL TO THE THRESHOLD, not global.
+
+This is the second time in three days that a headline metric moved without
+the thing it was supposed to predict moving (entry 145: retrieval v3's
+deterministic recall gains vs the unreliable judged delta). Adding to the
+standing method rules: report gate changes at MATCHED COVERAGE, never at
+matched percentile, and never infer a frontier gain from an AUROC gain.
+
+WHAT SURVIVES: entry 167's finding is still true and still interesting --
+post-integration judgment resolves better, exactly as the delayed-JOL
+literature predicts, confirmed by paired bootstrap and confound-checked.
+It is a real result about where metacognitive signal lives in the pipeline.
+It is simply not, on this data, a lever for the dial.
