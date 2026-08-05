@@ -7789,3 +7789,47 @@ states for the 1,227 TRAIN rows on the studio (~2h). That gives:
 Note the discipline point: this is not a new idea, it is the removal of the
 constraint that has silently capped four separate experiments. Worth more
 than any of the signals in the sweep.
+
+## Entry 172 — 2026-08-06 (p2: the data fix WORKS for AUROC and STILL does not move the frontier. Widening now helps (0.741 -> 0.755 held-out) once trained on 1,227 rows, but matched-coverage operating points are unchanged. Second confirmation of entry 168's law: gate gains live at the margin, not in the ranking.)
+
+Removed the constraint identified in entry 171: extracted delayed states for
+the 1,227 TRAIN rows and trained the probe properly held-out (train on train,
+test on eval) instead of 5-fold CV on the eval set.
+
+TWO GOOD METHODOLOGICAL RESULTS:
+1. The widening lever REVERSES with more data, exactly as diagnosed:
+     probe input            held-out answerable
+     single layer 16              0.741
+     3 layers                     0.752
+     7 layers                     0.755
+     all 32 layers                0.755
+   At n=476 CV it went 0.757 -> 0.706 (monotonically worse); at n=1,227
+   training rows it goes 0.741 -> 0.755 (monotonically better). The
+   literature's lever was real and was blocked by our sample size.
+2. Our CV numbers were only mildly optimistic: held-out single-layer 0.741
+   vs CV 0.757, ~1.6pt. Every gate figure in this notebook was estimated by
+   CV on eval; they are honest to within about that much. Worth knowing,
+   since it validates a lot of prior reporting retrospectively.
+
+AND THE FRONTIER STILL DOES NOT MOVE. Matched coverage, held-out both arms:
+  coverage   single corr/hall   widened corr/hall   delta hall
+    60.1%      50.2 / 16.2        49.8 / 16.6         +0.4
+    55.0%      48.9 / 14.3        48.5 / 14.7         +0.4
+    50.0%      47.5 / 12.8        47.9 / 12.2         -0.6
+    45.0%      46.8 /  9.7        46.2 / 10.7         +1.1
+    35.1%      43.9 /  6.9        43.7 /  7.4         +0.4
+Noise around zero, no consistent direction.
+
+SO ENTRY 168'S LAW IS CONFIRMED TWICE, on two different interventions
+(post-draft probing, and now input widening): AUROC improvements to this
+gate do not reach the operating points. Both interventions improved the
+ranking of the population; neither changed the ordering of the rows that sit
+next to the threshold, which is the only place a gate can act. The gate's
+real ceiling is not the probe's global discrimination -- it is how
+separable correct from incorrect answers are AMONG THE MARGINAL CASES, and
+nothing tried so far has moved that.
+
+That is now a strong, twice-tested claim and it should stop me reaching for
+probe improvements. If the dial is to improve, the intervention has to be
+one that changes the marginal population itself -- different evidence, or a
+different composer decision -- not a better reading of the same states.
