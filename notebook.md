@@ -8126,3 +8126,34 @@ follow-ups are (a) the same 300 under a GPT judge when available, to separate
 "frontier judges are harsher" from "gemini specifically is harsher", and
 (b) Generalization & Application, which is where the harsher judge says our
 answers are actually fabricating.
+
+**Addendum (entry 176b) -- who is actually right, read off the items.** The
+marginals establish judge variance; only the items say which judge is correct.
+Read the three dominant disagreement flows. It splits roughly evenly.
+
+FRONTIER IS RIGHT, our judge was lenient (real defects it waved through):
+- gold "crowded tourist spots for cultural enrichment" -> ours "Cultural
+  enrichment and TRANQUILITY". We invented a detail that CONTRADICTS the
+  evidence ("crowded"). Genuine hallucination, scored Correct locally.
+- gold "strategic and cooperative games" -> ours "Cooperative games, TACTICAL
+  SHOOTERS". We promoted a personal preference into a plan. Real conflation.
+- gold "a mix of relief and anticipation" -> ours "Relieved and OPTIMISTIC".
+
+FRONTIER IS WRONG, over-strict on compression:
+- gold "Late-night jazz sessions" -> ours "Listening to jazz", graded
+  HALLUCINATION for "introducing an unsupported detail ('listening')". The
+  official rubric explicitly permits paraphrase. Indefensible.
+- gold "Unemployed due to a layoff from Albi B&B" -> ours "Unemployed", graded
+  Omission. The question asked employment STATUS; we answered it.
+
+So: ours is too lenient about EMBELLISHMENT, the frontier judge too harsh about
+COMPRESSION. The truth is between them, which strengthens rather than weakens
+entry 176's headline -- no single-judge row, ours or MOSAIC's, is precise.
+
+**The actionable finding is about us, not the judge.** Our composer ADDS
+UNSUPPORTED DETAIL: tranquility, optimistic, tactical shooters. That is a
+specific attackable failure mode, on-thesis for an evidence-grounded system, and
+the same defect proposition rendering (entries 173/174) was attacking from the
+storage side. It is also invisible to our own judge, which is why it survived
+this long -- 8 assertion-guidance interventions never targeted it because our
+scorer never flagged it.
