@@ -7869,3 +7869,38 @@ STATUS: third user still judging (~1h). The headline extraction F1 (0.282
 in round 5) comes from the harness's own combination of these two metrics
 and will be read from the final stat file rather than estimated here.
 This is the first substantial confirmed win since retrieval v3.
+
+## Entry 174 — 2026-08-06 (p2: EXTRACTION F1 0.282 -> 0.340 CONFIRMED (+21% relative) from rendering alone. Integrity 0.625 -> 0.817 on 1,847 paired records. QA verified unmoved. And a bonus: judge nondeterminism measured at 2.5%.)
+
+Stage-2 rerun complete, 3 users, paired on identical memory points:
+  INTEGRITY  atom 0.625 -> prop 0.817   (+0.192, +31% relative, n=1,847)
+  ACCURACY   atom 0.555 -> prop 0.579   (+0.024, n=3,706)
+  HEADLINE extraction F1  0.282 -> 0.340   (+21% relative)
+
+Nothing was extracted differently. Same store, same facts, same retrieval,
+same composer. The only change is that stored atoms are reported as
+natural-language propositions -- the form the gold uses and every comparable
+system stores natively.
+
+QA INTEGRITY CHECK, because I claimed the QA row "cannot have moved" and
+should not have asserted that without testing it: the 484 QA rows judged in
+both runs agree on 97.5% of verdicts, with the subset reading 53.93/20.04
+(round 5) vs 54.34/19.42 (prop). Answers were byte-identical, so the 2.5%
+disagreement is JUDGE NONDETERMINISM, not a real change.
+  THAT IS A USEFUL NUMBER IN ITS OWN RIGHT. It means ~2.5% of verdicts flip
+  on re-judging identical text, which puts a noise floor under every judged
+  comparison in this notebook: at n=476 that is roughly +-12 questions of
+  pure judge noise, i.e. about 2.5pt. Consistent with the churn band entry
+  145 derived by a completely different route (McNemar on paired configs),
+  and it explains WHY that band exists. Any judged delta under ~2.5pt is
+  indistinguishable from the judge re-rolling its own dice.
+
+WHAT SHIPS: the proposition renderer, already committed and wired to the
+extraction artifact only (entry 163). The official row's QA numbers are
+unaffected; the extraction column improves from 0.282 to ~0.34.
+
+WHAT IS STILL HONEST TO SAY: 0.340 remains far below MOSAIC's 0.868. The
+rendering fix recovered a format artifact, not a knowledge gap -- entries
+148 and 152 established that the missing 44% is genuinely absent and
+dominated by cross-turn synthesis we do not perform. Rendering was worth
++21% relative and cost nothing; it does not change the standing.
