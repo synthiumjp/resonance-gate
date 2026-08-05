@@ -7904,3 +7904,69 @@ rendering fix recovered a format artifact, not a knowledge gap -- entries
 148 and 152 established that the missing 44% is genuinely absent and
 dominated by cross-turn synthesis we do not perform. Rendering was worth
 +21% relative and cost nothing; it does not change the standing.
+
+## Entry 175 — 2026-08-06 (p2: the judge-parity instrument. Every RG number was scored by our local qwen3:14b; every comparator by GPT-4o. Built a $0 path to measure how much of the gap that accounts for.)
+
+**The question.** MOSAIC posts 73.1 correct / 10.2 hallucination. We post 57.6 / 18.0.
+That comparison has never been apples-to-apples: their number was produced with
+GPT-4o as *both* composer and judge, ours with a local qwen3:14b as both. Entry
+105 established our judge is stricter and noisier (nondeterminism measured at
+2.5% in entry 174), but nobody ever measured how many points the judge alone is
+worth. Until that is measured, "MOSAIC dominates us" is an unfalsified claim.
+
+**Why not just run a bigger local composer.** Asked whether qwen3-235B could
+stand in for a paid GPT-4o run. It cannot, and the ladder already says so:
+24B 38.0, 14B 51.7, 32b 53.2, 235B 47.9 -- four composers on identical evidence,
+clustered in one band, no relationship to scale (entries 118/120/121). A fifth
+would land in the same band. The 235B is also no longer resident on the studio
+(Chris has swapped to Qwen3.6-35B-A3B + Qwen3.5-4B). Composer scale is not the
+variable under test; the *scorer* is.
+
+**Kaggle does not solve it.** 30 GPU-h/week of T4 (16GB) is compute, not
+frontier-model API access, and it is strictly worse than the M3 Ultra we already
+borrow for free. Ruled out for this question.
+
+**What is actually free.** Google AI Studio's Gemini free tier: ~1,500 req/day on
+2.5-flash, no card. A judge-only re-run of round-5 is 1,764 items ≈ 2.1M tokens
+(1.88M in / 0.21M out, measured from the real artifacts) -- two days of quota, $0.
+Second option if the OpenAI account is already in a usage tier: the data-sharing
+program grants ~1M tokens/day on large models, which *is* GPT-4o class.
+
+**Scope discipline: QA only.** A full re-eval would also re-judge integrity and
+accuracy -- extrapolating from entry 174's paired counts that is ~20,000 calls,
+13 days of free quota. But the gap we are chasing is entirely in QA, and QA is
+1,764 calls. Integrity/accuracy stay on the local judge.
+
+**Built `experiments/p2/judge_frontier.py`.** Deliberately not a reimplementation:
+the harness takes its judge from OPENAI_BASE_URL/API_KEY/MODEL, so a frontier
+judge is a pure env swap and the official `evaluation_for_question` prompt is
+still what scores. Only the real official judge counts.
+- resumable: every verdict appended immediately; re-running skips judged items,
+  so 1,764 items can cross several days of quota without losing work
+- `--rpm` pacing (15 = free-tier flash) and `--max-calls` daily-cap stop
+- refuses to start if RG_NO_THINK/RG_PREFIX_NO_THINK are set (qwen3-only paths
+  that would silently reroute a frontier judge through ollama's native endpoint)
+- failed calls recorded as errors, not verdicts, so they retry rather than
+  masquerading as judge refusals (a None)
+
+**Paired, not marginal.** The instrument compares frontier vs local on the SAME
+items and reports the full disagreement matrix plus McNemar -- two judges can
+agree on the headline rate while disagreeing on most individual items, and only
+the matrix shows that. Pairing is greedy on (uuid, question, system_response):
+positional pairing is WRONG (29/1764 mismatches -- the harness judges users with
+a worker pool, so tmp2 order != session order); the content key gives 1764/1764
+with zero leftovers. 14 questions repeat within a user, but a repeat with an
+identical response is interchangeable for judging, so queue-consumption is sound.
+
+**Validated offline.** Synthesised a verdict file from the local verdicts and ran
+the full path: 100% agreement, identical marginals, McNemar p=1 on 600 items.
+The 600-item subset reads 55.8/19.5 against the full set's 57.6/18.0, so the
+subset is representative. Fixed one bug found by the self-test (mcnemar omits
+`net` when discordant count is zero). Test artifact removed from the results dir.
+
+**Status: instrument ready, blocked on a key.** Needs a free API key pasted in;
+no spend, no code change. Pre-registering the read so it cannot be rationalised
+afterwards: if the frontier judge moves us materially toward 73/10, a large part
+of the "MOSAIC dominates" gap is scorer strictness, not memory quality. If it
+moves us barely, the gap is real and the evidence layer is genuinely behind.
+Either result is worth having; the second is the one we should expect to survive.
