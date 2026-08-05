@@ -7748,3 +7748,44 @@ the reported gains are largely artifact; a 0.541 cap reported where a good
 probe exists); ReDeEP/Lumina (they detect parametric override, which is NOT
 our failure mode -- flagged explicitly by the scout so we do not port them
 expecting a fit).
+
+## Entry 171 — 2026-08-05 (p2: widening the probe input HURTS monotonically (0.757 -> 0.706 as layers are added). The literature's lever needs data we do not have. Bottleneck confirmed as LABELS, not architecture -- and now being fixed at source.)
+
+Tested the hallucination sweep's top recommendation: widen the probe's input
+across layers rather than adding signal families. Our states are already
+[476, 32, 2560], so the experiment was free. PCA per layer to keep the
+dimensionality survivable, 5-fold CV, answerable-only column is the one that
+matters:
+
+  probe input                          AUROC all   answerable
+  single layer 16 (current)              0.848       0.757
+  single layer 16 + PCA32                0.844       0.754
+  3 layers (8/16/24), PCA16 each         0.839       0.756
+  7 layers (every 4th), PCA16 each       0.826       0.728
+  all 32 layers, PCA16 each              0.815       0.706
+  mean-pooled across layers              0.828       0.726
+
+MONOTONICALLY WORSE with width. The opposite of arXiv:2604.06277's +11.4pt.
+The reason is not subtle: they trained a hierarchical transformer over full
+layer x token tensors with thousands of examples; we have 476 rows in CV.
+Adjacent layers are highly correlated, so extra dimensions add variance and
+no information at this sample size. Capacity is not free when n is small --
+the paper's finding is real and simply does not apply to our data regime.
+
+THIS IS THE THIRD INDEPENDENT ARRIVAL AT THE SAME BOTTLENECK: entry 144
+(probe ceiling is label noise), entry 126 (0.796 AUROC from 1.2k noisy
+labels), and now this. Every architectural lever on the gate is blocked by
+having too few labelled rows, not by design.
+
+SO THE FIX IS AT SOURCE, and it is running: extract the DELAYED (post-draft)
+states for the 1,227 TRAIN rows on the studio (~2h). That gives:
+  - 2.6x the training data for the probe;
+  - a properly HELD-OUT evaluation (train on train, test on eval) instead of
+    5-fold CV on the eval set, which is what every gate number in this
+    notebook has been so far;
+  - and the sample size at which the widen-the-input lever might actually
+    pay, so the negative above can be retested rather than just recorded.
+
+Note the discipline point: this is not a new idea, it is the removal of the
+constraint that has silently capped four separate experiments. Worth more
+than any of the signals in the sweep.
