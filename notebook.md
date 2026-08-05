@@ -7420,3 +7420,54 @@ confirm -- and that is a stage-2-only rerun (the QA answers are unaffected),
 which is cheap. Open question deliberately NOT bundled: whether proposition
 form also helps the QA CONTEXT. That is a separate judged test with its own
 bar, and the law says evidence-shape changes are the class that can work.
+
+## Entry 164 — 2026-08-05 (p2: KORIAT (JP's idea) EXPLAINS THE ASSERTION LAW. Accessibility drives the composer's decision to answer (AUROC 0.753) while being BELOW CHANCE for correctness (0.358). Quality features predict correctness (0.67) and the composer keys on them inversely. Not a replacement for the probe -- an explanation of eight failures.)
+
+Koriat's accessibility model: feeling-of-knowing is driven by the QUANTITY
+and intensity of partial information that comes to mind, REGARDLESS of its
+correctness. Computed six accessibility features from the v3 retrieval (pure
+python, no model) and asked what each predicts.
+
+  feature          AUROC -> ASSERT   AUROC -> CORRECT
+  n_items                0.753             0.358   <- below chance
+  top_overlap            0.351             0.665
+  convergence            0.236             0.666
+  spread                 0.313             0.673
+  combined (CV)          0.755             0.693
+
+THE SIGNATURE IS EXACT. Sheer VOLUME of accessible evidence drives the
+composer to answer (0.753) and is ANTI-predictive of being right (0.358).
+The features that DO predict correctness -- convergence among clues, a
+strong leading clue, a peaked score distribution -- the composer keys on
+INVERSELY (0.24, 0.35, 0.31). It is answering on how much is in front of it
+and ignoring whether that material agrees with itself.
+
+THIS EXPLAINS THE PROJECT'S CENTRAL LAW AND FOUR SPECIFIC FAILURES:
+  - eight assertion instructions failed (entries 103-143) because wording
+    never changed what the composer keys on -- volume.
+  - agentic pull collapsed (-11.5c/+24.3h, entry 149): searching GENERATES
+    accessibility, so the model committed harder on less evidence. Under
+    Koriat that was predictable, not surprising.
+  - the gist tier hurt (entry 142): six pattern lines are six more
+    accessible items -> more assertion, no more truth.
+  - the probe gate is the only lever that ever moved the frontier favourably
+    (entry 155) precisely because it FILTERS OUTPUT rather than altering
+    accessibility -- it is the one intervention that sits outside the loop.
+
+CAN IT REPLACE THE 4B SIDECAR? No, and the null-discipline says so plainly:
+  predicting judge-correct     all rows    answerable-only
+    4B + probe                  0.841          0.723
+    Koriat lexical (0 models)   0.704          0.557
+    both combined               0.822          0.693
+On answerable questions -- where a gate must actually work -- the free
+lexical signal is 0.557, barely above chance, and combining it with the
+probe HURTS (0.693 vs 0.723). So the footprint win is not available: the
+hidden-state probe is measuring something the surface statistics do not
+capture. Recorded as a negative for the "drop the sidecar" hope.
+
+WHAT IT IS WORTH: the strongest EXPLANATORY result the project has. It
+converts "instructions never work" from an empirical regularity with eight
+data points into a mechanism with a named cognitive model and a measured
+signature, and it predicts which future interventions will fail --
+anything that increases accessible material without increasing convergence.
+That is a design rule and a paper section, not a feature.
