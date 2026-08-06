@@ -8756,3 +8756,55 @@ candidates, both output-side:
 Any fit of a filter against gold needs the shuffled-gold null (entries 151-153)
 -- fitting a threshold to a containment metric is exactly how those artifacts
 arose.
+
+## Entry 187 — 2026-08-06 (p2: double-emission sized at 10.1% (1.66x -> 1.49x), and the instrument check found a bigger one: 76.8% of our extraction artifact ends in "(provisional)" while gold is clean prose.)
+
+**Sized as asked, before tuning any filter against the inflation.**
+
+First measurement said 0.6% and was WRONG. _fact_str appends the tier --
+`f"{prop} ({nd.get('tier','asserted')})"` -- so the same fact at provisional and
+at confirmed renders as two different strings, and a duplicate count over raw
+strings misses exactly the promotion case it was built to test. Third time this
+session that checking what a metric actually computes changed the answer
+(entry 181's search_duration_ms, the profile.py shadowing, this).
+
+**Corrected, tier-stripped:**
+
+    gold                     7396   10.69 / session
+    emitted (as scored)     12282   17.75 / session   ratio 1.66x
+    unique, tier-stripped   11047   15.96 / session   ratio 1.49x
+    repeat emissions         1235   10.1% of what we emit
+    multiplicity: 2x 1103 facts, 3x 49, 4x 10, 5x 1
+
+So de-duplication is worth 0.17x of the 0.66x excess -- about a quarter of the
+problem. Worth fixing (eval_rgp2 emits on TIER CHANGE, so promotion re-emits a
+fact HaluMem's gold has no event for), but it does not close the gap alone.
+
+**The bigger find, and it is free.** Tier suffixes across the artifact:
+
+    (provisional)  9428     (asserted)  2854      = 76.8% provisional
+
+Every emitted memory carries a parenthetical status marker; gold memory points
+are clean prose. We are handing the judge
+
+    "Martin Mark's birth date is 1996-08-02 (provisional)"
+
+against gold written
+
+    "Michelle Hernandez's birth date is 1980-04-20"
+
+This is the SAME CLASS as entry 162's atoms-vs-propositions mismatch, which was
+worth +25% integrity and +21% F1 when fixed. The corroboration tier is RG's
+differentiator and belongs in the QA CONTEXT, where CAL rule 1 actually reads
+it. In the extraction ARTIFACT, judged against clean gold, it is noise on
+three-quarters of our memories -- and "(provisional)" is a hedge word, which is
+the worst possible thing to append when the judge is scoring whether a memory
+was captured.
+
+**Two free output-side fixes now queued, neither a prompt instruction (entry
+186's lesson):**
+  1. strip the tier from the extraction artifact only -- QA context untouched
+  2. emit each fact once, on first appearance rather than on every tier change
+Both are pure rendering/bookkeeping, testable with the existing paired harness,
+and both need the shuffled-gold null because extraction F1 is a containment
+metric (entries 151-153).
