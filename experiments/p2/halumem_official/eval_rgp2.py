@@ -136,6 +136,14 @@ def _fact_str(nd, owner=None):
     """
     import propositions as PR
     prop = PR.render(nd, owner=owner)
+    # RG_ARTIFACT_NO_TIER (entry 187): 76.8% of emitted strings ended in
+    # "(provisional)" while gold memory points are clean prose. The tier is
+    # RG's differentiator and belongs in the QA CONTEXT, where CAL rule 1
+    # actually reads it; appending a hedge word to three-quarters of the
+    # artifact the judge scores for CAPTURE is noise. Off by default so round 5
+    # stays reproducible.
+    if os.environ.get("RG_ARTIFACT_NO_TIER") == "1":
+        return prop if prop else f"{nd['attr']}: {nd['value']}"
     if not prop:
         return f"{nd['attr']}: {nd['value']} ({nd.get('tier', 'asserted')})"
     return f"{prop} ({nd.get('tier', 'asserted')})"
@@ -212,8 +220,17 @@ def process_user(idx, user_data, cache_dir=DEFAULT_CACHE_DIR):
         cur_state = {nid: nd["tier"] for nid, nd in cur_items}
         import propositions as PR
         _owner = PR.owner_name([nd for _, nd in cur_items])
-        new_facts = [_fact_str(nd, owner=_owner) for nid, nd in cur_items
-                     if prev_state.get(nid) != nd["tier"]]
+        # RG_EMIT_ONCE (entry 187): the default emits on TIER CHANGE, so a
+        # fact promoted provisional->confirmed is emitted in TWO sessions.
+        # HaluMem gold has no promotion event, so that re-emission is pure
+        # inflation of our count against theirs -- measured at 10.1% of
+        # emissions, ratio 1.66x -> 1.49x.
+        if os.environ.get("RG_EMIT_ONCE") == "1":
+            new_facts = [_fact_str(nd, owner=_owner) for nid, nd in cur_items
+                         if nid not in prev_state]
+        else:
+            new_facts = [_fact_str(nd, owner=_owner) for nid, nd in cur_items
+                         if prev_state.get(nid) != nd["tier"]]
         prev_state = cur_state
 
         new_session = {

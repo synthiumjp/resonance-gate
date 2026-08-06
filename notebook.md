@@ -8808,3 +8808,41 @@ was captured.
 Both are pure rendering/bookkeeping, testable with the existing paired harness,
 and both need the shuffled-gold null because extraction F1 is a containment
 metric (entries 151-153).
+
+## Entry 188 — 2026-08-06 (p2: emit-once CONFIRMED on the proxy — F1 25.74 -> 26.77 with a 0.00% null, ratio 1.68x -> 1.51x. The tier fix is untestable by this proxy, not disproven.)
+
+Both entry-187 fixes implemented behind env flags (round 5 reproducible):
+RG_ARTIFACT_NO_TIER=1 drops the "(provisional)" suffix from the extraction
+artifact only; RG_EMIT_ONCE=1 emits a fact on first appearance rather than on
+every tier change. Mirrored to experiments/p2/halumem_official/.
+
+**A/B on users 10-12, same cached extraction in all arms -- only rendering and
+emission timing differ:**
+
+    arm       recall  precision      F1   nullF1    emitted  ratio
+    base      36.12%     19.99%  25.74%    0.00%       3651  1.68x
+    no-tier   36.12%     19.99%  25.74%    0.00%       3651  1.68x
+    once      35.43%     21.51%  26.77%    0.00%       3287  1.51x
+    both      35.43%     21.51%  26.77%    0.00%       3287  1.51x
+
+**Emit-once is real and its null is clean.** +1.03pt F1 (+4% relative): recall
+-0.69, precision +1.52, ratio 1.68x -> 1.51x, matching the predicted 1.66->1.49
+arithmetic. The shuffled-gold null is 0.00% in every arm -- entries 151-153
+retracted three findings whose nulls were substantial, and this metric has no
+such slack, because coverage is scored PER EMITTED STRING rather than against
+the pooled union (which is what let token soup assemble matches before).
+
+**The tier fix is UNTESTABLE HERE, and that is a property of my proxy, not a
+result.** Coverage asks whether GOLD tokens appear in our emitted string.
+Removing "(provisional)" removes tokens from OUR side, which such a metric
+cannot register by construction. The hypothesis is about a JUDGE discounting a
+hedge word on a memory it is scoring for capture; only a judged run can see it.
+Recorded as untested. Do not read the 0.00pt as a null.
+
+**Proportion check, so this is not oversold.** +1.03pt on a proxy F1 of 25.74,
+against a judged gap of 0.340 vs MOSAIC's 0.8677. Emit-once is a genuine
+bookkeeping fix worth keeping -- it costs nothing and its null is clean -- but
+it closes a few percent of a very large gap. We are still emitting 1.51x gold
+after it, so the precision problem is mostly unsolved: the remaining excess is
+facts we extract that gold simply does not contain, which no amount of
+de-duplication reaches.
