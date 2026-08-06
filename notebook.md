@@ -8588,3 +8588,56 @@ worth recording, because the assertion law (entry 164, mechanised by JP's sec 6)
 DOES apply to the assert/abstain decision. Two different stages, two different
 diagnoses: the decision to answer is output-stage and prompt-immune; the
 content of the answer is retrieval-bound.
+
+## Entry 184 — 2026-08-06 (p2: propositions in the QA context = NULL. All four audit defects are now closed, three of them null. The audit found real code defects and almost no accuracy.)
+
+**Props A/B (n=476, users 10-12, paired, one variable):**
+
+    A atoms (round-5)   Correct 43.28%  Halluc 25.63%  Omission 31.09%
+    B propositions      Correct 44.12%  Halluc 25.21%  Omission 30.67%
+    McNemar Correct        net  +4, p=0.618
+    McNemar Hallucination  net  -2, p=0.894
+
+0% identical contexts, so the manipulation applied everywhere -- this is a real
+null, not a failed intervention. Direction faintly favourable, magnitude nil.
+
+**Why it was right to expect more, and why it failed anyway.** Rendering moved
+memory-integrity +25% and extraction F1 +21% (entries 173/174). That worked
+because the extraction ARTIFACT is compared against prose gold BY A JUDGE, and
+the judge was penalising a form mismatch. The COMPOSER was never confused by
+atoms. Entry 183 explains the rest: the composer's failure is missing evidence,
+not misread evidence, and reformatting what it already reads correctly cannot
+create what was never retrieved.
+
+**Audit scorecard, entries 177-184.** Five defects found:
+    1. judge reasoning disabled     REAL, quantified: ~2.7pt of the 9.67pt
+                                    judge gap. A measurement artifact, not our
+                                    accuracy.
+    2. composer reasoning disabled  UNTESTED. Entry 183 shows it cannot reach
+                                    omissions; it re-opens entry 135's ledger
+                                    (self-consistency, the scale law) and
+                                    nothing else.
+    3. rerank cutoff (k double duty) REAL code defect, accuracy NULL. Banked as
+                                    a 74% context-token saving.
+    4. propositions absent from QA   REAL gap, accuracy NULL (this entry).
+    5. .env line-32 corruption       cosmetic, but it is how #1 stayed invisible.
+Plus a footprint scare that was my own misreading (entry 181): retrieval is
+~156 ms/query, not 4.5 s.
+
+**The honest summary of the audit: it found real defects and almost no
+accuracy.** Three of four testable levers are null. That is worth knowing --
+it removes three standing hypotheses about why we trail MOSAIC -- but it means
+the measured gap is not an artifact of our own plumbing.
+
+**What the same period DID produce, both on the axis we chose to fight on:**
+  * entry 179/180 -- the inference gate. Dominates its matched-coverage null on
+    BOTH axes at every threshold, held-out detector AUROC 0.933, wired as
+    RG_QGATE. Strict judge th=3.0: 80% coverage, 48.0c/14.0h vs 50.0c/23.3h.
+  * entry 183 -- abstentions are evidence-calibrated (median gold-overlap 0.00
+    abstaining vs 0.75 answering). The product's central claim, measured
+    directly for the first time rather than inferred.
+
+**Where the remaining headroom is.** Upstream. Entry 183 localises omissions to
+retrieval/extraction, and entries 178/184 show the composer-side context is not
+the constraint -- neither its SIZE nor its FORM changed anything. Every
+composer-side lever is bounded by what retrieval hands over.
