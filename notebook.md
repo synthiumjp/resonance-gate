@@ -8288,3 +8288,74 @@ test):**
   3. reasoning ON for the composer -- expensive, but re-opens entry 135's ledger
 Each gets a shuffled-gold null where a containment metric is involved, per the
 standing rule from entries 151-153.
+
+## Entry 179 — 2026-08-06 (p2: FIGHT ON THE AXIS WE CAN WIN. HaluMem is two tasks; we are strong on one and fabricate on the other. An inference-question gate halves hallucination and DOMINATES the matched-coverage null on both axes.)
+
+**The decomposition that reframes everything.** Under the STRICT judge
+(gemini-3.6-flash, harsher than anything MOSAIC was scored with), the 300-item
+stratified sample splits into two different systems:
+
+    Memory Boundary               n=71   95.8% correct    4.2% halluc
+    Memory Conflict               n=65   53.8%            4.6%
+    Basic Fact Recall             n=66   51.5%           28.8%
+    Dynamic Update                n=18   22.2%           44.4%
+    Multi-hop Inference           n=17   17.6%           41.2%   INFER
+    Generalization & Application  n=63    9.5%           47.6%   INFER
+
+    RETRIEVAL categories (73%)   64.1% correct / 15.0% halluc
+    INFERENCE categories (27%)   11.2% correct / 46.2% halluc
+
+We have not been sliding down one rank. We have been reporting the AVERAGE of a
+64% system and an 11% system. RG is an evidence layer: it retrieves receipted
+facts and hands composition to the client. On questions asking the MEMORY to
+generalise, our composer attempts it anyway and fabricates on ~46%. Meanwhile
+Memory Boundary proves the abstention machinery works when pointed at the right
+questions -- 95.8% correct, 4.2% hallucination, ZERO omissions, under the
+harshest scorer we have.
+
+**So point the abstention at the inference questions.** qtype_gate.py scores a
+question for "requires inference beyond stored evidence" from TEXT ALONE.
+
+Two rules keep this honest rather than a leaderboard trick:
+  1. The gold `question_type` is NEVER read at decision time -- it is a label
+     for validating the detector only. A product is not told the question's
+     category, so neither is the gate.
+  2. Every gain is measured against RANDOM abstention at MATCHED COVERAGE.
+     Abstaining on any 25% lowers hallucination; the only shippable result is
+     one that beats the coin flip at the same coverage. This is entry 168's
+     discipline, where an AUROC gain failed to convert.
+
+**Detector: AUROC 0.933 in-sample AND 0.933 held-out.** The patterns were
+hand-written after seeing the category profile on round-5 users 0-9, so
+in-sample AUROC is contaminated. Users 10-12 were never used to write them:
+held-out AUROC is IDENTICAL at 0.933 (n=437, precision 0.90 / recall 0.81 at
+th=1.0). It generalises because it is reading modal verbs -- could/should/would/
+might, recommend, to enhance -- which is a real linguistic signal, not a
+memorised quirk.
+
+**The frontier gain, STRICT judge (n=300), gate at 75% coverage:**
+
+    ungated                 correct 50.00%   halluc 23.33%
+    inference-gated         correct 45.67%   halluc 12.33%
+    matched-coverage NULL   correct 37.50%   halluc 17.50%
+    gate beats the null by  +8.17 correct    +5.17 halluc
+
+It DOMINATES the null on BOTH axes -- more correct AND less hallucination at
+identical coverage. So this is not "answer less, hallucinate less"; the gate is
+picking the right questions to decline. Local judge (n=1,764) agrees in
+direction but smaller: 54.99/18.65 -> 46.54/13.10, beating its null by +4.85c /
++1.09h. The effect is LARGER under the strict judge, which is what you would
+expect if the thing being suppressed is real fabrication that a lenient judge
+was waving through.
+
+**What we can and cannot claim.** We cannot claim to beat MOSAIC's 73.1/10.2 on
+correct -- we are at 45.7 correct under a stricter judge at 75% coverage. What we
+can claim, and now have measured under adversarial scoring: hallucination in the
+same class as the leader (12.3% vs 10.2%), with an EXPLICIT COVERAGE DIAL that
+no comparator reports at all, and a 95.8%/4.2% abstention discipline on boundary
+questions. That is a different product, not a worse leaderboard row.
+
+**Standing correction to how we have been reporting.** Aggregate HaluMem
+accuracy averages two tasks with a 53-point spread. Every future number gets
+reported split retrieval/inference, because the aggregate hides the only thing
+about our system that is actually good.
