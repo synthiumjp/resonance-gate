@@ -54,6 +54,7 @@ _V3 = os.environ.get("RG_RETRIEVE_V3", "0") == "1"
 if _V3:
     import retrieve_v3 as RV3   # noqa: E402  (opt-in accuracy tier)
 import timeline as TL     # noqa: E402
+import qtype_gate as QG   # noqa: E402  (entry 179)
 from llms import llm_request        # noqa: E402  (harness-local)
 from prompts import PROMPT_MEMZERO  # noqa: E402
 
@@ -61,6 +62,20 @@ DEFAULT_DATA_PATH = os.path.expanduser("~/rg_private/halumem/HaluMem-Medium.json
 DEFAULT_CACHE_DIR = os.path.expanduser("~/rg_private/halumem")
 
 _TIMELINE = os.environ.get("RG_TIMELINE", "0") == "1"
+
+# Inference-question gate (entry 179). HaluMem is two tasks: on retrieval
+# categories we score 64.1% correct / 15.0% halluc under the strict judge, on
+# inference categories 11.2% / 46.2%. RG is an evidence layer -- it retrieves
+# receipted facts and hands composition to the client -- so when a question
+# asks the MEMORY to generalise, declining is the honest answer rather than a
+# dodge. RG_QGATE=<threshold> turns it on; unset keeps round-5 behaviour.
+# Reads the question TEXT only: a product is never told the question's category.
+_QGATE = None
+if os.environ.get("RG_QGATE"):
+    try:
+        _QGATE = float(os.environ["RG_QGATE"])
+    except ValueError:
+        _QGATE = None
 
 # The calibrated grounding rules judged at 51.7/22.5 (entry 110). Keep
 # byte-identical to compose_judge_v2ctx.py's CAL.
@@ -80,7 +95,13 @@ def compose_answer(mem, question, index):
         facts = RV3.retrieve_facts_v3(index, question)
     else:
         facts = RV.retrieve_facts(mem, question, index=index)
-    context = "\n".join(RV.format_fact(d) for d in facts) or "(no relevant memories)"
+    context = "\n".join(RV.format_fact(d, owner=getattr(index, "owner", None))
+                        for d in facts) or "(no relevant memories)"
+    if _QGATE is not None and QG.inference_score(question) >= _QGATE:
+        # Abstain BEFORE composing: the composer cannot fabricate an inference
+        # it was never asked to make, and the call is saved outright. Context is
+        # still returned so the decision stays auditable.
+        return QG.ABSTAIN, context
     extra = ""
     if _V3 and RV3.ANCHORED_RX.search(question):
         extra += RV3.TEMPORAL_RULE

@@ -8359,3 +8359,57 @@ questions. That is a different product, not a worse leaderboard row.
 accuracy averages two tasks with a 53-point spread. Every future number gets
 reported split retrieval/inference, because the aggregate hides the only thing
 about our system that is actually good.
+
+## Entry 180 — 2026-08-06 (p2: the gate is a FRONTIER, not a point — every threshold dominates its matched-coverage null on both axes. And the footprint audit says we are NOT low-cost: retrieval v3 is 4.5s/query.)
+
+**Gate swept into a curve.** Entry 179 reported one operating point because it
+was the first threshold tried. The threshold is a dial, so the artifact is the
+curve, and every point carries its matched-coverage null.
+
+STRICT judge (gemini-3.6-flash, n=300):
+    thresh   cov%   correct  halluc | null_c  null_h | dominates
+      none  100.0    50.00   23.33  |  50.00   23.33 |  --
+       4.0   84.3    48.00   17.00  |  42.07   19.60 |  YES
+       3.0   80.0    48.00   14.00  |  40.00   18.67 |  YES
+       2.0   75.7    46.00   12.67  |  37.80   17.73 |  YES
+       1.0   75.0    45.67   12.33  |  37.53   17.53 |  YES
+       0.0   72.7    44.67   12.00  |  37.00   16.60 |  YES
+      -1.0   39.3    28.33    6.67  |  19.67    9.40 |  YES
+EVERY point beats random abstention at identical coverage on BOTH axes. Local
+judge (n=1,764) agrees in direction at every threshold, with a smaller
+hallucination margin -- as expected, since the lenient judge was not charging us
+for the fabrications being suppressed.
+
+**Recommended operating point: th=3.0.** 80% coverage, 48.0 correct / 14.0
+halluc against an ungated 50.0 / 23.3 -- two points of correct for NINE points
+of hallucination, and the detector's precision at that threshold is 0.99
+held-out, so it is declining genuine inference questions rather than guessing.
+
+**Wired, not just analysed.** RG_QGATE=<threshold> in eval_rgp2.compose_answer.
+It abstains BEFORE composing, so the composer cannot fabricate an inference it
+was never asked to make and the LLM call is saved outright. Context is still
+returned so the decision stays auditable. Unset preserves round-5 behaviour.
+Mirrored to experiments/p2/halumem_official/.
+
+**FOOTPRINT AUDIT -- the uncomfortable half.** Measured from round 5's own
+recorded search_duration_ms, not a synthetic benchmark:
+    retrieval v3   mean 4533 ms/question   p50 4786   p90 8340   p99 11208
+                   = 133 min CPU for one 1,764-question run
+    qtype gate     17.7 us/question, zero models  (0.0004% of retrieval)
+    default tier   BM25, pure python, zero models, zero MB
+    v3 models      bge-small (~33M) + ms-marco-MiniLM-L6 (~22M), ~220 MB
+We have been describing RG as low-overhead. The DEFAULT tier still is. The v3
+tier -- the one every benchmark number comes from -- is 4.5s/query and is our
+slowest component by far. That claim needs fixing or qualifying; it is much
+worse to have a user correct it than to correct it ourselves.
+
+**Where the cost actually is, and the lever.** The cross-encoder scores up to
+140 candidates per query (k=120 BM25 + 20 dense). RG_TOP_N trims only what the
+COMPOSER reads and saves no CPU whatsoever. RG_POOL_K shrinks the candidate pool
+the CROSS-ENCODER must score, which is the real lever -- pool=40 should be ~3x
+cheaper. Added to the A/B harness as mode=pool. Prediction: accuracy null, and a
+null is a WIN here because it buys back the footprint claim.
+
+**Banked from the entry-178 negative.** top_n=20 was an accuracy null, but it
+cuts composer context 75.8 -> 19.9 lines, a 74% token reduction for free. Worth
+adopting on efficiency grounds even though it failed as an accuracy lever.
