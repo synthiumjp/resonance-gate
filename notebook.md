@@ -9181,3 +9181,45 @@ per-person facts gold actually contains.
 done -- the probe is now safe to ship subject to the relation-label caveat.
 S2 (refined SYSTEM_ASSISTANT arm) running. S4 (write-time narrative linking)
 still unbuilt and still the largest remaining idea.
+
+## Entry 196 — 2026-08-06 (p2: S4 narrative linking is BLOCKED, not null. Only 13.4% of question-relevant gold is in the store, and retrieval already finds ~10% of it — expansion cannot reach what was never stored.)
+
+Built narrative_link.py (entity + capped session links, write-time, no model
+call) and tested 1-hop expansion per question type, per the PNAS prediction that
+linking should move INFERENCE categories and not lookups.
+
+**Result: identical in all three arms, including the random null.**
+
+    bucket   golds   base   +links   +random
+    lookup      85  10.6%    10.6%     10.6%
+    INFER       94   9.6%     9.6%      9.6%
+
+When adding ANY 10 facts changes nothing, the problem is not the expansion
+policy. Diagnosed:
+
+    gold points needed by the questions      179
+    present ANYWHERE in the store             24  (13.4%)
+    already in the retrieved top-20          ~10%
+
+**Retrieval is already surfacing ~75% of the gold the store contains.** There is
+nothing for a second hop to find. S4 is BLOCKED ON EXTRACTION, not disproven --
+and reporting it as a null would be the same error entry 183 avoided by calling
+the abstained-items probe "moot".
+
+This is the third independent confirmation that extraction is the binding
+constraint (183: abstentions calibrated; 189: user-turns-only ceiling; this).
+It also re-scopes retrieval work permanently: at 75% of available gold
+retrieved, retrieval tuning has at most ~3pt of headroom on this store, which
+retrospectively explains why top_n (178) and propositions-in-QA (184) were both
+null. Those were not bad ideas badly executed; there was no room.
+
+**One real bug found and fixed en route.** entity_vocab used capitalisation to
+find names, but halumem_run LOWERCASES every value on ingest, so it found 17
+entities and linked 45 of 333 facts. Rewritten to collect entities structurally
+(subject prefixes, values of naming/relationship attributes, CamelCase tokens
+that survive lowercasing). The fix did not change the result -- because of the
+above -- but the code was wrong either way.
+
+**S4 re-run condition:** after all-turns extraction is in the store used for the
+test. S0 raised recall 38 -> 52 on the ARTIFACT; this test ran against a
+user-turns-only store, so it has not yet seen that benefit.
