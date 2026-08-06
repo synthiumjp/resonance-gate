@@ -9271,3 +9271,47 @@ clause in the gap probe (needed deterministic guards instead, entry 195). Every
 extraction win today came from SCOPE OF INPUT (all-turns) or DETERMINISTIC
 POST-PROCESSING (emit-once, guards, splitting). That is now a strong enough
 pattern to treat as a design rule rather than an observation.
+
+## Entry 198 — 2026-08-06 (p2: S4 CLOSED. Linking cannot help — even with all-turns, only 21.2% of question-relevant gold is in the store and retrieval already gets 71% of it. And a metric discrepancy worth understanding: 52% artifact recall vs 21% question-gold coverage.)
+
+**Re-ran the linking test against an ALL-TURNS store, as entry 196 required.**
+
+    bucket   golds   base   +links   +random
+    lookup      85  17.6%    17.6%     17.6%
+    INFER       94  11.7%    11.7%     11.7%
+
+Base rose (lookup 10.6 -> 17.6, INFER 9.6 -> 11.7), confirming S0 helps at the
+STORE level and not only in the artifact. Expansion is still exactly flat in
+every arm, including random.
+
+**Sized, and that closes it:**
+
+    ALL-TURNS store, mean 785 facts
+    question-relevant gold points needed   179
+      present in the store                  38  (21.2%)   [user-turns: 13.4%]
+      present in the retrieved top-20      ~15%
+      retrieval captures ~71% of what is available
+
+The residue retrieval misses is ~6pt of golds spread across 785 facts. A 10-fact
+expansion has almost no chance of landing on a specific one, and widening the
+budget just re-runs the top_n experiment that already measured null (entry 178)
+-- and measured slightly NEGATIVE in the 50-100 line band. There is no budget at
+which this works: small budgets cannot find the needle, large ones re-create a
+known failure. S4 CLOSED, not parked.
+
+**The ceiling that actually matters.** Even with PERFECT retrieval we cap at
+21.2% on these questions, because that is all the store holds. Every
+retrieval-side idea -- linking, expansion, reranking, re-formatting -- is
+bounded by that number. This is the fourth independent confirmation that
+extraction is the only binding constraint (183, 189, 196, this).
+
+**A metric discrepancy that needs stating, because two numbers in this notebook
+look contradictory.** ab_artifact reports 52.01% recall; this reports 21.2%
+gold-in-store. They are different denominators:
+  * 52.01% = of SESSION memory points, how many does the emitted artifact cover
+  * 21.2%  = of the golds the QUESTIONS actually need, how many are in the store
+The gap means question-relevant golds are substantially HARDER than average
+session golds -- the benchmark asks about precisely the memories we are worst at
+capturing. That is not obvious and it is not good news; it means artifact recall
+overstates how useful the store is for answering. Any future quote of "52%"
+should carry this caveat.
