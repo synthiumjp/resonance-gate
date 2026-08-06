@@ -61,7 +61,53 @@ def candidate_turns(turns, group, slot, limit=6):
     return [i for _, i in scored[:limit]]
 
 
-def probe_gaps(store_texts, turns, extract_fn, limit_per_slot=6, max_slots=None):
+# Slots that name ANOTHER person. A value equal to the profile owner is the
+# self-reference failure S3b measured (partner = the user's own first name).
+_PERSON_SLOTS = {"partner", "children", "family", "friends", "colleagues"}
+# Slots that hold exactly one value. A comma list here is the conflation
+# failure: "Both parents are deceased, Married, Two children" merges three
+# separate gold memory points into one unusable string.
+_SINGULAR = {"name", "gender", "birth_date", "age", "job_title", "employer",
+             "employment_status", "income", "education_level", "major",
+             "personality", "partner"}
+# Slots that legitimately hold MANY values. Gold stores one memory point per
+# person ("Michelle Hernandez's Colleague BrownKaren, ..."), so a comma list
+# here is not an error -- it is several facts in one string, and storing it
+# whole is why the colleagues value scored 0.25 against gold in S3b. Split it.
+_MULTI = {"children", "family", "friends", "colleagues", "career_history"}
+
+
+def split_multi(slot, value):
+    """One value string -> the separate facts it actually contains."""
+    if slot not in _MULTI:
+        return [value]
+    parts = [p.strip(" .;") for p in re.split(r",| and ", str(value))]
+    return [p for p in parts if len(p) > 1] or [value]
+
+
+def reject(slot, value, owner_tokens):
+    """Why this recovered value must not enter the store, or None to accept.
+
+    A slot-directed question PRESUPPOSES the slot has a value and invites the
+    model to find one, so "if unsure output []" does not hold -- S3b measured
+    50% clean precision without these guards. A wrong value in a previously
+    EMPTY slot is worse than the empty slot, because nothing downstream can
+    tell it was guessed."""
+    v = str(value or "").strip()
+    if not v:
+        return "empty"
+    vt = {w for w in re.findall(r"[a-z0-9]+", v.lower()) if len(w) > 2}
+    if slot in _PERSON_SLOTS and owner_tokens and (vt & owner_tokens):
+        return "self-reference"
+    if slot in _SINGULAR and ("," in v or " and " in v.lower()):
+        return "conflated (singular slot, list value)"
+    if len(v.split()) > 12:
+        return "too long for a slot value"
+    return None
+
+
+def probe_gaps(store_texts, turns, extract_fn, limit_per_slot=6, max_slots=None,
+               owner_tokens=None):
     """Fill what the schema says is missing.
 
     extract_fn(prompt) -> list[{attribute, value}]; injected so this module
@@ -76,7 +122,7 @@ def probe_gaps(store_texts, turns, extract_fn, limit_per_slot=6, max_slots=None)
     missing = gaps(store_texts)
     if max_slots:
         missing = missing[:max_slots]
-    found, report = [], []
+    found, report, rejected = [], [], []
     for group, slot in missing:
         cands = candidate_turns(turns, group, slot, limit_per_slot)
         got = []
@@ -89,8 +135,15 @@ def probe_gaps(store_texts, turns, extract_fn, limit_per_slot=6, max_slots=None)
                 continue
             for f in facts:
                 v = re.sub(r"\s+", " ", str(f.get("value", "")).strip())
-                if v and len(v) < 160:
-                    got.append({"attribute": slot, "value": v,
+                if not v or len(v) >= 160:
+                    continue
+                for piece in split_multi(slot, v):
+                    why = reject(slot, piece, owner_tokens or set())
+                    if why:
+                        rejected.append({"slot": slot, "value": piece,
+                                         "why": why})
+                        continue
+                    got.append({"attribute": slot, "value": piece,
                                 "group": group, "turn": i,
                                 "source": "schema_probe"})
             if got:
@@ -98,4 +151,6 @@ def probe_gaps(store_texts, turns, extract_fn, limit_per_slot=6, max_slots=None)
         report.append({"group": group, "slot": slot,
                        "candidates": len(cands), "filled": bool(got)})
         found.extend(got)
-    return found, report
+    # Rejections are returned, not swallowed: a guard that silently drops
+    # values would make the pass look cleaner than it is.
+    return found, report, rejected

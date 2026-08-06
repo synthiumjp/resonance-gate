@@ -9139,3 +9139,45 @@ touches the store. S2 (refined SYSTEM_ASSISTANT arm) is now unblocked and is the
 obvious next run: the blunt arm proved the ceiling converts, so the question is
 what the restatement-only scope rule costs in recall and buys in precision.
 S4 (write-time narrative linking) remains the largest unbuilt idea.
+
+## Entry 195 — 2026-08-06 (p2: S3b — gap-probe precision 50% -> 100% via two deterministic guards and multi-value splitting. The leading-question failure modes are now named and blocked.)
+
+**S3b validated the entry-193 values against gold and found 4/8 clean.** Three
+distinct failure modes, all consequences of a slot-directed question
+PRESUPPOSING the slot has a value:
+
+    partner = "Michelle"          SELF-REFERENCE -- the profile owner's own name
+    family  = "Both parents are deceased, Married, Two children"
+                                  CONFLATION -- three gold points in one string
+    colleagues = "AndersonElizabeth, BrownKaren, WilsonJames, LopezBarbara"
+                                  CONFLATION + relation mislabel (gold: Friend)
+
+"If unsure, output []" does not hold against a leading question. That is not a
+prompt-wording problem; it is what asking presupposes.
+
+**Two deterministic guards + splitting, all in schema_probe.py:**
+  * self-reference: a person-slot value overlapping the owner's name tokens is
+    rejected outright.
+  * conflation: a comma/and list in a SINGULAR slot is rejected.
+  * multi-value slots (children, family, friends, colleagues, career_history)
+    are SPLIT into separate facts, because gold stores one memory point per
+    person -- storing the list whole is why colleagues scored 0.25.
+  Rejections are RETURNED, not swallowed: a guard that silently drops values
+  makes the pass look cleaner than it is.
+
+**Result: 14/14 recovered values supported by gold (100%), from 4/8 (50%).**
+Splitting alone converted `family` to "Both parents are deceased", which matches
+its gold memory point verbatim, and turned the colleagues blob into the
+per-person facts gold actually contains.
+
+**Two caveats, because the 100% is softer than it looks.**
+  1. With single-token values like "AndersonElizabeth", a >=0.6 overlap test is
+     nearly free. This validates PRESENCE IN GOLD, not correctness.
+  2. Gold calls several of those people FRIENDS; we filed them under
+     `colleagues`. The person is right, the relation label is not, and this
+     metric cannot see that. Relation typing is an open defect, not a solved one.
+
+**Status.** S0 done (+14.01pt recall, flat precision). S1 done (ledger). S3+S3b
+done -- the probe is now safe to ship subject to the relation-label caveat.
+S2 (refined SYSTEM_ASSISTANT arm) running. S4 (write-time narrative linking)
+still unbuilt and still the largest remaining idea.
