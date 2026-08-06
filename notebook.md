@@ -8986,3 +8986,61 @@ answers the prior question: does the 86.9% ceiling convert into recall at all?
 If it does, the refined prompt should keep the recall and cost less precision.
 If it does not, the ceiling logic is wrong and the refined version cannot save
 it. Letting it finish rather than restarting.
+
+## Entry 192 — 2026-08-06 (p2: gold IS schema-shaped — 64.4% under a GENERAL 20-slot persona schema. My lexical census said 40% and was measuring surface phrasing. Plus: the literature says inference is built at ENCODING, which is the one place we do nothing.)
+
+**Literature (JP's four threads).**
+  * "Active linking through narratives facilitates associative inference"
+    (PNAS): narrative-based encoding SELECTIVELY enhanced memory for
+    associations and supported inference across INDIRECTLY RELATED items -- and
+    the advantage is "not general, but depends on the representational demands
+    of retrieval". A precise prediction for us: linking should help inference
+    questions and do nothing for lookups.
+  * Schema representations in distinct brain networks (eLife 70445): schema
+    activation at ENCODING predicted later recall; the same mPFC region was NOT
+    implicated at retrieval. Encoding-side and retrieval-side schema use are
+    different jobs.
+  * Narrative therapy / reconsolidation: a recalled memory becomes labile and
+    can be re-authored. We already have mark_labile (consolidate.py) and the
+    oplog's supersede -- this half is built.
+
+**Why that matters here.** Our two catastrophic categories are Multi-hop
+Inference (17.6% correct) and Generalization (9.5%, 46% hallucination). We have
+tried to fix them at the composer (assertion law killed it) and at retrieval
+(three nulls today). Both are RETRIEVAL-side. The literature says inference
+support is constructed at ENCODING by linking, and we do ZERO linking at write
+time -- we store isolated atoms with no associative structure. Entry 179's gate
+currently manages those categories by declining them, which is honest but is
+not the same as solving them.
+
+**CORRECTION to the census two messages ago.** I reported gold "is not
+tractably schema-shaped": 26.2% possessive-framed, 1,111 distinct slot phrases,
+top 80 covering 40.1%. That measured SURFACE PHRASING. Mapping gold onto a
+GENERAL 20-slot persona schema -- written from ordinary profile structure, with
+the slot list deliberately NOT read off gold's vocabulary, so coverage is a
+measurement and not a target:
+
+    gold points falling inside a general schema slot: 4861 / 7552 = 64.4%
+      identity       1256  (16.6%)   [age 1017, location 174]
+      work            924  (12.2%)   [job_title 441, employment_status 293]
+      psychology      914  (12.1%)   [motivation 468, life_goal 290]
+      relationships   896  (11.9%)   [children 639, friends 100]
+      health          702  ( 9.3%)   [condition 630]
+      education       169  ( 2.2%)
+
+The 1,111 phrases collapse onto ~20 categories. Schemas ARE tractable; the
+lexical census was the wrong instrument. Fourth time this session that checking
+what a measurement actually computes changed the conclusion.
+
+**persona_schema.py shipped.** The point is NOT extraction -- it is KNOWING A
+SLOT IS EMPTY. A text-directed extractor reports what a turn happened to
+contain and has no representation of what it never saw; gaps() returns the
+slots the store cannot answer. That is a different capability from failing to
+extract, and it is the one that converts a silent miss into a targeted second
+look. Cue matching is deliberately generous: a false "filled" costs a missed
+gap, a false "empty" costs a cheap re-look, and the asymmetry favours
+generosity.
+
+**Not yet done, and the bigger of the two:** narrative/associative LINKING at
+write time. That is the mechanism the PNAS result points at, it targets exactly
+the categories we currently decline, and nothing in RG does it today.
