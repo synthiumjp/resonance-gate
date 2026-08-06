@@ -8413,3 +8413,53 @@ null is a WIN here because it buys back the footprint claim.
 **Banked from the entry-178 negative.** top_n=20 was an accuracy null, but it
 cuts composer context 75.8 -> 19.9 lines, a 74% token reduction for free. Worth
 adopting on efficiency grounds even though it failed as an accuracy lever.
+
+## Entry 181 — 2026-08-06 (p2: CORRECTION to entry 180's footprint audit. Retrieval v3 is ~156 ms/query, not 4.5 s. The metric I used folds the composer LLM call into "search". We ARE still low-cost.)
+
+**The error.** Entry 180 reported retrieval v3 at 4533 ms/query and concluded
+"we are not the low-overhead system we claim". That number came from round 5's
+`search_duration_ms`. eval_rgp2.py:247-255 sets it as
+
+    t1 = time.time()
+    answer, context = compose_answer(mem, qa["question"], index)   # RETRIEVAL + LLM
+    new_qa["search_duration_ms"] = (time.time() - t1) * 1000
+    new_qa["response_duration_ms"] = 0.0                            # never filled
+
+so the field spans retrieval AND the composer call, and the field that should
+hold generation time is hardcoded to zero. I attributed the LLM's time to our
+retriever.
+
+**Measured directly instead (retrieval only, no composer, no judge), user 11
+session 74, 362-fact store:**
+
+    pool=120   155.7 ms/query
+    pool= 80   139.3
+    pool= 60   131.1
+    pool= 40   112.6   (top-20 identical to pool=120 on 6/7, jaccard 0.974)
+    pool= 25   102.5   (identical on 4/7, jaccard 0.923)
+
+So RG's own per-query cost is ~156 ms. The remaining ~4.4 s of that 4533 is the
+client LLM composing -- which in the evidence-layer architecture is the CALLER's
+cost, not ours. The claim survives: our layer is ~156 ms/query and the default
+BM25 tier is still pure python with zero models.
+
+**Consequence: the pool lever is not worth GPU time.** It was justified by a
+cost that turned out to be someone else's. It buys only 28% of 156 ms while
+perturbing the returned set (jaccard 0.974 at pool=40), so it trades real
+retrieval fidelity for ~44 ms. Deprioritised; RG_POOL_K stays in as a dial, not
+a default.
+
+**One genuine cost remains, unquantified.** IndexV3 build was 20.59 s for 362
+facts, but that measurement INCLUDES the lazy first-call load of both models
+(_models() initialises bge-small and the cross-encoder on first use). Steady-
+state build was not isolated, so no claim is made about it. In eval the index is
+rebuilt per session from scratch; a product would build once and update
+incrementally. Worth measuring properly before it appears in any product claim.
+
+**Method note.** The bug that produced this correction was mine twice over: I
+trusted a field's NAME instead of reading how it was assigned, and the earlier
+run also silently imported a scratchpad `profile.py` that shadowed the stdlib
+module cProfile depends on. Both are the same failure -- assuming a label
+describes its contents. The standing null-control rule exists for measurements;
+this says the same for INSTRUMENTS: check what a metric is actually computing
+before drawing a product conclusion from it.
