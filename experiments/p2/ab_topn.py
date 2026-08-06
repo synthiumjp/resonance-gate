@@ -39,15 +39,18 @@ from eval_tools import evaluation_for_question   # noqa: E402
 from validity import mcnemar               # noqa: E402
 
 
-def compose_with(top_n, mem, question, index):
-    """compose_answer, but with the rerank cutoff forced.
+def compose_with(mode, on, top_n, mem, question, index):
+    """compose_answer under one arm's configuration.
 
-    RG_TOP_N is read inside retrieve_facts_v3 at CALL time, so both arms can
-    share one process and one index."""
-    if top_n:
+    Both switches are read from the environment at CALL time -- RG_TOP_N inside
+    retrieve_facts_v3, RG_QA_PROPS inside format_fact -- so both arms share one
+    process and one index, which is what makes the pairing airtight."""
+    os.environ.pop("RG_TOP_N", None)
+    os.environ.pop("RG_QA_PROPS", None)
+    if mode == "topn" and on:
         os.environ["RG_TOP_N"] = str(top_n)
-    else:
-        os.environ.pop("RG_TOP_N", None)
+    elif mode == "props" and on:
+        os.environ["RG_QA_PROPS"] = "1"
     return E.compose_answer(mem, question, index)
 
 
@@ -55,6 +58,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--users", default="10,11,12")
     ap.add_argument("--top-n", type=int, default=20)
+    ap.add_argument("--mode", default="topn", choices=("topn", "props"),
+                    help="topn: B applies the rerank cutoff. "
+                         "props: B renders context as propositions.")
     ap.add_argument("--out", default=os.path.expanduser(
         "~/rg_private/halumem/dev/ab_topn.jsonl"))
     ap.add_argument("--limit", type=int, default=0)
@@ -96,8 +102,10 @@ def main():
                 if qid in done:
                     continue
                 q = qa["question"]
-                a_ans, a_ctx = compose_with(None, mem, q, index)
-                b_ans, b_ctx = compose_with(args.top_n, mem, q, index)
+                a_ans, a_ctx = compose_with(args.mode, False, args.top_n,
+                                            mem, q, index)
+                b_ans, b_ctx = compose_with(args.mode, True, args.top_n,
+                                            mem, q, index)
                 same_ctx = (a_ctx == b_ctx)
                 if same_ctx:
                     identical += 1
@@ -128,12 +136,12 @@ def main():
                           f"{el/60:.1f} min", flush=True)
                 if args.limit and n >= args.limit:
                     of.close()
-                    return report(args.out, args.top_n)
+                    return report(args.out, args.top_n, args.mode)
     of.close()
-    report(args.out, args.top_n)
+    report(args.out, args.top_n, args.mode)
 
 
-def report(path, top_n):
+def report(path, top_n, mode="topn"):
     recs = []
     for line in open(path):
         try:
@@ -145,12 +153,13 @@ def report(path, top_n):
     if not n:
         print("no judged records")
         return
-    print(f"\n=== top_n A/B  (n={n}) ===")
+    print(f"\n=== {mode} A/B  (n={n}) ===")
     print(f"identical contexts: {sum(1 for r in recs if r['same_context'])} "
           f"({100*sum(1 for r in recs if r['same_context'])/n:.0f}%)")
     print(f"mean context lines: A(120) {sum(r['a_lines'] for r in recs)/n:.1f}"
           f"   B({top_n}) {sum(r['b_lines'] for r in recs)/n:.1f}")
-    for arm, lbl in (("a", "A round-5 (no cutoff)"), ("b", f"B top_n={top_n}")):
+    blabel = f"B top_n={top_n}" if mode == "topn" else "B propositions"
+    for arm, lbl in (("a", "A round-5 baseline"), ("b", blabel)):
         c = collections.Counter(r[f"{arm}_verdict"] for r in recs)
         print(f"  {lbl:24} Correct {100*c['Correct']/n:5.2f}%  "
               f"Halluc {100*c['Hallucination']/n:5.2f}%  "

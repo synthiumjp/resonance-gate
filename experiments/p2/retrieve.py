@@ -14,6 +14,7 @@ receipt date -- so the composer can prefer corroborated, recent evidence and
 abstain honestly when the answer is absent.
 """
 import math
+import os
 from collections import Counter
 
 from wire import _tokens, _QUERY_SYNONYMS
@@ -65,11 +66,27 @@ def query_tokens(question):
                                 if t in _QUERY_SYNONYMS}
 
 
-def format_fact(d):
+def format_fact(d, owner=None):
+    """One retrieved fact as a context line.
+
+    RG_QA_PROPS=1 renders the fact as a natural-language proposition instead of
+    an `attr: value` atom (entry 178, defect 5). Gold memory points, MOSAIC's
+    nodes, mem0's statements and Zep's facts are all propositions; rendering our
+    EXTRACTION artifact that way was worth +25% integrity and +21% F1 (entries
+    173/174), but the QA path was deliberately left on atoms so round 5 stayed
+    reproducible. Off by default for exactly that reason.
+
+    The tier/date prefix is kept in both modes: CAL rule 1 refers to it, so
+    dropping it would change two things at once."""
     dates = sorted(d["convs"].values())
     dt = dates[-1] if dates else "?"
     tag = (f"confirmed x{d['n_mentions']}" if d["n_mentions"] >= 2
            else "unconfirmed(once)")
+    if os.environ.get("RG_QA_PROPS") == "1":
+        import propositions as _PR
+        prop = _PR.render(d, owner=owner)
+        if prop:                      # empty only for malformed facts
+            return f"[{tag}, {dt}] {prop}"
     return f"[{tag}, {dt}] {d['attr'].replace(':', ' of ')}: {d['value']}"
 
 

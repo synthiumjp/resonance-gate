@@ -50,6 +50,14 @@ class IndexV3:
         self.texts = [f"{d['attr']}: {d['value']}" for d in self.facts]
         self.emb = bi.encode(self.texts, batch_size=256, show_progress_bar=False,
                              normalize_embeddings=True)
+        # Owner name for proposition rendering (entry 178 defect 5): unprefixed
+        # facts belong to the profile owner, so the renderer needs it to say
+        # "Martin Mark's ..." rather than "The user's ...".
+        try:
+            import propositions as _PR
+            self.owner = _PR.owner_name(self.facts)
+        except Exception:
+            self.owner = None
         self.persona = set()
         for d in self.facts:
             if d["attr"] == "name":
