@@ -78,6 +78,12 @@ def retrieve_facts_v3(index, question, k=120, dense_k=20, top_n=None):
     reproducible; RG_TOP_N switches the fix on for A/B.
     """
     import numpy as np
+    # RG_POOL_K shrinks what the CROSS-ENCODER must score, which is where the
+    # measured 4.5s/query goes (entry 180). Distinct from RG_TOP_N, which only
+    # trims what the composer reads and saves no CPU at all.
+    pool = os.environ.get("RG_POOL_K", "").strip()
+    if pool.isdigit() and int(pool) > 0:
+        k = int(pool)
     if top_n is None:
         env = os.environ.get("RG_TOP_N", "").strip()
         top_n = int(env) if env.isdigit() and int(env) > 0 else k

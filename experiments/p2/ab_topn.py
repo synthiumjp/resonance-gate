@@ -47,10 +47,15 @@ def compose_with(mode, on, top_n, mem, question, index):
     process and one index, which is what makes the pairing airtight."""
     os.environ.pop("RG_TOP_N", None)
     os.environ.pop("RG_QA_PROPS", None)
+    os.environ.pop("RG_POOL_K", None)
     if mode == "topn" and on:
         os.environ["RG_TOP_N"] = str(top_n)
     elif mode == "props" and on:
         os.environ["RG_QA_PROPS"] = "1"
+    elif mode == "pool" and on:
+        # Shrinks what the cross-encoder must score -- the 4.5s/query cost --
+        # rather than what the composer reads. Different lever from top_n.
+        os.environ["RG_POOL_K"] = str(top_n)
     return E.compose_answer(mem, question, index)
 
 
@@ -58,9 +63,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--users", default="10,11,12")
     ap.add_argument("--top-n", type=int, default=20)
-    ap.add_argument("--mode", default="topn", choices=("topn", "props"),
+    ap.add_argument("--mode", default="topn", choices=("topn", "props", "pool"),
                     help="topn: B applies the rerank cutoff. "
-                         "props: B renders context as propositions.")
+                         "props: B renders context as propositions. "
+                         "pool: B shrinks the BM25 candidate pool (CPU).")
     ap.add_argument("--out", default=os.path.expanduser(
         "~/rg_private/halumem/dev/ab_topn.jsonl"))
     ap.add_argument("--limit", type=int, default=0)
@@ -158,7 +164,8 @@ def report(path, top_n, mode="topn"):
           f"({100*sum(1 for r in recs if r['same_context'])/n:.0f}%)")
     print(f"mean context lines: A(120) {sum(r['a_lines'] for r in recs)/n:.1f}"
           f"   B({top_n}) {sum(r['b_lines'] for r in recs)/n:.1f}")
-    blabel = f"B top_n={top_n}" if mode == "topn" else "B propositions"
+    blabel = {"topn": f"B top_n={top_n}", "props": "B propositions",
+              "pool": f"B pool_k={top_n}"}[mode]
     for arm, lbl in (("a", "A round-5 baseline"), ("b", blabel)):
         c = collections.Counter(r[f"{arm}_verdict"] for r in recs)
         print(f"  {lbl:24} Correct {100*c['Correct']/n:5.2f}%  "
