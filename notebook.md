@@ -9044,3 +9044,55 @@ generosity.
 **Not yet done, and the bigger of the two:** narrative/associative LINKING at
 write time. That is the mechanism the PNAS result points at, it targets exactly
 the categories we currently decline, and nothing in RG does it today.
+
+## Entry 193 — 2026-08-06 (p2: S3 — gap-directed extraction fills 8/8 missing schema slots for ~40 LLM calls. And the FIFTH instrument failure of the session, caught before it shipped.)
+
+**Staged plan (S0-S4) opened, with docs/EXPERIMENT_LEDGER.md as the running
+record of wins, failures and corrections. S1 (ledger) and S3 (this) done.**
+
+**The instrument failure, first.** persona_schema.slot_filled originally matched
+cues anywhere in the store's TEXT, and I justified the generosity as
+"a false filled only costs a missed gap". On user 10's 983-fact store it
+reported 22/23 slots filled -- because with 983 facts almost any cue word
+appears somewhere. The instrument could not return a negative. Matching
+ATTRIBUTE NAMES instead asks the right question (does the store have a slot for
+this, not does the word occur) and gives 15/23. Fifth time this session that a
+metric was trusted by its description rather than its behaviour; this one was
+caught before it produced a claim, which is the only difference from the other
+four.
+
+**S3 result, user 10, against the existing v5 store:**
+
+    schema coverage (strict)  15/23 slots (65%)
+    real gaps: work.job_title, work.career_history, education.major,
+               health.constraint, relationships.partner, relationships.children,
+               relationships.family, relationships.colleagues
+    gap-directed probe filled: 8/8
+    cost ceiling: 40 candidate turns (<=5 per slot, first hit stops the slot)
+                  vs 2,658 turns for a full re-extraction -- ~1.5%
+
+Values recovered are genuine gold content, including the relationship memories
+we barely capture at all:
+    colleagues = "AndersonElizabeth, BrownKaren, WilsonJames, LopezBarbara"
+    career_history = "Google, Microsoft"
+    major = "Computer Science/Artificial Intelligence"
+
+**And one is WRONG: partner = "Michelle"** -- that is the USER's own name, not
+her partner's. So the pass has strong gap recall and UNVERIFIED precision. A
+slot-directed question invites the model to find something, and "if unsure
+output []" did not stop it on a slot where the transcript discusses the user by
+name. Not shipping this into the store until the values are validated; a wrong
+value in a previously EMPTY slot is worse than the empty slot, because nothing
+downstream can tell it was guessed.
+
+**Why this is a different mechanism from "extract harder" (entry 185's failure
+mode).** It is scope-directed, not calibration-directed (entry 191's
+distinction); its cost scales with what is MISSING rather than transcript
+length; and it can only touch slots already known empty, so it cannot inflate
+the 1.51x over-extraction the way a broader pass would.
+
+**Next on S3 before it ships:** validate the recovered values (the partner error
+says precision is the open question), and decide whether a slot-directed answer
+enters at a lower tier than a spontaneously-extracted one -- it was produced by
+asking a leading question, and the provenance machinery already exists to record
+that.

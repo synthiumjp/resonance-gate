@@ -72,31 +72,44 @@ def _norm(s):
     return re.sub(r"[^a-z0-9 ]", " ", str(s or "").lower())
 
 
-def slot_filled(store_texts, group, slot):
-    """Is this slot represented anywhere in the store?
+def slot_filled(store_attrs, group, slot):
+    """Is this slot represented in the store, matched on ATTRIBUTE NAMES.
 
-    Cue-based and deliberately generous: a false 'filled' costs us a missed
-    gap, a false 'empty' costs a wasted second look. The asymmetry favours
-    generosity, since the second look is cheap and a wrong gap report is not."""
-    cues = SCHEMA[group][slot]
+    Takes attribute names, NOT free text. The first version of this matched
+    cues anywhere in the store's text and reported 22/23 slots filled on a
+    983-fact store -- with that many facts almost any cue word appears
+    somewhere, so the generous reading I justified ("a false filled only costs
+    a missed gap") made the instrument report success unconditionally. Matching
+    the attribute name asks the right question: does the store have a SLOT for
+    this, not does the word occur. Same store, strict reading: 15/23.
+    """
+    cues = {_norm(c) for c in SCHEMA[group][slot]}
     key = _norm(slot.replace("_", " "))
-    for t in store_texts:
-        n = _norm(t)
-        if key and key in n:
+    for a in store_attrs:
+        an = _norm(str(a).split(":")[-1].replace("_", " "))
+        if not an:
+            continue
+        if an == key or an in cues:
             return True
-        if any(c in n for c in cues):
+        # containment both ways, e.g. "job title" vs "title"
+        if len(an) > 3 and key and (key in an or an in key):
             return True
     return False
 
 
-def gaps(store_texts):
+def store_attrs_from(facts):
+    """Attribute names from stored fact dicts, subject prefix stripped."""
+    return [str(f.get("attr", "")).split(":")[-1] for f in facts]
+
+
+def gaps(store_attrs):
     """Which profile slots the store cannot currently answer.
 
     This is the whole point: a text-directed extractor cannot produce this
     list, because it has no representation of what it never saw."""
-    return [(g, s) for g, s in ALL_SLOTS if not slot_filled(store_texts, g, s)]
+    return [(g, s) for g, s in ALL_SLOTS if not slot_filled(store_attrs, g, s)]
 
 
-def coverage(store_texts):
-    filled = len(ALL_SLOTS) - len(gaps(store_texts))
+def coverage(store_attrs):
+    filled = len(ALL_SLOTS) - len(gaps(store_attrs))
     return filled / len(ALL_SLOTS), filled, len(ALL_SLOTS)
