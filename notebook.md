@@ -9416,3 +9416,54 @@ assignment before drawing a conclusion -- now needs a second clause:
 **when comparing our store to gold, render it the way we would report it.**
 Comparing internal representation against external gold is the specific trap,
 and it has now caught me twice on the same axis.
+
+## Entry 201 — 2026-08-06 (p2: pipeline loss decomposed correctly. Retrieval "loses" 23.5pt but recovering it does NOT help — entry 178 already proved that. Extraction's 21.2pt is the only actionable loss. S4 re-tested on the corrected metric and the negative HOLDS.)
+
+**First, S4 re-tested.** Entry 200 raised the possibility that the linking
+negative was the same atom-vs-proposition artifact. Re-ran it rendered:
+
+    bucket  golds   base   +links  +random  link gain  vs null
+    lookup     85  48.2%    49.4%    49.4%      +1.2      +0.0
+    INFER      94  34.0%    34.0%    35.1%      +0.0      -1.1
+
+Base coverage rose from 17.6/11.7 to 48.2/34.0 as expected once rendered, but
+the CONCLUSION is unchanged: links match random on lookups and are WORSE than
+random on inference. It also fails the PNAS prediction backwards -- a small gain
+where linking should not help, nothing where it should. S4 stays closed, now on
+a metric I trust.
+
+**The cascade, all rendered (user 10, top_n=20):**
+
+    stage            lookup    INFER      ALL
+    in transcript     80.0%    91.5%    86.0%
+    in store          67.1%    62.8%    64.8%
+    in context        49.4%    34.0%    41.3%
+
+    loss transcript->store  21.2pt   (extraction)
+    loss store->context     23.5pt   (retrieval)
+
+**Retrieval looks like the bigger loss and is not the bigger problem.** Entry
+178 already ran the decisive experiment without either of us noticing it
+answered this: top_n=20 versus no cutoff (120 facts) was NULL on composed
+answers, and slightly NEGATIVE in the 50-100 band. Raising the budget
+mechanically recovers most of that 23.5pt into the context -- and the answers do
+not improve. So the gold retrieval misses at rank >20 is gold the composer would
+not have used.
+
+That is consistent with entry 178's rank data: where a supporting fact is
+present it ranks p50=1, p75=3, p90=9. What sits below rank 20 is weakly related
+by construction. The 23.5pt is real as a coverage number and inert as a lever,
+which is why three separate retrieval interventions (top_n, propositions-in-QA,
+linking) all measured null. They were all trying to spend a budget that buys
+nothing.
+
+**So extraction's 21.2pt remains the only actionable loss**, and this is now
+established four different ways rather than assumed. The difference from entry
+199 is that it is 21.2pt and not 65pt, and that we are at 75% of ceiling rather
+than 25% -- a real but incremental target, not a transformative one.
+
+**Methodological note.** Entry 200's retraction made me re-test S4 rather than
+assume the negative held. It did hold. Re-testing a conclusion after finding the
+instrument was broken is cheap here (no LLM calls) and it is the only way to
+know which of the day's results survive the correction. Entries 196/198's
+absolute numbers are superseded by this one; their conclusion is not.
