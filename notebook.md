@@ -9315,3 +9315,51 @@ session golds -- the benchmark asks about precisely the memories we are worst at
 capturing. That is not obvious and it is not good news; it means artifact recall
 overstates how useful the store is for answering. Any future quote of "52%"
 should carry this caveat.
+
+## Entry 199 — 2026-08-06 (p2: 65 POINTS OF HEADROOM. Question-relevant gold is 86.0% single-turn recoverable and our store holds 21.2%. And entry 179 was wrong about WHY the inference categories fail — 90.4% of Generalization gold is stated in one turn.)
+
+Measured the extraction ceiling on the golds the QUESTIONS need, rather than on
+session memory points generally. Users 10-12, 645 question-relevant gold points:
+
+    recoverable from a single USER turn        251   38.9%
+    recoverable from a single turn ANY ROLE    555   86.0%   <- ceiling
+    recoverable from the union of all turns    645  100.0%
+    currently in our all-turns store                ~21.2%
+
+**We capture 25% of what is achievable (21.2 / 86.0), leaving 65 points.** That
+is the largest headroom number in the project, and it is on exactly the golds
+the benchmark asks about.
+
+**Why this differs from the 52% artifact recall.** On SESSION golds we reach
+52.01% against the entry-189 ceiling of 86.9% -- about 60% of achievable. On
+QUESTION-RELEVANT golds we reach 21.2% of 86.0% -- about 25%. Question-relevant
+golds are markedly harder for our extractor than average session golds. The
+benchmark asks about the memories we are worst at, and artifact recall hides it.
+
+**CORRECTION to entry 179's interpretation.** Single-turn ceiling by type:
+
+    Generalization & Application   n=260   90.4%   (our QA correct:  9.5%)
+    Dynamic Update                 n= 30   93.3%   (22.2%)
+    Multi-hop Inference            n= 64   84.4%   (17.6%)
+    Basic Fact Recall              n=109   83.5%   (51.5%)
+    Memory Conflict                n=182   80.8%   (53.8%)
+
+Entry 179 read the inference categories as architecturally out of scope -- RG is
+an evidence layer, it does not infer, so declining them is honest. That framing
+is wrong. **90.4% of Generalization gold is stated in a SINGLE TURN.** These are
+not questions requiring inference from us; they are questions whose answers sit
+in the transcript and never reach the store. The category label misled me, and I
+did not check the label against the data before building a gate around it.
+
+**What that means for the gate.** RG_QGATE still does what entry 180 measured --
+it dominates its matched-coverage null on both axes, and that result stands. But
+it is a WORKAROUND FOR AN EXTRACTION FAILURE, not a principled scope boundary.
+It should be understood as buying safety while extraction is broken, and
+revisited once extraction improves: gating away 20% of coverage is a poor trade
+if those questions become answerable.
+
+**Where this leaves the plan.** Every retrieval-side avenue is closed (178, 184,
+196, 198) and every prompt-engineering attempt has failed (0 for 3, entry 197).
+The one axis with measured, large headroom is what the extractor PULLS OUT of a
+turn it already reads. We now read every turn (S0) and still capture a quarter
+of what those turns contain.
