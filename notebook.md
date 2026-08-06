@@ -9223,3 +9223,51 @@ above -- but the code was wrong either way.
 **S4 re-run condition:** after all-turns extraction is in the store used for the
 test. S0 raised recall 38 -> 52 on the ARTIFACT; this test ran against a
 user-turns-only store, so it has not yet seen that benefit.
+
+## Entry 197 — 2026-08-06 (p2: S2 NEGATIVE. My bespoke SYSTEM_ASSISTANT is WORSE than just reusing the user prompt — on every axis, and worse than doing nothing. The blunt path wins and is now the default.)
+
+**Same user, same metric, three arms:**
+
+    arm                                    recall  precision      F1   ratio
+    user turns only                        38.00%     22.72%  28.44%   1.69x
+    all-turns BLUNT (reuse user prompt)    52.01%     22.96%  31.86%   2.61x
+    all-turns REFINED (SYSTEM_ASSISTANT)   35.77%     16.08%  22.19%   2.72x
+
+The refined prompt loses 16pt recall and 7pt precision against blunt, and it
+emits MORE (1828 vs 1751) while capturing LESS gold. It is also worse than the
+user-turns-only baseline it was meant to improve on. There is no reading of
+this where it wins.
+
+**Why it is worth recording rather than quietly reverting.** I designed
+SYSTEM_ASSISTANT in entry 191 to be the careful, principled answer to the
+contamination tension -- take restatements, refuse opinions and advice -- and
+argued it was the way to "overcome" the trade-off. It was strictly worse than
+reusing a prompt we already had. The elaborate solution lost to the trivial one.
+
+**And the contamination worry did not materialise.** The blunt arm's precision
+(22.96%) is HIGHER than the refined arm's (16.08%) and equal to the
+user-turns-only baseline (22.72%). Ingesting assistant turns with the ordinary
+extractor did not degrade fact quality at all. Entry 190's tension was real as a
+design concern and empty as a measured effect -- at least on this benchmark,
+where the assistant is a reliable narrator. The production concern stands; the
+benchmark cost of ignoring it does not.
+
+**The probable mechanism, and it is our own law again.** SYSTEM_ASSISTANT mixed
+SCOPE rules (good: "do not extract advice") with a CALIBRATION rule (bad: "when
+unsure whether the assistant is RECALLING or INVENTING, output nothing"). Entry
+191 drew that exact distinction and I then violated it in the same file.
+Precision got WORSE, not better, which is the perverse direction the assertion
+law predicts: telling a model to be more careful does not make it more careful,
+it makes it differently wrong.
+
+**Shipped:** the blunt path is now the DEFAULT for assistant turns;
+SYSTEM_ASSISTANT is behind RG_ASSISTANT_PROMPT=1 for further work. Cache
+namespacing now applies only when that flag is on, so the blunt path reuses the
+extractions S0 already paid for rather than re-extracting.
+
+**Running total for the session's prompt-engineering attempts: 0 for 3.** V6
+typed schema (null), SYSTEM_ASSISTANT (negative), and the "if unsure output []"
+clause in the gap probe (needed deterministic guards instead, entry 195). Every
+extraction win today came from SCOPE OF INPUT (all-turns) or DETERMINISTIC
+POST-PROCESSING (emit-once, guards, splitting). That is now a strong enough
+pattern to treat as a design rule rather than an observation.

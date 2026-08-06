@@ -115,13 +115,24 @@ def ingest_user(user, cache_path, min_mentions=2):
             # what the user established are memory; the assistant's opinions,
             # advice and inventions are not. Using the user-turn prompt here
             # would ingest the model's own output as user fact.
-            sysprompt = _SYSTEM if is_user else SYSTEM_ASSISTANT
+            # S2 (entry 197) measured SYSTEM_ASSISTANT WORSE than reusing the
+            # user prompt on assistant turns, on every axis: recall 35.77 vs
+            # 52.01, precision 16.08 vs 22.96, and MORE emissions. So the blunt
+            # path is the default and the bespoke prompt is opt-in for further
+            # work, not the shipped behaviour.
+            sysprompt = _SYSTEM
+            if not is_user and os.environ.get("RG_ASSISTANT_PROMPT") == "1":
+                sysprompt = SYSTEM_ASSISTANT
             # Assistant turns are namespaced in the cache so they cannot be
             # served an extraction made under the user prompt. User turns keep
             # the BARE text hash, so every existing cache stays valid -- the
             # alternative would invalidate ~3,700 already-paid-for extractions
             # across users 10-12 for no benefit.
-            h = hashlib.sha1((text if is_user else "a:" + text).encode()
+            # Namespace only when the bespoke assistant prompt is active, so
+            # the blunt path reuses the extractions S0 already paid for.
+            _ns = (not is_user
+                   and os.environ.get("RG_ASSISTANT_PROMPT") == "1")
+            h = hashlib.sha1((("a:" + text) if _ns else text).encode()
                              ).hexdigest()
             if h in cache:
                 facts = cache[h]
