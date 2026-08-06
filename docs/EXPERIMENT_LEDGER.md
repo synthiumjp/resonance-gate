@@ -78,14 +78,23 @@ retrieval categories **64.1%** correct / 15.0% hallucination, inference
 categories **11.2%** / 46.2% (e179). Reporting the mean hid the only part of the
 system that is good.
 
+## 5b. Retrieval is near its ceiling — stop tuning it
+
+Of 179 gold points the questions need, **24 (13.4%) are in the store at all**,
+and retrieval already surfaces ~10% — about **75% of what is available**
+(e196). Retrieval tuning therefore has ~3pt of headroom on this store, which
+retrospectively explains `top_n` (e178) and propositions-in-QA (e184) being
+null. Those were not bad ideas badly executed; there was no room.
+
 ## 6. Open, in priority order
 
 | # | Item | Status |
 |---|---|---|
-| S0 | blunt all-turns arm — does the 86.9% ceiling convert? | running |
+| S0 | blunt all-turns arm | **done** — +14.01pt recall, precision flat (e194) |
 | S2 | refined `SYSTEM_ASSISTANT` arm — ceiling at what precision cost | blocked on S0 |
-| S3 | schema `gaps()` → targeted second look | ready, independent of S0 |
-| S4 | narrative linking at write time | unbuilt; largest remaining idea |
+| S3 | schema `gaps()` → targeted second look | **done** — 8/8 slots, precision 50%→100% after guards (e193/e195) |
+| S4 | narrative linking at write time | built, **BLOCKED on extraction** — expansion cannot reach unstored gold (e196) |
+| S3c | relation typing in gap probe | open — right person, wrong relation label |
 | — | judged `no-tier` run | the one audit hypothesis the proxy could not test |
 
 ## 7. Unvalidated stack — read before any official run
