@@ -8463,3 +8463,79 @@ module cProfile depends on. Both are the same failure -- assuming a label
 describes its contents. The standing null-control rule exists for measurements;
 this says the same for INSTRUMENTS: check what a metric is actually computing
 before drawing a product conclusion from it.
+
+## Entry 182 — 2026-08-06 (p2: JP's two papers applied. The stack question is ANSWERED — qwen is the strongest encoding-signal model in his own panel, not Llama. Length replicates as a hallucination signal but attenuates ~60% held-out.)
+
+JP supplied two manuscripts: "Represented but Not Expressed" (behavioural
+sandbagging signature, ACL submission) and paper 2 (encoding-time hallucination
+prediction, four-model panel).
+
+**STACK QUESTION: do not switch to Llama.** The instinct was that a fingerprint
+found in Llama argues for building there. It argues the opposite twice over.
+1. The fingerprint is an OUTPUT-STAGE OVERRIDE -- the paper's own finding is
+   that under the instruction the correct answer stays linearly decodable while
+   the emitted distribution collapses, i.e. expressed uncertainty becomes
+   non-credible. For a product whose pitch is calibrated abstention that is the
+   worst possible substrate. We want the representation, not the override.
+2. Paper 2 sec 4.1 settles it empirically: hold-out r for encoding-time
+   hallucination prediction is Qwen 0.601, Llama 0.432, Gemma 0.415, Mistral
+   0.413. QWEN IS THE BEST MODEL IN HIS OWN PANEL and the only one clearing the
+   registered 0.5. Its locked layer is mid-stack (21 of 29) and reproduces
+   development to within 0.007, while the three upper-stack layers regress
+   0.09-0.17. Switching would trade our strongest pre-generation signal for one
+   0.17 weaker. Decodability is what we want and it is not Llama-specific; the
+   override is Llama-specific and is a liability.
+
+**Why "Represented but Not Expressed" matters to us beyond the stack.** It gives
+a MECHANISM for the assertion law, which Koriat (entry 164) only described. Our
+eight assertion-guidance interventions failed at ~1:1 omission->hallucination.
+That is what moving an output-stage policy over an untouched representation
+looks like: the gate slides, the content never arrives. Sec 6's framing is the
+sharp part -- "a validity failure rather than a calibration failure", and "no
+recalibration of the emitted distribution could recover information the model
+demonstrably still holds". That is why ten prompt variants could never work.
+
+It also incidentally VINDICATES the entry-179 gate: sec 6 warns that abstention
+rules built on expressed uncertainty are unsafe when the expressed signal is
+decoupled. Our gate reads the QUESTION TEXT and never touches the model's
+expressed uncertainty, so it is immune to exactly that failure. That was luck,
+not foresight, but it is now a design property with a reason behind it.
+
+**Paper 2 sec 4.8 tested on OUR data -- it replicates.** The claim is that label
+and length share a generator: a model that does not know produces longer,
+hedged, elaborated output. Measured on round 5:
+
+    local judge  (n=1764)  correct 2.96 words  hallucinated 5.17   d +0.63
+    strict judge (n=300)   correct 2.46 words  hallucinated 6.49   d +1.24
+
+Larger under the strict judge, which is right -- the extra words ARE the
+embellishment entry 176b found by hand ("tranquility", "optimistic", "tactical
+shooters"). His sec 4.8 warning also bites: 34.7% of our answers are "Unknown."
+at 1-2 words, so any naive length signal is dominated by the abstention path and
+committed answers must be split out first.
+
+**Length as an output filter -- and the held-out correction.** Output filtering
+is one of only two levers that has ever worked here, so this was promising.
+Round 5, strict judge, all beating their matched-coverage nulls:
+
+    type>=3 only            cov 80.0%   48.00c / 14.00h
+    type>=3 OR length>10    cov 74.3%   46.00c / 11.67h
+    length>10 alone         cov 92.0%   48.00c / 19.67h
+
+BUT held out on users 10-12 (never used to pick the threshold), the length
+effect shrinks from d +0.63/+1.24 to d +0.25, and its margins over the null fall
+with it. The type gate holds (+5.59 correct margin, consistent with round 5);
+the length filter is a real but much smaller secondary signal. I scanned four
+thresholds against the same verdicts I reported them on -- that is selection, and
+the held-out number is the honest one. Ship the type gate; treat length as a
+weak auxiliary, not a headline.
+
+**Still open, and now well-posed.** Does our composer internally hold the answer
+on items where it emits "Unknown."? That is sec 5's method pointed at our
+omissions (26.4% overall, 42.5% on inference categories), with his controls --
+item-disjoint CV, position randomisation, and the honest-decoding upper curve so
+a null is interpretable. Two honest caveats before running it: our composer sees
+RETRIEVED EVIDENCE, so a positive reads as "the evidence was sufficient and the
+composer declined it" rather than parametric recall; and our setting is
+open-ended, so there is no 10-way label and no 0.10 chance floor, which makes
+the readout weaker than his Figure 2 and not a replication of it.
