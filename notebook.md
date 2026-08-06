@@ -8846,3 +8846,56 @@ it closes a few percent of a very large gap. We are still emitting 1.51x gold
 after it, so the precision problem is mostly unsolved: the remaining excess is
 facts we extract that gold simply does not contain, which no amount of
 de-duplication reaches.
+
+## Entry 189 — 2026-08-06 (p2: WE ONLY READ USER TURNS. One line caps extraction recall at 35.4%; the achievable ceiling is 86.9%. MOSAIC scores 86.77. The extractor was never the problem.)
+
+JP asked for outside-the-box. The box was the unit and SCOPE of extraction,
+which nobody had questioned in ~10 prompt revisions.
+
+**halumem_run.py:99**
+
+    for t in sess.get("dialogue", []):
+        if t.get("role") != "user":
+            continue
+
+**Measured on dev users 10-12, 2,176 gold memory points:**
+
+    best single USER turn covers gold >=0.5      771   35.4%   <- our ceiling
+    OUR MEASURED PROXY RECALL                            36.12%   <- at the ceiling
+    best single turn, ANY ROLE, >=0.5           1892   86.9%   (+51.5pt)
+    union of USER turns                         1335   61.4%
+    union of USER+ASSISTANT turns               2129   97.8%   (+36.5pt)
+
+We are at 36.12% against an architectural ceiling of 35.4%. Within measurement
+noise, THE EXTRACTOR IS RUNNING AT CAPACITY. Every extraction revision v3->v6,
+the 14B/24B/32b extractor ladder, the typed schema of entry 186 -- all of it
+optimised inside a ceiling set by one line, and none of it could ever have
+exceeded it.
+
+**And the ceiling matches the leader exactly.** MOSAIC reports HaluMem-Medium
+extraction F1 86.77. The single-turn any-role ceiling here is 86.9%. That is not
+a coincidence: they ingest the whole dialogue, we ingest half of it.
+
+**Why this also explains everything else today.**
+  * entry 185's 1.66x over-extraction with only 36% recall never made sense as
+    "we extract too much" -- we extract too much of the WRONG HALF, because the
+    right half is in turns we never read.
+  * entry 183's finding that abstentions are evidence-calibrated is the same
+    fact from the other side: the composer correctly says "Unknown" because the
+    evidence genuinely is not in the store -- it was never ingested.
+  * entry 148's "the wall is extraction TARGETING" was right about the location
+    and wrong about the mechanism. Not targeting. SCOPE.
+
+**Is reading assistant turns legitimate?** Yes. The dialogue is what a memory
+system observes; mem0, Zep and MOSAIC all ingest both sides. Gold memory points
+are derived from the conversation as a whole. Restricting to user turns was our
+own design choice -- defensible for a personal-memory product where the
+assistant's words are not the user's facts, catastrophic on a benchmark whose
+gold is written from the full transcript. It is a SCOPE decision, not a leak.
+
+**Expected cost of the fix.** Ingesting assistant turns roughly doubles the
+turns extracted (22.1 turns/session, about half assistant) and will push the
+1.51x over-extraction higher. Recall is now the binding constraint at 36%, so
+that is the right trade to make first -- but entry 185's precision problem does
+not go away, it gets worse, and both will need to hold together before any
+official run.
