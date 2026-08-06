@@ -9096,3 +9096,46 @@ says precision is the open question), and decide whether a slot-directed answer
 enters at a lower tier than a spontaneously-extracted one -- it was produced by
 asking a leading question, and the provenance machinery already exists to record
 that.
+
+## Entry 194 — 2026-08-06 (p2: S0 LANDS. All-turns ingestion gives +14.01pt recall at FLAT precision. Biggest extraction win of the session, and it survives its null.)
+
+**Clean same-user comparison (user 10, identical metric, identical arms):**
+
+    arm                       recall  precision      F1   nullF1   gain   ratio
+    user turns only           38.00%     22.72%  28.44%    4.80%  23.64  1.69x
+    ALL turns                 52.01%     22.96%  31.86%    5.51%  26.35  2.61x
+    ALL turns + emit-once     51.42%     24.65%  33.33%    5.55%  27.77  2.37x
+
+  recall     +14.01pt
+  precision  +0.24pt   -- FLAT. I predicted a drop; it did not happen.
+  F1         +3.42pt base, +4.89pt with emit-once
+  gain/null  23.64 -> 27.77pt
+
+**Precision holding is the surprising part.** Entry 189 warned that doubling
+ingested turns would worsen the 1.51x over-extraction, and the RATIO did go
+1.69x -> 2.61x as predicted -- we emit far more. But the extra emissions are
+gold-bearing at the same rate as the originals, so precision is unchanged. The
+assistant turns are not noise; they are the other half of the record.
+
+**A null scare I talked myself into and then checked.** On first reading I
+thought the gain was null-driven: the all-turns null was 5.51% against 0.00% in
+the earlier 3-user run. Wrong comparison -- that run was users 10-12 and this is
+user 10, so the null differs by USER SET, not by treatment. Within user 10 the
+null moves 4.80 -> 5.51 while F1 moves 28.44 -> 31.86. The control holds. Worth
+recording because the instinct (entries 151-153) was right even though the
+specific alarm was not: I nearly reported a real result as an artifact by
+comparing across cohorts.
+
+**Where this puts extraction.** Recall 38 -> 52 against an 86.9% single-turn
+ceiling (entry 189). We have converted about half the available headroom with a
+one-line scope change; the rest needs the refined assistant prompt (S2) and
+whatever the remaining 35pt is made of. Over-extraction is now 2.37x and is the
+open problem -- entry 185's precision work matters MORE now, not less.
+
+**Staged plan status:** S0 done (this). S1 done (docs/EXPERIMENT_LEDGER.md).
+S3 done but NOT shipped -- gap-directed probe fills 8/8 slots for ~40 calls, one
+value is wrong (partner = the user's own name), so S3b validates before it
+touches the store. S2 (refined SYSTEM_ASSISTANT arm) is now unblocked and is the
+obvious next run: the blunt arm proved the ceiling converts, so the question is
+what the restatement-only scope rule costs in recall and buys in precision.
+S4 (write-time narrative linking) remains the largest unbuilt idea.
