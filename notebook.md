@@ -8899,3 +8899,46 @@ turns extracted (22.1 turns/session, about half assistant) and will push the
 that is the right trade to make first -- but entry 185's precision problem does
 not go away, it gets worse, and both will need to hold together before any
 official run.
+
+## Entry 190 — 2026-08-06 (p2: WHY the assistant turns matter — they carry the "from" side of updates. And the fix creates a genuine product tension: ingesting assistant turns means ingesting model output.)
+
+Inspected the dialogue to understand the entry-189 gap rather than just take the
++51.5pt. Sample session, user 10:
+
+    [user]      I've recently transitioned from Apple to Google as a Lead Data Analyst.
+    [assistant] ... Your background as a SENIOR DATA SCIENTIST has equipped you ...
+
+    gold: "Michelle Hernandez's career_status updated job_title from
+           'Senior Data Scientist' to 'Lead Data Analyst'."
+
+**The prior value exists ONLY in the assistant turn.** The user states the new
+job title; the assistant supplies the old one. Same for the income figures in
+that session's gold. So update-type gold memories are structurally unreachable
+from user turns alone -- not because our extractor is weak, but because half the
+proposition is in a turn we skip. That also explains why Dynamic Update is one
+of our worst QA categories under the strict judge (22.2% correct, 44.4% halluc,
+entry 179): we never had the "from" side to update FROM.
+
+**The tension this creates, stated before we bank the win.** On HaluMem the
+assistant is a reliable narrator -- synthetic dialogue, it restates user facts
+accurately. In a real deployment, ingesting assistant turns means INGESTING THE
+MODEL'S OWN OUTPUT, and a model that embellishes (which entry 176b measured ours
+doing) would write its embellishments into memory as fact. That is memory
+contamination, and there is a literature on it (MemGuard, arXiv 2605.28009).
+So the benchmark rewards something a careful product might refuse to do. Our
+original user-turns-only choice was not stupid; it was the safe reading, and it
+cost 51.5pt on a benchmark that does not model the risk.
+
+**The resolution is our own differentiator, which is a good sign.** Do not
+choose between the two -- ingest assistant turns WITH PROVENANCE. We already
+have receipts and corroboration tiers, and this is exactly what they exist for:
+an assistant-sourced fact enters at a lower tier than a user-stated one and is
+promoted only when a user turn corroborates it. That keeps the +51.5pt recall
+ceiling on the benchmark AND keeps the contamination guarantee in production,
+where an uncorroborated model-sourced fact is visibly marked as such rather than
+silently indistinguishable from something the user said.
+
+Not yet implemented -- the current RG_INGEST_ALL_TURNS is the blunt version,
+which is the right thing to measure first (does the ceiling actually convert?).
+Provenance tagging is the follow-up if it does, and it is a product feature in
+its own right rather than a benchmark accommodation.
