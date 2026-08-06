@@ -96,7 +96,16 @@ def ingest_user(user, cache_path, min_mentions=2):
     for si, sess in enumerate(user["sessions"]):
         date = str(sess.get("start_time", ""))[:12]
         for t in sess.get("dialogue", []):
-            if t.get("role") != "user":
+            # RG_INGEST_ALL_TURNS (entry 189): this line capped extraction
+            # recall at 35.4% while the achievable single-turn ceiling across
+            # BOTH roles is 86.9% -- 51.5pt of gold sits in assistant turns we
+            # never read. Restricting to user turns is defensible for a
+            # personal-memory product (the assistant's words are not the user's
+            # facts) and catastrophic on a benchmark whose gold is written from
+            # the full transcript. Off by default: round 5 must stay
+            # reproducible, and the precision cost is not yet measured.
+            if (t.get("role") != "user"
+                    and os.environ.get("RG_INGEST_ALL_TURNS") != "1"):
                 continue
             text = str(t.get("content", "")).strip()[:1800]
             if not text:
