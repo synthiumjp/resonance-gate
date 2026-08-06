@@ -32,6 +32,8 @@ containment test. Every result here states its control.
 | Corroboration-only emission | 0.22×, a 0.37× **under**-extraction | 77.9% of stored items are single-mention; corroboration ≠ gold-worthiness |
 | Provenance tiering for assistant facts | rejected before building | assistant-sourced gold is often stated once, so requiring corroboration discards it |
 | Abstained-items probe | **moot, not null** | no positive class exists — nothing is withheld because nothing was retrieved |
+| Bespoke `SYSTEM_ASSISTANT` prompt | **negative** — recall 35.77 vs blunt 52.01, precision 16.08 vs 22.96 | the elaborate solution lost to reusing the prompt we already had (e197) |
+| Narrative linking / 1-hop expansion | **closed** — flat at every budget | only 21.2% of question gold is in the store; retrieval already gets 71% of it (e198) |
 
 Reported as *moot* rather than *null* deliberately: we did not run an
 underpowered probe and present its failure as a finding.
@@ -78,11 +80,20 @@ retrieval categories **64.1%** correct / 15.0% hallucination, inference
 categories **11.2%** / 46.2% (e179). Reporting the mean hid the only part of the
 system that is good.
 
+## 4b. Prompt engineering: 0 for 3 this session
+
+V6 typed schema (null), `SYSTEM_ASSISTANT` (negative), and "if unsure output []"
+in the gap probe (needed deterministic guards instead). **Every extraction win
+came from scope of input (all-turns) or deterministic post-processing**
+(emit-once, self-reference guard, multi-value splitting). Treat that as a design
+rule, not an observation.
+
 ## 5b. Retrieval is near its ceiling — stop tuning it
 
 Of 179 gold points the questions need, **24 (13.4%) are in the store at all**,
 and retrieval already surfaces ~10% — about **75% of what is available**
-(e196). Retrieval tuning therefore has ~3pt of headroom on this store, which
+(e196; all-turns store: 21.2% present, ~71% of it retrieved, e198). Retrieval
+tuning therefore has only a few points of headroom on this store, which
 retrospectively explains `top_n` (e178) and propositions-in-QA (e184) being
 null. Those were not bad ideas badly executed; there was no room.
 
@@ -91,11 +102,19 @@ null. Those were not bad ideas badly executed; there was no room.
 | # | Item | Status |
 |---|---|---|
 | S0 | blunt all-turns arm | **done** — +14.01pt recall, precision flat (e194) |
-| S2 | refined `SYSTEM_ASSISTANT` arm — ceiling at what precision cost | blocked on S0 |
+| S2 | refined `SYSTEM_ASSISTANT` arm | **done — NEGATIVE**, blunt path now default (e197) |
 | S3 | schema `gaps()` → targeted second look | **done** — 8/8 slots, precision 50%→100% after guards (e193/e195) |
-| S4 | narrative linking at write time | built, **BLOCKED on extraction** — expansion cannot reach unstored gold (e196) |
+| S4 | narrative linking at write time | **closed — negative** at every budget (e198) |
 | S3c | relation typing in gap probe | open — right person, wrong relation label |
 | — | judged `no-tier` run | the one audit hypothesis the proxy could not test |
+
+## 6b. Caveat on the recall numbers
+
+`ab_artifact` reports **52.01%** recall — of SESSION memory points covered by
+the emitted artifact. Only **21.2%** of the golds the QUESTIONS need are in the
+store. Question-relevant golds are harder than average session golds, so
+artifact recall overstates how useful the store is for answering. Do not quote
+52% without this.
 
 ## 7. Unvalidated stack — read before any official run
 
