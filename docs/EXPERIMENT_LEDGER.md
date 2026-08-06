@@ -97,6 +97,22 @@ came from scope of input (all-turns) or deterministic post-processing**
 (emit-once, self-reference guard, multi-value splitting). Treat that as a design
 rule, not an observation.
 
+## 5a. The offline proxy is exhausted for absolute questions
+
+The token-overlap containment metric uses a 0.5 threshold that sits **exactly on
+the mode** of the gold-vs-store overlap distribution. Coverage reads ~85% at
+0.4, 64.8% at 0.5, ~28% at 0.6 (e202). Its sensitivity to an arbitrary constant
+exceeds the effect size we are chasing.
+
+- **Absolute figures from it are unreliable** — e200's 64.8% and e201's 21.2pt
+  are wide bands, not numbers.
+- **Paired A/B conclusions stand** — a threshold shift moves both arms together,
+  so S0 (+14.01pt), emit-once, the linking null, the S2 negative and the top_n
+  null all survive.
+
+Further extraction work needs the judged harness (~5,500 calls/arm), spent on
+one well-chosen change rather than on exploration.
+
 ## 5b. Retrieval is near its ceiling — stop tuning it
 
 Of 179 gold points the questions need, **24 (13.4%) are in the store at all**,

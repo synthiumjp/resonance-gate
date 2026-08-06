@@ -9467,3 +9467,57 @@ assume the negative held. It did hold. Re-testing a conclusion after finding the
 instrument was broken is cheap here (no LLM calls) and it is the only way to
 know which of the day's results survive the correction. Entries 196/198's
 absolute numbers are superseded by this one; their conclusion is not.
+
+## Entry 202 — 2026-08-06 (p2: THE PROXY IS EXHAUSTED. The 0.5 overlap threshold sits exactly on the mode of the distribution — coverage swings 28%–85% across plausible thresholds, so it cannot resolve a 21pt question. Extraction work now needs the judge.)
+
+Chasing extraction's 21.2pt, the corrected miss anatomy (64 misses, down from
+136 once rendered) said 77% were extraction-model failures. But the examples
+kept looking like near-misses rather than misses:
+
+    gold  "Michelle Hernandez's age in January 2025 is 45 years old"
+    ours  "Michelle Hernandez's age is 45"        -> overlap 0.43, scored MISS
+
+We HAVE the age. Gold carries a date qualifier and framing words our
+proposition does not, and the token-overlap test cannot tell that apart from
+not knowing the answer. So I plotted the distribution instead of trusting the
+count:
+
+    best overlap, gold point vs our best stored proposition (n=179)
+      0.2-0.3    2
+      0.3-0.4   24  ##############
+      0.4-0.5   37  ######################
+      0.5-0.6   65  ########################################   <- MODE
+      0.6-0.7   24
+      0.7-0.8   10
+      0.8-0.9   14
+      0.9-1.0    3
+
+**The 0.5 cut sits ON the mode.** 34.1% of golds are in [0.3,0.5). Coverage
+reads ~85% at a 0.4 threshold, 64.8% at 0.5, ~28% at 0.6. The measurement's
+sensitivity to an arbitrary constant is larger than the entire effect we are
+trying to move.
+
+**So the proxy is exhausted for ABSOLUTE questions.** "How much gold is in the
+store" and "how much headroom does extraction have" cannot be answered by this
+instrument at the precision the decision requires. Entry 200's 64.8% and entry
+201's 21.2pt should both be read as "somewhere in a wide band", not as numbers.
+
+**What the proxy is still good for, and this distinction matters.** PAIRED A/B
+comparisons are largely immune: a threshold shift moves both arms together, so
+"does emit-once beat base" or "does linking beat random" survives. Every A/B
+conclusion this session (S0 +14.01pt, emit-once, linking null, S2 negative,
+top_n null) rests on same-metric comparisons and stands. What does NOT stand is
+any absolute coverage figure quoted from it.
+
+**Consequence for the plan.** Further extraction work needs judged measurement
+-- the official memory-integrity/accuracy judge, which is what entry 174 used to
+confirm proposition rendering (+25% integrity, +21% F1) after the proxy
+suggested it. That is ~5,500 judge calls per arm and should be spent on ONE
+well-chosen extraction change, not on exploring. Proxy-driven extraction
+exploration should stop here; it has stopped being informative.
+
+**Seventh instrument finding of the session, and the most useful.** The others
+were bugs. This one is a limit: the instrument is working correctly and is not
+precise enough for the question. Recognising that is different from fixing a
+bug, and it is the right moment to stop rather than generate more numbers of
+unknown validity.
