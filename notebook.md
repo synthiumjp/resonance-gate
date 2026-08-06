@@ -8641,3 +8641,65 @@ the measured gap is not an artifact of our own plumbing.
 retrieval/extraction, and entries 178/184 show the composer-side context is not
 the constraint -- neither its SIZE nor its FORM changed anything. Every
 composer-side lever is bounded by what retrieval hands over.
+
+## Entry 185 — 2026-08-06 (p2: EXTRACTION DIAGNOSED. It is a PRECISION problem — we emit 1.66x more memories than gold, over-emitting on 89% of sessions. And MOSAIC's "entity-typed graph" is just HaluMem's own gold taxonomy, typed 1:1.)
+
+JP: target extraction. Literature checked, then measured on our own artifacts,
+and the measurement is more useful than the literature.
+
+**Literature.** MOSAIC (arXiv 2607.16211) holds HaluMem-Medium extraction F1
+86.77 against our 0.340. Three capabilities claimed: entity-typed graph storage
+(event / persona / relationship), hash-accelerated dual-path retrieval (LSH
+replacing LLM classification), and active conflict detection at SAVE time. The
+paper gives no extraction ablation and does not state whether the extractor is
+trained -- it says only "an LLM-based pipeline". So SOTA extraction is reached
+by PROMPTING with a typed schema, not by training. That reframes entry 159's
+"we have never trained an extractor" bet: training is not what the leader did.
+DimMem (arXiv 2605.15759) is the counterweight -- atomic typed records on one
+shared schema, and its compact-extractor result suggests the construction CAN be
+learned by smaller models. Worth keeping, not worth leading with.
+
+**The measurement that matters (round 5, 692 sessions with memory points):**
+
+    gold memory points     7396    mean 10.69 / session
+    RG extracted memories 12282    mean 17.75 / session
+    ratio                                1.66x
+    sessions where we emit MORE than gold: 613 (89%)
+    sessions where we emit FEWER:           58 (8%)
+    per-session p90:  ours 31   gold 12        (ours max 38, gold max 74)
+
+**So the wall is PRECISION, not recall.** Entry 148 called it "extraction
+TARGETING" and that was right, but the direction was never pinned down. We have
+spent the project trying to extract MORE. We extract too much. Over-extraction
+alone caps F1 at ~75% (10.69/17.75 precision even with perfect recall), and
+consistent with this the round-5 split is integrity 0.817 (coverage, good)
+against accuracy 0.579 (support, poor).
+
+**And the gold has a three-type taxonomy we do not use:**
+
+    Persona Memory       4572  (61.8%)
+    Event Memory         2216  (30.0%)
+    Relationship Memory   608  ( 8.2%)
+
+That is MOSAIC's schema exactly. Their "entity-typed graph storage across
+events, personas and relationships" is not an architectural preference -- it is
+HaluMem's own gold typology adopted 1:1. We emit untyped `attr: value` atoms
+against gold organised in three named categories. Entry 162 caught the FORM
+mismatch (atoms vs propositions) and fixed it for the artifact; this is the
+TYPE mismatch underneath it, and it is unfixed.
+
+**Two testable moves, both write-time, both cheap relative to what we have been
+spending:**
+  1. TYPE the extraction to persona / event / relationship, matching gold.
+  2. CUT the over-extraction 1.66x -> ~1.0x. We already have the machinery to
+     do this selectively rather than by a blunt cap: corroboration tiers,
+     n_mentions, and the write gate from entry 138.
+Both are prompt/pipeline changes, not training. Each needs the standing
+controls: a paired comparison and, because F1 is a containment metric, a
+shuffled-gold null (entries 151-153).
+
+**Caveat on the 86.77 vs 0.340 comparison.** Theirs is GPT-4o-judged and ours
+qwen-judged, and entry 176 measured a ~10pt judge effect on QA. Extraction F1 is
+also LLM-judged, so some unknown share of that gap is the scorer. The
+over-extraction ratio, by contrast, is judge-independent -- it is a count -- so
+it is the more trustworthy target.
