@@ -35,7 +35,7 @@ from llm_profile import SYSTEM_V3, SYSTEM_V4, canon_attr, extract_profile_facts
 
 # v4 (events/plans, entry 83) / v5.1 (narrative ontology, entries 94-95):
 # opt in via env so older caches stay valid for comparison.
-from llm_profile import SYSTEM_V5, SYSTEM_V6
+from llm_profile import SYSTEM_V5, SYSTEM_V6, SYSTEM_ASSISTANT
 # V6 checked first so it can be enabled without disturbing the V5 default,
 # same convention V5 used against V4 (entry 185).
 _SYSTEM = (SYSTEM_V6 if os.environ.get("RG_EXTRACT_V6")
@@ -104,18 +104,29 @@ def ingest_user(user, cache_path, min_mentions=2):
             # facts) and catastrophic on a benchmark whose gold is written from
             # the full transcript. Off by default: round 5 must stay
             # reproducible, and the precision cost is not yet measured.
-            if (t.get("role") != "user"
-                    and os.environ.get("RG_INGEST_ALL_TURNS") != "1"):
+            is_user = t.get("role") == "user"
+            if not is_user and os.environ.get("RG_INGEST_ALL_TURNS") != "1":
                 continue
             text = str(t.get("content", "")).strip()[:1800]
             if not text:
                 continue
             n_turns += 1
-            h = hashlib.sha1(text.encode()).hexdigest()
+            # Assistant turns get their OWN prompt (entry 191): restatements of
+            # what the user established are memory; the assistant's opinions,
+            # advice and inventions are not. Using the user-turn prompt here
+            # would ingest the model's own output as user fact.
+            sysprompt = _SYSTEM if is_user else SYSTEM_ASSISTANT
+            # Assistant turns are namespaced in the cache so they cannot be
+            # served an extraction made under the user prompt. User turns keep
+            # the BARE text hash, so every existing cache stays valid -- the
+            # alternative would invalidate ~3,700 already-paid-for extractions
+            # across users 10-12 for no benefit.
+            h = hashlib.sha1((text if is_user else "a:" + text).encode()
+                             ).hexdigest()
             if h in cache:
                 facts = cache[h]
             else:
-                facts = extract_profile_facts(text, system=_SYSTEM)
+                facts = extract_profile_facts(text, system=sysprompt)
                 cf.write(json.dumps({"h": h, "f": facts}) + "\n")
                 cf.flush()
                 cache[h] = facts
@@ -130,6 +141,12 @@ def ingest_user(user, cache_path, min_mentions=2):
                 key = f"{subj}:{a}" if subj else a
                 slots[key][v]["n"] += 1
                 slots[key][v]["recs"].append((date, f"s{si}"))
+                # Provenance: which role sourced this mention. Kept so an
+                # assistant-only fact is auditable and can be tiered
+                # differently later, rather than silently indistinguishable
+                # from something the user said (entry 190).
+                if not is_user:
+                    slots[key][v]["asst"] = slots[key][v].get("asst", 0) + 1
     facts, prov = [], []
     for attr, entries in slots.items():
         for cl in PF._cluster(entries):

@@ -8942,3 +8942,47 @@ Not yet implemented -- the current RG_INGEST_ALL_TURNS is the blunt version,
 which is the right thing to measure first (does the ceiling actually convert?).
 Provenance tagging is the follow-up if it does, and it is a product feature in
 its own right rather than a benchmark accommodation.
+
+## Entry 191 — 2026-08-06 (p2: overcoming the contamination tension — a SCOPE rule for assistant turns, not a trust rule. And a correction to entry 186's law: scope instructions work, assertion instructions do not.)
+
+JP: we should be able to overcome it. Agreed, and entry 190's provenance-tiering
+proposal had a hole -- assistant-sourced gold is often stated ONCE (the prior
+job title appears only in the assistant turn), so requiring user corroboration
+to promote would discard exactly what we came for.
+
+**Constrain WHAT we take, not how much we trust it.** The three kinds in the
+data are cleanly separable:
+
+    "Your background as a Senior Data Scientist ..."   RESTATEMENT -> memory
+    "Google is a great company"                        OPINION     -> drop
+    "You should try meditation"                        ADVICE      -> drop
+
+Only a restatement of something the user established is memory. SYSTEM_ASSISTANT
+(llm_profile.py) extracts second-person statements about the user's history and
+prior values named while acknowledging a change, and explicitly refuses the
+assistant's opinions, advice, questions, and anything it introduces that the
+user has not established -- "when unsure whether the assistant is RECALLING or
+INVENTING, output nothing."
+
+**CORRECTION to entry 186.** I wrote there that a prompt-shaped precision lever
+was doomed by the assertion law. That was too broad. The law is about
+ASSERTION CALIBRATION -- telling a model how confident to be, which has failed
+ten times. SCOPE rules are a different class and they DO hold in this codebase:
+v3/v4's "ignore roleplay", "ignore code paths", "ignore tech identifiers" all
+work. Entry 186's typed-filter failed because "emitting fewer is correct" is a
+calibration instruction wearing a schema's clothing. "Do not extract advice" is
+a scope instruction. The distinction is whether the rule names WHAT counts or
+HOW MUCH to hedge.
+
+**Wired:** assistant turns use SYSTEM_ASSISTANT, not the user prompt. Cache keys
+namespace assistant turns ("a:" + text) while user turns keep the BARE hash, so
+all ~3,700 existing extractions across users 10-12 stay valid rather than being
+invalidated for no benefit. Provenance recorded per mention (`asst` count on the
+slot) so an assistant-only fact stays auditable and can be tiered later.
+
+**Two arms now, and the blunt one is still the right baseline.** The run started
+before this change uses the user prompt on assistant turns -- crude, but it
+answers the prior question: does the 86.9% ceiling convert into recall at all?
+If it does, the refined prompt should keep the recall and cost less precision.
+If it does not, the ceiling logic is wrong and the refined version cannot save
+it. Letting it finish rather than restarting.

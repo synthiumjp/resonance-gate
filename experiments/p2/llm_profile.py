@@ -394,6 +394,60 @@ one of these three categories, DO NOT emit it and DO NOT force it into the \
 nearest one. Emitting fewer, well-typed facts is correct; padding the list is \
 an error.""")
 
+
+# SYSTEM_ASSISTANT (entry 190/191): extraction prompt for ASSISTANT turns.
+#
+# Entry 189 found we skip assistant turns entirely, capping recall at 35.4%
+# against an 86.9% ceiling. But ingesting assistant turns wholesale means
+# ingesting the model's own output, and a model that embellishes writes its
+# embellishments into memory as fact (memory contamination). Entry 190 proposed
+# provenance tiering; that has a hole -- assistant-sourced gold is often stated
+# ONCE (the prior job title appears only there), so requiring user corroboration
+# to promote would discard exactly what we came for.
+#
+# The resolution is to constrain WHAT we take, not how much we trust it. In the
+# data the three kinds are cleanly separable:
+#     "Your background as a Senior Data Scientist ..."  RESTATEMENT -> memory
+#     "Google is a great company"                       OPINION     -> drop
+#     "You should try meditation"                       ADVICE      -> drop
+# Only a restatement of something the USER has established is memory.
+#
+# This is a SCOPE rule, not an assertion-calibration rule. Entry 186's law --
+# instructing the model does not change assertion behaviour -- applies to
+# telling a model how confident to be. Scope rules do work here: v3/v4's
+# "ignore roleplay", "ignore code paths", "ignore tech identifiers" all hold.
+# Conflating the two is what made entry 186's typed-filter attempt fail.
+SYSTEM_ASSISTANT = """Extract STABLE facts about THE USER that this ASSISTANT \
+message RESTATES or REFERS BACK TO. The assistant is talking to the user about \
+the user's own life; your job is to recover facts the user has already \
+established, including ones this message is the only record of.
+
+Output ONLY a JSON array, one object per fact:
+[{"subject": "self" OR the other person/org/project, "attribute": "<short \
+noun>", "value": "<short>"}]
+
+EXTRACT only what the assistant attributes to the user as already true:
+- second-person statements about the user's history, situation or attributes \
+("your background as a senior data scientist", "since you moved to Google", \
+"your recent diagnosis") -- these are the assistant recalling what the user \
+told it, and are often the ONLY record of a previous value.
+- a PRIOR value the assistant names when acknowledging a change ("moving from \
+Apple to Google" -> employer_previous: apple).
+
+NEVER EXTRACT:
+- the assistant's OWN opinions, evaluations or encouragement ("that's a great \
+approach", "Google is a good company") -- these are not facts about the user.
+- ADVICE, suggestions, or anything the assistant proposes the user DO ("you \
+should try", "have you considered", "it might help to") -- a suggestion is not \
+a fact, even if the user later acts on it.
+- questions the assistant asks.
+- anything the assistant introduces that the user has not established -- if it \
+reads as new information invented by the assistant rather than recalled from \
+the user, DROP IT.
+
+When unsure whether the assistant is RECALLING or INVENTING, output nothing.
+If the message restates no user fact, output exactly: []"""
+
 def extract_profile_facts(text, system=None):
     """[{attribute, value}] stable self-facts from ONE user turn. Realtime: single
     turn, no history, small output."""
