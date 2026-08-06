@@ -8539,3 +8539,52 @@ RETRIEVED EVIDENCE, so a positive reads as "the evidence was sufficient and the
 composer declined it" rather than parametric recall; and our setting is
 open-ended, so there is no 10-way label and no 0.10 chance floor, which makes
 the readout weaker than his Figure 2 and not a replication of it.
+
+## Entry 183 — 2026-08-06 (p2: the abstained-items probe is MOOT, and the reason is good news. Our abstentions are evidence-calibrated: median gold-overlap 0.00 when we abstain vs 0.75 when we answer. Nothing is withheld because nothing is retrieved.)
+
+JP asked for sec 5 of "Represented but Not Expressed" pointed at our omissions.
+Running it required a positive class: items where the composer emitted "Unknown."
+while the content was present. There is none, and establishing that cost nothing.
+
+**The counts.** In the gate dataset (users 10-19, v5_14b caches), among items
+where the composer abstained, label=1 occurs 0/149 (train) and 0/60 (eval).
+
+**That could have been a label artifact, and is not.** The oracle is a >=0.5
+token-overlap test between a PROSE gold and an ATOM context, which defect 5 says
+under-counts. If the criterion were merely knife-edge, abstentions would pile up
+just below 0.5. They do not:
+
+    ABSTAINED  median overlap 0.00  mean 0.10 / 0.04   (103/149, 50/60 at exactly 0.0)
+    answered   median overlap 0.75  mean 0.67 / 0.65
+    in the [0.3,0.5) knife-edge band: 3.4% and 0%
+
+The control is internal and decisive: ANSWERED items score 0.71-0.75 median on
+the SAME lexical metric with the SAME atom-format context. The metric detects
+evidence when it is there, so the abstained 0.00 is genuine absence rather than
+measurement failure.
+
+**What this settles.**
+1. The sec-5 probe cannot show anything here -- no withheld-content class exists.
+   Reported as moot rather than null: we did not run an underpowered probe and
+   call its failure a finding.
+2. Our composer abstains when and only when the evidence is absent. That is
+   precisely the calibrated behaviour the product claims, now measured directly
+   rather than inferred from the Memory Boundary score.
+3. Our omissions (26.4% overall, 42.5% on inference categories) are a
+   RETRIEVAL/EXTRACTION failure, not a composition failure. Consistent with
+   entry 148's "the wall is extraction TARGETING", and it means composer-side
+   work -- including the entry-177 reasoning-on test -- cannot address them.
+
+**Where this moves the headroom.** Every composer-side lever we have left is
+bounded by what retrieval hands over. The remaining accuracy is upstream: what
+gets extracted and whether it can be found. The gate (entry 179) manages the
+inference categories, and the abstention discipline is now validated, but
+neither creates evidence that was never stored.
+
+**Note on the sandbagging frame.** "Represented but not expressed" describes a
+model withholding content it holds. Our composer holds nothing to withhold on
+these items, so the frame does not apply to RG's omissions -- which is itself
+worth recording, because the assertion law (entry 164, mechanised by JP's sec 6)
+DOES apply to the assert/abstain decision. Two different stages, two different
+diagnoses: the decision to answer is output-stage and prompt-immune; the
+content of the answer is retrieval-bound.
