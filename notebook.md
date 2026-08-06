@@ -9363,3 +9363,56 @@ if those questions become answerable.
 The one axis with measured, large headroom is what the extractor PULLS OUT of a
 turn it already reads. We now read every turn (S0) and still capture a quarter
 of what those turns contain.
+
+## Entry 200 — 2026-08-06 (p2: CORRECTION to entry 199. The 65pt headroom was a measurement artifact — I compared gold against RAW ATOMS instead of rendered propositions. Real headroom is 21.2pt and we are at 75% of ceiling, not 25%.)
+
+**Sixth instrument failure of the session, and the most consequential: it
+produced a wrong headline within the hour.**
+
+Entry 199 reported question-relevant gold at 21.2% in-store against an 86.0%
+single-turn ceiling, concluded 65 points of headroom, and called it "the largest
+headroom number in the project". That measurement compared gold memory points
+against `attr: value` ATOMS. We do not store atoms for comparison purposes -- we
+render propositions (entry 162/163), and the whole point of that entry was that
+the atom form scores catastrophically against prose gold.
+
+    question-relevant gold points                179
+      covered by RAW atoms                        44   24.6%   <- entry 199
+      covered by PROPOSITIONS (what we store)    116   64.8%
+      single-turn ceiling                              86.0%
+      REAL headroom                                    21.2pt, not 65pt
+
+We are at **75% of achievable**, which is consistent with the session-gold
+picture (52.01 of 86.9 = 60%) rather than the alarming 25% I reported.
+
+**What tipped it off.** The miss-anatomy diagnostic showed the "misses"
+directly: gold "Michelle Hernandez's age in January 2025 is 45 years old" was
+counted as missed while our store held `('age', '45')`; gold "Michelle Hernandez
+Beverages I like to drink: Black coffee" was counted as missed while our store
+held `('preference', 'black coffee for its alertness...')`. In both cases we
+HAVE the fact. The overlap test failed on gold's name prefix and category
+framing, which the atom form does not carry -- the exact mismatch entry 162
+identified and fixed, re-introduced by me in a new measurement.
+
+**What survives and what does not.**
+  * Entry 199's CORRECTION to entry 179 STANDS and is unaffected: the single-turn
+    CEILINGS by type (Generalization 90.4%, Dynamic Update 93.3%, Multi-hop
+    84.4%) are computed from gold against TURN TEXT, with no store atoms
+    involved. Generalization really is an extraction problem, not an inference
+    one, and the gate really is a workaround.
+  * Entry 199's headline number (65pt) is WITHDRAWN. Replaced by 21.2pt.
+  * Entries 196/198 (linking) also measured coverage on raw atoms, so their
+    ABSOLUTE figures understate the store. Their RELATIVE conclusion is
+    unaffected -- all arms used the same metric, and expansion was flat against
+    its own random null -- but "only 21.2% is in the store" as stated there
+    should read ~65%.
+
+**The pattern is now undeniable and it is the session's main methodological
+lesson.** Six times a measurement was wrong because of what it silently
+compared or computed. Four were caught before publishing, two (entry 180's
+footprint claim, entry 199's headroom claim) were published and then retracted
+within the hour. The rule already written in the ledger -- read a metric's
+assignment before drawing a conclusion -- now needs a second clause:
+**when comparing our store to gold, render it the way we would report it.**
+Comparing internal representation against external gold is the specific trap,
+and it has now caught me twice on the same axis.

@@ -65,9 +65,18 @@ was *called* instead of reading what it *computed*:
    because `_fact_str` appends the tier — 0.6% → **10.1%** (e187).
 4. Lexical slot census said gold was not schema-shaped (40%); category-level
    mapping says **64.4%** (e192).
+5. `slot_filled` matched cues anywhere in a 983-fact store and reported 22/23
+   slots filled — it could not return a negative. Attribute-name matching gives
+   15/23 (e193). *Caught before publishing.*
+6. Store-vs-gold coverage measured against **raw atoms** instead of rendered
+   propositions → "65pt of headroom" was wrong; it is **21.2pt**, and we are at
+   75% of ceiling not 25% (e199 → **retracted in e200**).
 
 **Standing rule: before drawing a conclusion from a metric, read its
-assignment.** This has cost more than any modelling error.
+assignment.** This has cost more than any modelling error. **Second clause,
+added after #6: when comparing our store to gold, render it the way we would
+report it.** Comparing internal representation against external gold is the
+specific trap, and it has caught us twice on the same axis (e162, e199).
 
 ## 5. Where the headroom is
 
