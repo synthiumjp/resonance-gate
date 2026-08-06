@@ -8703,3 +8703,56 @@ qwen-judged, and entry 176 measured a ~10pt judge effect on QA. Extraction F1 is
 also LLM-judged, so some unknown share of that gap is the scorer. The
 over-extraction ratio, by contrast, is judge-independent -- it is a count -- so
 it is the more trustworthy target.
+
+## Entry 186 — 2026-08-06 (p2: typed schema V6 built and it does NOT cut over-extraction (1.06x). I repeated the assertion-law mistake — tried to fix precision with a prompt instruction. Corroboration filtering is the opposite error, too blunt at 0.22x.)
+
+**SYSTEM_V6 shipped** (llm_profile.py): required `type` from the closed set
+persona | event | relationship, matching HaluMem's gold taxonomy 1:1 (entry
+185), with the v5 narrative block left entirely intact per the v5.1 note that
+trimming it measurably cost narrative recall. Parser passes `mtype` through as
+a passthrough so v3/v4/v5 caches parse unchanged. Wired as RG_EXTRACT_V6 with
+its own `_v6` cache suffix, checked before V5 so it cannot disturb the default.
+
+**Also shipped: RG_LLM_BASE.** extract_profile_facts loaded llama_cpp
+IN-PROCESS, so any extraction run would allocate a second copy of the same GGUF
+and contend for VRAM with the running composer/judge server. It now routes
+through an existing server when RG_LLM_BASE is set; unset keeps the old path.
+That is a real infrastructure fix independent of V6's outcome.
+
+**The smoke says V6 does not do the job.** 20 turns sampled evenly across user
+10, V5 vs V6 on identical input:
+
+    V5 total facts 17   V6 total facts 18   ratio 1.06
+    target was ~0.60 (to bring 1.66x back to ~1.0x)
+    V6 type mix: persona 13, relationship 2, untyped 3
+
+Typing itself WORKS -- 83% of facts got a valid type. The count did not move.
+
+**And I should have predicted that.** Our own law, from eight failed
+interventions: instructing the model does not change its assertion behaviour;
+only EVIDENCE CHANGES and OUTPUT FILTERING have ever worked. "THE TYPE IS A
+FILTER, NOT A LABEL" is an assertion instruction. I wrote a precision fix in
+precisely the class that has never worked for us, in the same session where I
+wrote up the law twice. Recording it because the failure mode is mine, not the
+model's -- when a lever is prompt-shaped, check it against the law BEFORE
+spending the GPU.
+
+**The obvious output filter is too blunt.** Measured on user 10 (61 sessions,
+983 stored items): corroborated (n>=2) 217, provisional (n==1) 766 -- 77.9% of
+what we emit is single-mention. Emitting only corroborated gives 0.22x current,
+turning a 1.66x over-extraction into a 0.37x under-extraction. Worse error,
+other direction. Gold contains plenty of single-mention facts, so corroboration
+is not a proxy for gold-worthiness on this benchmark.
+
+**What is actually needed: a GRADED precision filter that drops ~40%.** Two
+candidates, both output-side:
+  1. Use `mtype` as a downstream FEATURE rather than an instruction -- drop
+     untyped facts and rank by fit to the gold type distribution (persona 61.8 /
+     event 30.0 / relationship 8.2). This salvages V6's one working part.
+  2. Emit each fact ONCE. eval_rgp2 emits on TIER CHANGE
+     (`prev_state.get(nid) != nd["tier"]`), so a fact crossing provisional->
+     confirmed is emitted in TWO sessions. Not yet sized; needs checking before
+     it is claimed as a cause.
+Any fit of a filter against gold needs the shuffled-gold null (entries 151-153)
+-- fitting a threshold to a containment metric is exactly how those artifacts
+arose.

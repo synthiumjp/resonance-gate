@@ -35,10 +35,14 @@ from llm_profile import SYSTEM_V3, SYSTEM_V4, canon_attr, extract_profile_facts
 
 # v4 (events/plans, entry 83) / v5.1 (narrative ontology, entries 94-95):
 # opt in via env so older caches stay valid for comparison.
-from llm_profile import SYSTEM_V5
-_SYSTEM = (SYSTEM_V5 if os.environ.get("RG_EXTRACT_V5")
+from llm_profile import SYSTEM_V5, SYSTEM_V6
+# V6 checked first so it can be enabled without disturbing the V5 default,
+# same convention V5 used against V4 (entry 185).
+_SYSTEM = (SYSTEM_V6 if os.environ.get("RG_EXTRACT_V6")
+           else SYSTEM_V5 if os.environ.get("RG_EXTRACT_V5")
            else SYSTEM_V4 if os.environ.get("RG_EXTRACT_V4") else SYSTEM_V3)
-_CSFX = ("_v5" if os.environ.get("RG_EXTRACT_V5")
+_CSFX = ("_v6" if os.environ.get("RG_EXTRACT_V6")
+         else "_v5" if os.environ.get("RG_EXTRACT_V5")
          else "_v4" if os.environ.get("RG_EXTRACT_V4") else "")
 from consistency import get_llm
 from wire import (WireGraph, _tokens, extract_dates, _STOP, _QWORDS, _MONTHS,

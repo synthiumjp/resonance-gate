@@ -344,13 +344,79 @@ def active_system():
     return SYSTEM_V2 if os.environ.get("RG_EXTRACT_V2") else SYSTEM
 
 
+
+# v6 (entry 185: the wall is PRECISION, not recall). Measured on round 5, RG
+# emits 17.75 memories per session against gold's 10.69 -- a 1.66x
+# over-extraction, over-emitting on 89% of sessions and under-emitting on 8%.
+# Over-extraction alone caps extraction F1 at ~75% (10.69/17.75) before any
+# quality question. Every prior extraction revision, v4 and v5 included, pushed
+# COVERAGE: v5 exists because entry 94 read the oracle ceiling as a recall
+# problem. That direction is now measured to be wrong.
+#
+# Two changes, both aimed at precision, neither removing v5 content:
+#
+# 1. A required TYPE from a CLOSED SET -- persona | event | relationship.
+#    HaluMem's gold is organised in exactly these three categories (Persona
+#    61.8%, Event 30.0%, Relationship 8.2%), and MOSAIC's "entity-typed graph
+#    storage across events, personas and relationships" is that taxonomy
+#    adopted 1:1. We have been emitting untyped attribute:value pairs into it.
+#
+# 2. The type acts as the PRECISION FILTER. A candidate that does not sit
+#    cleanly in one of the three categories is dropped rather than forced into
+#    the nearest one. This is the mechanism for the 1.66x -> ~1.0x cut, and it
+#    is selective rather than a blunt per-session cap: it removes the items
+#    that were never gold-shaped to begin with.
+#
+# The v5 narrative block is left ENTIRELY intact. The v5.1 notes above record
+# that trimming narrative content measurably cost narrative recall on this
+# model (5/6 -> 3/6 on a fresh spot check) even when the probe score looked
+# clean, so narrative facts keep their place -- they are typed, not cut.
+SYSTEM_V6 = SYSTEM_V5.replace(
+    """Output ONLY a JSON array, one object per fact:
+[{"subject": "self" OR the other person/org/project (e.g. "wife", "friend \
+chris", "tic tracker"), "attribute": "<short noun, e.g. residence, employer, \
+possession, current_tool, weekly_class>", "value": "<short>"}]""",
+    """Output ONLY a JSON array, one object per fact:
+[{"type": "persona" | "event" | "relationship", "subject": "self" OR the other \
+person/org/project (e.g. "wife", "friend chris", "tic tracker"), "attribute": \
+"<short noun, e.g. residence, employer, possession, current_tool, \
+weekly_class>", "value": "<short>"}]
+
+Every fact MUST carry exactly one type from that closed set:
+- "persona": a durable attribute of a person -- who they are, what they have, \
+where they live or work, what they prefer, believe, feel, value or intend.
+- "event": something that HAPPENED or is concretely planned, with its stated \
+timing where given.
+- "relationship": the connection BETWEEN two named parties (who someone is to \
+someone else), not a fact about either one alone.
+THE TYPE IS A FILTER, NOT A LABEL. If a candidate fact does not sit cleanly in \
+one of these three categories, DO NOT emit it and DO NOT force it into the \
+nearest one. Emitting fewer, well-typed facts is correct; padding the list is \
+an error.""")
+
 def extract_profile_facts(text, system=None):
     """[{attribute, value}] stable self-facts from ONE user turn. Realtime: single
     turn, no history, small output."""
-    out = get_llm().create_chat_completion(
-        messages=[{"role": "system", "content": "/no_think " + (system or active_system())},
-                  {"role": "user", "content": text[:1600]}],
-        max_tokens=200, temperature=0.0)
+    msgs = [{"role": "system",
+             "content": "/no_think " + (system or active_system())},
+            {"role": "user", "content": text[:1600]}]
+    # RG_LLM_BASE routes extraction through an ALREADY-RUNNING llama-cpp server
+    # instead of loading a second in-process copy of the same GGUF, which would
+    # contend for VRAM with the composer/judge server. Unset keeps the original
+    # in-process path, so existing callers are unaffected.
+    base = os.environ.get("RG_LLM_BASE", "").strip()
+    if base:
+        import json as _json
+        import urllib.request as _u
+        body = _json.dumps({"model": "local", "messages": msgs,
+                            "max_tokens": 200, "temperature": 0.0}).encode()
+        req = _u.Request(base.rstrip("/") + "/chat/completions", data=body,
+                         headers={"Content-Type": "application/json"})
+        with _u.urlopen(req, timeout=300) as resp:
+            out = _json.load(resp)
+    else:
+        out = get_llm().create_chat_completion(messages=msgs, max_tokens=200,
+                                               temperature=0.0)
     txt = out["choices"][0]["message"]["content"]
     txt = re.sub(r"<think>.*?</think>", "", txt, flags=re.DOTALL).strip()
     m = re.search(r"\[.*\]", txt, re.DOTALL)
@@ -371,6 +437,12 @@ def extract_profile_facts(text, system=None):
             v = str(f["value"]).strip()[:160]
             if a and v:
                 fact = {"attribute": a, "value": v}
+                # v6: carry the typed category through when present. Kept as a
+                # passthrough rather than a requirement so v3/v4/v5 caches,
+                # which have no type, parse unchanged.
+                t = str(f.get("type", "")).strip().lower()
+                if t in ("persona", "event", "relationship"):
+                    fact["mtype"] = t
                 # v3: subject-typed world facts; absent (v1/v2) means self
                 subj = canon_subject(f.get("subject", "self"))
                 if subj != "self":
