@@ -20,6 +20,7 @@ containment test. Every result here states its control.
 | Emit-once improves extraction precision | F1 25.74 → 26.77, ratio 1.68× → 1.51×, **null 0.00%** (e188) | solid, shipped `RG_EMIT_ONCE` |
 | Extraction was capped by scope, not quality | best single **user** turn covers 35.4% of gold; we measured **36.12%** — at the ceiling. Any-role ceiling **86.9%**; MOSAIC reports 86.77 (e189) | solid |
 | Gold is schema-shaped at the category level | 64.4% of gold falls inside a **general** 20-slot persona schema whose slots were not read off gold (e192) | solid |
+| Relations must be read, not assumed | grammatical binding gives 98.9% vs a 64.9% majority-class null, n=94; survives ablating HaluMem's own template phrasing (e203) | solid |
 | Judge choice is worth ~10 points | frontier judge scores us 9.67pt lower; ~2.7pt of it is reasoning mode alone (e176/e177) | solid |
 
 ## 2. What failed
@@ -71,6 +72,13 @@ was *called* instead of reading what it *computed*:
 6. Store-vs-gold coverage measured against **raw atoms** instead of rendered
    propositions → "65pt of headroom" was wrong; it is **21.2pt**, and we are at
    75% of ceiling not 25% (e199 → **retracted in e200**).
+7. The overlap threshold sits on the distribution mode — see §5a (e202). Not a
+   bug: a **limit**. The instrument works and is not precise enough.
+8. `re.I` applied to a whole pattern also lowercases `[A-Z]`, so a gold parser
+   read `"'s friend invited her"` as the person **`invited`** — 26 of 120
+   "relationships" were verbs (e203). Scope the flag: `(?i:(friend|...))\s+([A-Z]\w+)`.
+   First one inside a measurement written in the same session it was used;
+   caught only because the miss list was printed.
 
 **Standing rule: before drawing a conclusion from a metric, read its
 assignment.** This has cost more than any modelling error. **Second clause,
@@ -130,8 +138,14 @@ null. Those were not bad ideas badly executed; there was no room.
 | S2 | refined `SYSTEM_ASSISTANT` arm | **done — NEGATIVE**, blunt path now default (e197) |
 | S3 | schema `gaps()` → targeted second look | **done** — 8/8 slots, precision 50%→100% after guards (e193/e195) |
 | S4 | narrative linking at write time | **closed — negative** at every budget (e198) |
-| S3c | relation typing in gap probe | open — right person, wrong relation label |
+| S3c | relation typing in gap probe | **done** — 64.9% → 98.9% vs gold, 0 wrong (e203) |
+| S5 | **judged** A/B of all-turns ingestion | in flight — the one change the judge budget is spent on |
 | — | judged `no-tier` run | the one audit hypothesis the proxy could not test |
+
+S5 is what §5a called for: entry 194's +14.01pt was a proxy result, and the
+proxy is exhausted for absolute questions. Paired on user 10 (the only user
+with assistant turns extracted), one variable, costed offline at 1822 vs 2398
+judge calls before launch. `experiments/p2/s5_run.sh`.
 
 ## 6b. Caveat on the recall numbers
 
