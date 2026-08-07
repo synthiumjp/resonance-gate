@@ -9521,3 +9521,73 @@ were bugs. This one is a limit: the instrument is working correctly and is not
 precise enough for the question. Recognising that is different from fixing a
 bug, and it is the right moment to stop rather than generate more numbers of
 unknown validity.
+
+## Entry 203 — 2026-08-07 (p2: S3c CLOSED. Relation typing 64.9% -> 98.9% against gold by reading the relation grammatically instead of by proximity. Two instrument bugs found and fixed on the way, one of them mine, in the measurement itself.)
+
+Entry 195 left this open: the gap probe asks about one slot at a time and
+files whatever it recovers under the slot it ASKED about, so gold's "Michelle
+Hernandez's Friend AndersonElizabeth" was stored as `colleagues`. Right person,
+invented relation, and the coverage proxy cannot see the difference because it
+scores the person token.
+
+**The fix reads the relation from the text.** Deterministic, no second model
+call -- ledger 4b says every extraction win here came from scope-of-input or
+deterministic post-processing and prompt fixes are 0 for 3. An unreadable
+relation is now a REJECTION ("relation not stated"), not a fallback to the
+probed slot: that fallback *is* the defect, and a wrong relation in a
+previously empty slot is unauditable downstream.
+
+**Measured against gold's own labels, all 20 users, n=94 typed relationships:**
+
+    recovered   93/94   98.9%
+    correct     93/94   98.9%   (100% of what it recovered)
+    wrong        0/94    0.0%
+    unstated     1/94    1.1%   -- rejected, not guessed
+
+    NULL (old behaviour: file every person under the probed slot)
+      probed as friends     61/94  64.9%   <- best possible null
+      probed as colleagues  33/94  35.1%
+    S3c 98.9% vs 64.9%: +32 items.
+
+The null matters more than usual here. Gold is 65% `friends`, so a constant
+guess is right about two-thirds of the time by doing nothing at all, and
+"81.9% correct" (where this landed first) is only +16 over that.
+
+**Two instrument bugs, and the second was mine.**
+
+1. `re.I` on the whole gold-parsing pattern also lowercases `[A-Z]`, so
+   `"'s friend invited her to dinner"` parsed **`invited`** as the person.
+   26 of 120 "gold relationships" were verbs. Fixed by scoping the flag to
+   the relation word only -- `(?i:(friend|colleague|...))\s+([A-Z]\w+)`.
+   Caught by printing the miss list, which is the only reason to print one.
+   Eighth instrument finding, and the first one inside a measurement I wrote
+   in the same session I used it.
+
+2. Proximity was the wrong reader. All 16 remaining errors were the SAME
+   shape and the same direction, friends->colleagues:
+
+       "I have several important friends and colleagues: ThomasSusan is my
+        Friend, Susan's support ..."
+
+   `colleagues` sits two characters before the name, `Friend` thirteen after,
+   so nearest-word wins for the list header. But "friends and colleagues:"
+   describes nobody in particular while "is my Friend" names this person's
+   relation outright. Replaced proximity-first with GRAMMATICAL BINDING first
+   -- `X is my REL`, `my REL X`, `X, a REL from work` -- falling back to
+   proximity only when no construction attaches. 16 errors -> 0.
+
+**Checked whether this is just HaluMem's template.** It is not. The three
+binders each carry a share (BEFORE 40, AFTER 34, PROXIMITY 18, APPOS 1), and
+ablating the AFTER shape -- the exact `X is my Friend` phrasing HaluMem
+generates -- leaves the score **unchanged at 98.9%**, because BEFORE picks up
+every case. A single-template artefact would have collapsed under that
+ablation. Caveat kept anyway: HaluMem is synthetic and its phrasings are
+narrow, so 98.9% is "on this corpus's constructions", not a general claim.
+11 unit tests pin the guards and use natural phrasings rather than gold's.
+
+**What this does and does not buy.** It fixes a correctness defect in what the
+probe WRITES; it does not add recall, and the probe is still not shipped into
+the store. Relationship Memory is 51/671 gold points for user 10 (7.6%), so
+the benchmark ceiling here is small -- but a memory that tells you someone is
+your colleague when they are your friend is wrong in a way a product cannot
+ship, independent of what it scores.

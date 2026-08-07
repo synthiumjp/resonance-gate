@@ -85,6 +85,119 @@ def split_multi(slot, value):
     return [p for p in parts if len(p) > 1] or [value]
 
 
+# --- S3c: relation typing (entry 195 named this as an open defect) ----------
+# The probe asks one slot at a time and files whatever it recovers under the
+# slot it ASKED about. So probing `colleagues` and finding Elizabeth stores
+# "colleagues: elizabeth" even when the text says "my friend Elizabeth" --
+# gold's "Michelle Hernandez's Friend AndersonElizabeth". The person is right
+# and the relation is invented, and the coverage metric cannot see the
+# difference because it scores the person token.
+#
+# Read the relation from the TEXT instead of assuming it from the question.
+# Deterministic rather than a second model call, per the ledger's 4b rule:
+# every extraction win in this codebase came from scope-of-input or
+# deterministic post-processing, and prompt-level fixes are 0 for 3.
+_RELATION_SLOT = {}
+for _slot, _words in {
+    "partner": ("wife", "husband", "spouse", "partner", "girlfriend",
+                "boyfriend", "fiance", "fiancee", "fiancé", "fiancée"),
+    "children": ("son", "daughter", "kid", "kids", "child", "children",
+                 "stepson", "stepdaughter"),
+    "family": ("mother", "father", "mom", "mum", "dad", "parent", "parents",
+               "sister", "brother", "sibling", "aunt", "uncle", "cousin",
+               "grandmother", "grandfather", "grandma", "grandpa", "niece",
+               "nephew", "mother-in-law", "father-in-law", "sister-in-law",
+               "brother-in-law", "stepmother", "stepfather"),
+    "friends": ("friend", "friends", "bestie", "buddy", "pal", "mate",
+                "housemate", "roommate", "flatmate", "neighbour", "neighbor"),
+    "colleagues": ("colleague", "colleagues", "coworker", "coworkers",
+                   "co-worker", "co-workers", "boss", "manager", "supervisor",
+                   "teammate", "teammates", "workmate", "intern", "mentor",
+                   "client", "direct report"),
+}.items():
+    for _w in _words:
+        _RELATION_SLOT[_w] = _slot
+
+_REL_RX = re.compile(r"\b(" + "|".join(
+    sorted((re.escape(w) for w in _RELATION_SLOT), key=len, reverse=True)
+) + r")\b", re.I)
+
+# How far from the name a relation word still counts as describing it. Wide
+# enough for "my colleague Sarah Chen" and "Sarah, a friend from work", narrow
+# enough that the next sentence's relation word does not bleed across.
+_REL_WINDOW = 60
+
+# Constructions that BIND a relation to a name, as opposed to merely sitting
+# near one. These are checked before proximity because proximity gets the
+# common HaluMem phrasing exactly backwards:
+#
+#   "I have several important friends and colleagues: ThomasSusan is my
+#    Friend, Susan's support ..."
+#
+# `colleagues` is two characters before the name and `Friend` is thirteen
+# after, so nearest-word picks colleagues -- but "friends and colleagues:" is
+# a LIST HEADER that describes no one in particular, while "is my Friend"
+# names this person's relation outright. Every one of the 16 errors in the
+# first S3c measurement was this one shape, all in the same direction.
+_HEDGE = r"(?:close|good|old|dear|former|long-?time|best|new|younger|elder)\s+"
+_AFTER = re.compile(
+    r"^\W{0,3}(?:is|was|are|were)\s+(?:my|his|her|their|a|an)\s+"
+    r"(?:" + _HEDGE + r")?(\w[\w-]*)", re.I)
+_APPOS = re.compile(
+    r"^\s*,\s*(?:my|his|her|their|a|an)\s+(?:" + _HEDGE + r")?(\w[\w-]*)", re.I)
+_BEFORE = re.compile(
+    r"(?:my|his|her|their)\s+(?:" + _HEDGE + r")?(\w[\w-]*)\W{0,3}$", re.I)
+
+
+def _bound_relation(low, ns, ne):
+    """A relation grammatically attached to the name at [ns:ne), or None."""
+    for rx, seg in ((_AFTER, low[ne:ne + 60]),
+                    (_APPOS, low[ne:ne + 60]),
+                    (_BEFORE, low[max(0, ns - 40):ns])):
+        m = rx.search(seg)
+        if m and m.group(1).lower() in _RELATION_SLOT:
+            return _RELATION_SLOT[m.group(1).lower()]
+    return None
+
+
+def relation_for(text, value):
+    """Which relation the SOURCE TEXT gives this person, or None.
+
+    Two readings, in order: a relation grammatically BOUND to the name ("X is
+    my friend", "my colleague X", "X, a friend from work"), then -- only if
+    none is found -- the nearest relation word within _REL_WINDOW.
+
+    Returns None rather than a guess when neither finds anything. None is a
+    real answer here: it means we found a person and the text did not say who
+    they are to the user, which is exactly the case the probe used to paper
+    over by reusing the slot it asked about."""
+    low = str(text or "").lower()
+    # HaluMem writes surnames CamelCased ("AndersonElizabeth") while the
+    # transcript spells them out ("Anderson Elizabeth"), so split on the case
+    # boundary before matching or the name is never found in its own source.
+    spaced = re.sub(r"(?<=[a-z])(?=[A-Z])", " ", str(value))
+    name_tokens = [w for w in re.findall(r"[a-z][a-z'-]{2,}", spaced.lower())
+                   if w not in ("the", "and", "her", "his", "their")]
+    if not low or not name_tokens:
+        return None
+    spans = [m.span() for tok in name_tokens
+             for m in re.finditer(r"\b" + re.escape(tok), low)]
+    if not spans:
+        return None
+    for ns, ne in spans:
+        bound = _bound_relation(low, ns, ne)
+        if bound:
+            return bound
+    best, best_d = None, None
+    for m in _REL_RX.finditer(low):
+        rs, re_ = m.span()
+        for ns, ne in spans:
+            d = 0 if (rs < ne and ns < re_) else min(abs(ns - re_), abs(rs - ne))
+            if d <= _REL_WINDOW and (best_d is None or d < best_d):
+                best_d, best = d, _RELATION_SLOT[m.group(1).lower()]
+    return best
+
+
 def reject(slot, value, owner_tokens):
     """Why this recovered value must not enter the store, or None to accept.
 
@@ -125,7 +238,7 @@ def probe_gaps(store_texts, turns, extract_fn, limit_per_slot=6, max_slots=None,
     found, report, rejected = [], [], []
     for group, slot in missing:
         cands = candidate_turns(turns, group, slot, limit_per_slot)
-        got = []
+        got, retyped = [], 0
         for i in cands:
             prompt = SLOT_QUESTION.format(slot=slot.replace("_", " "),
                                           attr=slot, text=str(turns[i])[:1200])
@@ -138,18 +251,35 @@ def probe_gaps(store_texts, turns, extract_fn, limit_per_slot=6, max_slots=None,
                 if not v or len(v) >= 160:
                     continue
                 for piece in split_multi(slot, v):
-                    why = reject(slot, piece, owner_tokens or set())
+                    # S3c: file the person under the relation the TEXT states,
+                    # not the one we happened to ask about. An unreadable
+                    # relation is a rejection, not a fallback to the probed
+                    # slot -- that fallback IS the defect, and a wrong relation
+                    # in a previously empty slot is unauditable downstream.
+                    tgt = slot
+                    if slot in _PERSON_SLOTS:
+                        rel = relation_for(turns[i], piece)
+                        if rel is None:
+                            rejected.append({"slot": slot, "value": piece,
+                                             "why": "relation not stated"})
+                            continue
+                        if rel != slot:
+                            retyped += 1
+                        tgt = rel
+                    why = reject(tgt, piece, owner_tokens or set())
                     if why:
-                        rejected.append({"slot": slot, "value": piece,
+                        rejected.append({"slot": tgt, "value": piece,
                                          "why": why})
                         continue
-                    got.append({"attribute": slot, "value": piece,
+                    got.append({"attribute": tgt, "value": piece,
                                 "group": group, "turn": i,
+                                "probed_slot": slot,
                                 "source": "schema_probe"})
             if got:
                 break                      # first hit wins; stop paying
         report.append({"group": group, "slot": slot,
-                       "candidates": len(cands), "filled": bool(got)})
+                       "candidates": len(cands), "filled": bool(got),
+                       "retyped": retyped})
         found.extend(got)
     # Rejections are returned, not swallowed: a guard that silently drops
     # values would make the pass look cleaner than it is.
