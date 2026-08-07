@@ -39,15 +39,45 @@ from collections import defaultdict
 EV = os.path.expanduser("~/rg_private/halumem/official/HaluMem/eval")
 
 
+def chunk_files(arm):
+    """Chunk checkpoints in session order (#c0, #c1, ... -- not lexical, or
+    #c10 would sort before #c2)."""
+    files = glob.glob(f"{EV}/results/rgp2-s5-{arm}-j/tmp2/*.json")
+    return sorted(files, key=lambda p: int(p.rsplit("#c", 1)[-1].split(".")[0]))
+
+
 def load(arm):
     recs = defaultdict(list)
-    files = sorted(glob.glob(f"{EV}/results/rgp2-s5-{arm}-j/tmp2/*.json"))
+    files = chunk_files(arm)
     for f in files:
         d = json.load(open(f, encoding="utf-8"))
         for k, v in d.items():
             if isinstance(v, list):
                 recs[k].extend(v)
     return recs, len(files)
+
+
+def per_chunk_recall(arm):
+    """Integrity recall per chunk, in session order.
+
+    Reported because it is the only thing that makes the pooled number
+    readable. The official metric judges a session's gold against the
+    memories NEW IN THAT SESSION, and a store emits most of its facts early --
+    so recall falls as sessions go on, and the first chunk scores far above
+    the run. Chunk 0 of the base arm reads 59.7% against round 5's 17.6%
+    overall, which invites exactly the wrong conclusion. ONLY THE POOLED
+    FIGURE IS THE ARM'S SCORE."""
+    out = []
+    for f in chunk_files(arm):
+        d = json.load(open(f, encoding="utf-8"))
+        real = [r for r in d.get("memory_integrity_records", [])
+                if r.get("memory_source") != "interference"]
+        if not real:
+            continue
+        hit = sum(1 for r in real if r.get("memory_integrity_score") == 2)
+        out.append((os.path.basename(f).rsplit("#c", 1)[-1].split(".")[0],
+                    hit, len(real)))
+    return out
 
 
 def wilson(k, n, z=1.96):
@@ -147,6 +177,16 @@ def main():
     for arm, ivals in (("base", ib), ("all", ia)):
         r = sum(ivals.values()) / max(1, len(ivals))
         print(f"  {arm:4s} P {prec[arm]:.4f}  R {r:.4f}  F1 {f1(prec[arm], r):.4f}")
+    print()
+
+    print("PER-CHUNK integrity recall (session order) -- context for the pooled "
+          "figure,\nnot a score in itself: the judge scores a session's gold "
+          "against the memories\nNEW in that session, and a store emits most of "
+          "its facts early.")
+    for arm in ("base", "all"):
+        row = per_chunk_recall(arm)
+        if row:
+            print(f"  {arm:4s} " + "  ".join(f"c{c}:{h/n:.0%}" for c, h, n in row))
     print()
 
     qb, qa_ = qa(arms["base"]), qa(arms["all"])

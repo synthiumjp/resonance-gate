@@ -9591,3 +9591,71 @@ the store. Relationship Memory is 51/671 gold points for user 10 (7.6%), so
 the benchmark ceiling here is small -- but a memory that tells you someone is
 your colleague when they are your friend is wrong in a way a product cannot
 ship, independent of what it scores.
+
+## Entry 204 — 2026-08-07 (p2: the integrity metric is a FIRST-NINE-SESSIONS metric. 25% of gold sits in sessions 0-8 and scores 39.3%; everything after scores 10.3%. The collapse is persona-specific and is NOT the gold mix changing.)
+
+Found while sanity-checking S5's first judged chunk, which read 59.7% integrity
+recall against round 5's 17.6% overall. That gap invited the wrong conclusion
+(a fourfold improvement), so I checked the boring explanation first, on data we
+already had. It was the boring explanation, and it turned into something worth
+having.
+
+**Round 5 (users 0-9), integrity recall by 9-session bucket:**
+
+    s 0-8    486/1236   39.3%   <- 25.3% of ALL gold points
+    s 9-17    64/546    11.7%
+    s18-26    66/574    11.5%
+    s27-35    50/563     8.9%
+    s36-44    48/534     9.0%
+    s45-53    62/573    10.8%
+    s54-62    50/462    10.8%
+    s63-71    28/320     8.8%
+    s72-80     6/68      8.8%
+    POOLED   860/4876   17.6%
+
+First bucket 39.3%, everything after 10.3%. The pooled 17.6% is a blend of two
+regimes, and quoting it as "our extraction recall" hides that.
+
+**It is not the gold mix changing.** Early sessions are 78.2% Persona Memory,
+later ones ~58% -- a real shift, so the obvious story is that we are good at
+persona and the benchmark simply serves less of it later. Per-type recall kills
+that story:
+
+    type                    early (s0-8)      late (s9+)     change
+    Persona Memory          454/1000 45.4%   207/2059 10.1%   -35.3pt
+    Event Memory             15/162   9.3%   142/1278 11.1%    +1.9pt
+    Relationship Memory      17/74   23.0%    25/303   8.3%   -14.7pt
+
+**Event memory is flat and uniformly bad (~10% everywhere). Persona memory
+falls off a cliff.** We are not a system that degrades with conversation
+length in general -- we are a system whose PERSONA extraction works for nine
+sessions and then stops.
+
+**The tempting excuse, and why I am not taking it.** The natural defence is
+that later persona gold restates facts we already hold, so we extracted them
+and the judge simply credits them to the wrong session (our artifact emits a
+fact once, when its node is created). Tested against the full store, swept
+rather than at one cut:
+
+    thresh 0.4   25.3% of late misses present in the store
+    thresh 0.5   12.0%
+    thresh 0.6    4.4%
+    thresh 0.7    1.2%
+
+Somewhere between ~1% and ~25%. Entry 202 applies exactly as written -- the
+band is wider than the claim, so this does NOT establish that late misses are
+miscredited, and most of them are probably real absences. Recording the excuse
+and its failure to hold, rather than the excuse alone.
+
+**Why this matters for what we do next.** Every extraction lever this session
+was measured on session-pooled numbers, which are 75% late-session data where
+persona recall is 10%. A change that only helps early sessions would look
+weak; one that only helps late sessions would look weak for the opposite
+reason. `experiments/p2/session_decay.py` reproduces all three cuts from any
+judged run with no model calls, and S5's per-chunk breakdown will show whether
+all-turns moves the early regime, the late one, or both.
+
+**Also: never quote a chunk as an arm.** S5 checkpoints per 9 sessions, so its
+first checkpoint is drawn entirely from the high-scoring regime. s5_compare.py
+now prints the per-chunk trend with that warning attached, because a partial
+run of this benchmark reads far better than the finished one.
