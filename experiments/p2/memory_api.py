@@ -191,6 +191,10 @@ class Memory:
             status = "corroborated"
         return {"attribute": nd["attr"], "value": nd["value"],
                 "mentions": nd["n_mentions"], "status": status,
+                # W1: set at write time by currency.mark_current. Exposed so
+                # every consumer sees one verdict instead of re-deriving it.
+                "current": nd.get("current", True),
+                "superseded_by": nd.get("superseded_by"),
                 "receipts": [{"date": d, "conversation":
                               self.titles.get(c, c)[:60],
                               "conversation_id": c} for c, d in recs[:3]]}

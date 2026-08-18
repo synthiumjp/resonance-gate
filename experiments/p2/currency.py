@@ -142,3 +142,87 @@ def subjects(facts):
         seen.setdefault(name, [0, is_non_person_subject(name)])
         seen[name][0] += 1
     return seen
+
+
+# --- write-time supersession (W1) -----------------------------------------
+#
+# resolve() above answers the question at READ time, over a list of facts. That
+# is the wrong place. Every system that scores well on HaluMem's UPDATING axis
+# -- MOSAIC's write-time conflict detection, Zep's bitemporal valid_at/
+# invalid_at edges, Eywa's "at most one active state fact per key" -- decides
+# at INGESTION whether a new fact replaces an old one. The systems that leave
+# it to the retriever score 5-25% on updating; ours scores 2.9%, worst on the
+# board (e211).
+#
+# So the same rule runs once, when the store is built, and the answer is
+# recorded on the node. Read-time then costs nothing and every consumer --
+# retrieval, the artifact, the QA context -- sees the same verdict instead of
+# each re-deriving it (or, today, not deriving it at all).
+
+def _session_ord(conv_id):
+    """Sort key for a receipt's conversation id. HaluMem ingestion writes
+    's12'; other paths write real conversation uuids, which carry no order --
+    those fall back to date, handled by the caller."""
+    cid = str(conv_id)
+    if cid.startswith("s") and cid[1:].isdigit():
+        return int(cid[1:])
+    return None
+
+
+def _node_position(nd):
+    """(session_index, date) for the LATEST mention of a node -- the point at
+    which the store last saw this value asserted."""
+    best_s, best_d = None, ""
+    for cid, date in (nd.get("convs") or {}).items():
+        si = _session_ord(cid)
+        if si is not None and (best_s is None or si > best_s):
+            best_s = si
+        if str(date) > best_d:
+            best_d = str(date)
+    return (best_s if best_s is not None else -1, best_d)
+
+
+def mark_current(nodes):
+    """Mark write-time supersession on wire node dicts, in place.
+
+    nodes: an iterable of node dicts as built by WireGraph._mk_node -- each has
+    `attr` (which may carry a 'subject:' prefix), `value`, and `convs`.
+
+    Adds to every node:
+        current        False if a LATER node gave the same subject+attribute a
+                       different value
+        superseded_by  the id of the node that replaced it, else None
+
+    Non-destructive by design: nothing is dropped and history stays queryable.
+    Only attributes in SINGLE_VALUED participate -- see the note there on why
+    that set is deliberately small.
+
+    Returns the number of nodes marked superseded.
+    """
+    from propositions import split_subject
+
+    groups = {}
+    for nd in nodes:
+        nd.setdefault("current", True)
+        nd.setdefault("superseded_by", None)
+        subj, attr = split_subject(nd.get("attr", ""))
+        if attr not in SINGLE_VALUED:
+            continue
+        groups.setdefault((_norm(subj), attr), []).append(nd)
+
+    n = 0
+    for members in groups.values():
+        if len(members) < 2:
+            continue
+        members.sort(key=_node_position)
+        winner = members[-1]
+        for nd in members[:-1]:
+            # A repeat of the same value is corroboration, not revision; it is
+            # already one node here (the cluster merged it), so any DIFFERENT
+            # value reaching this point is a genuine change.
+            if _norm(nd.get("value")) == _norm(winner.get("value")):
+                continue
+            nd["current"] = False
+            nd["superseded_by"] = winner.get("id")
+            n += 1
+    return n

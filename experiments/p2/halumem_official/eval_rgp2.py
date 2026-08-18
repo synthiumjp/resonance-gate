@@ -70,6 +70,15 @@ _TIMELINE = os.environ.get("RG_TIMELINE", "0") == "1"
 # asks the MEMORY to generalise, declining is the honest answer rather than a
 # dodge. RG_QGATE=<threshold> turns it on; unset keeps round-5 behaviour.
 # Reads the question TEXT only: a product is never told the question's category.
+# W1 (entry 213): surface WRITE-TIME supersession in the update readout.
+# HaluMem's update gold is literally shaped "X updated job_title from 'A' to
+# 'B'", and until now search_memories returned every value flat -- the judge
+# could not tell which was current, and our updating accuracy is 2.9%, worst
+# of the eight systems with published HaluMem numbers (e211). currency.
+# mark_current already decides this at ingestion; this only reports it.
+# Opt-in: it changes the artifact, so it has to be A/B-able.
+_SUPERSEDE = os.environ.get("RG_SUPERSEDE") == "1"
+
 _QGATE = None
 if os.environ.get("RG_QGATE"):
     try:
@@ -166,11 +175,26 @@ def search_memories(mem, query, top=10):
     r = mem.recall(query)
     if not r["found"]:
         return []
-    out = [f"{f['attribute']}: {f['value']}" for f in r["asserted"]]
-    out += [f"(linked) {w['fact']['attribute']}: {w['fact']['value']}"
-            for w in r["wired"]]
-    out += [f"UNCONFIRMED: {f['attribute']}: {f['value']}"
-            for f in r["unconfirmed"]]
+
+    def _v(f, prefix=""):
+        base = f"{prefix}{f['attribute']}: {f['value']}"
+        if not _SUPERSEDE or f.get("current", True):
+            return base
+        # Name the replacement, not just the fact of replacement -- "from A to
+        # B" is the whole content of an update gold point, and the id carries
+        # the new value already.
+        sb = str(f.get("superseded_by") or "")
+        newv = sb.split("=", 1)[1] if "=" in sb else ""
+        return base + (f" (SUPERSEDED by: {newv})" if newv else " (SUPERSEDED)")
+
+    def _key(f):
+        return 0 if f.get("current", True) else 1
+
+    ast = sorted(r["asserted"], key=_key) if _SUPERSEDE else r["asserted"]
+    unc = sorted(r["unconfirmed"], key=_key) if _SUPERSEDE else r["unconfirmed"]
+    out = [_v(f) for f in ast]
+    out += [_v(w["fact"], "(linked) ") for w in r["wired"]]
+    out += [_v(f, "UNCONFIRMED: ") for f in unc]
     return out[:top]
 
 

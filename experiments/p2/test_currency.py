@@ -94,3 +94,64 @@ def test_empty_and_single_inputs():
     assert C.current([]) == []
     one = C.current([_job("analyst", 1)])
     assert len(one) == 1 and one[0]["current"]
+
+
+# --- write-time supersession (W1) -----------------------------------------
+
+def _node(attr, value, sessions):
+    return {"id": f"{attr}={value}", "attr": attr, "value": value,
+            "convs": {f"s{i}": f"2025-01-{i+1:02d}" for i in sessions}}
+
+
+def test_mark_current_supersedes_by_latest_session():
+    nodes = [_node("occupation", "senior data scientist", [1]),
+             _node("occupation", "lead data analyst", [3]),
+             _node("occupation", "chief visionary officer", [56])]
+    n = C.mark_current(nodes)
+    assert n == 2
+    cur = [x for x in nodes if x["current"]]
+    assert [x["value"] for x in cur] == ["chief visionary officer"]
+    assert all(x["superseded_by"] == "occupation=chief visionary officer"
+               for x in nodes if not x["current"])
+
+
+def test_mark_current_is_subject_scoped():
+    """The mentor changing jobs must not supersede the owner's job."""
+    nodes = [_node("occupation", "founder", [39]),
+             _node("sophia:occupation", "mentor", [50])]
+    C.mark_current(nodes)
+    assert all(x["current"] for x in nodes)
+
+
+def test_mark_current_leaves_multi_valued_attributes_alone():
+    nodes = [_node("hobby", "puzzle games", [2]),
+             _node("hobby", "strategy games", [40]),
+             _node("belief", "data predicts behaviour", [1]),
+             _node("belief", "collaboration matters", [30])]
+    assert C.mark_current(nodes) == 0
+    assert all(x["current"] for x in nodes)
+
+
+def test_mark_current_handles_non_ordinal_conversation_ids():
+    """run_wire/memops paths use real uuids, which carry no session order --
+    the date must carry it instead of everything collapsing to one bucket."""
+    a = {"id": "city=hobart", "attr": "city", "value": "hobart",
+         "convs": {"abc-123": "2024-01-01"}}
+    b = {"id": "city=sydney", "attr": "city", "value": "sydney",
+         "convs": {"def-456": "2025-06-01"}}
+    C.mark_current([a, b])
+    assert b["current"] and not a["current"]
+
+
+def test_mark_current_is_idempotent():
+    nodes = [_node("city", "hobart", [1]), _node("city", "sydney", [9])]
+    first = C.mark_current(nodes)
+    second = C.mark_current(nodes)
+    assert first == 1 and second == 1
+    assert sum(1 for x in nodes if x["current"]) == 1
+
+
+def test_mark_current_on_a_single_node_changes_nothing():
+    nodes = [_node("occupation", "analyst", [4])]
+    assert C.mark_current(nodes) == 0
+    assert nodes[0]["current"] and nodes[0]["superseded_by"] is None

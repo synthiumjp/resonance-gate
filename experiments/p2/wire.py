@@ -287,6 +287,17 @@ class WireGraph:
             nd = cls._mk_node(*f[:4], "provisional", toks=f[4] if len(f) > 4 else None)
             if nd["id"] not in g.nodes:
                 g.provisional[nd["id"]] = nd
+        # W1: decide supersession ONCE, here, at write time -- not on every
+        # read. Provisional nodes take part: a superseded job title is usually
+        # single-mention, so excluding them would miss most of the changes.
+        try:
+            import currency as _CU
+            _CU.mark_current(list(g.nodes.values()) + list(g.provisional.values()))
+        except Exception:
+            for nd in list(g.nodes.values()) + list(g.provisional.values()):
+                nd.setdefault("current", True)
+                nd.setdefault("superseded_by", None)
+
         ids = sorted(g.nodes)
         for i, a in enumerate(ids):
             ca = g.nodes[a]["convs"]

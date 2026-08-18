@@ -123,9 +123,20 @@ def reject_subject_attr(subject, attr):
             and attr in _PERSON_ATTR)
 
 
+# A qualifier does not stop a company being a company: "google (part-time)"
+# reached the store as an OCCUPATION because the test matched bare names only.
+_QUALIFIER = re.compile(r"\s*[\(\[].*?[\)\]]\s*$|\s*[-,;]\s.*$")
+
+
 def is_organization(v):
     v = str(v or "").strip().lower()
-    return bool(v) and (v in _ORG_NAMES or bool(_ORG_SUFFIX.search(v)))
+    if not v:
+        return False
+    core = _QUALIFIER.sub("", v).strip()
+    for cand in (v, core):
+        if cand and (cand in _ORG_NAMES or _ORG_SUFFIX.search(cand)):
+            return True
+    return False
 
 
 def reslot_attr(attr, v):

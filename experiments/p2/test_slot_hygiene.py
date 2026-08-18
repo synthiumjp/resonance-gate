@@ -39,6 +39,22 @@ def test_organisations_are_reslotted_not_rejected():
         assert PF.reslot_attr("occupation", org) == "employer", org
 
 
+def test_qualified_company_names_are_still_companies():
+    """"google (part-time)" reached the store as an OCCUPATION because the
+    test matched bare names only. A qualifier does not stop a company being a
+    company."""
+    for org in ("google (part-time)", "apple - contract", "acme labs (remote)",
+                "innovative ai corp, seattle"):
+        assert PF.is_organization(org), org
+        assert PF.reslot_attr("occupation", org) == "employer", org
+
+
+def test_qualifiers_do_not_turn_job_titles_into_companies():
+    for job in ("data scientist (part-time)", "founder - ai startup",
+                "consultant (remote)", "analyst, contract"):
+        assert not PF.is_organization(job), job
+
+
 def test_real_job_titles_are_left_alone():
     """The failure that would matter: re-slotting a true occupation into
     employer silently empties the job field."""
