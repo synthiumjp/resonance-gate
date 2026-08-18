@@ -46,9 +46,23 @@ def chunk_files(arm):
     return sorted(files, key=lambda p: int(p.rsplit("#c", 1)[-1].split(".")[0]))
 
 
-def load(arm):
+def chunk_ids(arm):
+    return {int(p.rsplit("#c", 1)[-1].split(".")[0]) for p in chunk_files(arm)}
+
+
+def load(arm, only=None):
+    """Pool an arm's checkpoints. `only` restricts to a set of chunk ids.
+
+    THE GUARD. If one arm is further along than the other -- the normal state
+    of a resumable run, and exactly the state S5 was left in -- pooling each
+    arm over whatever it happens to have compares different session ranges.
+    Recall falls hard with session position (e204), so the arm with FEWER
+    chunks scores higher on every axis for no reason but being less finished.
+    Left unguarded this reads as a win for whichever arm was interrupted."""
     recs = defaultdict(list)
-    files = chunk_files(arm)
+    files = [f for f in chunk_files(arm)
+             if only is None
+             or int(f.rsplit("#c", 1)[-1].split(".")[0]) in only]
     for f in files:
         d = json.load(open(f, encoding="utf-8"))
         for k, v in d.items():
@@ -139,9 +153,21 @@ def f1(p, r):
 
 
 def main():
+    have = {arm: chunk_ids(arm) for arm in ("base", "all")}
+    common = have["base"] & have["all"]
+    partial = have["base"] != have["all"]
+    if partial:
+        print(f"PARTIAL RUN -- base has {len(have['base'])} chunks, all has "
+              f"{len(have['all'])}. Every figure below is restricted to the "
+              f"{len(common)} chunk(s) BOTH arms judged "
+              f"(sessions {min(common)*9}-{max(common)*9+8}), because recall "
+              "falls with\nsession position (e204) and pooling each arm over "
+              "its own range would\nhand the win to whichever arm is less "
+              "finished. These are NOT arm scores.\n")
+
     arms = {}
     for arm in ("base", "all"):
-        recs, nf = load(arm)
+        recs, nf = load(arm, only=common)
         arms[arm] = recs
         print(f"{arm}: {nf} chunks, "
               f"{len(recs['memory_integrity_records'])} integrity, "
@@ -183,6 +209,7 @@ def main():
           "figure,\nnot a score in itself: the judge scores a session's gold "
           "against the memories\nNEW in that session, and a store emits most of "
           "its facts early.")
+    print("  (all judged chunks, including any outside the common range above)")
     for arm in ("base", "all"):
         row = per_chunk_recall(arm)
         if row:

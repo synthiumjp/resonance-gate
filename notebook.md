@@ -9659,3 +9659,76 @@ all-turns moves the early regime, the late one, or both.
 first checkpoint is drawn entirely from the high-scoring regime. s5_compare.py
 now prints the per-chunk trend with that warning attached, because a partial
 run of this benchmark reads far better than the finished one.
+
+---
+
+## Entry 205 — 2026-08-07 (p2: S5 paused at the GPU handover. Base arm complete and it reproduces entry 204 out-of-sample. A ninth instrument failure, caught in the comparison script itself: pooling a partial arm against a complete one hands the win to whichever arm is less finished.)
+
+JP needed the GPU, so the judged A/B stopped mid-flight. Everything below is
+what exists on disk; nothing here is the answer to S5.
+
+**State.** Base arm complete: 7/7 chunks, 1822 judge calls, 0.1% parse
+failures. All-turns arm: 1/7 chunks. Chunk 1 was ~90% through its accuracy
+phase and is lost — checkpoints are per chunk, not per call. Stopped with
+SIGTERM down the tree (driver, evaluation.py, its ProcessPool workers, then
+the llama_cpp server last), never `-9`, so nothing was killed mid-load.
+
+**Base arm, pooled over all 7 chunks — a real judged score for user 10:**
+
+    integrity recall   26.88%  (118/439)
+    target_accuracy    66.49%  (310.5/467 target, 1014 emitted)
+    extraction F1      0.3828
+    QA                 56.9% correct / 17.5% hallucination / 25.5% omission
+
+Not comparable to round 5's 17.6% / 0.2820 / 55.0%: different users (10 vs
+0–9) and emit-once was off there. What it IS good for is that its per-chunk
+trend reproduces entry 204 on a user and a config that entry never saw:
+
+    c0 60%   c1 17%   c2 16%   c3 9%   c4 28%   c5 10%   c6 2%
+
+Entry 204 was one decomposition of one official run. This is the same shape
+out-of-sample, so the first-nine-sessions effect is a property of the system,
+not of round 5.
+
+**Instrument failure #9 — and it was in the comparison script I wrote for
+exactly this run.** `s5_compare.py` pooled each arm over whatever chunks it
+had. With base at 7 and all-turns at 1, that compared base's full session
+range against all-turns' first nine sessions. Given entry 204, the less
+finished arm wins by construction. It printed:
+
+    all  target_accuracy 76.56%   base 66.49%    <- +10pt "win" for all-turns
+
+Restricted to the chunk both arms judged, the sign reverses:
+
+    base target_accuracy 79.70%   all  76.56%    <- base ahead by 3pt
+
+The script now computes the common chunk set first and refuses to pool
+outside it, with a banner naming the session range. Same failure class as
+#1–#8: I trusted what the number was called. The specific lesson is narrower
+and worth keeping — **a resumable run's natural resting state is unequal
+arms, so any comparison over a resumable run needs a completeness guard, not
+just a correctness one.**
+
+**The partial paired result, with its caveats attached.** Sessions 0–8 only,
+n=119 gold points, both arms:
+
+    integrity   base 62.18%   all 63.87%   delta +1.68pt
+                discordant 5 / 7,  McNemar exact p=0.7744
+    precision   base 79.70%   all 76.56%
+    F1          base 0.6825   all 0.6964
+    QA          base 73.9% correct / 21.7% halluc
+                all  78.3% correct / 17.4% halluc   (p=1)
+
+Not significant on any axis, and drawn entirely from the regime entry 204
+identified as atypical — 15% of the run, the part where base already scores
+62% instead of 27%. This does **not** refute entry 194's +14.01pt: that claim
+is about recall pooled across all sessions, and the sessions where base recall
+is ~10% are precisely the ones missing here. Recording it because a +1.68pt
+first chunk is exactly the kind of number that quietly becomes "all-turns
+didn't work" if nobody writes down what it excludes.
+
+**Resume.** `bash experiments/p2/s5_run.sh` — stage-1 artifacts are built and
+completed chunks are skipped via `tmp2/`, so ~3h of judging remains rather
+than 3.5h. It re-verifies the ROCm banner and re-runs the emission preflight
+before spending a call, so a resume cannot silently become a CPU run or a
+different configuration.

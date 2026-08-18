@@ -79,6 +79,12 @@ was *called* instead of reading what it *computed*:
    "relationships" were verbs (e203). Scope the flag: `(?i:(friend|...))\s+([A-Z]\w+)`.
    First one inside a measurement written in the same session it was used;
    caught only because the miss list was printed.
+9. `s5_compare` pooled each A/B arm over whatever chunks it had judged. With a
+   partial run (base 7 chunks, all-turns 1) that compares different session
+   ranges, and by e204 the LESS FINISHED arm wins by construction — it printed
+   all-turns +10pt on precision; like-for-like, base is ahead by 3pt (e205).
+   **A resumable run's resting state is unequal arms, so any comparison over
+   one needs a completeness guard, not just a correctness one.**
 
 **Standing rule: before drawing a conclusion from a metric, read its
 assignment.** This has cost more than any modelling error. **Second clause,
@@ -139,7 +145,7 @@ null. Those were not bad ideas badly executed; there was no room.
 | S3 | schema `gaps()` → targeted second look | **done** — 8/8 slots, precision 50%→100% after guards (e193/e195) |
 | S4 | narrative linking at write time | **closed — negative** at every budget (e198) |
 | S3c | relation typing in gap probe | **done** — 64.9% → 98.9% vs gold, 0 wrong (e203) |
-| S5 | **judged** A/B of all-turns ingestion | in flight — the one change the judge budget is spent on |
+| S5 | **judged** A/B of all-turns ingestion | **paused** at GPU handover — base arm complete, all-turns 1/7 chunks, ~3h to resume (e205) |
 | — | judged `no-tier` run | the one audit hypothesis the proxy could not test |
 
 S5 is what §5a called for: entry 194's +14.01pt was a proxy result, and the
