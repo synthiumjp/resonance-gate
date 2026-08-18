@@ -10097,3 +10097,117 @@ of the five have survived a null AND been re-checked against the current
 stack. The rest were validated against configurations that no longer exist.
 Before any of them ships, each needs re-measuring on the current stack, which
 for the gate cost nothing because the judged records were already on disk.
+
+---
+
+## Entry 211 — 2026-08-07 (p2: where we ACTUALLY sit. Published HaluMem-Medium numbers exist for seven systems. Our QA is mid-pack before a judge adjustment and below it after; our extraction is second-worst of eight. The axis we are weakest on is the axis the field says differentiates.)
+
+Three research passes on the 2026 landscape. The competitive facts first, because
+they are unflattering and they should drive what we do next.
+
+**HaluMem-Medium, published figures** (arXiv:2511.03506 / MemTensor's repo;
+MOSAIC from arXiv:2607.16211):
+
+    system          extraction F1   updating acc   QA correctness
+    MOSAIC              86.77            --            73.10
+    MemOS               79.70          62.11           67.23
+    Mem0-Graph          57.85          24.50           54.66
+    Mem0                57.31          25.50           53.02
+    Supermemory         56.90          16.37           54.07
+    Zep                   --           47.28           55.47
+    Memobase            25.13           5.20           35.33
+    ---------------------------------------------------------
+    RG round5           28.20            2.9           55.0   (local judge)
+    RG s5-base          38.28            --            56.9   (local judge, n=137)
+
+**The judge adjustment matters and it goes the wrong way.** Entry 176 measured
+a frontier judge scoring us **9.67pt WORSE** than our local one — our judge is
+the lenient one, which is the opposite of what we assumed before measuring it.
+Published numbers are frontier-judged. So a like-for-like read puts our QA
+nearer **45-47%**, i.e. below Mem0 / Supermemory / Zep / Mem0-Graph, above
+Memobase, far below MemOS and MOSAIC. Indicative, not exact: e176 measured the
+gap on a different set, and I am not going to launder that into a precise
+number.
+
+**Extraction is the real problem.** At 28-38% F1 we are second-worst of eight,
+above only Memobase. And the field's own synthesis is that *"the
+extraction/updating axis, not the QA axis, is where systems actually
+differentiate — end-to-end QA accuracy compresses these differences"*, because
+a QA judge will accept a plausible-sounding wrong answer from a store with 25%
+updating accuracy. Our updating number, 2.9%, is the worst on the board.
+
+So: we are weakest exactly where the field says the difference is made. That is
+not a reason for despair — it is the clearest target statement we have had, and
+entries 189/204/206/209 have all been circling it.
+
+**What the leaders do that we do not: WRITE-TIME discipline.** Every system that
+scores well on operation-level evaluation resolves conflict and staleness at
+ingestion — MOSAIC's write-time conflict detection (66% vs 14% baseline),
+Zep's bitemporal `valid_at`/`invalid_at` edges (updating 47.28%, best of the
+non-leaders), Eywa's "at most one active state fact per (user, entity,
+fact_type)", MemOS's MemCube. Systems that leave it to the retriever or the
+composer show it in updating accuracy: Memobase 5.20%, Supermemory 16.37%,
+ours 2.9%.
+
+`currency.py`, written today, does exactly the right thing at exactly the wrong
+time — it supersedes at READ time, over the rendered artifact. **It should move
+into the write path**, where a superseded fact is marked once at ingestion
+rather than recomputed on every query. That is the single highest-value
+structural change identified today, and it is deterministic post-processing,
+the class §4b says every extraction win has come from.
+
+**Positioning: "receipts + abstention" is no longer white space.**
+  * **AgentPrizm** (verified, launched July 2026) ships confidence-weighted
+    facts, abstain-below-threshold, audit receipts, supersede chains and
+    GDPR-verifiable deletion — our pitch, hosted, aimed at enterprises.
+  * **Eywa** (arXiv:2605.30771) is closer still: "evidence before belief",
+    immutable source evidence stored before derived facts, zero LLM calls in
+    the read path, tunable abstention with three modes, published per-question
+    traces, and **refusal-aware F1** — a metric that zeroes credit for
+    abstaining on answerable questions, specifically to stop systems gaming
+    abstention. We should adopt that metric; our abstention claim is currently
+    unfalsifiable in exactly the way it punishes.
+  * **MOSS** (arXiv:2607.04391) holds the identical philosophy — deterministic
+    SQL retrieval, "the answer to why is always reconstructible" — with **zero
+    comparative benchmarks**, a one-year case study instead.
+
+What is genuinely unoccupied is the INTERSECTION: every provenance-focused
+competitor is hosted; every local-first project sells on "data never leaves
+your machine" and publishes no hallucination numbers. Local + small-model +
+receipts + measured abstention is empty. So local is the wedge and receipts are
+the mechanism, not the headline.
+
+**The field's credibility crisis is an asset we already own.** The Zep LoCoMo
+claim went 84% -> 58.44% (corrected by a competitor's GitHub issue) -> 94.7%
+(current site, new methodology, no third-party audit). Third-party citations of
+Mem0's LoCoMo differ from Mem0's own by 28pp. A Penfield audit found 6.4%
+ground-truth errors in LoCoMo; "MemPalace" claimed 100% via a retrieval-bypass
+trick; "Same Ranking, Different Winner" (arXiv:2605.24060) shows the winner
+depends on scoring-target choice. Informed buyers now discount every vendor
+number. We have 211 entries of nulls, retractions and instrument failures
+recorded at the same weight as wins — including three today. That is a practice
+nobody can retrofit, and it is worth more than a leaderboard row we would have
+to caveat anyway.
+
+**Corroboration of our own results, from outside.** Worth recording because it
+means these were not local flukes:
+  * *Sufficient Context* (ICLR 2025): hallucination 10.2% with NO context vs
+    **66.1% with insufficient-but-present context**. That is our inference-
+    question profile exactly, and it is a missing-signal problem, not a
+    calibration one — which is why all ten prompt interventions failed 1:1.
+  * A 35-method independent meta-evaluation finds self-knowledge gating
+    underperforms externally-computed uncertainty. "If unsure output []" was
+    never going to work.
+  * *Dawn After the Dark*: self-reflection helps at 70B+ and is
+    counterproductive at 7-13B. Our 235B-below-14B inversion is a known class.
+  * *"Don't Ask the LLM to Track Freshness"* (Jun 2026): code picking
+    `max(timestamp)` beats LLM-judged freshness by +10.8pp, +21pp at long
+    context — independent validation of today's `currency.py`. The same paper
+    scores Zep/Graphiti at 7%/3% on fact consolidation, below raw BM25.
+
+**And a warning aimed at us.** Entry 130's dial is a hidden-state probe (layer
+17, AUROC 0.841). Two independent replications (ACL 2025, EMNLP 2025 Findings)
+found that class collapses to ~0.58 — near random — on realistic OOD data, the
+second showing an apparent RAGTruth success was a spurious dataset correlation.
+Before the dial ships it needs revalidating on a held-out slice, exactly as the
+gate did today (e210).

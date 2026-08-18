@@ -177,6 +177,29 @@ tuning therefore has only a few points of headroom on this store, which
 retrospectively explains `top_n` (e178) and propositions-in-QA (e184) being
 null. Those were not bad ideas badly executed; there was no room.
 
+## 5e. Where we actually sit (e211)
+
+Published HaluMem-Medium: MOSAIC 86.77 extraction F1 / 73.10 QA; MemOS 79.70 /
+67.23; Mem0 57.31 / 53.02; Zep --/55.47 (updating 47.28); Memobase 25.13 /
+35.33. **RG: 28-38 extraction F1, 55-57 QA, updating 2.9% — all local-judged,
+and e176 says a frontier judge scores us 9.67pt WORSE.** Like-for-like our QA
+is ~45-47 and our extraction is second-worst of eight.
+
+**We are weakest on the axis the field says differentiates.** QA correctness
+compresses the differences because a judge accepts plausible wrong answers;
+extraction and updating do not. Every leader resolves conflict at **write
+time** (MOSAIC write-time detection, Zep bitemporal edges, Eywa one-active-
+state-fact); the laggards on updating accuracy are the ones that do not.
+`currency.py` supersedes at READ time and should move into the write path.
+
+Competitors in our niche as of 2026: **AgentPrizm** (July 2026, hosted:
+confidence-weighted facts, receipts, supersede chain, verifiable deletion),
+**Eywa** (arXiv:2605.30771 — evidence-before-belief, tunable abstention,
+**refusal-aware F1**, published traces), **MOSS** (arXiv:2607.04391 — same
+philosophy, zero benchmarks). The unoccupied intersection is local + small
+model + receipts + measured abstention. **Local is the wedge; receipts are the
+mechanism, not the headline.**
+
 ## 6. Open, in priority order
 
 | # | Item | Status |
@@ -189,6 +212,9 @@ null. Those were not bad ideas badly executed; there was no room.
 | S5 | **judged** A/B of all-turns ingestion | **paused** at GPU handover — base arm complete, all-turns 1/7 chunks, ~3h to resume (e205) |
 | S6 | proposition rendering | **already shipped** as e163 (`590529e`, 2026-08-05) — I proposed it not having checked the artifact's provenance (e208) |
 | S7 | record **bundling** — several attributes per proposition, not one | open, and distinct from S6: rendering changed each record's syntax, not how many propositions it carries. Indicative price **+4.3pt** over its own record count (e207), measured on the old format only |
+| W1 | move supersession from READ time into the WRITE path | **highest-value structural change** — every HaluMem leader does conflict resolution at ingestion; our updating accuracy is 2.9%, worst on the board (e211) |
+| W2 | adopt **refusal-aware F1** (Eywa, arXiv:2605.30771) | our abstention claim is currently unfalsifiable in exactly the way that metric punishes |
+| W3 | re-validate the e130 dial on held-out data | it is a hidden-state probe; two independent replications show that class collapsing to ~0.58 OOD (e211) |
 | P1 | job DUTIES filed as job titles | open — clutters role history; needs a duty/responsibility slot |
 | P2 | 88% of the store is `provisional` | open, **design decision not a bug**: promotion needs 2 mentions, people state most self-facts once. Either drop the rule for first-person attributes or stop surfacing tier as confidence |
 | — | judged `no-tier` run | the one audit hypothesis the proxy could not test |
