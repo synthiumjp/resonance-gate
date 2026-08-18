@@ -10043,3 +10043,57 @@ That one is a design decision, not a bug, and it is JP's call.
 post-processing, which is the class ledger §4b says every extraction win has
 come from. None of them needed the judge, the GPU, or a single model call.
 They needed someone to read the output.
+
+---
+
+## Entry 210 — 2026-08-07 (p2: the inference gate does NOT reduce hallucination profitably. It beats its null and is still net-negative — 0.70 hallucinations removed per correct answer lost on the official run. "Solid, shipped" was true as written and has been read as something it never said.)
+
+JP asked how we reduce hallucination and compete. First move was to inventory
+what we already have and never switched on. The eval path honours EIGHT flags;
+our banked official row (round 5) used THREE. `RG_QGATE` is wired, sits in the
+ledger's "what is established" table as *solid*, and has never been enabled in
+a run. That looked like free hallucination reduction sitting on the shelf.
+
+It is not. Measured on the judged QA records we already have, no GPU, no calls:
+
+    round5, n=1764, base 55.0% correct / 18.7% hallucination
+    gate th=3.0 fires on 348 questions (20%)
+      loses      115 correct
+      removes     81 hallucinations
+      exchange  0.70 : 1        UNFAVOURABLE     sign test p=0.018
+
+    s5-base, n=137 (current config)
+      exchange  0.86 : 1        UNFAVOURABLE     p=1 (underpowered)
+
+**Both the ledger and this are correct, and they are different claims.** The
+matched-coverage null — drop the same 348 questions at random, 2000 draws —
+scores 0.34:1 [0.26, 0.43]. So the gate genuinely PICKS BETTER THAN RANDOM
+which questions to decline, by a factor of two, exactly as entries 179/180
+measured. What it does not do is remove more hallucination than the
+correctness it costs. "Dominates its null" was never the same sentence as
+"improves the correct/hallucination trade", and I was about to recommend
+turning it on as though it were.
+
+**Why the old 4.65:1 does not reproduce.** Entry 180's strict-judge figures
+(48.0c/14.0h gated vs 50.0c/23.3h ungated) predate `RG_RETRIEVE_V3` (entry
+132). Retrieval improved, inference questions became answerable, and the
+population the gate declines is no longer mostly hallucination. This is ledger
+§7's warning arriving in person: anything measured downstream of a moving
+component gets re-measured, and the gate was validated against a retrieval
+stack we have since replaced.
+
+**What the gate actually is: a dial, not a win.** At 0.70:1 it is still the
+right setting for anyone who considers a wrong answer more costly than no
+answer — two hallucinations avoided for every three answers foregone. That is
+a product decision about the user's loss function, not a benchmark
+optimisation, and it is the same shape as entry 130's Pareto frontier. It
+should be documented and exposed as a trust setting, not switched on by
+default in pursuit of a leaderboard row.
+
+**The broader lesson, and it is the expensive one.** We have a shelf of
+validated mechanisms — gate, timeline, emit-once, no-tier, the sufficiency
+probe — and the temptation when asked to compete is to turn them all on. Two
+of the five have survived a null AND been re-checked against the current
+stack. The rest were validated against configurations that no longer exist.
+Before any of them ships, each needs re-measuring on the current stack, which
+for the gate cost nothing because the judged records were already on disk.

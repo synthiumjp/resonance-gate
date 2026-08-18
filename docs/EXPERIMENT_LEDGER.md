@@ -16,7 +16,7 @@ containment test. Every result here states its control.
 | Claim | Evidence | Status |
 |---|---|---|
 | Abstentions are evidence-calibrated | median gold-overlap **0.00** when abstaining vs **0.75** when answering; same metric, same format both sides (e183) | solid |
-| Inference-question gating dominates its null | every threshold beats matched-coverage random on **both** axes, both judges; detector AUROC 0.933 in-sample **and** held-out (e179/e180) | solid, shipped `RG_QGATE` |
+| Inference-question gating dominates its null | beats matched-coverage random by ~2x (0.70:1 vs 0.34:1 null on round5); detector AUROC 0.933 held-out (e179/e180) | **true but re-scoped (e210)** — it picks better than random which questions to decline, and is STILL net-negative: 115 correct lost to remove 81 hallucinations, p=0.018. A trust DIAL, not a win. Do not enable by default |
 | Emit-once improves extraction precision | F1 25.74 → 26.77, ratio 1.68× → 1.51×, **null 0.00%** (e188) | solid, shipped `RG_EMIT_ONCE` |
 | Extraction was capped by scope, not quality | best single **user** turn covers 35.4% of gold; we measured **36.12%** — at the ceiling. Any-role ceiling **86.9%**; MOSAIC reports 86.77 (e189) | solid |
 | Gold is schema-shaped at the category level | 64.4% of gold falls inside a **general** 20-slot persona schema whose slots were not read off gold (e192) | solid |
@@ -205,6 +205,17 @@ the emitted artifact. Only **21.2%** of the golds the QUESTIONS need are in the
 store. Question-relevant golds are harder than average session golds, so
 artifact recall overstates how useful the store is for answering. Do not quote
 52% without this.
+
+## 6c. Validated-then-invalidated: re-check before shipping
+
+The eval path honours EIGHT flags; the banked official row used THREE. The
+temptation when asked to compete is to turn the rest on. Do not. `RG_QGATE`
+was validated at 4.65:1 in e180 and measures 0.70:1 today, because e180
+predates `RG_RETRIEVE_V3` — retrieval improved, inference questions became
+answerable, and the population the gate declines is no longer mostly
+hallucination (e210). **Any mechanism validated before a component it sits
+downstream of changed must be re-measured, and for the gate that cost nothing
+because the judged records were already on disk.**
 
 ## 7. Unvalidated stack — read before any official run
 
