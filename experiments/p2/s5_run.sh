@@ -62,6 +62,20 @@ for ARM in base all; do
     > $SP/stage1_$ARM.log 2>&1 || { echo "stage1 $ARM FAILED"; exit 1; }
 done
 
+# --- surface lint: never ship a store that reads as broken English ---------
+# 7% of user 10's records shipped malformed ("plans to joining a club") and no
+# metric in the stack could see it -- token-overlap proxies compare word sets,
+# and the judge's per-record score tracks gold membership, not readability.
+# The only instrument that catches it is one that reads the text, so it runs
+# here, before any judge call is paid for.
+for ARM in base all; do
+  if ! python3 /home/jp/rg/experiments/p2/store_view.py lint \
+        --version s5-$ARM; then
+    echo "ABORT: stage-1 artifact for $ARM contains malformed prose (above)"
+    exit 1
+  fi
+done
+
 # --- preflight: the arms must actually differ ------------------------------
 # A silent env-var failure (the .env line-32 incident, entry 181) would make
 # both arms identical and waste the entire judge budget. Assert before paying.

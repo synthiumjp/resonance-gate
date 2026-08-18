@@ -240,6 +240,46 @@ def test_receipt_operations_are_non_destructive():
     assert d["facts"] == 2 and d["receipts"] == 4 and d["read_as_of"]
 
 
+def test_render_is_lint_clean_across_the_vocabulary():
+    """No (attribute, value) shape may render as broken English.
+
+    The two shipped bugs -- "plans to joining a club", "is motivated by to
+    contribute" -- were each a specific verb meeting a specific value shape.
+    Pinning those two cases only pins those two cases, and the verb table has
+    nineteen entries. This crosses the WHOLE vocabulary with the value shapes
+    that occur in real stores and asserts the store_view lint finds nothing,
+    so a new verb cannot be added with the same class of defect.
+    """
+    import sys, os
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import propositions as P
+    from store_view import MALFORMED
+
+    shapes = [
+        "joining a technology club",          # gerund
+        "to contribute to the vision",        # infinitive
+        "san jose",                           # bare noun
+        "a senior data scientist",            # determiner + noun
+        "expand the team",                    # bare verb
+        "exploring options and seeking a mentor",
+        "being more consistent",
+        "that data predicts behaviour",       # clause
+        "regular exercise",
+    ]
+    owner = "Michelle Hernandez"
+    bad = []
+    for attr in list(P._VERBAL) + ["name", "savings", "custom_attribute"]:
+        for value in shapes:
+            out = P.render({"attr": attr, "value": value}, owner=owner)
+            if not out:
+                continue
+            for name, rx, why in MALFORMED:
+                if rx.search(out + " (provisional)"):
+                    bad.append((name, attr, value, out))
+    assert not bad, "renderer produces malformed prose:\n" + "\n".join(
+        f"  [{n}] {a}/{v!r} -> {o}" for n, a, v, o in bad[:10])
+
+
 def test_proposition_rendering():
     """Facts render as natural-language propositions (entry 162): the form
     every comparable system stores and the form HaluMem's gold uses."""
