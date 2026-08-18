@@ -17,8 +17,10 @@ containment test. Every result here states its control.
 |---|---|---|
 | Abstentions are evidence-calibrated | median gold-overlap **0.00** when abstaining vs **0.75** when answering; same metric, same format both sides (e183) | solid |
 | Inference-question gating dominates its null | beats matched-coverage random by ~2x (0.70:1 vs 0.34:1 null on round5); detector AUROC 0.933 held-out (e179/e180) | **true but re-scoped (e210)** — it picks better than random which questions to decline, and is STILL net-negative: 115 correct lost to remove 81 hallucinations, p=0.018. A trust DIAL, not a win. Do not enable by default |
+| ~~All-turns gives +14.01pt extraction recall~~ | **RE-SCOPED (e212)**: proxy said +14.01pt, judge says **+1.65pt, p=0.40, null**. The proxy overstated ~8x. §5a's "paired conclusions survive" was too generous — the sign survived, the magnitude did not |
 | Emit-once improves extraction precision | F1 25.74 → 26.77, ratio 1.68× → 1.51×, **null 0.00%** (e188) | solid, shipped `RG_EMIT_ONCE` |
 | Extraction was capped by scope, not quality | best single **user** turn covers 35.4% of gold; we measured **36.12%** — at the ceiling. Any-role ceiling **86.9%**; MOSAIC reports 86.77 (e189) | solid |
+| All-turns ingestion converts abstentions into answers | judged A/B: omission −9.49pt (p=0.007), correct +6.57pt (p=0.049, marginal), hallucination ns; 1.43 correct per hallucination on recovered omissions; precision FLAT at 57% more emissions (e212) | solid on omission, marginal on correct |
 | Gold is schema-shaped at the category level | 64.4% of gold falls inside a **general** 20-slot persona schema whose slots were not read off gold (e192) | solid |
 | Relations must be read, not assumed | grammatical binding gives 98.9% vs a 64.9% majority-class null, n=94; survives ablating HaluMem's own template phrasing (e203) | solid |
 | The late-session collapse is granularity, not extraction | single-turn ceiling FLAT across position, emissions flat, 10/10 users; half of late misses present in their own session's emissions vs a ~2-3% matched null. **Replicated on a second judged run with the current renderer** — 15.5%/50.9%/1.8% vs 15.1%/50.0%/3.3% — so it is not an artifact of the old `slot: value` syntax (e206, e208) | solid |
@@ -177,6 +179,17 @@ tuning therefore has only a few points of headroom on this store, which
 retrospectively explains `top_n` (e178) and propositions-in-QA (e184) being
 null. Those were not bad ideas badly executed; there was no room.
 
+## 5f. Two mechanisms, one axis, opposite directions
+
+Measured in the same run, on the same trade:
+
+    RG_QGATE     correct -> omission    0.70 : 1   UNFAVOURABLE (e210)
+    all-turns    omission -> correct    1.43 : 1   favourable   (e212)
+
+**Declining to answer loses more than it saves; handing the composer more
+evidence gains more than it costs.** §4b's law on the QA axis, now measured
+from both ends. Both are DIALS for the user's loss function, not defaults.
+
 ## 5e. Where we actually sit (e211)
 
 Published HaluMem-Medium: MOSAIC 86.77 extraction F1 / 73.10 QA; MemOS 79.70 /
@@ -209,7 +222,7 @@ mechanism, not the headline.**
 | S3 | schema `gaps()` → targeted second look | **done** — 8/8 slots, precision 50%→100% after guards (e193/e195) |
 | S4 | narrative linking at write time | **closed — negative** at every budget (e198) |
 | S3c | relation typing in gap probe | **done** — 64.9% → 98.9% vs gold, 0 wrong (e203) |
-| S5 | **judged** A/B of all-turns ingestion | **paused** at GPU handover — base arm complete, all-turns 1/7 chunks, ~3h to resume (e205) |
+| S5 | **judged** A/B of all-turns ingestion | **DONE (e212)** — recall null (+1.65pt p=0.40), omissions −9.49pt (p=0.007), precision flat at +57% volume. Ship as a trust DIAL, not a default |
 | S6 | proposition rendering | **already shipped** as e163 (`590529e`, 2026-08-05) — I proposed it not having checked the artifact's provenance (e208) |
 | S7 | record **bundling** — several attributes per proposition, not one | open, and distinct from S6: rendering changed each record's syntax, not how many propositions it carries. Indicative price **+4.3pt** over its own record count (e207), measured on the old format only |
 | W1 | move supersession from READ time into the WRITE path | **highest-value structural change** — every HaluMem leader does conflict resolution at ingestion; our updating accuracy is 2.9%, worst on the board (e211) |

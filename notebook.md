@@ -10211,3 +10211,81 @@ found that class collapses to ~0.58 — near random — on realistic OOD data, t
 second showing an apparent RAGTruth success was a spurious dataset correlation.
 Before the dial ships it needs revalidating on a held-out slice, exactly as the
 gate did today (e210).
+
+---
+
+## Entry 212 — 2026-08-08 (p2: S5 CLOSED. Entry 194's +14.01pt recall does NOT survive the judge — the real integrity delta is +1.65pt, null. What all-turns actually buys is ANSWERS: omissions down 9.5pt, p=0.007. And precision held flat despite 57% more emissions, contradicting the prediction.)
+
+The judged A/B finished (both arms 7/7 chunks, sentinel silent throughout,
+~4,200 judge calls). Paired on user 10, one variable, costed offline before
+launch and matched to the call.
+
+**On the axis it was launched to test, it is a null.**
+
+    INTEGRITY (paired, n=424 gold points)
+      base 27.83%  [23.78, 32.28]
+      all  29.48%  [25.34, 33.99]     delta +1.65pt
+      discordant 22 / 29              McNemar exact p=0.4011
+
+Entry 194 measured **+14.01pt** on the token-overlap proxy. The judge says
++1.65pt and cannot distinguish it from zero. **Entry 194's headline is hereby
+re-scoped: the proxy overstated this effect by roughly 8x.** Entry 202 said
+paired A/B conclusions from the proxy would survive even though absolutes would
+not. That was too generous — the SIGN survived, the magnitude did not, and at
+this magnitude the conclusion changes.
+
+**What all-turns actually does is make the system answer.**
+
+    QA (paired, n=137)                base      all
+      correct                        56.93%   63.50%   +6.57pt
+      hallucination                  17.52%   20.44%   +2.92pt
+      omission                       25.55%   16.06%   -9.49pt
+
+    McNemar exact, per outcome:
+      Omission        17 / 4    p=0.0072   <- survives Bonferroni (0.05/3)
+      Correct          4 / 13   p=0.0490   <- marginal, does NOT survive
+      Hallucination    5 / 9    p=0.4240   <- null
+
+    of base's 35 omissions, all-turns converted 17:
+      -> Correct        10  (29%)
+      -> Hallucination   7  (20%)
+      -> still Omission 18  (51%)
+      exchange: 1.43 correct per hallucination
+
+The only effect that clears a multiple-comparison correction is the omission
+drop. Correct-answer gain is marginal and hallucination change is noise. So the
+honest statement is: **all-turns ingestion reliably converts abstentions into
+attempts, and roughly 59% of those attempts are right.**
+
+**Precision held, which the prediction said it would not.** Entry 189 expected
+ingesting assistant turns to push over-extraction higher and cost precision.
+It did not: target_accuracy 66.49% -> 66.94% on 1590 emissions against 1014, a
+57% increase in volume at flat precision. F1 0.3828 -> 0.4093. That is the one
+unambiguous win in the run and it was the risk everyone flagged.
+
+**The symmetry with the gate (e210) is the useful part.** Both mechanisms move
+the same axis in opposite directions, and only one is worth having:
+
+    RG_QGATE      correct -> omission     0.70 : 1   UNFAVOURABLE
+    all-turns     omission -> correct     1.43 : 1   favourable
+
+Declining to answer loses more than it saves; handing the composer more
+evidence gains more than it costs. That is §4b's law restated on the QA axis —
+evidence beats calibration — and it is now measured on both sides of the same
+trade in the same run.
+
+**Is it shippable?** For a product whose pitch is honest abstention, a
+mechanism that converts 35 abstentions into 17 attempts of which 7 are wrong is
+a DIAL, not a default — the same conclusion as the gate, from the other end.
+Ship it behind the same trust setting: a user who wants answers turns it on, a
+user who wants silence-unless-certain leaves it off. Given entry 183 measured
+our abstentions as evidence-calibrated (median gold-overlap 0.00 abstaining vs
+0.75 answering), turning it on by default would spend the one claim we have
+independent support for.
+
+**Caveats, stated plainly.** n=137 QA and 424 gold points, ONE user (10 is the
+only user with assistant-turn extractions cached). Every figure here is
+local-judged and e176 says a frontier judge scores us ~9.67pt worse. This does
+not generalise to the other 19 users without paying ~1,100-1,700 extraction
+calls each, and entry 211's competitive read does not change: +2.7pt of F1
+leaves us second-worst of eight on extraction.
