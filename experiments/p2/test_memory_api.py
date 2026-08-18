@@ -265,6 +265,30 @@ def test_proposition_rendering():
     # "plans to to expand" must not double the infinitive
     assert P.render({"attr": "plan", "value": "to expand the team"},
                     owner=owner) == "Michelle Hernandez plans to expand the team"
+    # SHAPE MISMATCH -> possessive fallback, never malformed English.
+    # Both of these shipped: 69 of user 10's 1014 records (7%) read as
+    # "plans to joining a club" or "is motivated by to contribute" before the
+    # renderer checked whether the value fit the verb it was being glued to.
+    # A gerund cannot follow "plans to"...
+    assert P.render({"attr": "plan", "value": "joining a technology club"},
+                    owner=owner) == ("Michelle Hernandez's plan is joining a "
+                                     "technology club")
+    assert P.render({"attr": "goal", "value": "seeking a mentor"},
+                    owner=owner) == "Michelle Hernandez's goal is seeking a mentor"
+    # ...and an infinitive cannot follow a verb that wants a noun phrase.
+    assert P.render({"attr": "motivation", "value": "to contribute to the vision"},
+                    owner=owner) == ("Michelle Hernandez's motivation is to "
+                                     "contribute to the vision")
+    # the well-shaped cases still take the verb template
+    assert P.render({"attr": "motivation", "value": "cognitive curiosity"},
+                    owner=owner) == "Michelle Hernandez is motivated by cognitive curiosity"
+    # nothing the renderer emits may contain these two joins
+    for attr, value in (("plan", "joining a club"), ("goal", "exploring options"),
+                        ("motivation", "to lead a team"), ("plan", "to ship it")):
+        out = P.render({"attr": attr, "value": value}, owner=owner)
+        assert " to " + value.split()[0] not in out or not value.startswith("to "), out
+        assert "plans to joining" not in out and "motivated by to" not in out, out
+
     # degenerate input yields nothing rather than malformed prose
     assert P.render({"attr": "", "value": "x"}) == ""
     assert P.render({"attr": "city", "value": ""}) == ""

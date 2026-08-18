@@ -46,6 +46,21 @@ _VERBAL = {
 
 _ARTICLEISH = re.compile(r"^(a|an|the|to|that|being|having)\b", re.I)
 
+# A verb template only reads correctly if the value is the right SHAPE.
+# "plans to" wants a bare infinitive, so a gerund gives "plans to joining a
+# club"; every other verb wants a noun phrase, so a value starting "to ..."
+# gives "is motivated by to contribute". Both shipped -- 69 of user 10's 1014
+# records (7%) were visibly malformed English. When the shapes do not match we
+# fall back to the possessive form, which is grammatical for any value.
+_GERUND = re.compile(r"^\w+ing\b", re.I)
+_LEADING_TO = re.compile(r"^to\s+", re.I)
+
+
+def _joins_cleanly(verb, value):
+    if verb.endswith(" to"):
+        return not _GERUND.match(value)
+    return not _LEADING_TO.match(value)
+
 
 def _clean(s):
     return re.sub(r"\s+", " ", str(s or "").strip())
@@ -95,7 +110,10 @@ def render(fact, owner=None):
         v = value
         if verb.endswith(" to") and _ARTICLEISH.match(v):
             v = re.sub(r"^to\s+", "", v, flags=re.I)
-        return f"{subject} {verb} {v}"
+        if _joins_cleanly(verb, v):
+            return f"{subject} {verb} {v}"
+        # shapes disagree -- the possessive form always reads
+        return f"{subject}'s {readable} is {v}"
     return f"{subject}'s {readable} is {value}"
 
 
