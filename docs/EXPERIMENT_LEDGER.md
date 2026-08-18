@@ -21,6 +21,7 @@ containment test. Every result here states its control.
 | Extraction was capped by scope, not quality | best single **user** turn covers 35.4% of gold; we measured **36.12%** — at the ceiling. Any-role ceiling **86.9%**; MOSAIC reports 86.77 (e189) | solid |
 | Gold is schema-shaped at the category level | 64.4% of gold falls inside a **general** 20-slot persona schema whose slots were not read off gold (e192) | solid |
 | Relations must be read, not assumed | grammatical binding gives 98.9% vs a 64.9% majority-class null, n=94; survives ablating HaluMem's own template phrasing (e203) | solid |
+| The late-session collapse is granularity, not extraction | single-turn ceiling FLAT across position (+0.3 to +3.8pt), emissions flat, 10/10 users; half of late misses present in their own session's emissions vs a 3% matched null (e206) | solid |
 | Judge choice is worth ~10 points | frontier judge scores us 9.67pt lower; ~2.7pt of it is reasoning mode alone (e176/e177) | solid |
 
 ## 2. What failed
@@ -127,6 +128,16 @@ exceeds the effect size we are chasing.
 Further extraction work needs the judged harness (~5,500 calls/arm), spent on
 one well-chosen change rather than on exploration.
 
+## 5c. The judge credits RECORDS, not stores
+
+What separates credited gold from missed gold is not whether we hold the
+content — it is whether ONE of our records covers it alone. Late misses have
+50% union coverage of their own session's emissions but only 15.1%
+single-record coverage; credited gold runs 88.5% / 57.8% (e206). Our records
+are short `slot: value` facts of constant granularity, and late gold bundles
+several propositions per sentence. **Store-level coverage is the wrong target;
+record-level coverage is the metric that pays.**
+
 ## 5b. Retrieval is near its ceiling — stop tuning it
 
 Of 179 gold points the questions need, **24 (13.4%) are in the store at all**,
@@ -146,6 +157,7 @@ null. Those were not bad ideas badly executed; there was no room.
 | S4 | narrative linking at write time | **closed — negative** at every budget (e198) |
 | S3c | relation typing in gap probe | **done** — 64.9% → 98.9% vs gold, 0 wrong (e203) |
 | S5 | **judged** A/B of all-turns ingestion | **paused** at GPU handover — base arm complete, all-turns 1/7 chunks, ~3h to resume (e205) |
+| S6 | **proposition rendering** — emit subject-bearing sentences instead of `slot: value (tier)` | NEXT, and in the winning class per §4b: deterministic post-processing. Upper bound ~50% of late misses (e206); only the judge can price it |
 | — | judged `no-tier` run | the one audit hypothesis the proxy could not test |
 
 S5 is what §5a called for: entry 194's +14.01pt was a proxy result, and the

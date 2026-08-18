@@ -9732,3 +9732,109 @@ completed chunks are skipped via `tmp2/`, so ~3h of judging remains rather
 than 3.5h. It re-verifies the ROCm banner and re-runs the emission preflight
 before spending a call, so a resume cannot silently become a CPU run or a
 different configuration.
+
+---
+
+## Entry 206 — 2026-08-07 (p2: the entry-204 collapse is GRANULARITY, not extraction. The single-turn ceiling is FLAT across session position, we emit at constant volume, and half of what the judge marks missing late is present in that session's own emissions — fragmented across several records instead of expressed as one.)
+
+Entry 204 left the mechanism open. Two stories fit its curve and they call for
+opposite work: (A) our extractor degrades late, or (B) late gold stops being
+stated in its own session, in which case the late regime is a benchmark
+ceiling and no extractor change touches it. Settled today, offline, on the
+round-5 judged records. **It is (A), and more specifically it is rendering.**
+
+**1. The ceiling is flat.** `ceiling_decay.py` computes entry 189's
+single-turn reachability ON THE JUDGED RECORDS, joined to the source dialogue
+by (uuid, ssession_id, memory_content) — so ceiling and recall share one
+population and every gold point is a matched pair (reachable?, credited?).
+Computing the ceiling over the raw dataset instead would have compared two
+denominators, which is instrument failure #6 exactly.
+
+    threshold   ceiling early -> late   recall      efficiency (recall|reachable)
+    0.4         94.6% -> 94.9%  +0.3pt  -29.0pt     40.7% -> 10.6%   -30.1pt
+    0.5         86.2% -> 87.4%  +1.1pt  -29.0pt     43.2% -> 10.9%   -32.3pt
+    0.6         64.9% -> 68.7%  +3.8pt  -29.0pt     47.9% -> 11.9%   -36.0pt
+
+The ceiling does not fall. It **rises** slightly, at every threshold. Late
+gold is as available in its own session as early gold; we simply stop
+converting it. Story (B) is dead.
+
+**2. It is not volume, and not composition.** Emissions per session are flat —
+19.4 early, 16–17 late, **zero** empty sessions, so no cap and no swallowed
+exception. Gold density falls faster than emissions do, so late we spend
+*more*:
+
+    s0-8    13.7 gold/session   19.4 emitted   1.4 emissions per gold   recall 39.3%
+    s9+      ~6.1 gold/session  ~17.4 emitted  ~2.9 emissions per gold  recall ~10%
+
+Twice the budget per gold point, four times worse. And 10/10 users show it
+individually, −18.8pt to −38.8pt, so it is not a composition effect.
+
+**3. Not gold length either.** Late gold is longer (mean 10.6 → 12.8 content
+tokens), which would bias a "cover ≥50% of gold's tokens" test. Cut by length
+band, the gap persists inside every band and is *largest* where gold is
+longest:
+
+    gold tokens   0-6    7-9    10-12   13-16   17+
+    early-late   -26.9  -27.3   -7.9   -35.3  -55.3 pt
+
+**4. What we emit instead — the actual finding.** Reading one late session's
+misses against its own emissions:
+
+    gold MISSED  "Johnson Joseph's cognitive curiosity drives him to explore
+                  new opportunities and partnerships."
+    we emitted   "motivation: cognitive curiosity for testing boundaries and
+                  seeking new opportunities (asserted)"
+
+    gold MISSED  "Johnson Joseph is committed to fostering innovative
+                  solutions and shared goals in his consultancy practice."
+    we emitted   "focus: innovative solutions and shared goals (provisional)"
+
+We have the content. We hand the judge `slot: value (tier)` — machine syntax,
+no subject — where gold is a sentence about a named person. Quantified over
+all 4,876 judged points (`granularity.py`), with the persona name removed
+from gold and our slot/tier syntax stripped, so the comparison is content
+against content:
+
+    threshold 0.5        one emission   union of session   matched null
+    EARLY credited          59.9%           80.7%              3.1%
+    EARLY missed            28.7%           52.4%              3.3%
+    LATE  credited          57.8%           88.5%              2.9%
+    LATE  missed            15.1%           50.0%              3.3%
+
+**Half of what the judge marks missing late is present in that session's own
+emissions.** The null — same user, a different session's emissions, so same
+persona, same slots, same volume, only the pairing destroyed — runs at 3%.
+Swept 0.4/0.5/0.6/0.7 the absolute levels move a lot and the single-vs-union
+gap does not (26.4/15.1/7.2/3.6 single vs 65.3/50.0/30.5/16.2 union).
+
+**5. The mechanism, stated precisely.** Look at which column separates
+credited from missed. It is not the union — LATE credited 88.5% vs LATE
+missed 50.0%. It is the *single-emission* column: 57.8% vs 15.1%. **The judge
+credits records, not stores.** Gold gets credited when ONE of our records
+covers it alone. Our records are short slot-facts of roughly constant
+granularity; early gold is atomic ("User's name is Martin Mark") and one
+record covers it; late gold bundles two or three propositions into a
+discursive sentence and takes several. That is the whole position effect, and
+it also explains entry 204's per-type table: Event gold was ALWAYS discursive
+(9.3% early, 11.1% late — flat and bad), Persona gold *starts* atomic and
+becomes discursive (45.4% → 10.1%).
+
+**What this licenses, and what it does not.** Union coverage is an UPPER
+BOUND on what re-rendering could recover, not a prediction — "the tokens are
+present across three records" is not "the judge would credit one assembled
+proposition." Only the judge settles that, and S5 owns the GPU right now.
+
+But the lever it points at is the right *class*. Ledger §4b: every extraction
+win this project has had came from scope of input or deterministic
+post-processing, and prompt engineering is 0-for-3. Composing subject-bearing
+propositions from the slot facts we already hold is deterministic
+post-processing. It is the first candidate since all-turns that sits in the
+winning class rather than the losing one.
+
+**Also settled: entry 204's "tempting excuse" is dead for a second reason.**
+Round 5 ran WITHOUT `RG_EMIT_ONCE` (config: `RG_EXTRACT_V5`,
+`RG_PREFIX_NO_THINK`, `RG_RETRIEVE_V3` only). Nothing was suppressing
+re-emission, so late misses cannot be blamed on a fact having been emitted in
+an earlier session. Entry 204 recorded that defence as unresolved at 1–25%;
+it is now resolved against.
