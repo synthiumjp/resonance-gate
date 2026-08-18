@@ -149,6 +149,12 @@ def ingest_user(user, cache_path, min_mentions=2):
                         or PF._reject_value(a, v)):
                     continue
                 subj = fct.get("subject")
+                # Slot hygiene, deterministic and applied before storage:
+                # a group is not a person, and an employer is not a job title.
+                # Both defects were found by reading the store (entry 209).
+                if PF.reject_subject_attr(subj, a):
+                    continue
+                a = PF.reslot_attr(a, v)
                 key = f"{subj}:{a}" if subj else a
                 slots[key][v]["n"] += 1
                 slots[key][v]["recs"].append((date, f"s{si}"))

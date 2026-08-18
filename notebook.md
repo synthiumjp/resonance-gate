@@ -9967,3 +9967,79 @@ changes unless you make it.**
 Round 5 remains the only multi-user judged run we have, so it stays useful —
 but every conclusion drawn from it now carries "pre-590529e format" as a
 condition, and the ledger says so.
+
+---
+
+## Entry 209 — 2026-08-07 (p2: three product fixes found by reading the store instead of scoring it — broken prose, no supersession, corrupt slots. "What do you do?" goes from 18 answers to the right one.)
+
+JP: "this isn't a paper we are building towards. we want something people will
+actually use." Correct, and the last stretch had drifted. What follows came
+from printing user 10's store and reading it as the person it is about.
+
+**Why nothing caught these.** Verified rather than assumed:
+
+  * the offline proxies compare token SETS, so they are near-invariant to
+    whether the words form a sentence;
+  * the judge's per-record accuracy score is close to a restatement of gold
+    membership — in-gold mean 1.330, out-of-gold 0.022, and NO in-gold record
+    scores 0. Read unconditioned it says malformed records scored 0.278 vs
+    0.652, i.e. that the judge flagged our grammar bug all along. Conditioned,
+    the real gap is 1.000 vs 1.345 on n=20 and no surface defect clears a lift
+    bar at all;
+  * every aggregate we report is a mean over one of those two.
+
+There was no signal to miss. Nothing in the stack read the text. That is a
+missing CATEGORY of check, not a missed check, and it is why the earlier
+"+2.7pt precision" estimate in this session was wrong — the real figure is
++0.7pt, and the grammar fix is a product fix, not a scores fix.
+
+**Fix 1 — 7% of records were broken English.** `render()` glued a verb
+template to a value without checking shape: "plans to" takes a bare
+infinitive, so a gerund gave *"plans to joining a club"*; every other verb
+wants a noun phrase, so a "to ..." value gave *"is motivated by to
+contribute"*. Now falls back to the possessive form, grammatical for any
+value. A property test crosses all 19 verb templates with 9 real value shapes;
+verified to FAIL when the fix is reverted. `store_view.py lint` exits non-zero
+on malformed prose and runs in `s5_run.sh` before any judge call is paid for.
+
+**Fix 2 — supersession.** 25 job records sat flat with equal standing, so
+"what do you do?" had 18 answers. The store was RIGHT: in conversation order
+it held a coherent career. A memory that never supersedes anything is a log.
+`currency.py` resolves single-valued attributes in conversation order and
+keeps history. The risk is in the attribute list, so it is explicit and small
+— "latest wins" on `hobby` would leave a person with one hobby. Restatement is
+kept distinct from supersession; they mean opposite things about confidence.
+Subjects are scoped independently, which caught a bug in my own first version
+where the mentor's job appeared in Michelle's career.
+
+**Fix 3 — slot hygiene.** Two crossings a person spots on sight:
+
+    "Ai works as empathetic interaction to foster teamwork"
+    "Michelle Hernandez works as apple"          <- the EMPLOYER as a job title
+
+A non-person subject holding a PERSON attribute is rejected — only the
+crossing, because "team dynamic is collaborative" is merely dull whereas "Ai's
+age is 45" is corrupt. An organisation in a job slot is RE-SLOTTED to
+`employer`, never rejected: a wrong re-slot moves a true fact one field over,
+a wrong rejection destroys it. Fires on 8 of user 10's records, all 8 correct.
+
+**Together, on the real store:**
+
+    "What do you do?"        -> chief visionary officer
+    "Where do you work?"     -> innovative ai corp
+    "Where did I work before?"  apple -> google -> visionary ai solutions
+                                -> innovative ai corp (current)
+
+109 tests green.
+
+**Not fixed, on purpose.** Job DUTIES are still filed as job titles
+("overseeing technical developments", "consulting with various teams"), which
+clutters the role history. And 88% of the store is still `provisional`, because
+promotion needs two mentions and people state most facts about themselves once
+— the confidence signal that is the evidence-layer pitch is stuck in one state.
+That one is a design decision, not a bug, and it is JP's call.
+
+**Method note worth keeping.** All three fixes are deterministic
+post-processing, which is the class ledger §4b says every extraction win has
+come from. None of them needed the judge, the GPU, or a single model call.
+They needed someone to read the output.

@@ -146,6 +146,18 @@ exceeds the effect size we are chasing.
 Further extraction work needs the judged harness (~5,500 calls/arm), spent on
 one well-chosen change rather than on exploration.
 
+## 5d. No instrument in the stack reads the text
+
+Three product defects shipped for months and nothing could see them: 7% of
+records were broken English, changing attributes never superseded (18 answers
+to "what do you do?"), and groups carried personal attributes ("Ai works as
+empathetic interaction"). The proxies compare token SETS (near-invariant to
+grammar); the judge's per-record score tracks GOLD MEMBERSHIP (in-gold mean
+1.330 vs out-of-gold 0.022, no in-gold record scores 0); every aggregate is a
+mean over one of those. **`store_view.py lint` is now the check that reads the
+text, and it runs before judge spend.** If a defect would be obvious to a
+person reading the output, it belongs in lint, not in a metric (e209).
+
 ## 5c. The judge credits RECORDS, not stores
 
 What separates credited gold from missed gold is not whether we hold the
@@ -177,6 +189,8 @@ null. Those were not bad ideas badly executed; there was no room.
 | S5 | **judged** A/B of all-turns ingestion | **paused** at GPU handover — base arm complete, all-turns 1/7 chunks, ~3h to resume (e205) |
 | S6 | proposition rendering | **already shipped** as e163 (`590529e`, 2026-08-05) — I proposed it not having checked the artifact's provenance (e208) |
 | S7 | record **bundling** — several attributes per proposition, not one | open, and distinct from S6: rendering changed each record's syntax, not how many propositions it carries. Indicative price **+4.3pt** over its own record count (e207), measured on the old format only |
+| P1 | job DUTIES filed as job titles | open — clutters role history; needs a duty/responsibility slot |
+| P2 | 88% of the store is `provisional` | open, **design decision not a bug**: promotion needs 2 mentions, people state most self-facts once. Either drop the rule for first-person attributes or stop surfacing tier as confidence |
 | — | judged `no-tier` run | the one audit hypothesis the proxy could not test |
 
 S5 is what §5a called for: entry 194's +14.01pt was a proxy result, and the

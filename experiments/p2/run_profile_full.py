@@ -81,6 +81,61 @@ _GENERIC_PLACE = {"house", "home", "apartment", "flat", "unit", "room"}
 _VACUOUS_OCC = {"day job", "job", "work", "full-time job", "full time job"}
 
 
+# --- subject/slot hygiene (found by reading a store, not by scoring one) ---
+#
+# Two defects visible in user 10's shipped store, both of which a person would
+# spot on sight and no metric we had could:
+#
+#   "Ai works as empathetic interaction to foster teamwork"
+#   "Friends works as provide diverse perspectives and encouragement"
+#   "Michelle Hernandez works as apple"          <- the EMPLOYER, as a job title
+#
+# Groups and abstractions are not people and must not carry personal
+# attributes. This rejects only the crossing of the two -- a non-person
+# subject holding a PERSON attribute -- rather than everything about them,
+# because "team is instrumental in overcoming challenges" is merely useless
+# whereas "Ai's age is 45" is corrupt.
+_NON_PERSON_SUBJECT = {"ai", "team", "friends", "colleagues", "family",
+                       "people", "everyone", "others", "society", "work",
+                       "company", "group", "community", "world", "technology",
+                       "them", "us", "we", "they"}
+_PERSON_ATTR = {"occupation", "job_title", "employer", "workplace", "age",
+                "gender", "birth_date", "income", "monthly_income", "salary",
+                "savings", "marital_status", "name", "location", "residence"}
+
+# An organisation is not a job title. Conservative on purpose: the test fires
+# only on an unambiguous corporate suffix or a handful of names no one uses as
+# a role, and the outcome is a RE-SLOT (occupation -> employer), never a
+# rejection. A wrong re-slot moves a true fact to a neighbouring field; a
+# wrong rejection destroys it.
+_ORG_SUFFIX = re.compile(
+    r"\b(?:inc|llc|ltd|corp|corporation|co|plc|gmbh|labs?|technologies|"
+    r"systems|solutions|group|holdings|ventures|partners|associates)\.?$", re.I)
+_ORG_NAMES = {"apple", "google", "microsoft", "amazon", "meta", "facebook",
+              "netflix", "tesla", "nvidia", "ibm", "oracle", "intel", "adobe",
+              "salesforce", "uber", "airbnb", "spotify", "twitter", "openai",
+              "anthropic", "deepmind"}
+
+
+def reject_subject_attr(subject, attr):
+    """True if a non-person subject is being given a personal attribute."""
+    return (str(subject or "").strip().lower() in _NON_PERSON_SUBJECT
+            and attr in _PERSON_ATTR)
+
+
+def is_organization(v):
+    v = str(v or "").strip().lower()
+    return bool(v) and (v in _ORG_NAMES or bool(_ORG_SUFFIX.search(v)))
+
+
+def reslot_attr(attr, v):
+    """Deterministic slot correction. Returns the attribute this (attr, value)
+    actually belongs in -- unchanged unless we are confident."""
+    if attr in ("occupation", "job_title") and is_organization(v):
+        return "employer"
+    return attr
+
+
 def _reject_value(attr, v):
     """True if this (attr, value) is a technical/path/device artefact, not a fact."""
     v = v.strip().lower()
