@@ -107,6 +107,12 @@ its contents.** Entries 206/207 diagnosed a rendering format we had already
 replaced two days before the run was generated. Any conclusion from
 `rgp2-round5` carries "pre-590529e format" as a condition.
 
+13. `w1_update_ab` read `result_type` off the update judge, which returns
+   `evaluation_result` (`evaluation.py:170`) — `result_type` is the QA judge's
+   key. Every record scored None and the run exited 0 (e213). **An all-None
+   result with a clean exit code is indistinguishable from "no effect" unless
+   the script asserts its scores are in the harness's own valid set.**
+
 **Standing rule: before drawing a conclusion from a metric, read its
 assignment.** This has cost more than any modelling error. **Second clause,
 added after #6: when comparing our store to gold, render it the way we would
@@ -179,6 +185,17 @@ tuning therefore has only a few points of headroom on this store, which
 retrospectively explains `top_n` (e178) and propositions-in-QA (e184) being
 null. Those were not bad ideas badly executed; there was no room.
 
+## 5g. Architectural reasoning is not evidence of a lever
+
+Twice in two days a TRUE statement was read as a different one:
+  * "the gate dominates its null" -> "so turn it on to cut hallucination"
+    (e210: it is net-negative, 0.70:1)
+  * "every leader supersedes at write time" -> "so it will move our updating
+    score" (e213: null, because the axis is omission-bound at 92%)
+
+**Before building a mechanism, measure whether the axis it targets is bound by
+what it fixes.** Both checks cost nothing — the records were already on disk.
+
 ## 5f. Two mechanisms, one axis, opposite directions
 
 Measured in the same run, on the same trade:
@@ -225,7 +242,9 @@ mechanism, not the headline.**
 | S5 | **judged** A/B of all-turns ingestion | **DONE (e212)** — recall null (+1.65pt p=0.40), omissions −9.49pt (p=0.007), precision flat at +57% volume. Ship as a trust DIAL, not a default |
 | S6 | proposition rendering | **already shipped** as e163 (`590529e`, 2026-08-05) — I proposed it not having checked the artifact's provenance (e208) |
 | S7 | record **bundling** — several attributes per proposition, not one | open, and distinct from S6: rendering changed each record's syntax, not how many propositions it carries. Indicative price **+4.3pt** over its own record count (e207), measured on the old format only |
-| W1 | move supersession from READ time into the WRITE path | **highest-value structural change** — every HaluMem leader does conflict resolution at ingestion; our updating accuracy is 2.9%, worst on the board (e211) |
+| W1 | move supersession from READ time into the WRITE path | **DONE, and NULL on the metric (e213)**: 0.7% → 2.2%, p=0.5. Kept — it is correct, cheap and the product behaviour depends on it — but the update axis is omission-bound at 92%, not supersession-bound. Only **25%** of update-relevant facts are in the store at all; retrieval surfaces 13% |
+| W1b | extract the PRIOR value of an updated fact | the real update lever — 75% of "from" sides are never stored, and e190 says they live in ASSISTANT turns. Re-run the e213 A/B on the all-turns store, which already exists |
+| W1c | retrieval for update queries | we hold 25% and surface 13%; the query is a whole sentence describing a change, a poor BM25 key |
 | W2 | adopt **refusal-aware F1** (Eywa, arXiv:2605.30771) | our abstention claim is currently unfalsifiable in exactly the way that metric punishes |
 | W3 | re-validate the e130 dial on held-out data | it is a hidden-state probe; two independent replications show that class collapsing to ~0.58 OOD (e211) |
 | P1 | job DUTIES filed as job titles | open — clutters role history; needs a duty/responsibility slot |

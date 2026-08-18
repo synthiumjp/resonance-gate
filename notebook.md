@@ -10289,3 +10289,89 @@ local-judged and e176 says a frontier judge scores us ~9.67pt worse. This does
 not generalise to the other 19 users without paying ~1,100-1,700 extraction
 calls each, and entry 211's competitive read does not change: +2.7pt of F1
 leaves us second-worst of eight on extraction.
+
+---
+
+## Entry 213 — 2026-08-19 (p2: W1 shipped — supersession now decided at write time. Judged on the update axis it is a NULL, 0.7% -> 2.2%, p=0.5. The reason is decisive and worth more than the change: only 25% of update-relevant facts are in the store AT ALL, so the metric was never supersession-bound.)
+
+Entry 211 named W1 the highest-value structural change: every system with a
+good HaluMem updating score resolves conflict at ingestion, ours resolved it at
+read time over the rendered artifact, and our updating accuracy is 2.9% —
+worst of eight. Built, tested, measured.
+
+**What shipped.** `currency.mark_current()` runs once inside
+`WireGraph.from_facts`, marking `current` / `superseded_by` on every node
+including provisional ones (a superseded job title is usually single-mention,
+so skipping them would miss most changes). `memory_api._fact` exposes both, so
+retrieval, the artifact and the QA context see ONE verdict instead of each
+re-deriving it. `search_memories` — the update metric's only input — now names
+the replacement: `occupation: executive (SUPERSEDED by: chief visionary
+officer)`, current values first. HaluMem update gold is literally *"X updated
+job_title from 'A' to 'B'"*, so this hands the judge exactly the from→to pair,
+and it survives even when retrieval misses the current node, because the
+annotation carries the replacement VALUE not just a flag.
+
+On user 10's real store, built from cache with no GPU: 979 nodes, 16 superseded
+at write time (occupation 12, employer 3, lifestyle 1), resolving to
+`occupation = chief visionary officer`, `employer = innovative ai corp`. Both
+correct.
+
+**The judged result — 270 official-judge calls, one variable, both arms scored
+in the same run so no judge drift can enter:**
+
+    135 gold update points, readout differs on 42 (31%)
+
+                    Omission   Other   Halluc   Correct
+      SUPERSEDE off   93.3%     3.7%    2.2%     0.7%
+      SUPERSEDE on    91.9%     3.7%    2.2%     2.2%
+
+      Correct        off-only 0, on-only 2    McNemar exact p=0.5
+      restricted to the 42 changed readouts:  p=0.5
+
+**A null.** One update point gained to three. Right architecture, no effect.
+
+**Why, and this is the finding.** The metric is not supersession-bound, it is
+omission-bound at 92%, and the omissions are upstream:
+
+    original fact IS IN THE STORE somewhere     34/135 = 25%
+    original fact was RETRIEVED for the query   18/135 = 13%
+    query returned nothing at all               17/135 = 13%
+
+**Three quarters of the facts an update question asks about were never
+extracted.** Of the quarter we do hold, retrieval surfaces about half. So the
+ceiling on updating accuracy given today's store is ~25%, we score 2.2%, and no
+amount of correctly reporting supersession can exceed a store that lacks the
+original fact. Zep scores 47.28% on this axis because its bitemporal graph
+holds the prior value, not because it labels it better.
+
+**What I got wrong in entry 211.** I called W1 "the highest-value structural
+change" from an architectural argument — the leaders do it at write time, we
+did not — without checking whether the axis it targets was actually bound by
+it. It was not. The architectural reasoning was sound and the conclusion did
+not follow, which is the same error shape as e210's gate: a true statement
+("dominates its null", "the leaders do this") read as a different one ("so it
+will move our number").
+
+**Keep it anyway, and this is not sunk cost.** Write-time marking is correct,
+non-destructive, costs one pass at ingestion instead of work on every read, and
+is a precondition for anything that answers "what is true now" — which is the
+product behaviour (e209: 18 answers to "what do you do?" became one). It just
+is not a scoring lever today. Left ON for the store, and the reporting behind
+`RG_SUPERSEDE` until an axis exists that it moves.
+
+**Where the update headroom actually is, in order:**
+  1. EXTRACTION of the prior value — 75% of update-relevant facts absent. This
+     is entry 190's point returning: the "from" side of an update often lives
+     in an ASSISTANT turn, and all-turns ingestion (e212) is the lever that
+     reaches it. Worth re-running this A/B on the all-turns store, which
+     already exists.
+  2. RETRIEVAL for update queries — we hold 25% and surface 13%. The query is
+     a whole sentence describing a change, which is a poor BM25 key.
+  3. Reporting — done, and worth ~1.5pt when the other two are fixed.
+
+**Instrument note (#13).** The first run of `w1_update_ab.py` scored 100% None
+and exited 0. I read `result_type` off the judge's response; the update judge
+returns `evaluation_result` (`evaluation.py:170`) and `result_type` belongs to
+the QA judge. A clean exit code on an all-None result is exactly the shape that
+gets mistaken for "no effect". The script now asserts scores fall in the
+harness's own valid set and warns otherwise.
