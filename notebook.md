@@ -10375,3 +10375,84 @@ returns `evaluation_result` (`evaluation.py:170`) and `result_type` belongs to
 the QA judge. A clean exit code on an all-None result is exactly the shape that
 gets mistaken for "no effect". The script now asserts scores fall in the
 harness's own valid set and warns otherwise.
+
+---
+
+## Entry 214 — 2026-08-19 (p2: W1b and W1c are both dead ends, and chasing them found the real defect. ONE user's store holds 161 distinct attribute names — 14 for health, 5 for employer including `former_employer`/`past_employer`/`previous_employer`. The extractor is doing supersession in the SLOT NAME, three different ways, so keys never collide.)
+
+Entry 213 left W1 null and named two suspects: extraction of the prior value
+(75% absent) and update-query retrieval (we hold 25%, surface 13%). Both were
+cheap to test. Both are wrong.
+
+**W1b — extract the prior value — CONFIRMED as a mechanism, NULL as a lever.**
+Entry 190 predicted the "from" side of an update lives in assistant turns. It
+does, and by a lot:
+
+    store        nodes   prior fact IN STORE   RETRIEVED   superseded
+    user-turns     979        25.2%             13.3%          16
+    all-turns     1522        43.7%             27.4%          27
+
+Both roughly double. Judged, 270 more official calls, same script, one variable:
+
+                                 Omission   Correct
+      all-turns, SUPERSEDE off     93.3%     2.2%
+      all-turns, SUPERSEDE on      91.9%     2.2%    McNemar p=1
+
+**Updating accuracy does not move — 2.2% either way, omission still 92%.** Not
+the store, not retrieval. Both suspects cleared, leaving the thing neither
+explained: we retrieve the right facts and the judge still sees no update.
+
+**Reading three retrieved-and-still-omitted records showed why.**
+
+    gold   physical health status changed from "Normal" to "Affected by
+           chronic disease" due to diabetes
+    ours   health_condition:   chronic disease
+           physical_health:    stable
+           health_status:      hypertension managed
+           physical_condition: normal, no chronic diseases
+
+Four slot names for one concept, all current, mutually contradictory.
+Supersession cannot fire because the keys never collide. Across the store:
+
+    1270 owner-scoped nodes under 161 DISTINCT attribute names
+      'health'   -> 14 slots
+      'focus'    ->  9      'goal' -> 9      'work' -> 8
+      'employer' ->  5: current_employer, employer, former_employer,
+                        past_employer, previous_employer
+    SINGLE_VALUED covers 11 of 161 names
+    supersession fires on 22 of 1270 nodes
+
+**The employer row is the whole finding in one line.** `former_employer`,
+`past_employer`, `previous_employer` are the extractor performing supersession
+IN THE ATTRIBUTE NAME, three different ways, for one relation. It already knows
+the fact was replaced — and by encoding that as a new slot rather than a new
+value, it guarantees old and new never meet. No conflict is detectable and both
+stay current forever. That is why W1 fired on 22 nodes: not because the store
+lacks changes, but because the changes were spelled into separate slots.
+
+**The lever is attribute canonicalisation, and entry 192 already sized it.**
+That entry established 64.4% of gold falls inside a GENERAL 20-slot persona
+schema whose slots were not read off gold. Gold wants ~20. We emit 161 for one
+user. Collapsing them is deterministic post-processing — §4b's winning class,
+alongside emit-once, the self-reference guard and multi-value splitting — and
+it should move four things at once:
+
+  * **updating accuracy** — supersession finally has colliding keys
+  * **extraction F1** — 161 idiosyncratic slots against gold's ~20 is a
+    precision tax paid on every emission
+  * **the contradictory-store product defect** — four current health values is
+    what a user would actually see
+  * **retrieval** — an attribute bridge cannot discriminate across 161 names,
+    which is FIX F in halumem_run's own notes, worked around rather than fixed
+
+`canon_attr` already runs at ingestion (`halumem_run.py:145`) and is evidently
+far too weak. Next: measure its current collapse rate, then extend it toward
+the entry-192 schema with the same discipline as `SINGLE_VALUED` — an explicit,
+conservative map, because merging two genuinely different slots destroys facts
+while missing a merge only leaves clutter.
+
+**Method note.** Three cheap checks in sequence — offline store coverage, 270
+judged calls, then reading three actual records — each killed a hypothesis, and
+the last found the cause. The reading was decisive and cost nothing. That is
+entry 209's lesson arriving a second time: no metric we had could see 161
+attribute names, because every metric aggregates over whatever names exist.

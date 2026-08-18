@@ -185,6 +185,15 @@ tuning therefore has only a few points of headroom on this store, which
 retrospectively explains `top_n` (e178) and propositions-in-QA (e184) being
 null. Those were not bad ideas badly executed; there was no room.
 
+## 5h. The extractor supersedes in the attribute NAME
+
+`employer`, `current_employer`, `former_employer`, `past_employer` and
+`previous_employer` all exist in one user's store. The extractor already knows
+a fact has been replaced — and encodes it as a NEW SLOT rather than a new
+value, three different ways, guaranteeing old and new never meet. No conflict
+is detectable and both stay current forever. 161 attribute names for one user;
+gold wants ~20 (e192, e214).
+
 ## 5g. Architectural reasoning is not evidence of a lever
 
 Twice in two days a TRUE statement was read as a different one:
@@ -243,8 +252,9 @@ mechanism, not the headline.**
 | S6 | proposition rendering | **already shipped** as e163 (`590529e`, 2026-08-05) — I proposed it not having checked the artifact's provenance (e208) |
 | S7 | record **bundling** — several attributes per proposition, not one | open, and distinct from S6: rendering changed each record's syntax, not how many propositions it carries. Indicative price **+4.3pt** over its own record count (e207), measured on the old format only |
 | W1 | move supersession from READ time into the WRITE path | **DONE, and NULL on the metric (e213)**: 0.7% → 2.2%, p=0.5. Kept — it is correct, cheap and the product behaviour depends on it — but the update axis is omission-bound at 92%, not supersession-bound. Only **25%** of update-relevant facts are in the store at all; retrieval surfaces 13% |
-| W1b | extract the PRIOR value of an updated fact | the real update lever — 75% of "from" sides are never stored, and e190 says they live in ASSISTANT turns. Re-run the e213 A/B on the all-turns store, which already exists |
-| W1c | retrieval for update queries | we hold 25% and surface 13%; the query is a whole sentence describing a change, a poor BM25 key |
+| W1b | extract the PRIOR value of an updated fact | **mechanism confirmed, lever NULL (e214)** — all-turns doubles prior-fact coverage (25%→44%) and retrieval (13%→27%); updating accuracy unmoved at 2.2%, p=1 |
+| W1c | retrieval for update queries | **cleared as the cause (e214)** — we retrieve the right facts and the judge still sees no update |
+| **W2a** | **attribute canonicalisation** | **THE LEVER (e214)**. One user's store: **161 distinct attribute names**, 14 for health, 5 for employer including `former_/past_/previous_employer` — the extractor superseding in the SLOT NAME, so keys never collide and W1 fires on 22 of 1270 nodes. Gold wants ~20 (e192). Deterministic post-processing; should move updating, extraction F1, the contradictory-store defect and retrieval at once |
 | W2 | adopt **refusal-aware F1** (Eywa, arXiv:2605.30771) | our abstention claim is currently unfalsifiable in exactly the way that metric punishes |
 | W3 | re-validate the e130 dial on held-out data | it is a hidden-state probe; two independent replications show that class collapsing to ~0.58 OOD (e211) |
 | P1 | job DUTIES filed as job titles | open — clutters role history; needs a duty/responsibility slot |
