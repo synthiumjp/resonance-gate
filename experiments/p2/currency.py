@@ -41,6 +41,7 @@ SINGLE_VALUED = {
     "age", "birth_date", "gender", "name",
     "marital_status", "relationship_status",
     "lifestyle", "employment_status",
+    "health_condition", "mental_health",
 }
 
 # Subjects that are not people and must not carry personal attributes.
@@ -50,6 +51,77 @@ SINGLE_VALUED = {
 NON_PERSON = {"ai", "team", "friends", "colleagues", "family", "people",
               "everyone", "others", "society", "work", "company", "group",
               "community", "world", "technology"}
+
+
+# --- alias groups for STATE slots (W2a, e215) ------------------------------
+#
+# The extractor spells one concept many ways. For user 10, the person's
+# physical health state is spread over six slot names holding mutually
+# contradictory values, all marked current:
+#
+#   physical_condition: normal, no chronic diseases   (early)
+#   health_condition:   chronic disease
+#   health_status:      hypertension managed
+#   physical_health:    stable
+#
+# Supersession cannot fire because the keys never collide (e214).
+#
+# SCOPE, and it is the whole design. This aliases ONLY state-like slots -- the
+# ones that are single-valued anyway, where two names for one concept produce
+# a contradiction. It deliberately does NOT touch the narrative slots
+# (motivation, value, belief, plan), which hold 233 and 86 values for this one
+# user: those are genuinely multi-valued, merging them buys nothing, and
+# supersession would be actively wrong.
+#
+# Mechanical normalisation was tried first and rejected on measurement:
+# stripping current_/former_/_preference/_area style affixes collapsed 161
+# names to 137 (15%) and the new collisions were almost all in `motivation`.
+# The 161 names are different WORDS, not morphological variants, so the map is
+# explicit and hand-checked rather than derived.
+#
+# NOTHING IS RENAMED. The store keeps whatever the extractor called it; these
+# groups are used only to decide which value is current, so a wrong alias
+# costs a wrong supersession, never a lost fact.
+_ALIAS = {}
+
+
+def _alias_group(*names, canon=None):
+    tgt = canon or names[0]
+    for n in names:
+        _ALIAS[n] = tgt
+
+
+_alias_group("occupation", "job_title", "job", "role", "position",
+             "current_role", "current_position", "current_job")
+_alias_group("employer", "current_employer", "company", "workplace",
+             "organisation", "organization", "firm")
+_alias_group("location", "residence", "city", "current_location", "hometown",
+             "based_in")
+_alias_group("income", "monthly_income", "salary", "current_income", "wage",
+             "monthly_salary")
+_alias_group("health_condition", "condition", "health", "health_status",
+             "physical_condition", "physical_health", "physical_health_status")
+_alias_group("mental_health", "mental_health_status", "mental_state",
+             "mental_condition")
+_alias_group("marital_status", "relationship_status")
+_alias_group("employment_status", "work_status", "employment")
+
+# A slot name that says the value is OLD. The extractor is already performing
+# supersession here -- in the attribute name, three different ways (e214) --
+# so read it rather than fight it: these alias to the base slot but may never
+# WIN it, whatever their session order. Without this, "I used to work at
+# Google" mentioned late would supersede the current employer.
+_PAST_PREFIX = re.compile(r"^(?:former|past|previous|prior|ex)_(.+)$")
+
+
+def canon_state_attr(attr):
+    """-> (grouping key, is_past). Never renames the stored attribute."""
+    a = str(attr or "").strip().lower()
+    past = False
+    m = _PAST_PREFIX.match(a)
+    if m:
+        a, past = m.group(1), True
+    return _ALIAS.get(a, a), past
 
 
 def _norm(v):
@@ -169,6 +241,18 @@ def _session_ord(conv_id):
     return None
 
 
+_TIER_RANK = {"asserted": 1, "provisional": 0}
+
+
+def _evidence(nd):
+    """Tiebreak within one session: corroboration first, then tier. Recency
+    alone cannot separate two values asserted in the SAME session, and picking
+    by list order silently chose a job DUTY over "chief visionary officer"
+    when both landed in session 56."""
+    return (int(nd.get("n_mentions", 1) or 1),
+            _TIER_RANK.get(nd.get("tier"), 0))
+
+
 def _node_position(nd):
     """(session_index, date) for the LATEST mention of a node -- the point at
     which the store last saw this value asserted."""
@@ -206,23 +290,44 @@ def mark_current(nodes):
         nd.setdefault("current", True)
         nd.setdefault("superseded_by", None)
         subj, attr = split_subject(nd.get("attr", ""))
-        if attr not in SINGLE_VALUED:
+        canon, past = canon_state_attr(attr)
+        nd["past"] = past
+        if canon not in SINGLE_VALUED:
             continue
-        groups.setdefault((_norm(subj), attr), []).append(nd)
+        groups.setdefault((_norm(subj), canon), []).append(nd)
 
     n = 0
     for members in groups.values():
         if len(members) < 2:
             continue
-        members.sort(key=_node_position)
-        winner = members[-1]
-        for nd in members[:-1]:
-            # A repeat of the same value is corroboration, not revision; it is
-            # already one node here (the cluster merged it), so any DIFFERENT
-            # value reaching this point is a genuine change.
-            if _norm(nd.get("value")) == _norm(winner.get("value")):
+        members.sort(key=lambda m: (_node_position(m), _evidence(m)))
+        # a slot that names itself as past may never be the current value
+        live = [m for m in members if not m.get("past")] or members
+
+        # A GENUINE TIE IS NOT A DECISION. If two values share the latest
+        # session AND the same evidence, we do not know which is current --
+        # so both stay current rather than one being picked by list order.
+        # Asserting the wrong one is worse than admitting the ambiguity, and
+        # this is a store whose whole claim is not doing that.
+        top = (_node_position(live[-1]), _evidence(live[-1]))
+        winners = [m for m in live
+                   if (_node_position(m), _evidence(m)) == top]
+        winner = winners[-1]
+        tied = {id(m) for m in winners}
+        for nd in members:
+            if id(nd) in tied:
                 continue
+            # Same value, different slot name ("employer" and
+            # "current_employer" both holding "innovative ai corp") is a
+            # DUPLICATE, not a revision. Within one slot the cluster already
+            # merged these, so this only arises across an alias group -- and
+            # leaving both current shows the user the same fact twice. Retire
+            # it as a restatement, which is what it is: corroboration, not a
+            # change of mind.
             nd["current"] = False
-            nd["superseded_by"] = winner.get("id")
-            n += 1
+            if _norm(nd.get("value")) == _norm(winner.get("value")):
+                nd["restated_by"] = winner.get("id")
+            else:
+                nd["superseded_by"] = winner.get("id")
+                n += 1
     return n

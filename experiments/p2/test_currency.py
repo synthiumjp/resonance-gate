@@ -155,3 +155,88 @@ def test_mark_current_on_a_single_node_changes_nothing():
     nodes = [_node("occupation", "analyst", [4])]
     assert C.mark_current(nodes) == 0
     assert nodes[0]["current"] and nodes[0]["superseded_by"] is None
+
+
+# --- state-slot aliasing (W2a) --------------------------------------------
+
+def test_aliases_group_one_concept_spelled_many_ways():
+    """Six slot names for physical health, all current and contradictory, was
+    the real reason W1 fired on 22 of 1270 nodes (e214)."""
+    nodes = [_node("physical_condition", "normal, no chronic diseases", [1]),
+             _node("health_status", "hypertension managed", [30]),
+             _node("health_condition", "chronic disease", [55])]
+    C.mark_current(nodes)
+    cur = [x for x in nodes if x["current"]]
+    assert len(cur) == 1 and cur[0]["value"] == "chronic disease"
+
+
+def test_a_slot_naming_itself_past_can_never_win():
+    """"I used to work at Google", said late, must not become the current
+    employer. The extractor already told us it is old -- in the slot name."""
+    nodes = [_node("employer", "innovative ai corp", [10]),
+             _node("former_employer", "google", [56])]
+    C.mark_current(nodes)
+    cur = [x for x in nodes if x["current"]]
+    assert len(cur) == 1 and cur[0]["value"] == "innovative ai corp"
+
+
+def test_past_only_group_still_yields_something():
+    """If every value is past-marked we must not return an empty answer."""
+    nodes = [_node("former_employer", "apple", [1]),
+             _node("previous_employer", "google", [9])]
+    C.mark_current(nodes)
+    assert sum(1 for x in nodes if x["current"]) == 1
+
+
+def test_narrative_slots_are_NOT_aliased():
+    """motivation holds 233 values for one user; merging narrative slots would
+    make supersession actively wrong."""
+    for a in ("motivation", "value", "belief", "plan", "goal",
+              "motivation_strategy", "routine", "habit", "health_habit",
+              "health_concern", "health_choice"):
+        canon, _ = C.canon_state_attr(a)
+        assert canon not in C.SINGLE_VALUED, f"{a} -> {canon} must stay multi-valued"
+    nodes = [_node("motivation", "curiosity", [1]),
+             _node("motivation_strategy", "growth", [40])]
+    C.mark_current(nodes)
+    assert all(x["current"] for x in nodes)
+
+
+def test_mental_and_physical_health_do_not_merge():
+    nodes = [_node("physical_health", "stable", [1]),
+             _node("mental_health", "positive", [2])]
+    C.mark_current(nodes)
+    assert all(x["current"] for x in nodes)
+
+
+def test_canon_state_attr_reports_past_without_renaming_the_store():
+    assert C.canon_state_attr("former_employer") == ("employer", True)
+    assert C.canon_state_attr("employer") == ("employer", False)
+    assert C.canon_state_attr("health_status") == ("health_condition", False)
+    assert C.canon_state_attr("wholly_unknown_slot") == ("wholly_unknown_slot", False)
+
+
+def test_a_genuine_tie_leaves_both_current():
+    """Two values in the SAME session with the same evidence: we do not know
+    which is current. Picking by list order chose a job duty over "chief
+    visionary officer" on the real store."""
+    a = _node("occupation", "chief visionary officer", [56])
+    b = _node("occupation", "enhancing decision-making", [56])
+    C.mark_current([a, b])
+    assert a["current"] and b["current"]
+
+
+def test_corroboration_breaks_a_same_session_tie():
+    a = dict(_node("occupation", "chief visionary officer", [56]), n_mentions=3)
+    b = dict(_node("occupation", "enhancing decision-making", [56]), n_mentions=1)
+    C.mark_current([a, b])
+    assert a["current"] and not b["current"]
+
+
+def test_recency_still_beats_corroboration_across_sessions():
+    """A well-corroborated OLD value must not outrank a newer one -- that is
+    the whole point of supersession."""
+    a = dict(_node("occupation", "data scientist", [1]), n_mentions=9)
+    b = dict(_node("occupation", "founder", [40]), n_mentions=1)
+    C.mark_current([a, b])
+    assert b["current"] and not a["current"]
