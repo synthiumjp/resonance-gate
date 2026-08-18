@@ -66,6 +66,17 @@ SLOT = re.compile(r"^[a-z_]+:\s*")
 OWNER = re.compile(r"([A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z]+)?)'s\b")
 
 
+def dechunk(uuid, ssession_id):
+    """Chunked runs (s5_chunk.py) split one user into pseudo-users
+    "<uuid>#c3" whose sessions restart at 0. Absolute position is what every
+    position-based cut here depends on, so restore it: session 4 of chunk 3 is
+    session 31. Unchunked runs pass through untouched."""
+    if "#c" in uuid:
+        base, c = uuid.rsplit("#c", 1)
+        return base, int(c) * BUCKET + int(ssession_id)
+    return uuid, int(ssession_id)
+
+
 def toks(s):
     return {w for w in re.findall(r"[a-z0-9]+", str(s).lower())
             if w not in STOP and len(w) > 2}
@@ -97,7 +108,7 @@ def load(version):
     for r in recs:
         m = OWNER.match(str(r.get("memory_content", "")))
         if m:
-            lead[r["uuid"]][m.group(1)] += 1
+            lead[dechunk(r["uuid"], 0)[0]][m.group(1)] += 1
     names = {u: toks(c.most_common(1)[0][0]) for u, c in lead.items()}
 
     emit = {}
@@ -105,8 +116,8 @@ def load(version):
                      encoding="utf-8"):
         u = json.loads(line)
         for si, s in enumerate(u["sessions"]):
-            emit[(u["uuid"], si)] = [toks(unrender(m))
-                                     for m in s.get("extracted_memories", [])]
+            emit[dechunk(u["uuid"], si)] = [
+                toks(unrender(m)) for m in s.get("extracted_memories", [])]
     return recs, names, emit
 
 
@@ -126,7 +137,7 @@ def main():
     def cells(th):
         out = collections.defaultdict(lambda: [0, 0, 0, 0])
         for r in recs:
-            uu, si = r["uuid"], int(r.get("ssession_id", 0))
+            uu, si = dechunk(r["uuid"], r.get("ssession_id", 0))
             g = toks(r.get("memory_content")) - names.get(uu, set())
             if not g:
                 continue

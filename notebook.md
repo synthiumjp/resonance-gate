@@ -9838,3 +9838,132 @@ Round 5 ran WITHOUT `RG_EMIT_ONCE` (config: `RG_EXTRACT_V5`,
 re-emission, so late misses cannot be blamed on a fact having been emitted in
 an earlier session. Entry 204 recorded that defence as unresolved at 1–25%;
 it is now resolved against.
+
+---
+
+## Entry 207 — 2026-08-07 (p2: pricing S6 offline. Consolidation earns +4.3pt on late misses, not the +9.9pt it first appeared to — most of the gain is the mechanical artifact of bigger records, and entry 206's ~50% "upper bound" is the degenerate all-in-one case.)
+
+Entry 206 pointed at proposition rendering and said the judge would have to
+price it. `merge_probe.py` prices the deterministic half of it offline first,
+because it is cheaper to find out here that the effect is small.
+
+Four passes over each session's emissions, coverage of name-stripped gold at
+threshold 0.5:
+
+    strategy                  records   EARLY cov   LATE cov   LATE missed
+    none                        12282      40.9%      19.5%       15.1%
+    by_slot                      5623      54.9%      27.5%       22.9%
+    random-null(by_slot)         5623      50.9%      24.9%       20.3%
+    by_overlap                   6824      46.3%      29.4%       25.0%
+    random-null(by_overlap)      6824      43.4%      25.4%       20.7%
+    all                           692      63.5%      53.9%       50.0%
+
+**The null is the entry.** A merged record is a bigger token set, so it covers
+more of *any* gold by construction. The control merges the same records into
+the same NUMBER of groups chosen at random — so a strategy has to beat its own
+record count, not beat zero. Against that:
+
+    by_slot      +7.8pt raw   ->  +2.6pt over its own record count
+    by_overlap   +9.9pt raw   ->  +4.3pt over its own record count
+
+**Nearly 60% of the apparent gain was the artifact.** Reported as +9.9pt this
+would have been a 2.3x overstatement, and it is precisely the shape of the
+three findings entries 151–153 retracted. by_overlap is still the best
+non-degenerate strategy and +4.3pt is a real effect, but it is a modest one.
+
+**And a correction to how I framed entry 206.** That entry called the 50%
+union figure an "upper bound on what re-rendering could recover." It is the
+same number as the `all` row here — merging every emission in a session into
+one record. So it is a *degenerate* upper bound: unreachable by anything that
+preserves the record as a unit, and it has no null separating it from "one
+giant record covers everything." Entry 206's other claims are unaffected —
+the flat ceiling, the flat emission volume, 10/10 users, and the
+single-vs-union gap all carry their own controls, and its matched null (same
+user, different session, 3%) tests a different question and stands. But the
+forward-looking number in that entry should be read as **+4.3pt**, not ~+35pt.
+
+**What this does to S6.** It stays in the winning class — deterministic
+post-processing, ledger §4b — but it is no longer obviously worth a judged
+arm on its own. Two things could still change that, and both are cheap to
+check before spending:
+
+  1. The record-count trade is not priced. by_overlap cuts records 44%, which
+     is the denominator of target_accuracy. If precision holds, F1 moves on
+     the recall side alone; if it falls, +4.3pt of recall buys nothing.
+  2. The subject-name question is untested and deliberately unmeasurable here.
+     Gold names the person in every point and our records never do, so any
+     token metric scores that change mechanically. It may matter a great deal
+     to the judge or not at all, and only the judge can say — which makes it
+     the one part of S6 that is genuinely judge-shaped rather than
+     proxy-shaped.
+
+Recording the deflation at the same weight as the finding, per the standing
+rule. The instrument caught it before it reached the ledger, which is the
+system working.
+
+---
+
+## Entry 208 — 2026-08-07 (p2: CORRECTION and CONFIRMATION. Entries 206/207 were computed on a pre-590529e artifact — proposition rendering shipped two days AFTER round 5 was generated, so the format I diagnosed is one we stopped emitting. Re-run on a judged run with the current renderer, the finding REPLICATES and the collapse is worse: -45.7pt.)
+
+A code-recon pass over the renderer turned up a date I should have checked
+first. Verified directly rather than taken on trust:
+
+    ebb1b1a  2026-08-03  OFFICIAL ROUND 5 LAUNCHED
+    590529e  2026-08-05  proposition rendering shipped (entry 163)
+
+    round5   "name: martin mark (provisional)"
+    s5-base  "Michelle Hernandez's gender is female (provisional)"
+
+**So entries 206 and 207 diagnosed a format we have not emitted since Aug 5,
+and the "S6 proposition rendering" they proposed as the next lever is already
+shipped.** I proposed building a thing that exists. The failure was reaching
+for the most recent judged run without checking whether the code that made it
+was the code we run now — a variant of §4's standing rule, one level up: read
+the artifact's provenance, not just its contents.
+
+**Re-run on rgp2-s5-base-j — judged, current renderer, user 10, 7/7 chunks.**
+(Both scripts needed a `dechunk()` fix first: s5_chunk splits a user into
+pseudo-users `<uuid>#c3` whose sessions restart at 0, so every position-based
+cut silently read chunk-local indices. Session 4 of chunk 3 is session 31.)
+
+*The structural finding is confirmed, and stronger:*
+
+    threshold 0.5     ceiling early -> late    recall     efficiency
+    round5 (old fmt)  86.2% -> 87.4%  +1.1pt   -29.0pt    -32.3pt
+    s5-base (prose)   84.7% -> 89.2%  +4.5pt   -45.7pt    -48.3pt
+
+The ceiling is still flat — still *rising* late. The collapse is larger, not
+smaller. Proposition rendering did not touch the position effect.
+
+*And the granularity structure replicates almost exactly:*
+
+    threshold 0.5, LATE MISSED     one emission   union   null
+    round5  (slot: value)              15.1%      50.0%   3.3%
+    s5-base (prose, subject)           15.5%      50.9%   1.8%
+
+Independent run, different user, different renderer, same numbers to within a
+point. **So entry 206's finding is not an artifact of the old syntax.** That
+is the part I got wrong and the part I got right, and they are separable:
+proposition rendering changed the SYNTAX of each record; it did not change
+how many propositions a record carries. Gold still bundles two or three per
+sentence and we still emit one per record. Granularity, not syntax.
+
+**What this does to the open item.** S6 as written is closed — it shipped as
+entry 163. The live lever is record BUNDLING, which is a different change:
+group several attributes into one proposition rather than dress each one up
+individually. Entry 207's +4.3pt-over-null is the only price we have for it
+and it is measured on the old format, so treat it as indicative only.
+
+**A fourth instrument note (#11).** `merge_probe.py` reads the grouping key
+off the `slot:` prefix. On a proposition-rendered artifact that prefix does
+not exist, every record parses as slot `""`, and by_slot silently degenerates
+to `all` — it printed 61 records for 1014 emissions, one per session, as a
+3x "win". It now asserts the format and refuses. The key still exists upstream
+as `nd['attr']`, so the strategy is implementable in the pipeline; it is just
+not measurable by reading the artifact back. **A probe that parses a rendered
+string is coupled to the renderer, and will not fail loudly when the renderer
+changes unless you make it.**
+
+Round 5 remains the only multi-user judged run we have, so it stays useful —
+but every conclusion drawn from it now carries "pre-590529e format" as a
+condition, and the ledger says so.

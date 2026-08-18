@@ -56,6 +56,17 @@ STOP = set("the a an is are was were of to in on at for and or with his her "
            "their its it he she they as by from that this what which who".split())
 
 
+def dechunk(uuid, ssession_id):
+    """Chunked runs (s5_chunk.py) split one user into pseudo-users
+    "<uuid>#c3" whose sessions restart at 0. Absolute position is what every
+    position-based cut here depends on, so restore it: session 4 of chunk 3 is
+    session 31. Unchunked runs pass through untouched."""
+    if "#c" in uuid:
+        base, c = uuid.rsplit("#c", 1)
+        return base, int(c) * BUCKET + int(ssession_id)
+    return uuid, int(ssession_id)
+
+
 def toks(s):
     return {w for w in re.findall(r"[a-z0-9]+", str(s).lower())
             if w not in STOP and len(w) > 2}
@@ -101,8 +112,8 @@ def build(version):
     rows = []
     missing = 0
     for r in load_records(version):
-        sess = users.get(r["uuid"])
-        si = int(r.get("ssession_id", 0))
+        uu, si = dechunk(r["uuid"], r.get("ssession_id", 0))
+        sess = users.get(uu)
         if sess is None or si >= len(sess):
             missing += 1
             continue

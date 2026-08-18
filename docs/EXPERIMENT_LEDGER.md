@@ -21,7 +21,7 @@ containment test. Every result here states its control.
 | Extraction was capped by scope, not quality | best single **user** turn covers 35.4% of gold; we measured **36.12%** — at the ceiling. Any-role ceiling **86.9%**; MOSAIC reports 86.77 (e189) | solid |
 | Gold is schema-shaped at the category level | 64.4% of gold falls inside a **general** 20-slot persona schema whose slots were not read off gold (e192) | solid |
 | Relations must be read, not assumed | grammatical binding gives 98.9% vs a 64.9% majority-class null, n=94; survives ablating HaluMem's own template phrasing (e203) | solid |
-| The late-session collapse is granularity, not extraction | single-turn ceiling FLAT across position (+0.3 to +3.8pt), emissions flat, 10/10 users; half of late misses present in their own session's emissions vs a 3% matched null (e206) | solid |
+| The late-session collapse is granularity, not extraction | single-turn ceiling FLAT across position, emissions flat, 10/10 users; half of late misses present in their own session's emissions vs a ~2-3% matched null. **Replicated on a second judged run with the current renderer** — 15.5%/50.9%/1.8% vs 15.1%/50.0%/3.3% — so it is not an artifact of the old `slot: value` syntax (e206, e208) | solid |
 | Judge choice is worth ~10 points | frontier judge scores us 9.67pt lower; ~2.7pt of it is reasoning mode alone (e176/e177) | solid |
 
 ## 2. What failed
@@ -75,6 +75,19 @@ was *called* instead of reading what it *computed*:
    75% of ceiling not 25% (e199 → **retracted in e200**).
 7. The overlap threshold sits on the distribution mode — see §5a (e202). Not a
    bug: a **limit**. The instrument works and is not precise enough.
+11. `merge_probe` reads its grouping key off the `slot:` prefix, which
+   proposition rendering removed. Every record then parses as slot `""` and
+   by_slot degenerates to `all` — 61 records for 1014 emissions, printed as a
+   3x win (e208). It now asserts the format. **A probe that parses a rendered
+   string is coupled to the renderer and will not fail loudly on its own.**
+12. Position-based cuts read chunk-local session indices on chunked runs
+   (`<uuid>#c3` restarts at session 0), silently scoring session 31 as
+   session 4 (e208).
+10. A merge strategy scored +9.9pt on gold coverage — but merging makes each
+   record a bigger token set, so it covers more of ANY gold. Randomly merging
+   to the same record count scored +5.6pt of that. Real effect **+4.3pt**
+   (e207). Same shape as e151–153: containment without a null. *Caught before
+   it reached this table as a finding.*
 8. `re.I` applied to a whole pattern also lowercases `[A-Z]`, so a gold parser
    read `"'s friend invited her"` as the person **`invited`** — 26 of 120
    "relationships" were verbs (e203). Scope the flag: `(?i:(friend|...))\s+([A-Z]\w+)`.
@@ -86,6 +99,11 @@ was *called* instead of reading what it *computed*:
    all-turns +10pt on precision; like-for-like, base is ahead by 3pt (e205).
    **A resumable run's resting state is unequal arms, so any comparison over
    one needs a completeness guard, not just a correctness one.**
+
+**Third clause, added after #11/#12: read the ARTIFACT'S PROVENANCE, not just
+its contents.** Entries 206/207 diagnosed a rendering format we had already
+replaced two days before the run was generated. Any conclusion from
+`rgp2-round5` carries "pre-590529e format" as a condition.
 
 **Standing rule: before drawing a conclusion from a metric, read its
 assignment.** This has cost more than any modelling error. **Second clause,
@@ -157,7 +175,8 @@ null. Those were not bad ideas badly executed; there was no room.
 | S4 | narrative linking at write time | **closed — negative** at every budget (e198) |
 | S3c | relation typing in gap probe | **done** — 64.9% → 98.9% vs gold, 0 wrong (e203) |
 | S5 | **judged** A/B of all-turns ingestion | **paused** at GPU handover — base arm complete, all-turns 1/7 chunks, ~3h to resume (e205) |
-| S6 | **proposition rendering** — emit subject-bearing sentences instead of `slot: value (tier)` | NEXT, and in the winning class per §4b: deterministic post-processing. Upper bound ~50% of late misses (e206); only the judge can price it |
+| S6 | proposition rendering | **already shipped** as e163 (`590529e`, 2026-08-05) — I proposed it not having checked the artifact's provenance (e208) |
+| S7 | record **bundling** — several attributes per proposition, not one | open, and distinct from S6: rendering changed each record's syntax, not how many propositions it carries. Indicative price **+4.3pt** over its own record count (e207), measured on the old format only |
 | — | judged `no-tier` run | the one audit hypothesis the proxy could not test |
 
 S5 is what §5a called for: entry 194's +14.01pt was a proxy result, and the
