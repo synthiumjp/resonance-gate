@@ -10660,3 +10660,79 @@ the current format, replicating e207's +4.3pt on the old one.
 **The bones stay untouched throughout**: receipts, tiers, corroboration,
 WireGraph, retrieval, abstention, local-only, and the extractor prompt — which
 §4b says not to touch, and nothing here needs to.
+
+---
+
+## Entry 218 — 2026-08-19 (p2: both composers measured, both weak. Relationship composition is NEGATIVE against the atomic baseline; compound composition beats its null by +2.1pt at +34% records. And the relationship result is blocked on something else entirely — ENTITY RESOLUTION.)
+
+Two sonnet agents built the two composers from e217's corrected plan. Both
+delivered working, tested modules (165 tests green) and both reported honestly
+against their own briefs, including two null-construction bugs they found in
+their own measurements. No judge calls were spent, because the offline results
+do not justify any.
+
+**Compound composition** (`compose_compound.py`, 513 compounds, mean group 2.85):
+
+    strategy                    records   cov@0.4  cov@0.5  cov@0.6
+    atoms only                     1522    65.6%    44.3%    22.7%
+    atoms + compounds              2035    75.9%    55.3%    32.2%
+    atoms + NULL (size-matched)    2035    75.1%    53.2%    27.6%
+
++11.0pt over atoms at 0.5 — and only **+2.1pt over its own null**. Nine of the
+eleven points are "bigger records". The null here is stronger than
+merge_probe's: it matches the real strategy's per-session GROUP-SIZE LIST, not
+just the record count. The agent's first attempt used count-matching only, the
+null WON, and the cause was that dropping singleton groups made the null's
+buckets larger than the real ones. Corrected before reporting.
+
+**Relationship composition** (`compose_relationship.py`, 42 propositions):
+
+    thr    composed        shuffled-null    atomic single-record
+    0.4    31/51  60.8%    28/51  54.9%     41/51  80.4%
+    0.5    17/51  33.3%    12/51  23.5%     19/51  37.3%
+    0.6     6/51  11.8%     4/51   7.8%      6/51  11.8%
+
+**Composed is WORSE than the atomic baseline at 0.4 and 0.5 and tied at 0.6.**
+It beats its own shuffled null, which only says the grouping is not random —
+it does not beat doing nothing.
+
+**My own error, recorded because it nearly went into the record.** I ran that
+module while the agent was still editing it and reported +41pt over atomic,
++7.8pt over null, calling relationships "the better bet". Those numbers came
+from ~33 junk `"Michelle Hernandez's Michelle"` self-referential propositions
+that trivially token-matched every gold point's owner tokens. The agent found
+the self-reference bug, fixed it, and reported the corrected figures. **Never
+measure a subagent's artifact before its completion notification** — the file
+on disk mid-run is not the deliverable.
+
+**Why relationship composition fails, and it is the useful part.** The agent
+read its own output and found the cause is upstream:
+
+  * **Entity fragmentation.** "Karen" and "BrownKaren" are two separate
+    subject keys for one person; likewise Donald/MillerDonald,
+    Sophia/"Sophia (mentor)", Linh/"Nguyen Linh". Each person's descriptive
+    facts scatter across several weak records instead of concentrating in one
+    strong one — the exact "parts in separate records" problem the composer
+    exists to solve, recurring one level up at the ENTITY.
+  * **`_NON_PERSON_SUBJECT` is too small for real data.** It matches bare
+    words ("team", "company"), so "Visionary Ai Solutions", "network",
+    "organization", "Team Members", "Key Stakeholders" leak through and
+    produce fake relationship propositions. The agent left it rather than
+    inventing a list, which was the right call.
+  * Only 16 of 42 composed propositions got a relation typed at all —
+    `relation_for` fires far less over arbitrary subjects than over the
+    gold-labelled pairs e203 measured it on (98.9%).
+
+**So composition is not the lever, and entity resolution is the blocker.**
+That is the item the project memory has carried as "owed" since the v3 work
+and it now has a measured consequence rather than an intuition behind it: you
+cannot compose one good record per person while one person is several
+subjects.
+
+**Revised priority.** Entity resolution moves ahead of composition. It is a
+precondition for the relationship slice, it is deterministic post-processing
+(§4b's winning class), and MOSAIC — 86.77 extraction F1 — does exactly this at
+write time as "entity-typed graph with active conflict detection at save
+time". Compound composition stays on the shelf at +2.1pt, worth revisiting
+only after entity resolution, and never worth a judged run at that margin
+against a 34% record-count cost.

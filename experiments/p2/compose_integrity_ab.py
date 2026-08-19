@@ -120,6 +120,10 @@ def main():
     ap.add_argument("--user", type=int, default=10)
     ap.add_argument("--limit", type=int, default=0,
                     help="judge only the first N gold points (pilot)")
+    ap.add_argument("--type", default="",
+                    help="restrict to one memory_type, e.g. 'Relationship' -- "
+                         "lets a targeted composer be priced for ~100 calls "
+                         "instead of 1072")
     a = ap.parse_args()
 
     mod, fn = a.composer.split(":")
@@ -137,6 +141,9 @@ def main():
           "script\n      cannot see that cost -- read it with merge_probe.\n")
 
     pts = list(gold_points(user))
+    if a.type:
+        pts = [(si, mp) for si, mp in pts
+               if a.type.lower() in str(mp.get("memory_type", "")).lower()]
     if a.limit:
         pts = pts[:a.limit]
     print(f"{len(pts)} non-update gold points to judge, x2 arms\n")
