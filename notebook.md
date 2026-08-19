@@ -10598,3 +10598,65 @@ unnoticed: the metric where we look fine is downstream of the metric where we
 do not.
 
 **Ledger corrected.** §5e rewritten; the "~45–47" figure is retracted.
+
+---
+
+## Entry 217 — 2026-08-19 (p2: BEFORE rebuilding extraction as typed-schema-first, I measured what gold actually looks like. Only 4% of it is attribute-shaped. 96% is prose propositions, including 428 of 452 Persona points. A typed-slot extractor would optimise for 24 memory points out of 671.)
+
+JP authorised reworking the system — keep the bones, attack extraction. The
+plan on the table was typed-schema-first extraction toward entry 192's 20-slot
+persona schema. I checked the premise first and it does not hold.
+
+**What gold for user 10 actually is (671 points):**
+
+    ATTRIBUTE-SHAPED  "X's <slot>: <value>" or "X's <slot> is <value>"
+        24 points = 4%,  ALL of them Persona Memory
+        and they are the classic profile fields, one each: name, gender,
+        birth date, job title, savings amount, mbti personality type,
+        parent/partner/child status, physical + mental health condition...
+
+    EVERYTHING ELSE   96%  (Persona 428, Event 168, Relationship 51)
+        Michelle Hernandez lives in San Jose
+        Michelle Hernandez works at Apple
+        Michelle Hernandez's Friend AndersonElizabeth, Elizabeth is a close
+          friend who challenges my perspective
+
+**So 428 of 452 Persona Memory points are prose, not slots.** Entry 192's
+finding — 64.4% of gold falls inside a general 20-slot schema — was a
+CATEGORY-level mapping, and I was about to read it as a claim about gold's
+FORM. It is not. Gold's categories are schema-shaped; gold's text is
+sentences.
+
+**Consequence: a typed-slot extractor optimises for 4% of the benchmark.**
+That is the rebuild JP just approved, and it would have been the most
+expensive null of the project. Recording this before building rather than
+after, which is the only reason it is cheap.
+
+**What the evidence actually points to.** Our proposition renderer already
+emits gold's form — "Michelle Hernandez lives in san jose" is exactly a gold
+sentence. The gap is not the shape of a single fact, it is COMPOSITION: gold
+bundles a relation, a name and a descriptor into one point
+("...Friend AndersonElizabeth, Elizabeth is a close friend who challenges my
+perspective") where we emit the parts separately. That is entry 206's
+single-record-vs-union gap (15.1% vs 50.0%) restated from gold's side, and
+merge_probe now measures the lever at **+5.6pt over its own record count** on
+the current format, replicating e207's +4.3pt on the old one.
+
+**Corrected plan — same goal, right target:**
+
+  1. **Compound proposition emission.** Assemble same-session facts that share
+     a subject into ONE gold-shaped sentence, emitted ALONGSIDE the atoms so
+     the store keeps its addressable units. Measured lever: +5.6pt proxy.
+     Deterministic post-processing, §4b's winning class.
+  2. **Relationship points first.** 51 of 671, and they have the most regular
+     structure of all — "X's <Relation> <Name>, <descriptor>". S3c already
+     reads relations at 98.9% (e203). This is the highest hit-rate-per-effort
+     slice in the benchmark and we have the parts already.
+  3. **Only then** consider typed slots, scoped to the 24 profile fields where
+     gold IS attribute-shaped — a bounded, verifiable 4%, worth doing for the
+     product (they are exactly the "what do you know about me" fields) but not
+     sold as an F1 lever.
+
+**The bones stay untouched throughout**: receipts, tiers, corroboration,
+WireGraph, retrieval, abstention, local-only, and the extractor prompt — which
+§4b says not to touch, and nothing here needs to.
