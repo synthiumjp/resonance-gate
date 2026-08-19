@@ -56,7 +56,8 @@ def gold_for(user):
     return out
 
 
-def run_lora(user, base, adapter, max_new=192, max_turns=0, batch=8):
+def run_lora(user, base, adapter, max_new=192, max_turns=0, batch=8,
+             scope="user"):
     import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer
     from peft import PeftModel
@@ -75,8 +76,17 @@ def run_lora(user, base, adapter, max_new=192, max_turns=0, batch=8):
     for si, s in enumerate(user["sessions"]):
         for t in (s.get("dialogue") or []):
             c = str(t.get("content", "")).strip()
-            if c:
-                jobs.append((si, f"[{t.get('role','user')}] " + c[:1800]))
+            if not c:
+                continue
+            # SCOPE MUST MATCH THE BASELINE. The shipped extractor reads user
+            # turns only (round 5, the official row; all-turns is a dial, not a
+            # default -- e212), and its cache holds only those. Letting the
+            # LoRA read assistant turns while the baseline cannot would compare
+            # scope-of-input and extractor quality at the same time, which is
+            # exactly the confound e211/e218 turned on.
+            if scope == "user" and t.get("role") != "user":
+                continue
+            jobs.append((si, f"[{t.get('role','user')}] " + c[:1800]))
     if max_turns:
         jobs = jobs[:max_turns]
 
@@ -112,11 +122,19 @@ def run_prompted(user, uidx):
     """The shipped extractor: cached atoms, RENDERED, which is what it emits."""
     import halumem_run as H
     import propositions as PR
-    cache = os.path.expanduser(
-        f"~/rg_private/halumem/dev/cache_u{uidx}_v5_14b.jsonl")
-    if not os.path.exists(cache):
-        cache = os.path.expanduser(f"~/rg_private/halumem/cache_u{uidx}.jsonl")
-    if not os.path.exists(cache):
+    # v5 is the shipped extractor. The dev/*_v5_14b caches only exist for
+    # users 10-12, which are TRAINING users -- the held-out users have their v5
+    # cache at the top level. Try in order of specificity and report which one
+    # was used, because scoring against the wrong extractor version would make
+    # the baseline meaningless.
+    for cand in (f"~/rg_private/halumem/dev/cache_u{uidx}_v5_14b.jsonl",
+                 f"~/rg_private/halumem/cache_u{uidx}_v5.jsonl",
+                 f"~/rg_private/halumem/cache_u{uidx}.jsonl"):
+        cache = os.path.expanduser(cand)
+        if os.path.exists(cache):
+            print(f"  baseline cache: {os.path.basename(cache)}")
+            break
+    else:
         return None, 0
     mem, _ = H.ingest_user(user, cache_path=cache)
     nodes = list(mem.g.nodes.values()) + list(mem.g.provisional.values())
@@ -155,6 +173,9 @@ def main():
     ap.add_argument("--adapter", default=os.path.expanduser(
         "~/rg_private/halumem/lora/adapter-v1"))
     ap.add_argument("--max-turns", type=int, default=0)
+    ap.add_argument("--scope", default="user", choices=("user", "all"),
+                    help="turns the LoRA reads; 'user' matches the shipped "
+                         "baseline's scope and is the fair comparison")
     a = ap.parse_args()
 
     users = [int(x) for x in a.users.split(",")]
@@ -173,23 +194,26 @@ def main():
             mp for v in gold.values() for mp in v), re.M)) or "")
         print(f"\n=== user {ui} (held out) ===")
         pb, nb = run_prompted(u, ui)
-        pl, nturns = run_lora(u, a.base, a.adapter, max_turns=a.max_turns)
+        pl, nturns = run_lora(u, a.base, a.adapter, max_turns=a.max_turns,
+                              scope=a.scope)
         for th in (0.4, 0.5, 0.6):
             if pb is not None:
                 h, t = score(pb, gold, own, th)
                 agg[("prompted", th)][0] += h
                 agg[("prompted", th)][1] += t
-                agg[("prompted", th)][2] = nb
+                agg[("prompted", th)][2] += nb
             h, t = score(pl, gold, own, th)
             agg[("lora", th)][0] += h
             agg[("lora", th)][1] += t
-            agg[("lora", th)][2] = sum(len(v) for v in pl.values())
+            agg[("lora", th)][2] += sum(len(v) for v in pl.values())
         unp = sum(1 for v in pl.values() for x in v if x == "__UNPARSEABLE__")
         print(f"  turns generated {nturns}, unparseable outputs {unp}")
 
-    print(f"\n{'arm':<12}{'thr':>6}{'covered':>16}{'records':>10}")
+    print(f"\nscope: LoRA reads {a.scope} turns (baseline reads user turns)")
+    print(f"{'arm':<12}{'thr':>6}{'covered':>16}{'records':>10}{'rec/gold':>10}")
     for (arm, th), (h, t, n) in sorted(agg.items()):
-        print(f"{arm:<12}{th:>6}{h}/{t} = {h/max(1,t):6.1%}{n:>10}")
+        print(f"{arm:<12}{th:>6}{h}/{t} = {h/max(1,t):6.1%}{n:>10}"
+              f"{n/max(1,t):>10.2f}")
     print("\n  Offline coverage over-reads judged recall by ~18pt (e220). This")
     print("  is a SCREEN to decide whether the adapter earns judge calls, not")
     print("  a result. Record counts are the precision cost.")
