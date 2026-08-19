@@ -185,6 +185,19 @@ tuning therefore has only a few points of headroom on this store, which
 retrospectively explains `top_n` (e178) and propositions-in-QA (e184) being
 null. Those were not bad ideas badly executed; there was no room.
 
+## 5i. Shape beats knowledge on this benchmark
+
+Five judged A/Bs on the update axis. Four architectural fixes — report
+supersession, double the prior-fact coverage, alias the state slots, add the
+reverse link — all NULL, though each fixed a real defect. The fifth, rendering
+the same facts as subject-bearing propositions, moved it 3.7x (e215).
+
+**The judge credits RECORDS, and a record has to be the right shape** — now
+measured on integrity (e206), replicated under a different renderer (e208),
+and confirmed on the update axis (e215). On this benchmark how we SAY a thing
+has repeatedly mattered more than whether we know it. Both matter for a
+product; only one was being worked on.
+
 ## 5h. The extractor supersedes in the attribute NAME
 
 `employer`, `current_employer`, `former_employer`, `past_employer` and
@@ -254,6 +267,7 @@ mechanism, not the headline.**
 | W1 | move supersession from READ time into the WRITE path | **DONE, and NULL on the metric (e213)**: 0.7% → 2.2%, p=0.5. Kept — it is correct, cheap and the product behaviour depends on it — but the update axis is omission-bound at 92%, not supersession-bound. Only **25%** of update-relevant facts are in the store at all; retrieval surfaces 13% |
 | W1b | extract the PRIOR value of an updated fact | **mechanism confirmed, lever NULL (e214)** — all-turns doubles prior-fact coverage (25%→44%) and retrieval (13%→27%); updating accuracy unmoved at 2.2%, p=1 |
 | W1c | retrieval for update queries | **cleared as the cause (e214)** — we retrieve the right facts and the judge still sees no update |
+| W2a-e | **render the update readout as propositions** | **DONE, the only thing that moved it (e215)**: updating **2.2% → 8.1%**, omissions −11.1pt p=0.0003. `search_memories` never got e163's renderer and was emitting `attr: value` into the one place gold is most sentence-like |
 | **W2a** | **attribute canonicalisation** | **THE LEVER (e214)**. One user's store: **161 distinct attribute names**, 14 for health, 5 for employer including `former_/past_/previous_employer` — the extractor superseding in the SLOT NAME, so keys never collide and W1 fires on 22 of 1270 nodes. Gold wants ~20 (e192). Deterministic post-processing; should move updating, extraction F1, the contradictory-store defect and retrieval at once |
 | W2 | adopt **refusal-aware F1** (Eywa, arXiv:2605.30771) | our abstention claim is currently unfalsifiable in exactly the way that metric punishes |
 | W3 | re-validate the e130 dial on held-out data | it is a hidden-state probe; two independent replications show that class collapsing to ~0.58 OOD (e211) |

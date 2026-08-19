@@ -10456,3 +10456,84 @@ judged calls, then reading three actual records — each killed a hypothesis, an
 the last found the cause. The reading was decisive and cost nothing. That is
 entry 209's lesson arriving a second time: no metric we had could see 161
 attribute names, because every metric aggregates over whatever names exist.
+
+---
+
+## Entry 215 — 2026-08-19 (p2: W2a. Updating accuracy 2.2% -> 8.1%, omissions -11.1pt at p=0.0003. Five judged A/Bs on this metric; the first four were nulls and the fifth was the one thing I had not tried — RENDERING. `search_memories` never got entry 163's proposition renderer.)
+
+Continuing W1. Four more judged A/Bs on the update axis, 270 official calls
+each, all on user 10, one variable each time.
+
+**The four nulls, each of which fixed something real:**
+
+    #1  report supersession                    2.2%   p=0.5     (e213)
+    #2  + all-turns store (2x prior-fact       2.2%   p=1       (e214)
+        coverage, 25%->44%)
+    #3  + alias the STATE slots                2.2%   p=1
+        (superseded 27->61, contradictions -> 0)
+    #4  + reverse link, current node carries   3.0%   p=1
+        what it replaced
+
+Every one of those found a genuine defect — six slot names for one health
+concept, `former_/past_/previous_employer` as three spellings of supersession,
+a job DUTY beating "chief visionary officer" on an arbitrary tie-break, a
+fabricated "updated from 8700 usd monthly" caused by exact-string comparison
+across aliases. The store is materially better for all four. The metric did
+not move for any of them.
+
+**#5 — read the judge's prompt, which should have been step one.** It asks
+whether Generated Memories *"contains all information points"* of a target
+written as:
+
+    Michelle Hernandez's career_status updated monthly_income from
+    '8210 USD' to '8700 USD'.
+
+and we were handing it `monthly_income: 8700 usd`. Correct values, wrong
+SHAPE — no subject, not a proposition. Entry 163 shipped proposition rendering
+for the extraction artifact and **`search_memories` was never wired to it**;
+it has always had its own `f"{attr}: {value}"` renderer. So this path has been
+emitting the pre-590529e format for months, in the one place gold is most
+sentence-like.
+
+    before   monthly_income: 8700 usd
+    after    Michelle Hernandez's monthly income is 8700 usd
+
+(Owner has to come from the WHOLE STORE, not the recall — the `name` fact is
+rarely among a query's results, so deriving it locally rendered "The user" on
+nearly every query while gold names the person every time.)
+
+**The result — 127 of 135 readouts changed, so almost everything could move:**
+
+                    Omission   Correct   Hallucination
+      SUPERSEDE off   93.3%     2.2%        2.2%
+      SUPERSEDE on    82.2%     8.1%        6.7%
+
+      Omission        16 / 1    p=0.00027   <- survives Bonferroni (0.05/3)
+      Correct          1 / 9    p=0.0215    <- suggestive, does NOT survive
+      Hallucination    0 / 6    p=0.0313    <- suggestive, does NOT survive
+
+**Updating accuracy 2.2% -> 8.1%, a 3.7x relative gain.** The only effect
+clearing a multiple-comparison correction is the omission drop; the correct
+gain and the hallucination rise are both suggestive at n=135 and neither
+survives strictly. So the defensible statement is the same shape as e212's:
+**the change converts abstentions into attempts, and about 60% of those
+attempts are right** — 16 omissions recovered as 9 correct, 6 hallucinated,
+1 other. Roughly 1.5 correct per hallucination, against all-turns' 1.43.
+
+**Competitive position, honestly.** 8.1% against Zep 47.28%, MemOS 62.11%,
+Mem0 25.50%, Supermemory 16.37%, Memobase 5.20% (e211). We move from worst on
+the board to above Memobase. That is progress and it is not competitiveness.
+
+**What the five-A/B arc actually taught.** Four architectural fixes moved
+nothing; one rendering fix moved the metric 3.7x. That is entry 206's finding
+for the third time — **the judge credits RECORDS, and a record has to be the
+right shape** — and it is now measured on the update axis as well as
+integrity. The corollary is uncomfortable and worth stating plainly: on this
+benchmark, how we SAY a thing has repeatedly mattered more than whether we
+know it. Both matter for a product; only one of them was being worked on.
+
+**And the cheapest check was the last one I ran.** Reading
+`EVALUATION_PROMPT_FOR_UPDATE_MEMORY` cost nothing and would have pointed
+straight here. Ledger §4's standing rule says read the metric's assignment
+before drawing a conclusion from it; the corollary is to read it before
+spending four A/Bs trying to move it.
