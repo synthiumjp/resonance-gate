@@ -70,7 +70,14 @@ def check(path, flat_window=8):
             _LAST[path] = (st[0], now)
     if any(x != x or x in (float("inf"), float("-inf")) for x in tr + ev):
         out.append(("NAN", "loss went nan/inf -- kill the run"))
-    if len(tr) >= flat_window:
+    # FLAT only means something EARLY. A converged run stops improving by
+    # design, so firing near the end reports success as failure -- which it did
+    # on v3 at 22:02, killing the watcher for the last 40 minutes of a healthy
+    # run. Same family as STALL firing after a clean finish. Suppress once the
+    # run is most of the way through.
+    st_now = steps(path)
+    near_end = bool(st_now and st_now[1] and st_now[0] / st_now[1] > 0.6)
+    if len(tr) >= flat_window and not near_end:
         w = tr[-flat_window:]
         if min(w) >= min(tr[:-flat_window] or [float("inf")]):
             out.append(("FLAT", f"train loss has not improved in {flat_window} "

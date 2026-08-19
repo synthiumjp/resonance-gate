@@ -10933,3 +10933,59 @@ held-out users (coverage + emission count, as a screen for judge calls). Then
 add probe-targeted confidence to the extractor rather than inventing a
 mechanism -- and screen whatever comes out with the validity protocol before
 believing its AUROC.
+
+---
+
+## Entry 222 — 2026-08-20 (p2: the specialised extractor BEATS the prompted 14B on held-out users, at every threshold, with 3.9x fewer emissions. A 1.7B LoRA. This is the first thing all week that earns judge calls.)
+
+adapter-v3: Qwen3-1.7B + LoRA r=32, trained on users 10-19 only, balanced
+negatives (45% vs v2's 67%). Screened on users 0-1, never trained on, both arms
+reading USER TURNS ONLY so scope-of-input is not confounded with extractor
+quality.
+
+    1221 held-out gold points    thr 0.4   thr 0.5   thr 0.6   rec/gold
+      prompted 14B (shipped)      30.1%     20.1%     12.1%      1.86
+      LoRA 1.7B v2                23.8%     18.8%     14.5%      0.29
+      LoRA 1.7B v3                31.4%     24.7%     19.5%      0.48
+      v3 vs prompted              +1.3pt    +4.6pt    +7.4pt     3.9x fewer
+
+**An 8x smaller model wins on every axis at once**, and the margin GROWS as the
+matching threshold tightens (+1.3 / +4.6 / +7.4) -- the signature of records
+that are better shaped, not merely more numerous.
+
+**The per-record hit rate is the mechanism.** Coverage divided by rec/gold:
+
+    prompted 14B   20.1 / 1.86 = ~11% of emitted records land on gold
+    LoRA v2        18.8 / 0.29 = ~65%
+    LoRA v3        24.7 / 0.48 = ~51%
+
+The prompted extractor's 1.86 records per gold point is entry 185's 1.66x
+over-extraction seen from a new angle, on held-out users. The LoRA does not
+have it.
+
+**The v2 -> v3 change was one variable and it did what it was predicted to.**
+v2 was not less capable, it was under-emitting: at 0.29 rec/gold its coverage
+was capped near 29% however good each record was, and that ceiling came from
+me setting 67% of training examples to negatives -- over-weighting precision
+when recall is the binding constraint. Rebalancing to 45% raised volume 0.29 ->
+0.48 and coverage 18.8% -> 24.7%, with the hit rate falling 65% -> 51% as
+expected. Still under-emitting, so there is likely more here.
+
+**What this does NOT establish.** Coverage is the offline proxy, and e220
+measured it over-reading judged recall by ~18pt. Precision is not measured at
+all -- rec/gold is only its proxy, and the official `target_accuracy` judges
+each emitted record. A model that emits fewer records can still be judged
+badly on the ones it emits. **So this is a screen that has been passed, not a
+result.** The claim it licenses is exactly: the adapter has earned judge calls,
+which is the first time anything this week has.
+
+**Why this is the right lever after a week of nulls.** Composition +0.6pt
+pooled (e220), all-turns +1.65pt judged-null (e212), supersession null on the
+update axis four times (e213/e214), the gate net-negative (e210). Every one of
+those was post-processing. e217 showed gold is 96% prose and the leaders reach
+80-87 F1 with typed extraction, which pointed at WHAT the extractor emits per
+turn -- and section 4b says that cannot be prompted. It can be trained.
+
+**Next: the judged run.** Full pipeline, LoRA extractor vs prompted baseline,
+official harness, both integrity AND accuracy scored -- because F1 is a
+harmonic mean and this whole result could still be given back on precision.
