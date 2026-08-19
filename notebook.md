@@ -10804,3 +10804,63 @@ the wrong pair of things — e211 subtracted a judge penalty from one side only,
 e218 compared a component against the whole store. The metric was right both
 times; the ARMS were wrong. Read what is on each side of the comparison before
 reading the number between them.
+
+---
+
+## Entry 220 — 2026-08-19 (p2: composition generalises to NOTHING. +10.8pt on Relationship gold, +0.3pt on Persona, +0.0pt on Event — and both of those are entirely matched by the null. Pooled effect +0.6pt. The line is closed.)
+
+Before judging the relationship win (e219: +7.8pt, 14 records) I asked the
+question that decides whether to keep building: relationship gold is 37 of 536
+non-update points, so even a perfect result there is worth ~0.7pt pooled. Does
+the same machinery help on Persona (371) and Event (128), which are 93%?
+
+**Measured at thr 0.5, `atoms` vs `atoms + compose+person+entity`, against a
+null that reassigns subjects at random:**
+
+    type                    n     atoms   +compose   null    delta
+    Persona Memory        371     47.4%     47.7%    47.7%   +0.3pt
+    Relationship Memory    37     48.6%     59.5%    51.4%  +10.8pt
+    Event Memory          128     42.2%     42.2%    42.2%   +0.0pt
+    ALL (non-update)      536     46.3%     47.2%    46.6%   +0.9pt
+
+**Persona and Event move by 0.3pt and 0.0pt, and the NULL matches both
+exactly.** The relationship effect is real and large in relative terms
+(+10.8pt over atoms, +8.1pt over its null) and it is confined to the 7% of
+gold the composer was written for — which is not a flaw in the composer, it
+composes relationship propositions and nothing else. Pooled: **+0.9pt, of
+which +0.6pt survives the null.**
+
+Recall 0.290 -> ~0.296. F1 0.383 -> ~0.388. That is not a competitive move and
+no amount of polishing this component makes it one.
+
+**So the line is closed, and closing it cost 102 judge calls we did not
+spend.** The generality check was five minutes of cache replay. Entry 213
+spent four judged A/Bs discovering something a prompt-read would have shown;
+this time the cheap check came first.
+
+**What was actually banked, and it is not nothing:**
+  * `person_subject` — 10/10 leaks caught vs the baseline's 3/10, 0 false
+    rejections. Fake relationships ("Michelle Hernandez's Colleague network")
+    stop being emitted. That is a PRODUCT fix regardless of F1.
+  * `entity_resolve` — 31 subjects to 23 identities, 0 wrong merges, null 0%.
+    One person is one identity. Also a product fix: "who is Karen" stops
+    having three partial answers.
+  * Both are deterministic, tested (207 green), and independent of the
+    composer that is now shelved.
+
+**A calibration note that matters more than the result.** The proxy says atoms
+cover 46.3% of non-update gold at thr 0.5; the JUDGE scores integrity recall
+at 27.8% on the same store. The proxy over-reads by ~18pt. Entry 202 said it
+could not carry absolutes and could carry paired comparisons — this is the
+size of the absolute error, measured, and it is a reason to distrust any
+offline coverage figure quoted as "recall".
+
+**Where this leaves extraction.** We need +11pt of recall for F1 0.50 and
++21pt for Mem0 parity. Measured candidates: composition +0.6pt, all-turns
++1.65pt (judged, null), emit-once and the rest already banked. **We do not
+have a path to +11pt from post-processing, and I should stop implying one
+exists.** The leaders reach 80-87 F1 with typed-graph extraction architectures
+(MOSAIC's write-time conflict detection, MemOS's MemCubes), and e217 showed
+gold is 96% prose — so the honest reading is that their advantage is in WHAT
+they extract per turn, not in how they post-process it, and that is the
+extractor itself. Which §4b says we cannot fix by prompting.

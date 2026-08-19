@@ -90,15 +90,24 @@ def main():
              for k, v in arms.items()}
     atoms = [p for p in (PR.render(f, owner=owner) for f in facts) if p]
 
-    gold = [mp["memory_content"] for s in user["sessions"]
-            for mp in s.get("memory_points", [])
-            if mp.get("memory_type") == "Relationship Memory"]
+    # Relationship gold is 51 of 671 points (7.6%): even a perfect result
+    # there is worth ~0.6pt of pooled recall. The question that decides
+    # whether this line of work continues is whether the SAME machinery helps
+    # on Persona (452) and Event (168) -- 92% of gold.
+    gold_by = collections.defaultdict(list)
+    for s in user["sessions"]:
+        for mp in s.get("memory_points", []):
+            if str(mp.get("is_update")) == "True":
+                continue
+            gold_by[mp.get("memory_type")].append(mp["memory_content"])
+    gold_by["ALL (non-update)"] = [g for v in list(gold_by.values()) for g in v]
+    gold = gold_by["Relationship Memory"]
     own = toks(owner or "")
 
-    def cov(records, th):
+    def cov(records, th, gl=None):
         recs = [toks(r) for r in records]
         hit = 0
-        for g in gold:
+        for g in (gl if gl is not None else gold):
             gt = toks(g) - own
             if gt and any(len(gt & r) / len(gt) >= th for r in recs):
                 hit += 1
@@ -130,9 +139,23 @@ def main():
             out.append(g)
         return CR.compose(g_ := out, owner=owner, session_text=text) or []
 
-    print(f"{len(gold)} Relationship gold points | atoms {len(atoms)}")
+    print(f"atoms {len(atoms)} | gold: " +
+          ", ".join(f"{k.split()[0]} {len(v)}" for k, v in gold_by.items()))
     for k in arms:
         print(f"  {k:<24} {len(props[k])} composed propositions")
+    print()
+    print("PER GOLD TYPE at thr 0.5 -- does this generalise beyond relationships?")
+    print(f"  {'type':<22}{'n':>6}{'atoms':>10}{'+compose+p+e':>14}{'null':>9}{'delta':>9}")
+    best = arms and list(arms)[-1]
+    nl_best = null_props(best)
+    for t, gl in gold_by.items():
+        if not gl:
+            continue
+        a0 = cov(atoms, 0.5, gl) / len(gl)
+        a1 = cov(atoms + props[best], 0.5, gl) / len(gl)
+        a2 = cov(atoms + nl_best, 0.5, gl) / len(gl)
+        print(f"  {t:<22}{len(gl):>6}{a0:>10.1%}{a1:>14.1%}{a2:>9.1%}"
+              f"{(a1-a0)*100:>+8.1f}pt")
     print()
     hdr = f"  {'arm':<24}" + "".join(f"{'thr '+str(t):>12}" for t in (0.4, 0.5, 0.6))
     print(hdr)

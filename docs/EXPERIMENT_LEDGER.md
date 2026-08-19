@@ -265,6 +265,21 @@ philosophy, zero benchmarks). The unoccupied intersection is local + small
 model + receipts + measured abstention. **Local is the wedge; receipts are the
 mechanism, not the headline.**
 
+## 5j. The composition line, closed
+
+Relationship composition is real (+10.8pt over atoms on Relationship gold,
++8.1pt over its null, for 14 records) and confined to 7% of gold. Persona
++0.3pt and Event +0.0pt, both fully matched by the null. **Pooled +0.6pt**
+(e220). Recall 0.290 -> 0.296. Closed.
+
+Banked and kept: `person_subject` (10/10 leaks vs baseline 3/10, 0 false
+rejections) and `entity_resolve` (0 wrong merges, null 0%) — both product
+fixes independent of the shelved composer.
+
+**Proxy calibration, measured:** offline coverage reads 46.3% of non-update
+gold where the JUDGE scores integrity recall 27.8% on the same store — the
+proxy over-reads by ~18pt. Never quote an offline coverage figure as "recall".
+
 ## 6. Open, in priority order
 
 | # | Item | Status |
