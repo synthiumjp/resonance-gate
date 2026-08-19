@@ -300,7 +300,9 @@ proxy over-reads by ~18pt. Never quote an offline coverage figure as "recall".
 | W2 | adopt **refusal-aware F1** (Eywa, arXiv:2605.30771) | our abstention claim is currently unfalsifiable in exactly the way that metric punishes |
 | W3 | re-validate the e130 dial on held-out data | it is a hidden-state probe; two independent replications show that class collapsing to ~0.58 OOD (e211) |
 | P1 | job DUTIES filed as job titles | open — clutters role history; needs a duty/responsibility slot |
-| P2 | 88% of the store is `provisional` | open, **design decision not a bug**: promotion needs 2 mentions, people state most self-facts once. Either drop the rule for first-person attributes or stop surfacing tier as confidence |
+| P2 | 88% of the store is `provisional` | **candidate fix identified (e221)**: PT-CSFT (JP's own, arXiv:2604.24070) trains the extractor to emit a probe-calibrated confidence per memory point, replacing a corroboration count that cannot work when people state self-facts once. Do NOT ask a small model for a 0–100 number — arXiv:2604.22215 measured all seven 3–9B models Invalid at that, 91.7% ceiling |
+| W3 | re-validate the e130 dial | **instrument identified (e221)**: JP's Validity Scaling Protocol (arXiv:2604.17707/.17714/.17716) — Invalid models score AUROC ~0.36 on selective prediction while APPEARING well-calibrated, which is precisely the risk |
+| X1 | specialised extractor (LoRA) | **adapter-v2 trained (e221)** — Qwen3-1.7B, users 10–19 only, name hallucination 41.0% → 0.0%, emission volume matches gold, gold's own conventions. Screen vs the prompted 14B next |
 | — | judged `no-tier` run | the one audit hypothesis the proxy could not test |
 
 S5 is what §5a called for: entry 194's +14.01pt was a proxy result, and the

@@ -10864,3 +10864,72 @@ exists.** The leaders reach 80-87 F1 with typed-graph extraction architectures
 gold is 96% prose — so the honest reading is that their advantage is in WHAT
 they extract per turn, not in how they post-process it, and that is the
 extractor itself. Which §4b says we cannot fix by prompting.
+
+---
+
+## Entry 221 — 2026-08-19 (p2: the extractor LoRA works — 0% name hallucination, gold's own conventions, right emission volume. And JP's own published research supplies the next piece: the tier signal should be a probe-targeted calibrated confidence, not a corroboration count.)
+
+**adapter-v2, the specialised extractor.** Qwen3-1.7B + LoRA r=32, bf16, trained
+on users 10-19 only (0-9 refused at build time), 11,248 examples, 2 epochs,
+1h13m on the RX 7900 GRE.
+
+    measured on 450 held-out turns of user 0        v1        v2
+      emissions leaking a TRAINING user's name     41.0%     0.0%
+      emissions using the canonical "User"           --      94.5%
+      emissions (against ~132 gold points)          134      127
+      unparseable JSON                              4.3%     5.5%
+      eval_loss (best)                            0.3115    0.3089
+
+v1's defect was invisible in loss and fatal in output: it emitted *"Christopher
+Anderson's highest education level is Bachelor"* for a user named Martin Mark,
+sampling names it had memorised from the training users. Removing owner names
+from the targets removed the failure class -- a model that never emits a name
+cannot hallucinate one -- and cost nothing in loss.
+
+What it now produces is gold's own form, including keeping the real name in the
+single place where the name IS the fact:
+
+    User's name is Martin Mark
+    User's gender is Male
+    User lives in Columbus
+    User's age in January 2025 is 29 years old
+
+**JP's research changes what comes next.** https://synthiumjp.github.io/ --
+30+ 2026 preprints on metacognition and confidence calibration. Three pieces
+land directly on open RG items, and two are cautions against things we would
+plausibly have built:
+
+  * **PT-CSFT** (arXiv:2604.24070, Zenodo 10.5281/zenodo.20436841) trains a
+    model to VERBALISE calibrated confidence using a mid-layer linear probe as
+    the target. Recovers 91-115% of probe discrimination, beats 5-sample
+    self-consistency at a fifth of the cost, survives later alignment. **This
+    is the fix for ledger P2**: 88% of our store is `provisional` because
+    promotion needs two mentions and people state self-facts once, so the
+    confidence signal that IS the evidence-layer pitch is stuck in one state.
+    A confidence emitted per memory point, calibrated against a probe, replaces
+    a corroboration count that does not work.
+  * **Validity Scaling** (arXiv:2604.17707/.17714/.17716) is the instrument
+    ledger W3 needs. Invalid models score AUROC ~0.36 on selective prediction
+    **while appearing well-calibrated** -- which is exactly the risk flagged
+    for entry 130's dial, a hidden-state probe that two independent
+    replications suggest collapses to ~0.58 out of distribution.
+  * **Verbal confidence saturation** (arXiv:2604.22215): all seven 3-9B
+    instruction-tuned models were Invalid on numeric 0-100 confidence, 91.7%
+    ceiling rate. So asking our 1.7B for a 0-100 number is measured to fail --
+    probe-targeted training is the alternative, not a prompt.
+
+  Cautions, both from JP's own results:
+  * **Competence Gate** "doesn't improve grounded QA; parametric competence
+    signal interferes on evidential grounding tasks." RG's QA IS evidential
+    grounding. So a competence gate belongs on the EXTRACTION side ("is this
+    worth storing?"), not the QA side -- which is where I would have put it.
+  * **Resonance Gate**: confidence read from store geometry "detects
+    store-membership, not errors" (0.516 AUROC among retrieved items). A
+    receipted store must not treat "it is in the store" as "it is right", which
+    is a failure mode our whole pitch is exposed to.
+
+**Revised plan.** Finish scoring adapter-v2 against the prompted 14B on
+held-out users (coverage + emission count, as a screen for judge calls). Then
+add probe-targeted confidence to the extractor rather than inventing a
+mechanism -- and screen whatever comes out with the validity protocol before
+believing its AUROC.
