@@ -49,11 +49,61 @@ EVAL_USERS = list(range(0, 10))
 STOP = set("the a an is are was were of to in on at for and or with his her "
            "their its it he she they as by from that this what which who".split())
 
+# The subject is ALWAYS the literal token "User" -- never the person's name.
+#
+# Measured on adapter-v1: 41% of emissions carried a WRONG subject name, and 28
+# of those 55 were literally the TRAINING users' own names (Steven Miller,
+# Barbara Jones, Christopher Anderson, Oleksandr Shevchenko, Michelle
+# Hernandez). The model learned "emit a name" but a single turn rarely contains
+# one, so it sampled from the names it had seen. Textbook entity memorisation,
+# and invisible in the loss curve -- eval_loss bottomed at 0.3115 with this
+# defect fully present.
+#
+# It cannot be prompted away and does not need to be: the owner's name is
+# something the STORE knows and the model does not. So the model emits "User's
+# ..." and the name is substituted deterministically at emission time
+# (OWNER_TOKEN below). A model that never emits a name cannot hallucinate one
+# -- the failure class is removed rather than reduced, which is section 4b's
+# winning pattern.
+OWNER_TOKEN = "User"
+
 SYSTEM = ("Extract the memory points a long-term memory system should store "
           "from this message. Output a JSON array of objects with keys "
           '"type" (Persona|Event|Relationship) and "content" (one complete '
-          "sentence naming the person). Output [] if there is nothing to "
-          "store.")
+          'sentence). ALWAYS refer to the speaker as "User" -- never by name. '
+          "Output [] if there is nothing to store.")
+
+
+def owner_name_of(user):
+    """The owner's real name, from gold's own "User's name is X" point."""
+    for s in user["sessions"]:
+        for mp in s.get("memory_points", []):
+            m = re.match(r"User's name is (.+?)\s*$", str(mp.get("memory_content", "")))
+            if m:
+                return m.group(1).strip()
+    return None
+
+
+def dename(text, owner):
+    """Rewrite a gold sentence to use OWNER_TOKEN instead of the owner's name.
+
+    Handles the possessive ("Martin Mark's job") and the bare subject ("Martin
+    Mark lives in Columbus"), plus the first name alone, which gold uses
+    interchangeably. Other people's names are left ALONE -- they are real
+    content, and a relationship point without the other person's name is
+    worthless."""
+    if not owner:
+        return text
+    out = text
+    parts = [owner] + ([owner.split()[0]] if " " in owner else [])
+    for nm in parts:
+        out = re.sub(rf"\b{re.escape(nm)}'s\b", f"{OWNER_TOKEN}'s", out)
+        out = re.sub(rf"\b{re.escape(nm)}\b", OWNER_TOKEN, out)
+    # "User's name is User" is what denaming the name point produces; keep the
+    # real value, since the name IS the fact there.
+    out = re.sub(rf"{OWNER_TOKEN}'s name is {OWNER_TOKEN}\b",
+                 f"{OWNER_TOKEN}'s name is {owner}", out)
+    return out
 
 
 def toks(s):
@@ -73,6 +123,9 @@ def build(users, per_turn_cover=0.5, neg_ratio=0.3, seed=0):
                 f"{EVAL_USERS[0]}-{EVAL_USERS[-1]} are the evaluation split "
                 "and every official number depends on them staying unseen.")
         u = rows[ui]
+        owner = owner_name_of(u)
+        if not owner:
+            stats["users_without_owner_name"] += 1
         for sess in u["sessions"]:
             turns = [t for t in (sess.get("dialogue") or [])
                      if str(t.get("content", "")).strip()]
@@ -101,7 +154,8 @@ def build(users, per_turn_cover=0.5, neg_ratio=0.3, seed=0):
                 if not mps and rng.random() > neg_ratio:
                     continue
                 tgt = [{"type": str(m.get("memory_type", "")).replace(" Memory", ""),
-                        "content": m.get("memory_content", "")} for m in (mps or [])]
+                        "content": dename(m.get("memory_content", ""), owner)}
+                       for m in (mps or [])]
                 out.append({"messages": [
                     {"role": "system", "content": SYSTEM},
                     {"role": "user", "content":
@@ -140,6 +194,13 @@ def main():
     print(f"  targets/example      {dict(sorted(n.items())[:6])}")
     ty = collections.Counter(x["type"] for t in tgts for x in t)
     print(f"  target types         {dict(ty)}")
+    # the defect this build exists to remove: a target must not name the owner
+    owners = {owner_name_of(rows[ui]) for ui in TRAIN_USERS
+              for rows in [[json.loads(l) for l in open(DATA, encoding="utf-8")]]}
+    leaked = sum(1 for t in tgts for x in t
+                 for o in owners if o and o.split()[0] in x["content"])
+    print(f"  targets naming an owner  {leaked}  <- must be ~0; adapter-v1 "
+          f"emitted 41% wrong names because these were present")
     if a.out:
         with open(a.out, "w", encoding="utf-8") as fh:
             for e in ex:

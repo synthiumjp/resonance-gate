@@ -50,7 +50,15 @@ def check(path, flat_window=8):
         out.append(("DIVERGING", f"eval loss {ev[-1]:.4f} is >10% above its best "
                                  f"{min(ev):.4f} while train loss still falls -- "
                                  "memorising the training users"))
+    # A COMPLETED run stops writing, so an unqualified staleness check fires
+    # on success -- which it did on adapter-v1, reporting STALL 63 minutes
+    # after the run finished cleanly. Check for the completion marker first,
+    # the same way s5_sentinel checks S5_DONE.
+    done = False
     if os.path.exists(path):
+        with open(path, encoding="utf-8", errors="ignore") as fh:
+            done = "saved adapter to" in fh.read()[-4000:]
+    if os.path.exists(path) and not done:
         age = time.time() - os.path.getmtime(path)
         if age > 20 * 60:
             out.append(("STALL", f"no log write for {age/60:.0f} min"))
