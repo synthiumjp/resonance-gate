@@ -133,13 +133,24 @@ def main():
                 lead[dechunk(r["uuid"], 0)[0]][mo.group(1)] += 1
     names = {u: toks(c.most_common(1)[0][0]) for u, c in lead.items()}
 
+    # On a proposition-rendered artifact EVERY record contains the owner's
+    # name, so an overlap>=2 test merges almost everything and matches its own
+    # random null -- measuring "bigger records", not grouping. Strip the owner
+    # tokens from the grouping key, exactly as gold is name-stripped.
+    owner_toks = set()
+    for c in lead.values():
+        owner_toks |= toks(c.most_common(1)[0][0])
+
     raw = {}
     for line in open(f"{RESULTS}/rgp2-{a.version}/rgp2_eval_results.jsonl",
                      encoding="utf-8"):
         u = json.loads(line)
         for si, s in enumerate(u["sessions"]):
-            raw[dechunk(u["uuid"], si)] = [
-                split_record(m) for m in s.get("extracted_memories", [])]
+            rows = []
+            for m in s.get("extracted_memories", []):
+                slot, tk = split_record(m)
+                rows.append((slot, tk - owner_toks))
+            raw[dechunk(u["uuid"], si)] = rows
 
     # FORMAT GUARD. by_slot keys on the "slot:" prefix, which only the
     # pre-590529e artifact carries -- proposition rendering (entry 163) emits
@@ -151,20 +162,22 @@ def main():
     frac = have_slot / max(1, total_rec)
     print(f"rgp2-{a.version}, threshold {a.th}, gold name-stripped")
     print(f"  records carrying a 'slot:' prefix: {frac:.1%}")
-    if frac < 0.5:
-        print("\n  ABORT: this artifact is proposition-rendered, so the slot is\n"
-              "  not recoverable from the string and by_slot collapses to `all`.\n"
-              "  This probe reads the PRE-590529e format only. The grouping key\n"
-              "  still exists upstream as nd['attr'] -- the strategy is\n"
-              "  implementable in the pipeline, just not measurable from here.")
-        return
+    prose = frac < 0.5
+    if prose:
+        print("  proposition-rendered artifact: by_slot is unavailable (the slot\n"
+              "  is not recoverable from the string), so only by_overlap and its\n"
+              "  matched null are run. The grouping key still exists upstream as\n"
+              "  nd['attr'], so the strategy is implementable -- just not\n"
+              "  measurable from a rendered artifact.")
+    print()
     print()
     print(f"  {'strategy':<24}{'records':>9}{'EARLY cov':>12}{'LATE cov':>11}"
           f"{'LATE missed':>13}")
     import random
     rng = random.Random(0)
-    plans = ["none", "by_slot", "random-null(by_slot)",
-             "by_overlap", "random-null(by_overlap)", "all"]
+    plans = (["none", "by_overlap", "random-null(by_overlap)", "all"] if prose
+             else ["none", "by_slot", "random-null(by_slot)",
+                   "by_overlap", "random-null(by_overlap)", "all"])
     sizes = {}
     for how in plans:
         if how.startswith("random-null"):
