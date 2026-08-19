@@ -20,6 +20,12 @@ import sys
 import time
 
 NUM = re.compile(r"'(loss|eval_loss)':\s*'?([0-9.eE+-]+)'?")
+# tqdm writes the progress bar to STDERR (unbuffered) while Trainer's loss dicts
+# go to STDOUT, which python block-buffers under nohup -- so losses arrive in
+# ~8KB chunks and lag the bar badly (v3's step-25 log appeared at step 200).
+# Without a progress signal a genuine early stall is indistinguishable from
+# buffering, which is a blind spot the first version of this file had.
+STEP = re.compile(r"(\d+)/(\d+)\s*\[")
 
 
 def scan(path):
@@ -36,9 +42,32 @@ def scan(path):
     return tr, ev
 
 
+def steps(path):
+    """(current, total) from the newest tqdm bar, or None."""
+    if not os.path.exists(path):
+        return None
+    raw = open(path, encoding="utf-8", errors="ignore").read()[-20000:]
+    m = STEP.findall(raw.replace("\r", "\n"))
+    return (int(m[-1][0]), int(m[-1][1])) if m else None
+
+
+_LAST = {}
+
+
 def check(path, flat_window=8):
     tr, ev = scan(path)
     out = []
+    # progress-based stall detection, independent of the buffered loss stream
+    st = steps(path)
+    if st:
+        prev = _LAST.get(path)
+        now = time.time()
+        if prev and st[0] == prev[0] and now - prev[1] > 15 * 60:
+            out.append(("NO_PROGRESS",
+                        f"step {st[0]}/{st[1]} unchanged for "
+                        f"{(now-prev[1])/60:.0f} min"))
+        if not prev or st[0] != prev[0]:
+            _LAST[path] = (st[0], now)
     if any(x != x or x in (float("inf"), float("-inf")) for x in tr + ev):
         out.append(("NAN", "loss went nan/inf -- kill the run"))
     if len(tr) >= flat_window:
@@ -77,7 +106,9 @@ def main():
         for name, msg in bad:
             print(f"[{stamp}] ANOMALY {name}: {msg}", flush=True)
         if a.once:
-            print(f"[{stamp}] {len(tr)} train logs, {len(ev)} evals; "
+            st = steps(a.log)
+            print(f"[{stamp}] step {st[0]}/{st[1]}" if st else f"[{stamp}] no bar",
+                  f"| {len(tr)} train logs, {len(ev)} evals; "
                   f"train {tr[-1] if tr else '-'} eval {ev[-1] if ev else '-'}")
             return 1 if bad else 0
         if bad:
