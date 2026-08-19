@@ -10736,3 +10736,71 @@ write time as "entity-typed graph with active conflict detection at save
 time". Compound composition stays on the shelf at +2.1pt, worth revisiting
 only after entity resolution, and never worth a judged run at that margin
 against a 34% record-count cost.
+
+---
+
+## Entry 219 — 2026-08-19 (p2: CORRECTION to entry 218. Composition is POSITIVE — I compared 14 composed records against 1522 atoms when the design emits compounds ALONGSIDE atoms. Correctly framed: +7.8pt over the atomic baseline at thr 0.5, for 14 extra records. And entity resolution is what gets it there.)
+
+Entry 218 called relationship composition negative (33.3% composed vs 37.3%
+atomic). That comparison was wrong and the error was mine, not the agent's,
+though its measurement carried the same framing: **compounds are emitted
+ALONGSIDE atoms, never instead**, so `composed alone` is not an arm anyone
+would ship. Scoring 14 composed records against 1522 atoms asks whether a
+handful of sentences outperform the entire store — of course they do not.
+
+**The correct comparison, 51 Relationship gold points, same composer, same
+gold, same thresholds:**
+
+    arm                              thr 0.4   thr 0.5   thr 0.6
+    atoms only (baseline)             82.4%     54.9%     21.6%
+    atoms + compose                   84.3%     60.8%     27.5%
+        null (same count, random)     84.3%     56.9%     21.6%
+    atoms + compose+person            84.3%     60.8%     27.5%
+        null                          82.4%     54.9%     21.6%
+    atoms + compose+person+entity     84.3%     62.7%     27.5%
+        null                          82.4%     54.9%     21.6%
+
+**+7.8pt over atoms at thr 0.5, +5.9pt at 0.6, and it beats a proper null by
+the same margin** — the null here rebuilds the same NUMBER of propositions
+from the same facts under a RANDOM subject assignment, so the arm has to win
+on who it groups.
+
+**The cost is 14 records on 1522 — a 0.9% increase.** Compare compound
+composition: +2.1pt over null for +34% records. Relationship composition is a
+far better trade, and it is better precisely because it is targeted.
+
+**Entity resolution is doing real work.** person-filtering alone: 60.8%.
+Adding entity resolution: 62.7% — and it does that while HALVING the record
+count, 27 propositions to 14, because one person is now one record instead of
+three. That is the mechanism e218 predicted, confirmed.
+
+**Both new components verified independently before this:**
+
+    person_subject   31 subjects -> 21 person / 10 non-person
+                     0 false rejections vs 13 gold-mined person names
+                     10/10 leaks caught; the exact-word baseline caught 3/10
+    entity_resolve   31 subjects -> 23 identities, 8 merges
+                     0 WRONG merges, 3/3 scoreable gold pairs correct
+                     null: 0/8 correct by chance
+                     (2 gold pairs unscoreable -- our extractor only ever
+                      wrote the CamelCase spelling for those two people)
+
+**A second null bug, mine, caught in the same run.** My first null shuffled
+the composed propositions' LIST ORDER. Coverage asks "does ANY record cover
+this gold point", which is order-invariant, so the null scored identically to
+the real arm in every single cell — and an exact match across nine cells reads
+like a perfect control rather than a broken one. A null must change WHICH
+FACTS SHARE A RECORD. Third null-construction defect in two days: the agents
+found two in their own work and I made this one.
+
+**Revised standing.** Composition is alive, targeted at relationships, and
+gated on entity resolution — which is now built, measured, and safe (0 wrong
+merges). Next: wire person_subject + entity_resolve into ingestion and price
+the whole thing with the official judge on the relationship slice, which is
+~102 calls because there are only 51 gold points.
+
+**And the lesson worth keeping.** Two entries in two days turned on comparing
+the wrong pair of things — e211 subtracted a judge penalty from one side only,
+e218 compared a component against the whole store. The metric was right both
+times; the ARMS were wrong. Read what is on each side of the comparison before
+reading the number between them.
