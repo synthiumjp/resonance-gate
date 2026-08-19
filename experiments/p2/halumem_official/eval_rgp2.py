@@ -178,8 +178,17 @@ def search_memories(mem, query, top=10):
 
     def _v(f, prefix=""):
         base = f"{prefix}{f['attribute']}: {f['value']}"
-        if not _SUPERSEDE or f.get("current", True):
+        if not _SUPERSEDE:
             return base
+        if f.get("current", True):
+            # The current node carries what it REPLACED. Retrieval ranks the
+            # old value far lower and usually never returns it, so without
+            # this the from->to pair is invisible to anything reading the
+            # store -- and "updated X from A to B" is the whole content of an
+            # update gold point.
+            prev = [p for p in (f.get("supersedes") or []) if p]
+            return base + (f" (updated from: {'; '.join(str(p) for p in prev[-3:])})"
+                           if prev else "")
         # Name the replacement, not just the fact of replacement -- "from A to
         # B" is the whole content of an update gold point, and the id carries
         # the new value already.

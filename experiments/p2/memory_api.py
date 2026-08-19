@@ -195,6 +195,7 @@ class Memory:
                 # every consumer sees one verdict instead of re-deriving it.
                 "current": nd.get("current", True),
                 "superseded_by": nd.get("superseded_by"),
+                "supersedes": list(nd.get("supersedes") or []),
                 "receipts": [{"date": d, "conversation":
                               self.titles.get(c, c)[:60],
                               "conversation_id": c} for c, d in recs[:3]]}

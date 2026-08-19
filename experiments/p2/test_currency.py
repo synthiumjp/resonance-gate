@@ -240,3 +240,53 @@ def test_recency_still_beats_corroboration_across_sessions():
     b = dict(_node("occupation", "founder", [40]), n_mentions=1)
     C.mark_current([a, b])
     assert b["current"] and not a["current"]
+
+
+def test_the_current_node_records_what_it_replaced():
+    """Retrieval returns the CURRENT node and ranks the old value far lower,
+    so old->new alone hides the pair from every reader. "updated X from A to
+    B" needs A on the node that actually surfaces."""
+    nodes = [_node("monthly_income", "8210 usd", [1]),
+             _node("monthly_income", "8700 usd", [40])]
+    C.mark_current(nodes)
+    cur = [x for x in nodes if x["current"]][0]
+    assert cur["value"] == "8700 usd"
+    assert cur["supersedes"] == ["8210 usd"]
+
+
+def test_supersedes_accumulates_in_order_across_a_chain():
+    nodes = [_node("occupation", "analyst", [1]),
+             _node("occupation", "lead", [10]),
+             _node("occupation", "founder", [40])]
+    C.mark_current(nodes)
+    cur = [x for x in nodes if x["current"]][0]
+    assert cur["value"] == "founder"
+    assert cur["supersedes"] == ["analyst", "lead"]
+
+
+def test_restatements_do_not_pollute_supersedes():
+    nodes = [_node("city", "hobart", [1]), _node("city", "hobart", [5]),
+             _node("city", "sydney", [9])]
+    C.mark_current(nodes)
+    cur = [x for x in nodes if x["current"]][0]
+    assert cur["supersedes"] == ["hobart", "hobart"] or cur["supersedes"] == ["hobart"]
+    assert "sydney" not in cur["supersedes"]
+
+
+def test_a_more_detailed_phrasing_is_the_same_fact_not_a_revision():
+    """"8700 usd" and "8700 usd monthly" are one fact. Calling it a revision
+    made the store report a change that never happened -- on an update metric
+    a fabricated update is worse than none."""
+    nodes = [_node("income", "8700 usd monthly", [3]),
+             _node("monthly_income", "8700 usd", [40])]
+    C.mark_current(nodes)
+    cur = [x for x in nodes if x["current"]][0]
+    assert cur["supersedes"] == [], cur["supersedes"]
+
+
+def test_overlapping_but_different_values_are_still_a_revision():
+    nodes = [_node("monthly_income", "8210 usd", [1]),
+             _node("monthly_income", "8700 usd", [40])]
+    C.mark_current(nodes)
+    cur = [x for x in nodes if x["current"]][0]
+    assert cur["supersedes"] == ["8210 usd"]

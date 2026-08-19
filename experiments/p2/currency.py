@@ -124,6 +124,30 @@ def canon_state_attr(attr):
     return _ALIAS.get(a, a), past
 
 
+def _same_value(a, b):
+    """Are these two strings the SAME fact, differently phrased?
+
+    Exact comparison was enough while supersession only ever compared values
+    inside ONE slot, where clustering had already merged variants. Across an
+    alias group it is not: `monthly_income = "8700 usd"` and
+    `income = "8700 usd monthly"` are one fact, and calling them a revision
+    made the store report "updated from: 8700 usd monthly" -- a fabricated
+    change, which on an update metric is worse than reporting nothing.
+
+    Subset rather than similarity: one phrasing carrying strictly more detail
+    than the other is the same fact elaborated. Two values that merely overlap
+    ("8700 usd" vs "8210 usd") are not, and must stay a revision.
+    """
+    na, nb = _norm(a), _norm(b)
+    if na == nb:
+        return True
+    ta = {t for t in re.findall(r"[a-z0-9]+", na) if len(t) > 1}
+    tb = {t for t in re.findall(r"[a-z0-9]+", nb) if len(t) > 1}
+    if not ta or not tb:
+        return False
+    return ta <= tb or tb <= ta
+
+
 def _norm(v):
     return re.sub(r"\s+", " ", str(v or "").strip().lower())
 
@@ -314,6 +338,8 @@ def mark_current(nodes):
                    if (_node_position(m), _evidence(m)) == top]
         winner = winners[-1]
         tied = {id(m) for m in winners}
+        for w in winners:
+            w.setdefault("supersedes", [])
         for nd in members:
             if id(nd) in tied:
                 continue
@@ -325,9 +351,16 @@ def mark_current(nodes):
             # it as a restatement, which is what it is: corroboration, not a
             # change of mind.
             nd["current"] = False
-            if _norm(nd.get("value")) == _norm(winner.get("value")):
+            if _same_value(nd.get("value"), winner.get("value")):
                 nd["restated_by"] = winner.get("id")
             else:
                 nd["superseded_by"] = winner.get("id")
+                # THE REVERSE LINK, and it is the one that matters. Retrieval
+                # returns the CURRENT node; the old value is ranked lower and
+                # usually never surfaces. Recording only old->new therefore
+                # hides the pair from anything that reads the store. The
+                # update judge asks for "all information points" of "updated
+                # X from A to B", so the current node has to carry A.
+                winner["supersedes"].append(nd.get("value"))
                 n += 1
     return n
