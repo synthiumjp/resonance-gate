@@ -24,7 +24,7 @@ containment test. Every result here states its control.
 | Gold is schema-shaped at the category level | 64.4% of gold falls inside a **general** 20-slot persona schema whose slots were not read off gold (e192) | solid |
 | Relations must be read, not assumed | grammatical binding gives 98.9% vs a 64.9% majority-class null, n=94; survives ablating HaluMem's own template phrasing (e203) | solid |
 | The late-session collapse is granularity, not extraction | single-turn ceiling FLAT across position, emissions flat, 10/10 users; half of late misses present in their own session's emissions vs a ~2-3% matched null. **Replicated on a second judged run with the current renderer** — 15.5%/50.9%/1.8% vs 15.1%/50.0%/3.3% — so it is not an artifact of the old `slot: value` syntax (e206, e208) | solid |
-| Judge choice is worth ~10 points | frontier judge scores us 9.67pt lower; ~2.7pt of it is reasoning mode alone (e176/e177) | solid |
+| Judge choice is worth ~10 points | frontier judge scores us 9.67pt lower; ~2.7pt of it is reasoning mode alone (e176/e177) | solid **about our own scores** — it does NOT license a one-sided correction against other systems' published numbers, which is how e211 misused it (e216) |
 
 ## 2. What failed
 
@@ -229,20 +229,33 @@ Measured in the same run, on the same trade:
 evidence gains more than it costs.** §4b's law on the QA axis, now measured
 from both ends. Both are DIALS for the user's loss function, not defaults.
 
-## 5e. Where we actually sit (e211)
+## 5e. Where we actually sit (e211, CORRECTED in e216)
 
-Published HaluMem-Medium: MOSAIC 86.77 extraction F1 / 73.10 QA; MemOS 79.70 /
-67.23; Mem0 57.31 / 53.02; Zep --/55.47 (updating 47.28); Memobase 25.13 /
-35.33. **RG: 28-38 extraction F1, 55-57 QA, updating 2.9% — all local-judged,
-and e176 says a frontier judge scores us 9.67pt WORSE.** Like-for-like our QA
-is ~45-47 and our extraction is second-worst of eight.
+Unadjusted, same benchmark, same split:
 
-**We are weakest on the axis the field says differentiates.** QA correctness
-compresses the differences because a judge accepts plausible wrong answers;
-extraction and updating do not. Every leader resolves conflict at **write
-time** (MOSAIC write-time detection, Zep bitemporal edges, Eywa one-active-
-state-fact); the laggards on updating accuracy are the ones that do not.
-`currency.py` supersedes at READ time and should move into the write path.
+    QA correctness    RG 52.6 (official row) / 55.0 (round5)
+                      Mem0 53.02  Mem0-Graph 54.66  Supermemory 54.07
+                      Zep 55.47   MemOS 67.23   MOSAIC 73.10
+    extraction F1     RG 28.2 / 38.3 | Memobase 25.13, Mem0 57.31,
+                      MemOS 79.70, MOSAIC 86.77
+    updating          RG 2.9 -> 8.1 (e215) | Memobase 5.20, Mem0 25.50,
+                      Zep 47.28, MemOS 62.11
+
+**On QA we are MID-PACK — level with Mem0 and Zep, behind only the two
+leaders.** Entry 117 said so in July. e211 wrongly applied e176's −9.67pt
+frontier-judge penalty to OUR number alone to claim "~45–47, below the pack";
+a stricter judge penalises everyone, and the published table's judge is
+unverified (HaluMem reads it from `OPENAI_MODEL`). **That figure is
+retracted.**
+
+**The real gaps are extraction (20–50pt) and updating (17–54pt)**, and those
+survive the judge objection by size — a ~10pt scorer effect cannot explain
+them.
+
+Note what this combination means: we answer as well as Mem0 while extracting
+about half as well. Retrieval/composition are doing more with less (cf. §5b,
+~75% of what the store makes available) — and the extraction gap is invisible
+on the axis where we look fine, which is why it went unnoticed.
 
 Competitors in our niche as of 2026: **AgentPrizm** (July 2026, hosted:
 confidence-weighted facts, receipts, supersede chain, verifiable deletion),

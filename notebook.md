@@ -10537,3 +10537,64 @@ know it. Both matter for a product; only one of them was being worked on.
 straight here. Ledger §4's standing rule says read the metric's assignment
 before drawing a conclusion from it; the corollary is to read it before
 spending four A/Bs trying to move it.
+
+---
+
+## Entry 216 — 2026-08-19 (p2: CORRECTION to entry 211's competitive read. I subtracted a judge penalty from OUR number and not from theirs. On QA we are level with Mem0 and Zep, exactly as entry 117 said. The real gap is extraction and updating, and it is far too large to be a judge artifact.)
+
+JP pushed back: "how are we so bad compared? weren't we hitting 50% before?"
+Correct on both counts, and entry 211 was wrong in a specific, checkable way.
+
+**What entry 211 did.** It took our QA correctness (55.0% on round5, 52.6% on
+the banked official row) and applied entry 176's −9.67pt frontier-judge
+penalty to land at "~45–47%, below Mem0 / Supermemory / Zep."
+
+**Why that is invalid.** Entry 176 measured our LOCAL qwen3:14b judge against
+gemini-3.6-flash on 300 of OUR OWN items. It says our judge is the lenient one
+— a real and pre-registered finding. It does not license subtracting 9.67pt
+from our score while leaving every competitor's untouched. **A stricter judge
+penalises everyone.** If the published table were re-scored under
+gemini-3.6-flash, Mem0's 53.02 and Zep's 55.47 would move too, and nothing I
+have says by how much. Applying a one-sided correction is precisely the
+apples-to-oranges error §4 exists to catch, and I made it in the entry that was
+supposed to establish where we stand.
+
+**Second problem: I asserted the published table's judge and never verified
+it.** The research pass explicitly said "exact judge model not confirmed", and
+HaluMem's harness takes the judge from `OPENAI_MODEL` — configurable, ours set
+to qwen3:14b. I do not know what scored the published numbers. That is now an
+open question, not an assumption.
+
+**The corrected read — unadjusted, same benchmark, same split:**
+
+    QA correctness      RG 52.6 (official row) / 55.0 (round5)
+                        Mem0 53.02   Mem0-Graph 54.66
+                        Supermemory 54.07   Zep 55.47
+                        MemOS 67.23   MOSAIC 73.10
+
+Entry 117 said this in July and was right: **we tie Mem0 on correct and edge
+it on hallucination.** We are mid-pack on QA, behind only the two leaders. Not
+"bad".
+
+    extraction F1       RG 28.2 (round5) / 38.3 (s5-base)
+                        Memobase 25.13   Supermemory 56.90
+                        Mem0 57.31   MemOS 79.70   MOSAIC 86.77
+
+    updating accuracy   RG 2.9 -> 8.1 (e215)
+                        Memobase 5.20   Supermemory 16.37
+                        Mem0 25.50   Zep 47.28   MemOS 62.11
+
+**Those are the real gaps, and they survive the judge objection by size.** A
+~10pt scorer effect does not explain being 20–50pt behind on extraction or
+17–54pt behind on updating. The QA claim was the one sensitive to it, and it is
+the one I got wrong.
+
+**The genuinely interesting fact this exposes.** We answer questions as well as
+Mem0 while extracting roughly HALF as well. Retrieval and composition are doing
+more with less — which is a real result and consistent with entry 196's finding
+that retrieval is at ~75% of what the store makes available. It also means the
+extraction gap is not yet costing us on the QA axis, which is why it went
+unnoticed: the metric where we look fine is downstream of the metric where we
+do not.
+
+**Ledger corrected.** §5e rewritten; the "~45–47" figure is retracted.
