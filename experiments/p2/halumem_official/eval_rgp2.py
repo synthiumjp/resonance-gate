@@ -176,8 +176,32 @@ def search_memories(mem, query, top=10):
     if not r["found"]:
         return []
 
+    # Entry 163 shipped proposition rendering for the extraction artifact and
+    # this path never got it: search_memories has always had its own
+    # "attr: value" renderer that does not call propositions.render. The
+    # update judge asks whether we contain "all information points" of a gold
+    # point written as "Michelle Hernandez's career_status updated
+    # monthly_income from '8210 USD' to '8700 USD'" -- an atom with no subject
+    # cannot contain them however correct its values are (e206: the judge
+    # credits RECORDS, and a record has to be the right shape).
+    import propositions as PR
+    # Owner comes from the WHOLE STORE, not the recall: the `name` fact is
+    # rarely among the facts a given query returns, so deriving it from the
+    # recall yields "The user" on almost every query -- and gold names the
+    # person in every single memory point.
+    _own = PR.owner_name(
+        [{"attr": nd["attr"], "value": nd["value"]}
+         for nd in list(mem.g.nodes.values()) + list(mem.g.provisional.values())]
+    ) or PR.owner_name([{"attr": f["attribute"], "value": f["value"]}
+                        for f in r["asserted"] + r["unconfirmed"]])
+
     def _v(f, prefix=""):
         base = f"{prefix}{f['attribute']}: {f['value']}"
+        if _SUPERSEDE:
+            prop = PR.render({"attr": f["attribute"], "value": f["value"]},
+                             owner=_own)
+            if prop:
+                base = f"{prefix}{prop}"
         if not _SUPERSEDE:
             return base
         if f.get("current", True):
