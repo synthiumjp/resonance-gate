@@ -113,7 +113,18 @@ def _span(tok, doc, drop=(), owner=None, second=False):
     ids = sorted(t.i for t in tok.subtree if t.i not in drop)
     if not ids:
         return ""
-    txt = doc[ids[0]:ids[-1] + 1].text.strip(" ,.;:")
+    # A CONTIGUOUS SLICE of a DISCONTIGUOUS subtree swallows whatever sits in
+    # between. On the comma splice "I dislike violent video games, I avoid
+    # violent video games because ..." that produced
+    #   "Martin Mark avoids Martin Mark dislike violent video games violent
+    #    video games"
+    # -- the first clause dragged into the second. Slice only when the subtree
+    # really is contiguous; otherwise join the tokens that belong to it.
+    if ids[-1] - ids[0] + 1 == len(ids):
+        txt = doc[ids[0]:ids[-1] + 1].text
+    else:
+        txt = " ".join(doc[i].text for i in ids)
+    txt = re.sub(r"\s+([,.;:])", r"\1", txt).strip(" ,.;:")
     for c, full in _CONTRACT.items():
         txt = txt.replace(c + " ", full + " ")
     return _shift_person(txt, owner, second) if owner else txt
@@ -290,8 +301,16 @@ def _extract_into(text, nlp, o, out, seen, second=False):
                 # So do not require a label: if the copula's subject is a
                 # proper noun, the relation is the noun carrying a
                 # first-person possessive anywhere in that clause.
+                # PROPN only, and the subject must not itself be possessed by
+                # the speaker. Accepting any NOUN turned "I think that MY JOB is
+                # stressful" into "Martin Mark's job job, Martin Mark think
+                # that ..." -- a relationship proposition about a job. A
+                # relationship needs a NAMED person on the other side.
                 if (subj is not None and subj.text.lower() not in _FIRST
-                        and subj.pos_ in ("PROPN", "NOUN")):
+                        and subj.pos_ == "PROPN"
+                        and not any(c.dep_ == "poss"
+                                    and c.text.lower() in (_FIRST | _SECOND)
+                                    for c in subj.children)):
                     if comp is None or not any(
                             c.dep_ == "poss" and c.text.lower() in subj_set
                             for c in comp.children):
@@ -340,6 +359,21 @@ def _extract_into(text, nlp, o, out, seen, second=False):
                         if c.dep_ in ("dobj", "obj", "prep", "attr", "acomp",
                                       "xcomp", "ccomp", "advmod", "dative",
                                       "oprd", "npadvmod")]
+                # A COMMA SPLICE IS NOT A COMPLEMENT. In "I dislike violent
+                # video games, I avoid violent video games because ...", spaCy
+                # hangs the whole first clause off `avoid` as a `ccomp`, so the
+                # tail became "Martin Mark avoids Martin Mark dislike violent
+                # video games violent video games". That clause is ALREADY
+                # emitted as its own proposition, so absorbing it is pure
+                # duplication. A genuine complement ("I think THAT x") carries a
+                # complementiser; a spliced clause repeats the subject and has
+                # none.
+                rest = [c for c in rest
+                        if not (c.dep_ == "ccomp"
+                                and any(g.dep_ == "nsubj"
+                                        and g.text.lower() in subj_set
+                                        for g in c.children)
+                                and not any(g.dep_ == "mark" for g in c.children))]
                 # participial adjuncts carry real content: "I am currently
                 # Employed, WORKING IN THE HEALTHCARE INDUSTRY" gave the
                 # copula and dropped the clause gold actually asks for.
