@@ -10989,3 +10989,82 @@ turn -- and section 4b says that cannot be prompted. It can be trained.
 **Next: the judged run.** Full pipeline, LoRA extractor vs prompted baseline,
 official harness, both integrity AND accuracy scored -- because F1 is a
 harmonic mean and this whole result could still be given back on precision.
+
+---
+
+## Entry 223 — 2026-08-20 (p2: the judged run REVERSES the screen — LoRA 17.0% vs prompted 21.0%. And the proxy bias that hid it is measured. Then JP's architectural point, tested: a DEPENDENCY PARSER with no model at all reaches 19.8% — within a point of a prompted 14B.)
+
+**The judged result first, because it overturns e222.**
+
+    JUDGED INTEGRITY, user 0 held out, 576 gold points, both arms in one run
+      prompted 14B  21.01%  (121/576)
+      LoRA 1.7B     17.01%  (98/576)    delta -3.99pt
+      discordant 78 / 55,  McNemar exact p=0.056
+
+The screen said +4.6pt. The judge says -4.0pt. Entry 222's headline is
+withdrawn.
+
+**Why, measured rather than guessed.** Like-for-like on user 0:
+
+      prompted   coverage 20.5%  ->  judged 21.0%    accurate (+0.5)
+      LoRA       coverage 22.4%  ->  judged 17.0%    OVER-READS by 5.4pt
+
+The token-overlap proxy systematically flatters gold-SHAPED output, which is
+precisely what a trained extractor produces. The screen was structurally
+biased toward the arm it was screening. It is now barred from LoRA-vs-baseline
+comparisons and kept only for LoRA-vs-LoRA, where the bias is common.
+
+**Reading the marginal matches found two real defects**, both fixed and now
+training as v4:
+  * PRONOUN GENDER. Gold uses gendered pronouns matching the owner -- "his"
+    2751x for male owners, "her" 2462x for female, near-perfectly separated.
+    v3 emitted FEMALE pronouns in 27.9% of records for a MALE user. Same
+    memorisation class as the names; denaming fixed the subject and left the
+    pronouns. Fixed by HANDING the model the gender: a name is easy to
+    substitute, a pronoun sits mid-sentence and may refer to someone else.
+  * NO SESSION CONTEXT. The model saw one turn while gold is written per
+    session. Near-misses like gold "partner status: no_relationship" vs ours
+    "parent relationship status: No children" are a model guessing what a bare
+    turn is about. Four prior turns now supplied as context.
+
+**Then JP's architectural argument: extraction should not need a powerful LLM;
+grammar carries the structure, and the LLM should only CHECK or FIX.**
+
+Tested rather than agreed with. First a regex prototype: 1.7% of gold, because
+only 29 of 576 gold points are copular -- e217's "gold is 96% prose" again. So
+the narrow reading fails and a parser is needed. With spaCy dependency parsing
+and an explicit first-to-third PERSON SHIFT (subject rewrite, pronoun shift
+inside the span, auxiliary-chain agreement):
+
+    NO MODEL AT ALL          user 0    user 1
+      gold covered @0.5       19.8%     16.7%
+      rec/gold                 2.57      2.41
+
+    for comparison, user 0
+      prompted 14B            20.5%     1.73
+      LoRA 1.7B v3            22.4%     0.47
+
+**A dependency parser reaches within a point of a prompted 14B, with zero
+model calls.** That is JP's thesis holding on our own data, and it is
+consistent with the two things this project already measured: S3c typed
+relations at 98.9% by grammatical binding alone (e203), and section 4b's
+record that every extraction win came from deterministic post-processing.
+
+**What the parser is bad at is exactly what a checker is good at.** It emits
+2.57 records per gold point -- worse over-extraction than the 14B's 1.73 -- and
+its failures are morphological and surface-level ("ises looking", "has
+reflecting", adverb placement), not semantic. High recall, low precision, cheap
+errors. The literature agrees on the division of labour: MiniCheck-class
+verifiers at 770M match GPT-4-turbo on entailment at ~400x lower cost. Checking
+is cheap; generating is not.
+
+**So the architecture this points at is:** parse to candidates (deterministic,
+receipted, no model), then a small local model filters and repairs. That is a
+different system from either arm measured today, and it is the one that fits
+the product -- local, small, auditable, with the model in the role it is
+actually reliable in.
+
+**Caveat carried forward, and it applies to the parser too.** Coverage
+over-reads gold-shaped output by ~5pt, and the parser produces gold-shaped
+output by construction. This is a feasibility read. Nothing here is believed
+until the judge scores it.
