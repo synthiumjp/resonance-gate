@@ -11481,3 +11481,60 @@ came from reasoning forward from a mechanism rather than measuring. The
 measurements that have worked this session were all diagnostic first: read the
 misses, find the bug, fix the bug. The two that failed were both "I have a
 theory about the judge".
+
+---
+
+## Entry 231 — 2026-08-21 (p2: F1 0.5891 with zero model calls — ABOVE Mem0, Mem0-Graph and Supermemory on the published table. Three parse rules traced from source turns were worth +5.1pt of recall.)
+
+    JUDGED, held-out user 0, 573 gold points, prompted arm reused
+      prompted 14B     P 0.7759  R 0.2129  F1 0.3341
+      grammar parser   P 0.9301  R 0.4311  F1 0.5891
+
+      recall +21.82pt, discordant 47/172, McNemar exact p = 6.1e-18
+
+Recall 38.02% -> 43.11% from three rules, each found by tracing a judged miss
+back to its source turn rather than theorised:
+
+  * POSSESSIVE SUBJECTS. Every rule required the subject to BE the pronoun, so
+    "Your proactive approach can open doors" never fired -- and that is how the
+    assistant states facts about the user.
+  * PASSIVES. "Your motivation is driven by your desire" makes `driven` the
+    ROOT with `is` as auxpass, so the copular branch saw no copula and the
+    eventive branch skipped it.
+  * PARTICIPIALS ON A COPULA. "I am currently Employed, working in healthcare"
+    -- the copular branch matched first, so the participial code never ran.
+
+**Published HaluMem-Medium extraction F1:**
+
+      Memobase              25.13
+      RG at session start   28.20
+      Supermemory           56.90
+      Mem0                  57.31
+      Mem0-Graph            57.85
+      RG NOW                58.91   <- CPU, spaCy, no model calls
+      MemOS                 79.70
+      MOSAIC                86.77
+
+**Above three commercial systems, with a dependency parser and a few hundred
+lines of deterministic rules.** The trained 1.7B LoRA scored R 0.1701 on the
+same judge; the prompted 14B scores 0.3341.
+
+**The session's arc, because it is the actual lesson.** Every gain came from
+reading failures: judged misses traced to source turns, raw output read for
+malformed English. Every loss came from theorising about the judge --
+preference templates (-1.2pt) and pruning (-12.2pt) were both reasoned forward
+from a mechanism and both wrong within the hour. Four correctness bugs surfaced
+this way too (negation inversion, comma splices, discontiguous spans, bogus
+relations), none of which any metric could see.
+
+**Caveats, unchanged and load-bearing.** ONE user. Local judge -- e176 measured
+a frontier judge scoring us ~9.67pt worse, and although that applies to both
+arms in a paired design, it does NOT apply to the published table, which is
+scored by someone else's judge. Precision is a 200-record sample, SE ~3%. The
+prompted baseline reads user turns only. **Nobody should quote 58.91 against
+Mem0 until it holds on a second user and preferably a frontier judge.**
+
+**Next: the UD port is written and tested but unjudged.** spaCy scores 61.45%
+LAS on conversational data against Stanza's 85.19% (CAIT, arXiv:2605.19718),
+and the UD version replaces five hand-written branches with one clause walker.
+It should be judged against this 0.5891 baseline as a single change.
