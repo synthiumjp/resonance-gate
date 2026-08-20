@@ -266,6 +266,24 @@ philosophy, zero benchmarks). The unoccupied intersection is local + small
 model + receipts + measured abstention. **Local is the wedge; receipts are the
 mechanism, not the headline.**
 
+## 5k. Over-emission does not cost extraction F1
+
+`evaluation.py:289` computes `memory_extraction_f1` from `target_accuracy(all)`,
+and that term is summed **only over records the judge marks
+`is_included_in_golden_memories`** — 46% of emissions on s5-base, 41% on
+round5. Records not about gold content are excluded, so emitting them costs
+nothing on F1 (e224).
+
+**Entry 185's "we emit 1.66x more memories than gold" has been read as a
+precision problem since. On the metric the harness reports, it is not one.** It
+may still be a product problem — surplus is worse to use and worse to retrieve
+from — but that argument should stop being made in F1's name.
+
+Consequence: a checker layer should FIX the in-gold records, not FILTER the
+surplus. And entailment filtering cannot do the job regardless — a true
+proposition absent from gold is still entailed by its turn, so entailment
+measures groundedness, not gold-worthiness.
+
 ## 5j. The composition line, closed
 
 Relationship composition is real (+10.8pt over atoms on Relationship gold,

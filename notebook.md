@@ -11068,3 +11068,65 @@ actually reliable in.
 over-reads gold-shaped output by ~5pt, and the parser produces gold-shaped
 output by construction. This is a feasibility read. Nothing here is believed
 until the judge scores it.
+
+---
+
+## Entry 224 — 2026-08-20 (p2: the checker layer, and a structural finding about the benchmark found while building it — OVER-EMISSION DOES NOT COST EXTRACTION F1. `target_accuracy` is computed over in-gold records only.)
+
+Built the deterministic half of JP's check layer over the parser, then read the
+metric it was meant to protect and found it was protecting nothing.
+
+**Stage 1, deterministic, no model.** Three tests, in the order that costs
+least: GROUNDED (every content word must trace to the source turn -- this is an
+extractive system, so a word absent from the turn was invented, which is the
+evidence-layer claim written as a filter), WELLFORMED (the morphology the
+parser is known to break, first-person residue where the person shift failed,
+degenerate self-reference), SUBSTANTIVE.
+
+First version dropped 18% of candidates and 14 gold points with them. All the
+losses were MY bugs, not the parser's:
+
+    DROPPED "ungrounded (mark's)"  ->  "Martin Mark's major is Public Health"
+    DROPPED "not substantive"      ->  "Martin Mark is a Male"
+
+Possessives were never normalised, so the owner's own surname read as invented
+content; and I required two content words when "Male" or "Bachelor" is the
+whole fact. Fixed:
+
+    user 0   1482 props, cov 19.8%  ->  1411 props, cov 19.8%   5% dropped, 0 gold lost
+    user 1   1555 props, cov 16.7%  ->  1493 props, cov 16.7%   4% dropped, 0 gold lost
+
+**Lossless, and weak.** 2.57 -> 2.45 rec/gold. It removes provably invented
+content at zero cost to recall, which is worth having for the PRODUCT -- a user
+should not see junk -- but it is not a precision lever.
+
+**Then the finding, which changes what stage 2 should be.**
+
+`evaluation.py:289`: `memory_extraction_f1 = compute_f1(precision=
+target_accuracy(all), recall=recall(all))`. And `target_accuracy` is summed
+ONLY over records the judge marks `is_included_in_golden_memories`:
+
+    s5-base   1014 emitted, 467 IN-GOLD (46%)   target_accuracy over the 467
+    round5   12282 emitted, 5038 IN-GOLD (41%)  target_accuracy over the 5038
+
+**Records that are not about gold content are excluded from the precision term
+that F1 uses. Over-emitting them costs nothing on extraction F1.**
+
+That reframes a claim this project has carried since entry 185. "We emit 1.66x
+more memories than gold" was read for months as a precision problem; on the
+metric the harness actually reports, it is not one. It may still be a PRODUCT
+problem -- a store full of surplus is worse to use and worse to retrieve from --
+but those are different arguments and should stop being made in F1's name.
+
+**So the checker should FIX, not FILTER.** Cutting the parser's 2.45 rec/gold
+down toward gold's 1.0 buys nothing measurable. What buys something is raising
+the score of the records that ARE about gold content -- the judge grades those
+0/1/2, and target_accuracy is 0.5x that mean. The parser's failures on those
+are morphological and surface-level, which is exactly what a small local model
+can repair and what MiniCheck-class verifiers do at 770M for ~400x less than a
+frontier model.
+
+Entailment filtering could not have done this job anyway, and it is worth
+saying why: a parser proposition that is TRUE but absent from gold is entailed
+by its turn, so an entailment check keeps it. Entailment measures
+groundedness, not gold-worthiness. The two were being conflated.
