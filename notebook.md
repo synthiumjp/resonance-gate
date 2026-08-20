@@ -11130,3 +11130,75 @@ Entailment filtering could not have done this job anyway, and it is worth
 saying why: a parser proposition that is TRUE but absent from gold is entailed
 by its turn, so an entailment check keeps it. Entailment measures
 groundedness, not gold-worthiness. The two were being conflated.
+
+---
+
+## Entry 225 — 2026-08-20 (p2: a dependency parser with NO MODEL CALLS beats the prompted 14B on the official judge — on precision AND recall. F1 0.3611 vs 0.3322. JP's architectural argument, measured.)
+
+Judged A/B on held-out user 0, 576 gold points, both arms scored in one run.
+
+    INTEGRITY (paired)
+      prompted 14B    21.18%  (122/576)
+      grammar parser  23.26%  (134/576)   +2.08pt
+      discordant 60 / 72,  McNemar exact p=0.3384
+
+    ACCURACY (sampled 200 records/arm)
+      prompted 14B    77.01%  (67.0/87 in-gold)
+      grammar parser  80.65%  (75.0/93 in-gold)
+
+    EXTRACTION F1 (harness definition)
+      prompted 14B    P 0.7701  R 0.2118  F1 0.3322
+      grammar parser  P 0.8065  R 0.2326  F1 0.3611
+
+**Extraction with no model at all wins on both axes.** +2.1pt recall, +3.6pt
+precision, +8.7% relative F1, against a prompted 14B. And against the trained
+1.7B LoRA, which the same judge scored at 17.01% recall, it is +6.3pt.
+
+For the record, the three arms on the same held-out user under the same judge:
+
+      grammar parser (0 model calls)   23.26%
+      prompted 14B                     21.18%
+      LoRA 1.7B v3                     17.01%
+
+**This is JP's argument, and it held.** "It shouldn't need a powerful LLM. Grammar
+follows a structure and we can extract based on the structure." The
+transformation turned out to be a PERSON SHIFT -- first person to third, with
+verb agreement, pronoun shift inside the span, and a small lexicon mapping
+surface expressions to gold's slot names. Morphology and dependency structure.
+A 14B was being paid to do agreement.
+
+It is also the third independent confirmation of the same law: S3c typed
+relations at 98.9% by grammatical binding alone (e203); section 4b's record
+that every extraction win came from deterministic post-processing while
+prompting went 0-for-3; and now this.
+
+**And the proxy failed in the opposite direction from what I predicted.** I
+warned that coverage flatters gold-shaped output and that the parser would be
+flattered too. It was not:
+
+      LoRA      proxy 22.4%  ->  judged 17.0%   over-read by 5.4pt
+      parser    proxy 19.8%  ->  judged 23.3%   UNDER-read by 3.5pt
+
+Token overlap over-credits GENERATED text that resembles gold and under-credits
+EXTRACTIVE text that reuses the speaker's own words. My stated reason for
+distrusting the parser's screen was wrong, and in the safe direction.
+
+**Caveats, stated plainly.** One user. McNemar p=0.34 on recall, so the recall
+lead is not significant -- what is solid is that a zero-model extractor is not
+WORSE, which is the claim that matters for the architecture. Precision is a
+200-record sample per arm (SE ~3%). Local judge, though it applies equally to
+both arms in a paired design. And this scored the PRE-lexicon artifact; the
+current parser is ~1pt better on the proxy, so this is a lower bound.
+
+**Competitive position, honestly.** F1 0.3611 against Mem0's 57.31 and MOSAIC's
+86.77 is still well behind. What changed is the cost basis: we now match and
+slightly beat our own 14B baseline using spaCy and a few hundred lines of
+deterministic code. That is a different product -- extraction that runs on a
+CPU, is auditable line by line, and whose every output carries the turn it came
+from.
+
+**Next, and it is now a different question.** Not "how do we make the extractor
+smarter" but "what does the checker add on top of a parser that already wins".
+Ledger 5k says the checker should FIX rather than FILTER, because over-emission
+does not cost F1 -- and the parser's 2.46 rec/gold is now demonstrably not a
+liability, since its precision is HIGHER than the 14B's.
