@@ -68,10 +68,77 @@ STOP = set("the a an is are was were of to in on at for and or with his her "
 OWNER_TOKEN = "User"
 
 SYSTEM = ("Extract the memory points a long-term memory system should store "
-          "from this message. Output a JSON array of objects with keys "
+          "from the LAST message. Output a JSON array of objects with keys "
           '"type" (Persona|Event|Relationship) and "content" (one complete '
           'sentence). ALWAYS refer to the speaker as "User" -- never by name. '
           "Output [] if there is nothing to store.")
+
+# GENDER IS GIVEN, NOT GUESSED.
+#
+# Gold uses gendered pronouns matching the owner: across the training users,
+# "his" appears 2751 times for male owners and "her" 2462 times for female,
+# almost perfectly separated. adapter-v3 emitted FEMALE pronouns in 27.9% of
+# records for a MALE held-out user -- it cannot know gender from one turn, so
+# it guessed at the training prior. Same memorisation class as the names
+# (e221); denaming fixed the subject and left the pronouns.
+#
+# The name is handled by substitution because a subject is easy to replace.
+# A pronoun is not: it sits mid-sentence and may refer to someone other than
+# the owner, so rewriting it deterministically would need coreference we do
+# not have. Gender is instead HANDED to the model -- it is a fact the store
+# already extracts, so this is using what we know rather than asking the model
+# to invent it.
+def persona_line(owner_gender):
+    if not owner_gender or owner_gender not in ("male", "female"):
+        return "The speaker's gender is unknown; use they/their."
+    return f"The speaker is {owner_gender}; use " + (
+        "he/his." if owner_gender == "male" else "she/her.")
+
+
+# CONTEXT WINDOW.
+#
+# The model saw exactly ONE turn and gold is written per SESSION -- 12% of
+# gold points are unattributable to any single turn by construction, and the
+# near-misses in adapter-v3 (gold "partner status: no_relationship" vs ours
+# "parent relationship status: No children") are the signature of a model
+# guessing at what a bare turn is about. Prior turns are supplied as CONTEXT,
+# clearly separated, with extraction still scoped to the last message so the
+# per-turn target alignment stays valid.
+CONTEXT_TURNS = 4
+
+
+def build_user_block(turns, i, ctx_turns=None):
+    """The USER message for turn i: prior turns as context, then the target.
+
+    Shared by training AND inference deliberately. adapter-v3's prompt was
+    built by hand in three files; the moment training and generation disagree
+    the model is served a distribution it never saw, and nothing in the loss or
+    the output makes that visible. One builder, imported everywhere."""
+    n = CONTEXT_TURNS if ctx_turns is None else ctx_turns
+    ctx = turns[max(0, i - n):i]
+    block = ""
+    if ctx:
+        block = "CONTEXT (do not extract from these):\n" + "\n".join(
+            f"[{c.get('role','user')}] " + str(c["content"]).strip()[:400]
+            for c in ctx) + "\n\n"
+    t = turns[i]
+    return block + ("EXTRACT FROM THIS MESSAGE:\n"
+                    f"[{t.get('role','user')}] "
+                    + str(t["content"]).strip()[:1800])
+
+
+def build_messages(turns, i, gender, ctx_turns=None):
+    return [{"role": "system", "content": SYSTEM + "\n" + persona_line(gender)},
+            {"role": "user", "content": build_user_block(turns, i, ctx_turns)}]
+
+
+def owner_gender_of(user):
+    for s in user["sessions"]:
+        for mp in s.get("memory_points", []):
+            m = re.search(r"gender is (\w+)", str(mp.get("memory_content", "")), re.I)
+            if m:
+                return m.group(1).strip().lower()
+    return None
 
 
 def owner_name_of(user):
@@ -124,6 +191,7 @@ def build(users, per_turn_cover=0.5, neg_ratio=0.3, seed=0):
                 "and every official number depends on them staying unseen.")
         u = rows[ui]
         owner = owner_name_of(u)
+        gender = owner_gender_of(u)
         if not owner:
             stats["users_without_owner_name"] += 1
         for sess in u["sessions"]:
@@ -156,12 +224,9 @@ def build(users, per_turn_cover=0.5, neg_ratio=0.3, seed=0):
                 tgt = [{"type": str(m.get("memory_type", "")).replace(" Memory", ""),
                         "content": dename(m.get("memory_content", ""), owner)}
                        for m in (mps or [])]
-                out.append({"messages": [
-                    {"role": "system", "content": SYSTEM},
-                    {"role": "user", "content":
-                        f"[{t.get('role','user')}] " + str(t["content"]).strip()[:1800]},
-                    {"role": "assistant", "content": json.dumps(tgt, ensure_ascii=False)},
-                ]})
+                out.append({"messages": build_messages(turns, i, gender) + [
+                    {"role": "assistant",
+                     "content": json.dumps(tgt, ensure_ascii=False)}]})
                 stats["neg" if not mps else "pos"] += 1
     return out, stats
 

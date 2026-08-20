@@ -22,8 +22,14 @@ HELD-OUT ONLY. Users 0-9 were never trained on (`lora_dataset.py` refuses
 them) and this script refuses to evaluate on 10-19, so a contaminated number
 cannot be produced by accident in either direction.
 
-The offline coverage figure over-reads judged recall by ~18pt (e220), so it is
-a SCREEN, not a result: it decides whether the adapter is worth judge calls.
+CALIBRATION, measured: on user 0 this proxy read 20.5% for the prompted arm
+against a judged 21.0% -- accurate -- and 22.4% for the LoRA against a judged
+17.0%, over-reading by 5.4pt. It systematically flatters gold-SHAPED output,
+which is exactly what a trained extractor produces. So it must NOT be used to
+compare the LoRA against the prompted baseline.
+
+It remains valid for comparing one LoRA against another, where the bias is
+common to both arms -- which is what it is used for now.
 """
 import argparse
 import collections
@@ -61,7 +67,7 @@ def run_lora(user, base, adapter, max_new=192, max_turns=0, batch=8,
     import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer
     from peft import PeftModel
-    from lora_dataset import SYSTEM
+    from lora_dataset import build_messages, owner_gender_of
 
     tok = AutoTokenizer.from_pretrained(adapter)
     if tok.pad_token is None:
@@ -72,12 +78,12 @@ def run_lora(user, base, adapter, max_new=192, max_turns=0, batch=8,
     m = PeftModel.from_pretrained(m, adapter)
     m.eval()
 
+    gender = owner_gender_of(user)
     jobs = []
     for si, s in enumerate(user["sessions"]):
-        for t in (s.get("dialogue") or []):
-            c = str(t.get("content", "")).strip()
-            if not c:
-                continue
+        turns = [t for t in (s.get("dialogue") or [])
+                 if str(t.get("content", "")).strip()]
+        for ti, t in enumerate(turns):
             # SCOPE MUST MATCH THE BASELINE. The shipped extractor reads user
             # turns only (round 5, the official row; all-turns is a dial, not a
             # default -- e212), and its cache holds only those. Letting the
@@ -86,24 +92,23 @@ def run_lora(user, base, adapter, max_new=192, max_turns=0, batch=8,
             # exactly the confound e211/e218 turned on.
             if scope == "user" and t.get("role") != "user":
                 continue
-            jobs.append((si, f"[{t.get('role','user')}] " + c[:1800]))
+            jobs.append((si, build_messages(turns, ti, gender)))
     if max_turns:
         jobs = jobs[:max_turns]
 
     per = collections.defaultdict(list)
     for i in range(0, len(jobs), batch):
         chunk = jobs[i:i + batch]
-        prompts = [tok.apply_chat_template(
-            [{"role": "system", "content": SYSTEM},
-             {"role": "user", "content": c}],
-            tokenize=False, add_generation_prompt=True, enable_thinking=False)
-            for _, c in chunk]
+        prompts = [tok.apply_chat_template(msgs, tokenize=False,
+                                           add_generation_prompt=True,
+                                           enable_thinking=False)
+                   for _, msgs in chunk]
         enc = tok(prompts, return_tensors="pt", padding=True,
-                  truncation=True, max_length=1024).to("cuda")
+                  truncation=True, max_length=1536).to("cuda")
         with torch.no_grad():
             out = m.generate(**enc, max_new_tokens=max_new, do_sample=False,
                              pad_token_id=tok.pad_token_id)
-        for (si, _), seq in zip(chunk, out):
+        for (si, _m), seq in zip(chunk, out):
             txt = tok.decode(seq[enc["input_ids"].shape[1]:],
                              skip_special_tokens=True).strip()
             try:

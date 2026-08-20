@@ -74,11 +74,12 @@ def main():
     import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer
     from peft import PeftModel
-    from lora_dataset import SYSTEM
+    from lora_dataset import build_messages, owner_gender_of
 
     user = [json.loads(l) for l in open(DATA, encoding="utf-8")][a.user]
     owner = owner_of(user)
-    print(f"user {a.user}, owner {owner!r}, scope {a.scope}")
+    gender = owner_gender_of(user)
+    print(f"user {a.user}, owner {owner!r}, gender {gender!r}, scope {a.scope}")
 
     tok = AutoTokenizer.from_pretrained(a.adapter)
     tok.pad_token = tok.pad_token or tok.eos_token
@@ -87,24 +88,29 @@ def main():
         AutoModelForCausalLM.from_pretrained(a.base, dtype=torch.bfloat16,
                                              device_map={"": 0}), a.adapter).eval()
 
+    # Build prompts with the SHARED builder so generation cannot drift from
+    # training. Context is taken over the full dialogue, then extraction is
+    # scoped -- a user-scope run still SEES assistant turns as context, which
+    # is what the training examples look like.
     jobs = []
     for si, s in enumerate(user["sessions"]):
-        for ti, t in enumerate(s.get("dialogue") or []):
-            c = str(t.get("content", "")).strip()
-            if not c or (a.scope == "user" and t.get("role") != "user"):
+        turns = [t for t in (s.get("dialogue") or [])
+                 if str(t.get("content", "")).strip()]
+        for ti, t in enumerate(turns):
+            if a.scope == "user" and t.get("role") != "user":
                 continue
-            jobs.append((si, ti, f"[{t.get('role','user')}] " + c[:1800]))
+            jobs.append((si, ti, build_messages(turns, ti, gender)))
 
     per = collections.defaultdict(list)
     bad = 0
     for i in range(0, len(jobs), a.batch):
         ch = jobs[i:i + a.batch]
-        ps = [tok.apply_chat_template(
-            [{"role": "system", "content": SYSTEM}, {"role": "user", "content": c}],
-            tokenize=False, add_generation_prompt=True, enable_thinking=False)
-            for _, _, c in ch]
+        ps = [tok.apply_chat_template(msgs, tokenize=False,
+                                      add_generation_prompt=True,
+                                      enable_thinking=False)
+              for _, _, msgs in ch]
         enc = tok(ps, return_tensors="pt", padding=True, truncation=True,
-                  max_length=1024).to("cuda")
+                  max_length=1536).to("cuda")
         with torch.no_grad():
             out = m.generate(**enc, max_new_tokens=192, do_sample=False,
                              pad_token_id=tok.pad_token_id)
