@@ -30,6 +30,7 @@ majority, which is what this file tests.
 Deterministic. No model call anywhere in extraction. Every proposition carries
 the turn it came from, which is the receipt.
 """
+import os
 import re
 
 _BE = {"be", "is", "am", "are", "was", "were"}
@@ -295,7 +296,15 @@ def extract(text, nlp, owner=None, role="user"):
     # have several important friends and colleagues: ...").
     for seg in list(segments(text))[::-1]:
         _extract_into(seg, nlp, o, out, seen, role == "assistant")
-    out.extend(preference_templates(out, owner))
+    # OFF by default: measured a REGRESSION. Adding 28 template records took
+    # judged recall 38.02% -> 36.81% and moved 9 gold points from credited to
+    # missed (discordant prompted-only 48 -> 57 while grammar-only barely
+    # moved, 145 -> 147). See entry 229 -- over-emission is free for
+    # target_accuracy but NOT for integrity, because the integrity judge reads
+    # a session's emissions as ONE concatenated blob and more records crowd out
+    # the ones it was already matching.
+    if os.environ.get("RG_PREF_TEMPLATES") == "1":
+        out.extend(preference_templates(out, owner))
     return out
 
 

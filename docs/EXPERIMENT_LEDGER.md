@@ -281,7 +281,21 @@ They surfaced only from READING judged misses and raw output. **A store that
 ships the negation of a fact is worse than a store that ships nothing**, and no
 overlap metric will tell you which you have.
 
-## 5k. Over-emission does not cost extraction F1
+## 5k. Over-emission is free for PRECISION and expensive for RECALL
+
+**Corrected in e229.** `target_accuracy` scores each record ALONE, so surplus
+cannot dilute it — the original finding holds for the term it named. But
+`integrity` hands the judge a session's emissions as ONE CONCATENATED BLOB and
+asks whether a gold point is in it, so surplus is a longer haystack. Adding 28
+gold-shaped records took judged recall 38.02% → 36.81%, moving 9 gold points
+from credited to missed.
+
+So: do not read this as a licence to emit freely. The parser's 4834 records may
+already be costing recall — a live hypothesis with a cheap test (prune to the
+best records, see if recall rises). If it does, a checker layer earns its place
+as a RECALL filter, which is the opposite of the job it is usually given.
+
+## 5k-orig. Over-emission does not cost extraction F1
 
 `evaluation.py:289` computes `memory_extraction_f1` from `target_accuracy(all)`,
 and that term is summed **only over records the judge marks

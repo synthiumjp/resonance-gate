@@ -11384,3 +11384,56 @@ clean one-variable series is the parser's own 0.3621 -> 0.5036 -> 0.5435.
 dialogue, 40% of the misses are already emitted in some form (a FORM problem),
 60% are not emitted at all (coverage). Both are parsing work, and parsing work
 has been returning 3-11pt a round.
+
+---
+
+## Entry 229 — 2026-08-20 (p2: over-emission is free for PRECISION and expensive for RECALL. Adding 28 gold-shaped records took judged recall 38.02% -> 36.81%. Ledger 5k was right about the metric it named and I generalised it too far.)
+
+30% of the parser's remaining misses are a FORM problem -- gold writes
+"Martin Mark Sports I dislike: Automobile racing" where we emit "Martin Mark
+dislikes automobile racing". So I emitted the template ALONGSIDE the prose,
+reasoning from ledger 5k that surplus records cost nothing because
+target_accuracy counts only in-gold rows.
+
+**Judged: recall 38.02% -> 36.81%, and the discordant cells say it is real.**
+
+      before  prompted-only 48   grammar-only 145
+      after   prompted-only 57   grammar-only 147
+
+Nine gold points moved from credited to missed while the templates gained two.
+28 extra records, net -9.
+
+**The mechanism, and it is a correction to 5k.** The integrity judge is handed
+a session's emissions as ONE CONCATENATED BLOB and asked whether a gold point
+is present in it. More records is a longer haystack. So:
+
+    target_accuracy  scores each record ALONE   -> surplus is free  (5k holds)
+    integrity        scores gold against a BLOB -> surplus CROWDS OUT
+
+5k said "over-emission does not cost extraction F1". That was true of the term
+it named and I extended it into a general licence to emit freely. It is not:
+the same surplus that cannot touch precision can and does cost recall, and
+recall is the binding constraint.
+
+**Two things follow.**
+  1. The templates are OFF by default (`RG_PREF_TEMPLATES=1` to re-enable).
+     The idea is not disproven -- the FORM problem is real, 30% of misses --
+     but adding a second copy of a fact is the wrong way to fix it. Replacing
+     the prose with the template, rather than emitting both, is the version
+     worth testing.
+  2. **The parser's 4834 records may already be costing recall.** That is now
+     a live hypothesis with a cheap test: prune to the highest-confidence
+     records and see whether recall goes UP. If it does, the checker layer JP
+     asked for has a job after all -- not as a precision filter, which 5k
+     correctly says is pointless, but as a recall filter.
+
+**Also fixed on the way, and worth keeping regardless.** The checker rejected
+every template record it was given, twice over: the residue check banned the
+pronoun "I" that gold's own template contains, and the grounding check called
+the category "Sports" invented content because it is not in the source -- the
+same label-vs-content distinction I fixed for slot names and did not
+generalise. Both narrowly exempted, with the value still grounded so an
+unsupported preference is still rejected.
+
+**Standing numbers unchanged:** best judged config remains parser + correctness
+fixes, P 0.9524 / R 0.3802 / F1 0.5435, against the prompted 14B's 0.3328.
