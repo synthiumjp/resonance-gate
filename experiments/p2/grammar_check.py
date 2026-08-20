@@ -147,3 +147,37 @@ def verify(prop, turn, ask):
     """Model entailment. `ask(prompt) -> str`. One yes/no, never generation."""
     out = ask(VERIFY_PROMPT.format(turn=str(turn)[:1500], prop=prop))
     return str(out).strip().upper().startswith("Y")
+
+
+def quality(prop, turn, owner=None):
+    """A deterministic 0-1 score for RANKING records when pruning.
+
+    e229 measured that surplus records cost RECALL: the integrity judge reads a
+    session's emissions as one blob, so extra records crowd out the ones it was
+    already matching. Pruning therefore needs an order, and the order has to
+    come from something we can compute without a model.
+
+    Three signals, all cheap and all defensible:
+      grounded   what fraction of the record's value words are in the source.
+                 An extractive record that is fully grounded is the kind we
+                 most want to keep.
+      brevity    gold points are short (median ~10 content tokens). A very long
+                 record is usually a swallowed clause, and it also eats more of
+                 the judge's attention than a short one.
+      shape      a record with a recognisable slot or relation is closer to
+                 gold's form than a bare verb phrase.
+    """
+    text = str(prop)
+    own = set(_content(owner or "")) | {"user"}
+    pc = [w for w in _content(text) if w not in own]
+    if not pc:
+        return 0.0
+    src = _stems(_content(turn))
+    grounded = sum(1 for w in pc if w in src or w[:-1] in src
+                   or (w + "s") in src) / len(pc)
+    n = len(pc)
+    brevity = 1.0 if n <= 12 else max(0.0, 1.0 - (n - 12) / 24.0)
+    shape = 1.0 if re.search(r"'s [\w ]{2,30} (?:is|are)\b|'s (?:Friend|Colleague|"
+                             r"Partner|Family|Mother|Father|Brother|Sister)\b",
+                             text) else 0.6
+    return 0.5 * grounded + 0.3 * brevity + 0.2 * shape

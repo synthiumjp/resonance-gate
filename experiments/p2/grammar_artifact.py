@@ -27,6 +27,11 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--scope", default="user", choices=("user", "all"))
     ap.add_argument("--no-check", action="store_true")
+    ap.add_argument("--cap", type=int, default=0,
+                    help="keep only the top-N records per SESSION by "
+                         "grammar_check.quality. e229: surplus records cost "
+                         "recall because the integrity judge reads a session's "
+                         "emissions as one blob.")
     a = ap.parse_args()
     if a.user in TRAIN_USERS:
         raise SystemExit(f"REFUSING: user {a.user} is a TRAINING user.")
@@ -62,12 +67,31 @@ def main():
                         dropped[why.split(" (")[0]] += 1
                         continue
                 per[si].append({"content": p, "type": kind,
-                                "session": si, "turn": ti})
+                                "session": si, "turn": ti,
+                                "q": round(C.quality(p, txt, owner), 4)})
         if si % 20 == 0:
             print(f"  session {si}/{len(user['sessions'])}", flush=True)
 
     n = sum(len(v) for v in per.values())
     print(f"turns {nturns} -> {n} propositions; dropped {dict(dropped)}")
+    if a.cap:
+        kept = 0
+        for si in list(per):
+            ranked = sorted(per[si], key=lambda x: -x.get("q", 0))
+            # dedupe identical content before capping, so the cap is spent on
+            # distinct facts rather than repeats
+            seen, uniq = set(), []
+            for x in ranked:
+                k = x["content"].lower()
+                if k in seen:
+                    continue
+                seen.add(k)
+                uniq.append(x)
+            per[si] = uniq[:a.cap]
+            kept += len(per[si])
+        print(f"  capped at {a.cap}/session -> {kept} propositions "
+              f"({kept/max(1,n):.0%} of raw)")
+        n = kept
     with open(a.out, "w", encoding="utf-8") as fh:
         json.dump({"user": a.user, "owner": owner, "scope": a.scope,
                    "generator": "grammar_parse+check", "unparseable": 0,
