@@ -27,6 +27,10 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--scope", default="user", choices=("user", "all"))
     ap.add_argument("--no-check", action="store_true")
+    ap.add_argument("--engine", default="spacy", choices=("spacy", "ud"),
+                    help="'ud' uses Stanza + grammar_ud (85.19% LAS on "
+                         "conversational data vs spaCy's 61.45%, CAIT "
+                         "arXiv:2605.19718)")
     ap.add_argument("--cap", type=int, default=0,
                     help="keep only the top-N records per SESSION by "
                          "grammar_check.quality. e229: surplus records cost "
@@ -36,10 +40,16 @@ def main():
     if a.user in TRAIN_USERS:
         raise SystemExit(f"REFUSING: user {a.user} is a TRAINING user.")
 
-    import spacy
-    import grammar_parse as G
     import grammar_check as C
-    nlp = spacy.load("en_core_web_sm")
+    if a.engine == "ud":
+        import stanza
+        import grammar_ud as G
+        nlp = stanza.Pipeline("en", processors="tokenize,pos,lemma,depparse",
+                              use_gpu=False, verbose=False)
+    else:
+        import spacy
+        import grammar_parse as G
+        nlp = spacy.load("en_core_web_sm")
 
     user = [json.loads(l) for l in open(DATA, encoding="utf-8")][a.user]
     owner = None
