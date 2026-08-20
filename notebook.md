@@ -11437,3 +11437,47 @@ unsupported preference is still rejected.
 
 **Standing numbers unchanged:** best judged config remains parser + correctness
 fixes, P 0.9524 / R 0.3802 / F1 0.5435, against the prompted 14B's 0.3328.
+
+---
+
+## Entry 230 — 2026-08-20 (p2: pruning REFUTED — capping to 25 records/session cost 12pt of recall. And that retracts the mechanism I proposed one entry ago: the e229 regression was not a crowding law.)
+
+e229 measured +28 records costing 1.2pt of recall and I proposed a mechanism:
+the integrity judge reads a session's emissions as one blob, so surplus crowds
+out what it was already matching. That predicted pruning would RAISE recall.
+It was cheap to test, so I tested it.
+
+    full         4862 records (~75/session)   recall 38.02%
+    cap 25       1607 records (~25/session)   recall 25.87%   -12.15pt
+
+**Cutting 67% of records cost twelve points of recall.** The prediction was
+wrong and in the largest possible way.
+
+**So e229's mechanism is retracted.** If surplus crowded out matches, less
+surplus would match more. It does the opposite: records overwhelmingly earn
+their place, and gold points are found by having a record that covers them --
+which is exactly what the naive reading said and what I talked myself out of.
+
+**What e229's -1.2pt actually was, honestly: unexplained.** It is one
+comparison, 28 records, nine gold points moved. Against this result the
+simplest reading is judge variance on a blob whose contents shifted, not a
+law. I built a mechanism out of a single small regression and it did not
+survive its first test. The ledger entry claiming surplus costs recall is
+withdrawn; 5k stands as originally written -- surplus does not cost
+target_accuracy -- with no general claim about recall attached.
+
+**The quality ranking is not wasted.** `grammar_check.quality()` scores a
+record on grounding, brevity and shape with no model call. Pruning by it is
+refuted as an F1 lever, but it is exactly the ordering a PRODUCT needs -- what
+to show first when a user asks what the system knows, and what to surface when
+context is budgeted. Kept, with `--cap` off by default and documented as
+measured-harmful for extraction.
+
+**Standing numbers unchanged.** Best judged config remains parser + correctness
+fixes: P 0.9524 / R 0.3802 / F1 0.5435 against the prompted 14B's 0.3328.
+
+**Two negatives in a row now** -- preference templates and pruning -- and both
+came from reasoning forward from a mechanism rather than measuring. The
+measurements that have worked this session were all diagnostic first: read the
+misses, find the bug, fix the bug. The two that failed were both "I have a
+theory about the judge".

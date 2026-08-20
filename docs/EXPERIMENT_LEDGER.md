@@ -281,7 +281,22 @@ They surfaced only from READING judged misses and raw output. **A store that
 ships the negation of a fact is worse than a store that ships nothing**, and no
 overlap metric will tell you which you have.
 
-## 5k. Over-emission is free for PRECISION and expensive for RECALL
+## 5k. Over-emission does not cost precision — and pruning does not buy recall
+
+`target_accuracy` scores each record ALONE, so surplus cannot dilute it (e224).
+
+e229 saw +28 records cost 1.2pt of recall and proposed that the integrity
+judge's concatenated blob crowds out matches. **That mechanism is RETRACTED
+(e230):** capping to 25 records/session cut 67% of records and cost **12.15pt**
+of recall (38.02% → 25.87%). If crowding were real, pruning would have helped.
+Records earn their place; e229's small regression is unexplained and most
+simply read as judge variance.
+
+`grammar_check.quality()` (grounding + brevity + shape, no model) is kept — not
+as an F1 lever, which is measured harmful, but as the ordering a PRODUCT needs
+for what to show first and what to surface under a context budget.
+
+## 5k-orig. Over-emission does not cost extraction F1
 
 **Corrected in e229.** `target_accuracy` scores each record ALONE, so surplus
 cannot dilute it — the original finding holds for the term it named. But
