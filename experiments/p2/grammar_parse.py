@@ -46,9 +46,17 @@ _ALREADY_3SG = {"is", "was", "has", "does", "goes", "had", "did", "were",
                 "must", "shall"}
 
 
+# infinitival "to" is not a verb and must never be inflected -- it produced
+# "Martin Mark tos save comfortably", which the grounding check then killed,
+# losing the whole clause.
+_NEVER_INFLECT = {"to", "not", "n't"}
+
+
 def _third(verb_text, lemma):
     """First-person present -> third-person singular. Morphology, not lookup."""
     v = verb_text.lower()
+    if v in _NEVER_INFLECT:
+        return verb_text
     if v in _ALREADY_3SG:
         return v
     if v in _IRREG:
@@ -188,6 +196,40 @@ def extract(text, nlp, owner=None):
                             seen.add(key)
                             out.append((f"{o} is {val}", "attr"))
 
+            # --- third-person subject: facts about OTHER PEOPLE -----------
+            #
+            # The parser only ever fired on first-person subjects, so
+            # "ThomasSusan is my Friend, Susan's support and encouragement
+            # inspire me..." produced nothing but "has several important
+            # friends and colleagues". Relationship gold is written from the
+            # OTHER person's side, and a memory of a life is mostly about
+            # other people -- this is a product gap as much as a benchmark one.
+            if tok.lemma_ in _BE and tok.pos_ in ("AUX", "VERB"):
+                subj = next((c for c in tok.children if c.dep_ == "nsubj"), None)
+                comp = next((c for c in tok.children
+                             if c.dep_ in ("attr", "acomp")), None)
+                if (subj is not None and comp is not None
+                        and subj.text.lower() not in _FIRST
+                        and subj.pos_ in ("PROPN", "NOUN")):
+                    poss = next((c for c in comp.children
+                                 if c.dep_ == "poss"
+                                 and c.text.lower() in _FIRST), None)
+                    if poss is not None:
+                        # The relation is the HEAD NOUN, not its subtree. Taking
+                        # the subtree swept up the appositive clause and
+                        # produced "Martin Mark's Friend, Susan's support
+                        # inspires me ThomasSusan" -- a relation, a descriptor
+                        # and a name fused into one unusable string.
+                        rel = " ".join([c.text for c in comp.children
+                                        if c.dep_ == "compound"] + [comp.text])
+                        name = " ".join([c.text for c in subj.children
+                                         if c.dep_ == "compound"] + [subj.text])
+                        if rel and name:
+                            key = ("rel", name.lower(), rel.lower())
+                            if key not in seen:
+                                seen.add(key)
+                                out.append((f"{o}'s {rel} {name}", "relationship"))
+
             # --- eventive: "I <verb> <complement>" -------------------------
             elif tok.pos_ in ("VERB", "AUX"):
                 subj = next((c for c in tok.children if c.dep_ == "nsubj"), None)
@@ -197,6 +239,17 @@ def extract(text, nlp, owner=None):
                         if c.dep_ in ("dobj", "obj", "prep", "attr", "acomp",
                                       "xcomp", "ccomp", "advmod", "dative",
                                       "oprd", "npadvmod")]
+                # participial adjuncts carry real content: "I am currently
+                # Employed, WORKING IN THE HEALTHCARE INDUSTRY" gave the
+                # copula and dropped the clause gold actually asks for.
+                for c in tok.children:
+                    if c.dep_ in ("advcl", "acl") and c.tag_ == "VBG":
+                        sub = _span(c, doc, owner=o)
+                        if sub and len(sub.split()) <= 20:
+                            k = ("part", sub.lower()[:40])
+                            if k not in seen:
+                                seen.add(k)
+                                out.append((f"{o} is {sub}", "event"))
                 if not rest:
                     continue
                 tail = " ".join(_span(c, doc, owner=o)
