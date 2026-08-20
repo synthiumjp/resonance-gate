@@ -94,9 +94,29 @@ def prefilter(prop, turn, owner=None, min_grounded=0.85, min_content=1):
                            text, re.I):
         return False, "degenerate self-reference"
 
+    # GROUND THE VALUE, NOT THE SLOT NAME.
+    #
+    # A slot name is a LABEL we supply from our own schema; a value is CONTENT
+    # that must come from the source. Gold calls it "birth date" where the
+    # speaker said "born on", and "parent status" where they said "Both
+    # parents are alive" -- so grounding the whole string rejects exactly the
+    # canonical naming the lexicon exists to add, which is what happened: every
+    # lexicon proposition was dropped as "ungrounded (birth, date)".
+    #
+    # The evidence-layer claim is that we never invent CONTENT. It was never
+    # that we may only use the speaker's own words for our field names.
+    body = text
+    m = re.search(r"'s .{0,40}? (?:is|are|include[s]?)\s+(.*)$", text)
+    if not m:
+        m = re.search(r"'s .{0,40}?:\s*(.*)$", text)
+    if m:
+        body = m.group(1)
+    vc = [w for w in _content(body) if w not in own] or pc
+
     src = _stems(_content(turn))
-    ungrounded = [w for w in pc if w not in src and w[:-1] not in src
+    ungrounded = [w for w in vc if w not in src and w[:-1] not in src
                   and (w + "s") not in src]
+    pc = vc
     frac = 1.0 - (len(ungrounded) / max(1, len(pc)))
     if frac < min_grounded:
         return False, f"ungrounded ({', '.join(ungrounded[:4])})"

@@ -98,10 +98,64 @@ def _span(tok, doc, drop=(), owner=None):
     return _shift_person(txt, owner) if owner else txt
 
 
+# --- SLOT LEXICON ----------------------------------------------------------
+#
+# The parser finds STRUCTURE; it has no idea what gold calls a thing. 45% of
+# the 462 gold points it missed on user 0 are present in the session's own user
+# turns -- they are missed because gold names a slot the source never uses:
+#
+#   "I was born on 1996-08-02"   ->  "birth date is 1996-08-02"
+#   "Both parents are alive"     ->  "parent status: Both parents are alive"
+#   "no_relationship"            ->  "partner status: no_relationship"
+#
+# So structure alone is not enough and neither is a lexicon alone (the regex
+# prototype reached 1.7% because only 5% of gold is copular). This is the
+# lexicon half: a small, explicit map from surface expression to gold's slot
+# name, applied alongside the parse rather than instead of it.
+_LEX = [
+    (re.compile(r"\bI\s+was\s+born\s+on\s+([0-9]{4}-[0-9]{2}-[0-9]{2})", re.I),
+     "birth date is {0}"),
+    (re.compile(r"\bI\s+am\s+(?:now\s+)?(\d{1,3})\s+years?\s+old", re.I),
+     "age is {0} years old"),
+    (re.compile(r"\b(Both\s+parents\s+are\s+\w+|One\s+parent[^.,;]{0,30}|"
+                r"Both\s+parents\s+are\s+deceased)", re.I),
+     "parent status: {0}"),
+    (re.compile(r"\b(no_relationship|Married|Single|Divorced|Widowed)\b"),
+     "partner status: {0}"),
+    (re.compile(r"\b(No\s+children|One\s+child|Two\s+children|"
+                r"Three\s+children)\b", re.I),
+     "child status: {0}"),
+    (re.compile(r"describe\s+me\s+with\s+these\s+words:\s*([^.]{3,120})", re.I),
+     "personality tags include: {0}"),
+    (re.compile(r"\bmy\s+personality\s+type\s+is\s+([A-Z]{4})\b"),
+     "MBTI personality type is {0}"),
+    (re.compile(r"\bI\s+(?:currently\s+)?work\s+(?:at|for)\s+([^.,;]{2,50})", re.I),
+     "employer is {0}"),
+]
+
+
+def lexicon(text, owner=None):
+    """Gold-slot propositions from surface expressions the parse cannot name."""
+    o = owner or "The user"
+    out, seen = [], set()
+    for rx, tmpl in _LEX:
+        for m in rx.finditer(text):
+            val = m.group(1).strip(" .,;")
+            if not val:
+                continue
+            body = tmpl.format(val)
+            if body.split()[0] in seen:
+                continue
+            seen.add(body.split()[0])
+            out.append((f"{o}'s {body}", "attr"))
+    return out
+
+
 def extract(text, nlp, owner=None):
     """-> [(proposition, kind)] from one turn. Deterministic."""
     o = owner or "The user"
     out, seen = [], set()
+    out.extend(lexicon(text, owner))
     doc = nlp(text)
 
     for sent in doc.sents:

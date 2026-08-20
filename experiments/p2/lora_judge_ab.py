@@ -79,10 +79,19 @@ def mcnemar(pairs):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--user", type=int, required=True)
-    ap.add_argument("--lora-artifact", required=True)
+    ap.add_argument("--lora-artifact", required=True,
+                    help="artifact JSON from lora_artifact.py OR "
+                         "grammar_artifact.py -- the harness does not care "
+                         "which generator produced it")
+    ap.add_argument("--label", default="lora")
     ap.add_argument("--limit-integrity", type=int, default=0)
     ap.add_argument("--limit-accuracy", type=int, default=0)
     ap.add_argument("--workers", type=int, default=4)
+    ap.add_argument("--save", default="",
+                    help="write per-record verdicts here. The first run was "
+                         "killed mid-way and its verdicts were lost, forcing "
+                         "a full re-judge of an unchanged arm -- ~1100 calls "
+                         "for nothing.")
     a = ap.parse_args()
     if a.user in TRAIN_USERS:
         raise SystemExit(f"REFUSING: user {a.user} is a TRAINING user.")
@@ -93,7 +102,7 @@ def main():
 
     user = [json.loads(l) for l in open(DATA, encoding="utf-8")][a.user]
     arms = {"prompted": prompted_arm(user, a.user),
-            "lora": lora_arm(a.lora_artifact)}
+            a.label: lora_arm(a.lora_artifact)}
     for k, v in arms.items():
         print(f"{k:<10} {sum(len(x) for x in v.values())} records")
 
@@ -128,16 +137,23 @@ def main():
                     print(f"  [integrity/{arm}] {i}/{len(jobs)}", flush=True)
         ints[arm] = res
 
+    if a.save:
+        json.dump({arm: {"|".join(str(x) for x in k): v for k, v in d.items()}
+                   for arm, d in ints.items()},
+                  open(a.save, "w", encoding="utf-8"))
+        print(f"  saved integrity verdicts to {a.save}")
     keys = [k for k in ints["prompted"]
-            if ints["prompted"].get(k) is not None and ints["lora"].get(k) is not None]
+            if ints["prompted"].get(k) is not None and ints[a.label].get(k) is not None]
     hp = sum(1 for k in keys if ints["prompted"][k] == 2)
-    hl = sum(1 for k in keys if ints["lora"][k] == 2)
+    hl = sum(1 for k in keys if ints[a.label][k] == 2)
     print(f"\nINTEGRITY (paired, n={len(keys)})")
     print(f"  prompted recall {hp/len(keys):7.2%}  ({hp}/{len(keys)})")
-    print(f"  lora     recall {hl/len(keys):7.2%}  ({hl}/{len(keys)})"
+    print(f"  {a.label:<8} recall {hl/len(keys):7.2%}  ({hl}/{len(keys)})"
           f"   delta {(hl-hp)/len(keys):+.2%}pt")
-    b, c, p = mcnemar([(ints["prompted"][k] == 2, ints["lora"][k] == 2) for k in keys])
-    print(f"  discordant: prompted-only {b}, lora-only {c}   McNemar exact p={p:.4g}")
+    b, c, p = mcnemar([(ints["prompted"][k] == 2, ints[a.label][k] == 2)
+                       for k in keys])
+    print(f"  discordant: prompted-only {b}, {a.label}-only {c}   "
+          f"McNemar exact p={p:.4g}")
 
     print("\nACCURACY (unpaired -- the arms emit different records)")
     prec = {}
@@ -165,7 +181,7 @@ def main():
               f"{tot} emitted)")
 
     print("\nEXTRACTION F1 (harness definition)")
-    for arm, h in (("prompted", hp), ("lora", hl)):
+    for arm, h in (("prompted", hp), (a.label, hl)):
         r = h / max(1, len(keys))
         f1 = 0.0 if prec[arm] + r == 0 else 2 * prec[arm] * r / (prec[arm] + r)
         print(f"  {arm:<9} P {prec[arm]:.4f}  R {r:.4f}  F1 {f1:.4f}")
