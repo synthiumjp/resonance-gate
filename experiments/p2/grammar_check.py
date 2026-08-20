@@ -34,6 +34,8 @@ STOP = set("the a an is are was were be been being of to in on at for and or "
 _BAD_MORPH = re.compile(r"\b\w+ises\b|\bhas \w+ing\b|\bises\b|\b(?:is|has) "
                         r"(?:is|has|was)\b", re.I)
 _FIRST_RESIDUE = re.compile(r"\b(?:I|my|me|mine|myself|we|us|our)\b")
+_GOLD_TEMPLATE_VAL = re.compile(r"\bI\s+(?:like|dislike)\s*:?\s*(.+)$", re.I)
+_GOLD_TEMPLATE = re.compile(r"\b[A-Z][\w ]{2,20}\s+I\s+(?:like|dislike)\b")
 _DISCOURSE = {"absolutely", "of course", "sure", "okay", "ok", "yes", "no",
               "hello", "hi", "thanks", "thank you", "well", "so", "actually"}
 
@@ -88,7 +90,11 @@ def prefilter(prop, turn, owner=None, min_grounded=0.85, min_content=1):
 
     if _BAD_MORPH.search(text):
         return False, "malformed morphology"
-    if _FIRST_RESIDUE.search(text):
+    # Gold's own preference template CONTAINS the first person -- "Martin Mark
+    # Sports I dislike: Automobile racing". The residue check exists to catch a
+    # FAILED person shift, not to ban the pronoun, and without this exemption it
+    # silently dropped 28 of the template records the moment they were added.
+    if not _GOLD_TEMPLATE.search(text) and _FIRST_RESIDUE.search(text):
         return False, "first-person residue (person shift incomplete)"
     if owner and re.search(rf"{re.escape(owner)}'s .* is {re.escape(owner)}'s",
                            text, re.I):
@@ -109,6 +115,12 @@ def prefilter(prop, turn, owner=None, min_grounded=0.85, min_content=1):
     m = re.search(r"'s .{0,40}? (?:is|are|include[s]?)\s+(.*)$", text)
     if not m:
         m = re.search(r"'s .{0,40}?:\s*(.*)$", text)
+    if not m:
+        # the preference template: "<Owner> <Category> I dislike: <value>".
+        # The CATEGORY is a label we supply, exactly like a slot name -- it is
+        # not in the source and must not be grounded, or every template record
+        # is rejected as "ungrounded (sports)".
+        m = _GOLD_TEMPLATE_VAL.search(text)
     if m:
         body = m.group(1)
     vc = [w for w in _content(body) if w not in own] or pc
