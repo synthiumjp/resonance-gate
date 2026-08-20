@@ -262,6 +262,8 @@ def _extract_into(text, nlp, o, out, seen, second=False):
                 elif (subj is not None and comp is not None
                       and subj.text.lower() in subj_set):
                     val = _span(comp, doc, owner=o, second=second)
+                    if any(c.dep_ == "neg" for c in tok.children) and val:
+                        val = "not " + val
                     if val:
                         key = ("self", val.lower())
                         if key not in seen:
@@ -360,15 +362,32 @@ def _extract_into(text, nlp, o, out, seen, second=False):
                 # element takes person. "I have been reflecting" -> "has been
                 # reflecting", not "has reflecting", which is what taking only
                 # the nearest aux produced.
-                auxes = sorted([c for c in tok.children
-                                if c.dep_ in ("aux", "auxpass")],
+                # NEGATION. spaCy gives "n't"/"not"/"never" the dep `neg`, not
+                # `aux`, so collecting only auxiliaries DROPPED IT ENTIRELY and
+                # inverted the fact:
+                #     "I don't like boxing"      -> "Martin Mark does like boxing"
+                #     "I do not enjoy skydiving" -> "Martin Mark does enjoy skydiving"
+                # Every negated statement became its opposite. For a store whose
+                # whole claim is that it does not fabricate, this was the worst
+                # defect in the file -- and invisible to any coverage metric,
+                # because the inverted sentence shares every content token with
+                # the true one.
+                parts = sorted([c for c in tok.children
+                                if c.dep_ in ("aux", "auxpass", "neg")],
                                key=lambda c: c.i)
+                auxes = [c for c in parts if c.dep_ != "neg"]
                 if auxes:
                     head = _CONTRACT.get(auxes[0].text.lower(), auxes[0].text)
+                    rest = [(_CONTRACT.get(c.text.lower(), c.text)
+                             if c.dep_ == "neg" else c.text)
+                            for c in parts if c is not auxes[0]]
                     verb = " ".join([_third(head, auxes[0].lemma_)]
-                                    + [a.text for a in auxes[1:]] + [tok.text])
+                                    + rest + [tok.text])
                 else:
-                    verb = _third(tok.text, tok.lemma_)
+                    negs = [c.text for c in parts if c.dep_ == "neg"]
+                    verb = " ".join([_third(tok.text, tok.lemma_)] + negs) \
+                        if not negs else \
+                        "does " + " ".join(negs + [tok.lemma_])
                 key = ("evt", verb.lower(), tail.lower()[:40])
                 if key in seen:
                     continue
