@@ -354,8 +354,22 @@ def _extract_into(text, nlp, o, out, seen, second=False):
                             # "User's name is X" -- the name IS the fact
                             lead = "User" if slot.lower() == "name" else o
                             out.append((f"{lead}'s {slot} is {val}", "attr"))
-                elif (subj is not None and comp is not None
-                      and subj.text.lower() in subj_set):
+                # A participial adjunct hangs off the COPULA -- "I am
+                # currently Employed, WORKING IN THE HEALTHCARE INDUSTRY" --
+                # and the copular branch matched first, so the eventive
+                # branch's participial code never ran for it.
+                if subj is not None and subj.text.lower() in subj_set:
+                    for c in tok.children:
+                        if c.dep_ in ("advcl", "acl") and c.tag_ == "VBG":
+                            sub = _span(c, doc, owner=o, second=second)
+                            if sub and len(sub.split()) <= 20:
+                                k = ("part", sub.lower()[:40])
+                                if k not in seen:
+                                    seen.add(k)
+                                    out.append((f"{o} is {sub}", "event"))
+
+                if (subj is not None and comp is not None
+                        and subj.text.lower() in subj_set):
                     val = _span(comp, doc, owner=o, second=second)
                     if any(c.dep_ == "neg" for c in tok.children) and val:
                         val = "not " + val
@@ -364,6 +378,36 @@ def _extract_into(text, nlp, o, out, seen, second=False):
                         if key not in seen:
                             seen.add(key)
                             out.append((f"{o} is {val}", "attr"))
+
+            # --- passive with a possessed subject -------------------------
+            # "Your motivation for a career change IS DRIVEN BY your desire
+            # for personal well-being" makes `driven` the ROOT with `is` as
+            # `auxpass`, so the copular branch never saw a copula and the
+            # eventive branch skipped it as passive. The assistant states a
+            # lot of the user's inner life in exactly this shape.
+            if tok.tag_ == "VBN" and any(c.dep_ == "auxpass"
+                                         for c in tok.children):
+                subj = next((c for c in tok.children
+                             if c.dep_ in ("nsubjpass", "nsubj")), None)
+                if subj is not None:
+                    ps = next((c for c in subj.children
+                               if c.dep_ == "poss" and c.text.lower() in subj_set),
+                              None)
+                    if ps is not None:
+                        head = _span(subj, doc, drop={ps.i}, owner=o,
+                                     second=second)
+                        rest = [c for c in tok.children
+                                if c.dep_ in ("agent", "prep", "advmod", "dobj",
+                                              "oprd", "xcomp")]
+                        tail = " ".join(_span(c, doc, owner=o, second=second)
+                                        for c in sorted(rest, key=lambda c: c.i))
+                        tail = re.sub(r"\s+", " ", tail).strip(" ,.;:")
+                        if head and tail and len(tail.split()) <= 22:
+                            k = ("pass", head.lower()[:24], tail.lower()[:40])
+                            if k not in seen:
+                                seen.add(k)
+                                out.append((f"{o}'s {head} is {tok.text} {tail}",
+                                            "attr"))
 
             # --- third-person subject: facts about OTHER PEOPLE -----------
             #
@@ -437,7 +481,17 @@ def _extract_into(text, nlp, o, out, seen, second=False):
             # --- eventive: "I <verb> <complement>" -------------------------
             elif tok.pos_ in ("VERB", "AUX"):
                 subj = next((c for c in tok.children if c.dep_ == "nsubj"), None)
-                if subj is None or subj.text.lower() not in subj_set:
+                if subj is None:
+                    continue
+                # The subject may BEAR the pronoun rather than BE it: "YOUR
+                # proactive approach can open doors", "YOUR motivation is
+                # driven by ...". Requiring the subject to be the pronoun
+                # itself missed every one of these, and the assistant states
+                # facts about the user in exactly this shape.
+                own_poss = next((c for c in subj.children
+                                 if c.dep_ == "poss"
+                                 and c.text.lower() in subj_set), None)
+                if subj.text.lower() not in subj_set and own_poss is None:
                     continue
                 rest = [c for c in tok.children
                         if c.dep_ in ("dobj", "obj", "prep", "attr", "acomp",
@@ -494,6 +548,17 @@ def _extract_into(text, nlp, o, out, seen, second=False):
                                 if c.dep_ in ("aux", "auxpass", "neg")],
                                key=lambda c: c.i)
                 auxes = [c for c in parts if c.dep_ != "neg"]
+                # possessive-subject clauses read as "<owner>'s <subject>
+                # <verb> <tail>", keeping the subject noun the speaker used.
+                lead = o
+                if own_poss is not None:
+                    # owner/second must be passed here too, or a possessive
+                    # inside the SUBJECT survives unshifted: "Martin Mark's
+                    # proactive approach to leveraging YOUR contacts".
+                    head = _span(subj, doc, drop={own_poss.i}, owner=o,
+                                 second=second)
+                    if head:
+                        lead = f"{o}'s {head}"
                 if auxes:
                     head = _CONTRACT.get(auxes[0].text.lower(), auxes[0].text)
                     rest = [(_CONTRACT.get(c.text.lower(), c.text)
@@ -506,8 +571,8 @@ def _extract_into(text, nlp, o, out, seen, second=False):
                     verb = " ".join([_third(tok.text, tok.lemma_)] + negs) \
                         if not negs else \
                         "does " + " ".join(negs + [tok.lemma_])
-                key = ("evt", verb.lower(), tail.lower()[:40])
+                key = ("evt", lead.lower()[:24], verb.lower(), tail.lower()[:40])
                 if key in seen:
                     continue
                 seen.add(key)
-                out.append((f"{o} {verb} {tail}", "event"))
+                out.append((f"{lead} {verb} {tail}", "event"))
