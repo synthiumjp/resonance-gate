@@ -159,11 +159,62 @@ def lexicon(text, owner=None):
     return out
 
 
+_SEG = re.compile(r"[:;]")
+
+
+def segments(text):
+    """The turn, plus each colon/semicolon-introduced clause on its own.
+
+    A colon wrecks the parse. In "I have several important friends and
+    colleagues: ThomasSusan is my Friend, ...", spaCy makes "is" the ROOT with
+    children [have, :, ThomasSusan, inspire] and hangs "Friend" off "inspire"
+    as nmod -- so the copula rule cannot see a subject-complement pair that is
+    plainly there. The SAME clause parsed alone is clean and yields the right
+    relation.
+
+    HaluMem's dialogue is full of this shape ("I have several important
+    friends and colleagues:", "Friends describe me with these words:"), so
+    rather than chase a degraded tree, parse the fragments too and let `seen`
+    dedupe. Cheap: a few extra parses of short strings, still no model call.
+    """
+    yield text
+    for part in _SEG.split(text):
+        part = part.strip()
+        if len(part.split()) >= 3 and part != text.strip():
+            yield part
+
+
 def extract(text, nlp, owner=None):
     """-> [(proposition, kind)] from one turn. Deterministic."""
     o = owner or "The user"
     out, seen = [], set()
     out.extend(lexicon(text, owner))
+    # Fragments FIRST, whole turn last. `seen` keeps whichever arrives first,
+    # and the clause parsed alone yields a clean descriptor while the whole
+    # turn drags the lead-in in with it ("...Friend ThomasSusan, Martin Mark
+    # have several important friends and colleagues: ...").
+    for seg in list(segments(text))[::-1]:
+        _extract_into(seg, nlp, o, out, seen)
+    return out
+
+
+def _describe(sent, doc, cop, subj, comp, owner):
+    """The descriptive remainder of a relationship clause.
+
+    Everything in the sentence that is not the copula, the named subject or
+    the relation noun -- person-shifted, so "inspire me" becomes "inspire
+    <owner>" rather than leaving the speaker's voice in a stored fact."""
+    drop = {cop.i, subj.i, comp.i}
+    drop |= {c.i for c in comp.children if c.dep_ == "poss"}
+    drop |= {c.i for c in subj.children if c.dep_ == "compound"}
+    ids = [t.i for t in sent if t.i not in drop and not t.is_punct]
+    if len(ids) < 3:
+        return ""
+    txt = doc[min(ids):max(ids) + 1].text.strip(" ,.;:")
+    return _shift_person(txt, owner)[:220]
+
+
+def _extract_into(text, nlp, o, out, seen):
     doc = nlp(text)
 
     for sent in doc.sents:
@@ -173,11 +224,15 @@ def extract(text, nlp, owner=None):
                 subj = next((c for c in tok.children if c.dep_ == "nsubj"), None)
                 comp = next((c for c in tok.children
                              if c.dep_ in ("attr", "acomp", "prep", "oprd")), None)
-                if subj is None or comp is None:
-                    continue
+                # NO EARLY `continue` HERE. It skipped the whole rest of the
+                # loop body for this token -- including the third-person
+                # relation rule below -- so "ThomasSusan is my Friend, ..."
+                # (where the copula has no `attr` child at all) could never be
+                # reached. The guard belongs on this branch, not on the token.
                 poss = next((c for c in subj.children
-                             if c.dep_ == "poss" and c.text.lower() in _FIRST), None)
-                if poss is not None:
+                             if c.dep_ == "poss" and c.text.lower() in _FIRST),
+                            None) if subj is not None else None
+                if poss is not None and comp is not None:
                     slot = _span(subj, doc, drop={poss.i})
                     val = _span(comp, doc, owner=o)
                     if slot and val:
@@ -188,7 +243,8 @@ def extract(text, nlp, owner=None):
                             # "User's name is X" -- the name IS the fact
                             lead = "User" if slot.lower() == "name" else o
                             out.append((f"{lead}'s {slot} is {val}", "attr"))
-                elif subj.text.lower() in _FIRST:
+                elif (subj is not None and comp is not None
+                      and subj.text.lower() in _FIRST):
                     val = _span(comp, doc, owner=o)
                     if val:
                         key = ("self", val.lower())
@@ -208,12 +264,27 @@ def extract(text, nlp, owner=None):
                 subj = next((c for c in tok.children if c.dep_ == "nsubj"), None)
                 comp = next((c for c in tok.children
                              if c.dep_ in ("attr", "acomp")), None)
-                if (subj is not None and comp is not None
-                        and subj.text.lower() not in _FIRST
+                # DEP LABELS ARE NOT STABLE HERE. "ThomasSusan is my Friend,
+                # Susan's support inspires me" puts Friend as `attr` under
+                # `is`; add one coordinated subject -- "support AND
+                # encouragement inspire me" -- and the same Friend becomes
+                # `nmod` under `inspire`. Same sentence shape, different tree.
+                # So do not require a label: if the copula's subject is a
+                # proper noun, the relation is the noun carrying a
+                # first-person possessive anywhere in that clause.
+                if (subj is not None and subj.text.lower() not in _FIRST
                         and subj.pos_ in ("PROPN", "NOUN")):
+                    if comp is None or not any(
+                            c.dep_ == "poss" and c.text.lower() in _FIRST
+                            for c in comp.children):
+                        comp = next((t2 for t2 in sent
+                                     if t2.pos_ in ("NOUN", "PROPN")
+                                     and any(c.dep_ == "poss"
+                                             and c.text.lower() in _FIRST
+                                             for c in t2.children)), None)
                     poss = next((c for c in comp.children
                                  if c.dep_ == "poss"
-                                 and c.text.lower() in _FIRST), None)
+                                 and c.text.lower() in _FIRST), None) if comp else None
                     if poss is not None:
                         # The relation is the HEAD NOUN, not its subtree. Taking
                         # the subtree swept up the appositive clause and
@@ -228,7 +299,19 @@ def extract(text, nlp, owner=None):
                             key = ("rel", name.lower(), rel.lower())
                             if key not in seen:
                                 seen.add(key)
-                                out.append((f"{o}'s {rel} {name}", "relationship"))
+                                # Gold writes a relationship as relation + name
+                                # + DESCRIPTOR: "Martin Mark's Friend
+                                # ThomasSusan, Susan's support and
+                                # encouragement inspire me to maintain my
+                                # focus...". The bare relation shares only 2 of
+                                # 11 content tokens with that, so emitting it
+                                # alone cannot match however correct it is --
+                                # which is why relationship coverage sat at 7%
+                                # while the relation itself extracted fine.
+                                desc = _describe(sent, doc, tok, subj, comp, o)
+                                body = f"{o}'s {rel} {name}"
+                                out.append(((body + ", " + desc) if desc
+                                            else body, "relationship"))
 
             # --- eventive: "I <verb> <complement>" -------------------------
             elif tok.pos_ in ("VERB", "AUX"):
@@ -275,4 +358,3 @@ def extract(text, nlp, owner=None):
                     continue
                 seen.add(key)
                 out.append((f"{o} {verb} {tail}", "event"))
-    return out
