@@ -11202,3 +11202,55 @@ smarter" but "what does the checker add on top of a parser that already wins".
 Ledger 5k says the checker should FIX rather than FILTER, because over-emission
 does not cost F1 -- and the parser's 2.46 rec/gold is now demonstrably not a
 liability, since its precision is HIGHER than the 14B's.
+
+---
+
+## Entry 226 — 2026-08-20 (p2: the relationship work moved the PROXY +2.9pt and the JUDGE −0.17pt. Fourth time the proxy has misled on this exact question. Precision rose though, so F1 is flat and the parser still beats the prompted 14B.)
+
+Judged the improved parser, reusing the prompted arm's saved verdicts so the
+run cost 576 calls instead of 1152.
+
+    parser v1  (proxy 19.8%)   P 0.8065  R 0.2326  F1 0.3611
+    parser v2  (proxy 22.7%)   P 0.8381  R 0.2309  F1 0.3621
+    prompted 14B               P 0.7759  R 0.2118  F1 0.3328
+
+**The relationship work raised the proxy 19.8% -> 22.7% and judged recall
+23.26% -> 23.09%.** Flat, marginally down. What it DID do is raise precision
+80.65% -> 83.81%, so F1 is unchanged at 0.362 and the parser still beats the
+prompted 14B by ~3pt of F1.
+
+**Why the proxy was wrong again.** Attaching the descriptor to a relationship
+proposition adds many content tokens that also appear in gold's descriptor, so
+token overlap rises steeply. The judge is asked whether the gold MEMORY POINT
+is present, and a person-shifted paraphrase of the descriptor does not
+persuade it -- gold keeps the speaker's voice ("inspire me to maintain my
+focus"), ours says "inspire Martin Mark to maintain Martin Mark's focus".
+Closer on tokens, not the same statement.
+
+**Four failures now, in both directions, on the same question:**
+
+    LoRA v3       proxy 22.4%  ->  judged 17.0%    over-read  5.4pt
+    parser v1     proxy 19.8%  ->  judged 23.3%    under-read 3.5pt
+    garbage relation strings scored HIGHER on the proxy than correct ones
+    parser v2     proxy +2.9pt ->  judged -0.17pt
+
+The rule this session should end with: **the token-overlap proxy is not a
+screen for extraction changes and must not be used to tune the parser.** It
+was already barred from LoRA-vs-baseline (e223); it is now barred from
+parser-vs-parser too. Every extraction change from here gets judged or it
+does not get believed. The reuse flag makes that affordable -- a fixed
+baseline is never re-scored.
+
+**What the relationship work was actually worth.** +3.2pt of precision, for
+free, with no recall cost. That is a real gain and it is the opposite of what
+I predicted while building it. It also fixed four genuine parser bugs that
+would have hurt any future work: colon-wrecked parses, unstable dep labels, an
+early `continue` that made a whole rule unreachable, and a bare relation that
+could never match gold however correct it was.
+
+**Where this leaves the parser.** F1 0.3621 with zero model calls, against the
+prompted 14B's 0.3328 and the trained LoRA's 0.1701 recall. Recall is stuck
+around 23% and that is what F1 needs -- 0.40 would give F1 0.535. The
+relationship slice is now well covered; the remaining misses are the ones NOT
+present in the user turns at all, which is a scope question (assistant turns)
+rather than a parsing one.

@@ -87,6 +87,11 @@ def main():
     ap.add_argument("--limit-integrity", type=int, default=0)
     ap.add_argument("--limit-accuracy", type=int, default=0)
     ap.add_argument("--workers", type=int, default=4)
+    ap.add_argument("--reuse", default="",
+                    help="verdicts JSON from a previous run; arms found there "
+                         "are NOT re-judged. The prompted baseline is fixed, "
+                         "so re-scoring it costs ~576 calls for an identical "
+                         "answer.")
     ap.add_argument("--save", default="",
                     help="write per-record verdicts here. The first run was "
                          "killed mid-way and its verdicts were lost, forcing "
@@ -119,8 +124,25 @@ def main():
         pts = pts[:a.limit_integrity]
     print(f"\nintegrity: {len(pts)} gold points x 2 arms = {len(pts)*2} calls")
 
+    def _unkey(k):
+        """Saved keys are "<session>|<index>"; rebuild the tuple form."""
+        a_, _, b_ = k.partition("|")
+        idx = None if b_ in ("None", "") else int(b_)
+        return (int(a_), idx)
+
+    prev = {}
+    if a.reuse and os.path.exists(a.reuse):
+        raw = json.load(open(a.reuse, encoding="utf-8"))
+        prev = {arm: {_unkey(k): v for k, v in d.items()}
+                for arm, d in raw.items()}
+        print(f"  reusing verdicts for: {sorted(prev)}")
+
     ints = {}
     for arm, per in arms.items():
+        if arm in prev and arm != a.label:
+            ints[arm] = prev[arm]
+            print(f"  [{arm}] reused {len(ints[arm])} verdicts, 0 calls")
+            continue
         jobs = [((si, mp.get("index")), "\n".join(per.get(si, [])), mp)
                 for si, mp in pts]
         res = {}
