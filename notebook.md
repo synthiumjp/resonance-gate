@@ -11320,3 +11320,67 @@ a trained 1.7B scored 0.1701 recall where the parser scores 0.3438. The next
 questions are whether this holds on a second held-out user, and whether the
 43% of misses still sitting in USER turns can be reached -- that is a parsing
 gap, and parsing gaps have been closing at 5-10pt each.
+
+---
+
+## Entry 228 — 2026-08-20 (p2: F1 0.5435 with zero model calls. Four CORRECTNESS fixes — none of which any metric could see — bought +3.6pt of recall on top of the scope work. We are now ~3pt off Mem0's published extraction F1.)
+
+    JUDGED, held-out user 0, 576 gold points, prompted arm reused
+      prompted 14B                    P 0.7759  R 0.2118  F1 0.3328
+      parser, user turns              P 0.8381  R 0.2309  F1 0.3621
+      parser, all turns + 2nd person  P 0.9412  R 0.3438  F1 0.5036
+      parser + correctness fixes      P 0.9524  R 0.3802  F1 0.5435
+
+      vs prompted: recall +16.84pt, discordant 48/145, McNemar p = 1.6e-12
+
+**The correctness fixes bought recall, which I did not expect.** I predicted
+precision up and recall flat -- I was removing junk, not adding coverage. It
+went 34.38% -> 38.02%. Cleaner records are records the judge can credit: a
+duplicated or inverted sentence is not a near-miss, it is a different claim.
+
+**The four bugs, and the thing they have in common.**
+  * NEGATION DROPPED. "I don't like boxing" was stored as "Martin Mark does
+    like boxing". spaCy gives `neg` its own dep, so the auxiliary-chain code
+    collected the auxiliary and discarded the negation. Every negated
+    statement was stored as its opposite.
+  * COMMA SPLICE ABSORBED. "I dislike X, I avoid X because ..." hangs the
+    first clause off the second as `ccomp`, giving "Martin Mark avoids Martin
+    Mark dislike violent video games violent video games" -- a clause already
+    emitted on its own.
+  * CONTIGUOUS SLICE OF A DISCONTIGUOUS SUBTREE, which swallows whatever sits
+    between the subtree's tokens.
+  * RELATIONS FROM ANY NOUN, so "I think that MY JOB is stressful" produced a
+    relationship proposition about a job.
+
+**None of them were visible to any instrument we have.** An inverted sentence
+shares every content token with the true one, so token-overlap coverage scores
+them identically; a duplicated span scores HIGHER. They surfaced only from
+reading judged misses and raw parser output. That is worth stating as a rule:
+**a metric built on token overlap cannot see the difference between a fact and
+its negation, and a store that ships one is worse than a store that ships
+nothing.**
+
+**Where this lands on the published table** (HaluMem-Medium extraction F1):
+
+      Memobase     25.13
+      RG at session start  28.20
+      RG NOW       54.35    <- CPU, spaCy, no model calls
+      Supermemory  56.90
+      Mem0         57.31
+      MemOS        79.70
+      MOSAIC       86.77
+
+From second-worst to within 3 points of Mem0 and 2.5 of Supermemory, with a
+dependency parser and a few hundred lines of deterministic code. The trained
+1.7B LoRA, for comparison, scored R 0.1701 on the same judge.
+
+**Caveats, unchanged.** One user. Local judge (e176: a frontier judge scores us
+~9.67pt worse, applied equally to both arms here). Precision is a 200-record
+sample per arm, SE ~3%. The prompted baseline reads user turns only, so the
+clean one-variable series is the parser's own 0.3621 -> 0.5036 -> 0.5435.
+
+**Next, in order.** Confirm on a second held-out user before anyone quotes
+0.5435. Then the remaining 62% of gold: 97% of it is present in the session
+dialogue, 40% of the misses are already emitted in some form (a FORM problem),
+60% are not emitted at all (coverage). Both are parsing work, and parsing work
+has been returning 3-11pt a round.
