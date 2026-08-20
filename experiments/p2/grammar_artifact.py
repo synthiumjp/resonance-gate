@@ -54,7 +54,8 @@ def main():
             if not txt or (a.scope == "user" and t.get("role") != "user"):
                 continue
             nturns += 1
-            for p, kind in G.extract(txt, nlp, owner):
+            for p, kind in G.extract(txt, nlp, owner,
+                                     role=t.get("role", "user")):
                 if not a.no_check:
                     ok, why = C.prefilter(p, txt, owner)
                     if not ok:

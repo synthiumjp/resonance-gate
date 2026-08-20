@@ -34,6 +34,16 @@ import re
 
 _BE = {"be", "is", "am", "are", "was", "were"}
 _FIRST = {"i", "me", "my", "mine", "myself", "we", "us", "our"}
+# In an ASSISTANT turn the user is addressed in the SECOND person -- "You have
+# been reflecting on your career". Every rule here keys on a first-person
+# subject, so assistant turns produced almost nothing: doubling the input from
+# 1403 to 2806 turns added only 145 propositions. 54% of the parser's remaining
+# misses live only in assistant turns, so this is where they are.
+#
+# Scoped to assistant turns ON PURPOSE: in a USER turn "you" is the assistant,
+# and treating that as the owner would attribute the model's own attributes to
+# the person.
+_SECOND = {"you", "your", "yours", "yourself"}
 _IRREG = {"have": "has", "do": "does", "go": "goes", "am": "is", "are": "is",
           "was": "was", "were": "was", "'m": "is", "'ve": "has"}
 
@@ -78,7 +88,7 @@ _CONTRACT = {"'d": "would", "'ll": "will", "'ve": "has", "'m": "is",
              "'re": "is", "n't": "not"}
 
 
-def _shift_person(text, owner):
+def _shift_person(text, owner, second=False):
     """First person INSIDE a span -> third.
 
     Without this the subject is rewritten and the span still says "my basic
@@ -89,13 +99,16 @@ def _shift_person(text, owner):
     subs = [(r"\bmy\b", f"{o}'s"), (r"\bmine\b", f"{o}'s"),
             (r"\bmyself\b", o), (r"\bme\b", o), (r"\bI\b", o),
             (r"\bour\b", f"{o}'s"), (r"\bus\b", o), (r"\bwe\b", o)]
+    if second:
+        subs = [(r"\byour\b", f"{o}'s"), (r"\byours\b", f"{o}'s"),
+                (r"\byourself\b", o), (r"\byou\b", o)] + subs
     out = text
     for rx, rep in subs:
         out = re.sub(rx, rep, out)
     return re.sub(r"\s+", " ", out).strip()
 
 
-def _span(tok, doc, drop=(), owner=None):
+def _span(tok, doc, drop=(), owner=None, second=False):
     """The subtree of tok as surface text, minus dropped tokens."""
     ids = sorted(t.i for t in tok.subtree if t.i not in drop)
     if not ids:
@@ -103,7 +116,7 @@ def _span(tok, doc, drop=(), owner=None):
     txt = doc[ids[0]:ids[-1] + 1].text.strip(" ,.;:")
     for c, full in _CONTRACT.items():
         txt = txt.replace(c + " ", full + " ")
-    return _shift_person(txt, owner) if owner else txt
+    return _shift_person(txt, owner, second) if owner else txt
 
 
 # --- SLOT LEXICON ----------------------------------------------------------
@@ -184,8 +197,10 @@ def segments(text):
             yield part
 
 
-def extract(text, nlp, owner=None):
-    """-> [(proposition, kind)] from one turn. Deterministic."""
+def extract(text, nlp, owner=None, role="user"):
+    """-> [(proposition, kind)] from one turn. Deterministic.
+
+    role: "assistant" makes second-person forms refer to the owner."""
     o = owner or "The user"
     out, seen = [], set()
     out.extend(lexicon(text, owner))
@@ -194,7 +209,7 @@ def extract(text, nlp, owner=None):
     # turn drags the lead-in in with it ("...Friend ThomasSusan, Martin Mark
     # have several important friends and colleagues: ...").
     for seg in list(segments(text))[::-1]:
-        _extract_into(seg, nlp, o, out, seen)
+        _extract_into(seg, nlp, o, out, seen, role == "assistant")
     return out
 
 
@@ -214,7 +229,8 @@ def _describe(sent, doc, cop, subj, comp, owner):
     return _shift_person(txt, owner)[:220]
 
 
-def _extract_into(text, nlp, o, out, seen):
+def _extract_into(text, nlp, o, out, seen, second=False):
+    subj_set = (_FIRST | _SECOND) if second else _FIRST
     doc = nlp(text)
 
     for sent in doc.sents:
@@ -230,11 +246,11 @@ def _extract_into(text, nlp, o, out, seen):
                 # (where the copula has no `attr` child at all) could never be
                 # reached. The guard belongs on this branch, not on the token.
                 poss = next((c for c in subj.children
-                             if c.dep_ == "poss" and c.text.lower() in _FIRST),
+                             if c.dep_ == "poss" and c.text.lower() in subj_set),
                             None) if subj is not None else None
                 if poss is not None and comp is not None:
                     slot = _span(subj, doc, drop={poss.i})
-                    val = _span(comp, doc, owner=o)
+                    val = _span(comp, doc, owner=o, second=second)
                     if slot and val:
                         key = ("attr", slot.lower())
                         if key not in seen:
@@ -244,8 +260,8 @@ def _extract_into(text, nlp, o, out, seen):
                             lead = "User" if slot.lower() == "name" else o
                             out.append((f"{lead}'s {slot} is {val}", "attr"))
                 elif (subj is not None and comp is not None
-                      and subj.text.lower() in _FIRST):
-                    val = _span(comp, doc, owner=o)
+                      and subj.text.lower() in subj_set):
+                    val = _span(comp, doc, owner=o, second=second)
                     if val:
                         key = ("self", val.lower())
                         if key not in seen:
@@ -275,16 +291,16 @@ def _extract_into(text, nlp, o, out, seen):
                 if (subj is not None and subj.text.lower() not in _FIRST
                         and subj.pos_ in ("PROPN", "NOUN")):
                     if comp is None or not any(
-                            c.dep_ == "poss" and c.text.lower() in _FIRST
+                            c.dep_ == "poss" and c.text.lower() in subj_set
                             for c in comp.children):
                         comp = next((t2 for t2 in sent
                                      if t2.pos_ in ("NOUN", "PROPN")
                                      and any(c.dep_ == "poss"
-                                             and c.text.lower() in _FIRST
+                                             and c.text.lower() in subj_set
                                              for c in t2.children)), None)
                     poss = next((c for c in comp.children
                                  if c.dep_ == "poss"
-                                 and c.text.lower() in _FIRST), None) if comp else None
+                                 and c.text.lower() in subj_set), None) if comp else None
                     if poss is not None:
                         # The relation is the HEAD NOUN, not its subtree. Taking
                         # the subtree swept up the appositive clause and
@@ -316,7 +332,7 @@ def _extract_into(text, nlp, o, out, seen):
             # --- eventive: "I <verb> <complement>" -------------------------
             elif tok.pos_ in ("VERB", "AUX"):
                 subj = next((c for c in tok.children if c.dep_ == "nsubj"), None)
-                if subj is None or subj.text.lower() not in _FIRST:
+                if subj is None or subj.text.lower() not in subj_set:
                     continue
                 rest = [c for c in tok.children
                         if c.dep_ in ("dobj", "obj", "prep", "attr", "acomp",
@@ -327,7 +343,7 @@ def _extract_into(text, nlp, o, out, seen):
                 # copula and dropped the clause gold actually asks for.
                 for c in tok.children:
                     if c.dep_ in ("advcl", "acl") and c.tag_ == "VBG":
-                        sub = _span(c, doc, owner=o)
+                        sub = _span(c, doc, owner=o, second=second)
                         if sub and len(sub.split()) <= 20:
                             k = ("part", sub.lower()[:40])
                             if k not in seen:
@@ -335,7 +351,7 @@ def _extract_into(text, nlp, o, out, seen):
                                 out.append((f"{o} is {sub}", "event"))
                 if not rest:
                     continue
-                tail = " ".join(_span(c, doc, owner=o)
+                tail = " ".join(_span(c, doc, owner=o, second=second)
                                 for c in sorted(rest, key=lambda c: c.i))
                 tail = re.sub(r"\s+", " ", tail).strip(" ,.;:")
                 if not tail or len(tail.split()) > 24:

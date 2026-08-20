@@ -22,7 +22,8 @@ containment test. Every result here states its control.
 | Extraction was capped by scope, not quality | best single **user** turn covers 35.4% of gold; we measured **36.12%** — at the ceiling. Any-role ceiling **86.9%**; MOSAIC reports 86.77 (e189) | solid |
 | All-turns ingestion converts abstentions into answers | judged A/B: omission −9.49pt (p=0.007), correct +6.57pt (p=0.049, marginal), hallucination ns; 1.43 correct per hallucination on recovered omissions; precision FLAT at 57% more emissions (e212) | solid on omission, marginal on correct |
 | Gold is schema-shaped at the category level | 64.4% of gold falls inside a **general** 20-slot persona schema whose slots were not read off gold (e192) | solid — **but CATEGORY only.** Gold's TEXT is prose: just **4%** (24/671) is attribute-shaped, and 428 of 452 Persona points are sentences. A typed-slot extractor optimises for 4% of the benchmark (e217) |
-| **Grammar beats an LLM at extraction** | judged, held-out user 0, same run: parser **F1 0.3611** (P 0.8065 / R 0.2326) vs prompted 14B **0.3322** (P 0.7701 / R 0.2118), and vs LoRA 1.7B R 0.1701. **Zero model calls.** Recall lead not significant (p=0.34); the solid claim is that a zero-model extractor is not worse (e225) | solid |
+| **Grammar beats an LLM at extraction, decisively** | judged, held-out user 0: parser all-turns **F1 0.5036** (P 0.9412 / R 0.3438) vs prompted 14B **0.3328**; recall +13.19pt at **p=3.5e-08**. Zero model calls. Puts us from second-worst on the published table to within 7pt of Mem0 (e227) | solid |
+| ~~Grammar beats an LLM at extraction~~ | judged, held-out user 0, same run: parser **F1 0.3611** (P 0.8065 / R 0.2326) vs prompted 14B **0.3322** (P 0.7701 / R 0.2118), and vs LoRA 1.7B R 0.1701. **Zero model calls.** Recall lead not significant (p=0.34); the solid claim is that a zero-model extractor is not worse (e225) | solid |
 | ~~A specialised 1.7B extractor beats a prompted 14B~~ | **RETRACTED (e223)**: the judge says 17.01% vs 21.18%. The screen was structurally biased — token overlap over-reads GENERATED gold-shaped text by 5.4pt and UNDER-reads extractive text by 3.5pt (e225) |
 | Relations must be read, not assumed | grammatical binding gives 98.9% vs a 64.9% majority-class null, n=94; survives ablating HaluMem's own template phrasing (e203) | solid |
 | The late-session collapse is granularity, not extraction | single-turn ceiling FLAT across position, emissions flat, 10/10 users; half of late misses present in their own session's emissions vs a ~2-3% matched null. **Replicated on a second judged run with the current renderer** — 15.5%/50.9%/1.8% vs 15.1%/50.0%/3.3% — so it is not an artifact of the old `slot: value` syntax (e206, e208) | solid |
@@ -304,7 +305,7 @@ proxy over-reads by ~18pt. Never quote an offline coverage figure as "recall".
 
 | # | Item | Status |
 |---|---|---|
-| S0 | blunt all-turns arm | **done** — +14.01pt recall, precision flat (e194) |
+| S0 | blunt all-turns arm | **done** — +14.01pt proxy, judged NULL +1.65pt (e212). But worth **+11pt to the PARSER** once it could read the second person (e227): scope was never the lever, reading it was |
 | S2 | refined `SYSTEM_ASSISTANT` arm | **done — NEGATIVE**, blunt path now default (e197) |
 | S3 | schema `gaps()` → targeted second look | **done** — 8/8 slots, precision 50%→100% after guards (e193/e195) |
 | S4 | narrative linking at write time | **closed — negative** at every budget (e198) |

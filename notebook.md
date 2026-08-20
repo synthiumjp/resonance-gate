@@ -11254,3 +11254,69 @@ around 23% and that is what F1 needs -- 0.40 would give F1 0.535. The
 relationship slice is now well covered; the remaining misses are the ones NOT
 present in the user turns at all, which is a scope question (assistant turns)
 rather than a parsing one.
+
+---
+
+## Entry 227 — 2026-08-20 (p2: extraction F1 0.3328 -> 0.5036 with ZERO model calls. Assistant turns were worth ~nothing to the LLM extractor and +11pt to the parser, because the parser could not READ them until it understood the second person.)
+
+    JUDGED, held-out user 0, 576 gold points, prompted arm reused
+      prompted 14B              P 0.7759  R 0.2118  F1 0.3328
+      parser, user turns        P 0.8381  R 0.2309  F1 0.3621
+      parser, ALL turns + 2nd   P 0.9412  R 0.3438  F1 0.5036
+
+      integrity delta vs prompted  +13.19pt
+      discordant 57 / 133          McNemar exact p = 3.5e-08
+
+**Recall +13.2pt at p<1e-7, precision 94.12%, F1 up 51% relative -- and no
+model call anywhere in extraction.** First significant result of the session,
+and the first time anything has moved F1 by more than a rounding error.
+
+**The mechanism, and it explains an old null.** 54% of the parser's remaining
+misses were present ONLY in assistant turns. Feeding them in raised the
+proposition count from 1584 to just 1729 -- almost nothing -- because every
+rule keyed on a FIRST-PERSON subject and the assistant addresses the user in
+the SECOND person: "You have been reflecting on your career". Adding
+second-person handling took it to 5756 propositions and recall from 23.09% to
+34.38%.
+
+So scope was never the lever on its own; the lever was being able to READ the
+scope. That retro-explains entry 212, where all-turns ingestion measured a
+judged NULL (+1.65pt) for the LLM extractor: the LLM could read second-person
+text perfectly well and still got almost nothing from it, while the parser --
+once taught the pronoun -- gets +11pt. The two systems fail on assistant turns
+for opposite reasons.
+
+Second-person handling is scoped to assistant turns ON PURPOSE: in a user turn
+"you" is the assistant, and treating it as the owner would file the model's
+own attributes as the person's.
+
+**Precision went UP, not down.** 83.81% -> 94.12% while more than tripling
+emissions. That is the opposite of the usual trade and it is worth saying why:
+target_accuracy is computed only over records the judge marks as in-gold
+(ledger 5k), so surplus does not dilute it, and assistant turns restate the
+user's facts in cleaner, more complete sentences than the user's own
+conversational phrasing.
+
+**Where this puts us on the published table** (HaluMem-Medium extraction F1):
+
+      Memobase   25.13
+      RG before  28.20
+      RG NOW     50.36   <- zero model calls, CPU, spaCy
+      Supermemory 56.90
+      Mem0        57.31
+      MemOS       79.70
+      MOSAIC      86.77
+
+From second-worst to within 7 points of Mem0, using a dependency parser.
+
+**Caveats, unchanged and real.** One user. Local judge (e176: a frontier judge
+scores us ~9.67pt worse, though it applies to both arms in a paired design).
+Precision is a 200-record sample per arm, SE ~3%. And the prompted baseline
+reads user turns only, so the comparison against IT mixes scope with
+extractor -- the clean one-variable number is the parser's own 0.3621 -> 0.5036.
+
+**What this does to the plan.** The LoRA line is now clearly the wrong branch:
+a trained 1.7B scored 0.1701 recall where the parser scores 0.3438. The next
+questions are whether this holds on a second held-out user, and whether the
+43% of misses still sitting in USER turns can be reached -- that is a parsing
+gap, and parsing gaps have been closing at 5-10pt each.
