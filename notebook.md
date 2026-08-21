@@ -11769,3 +11769,66 @@ move, so recall is the whole measurement.
 **Prediction, stated in advance:** precision flat (definitional), recall flat
 or slightly down, product output materially better. If precision moves at all,
 my reading of the harness is wrong and that is the finding.
+
+---
+
+## Entry 236 — 2026-08-21 (p2: the interrogative filter is built. 0 false positives across 84 dropped records on two users. And reading what it dropped found two MORE agreement bugs — one of them mine, from e234.)
+
+**The filter.** A clause is interrogative, and therefore not an assertion, if:
+
+  * its head IS the wh-word — "What are your life goals?" parses with
+    `What` as root (PronType=Int), `goals` as its nsubj and a cop;
+  * its SUBJECT is the wh-word — "Who told you that?";
+  * it shows subject-auxiliary inversion (first aux/cop id < nsubj id)
+    inside a sentence ending in "?" — "do you have", "Can you tell",
+    "are you considering".
+
+Each disjunct was read off a real UD parse before it was written, not guessed.
+The "?" requirement on the third guards declarative fronting ("Never have I
+been so sure"), which inverts without asking anything.
+
+**Decided per CLAUSE, not per sentence,** so a presupposition survives the
+question that carries it. "Since you moved to Albi last year, how are you
+settling in?" — the `advcl` is not inverted, so "Martin Mark moved to Albi"
+is still emitted and only the `settling in` clause is dropped. That case is a
+test.
+
+**What it actually drops**, sessions 0-5 of each user, diffed against the same
+code with the filter removed:
+
+    user 0   345 -> 297   dropped 48 (13.9%)   added 0
+    user 1   330 -> 294   dropped 36 (10.9%)   added 0
+
+I read all 84. **Every one is a question.** No fact was lost, and nothing new
+appeared. This is the check I would want to have done before ANY pruning
+change — e230 removed 67% of records on an argument and cost 12.15pt.
+
+**Then reading the dropped records found two more bugs**, which is the second
+time this session that the diagnostic output was worth more than the fix:
+
+  "Martin Mark has thought about how Martin Mark might measures success"
+
+**MINE, from e234.** The agreement fix inflected any verb whose nsubj was a
+shifted pronoun — including one under a modal, where the auxiliary already
+carries the finiteness. "should exercises", "would considers". Caught before
+it shipped; the pre-e234 code gets this right. Fixed: skip a verb that has an
+`aux` child.
+
+  "Martin Mark saids Martin Mark would consider the offer"
+
+**PRE-EXISTING, and it is in the shipped rgx 0.1.0.** `_third`'s past-tense
+guard is `w.endswith("ed")`, a spelling test, so every IRREGULAR past falls
+through to the default and takes an -s: said, told, sought, felt, spent. UD
+marks tense; `_third` now reads `Tense=Past` from the features instead of
+guessing. Rare — 4/5011 records on u0, 3/5497 on u1 (~0.06%) — so this is a
+correctness fix, not a lever, and I am not going to pretend otherwise.
+
+23 tests in `rgx/test_parse.py` now. The discipline that matters: each new
+test is run against the PREVIOUS commit's parser first. 6 of the 9
+interrogative tests fail there and pass here; the other 3 are guards.
+
+**Still unmeasured.** u1 is in its accuracy phase. Prediction from e235 stands
+and is now sharper: precision cannot move (out-of-gold records are excluded
+from `k/n` by definition), so **recall is the entire measurement**, and the
+84 records I read say it should be flat. If recall drops, one of those 84 was
+matching a gold point and I want to see which.

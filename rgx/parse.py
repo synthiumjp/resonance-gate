@@ -59,8 +59,14 @@ SHIFTED = {"i", "me", "we", "us"}
 SHIFTED_2 = SHIFTED | {"you"}
 
 
-def _third(word, lemma):
+def _third(word, lemma, feats=None):
     w = word.lower()
+    # Past tense is already agreement-neutral. The surface test below
+    # (`endswith("ed")`) only catches the REGULAR ones, so "I said" became
+    # "Martin Mark saids" and "I told" became "tolds" -- shipped in 0.1.0.
+    # UD marks the tense; read it rather than guessing from the spelling.
+    if feats and "Tense=Past" in feats:
+        return word
     # A detached clitic ("I'd like" -> ["I", "'d"]) is not a word we can
     # inflect: appending -s to it produced "Martin Mark 'ds like". Stanza
     # gives the lemma, so agree THAT and let it print in full.
@@ -135,8 +141,13 @@ class _S:
             if owner and t.upos in ("VERB", "AUX"):
                 sub = next(iter(self.children(t, ("nsubj", "nsubj:pass"))),
                            None)
-                if sub is not None and sub.text.lower() in shifted:
-                    txt = _third(t.text, t.lemma)
+                # An auxiliary carries the finiteness, so the verb under it
+                # stays bare: "how I might measure" must not become "might
+                # measures". The aux itself is agreed if it needs it, and
+                # every modal is already third-singular.
+                aux = self.children(t, ("aux", "aux:pass"))
+                if sub is not None and not aux and sub.text.lower() in shifted:
+                    txt = _third(t.text, t.lemma, t.feats)
             parts.append(txt)
         s = " ".join(parts)
         s = re.sub(r"\s+([',.;:])", r"\1", s).strip(" ,.;:")
@@ -146,6 +157,36 @@ class _S:
 def _negated(s, head):
     return any(c.lemma.lower() in NEG_LEMMAS
                for c in s.children(head, ("advmod", "det")))
+
+
+def _interrogative(s, head, subj, is_question):
+    """A clause that ASKS is not a clause that ASSERTS.
+
+    The parser found a subject and a verb in "What kind of personality do you
+    have?" and emitted "Martin Mark does have What kind of personality" -- a
+    claim nobody made. ~12% of every record on users 0 and 1 (e235).
+
+    Decided per CLAUSE, not per sentence, so a presupposition survives the
+    question that carries it: in "Since you moved to Albi, how are you
+    settling in?" the `advcl` is not inverted and still yields "Martin Mark
+    moved to Albi".
+
+    Three signals, each read off a real UD parse:
+      * the clause head IS the wh-word   -- "What are your life goals?"
+        (root=What, PronType=Int, with `goals` as its nsubj and a cop)
+      * the SUBJECT is the wh-word       -- "Who told you that?"
+      * subject-auxiliary inversion      -- "do you have", "Can you tell",
+        "are you considering": the first aux/cop precedes the nsubj. Only
+        trusted inside a sentence that ends in "?", because declarative
+        fronting ("Never have I been so sure") inverts too.
+    """
+    if "PronType=Int" in (head.feats or "") or "PronType=Int" in (subj.feats or ""):
+        return True
+    if is_question:
+        av = s.children(head, ("aux", "aux:pass", "cop"))
+        if av and min(a.id for a in av) < subj.id:
+            return True
+    return False
 
 
 def _poss(s, word, allow):
@@ -162,11 +203,16 @@ def extract(text, nlp, owner=None, role="user"):
 
     for sent in nlp(text).sentences:
         s = _S(sent)
+        # Stanza breaks sentences at terminal punctuation, so the "?" -- if
+        # there is one -- is at the end. Allow for a trailing quote.
+        is_q = any(w.text == "?" for w in sent.words[-3:])
         for head in sent.words:
             if head.deprel not in CLAUSE_DEPS:
                 continue
             subj = next(iter(s.children(head, ("nsubj", "nsubj:pass"))), None)
             if subj is None:
+                continue
+            if _interrogative(s, head, subj, is_q):
                 continue
             cop = next(iter(s.children(head, ("cop",))), None)
             neg = _negated(s, head)
@@ -218,7 +264,7 @@ def extract(text, nlp, owner=None, role="user"):
                     continue
                 aux = [c for c in s.children(head, ("aux", "aux:pass"))]
                 if aux:
-                    verb = _third(aux[0].text, aux[0].lemma)
+                    verb = _third(aux[0].text, aux[0].lemma, aux[0].feats)
                     if neg:
                         verb += " not"
                     verb += " " + " ".join(
@@ -227,7 +273,7 @@ def extract(text, nlp, owner=None, role="user"):
                         for a in aux[1:] if a is not aux[0])
                     verb = verb.strip() + " " + head.text
                 else:
-                    verb = _third(head.text, head.lemma)
+                    verb = _third(head.text, head.lemma, head.feats)
                     if neg:
                         verb = f"does not {head.lemma}"
                 lead = (o if sp is None else
