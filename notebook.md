@@ -11135,6 +11135,13 @@ groundedness, not gold-worthiness. The two were being conflated.
 
 ## Entry 225 — 2026-08-20 (p2: a dependency parser with NO MODEL CALLS beats the prompted 14B on the official judge — on precision AND recall. F1 0.3611 vs 0.3322. JP's architectural argument, measured.)
 
+> **CORRECTION (e233).** The precision in this entry is HEAD-SAMPLED and
+> therefore inflated: `--limit-accuracy` took the FIRST N records, which are
+> early templated sessions. The F1 quoted here is withdrawn. The recall is
+> unaffected — integrity judges every gold point. On the one arm measured
+> both ways the head bias was +10.75pt (prompted 0.7759 → 0.6684 corrected).
+> Do not carry any number from this entry forward except the recall.
+
 Judged A/B on held-out user 0, 576 gold points, both arms scored in one run.
 
     INTEGRITY (paired)
@@ -11259,6 +11266,13 @@ rather than a parsing one.
 
 ## Entry 227 — 2026-08-20 (p2: extraction F1 0.3328 -> 0.5036 with ZERO model calls. Assistant turns were worth ~nothing to the LLM extractor and +11pt to the parser, because the parser could not READ them until it understood the second person.)
 
+> **CORRECTION (e233).** The precision in this entry is HEAD-SAMPLED and
+> therefore inflated: `--limit-accuracy` took the FIRST N records, which are
+> early templated sessions. The F1 quoted here is withdrawn. The recall is
+> unaffected — integrity judges every gold point. On the one arm measured
+> both ways the head bias was +10.75pt (prompted 0.7759 → 0.6684 corrected).
+> Do not carry any number from this entry forward except the recall.
+
     JUDGED, held-out user 0, 576 gold points, prompted arm reused
       prompted 14B              P 0.7759  R 0.2118  F1 0.3328
       parser, user turns        P 0.8381  R 0.2309  F1 0.3621
@@ -11324,6 +11338,13 @@ gap, and parsing gaps have been closing at 5-10pt each.
 ---
 
 ## Entry 228 — 2026-08-20 (p2: F1 0.5435 with zero model calls. Four CORRECTNESS fixes — none of which any metric could see — bought +3.6pt of recall on top of the scope work. We are now ~3pt off Mem0's published extraction F1.)
+
+> **CORRECTION (e233).** The precision in this entry is HEAD-SAMPLED and
+> therefore inflated: `--limit-accuracy` took the FIRST N records, which are
+> early templated sessions. The F1 quoted here is withdrawn. The recall is
+> unaffected — integrity judges every gold point. On the one arm measured
+> both ways the head bias was +10.75pt (prompted 0.7759 → 0.6684 corrected).
+> Do not carry any number from this entry forward except the recall.
 
     JUDGED, held-out user 0, 576 gold points, prompted arm reused
       prompted 14B                    P 0.7759  R 0.2118  F1 0.3328
@@ -11486,6 +11507,13 @@ theory about the judge".
 
 ## Entry 231 — 2026-08-21 (p2: F1 0.5891 with zero model calls — ABOVE Mem0, Mem0-Graph and Supermemory on the published table. Three parse rules traced from source turns were worth +5.1pt of recall.)
 
+> **CORRECTION (e233).** The precision in this entry is HEAD-SAMPLED and
+> therefore inflated: `--limit-accuracy` took the FIRST N records, which are
+> early templated sessions. The F1 quoted here is withdrawn. The recall is
+> unaffected — integrity judges every gold point. On the one arm measured
+> both ways the head bias was +10.75pt (prompted 0.7759 → 0.6684 corrected).
+> Do not carry any number from this entry forward except the recall.
+
     JUDGED, held-out user 0, 573 gold points, prompted arm reused
       prompted 14B     P 0.7759  R 0.2129  F1 0.3341
       grammar parser   P 0.9301  R 0.4311  F1 0.5891
@@ -11571,7 +11599,62 @@ precision needs re-measuring on a proper sample before any F1 above 0.5891 is
 claimed. The spaCy configuration's 0.5891 remains the last fully-measured
 number.
 
+> **CORRECTION (e233).** The last sentence is wrong. 0.5891 was itself built
+> on a head sample (P 0.9301), so it was never a fully-measured number and is
+> not a floor. Under the fixed sampler the only two comparable figures on user
+> 0 are the UD parser's **F1 0.5589** and the prompted arm's **0.3221**.
+
 **And the port is worth keeping regardless of the F1**, because of what it
 removed: the comma-splice guard, the label-tolerant relation fallback, the
 separate passive rule and the separate participial rule are all unnecessary
 under UD. Less code, on a parse that is right far more often.
+
+---
+
+## Entry 233 — 2026-08-21 (p2: the corrected precision landed. F1 0.5589 (P 0.7099 / R 0.4609) against the prompted arm's 0.3221. Every earlier F1 in this arc was inflated by a head sample, including the 0.5891 I had been treating as a floor.)
+
+    JUDGED, held-out user 0, 575 gold points, SEEDED RANDOM sample of 300
+    records per arm (previously: the first 300)
+
+      prompted        P 0.6684  (65.5/98 in-gold)   R 0.2122   F1 0.3221
+      UD/Stanza       P 0.7099  (57.5/81 in-gold)   R 0.4609   F1 0.5589
+                                                    +24.87pt recall
+                                    discordant 40/183, McNemar exact p=4.8e-23
+
+**The headline is unchanged and the margin is unchanged: +23.7pt of F1, driven
+by recall, with zero model calls at extraction time.** What changed is the
+level. I had been carrying 0.5891, and 0.5891 was never real.
+
+**What the head sample was doing.** `--limit-accuracy` took the first N
+records. The first N records are the early sessions — the templated persona
+intro, where the facts are short, atomic and near-verbatim in gold. Both arms
+were flattered. On the prompted arm, which is the only arm measured both ways,
+the bias was **+10.75pt**: 0.7759 head vs 0.6684 sampled. So the parser's
+0.9301/0.9524/0.9412 are not precision figures, they are early-session
+precision figures.
+
+**The correction I nearly missed.** e232 closed with "the spaCy
+configuration's 0.5891 remains the last fully-measured number", and used it as
+a floor the UD arm had to clear. That was wrong on its own terms — 0.5891 was
+computed from P 0.9301, which came from the same head sample. There was no
+floor. Under the fixed sampler there are exactly two comparable numbers on this
+user, 0.5589 and 0.3221, and everything else in entries 225–231 is a recall
+result with an inflated precision attached to it. Ledger §1 and entries
+225/227/228/231/232 are corrected in place.
+
+**Read this the right way round.** 0.5589 is not a 3pt regression from 0.5891.
+It is the first honest measurement of a quantity that was previously
+mis-measured upward. The parser also did not get worse — the UD port's recall
+gain (0.4311 → 0.4609) is real and was measured by integrity, which judges
+every gold point and never touched the accuracy sampler.
+
+**Still one user.** u1 is judging now (645 gold points, both arms, full
+integrity — no `--reuse`, there are no saved prompted verdicts for u1). The
+prompted arm for both users resolves to the same `cache_uN_v5.jsonl` family, so
+the baseline is consistent across them; that was checked before launching
+rather than assumed.
+
+**And still not comparable to the published table.** Our judge is local and
+e176 measured a frontier judge scoring us 9.67pt worse. That cancels inside
+these paired numbers and does not cancel against Mem0's 57.31. e231's "above
+Mem0" line is withdrawn for that reason as much as for the sampling one.

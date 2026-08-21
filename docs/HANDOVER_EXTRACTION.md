@@ -30,18 +30,20 @@ points, prompted arm reused across runs.
 
 | arm | precision | recall | F1 |
 |---|---|---|---|
-| prompted 14B (shipped extractor) | 0.6684 (n=98) | 0.2122 | 0.3231 |
+| prompted (shipped extractor) | 0.6684 (n=98) | 0.2122 | **0.3221** |
 | spaCy parser (pre-port) | 0.9301 **(biased)** | 0.4311 | 0.5891 **(withdrawn)** |
-| **UD/Stanza parser (current)** | **UNMEASURED** | **0.4609** | **OPEN** |
+| **UD/Stanza parser (current)** | **0.7099** (n=81) | **0.4609** | **0.5589** |
 
 - **Recall is solid and is the headline**: +24.87pt over the prompted 14B,
   discordant 40/183, **McNemar exact p = 4.8e-23**. Recall judges all gold
   points, so it is untouched by the sampling defect below.
-- **No F1 should be quoted.** `--limit-accuracy` used to take the FIRST N
-  records; those are early sessions (the templated persona intro, where
-  everything is easier). That inflated BOTH arms — prompted read 0.7759 biased
-  vs 0.6684 corrected. Fixed to a seeded random sample in
-  `lora_judge_ab.py`. The UD arm's corrected precision **never finished**.
+- **The corrected F1 is 0.5589, +23.68pt over the prompted arm (e233).**
+  `--limit-accuracy` used to take the FIRST N records; those are early sessions
+  (the templated persona intro, where everything is easier). That inflated BOTH
+  arms — prompted read 0.7759 biased vs 0.6684 corrected, a +10.75pt head bias.
+  Fixed to a seeded random sample in `lora_judge_ab.py`. Every precision in
+  entries 225–231 is head-sampled; **0.5891 was never a floor**, it was built on
+  the same bias.
 - **Everything rests on ONE user.**
 
 ### Published comparison (do NOT quote yet)
@@ -54,7 +56,8 @@ paired comparisons but **not** against someone else's published table.
 
 ## 3. Immediate next steps, in order
 
-1. **Finish user 0 precision.** Server may still be up on :8090.
+1. ~~Finish user 0 precision.~~ **DONE (e233): P 0.7099, F1 0.5589.**
+   Server may still be up on :8090.
    ```
    cd ~/rg_private/halumem/official/HaluMem/eval
    RG_EXTRACT_V5=1 RG_PREFIX_NO_THINK=1 PYTHONUNBUFFERED=1 \
@@ -66,13 +69,20 @@ paired comparisons but **not** against someone else's published table.
    Then F1 = harmonic(P, 0.4609). ~50 min; progress prints every 100 calls and
    a 15-minute silence is normal, not a stall (check `server_*.log` mtime).
 
-2. **Judge user 1.** Artifact already built:
+2. **Judge user 1 — IN FLIGHT** (launched 2026-08-21 15:42, ~2h: 645 gold
+   points x 2 arms full integrity, + 300 accuracy records/arm). Log and saved
+   verdicts under the session scratchpad; a quality sentinel (`watch_u1.py`)
+   watches tick RATE, not liveness — the failure mode that has actually
+   happened is a judge that stays up and error-defaults every call.
+   Artifact already built:
    `~/rg_private/halumem/lora/artifact_u1_ud.json` (3242 turns → 5497 props).
    Same command with `--user 1`, no `--reuse` (no saved prompted verdicts for
    u1). This is the weakest claim in the whole result — one user.
 
-3. **Re-baseline the ledger** once both land. §1 and entries 227/228/231 all
-   carry head-sampled precision; correct them in place, do not just supersede.
+3. ~~Re-baseline the ledger~~ **DONE (e233).** §1 corrected; notebook entries
+   225/227/228/231 annotated in place with the head-sampling correction, and
+   e232's "0.5891 remains the last fully-measured number" retracted — 0.5891
+   was built on the same head sample, so it was never a floor.
 
 ---
 
