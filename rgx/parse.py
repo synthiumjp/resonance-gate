@@ -52,10 +52,22 @@ SEPARATE = ("conj", "parataxis", "cc")
 IRREG = {"have": "has", "do": "does", "be": "is", "go": "goes"}
 ALREADY_3SG = {"is", "was", "has", "does", "did", "had", "were", "will",
                "would", "can", "could", "should", "may", "might", "must"}
+# Pronouns that the person shift rewrites to the owner's NAME. A verb whose
+# subject is one of these therefore needs third-singular agreement, wherever
+# in the span it sits -- see `_S.text`.
+SHIFTED = {"i", "me", "we", "us"}
+SHIFTED_2 = SHIFTED | {"you"}
 
 
 def _third(word, lemma):
     w = word.lower()
+    # A detached clitic ("I'd like" -> ["I", "'d"]) is not a word we can
+    # inflect: appending -s to it produced "Martin Mark 'ds like". Stanza
+    # gives the lemma, so agree THAT and let it print in full.
+    if w.startswith("'") and lemma:
+        word, w = lemma, lemma.lower()
+    if lemma == "be" and w == "were":
+        return "was"          # the subject is singular now
     if w in ALREADY_3SG or w in ("to", "not", "n't"):
         return word
     if lemma in IRREG:
@@ -110,7 +122,23 @@ class _S:
         toks = [t for t in self.subtree(word, stop) if t.upos != "PUNCT"]
         if not toks:
             return ""
-        s = " ".join(t.text for t in toks)
+        # The person shift is a string pass and cannot see that it has just
+        # made a verb's subject singular, so "because I find" became
+        # "because Martin Mark find". Agreement is decided HERE, where the
+        # dependency is still visible: a verb whose own nsubj is a pronoun
+        # the shift will rewrite. Verbs with no nsubj of their own (an
+        # infinitive under xcomp, a participle) are left alone.
+        shifted = SHIFTED_2 if second else SHIFTED
+        parts = []
+        for t in toks:
+            txt = t.text
+            if owner and t.upos in ("VERB", "AUX"):
+                sub = next(iter(self.children(t, ("nsubj", "nsubj:pass"))),
+                           None)
+                if sub is not None and sub.text.lower() in shifted:
+                    txt = _third(t.text, t.lemma)
+            parts.append(txt)
+        s = " ".join(parts)
         s = re.sub(r"\s+([',.;:])", r"\1", s).strip(" ,.;:")
         return _shift(s, owner, second) if owner else s
 
@@ -156,7 +184,7 @@ def extract(text, nlp, owner=None, role="user"):
                 if not val:
                     continue
                 if sp is not None:                    # "my job is X"
-                    slot = s.text(subj, stop={sp.id})
+                    slot = s.text(subj, stop={sp.id}, owner=o, second=second)
                     body = f"{o}'s {slot} is {'not ' if neg else ''}{val}"
                     kind = "attr"
                 elif is_self:                          # "I am X"
@@ -169,7 +197,7 @@ def extract(text, nlp, owner=None, role="user"):
                     desc = s.text(head, stop={subj.id, cop.id, head.id}
                                   | {c.id for c in s.children(head, ("nmod:poss",))},
                                   owner=o, second=second)
-                    body = f"{o}'s {rel} {s.text(subj)}"
+                    body = f"{o}'s {rel} {s.text(subj, owner=o, second=second)}"
                     if desc:
                         body += ", " + desc
                     kind = "relationship"
@@ -193,13 +221,17 @@ def extract(text, nlp, owner=None, role="user"):
                     verb = _third(aux[0].text, aux[0].lemma)
                     if neg:
                         verb += " not"
-                    verb += " " + " ".join(a.text for a in aux[1:] if a is not aux[0])
+                    verb += " " + " ".join(
+                        # same clitic problem as `_third`, one slot along
+                        a.lemma if a.text.startswith("'") else a.text
+                        for a in aux[1:] if a is not aux[0])
                     verb = verb.strip() + " " + head.text
                 else:
                     verb = _third(head.text, head.lemma)
                     if neg:
                         verb = f"does not {head.lemma}"
-                lead = o if sp is None else f"{o}'s {s.text(subj, stop={sp.id})}"
+                lead = (o if sp is None else
+                        f"{o}'s {s.text(subj, stop={sp.id}, owner=o, second=second)}")
                 body = f"{lead} {verb} {tail}"
                 kind = "event"
 

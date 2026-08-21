@@ -11658,3 +11658,60 @@ rather than assumed.
 e176 measured a frontier judge scoring us 9.67pt worse. That cancels inside
 these paired numbers and does not cancel against Mem0's 57.31. e231's "above
 Mem0" line is withdrawn for that reason as much as for the sampling one.
+
+---
+
+## Entry 234 — 2026-08-21 (p2: three person-shift bugs found by reading the raw artifacts, not by any metric. 5.5–9% of every record on BOTH users is ungrammatical in a way token overlap cannot see. Fixed, tested, NOT yet judged.)
+
+While user 1 was judging I read its artifact instead of waiting. The first six
+records contained two distinct defects, and a scan over both users' artifacts
+(u0 5011 records, u1 5497) says they are systematic:
+
+    defect                                    u0            u1
+    detached clitic inflected                 --          136 (2.5%)
+    pronoun inside the SUBJECT not shifted    204 (4.1%)  162 (2.9%)
+    subordinate-clause verb not agreed        146 (2.9%)  160 (2.9%)
+
+**A. "Martin Mark 'ds like to share ..."** Stanza splits `I'd` into `["I",
+"'d"]`. `_third` then tried to inflect the clitic: `'d` is not in
+`ALREADY_3SG` (which holds `would`, not `'d`), so it fell through to the
+default and appended -s. Every `I'd`/`I'll` in the corpus became `'ds`/`'lls`.
+Fixed by agreeing the LEMMA when the surface starts with an apostrophe, which
+also prints it in full: "Johnson Joseph would like to share".
+
+**B. "Martin Mark's ability to empower your team is ..."** Three call sites
+render the subject span as `s.text(subj, stop={sp.id})` — with `owner=None`.
+The subject's own possessive is rewritten by the `f"{o}'s ..."` template, so
+the record LOOKS shifted, and any pronoun embedded deeper in the subject
+survives untouched. Fixed by passing `owner`/`second` at all three.
+
+**C. "... because Martin Mark find wrestling too confrontational"** The person
+shift is a regex pass over an already-rendered string, so it cannot see that it
+has just made a verb's subject singular. Only the matrix verb was agreed.
+Fixed in `_S.text`, where the dependency is still visible: agree a verb whose
+own `nsubj` is a pronoun the shift will rewrite. Verbs with no `nsubj` of their
+own — an infinitive under `xcomp`, a participle — are deliberately left alone,
+which is why "I want to continue running" does not become "to continues".
+
+**Why no metric caught these.** Every one of them preserves all content words.
+"Martin Mark find wrestling too confrontational" and "Martin Mark finds
+wrestling too confrontational" are the same bag of tokens. This is the same
+blindness that let the negation inversion ship (e228) — the seventh instrument
+lesson in the same shape.
+
+`rgx/test_parse.py` covers all three plus three guards (infinitive, past
+tense, negation). **6 of the 10 tests fail on HEAD and pass on the fix**, which
+is the check worth doing: a regression test that passes on the broken code is
+worthless.
+
+**NOT MEASURED.** No F1 is claimed for this. The u1 judge run is scoring the
+PRE-fix artifact and will finish first; rebuilding artifacts now would replace
+the thing being measured mid-measurement. The fix gets judged as a single
+change against a two-user baseline, which is a better control than judging it
+against one user anyway.
+
+**Prior, stated in advance so it can be wrong:** these are precision-side
+repairs on ~6% of records, and `target_accuracy` scores each record alone
+(§5k), so the honest expectation is a small precision gain and no recall
+change. If recall moves, something else is going on and I should find out what
+before banking it.
