@@ -11992,5 +11992,19 @@ shape of a change the benchmark is blind to and a user is not. It ships on the
 product argument, with the measurement establishing only that it costs
 nothing.
 
-**u1 was mid-flight at integrity 500/645 when the machine had to come down.**
-Numbers above are user 0 only.
+**REPLICATED ON u1, and the sign flipped — which is the strongest form this
+result could take.** u1's integrity finished before the restart:
+
+    fixed vs baseline grammar arm, PAIRED over the same gold points
+      u0   0.4609 -> 0.4522   lost 32, gained 27   p = 0.6029
+      u1   0.3820 -> 0.3866   lost 25, gained 28   p = 0.7838
+
+Two users, **opposite signs**, both null. Two small negatives agreeing would
+have been weaker evidence — a systematic cost shows the same sign twice. This
+is what "the perturbation is symmetric noise" looks like when it is true. The
+reused prompted arm returned 18.32% on u1 again, and the parser's margin over
+it is unchanged at +20.34pt, p=2.4e-22.
+
+u1's ACCURACY phase did not finish. Given u0's precision came back inside its
+own standard error, it is the least informative number in the set; the recall
+question is settled.
