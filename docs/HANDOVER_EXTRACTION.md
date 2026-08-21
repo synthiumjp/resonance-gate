@@ -1,7 +1,7 @@
 # Handover — deterministic extraction (rgx), 2026-08-21
 
 Read this, then `docs/EXPERIMENT_LEDGER.md` §1 (established), §5a–5l (laws and
-corrections), §6 (open items). Notebook entries 217–232 are this arc.
+corrections), §6 (open items). Notebook entries 217–240 are this arc.
 
 ---
 
@@ -44,7 +44,9 @@ points, prompted arm reused across runs.
   Fixed to a seeded random sample in `lora_judge_ab.py`. Every precision in
   entries 225–231 is head-sampled; **0.5891 was never a floor**, it was built on
   the same bias.
-- **Everything rests on ONE user.**
+- **Replicated on user 1 (e237): F1 0.4895 vs prompted 0.2861, p=1.1e-21.**
+
+**CORRECTION (e240): every recall above is UNDER-read.** HaluMem's official `evaluation.py` computes recall over non-interference gold only; our harness counted interference points. On the official definition the parser in the tree scores **u0 R 0.5233 / u1 R 0.4418** (prompted 0.2705 / 0.2369), implied u0 F1 ≈ 0.59. The harness now prints both. Interference (the assistant's false memories about the user) is stored 19–20% of the time by the parser and 0% by the prompted arm — diagnosed as the assistant's 'I' being mapped to the owner, fixed in the e240 parser round.
 
 ### Published comparison (do NOT quote yet)
 HaluMem-Medium extraction F1: Memobase 25.13 · Supermemory 56.90 · Mem0 57.31 ·
@@ -61,6 +63,8 @@ Everything below is resumable; nothing is lost except that one run's progress.
 Saved logs and verdicts: `~/rg_private/halumem/lora/e239_fixrun/`.
 
 ### State as of the restart
+
+rgx tests need stanza — run them with `~/rg_private/halumem/official/.venv/bin/python -m pytest rgx/`; `~/rg/.venv` fails all of them with ModuleNotFoundError.
 
 | | u0 | u1 |
 |---|---|---|
@@ -95,8 +99,9 @@ to skip straight to accuracy. `chain_fix.sh` and `watch_chain.py` in
 
 ### 2. Then fix the queued parser defects (e238 + e237), as ONE measured change
 
-Both are diagnosed with examples; neither is written yet. Do not start these
-until step 1 is done, or the artifacts and the tree diverge again.
+Superseded by e240: defects A–G are being fixed as one round; see notebook e240.
+
+Both are diagnosed with examples; neither is written yet. The saved artifacts are frozen files, so step 1 can run at any time regardless of tree changes.
 
 * **`_third`'s spelling guards (e238).** `w.endswith("ed") or w.endswith("s")`
   catches need/feed/succeed/proceed and focus/pass/discuss/address/process.

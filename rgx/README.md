@@ -22,17 +22,14 @@ event   Martin Mark has been reflecting on
 
 ## Measured
 
-HaluMem-Medium, held-out user, scored by the benchmark's own judge harness:
+HaluMem-Medium, held-out users, scored by the benchmark's own judge harness:
 
-| extractor | recall |
-|---|---|
-| **rgx (0 model calls)** | **0.4609** |
-| prompted 14B | 0.2122 |
+| extractor | u0 recall | u1 recall |
+|---|---|---|
+| **rgx (0 model calls)** | **0.5233** | **0.4418** |
+| prompted 14B | 0.2705 | 0.2369 |
 
-+24.9pt, McNemar exact p = 4.8e-23. Precision and a second user are still
-being measured — see `docs/EXPERIMENT_LEDGER.md`, which records what failed
-as well as what worked, including six instrument defects found along the way.
-Five of them flattered the results.
+McNemar p=1.3e-16 / 4.8e-16. Precision on u0 is 0.68 (seeded 300-record sample); implied F1 ≈ 0.59 on a local judge — see `docs/EXPERIMENT_LEDGER.md` for what failed as well as what worked, including seven instrument defects found along the way (six flattered the results, one under-read them).
 
 ## What it will not do
 

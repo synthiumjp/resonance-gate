@@ -308,7 +308,7 @@ simply read as judge variance.
 as an F1 lever, which is measured harmful, but as the ordering a PRODUCT needs
 for what to show first and what to surface under a context budget.
 
-## 5k-orig. Over-emission does not cost extraction F1
+## 5k-corr. Over-emission — the e229 correction
 
 **Corrected in e229.** `target_accuracy` scores each record ALONE, so surplus
 cannot dilute it — the original finding holds for the term it named. But
