@@ -28,6 +28,7 @@ import collections
 import json
 import math
 import os
+import random
 import sys
 
 EV = os.path.expanduser("~/rg_private/halumem/official/HaluMem/eval")
@@ -181,8 +182,16 @@ def main():
     prec = {}
     for arm, per in arms.items():
         recs = [(si, r) for si in sorted(per) for r in per[si]]
-        if a.limit_accuracy:
-            recs = recs[:a.limit_accuracy]
+        if a.limit_accuracy and len(recs) > a.limit_accuracy:
+            # SAMPLE, do not take the head. Taking the first N biases toward
+            # early sessions, and because arms order their records differently
+            # it lands on wildly different in-gold fractions: the spaCy arm's
+            # first 200 held 93 in-gold records, the UD arm's held 20. That
+            # makes target_accuracy incomparable between arms -- 85% on n=20 is
+            # SE~8%, against 93% on n=93 at SE~2.6% -- for a reason that has
+            # nothing to do with either extractor.
+            rng = random.Random(0)
+            recs = rng.sample(recs, a.limit_accuracy)
         k = n = tot = 0
         with ProcessPoolExecutor(max_workers=a.workers) as ex:
             fut = {ex.submit(evaluation_for_memory_accuracy, dial.get(si, ""),

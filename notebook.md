@@ -11538,3 +11538,40 @@ Mem0 until it holds on a second user and preferably a frontier judge.**
 LAS on conversational data against Stanza's 85.19% (CAIT, arXiv:2605.19718),
 and the UD version replaces five hand-written branches with one clause walker.
 It should be judged against this 0.5891 baseline as a single change.
+
+---
+
+## Entry 232 — 2026-08-21 (p2: the UD/Stanza port lifts judged recall 43.11% -> 46.09%. The parser swap was worth +3pt on its own, confirming the LAS argument. Precision is under-measured and I am not quoting an F1 for it.)
+
+    JUDGED, held-out user 0, 575 gold points, prompted arm reused
+      prompted 14B      R 0.2122
+      spaCy parser      R 0.4311   (F1 0.5891 at P 0.9301)
+      UD/Stanza parser  R 0.4609   +24.87pt vs prompted
+                                   discordant 40/183, McNemar p = 4.8e-23
+
+**The parser swap alone is worth +3.0pt of recall**, which is what the LAS gap
+predicted: spaCy scores 61.45% on conversational data against Stanza's 85.19%
+(CAIT, arXiv:2605.19718). The rules did not change -- they were ported, and
+five hand-written branches collapsed into one clause walker because UD encodes
+the distinctions the ClearNLP scheme did not.
+
+**Precision is NOT reliably measured for this arm and I am not deriving an F1
+from it.** `--limit-accuracy` took the FIRST N records rather than sampling. The
+arms order their records differently, so the spaCy arm's first 200 contained 93
+in-gold records and the UD arm's contained 20 -- SE 2.6% against SE 8%, for a
+reason with nothing to do with either extractor. The UD arm read 85.00% on
+n=20, which is consistent with anything from 77% to 93%.
+
+Fixed: the accuracy sample is now drawn at random with a fixed seed. This is
+the fifth instrument defect this session and the same shape as the others --
+the number looked fine and the thing underneath it was not comparable.
+
+**So the honest state:** recall is measured and large (0.4609, p=4.8e-23);
+precision needs re-measuring on a proper sample before any F1 above 0.5891 is
+claimed. The spaCy configuration's 0.5891 remains the last fully-measured
+number.
+
+**And the port is worth keeping regardless of the F1**, because of what it
+removed: the comma-splice guard, the label-tolerant relation fallback, the
+separate passive rule and the separate participial rule are all unnecessary
+under UD. Less code, on a parse that is right far more often.
