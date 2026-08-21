@@ -165,11 +165,22 @@ def main():
                    for arm, d in ints.items()},
                   open(a.save, "w", encoding="utf-8"))
         print(f"  saved integrity verdicts to {a.save}")
-    keys = [k for k in ints["prompted"]
-            if ints["prompted"].get(k) is not None and ints[a.label].get(k) is not None]
+    judged = [k for k in ints["prompted"]
+              if ints["prompted"].get(k) is not None and ints[a.label].get(k) is not None]
+    # OFFICIAL DEFINITION (e240). evaluation.py:218-232 computes recall over
+    # gold with memory_source != "interference" ONLY, and scores interference
+    # points INVERSELY (score 0 = correctly NOT stored = "interference
+    # accuracy"). Every recall in entries 223-239 was computed over ALL gold
+    # and so UNDER-read both arms -- the parser by ~7pt, the prompted arm by
+    # ~6pt. The all-gold figure is kept below for continuity with them.
+    src = {(si, mp["index"]): mp.get("memory_source")
+           for si, mps in gold.items() for mp in mps}
+    keys = [k for k in judged if src.get(k) != "interference"]
+    inter = [k for k in judged if src.get(k) == "interference"]
     hp = sum(1 for k in keys if ints["prompted"][k] == 2)
     hl = sum(1 for k in keys if ints[a.label][k] == 2)
-    print(f"\nINTEGRITY (paired, n={len(keys)})")
+    print(f"\nINTEGRITY (paired, n={len(keys)} non-interference gold; "
+          f"official recall definition)")
     print(f"  prompted recall {hp/len(keys):7.2%}  ({hp}/{len(keys)})")
     print(f"  {a.label:<8} recall {hl/len(keys):7.2%}  ({hl}/{len(keys)})"
           f"   delta {(hl-hp)/len(keys):+.2%}pt")
@@ -177,6 +188,16 @@ def main():
                        for k in keys])
     print(f"  discordant: prompted-only {b}, {a.label}-only {c}   "
           f"McNemar exact p={p:.4g}")
+    if inter:
+        ip = sum(1 for k in inter if ints["prompted"][k] == 0)
+        il = sum(1 for k in inter if ints[a.label][k] == 0)
+        print(f"  interference accuracy (n={len(inter)}; score 0 = correctly "
+              f"NOT stored): prompted {ip/len(inter):.2%}  "
+              f"{a.label} {il/len(inter):.2%}")
+    hpa = sum(1 for k in judged if ints["prompted"][k] == 2)
+    hla = sum(1 for k in judged if ints[a.label][k] == 2)
+    print(f"  [all-gold recall, as logged in e223-e239: prompted "
+          f"{hpa/len(judged):.2%}  {a.label} {hla/len(judged):.2%}]")
 
     print("\nACCURACY (unpaired -- the arms emit different records)")
     prec = {}

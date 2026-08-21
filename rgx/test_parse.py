@@ -148,3 +148,11 @@ def test_irregular_past_is_not_inflected(ex, src, bad, good):
     every irregular past fell through to the default and took an -s."""
     out = " ".join(texts(ex, src))
     assert bad not in out and good in out
+
+
+def test_were_agrees_with_the_singular_owner_even_in_the_past(ex):
+    # e236's Tense=Past guard ran before the were->was rule and shipped
+    # "Martin Mark were born". Number agreement is not tense.
+    out = texts(ex, "You were born on 1996-08-02.", role="assistant")
+    assert any("was born" in p for p in out), out
+    assert not any("were born" in p for p in out), out

@@ -65,6 +65,8 @@ def _third(word, lemma, feats=None):
     # (`endswith("ed")`) only catches the REGULAR ones, so "I said" became
     # "Martin Mark saids" and "I told" became "tolds" -- shipped in 0.1.0.
     # UD marks the tense; read it rather than guessing from the spelling.
+    if lemma == "be" and w == "were":
+        return "was"          # the subject is singular now; past or not
     if feats and "Tense=Past" in feats:
         return word
     # A detached clitic ("I'd like" -> ["I", "'d"]) is not a word we can
@@ -72,8 +74,6 @@ def _third(word, lemma, feats=None):
     # gives the lemma, so agree THAT and let it print in full.
     if w.startswith("'") and lemma:
         word, w = lemma, lemma.lower()
-    if lemma == "be" and w == "were":
-        return "was"          # the subject is singular now
     if w in ALREADY_3SG or w in ("to", "not", "n't"):
         return word
     if lemma in IRREG:
@@ -196,6 +196,39 @@ def _poss(s, word, allow):
 
 def extract(text, nlp, owner=None, role="user"):
     """-> [(proposition, kind)]. Deterministic, no model call."""
+    return [(b, k) for b, k, _, _ in extract_keyed(text, nlp, owner, role)]
+
+
+def _pred_key(s, head, args, slot=None):
+    """The attribute KEY for a verbal clause: head lemma, plus the case
+    marker of its first oblique when there is no direct object
+    ("live in", "work at", "move to"). Closed and deterministic -- the
+    prompted extractor invented 161 attribute names for one user (W2a);
+    the lemma+case of the predicate is the same string every time."""
+    lem = head.lemma.lower()
+    has_obj = any(c.deprel in ("obj", "iobj") for c in args)
+    case = None
+    if not has_obj:
+        for c in args:
+            if c.deprel in ("obl", "nmod"):
+                cs = next(iter(s.children(c, ("case",))), None)
+                if cs is not None:
+                    case = cs.lemma.lower()
+                    break
+    key = lem if case is None else f"{lem}_{case}"
+    if slot:
+        key = f"{_slug(slot)}_{key}"
+    return key
+
+
+def _slug(text):
+    return re.sub(r"[^a-z0-9]+", "_", text.lower()).strip("_")
+
+
+def extract_keyed(text, nlp, owner=None, role="user"):
+    """-> [(proposition, kind, predicate_key, value)]. `predicate_key` is the
+    attribute name a slot store files the record under and `value` the
+    complement it stores there; `extract` drops both."""
     o = owner or "The user"
     second = role == "assistant"
     allow = (FIRST | SECOND) if second else FIRST
@@ -233,9 +266,13 @@ def extract(text, nlp, owner=None, role="user"):
                     slot = s.text(subj, stop={sp.id}, owner=o, second=second)
                     body = f"{o}'s {slot} is {'not ' if neg else ''}{val}"
                     kind = "attr"
+                    pred = _slug(slot)
+                    value = ("not " if neg else "") + val
                 elif is_self:                          # "I am X"
                     body = f"{o} is {'not ' if neg else ''}{val}"
                     kind = "attr"
+                    pred = "is"
+                    value = ("not " if neg else "") + val
                 elif subj.upos == "PROPN" and _poss(s, head, allow) is not None:
                     # "ThomasSusan is my Friend" -- the relation is the
                     # predicate noun, the named person is the subject
@@ -247,6 +284,9 @@ def extract(text, nlp, owner=None, role="user"):
                     if desc:
                         body += ", " + desc
                     kind = "relationship"
+                    pred = _slug(rel)
+                    value = s.text(subj, owner=o, second=second) + (
+                        ", " + desc if desc else "")
                 else:
                     continue
             else:
@@ -280,10 +320,15 @@ def extract(text, nlp, owner=None, role="user"):
                         f"{o}'s {s.text(subj, stop={sp.id}, owner=o, second=second)}")
                 body = f"{lead} {verb} {tail}"
                 kind = "event"
+                pred = _pred_key(s, head, args,
+                                 slot=None if sp is None else
+                                 s.text(subj, stop={sp.id}, owner=o, second=second))
+                value = ("not " if neg else "") + tail
 
             body = re.sub(r"\s+", " ", body).strip(" ,.;:")
             key = body.lower()[:90]
             if body and key not in seen:
                 seen.add(key)
-                out.append((body, kind))
+                out.append((body, kind, pred,
+                            re.sub(r"\s+", " ", value).strip(" ,.;:")))
     return out

@@ -45,6 +45,8 @@ class Record:
     role: str
     quality: float = 0.0           # 0-1: grounding, brevity, shape
     subject: Optional[str] = None
+    predicate: Optional[str] = None  # attribute key: head lemma (+case) / slot
+    value: Optional[str] = None      # what sits under that key
 
     def __str__(self):
         return self.text
@@ -76,14 +78,14 @@ class Extractor:
         from . import check as C
         from . import parse as G
         out = []
-        for prop, kind in G.extract(text, self._parser(), self.owner_name,
-                                    role=role):
+        for prop, kind, pred, val in G.extract_keyed(text, self._parser(),
+                                                self.owner_name, role=role):
             if self.check:
                 ok, _why = C.prefilter(prop, text, self.owner_name)
                 if not ok:
                     continue
             out.append(Record(text=prop, kind=kind, session=session,
-                              turn=turn, role=role,
+                              turn=turn, role=role, predicate=pred, value=val,
                               quality=C.quality(prop, text, self.owner_name)))
         return out
 

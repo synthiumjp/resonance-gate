@@ -12008,3 +12008,85 @@ it is unchanged at +20.34pt, p=2.4e-22.
 u1's ACCURACY phase did not finish. Given u0's precision came back inside its
 own standard error, it is the least informative number in the set; the recall
 question is settled.
+
+---
+
+## Entry 240 — 2026-08-22 (p2: SEVENTH instrument defect, and this one under-read us. HaluMem's official recall excludes "interference" gold; ours counted it. Parser recall is 0.5233 on u0 / 0.4418 on u1, not 0.4522 / 0.3866. And the interference column exposes a real defect: the parser stores 1 in 5 of the assistant's FALSE memories about the user, because it maps the assistant's "I" to the owner.)
+
+Reviewing the handover for the MCP push, I went to the judged u0 misses to
+see where recall is and found the denominator was wrong first.
+
+**The instrument.** `evaluation.py:84` builds the golden string from
+`memory_source != "interference"` and lines 218-232 count `recall(all)` over
+non-interference points only; interference points are scored INVERSELY
+(`score == 0` → "interference accuracy"). `lora_judge_ab.py` judged every
+non-update point and divided by all of them. Recomputed from the saved
+verdicts, no judge calls:
+
+                                 all-gold   OFFICIAL   interference stored
+    u0 parser (tree)              0.4522     0.5233        19.4%  (24/124)
+    u0 prompted 14B               0.2118     0.2705         0.0%
+    u1 parser (tree)              0.3866     0.4418        19.9%  (29/146)
+    u1 prompted 14B               0.1829     0.2369         0.0%
+
+Paired on the official set: u0 parser-only 156 vs prompted-only 42, McNemar
+p=1.3e-16; u1 134 vs 32, p=4.8e-16. At the tree's u0 precision (0.6782) the
+implied F1 is **0.59**, not 0.54. Six defects flattered us; this one did the
+opposite. The harness now prints the official definition, the interference
+accuracy, and the old all-gold figure for continuity.
+
+**What "interference" is.** All 24 stored distractors on u0 come from
+ASSISTANT turns, and they sit under the assistant's own first-person report
+frames: "I remember you expressing skepticism…", "I've noticed your
+preference has evolved…", "I've heard you express…". HaluMem's interference
+is the assistant falsely remembering things about the user. The parser
+treats first person in an assistant turn as the owner (`allow = FIRST |
+SECOND`), so it emits "Martin Mark remembers Martin Mark expressing
+skepticism" AND the embedded clause. The prompted arm read user turns only
+and stored none. This is the same defect that produces "Martin Mark thinks
+the Sphynx cat's social behavior really resonated with Martin Mark's need" —
+the assistant's opinion attributed to the user. Contract violation (NEVER
+INVENT), not a benchmark artefact.
+
+**Where the rest of the recall is — read, not theorised.** 315 misses on u0:
+Persona 203, Event 90, Relationship 22. By gold source: system 73% hit,
+secondary 46%, interference 19%; by type Relationship is worst at 18.5%.
+132 misses have a record with ≥50% of the gold's content words (FORM);
+183 have nothing close (COVERAGE). Five parser defects, each confirmed on a
+minimal sentence through `Extractor` before I wrote it down:
+
+  A. Coordinated VPs with a shared subject are dropped. "I am not only
+     enhancing X but also contributing to Y" → Y is never emitted. UD basic
+     deps do not propagate the subject to a `conj` head, so the clause walker
+     finds no nsubj and skips it. Inherit it from the conj parent.
+  B. Fronted modifiers land after the verb. "Interestingly, I was also
+     curious…" → "Martin Mark is Interestingly also curious"; "By integrating
+     eco-friendly practices…, I am enhancing…" → "is enhancing By integrating
+     … only Martin Mark's well being". Pre-head args must go to the end
+     (canonical order) or, for sentence adverbs, be dropped.
+  C. "not only … but also" is read as negation → "Martin Mark is not
+     enhancing". A FACT INVERSION of the kind the contract forbids.
+  D. The assistant's "I" is the owner (above).
+  E. A third-party subject with the owner as possessor is dropped: "Susan's
+     emotional encouragement was crucial during my entrepreneurial venture"
+     → nothing; "My friend ThomasSusan's support inspires me" → nothing
+     (possessor chain). Relationship gold is 18.5% because of this.
+
+Plus F, found while wiring the adapter: e236's `Tense=Past` guard now runs
+before the `were → was` rule it used to follow, so "you were born" →
+"Martin Mark were born". Reordered, tested (24/24).
+
+**Also this entry: the measured extractor is now connected to the product.**
+`Record` carries `predicate` (head lemma + case marker: `live_in`,
+`work_at`; the possessed slot: `job`; the relation noun: `friend`) and
+`value`; `rgx/facts.py` writes the `{"h","f":[{attribute,value}]}` cache
+that BOTH `run_wire.build_facts` (the MCP profile memory) and
+`halumem_run.ingest_user` read. The prompted extractor invented 161
+attribute names for one user (W2a); the predicate lemma is the same string
+every time. Nothing downstream changed. Not yet measured end to end.
+
+**Next, as one measured round:** A–F plus the queued e238 `_third`
+morphology and e237 escapes, rebuild both artifacts, judge with `--reuse`.
+Interference policy (tier assistant-sourced facts provisional until a user
+turn corroborates — the store already has the `asst` counter) is a separate
+experiment with a recall/interference trade-off, not part of this round.
