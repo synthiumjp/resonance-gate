@@ -23,3 +23,4 @@ experiments/p2/real/
 data-*batch*.zip
 *:Zone.Identifier
 private_chat/
+.venv-train/
