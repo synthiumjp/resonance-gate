@@ -11900,3 +11900,44 @@ current parser while I found these; changing `parse.py` now would leave the
 two artifacts built by different code, which is the exact "read what is on
 each side of the comparison" failure from e211/e218. Residual is 0.08%. It
 waits for the measurement.
+
+---
+
+## Entry 238 — 2026-08-21 (p2: the residual agreement failures are the SAME bug as "saids", one layer down — `_third` uses spelling where it should use morphology. "need" ends in "ed" and "focus" ends in "s". 0.7% of records, both users. Diagnosed, not yet fixed: a judge run is in flight against these artifacts.)
+
+The e234 agreement fix took the bare-verb-after-the-name count on u1 from 160
+to 31. Reading the 31 says they are not a new problem, they are the same one:
+
+    "Johnson Joseph focus on these areas"           -> focuses
+    "Johnson Joseph need to ensure it does n't ..." -> needs
+
+`_third` has two guards, and both are spelling tests standing in for
+morphology:
+
+    if w.endswith("ed") or w.endswith("s"): return word
+
+The first is meant to catch the regular past. It also catches **need, feed,
+succeed, proceed, exceed**. The second is meant to catch a form that is
+already third-singular. It also catches **focus, pass, discuss, address,
+process, miss, access, assess**.
+
+This is exactly the defect e236 fixed for irregular pasts — `endswith("ed")`
+missing "said" — and I fixed only the direction I had an example of. The guard
+is wrong in BOTH directions and I should have replaced the test rather than
+patched around it. UD gives the features; `_third` already receives them.
+
+    u0   30/4216 records (0.71%)   need 13, focus 9, address 5, discuss 2, assess 1
+    u1   32/4587 records (0.70%)   focus 16, need 13, succeed 1, assess 1, address 1
+
+**There is a second bug hiding behind the first.** Removing the guard is not
+sufficient: the inflection rule appends a bare -s, so "focus" would become
+"focuss". Verbs ending in a sibilant take -es. The `("sh","ch","x","z")`
+branch needs "s" (and "o") added — it was never exercised because the guard
+returned early on every word that needed it.
+
+**Not fixed now, deliberately.** The fix-judge chain is scoring
+`artifact_u*_ud_v2.json` as I write this, and those artifacts were built by
+the parser as it currently stands. Editing `parse.py` would leave the thing
+being measured and the thing in the tree different, which is the e211/e218
+failure. This goes in the next round with the two e237 question escapes, and
+gets measured as its own change.
