@@ -11941,3 +11941,56 @@ the parser as it currently stands. Editing `parse.py` would leave the thing
 being measured and the thing in the tree different, which is the e211/e218
 failure. This goes in the next round with the two e237 question escapes, and
 gets measured as its own change.
+
+---
+
+## Entry 239 — 2026-08-21 (p2: the four correctness fixes are BENCHMARK-NEUTRAL and that is the result I wanted. Recall −0.87pt at p=0.60, precision inside one standard error, while 16% of the store — every clitic, every irregular past, 600 questions-as-facts — is gone.)
+
+    USER 0, judged, corrected sampler, prompted arm reused
+
+                      P        R        F1      records
+      baseline      0.7099   0.4609   0.5589     5011
+      fixed         0.6782   0.4522   0.5426     4216   (-15.9%)
+
+**Recall: a null, and this one is properly tested.** Both grammar arms were
+scored against the same 575 gold points, so the comparison is PAIRED:
+
+      lost 32, gained 27,  McNemar exact p = 0.6029
+
+That is the test that mattered. e230 removed 67% of records on an argument and
+cost 12.15pt; this removes 16% and costs 0.87pt of recall that does not
+survive a significance test.
+
+**Precision: no claim either way.** 0.7099 → 0.6782 is a 3.17pt nominal drop
+on in-gold n of 81 and 101, where the standard errors are 5.0pt and 4.7pt. The
+confidence intervals overlap almost entirely. Accuracy is UNPAIRED by
+construction — the arms emit different records — so there is no paired test
+available and I am not going to read a direction into this. **I predicted a
+precision gain in e236. I did not get one, and the honest statement is that
+this experiment cannot resolve a change of that size.**
+
+**Two reproducibility controls came out exact**, which is worth recording
+because five of this session's instrument defects were invisible until
+something failed to reproduce: the reused prompted arm returned recall 21.22%
+AND `target_accuracy` 66.84% (65.5/98 in-gold, 300 emitted) — identical to the
+baseline run's figures, from the same seed over a different record pool.
+
+**What the discordant pairs say.** I wrote in e236 that if recall dropped I
+would want to know which of the 84 dropped records had been matching gold. The
+answer is that none of them identifiably were. The 32 lost and 27 gained gold
+points are qualitatively indistinguishable — ordinary Persona and Event points
+on both sides, nothing question-shaped among the losses. The mechanism is that
+the integrity judge reads each session's emissions as ONE BLOB, so shrinking
+the store perturbs every session's blob and matches flip both ways. That is
+e229's crowding intuition, finally seen directly: it is real, it is symmetric,
+and it is noise rather than a lever.
+
+**So the result is:** four correctness bugs fixed and 795 records of malformed
+or interrogative junk removed, at no measurable cost on the benchmark. Given
+§5k — the metric CANNOT penalise an out-of-gold record — that is exactly the
+shape of a change the benchmark is blind to and a user is not. It ships on the
+product argument, with the measurement establishing only that it costs
+nothing.
+
+**u1 was mid-flight at integrity 500/645 when the machine had to come down.**
+Numbers above are user 0 only.
