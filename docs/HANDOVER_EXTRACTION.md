@@ -66,9 +66,14 @@ Saved logs and verdicts: `~/rg_private/halumem/lora/e239_fixrun/`.
 |---|---|---|
 | baseline judged (pre-fix parser) | done, e233 | done, e237 |
 | artifact rebuilt with fixed parser | `artifact_u0_ud_v2.json` | `artifact_u1_ud_v2.json` |
-| fix judged | **done, e239** | **INCOMPLETE — died at integrity 500/645** |
+| fix judged — RECALL | **done, e239**: 0.4609→0.4522, p=0.60 | **done, e239**: 0.3820→0.3866, p=0.78 |
+| fix judged — precision | done: 0.7099→0.6782, inside 1 SE | **not run** (least informative number; optional) |
 
-### 1. Re-run the u1 fix judge (the only outstanding measurement)
+**The recall question is SETTLED on both users: two nulls with opposite
+signs.** Step 1 below is now optional — it only recovers u1's precision, and
+u0's precision came back inside its own standard error. Prefer step 2.
+
+### 1. (Optional) u1 precision only
 
 The GGUF judge server must be up on :8090 first — it does NOT survive a
 reboot:
@@ -83,10 +88,10 @@ Then, from `~/rg_private/halumem/official/HaluMem/eval`:
 RG_EXTRACT_V5=1 RG_PREFIX_NO_THINK=1 PYTHONUNBUFFERED=1   ~/rg_private/halumem/official/.venv/bin/python   /home/jp/rg/experiments/p2/lora_judge_ab.py   --user 1 --label grammar --limit-accuracy 300   --reuse ~/rg_private/halumem/lora/e239_fixrun/verdicts_u1_ud.json   --save ~/rg_private/halumem/lora/e239_fixrun/verdicts_u1_fix.json   --lora-artifact ~/rg_private/halumem/lora/artifact_u1_ud_v2.json
 ```
 
-`--reuse` skips the prompted arm (0 calls). ~75 min. Compare recall against
-the **0.3820** baseline with a PAIRED McNemar over the two grammar verdict
-maps — that is the test that matters, and u0's answer was a null (p=0.60).
-`chain_fix.sh` and `watch_chain.py` in `e239_fixrun/` do this end to end.
+`--reuse` skips the prompted arm (0 calls). ~75 min, and it will re-judge
+integrity you already have — pass `--reuse .../verdicts_u1_fix.json` instead
+to skip straight to accuracy. `chain_fix.sh` and `watch_chain.py` in
+`e239_fixrun/` run the whole thing end to end.
 
 ### 2. Then fix the queued parser defects (e238 + e237), as ONE measured change
 
