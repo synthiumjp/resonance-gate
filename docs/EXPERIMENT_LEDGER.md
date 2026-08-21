@@ -287,6 +287,16 @@ overlap metric will tell you which you have.
 
 `target_accuracy` scores each record ALONE, so surplus cannot dilute it (e224).
 
+**Sharpened (e235): this is DEFINITIONAL, not empirical.** The harness computes
+`prec = k/n` where `n` counts only records with
+`is_included_in_golden_memories == true`. An out-of-gold record is dropped from
+BOTH numerator and denominator, so it cannot move precision by any amount. The
+consequence is the uncomfortable one: **the benchmark cannot penalise a wrong
+record at all** — only a wrong record that gold happens to contain. ~12% of our
+records are assistant QUESTIONS asserted as facts ("Martin Mark does have What
+kind of personality"); the metric's incentive is to leave them in, because
+removing them can only risk recall. Product defect, benchmark-invisible.
+
 e229 saw +28 records cost 1.2pt of recall and proposed that the integrity
 judge's concatenated blob crowds out matches. **That mechanism is RETRACTED
 (e230):** capping to 25 records/session cut 67% of records and cost **12.15pt**
