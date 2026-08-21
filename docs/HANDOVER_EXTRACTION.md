@@ -56,35 +56,59 @@ paired comparisons but **not** against someone else's published table.
 
 ## 3. Immediate next steps, in order
 
-1. ~~Finish user 0 precision.~~ **DONE (e233): P 0.7099, F1 0.5589.**
-   Server may still be up on :8090.
-   ```
-   cd ~/rg_private/halumem/official/HaluMem/eval
-   RG_EXTRACT_V5=1 RG_PREFIX_NO_THINK=1 PYTHONUNBUFFERED=1 \
-     ~/rg_private/halumem/official/.venv/bin/python \
-     /home/jp/rg/experiments/p2/lora_judge_ab.py \
-     --user 0 --label grammar --limit-integrity 4 --limit-accuracy 300 \
-     --lora-artifact ~/rg_private/halumem/lora/artifact_u0_ud.json
-   ```
-   Then F1 = harmonic(P, 0.4609). ~50 min; progress prints every 100 calls and
-   a 15-minute silence is normal, not a stall (check `server_*.log` mtime).
+**Machine was restarted 2026-08-21 ~21:40 with the u1 fix-judge mid-run.**
+Everything below is resumable; nothing is lost except that one run's progress.
+Saved logs and verdicts: `~/rg_private/halumem/lora/e239_fixrun/`.
 
-2. **Judge user 1 — IN FLIGHT** (launched 2026-08-21 15:42, ~2h: 645 gold
-   points x 2 arms full integrity, + 300 accuracy records/arm). Log and saved
-   verdicts under the session scratchpad; a quality sentinel (`watch_u1.py`)
-   watches tick RATE, not liveness — the failure mode that has actually
-   happened is a judge that stays up and error-defaults every call.
-   Artifact already built:
-   `~/rg_private/halumem/lora/artifact_u1_ud.json` (3242 turns → 5497 props).
-   Same command with `--user 1`, no `--reuse` (no saved prompted verdicts for
-   u1). This is the weakest claim in the whole result — one user.
+### State as of the restart
 
-3. ~~Re-baseline the ledger~~ **DONE (e233).** §1 corrected; notebook entries
-   225/227/228/231 annotated in place with the head-sampling correction, and
-   e232's "0.5891 remains the last fully-measured number" retracted — 0.5891
-   was built on the same head sample, so it was never a floor.
+| | u0 | u1 |
+|---|---|---|
+| baseline judged (pre-fix parser) | done, e233 | done, e237 |
+| artifact rebuilt with fixed parser | `artifact_u0_ud_v2.json` | `artifact_u1_ud_v2.json` |
+| fix judged | **done, e239** | **INCOMPLETE — died at integrity 500/645** |
 
----
+### 1. Re-run the u1 fix judge (the only outstanding measurement)
+
+The GGUF judge server must be up on :8090 first — it does NOT survive a
+reboot:
+
+```
+~/rg/.venv/bin/python -m llama_cpp.server   --model /usr/share/ollama/.ollama/models/blobs/sha256-a8cc1361f3145dc01f6d77c6c82c9116b9ffe3c97b34716fe20418455876c40e   --n_gpu_layers -1 --n_ctx 16384 --port 8090 --host 127.0.0.1 --chat_format chatml
+```
+
+Then, from `~/rg_private/halumem/official/HaluMem/eval`:
+
+```
+RG_EXTRACT_V5=1 RG_PREFIX_NO_THINK=1 PYTHONUNBUFFERED=1   ~/rg_private/halumem/official/.venv/bin/python   /home/jp/rg/experiments/p2/lora_judge_ab.py   --user 1 --label grammar --limit-accuracy 300   --reuse ~/rg_private/halumem/lora/e239_fixrun/verdicts_u1_ud.json   --save ~/rg_private/halumem/lora/e239_fixrun/verdicts_u1_fix.json   --lora-artifact ~/rg_private/halumem/lora/artifact_u1_ud_v2.json
+```
+
+`--reuse` skips the prompted arm (0 calls). ~75 min. Compare recall against
+the **0.3820** baseline with a PAIRED McNemar over the two grammar verdict
+maps — that is the test that matters, and u0's answer was a null (p=0.60).
+`chain_fix.sh` and `watch_chain.py` in `e239_fixrun/` do this end to end.
+
+### 2. Then fix the queued parser defects (e238 + e237), as ONE measured change
+
+Both are diagnosed with examples; neither is written yet. Do not start these
+until step 1 is done, or the artifacts and the tree diverge again.
+
+* **`_third`'s spelling guards (e238).** `w.endswith("ed") or w.endswith("s")`
+  catches need/feed/succeed/proceed and focus/pass/discuss/address/process.
+  ~0.7% of records on both users. Replace the test with the UD features
+  `_third` already receives. **And the `-es` branch needs `"s"` added** or
+  "focus" becomes "focuss" — that branch was never reached before.
+* **Two interrogative escapes (e237),** 0.08% of records. One is an embedded
+  declarative inside a question ("What steps do you think you'll take?"). One
+  is a genuine PRESUPPOSITION ("When you joined the conservation group, did
+  you find...?") — the user did join, so that one wants the stray "When"
+  stripped, not the clause dropped.
+
+### 3. Then cut an rgx release
+
+The package currently on disk has all four e234/e236 fixes and is measured
+benchmark-neutral on u0. That is the first version whose shipped output
+matches what the ledger claims.
 
 ## 4. Standing rules earned this session — do not relearn these
 
