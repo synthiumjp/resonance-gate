@@ -11715,3 +11715,57 @@ repairs on ~6% of records, and `target_accuracy` scores each record alone
 (§5k), so the honest expectation is a small precision gain and no recall
 change. If recall moves, something else is going on and I should find out what
 before banking it.
+
+---
+
+## Entry 235 — 2026-08-21 (p2: ~12% of every record is a QUESTION asserted as a fact — and HaluMem's precision metric is structurally incapable of penalising it. Diagnosed, deliberately NOT fixed yet.)
+
+Same read-the-raw-output pass as e234, different defect class:
+
+    "Martin Mark does have What kind of personality"
+    "Martin Mark Can tell Martin Mark about Martin Mark's educational background"
+    "Martin Mark's life goals is What"
+    "Johnson Joseph does plan How to leverage this achievement to further ..."
+
+These come from the assistant's questions — "What kind of personality do you
+have?", "Can you tell me about your educational background?" The parser finds a
+subject and a verb, shifts the person, and emits an assertion. Nothing in any
+of them was ever claimed by anyone.
+
+    class                                       u0            u1
+    capitalised wh-word mid-record             608 (12.1%)  628 (11.4%)
+    ends in a bare wh-word ("is What")          24 (0.5%)     24 (0.4%)
+    modal-initial ("Can tell", "Do have")         8 (0.2%)     10 (0.2%)
+
+Not all 12% are wrong — "I'm considering what specific steps to take" is a
+genuine embedded wh-clause and its record is fine. The inverted-auxiliary cases
+are the wrong ones. That distinction is the work.
+
+**The part worth writing down is what the metric does with them.** From the
+harness itself:
+
+    if is_included_in_golden_memories: n += 1; k += 0.5 * accuracy_score
+    prec = k / n
+
+The denominator counts ONLY in-gold records. A question asserted as a fact is
+not in gold, so it is dropped from both numerator and denominator and changes
+precision by exactly nothing. This is the mechanism behind §5k's "over-emission
+does not cost precision", stated there as an empirical result; it is actually a
+definitional one.
+
+**So a system tuned purely on this benchmark would never fix this.** The
+defect is invisible to precision by construction and can only ever cost recall
+(if one of them happens to land in gold). The benchmark's incentive is to leave
+it in. That is the sharpest case yet for the standing position that HaluMem is
+an instrument, not the target.
+
+**NOT FIXED, on purpose.** This is a pruning change, and pruning is the one
+class that has actually burned us: e230 capped records per session and lost
+12.15pt of recall. I am not removing 11% of the store on the strength of the
+argument above. It gets built as a single change and judged against the
+two-user baseline, with recall as the thing being watched — precision cannot
+move, so recall is the whole measurement.
+
+**Prediction, stated in advance:** precision flat (definitional), recall flat
+or slightly down, product output materially better. If precision moves at all,
+my reading of the harness is wrong and that is the finding.
