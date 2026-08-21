@@ -11832,3 +11832,71 @@ and is now sharper: precision cannot move (out-of-gold records are excluded
 from `k/n` by definition), so **recall is the entire measurement**, and the
 84 records I read say it should be flat. If recall drops, one of those 84 was
 matching a gold point and I want to see which.
+
+---
+
+## Entry 237 — 2026-08-21 (p2: it replicates. User 1, judged end to end: parser F1 0.4895 vs the prompted arm's 0.2861, +20.34pt, McNemar p=1.1e-21. The one-user caveat is discharged.)
+
+    JUDGED, held-out, corrected seeded sampler, both arms scored in one run
+
+    user 0 (575 gold points)      P        R        F1
+      prompted                  0.6684   0.2122   0.3221
+      UD/Stanza parser          0.7099   0.4609   0.5589    +23.68pt
+                                discordant 40/183   p = 4.8e-23
+
+    user 1 (644 gold points)      P        R        F1
+      prompted                  0.6529   0.1832   0.2861
+      UD/Stanza parser          0.6813   0.3820   0.4895    +20.34pt
+                                discordant 32/160   p = 1.1e-21
+
+    pooled recall   parser 0.4192   prompted 0.1969
+
+**Everything replicates, in the right direction, on all four quantities.**
+Parser precision 0.7099/0.6813, prompted 0.6684/0.6529; parser recall more
+than double the prompted arm on both users. This was the weakest claim in the
+whole arc — "solid on ONE user" — and it is now a replication.
+
+**u1 is the harder user and that is the useful part.** Both arms fall: prompted
+recall 21.22% → 18.32%, parser 46.09% → 38.20%. If only our arm had dropped I
+would be looking for a defect in the port. Both arms dropping by a similar
+factor says the user is harder, not that the extractor is fragile. The margin
+survives: +24.87pt and +19.88pt of recall.
+
+**Still not comparable to the published table**, for the same reason as
+always: e176 measured a frontier judge scoring us 9.67pt worse, which cancels
+inside a paired comparison and does not cancel against Mem0's 57.31.
+
+**What this does NOT yet include.** The four correctness fixes from e234/e236
+are not in these numbers — this is the pre-fix parser on both users, which is
+what makes it a clean baseline for judging the fixes as a single change. Those
+artifacts are rebuilt and in the judge queue.
+
+**First look at the rebuilt u0 artifact** (5011 → 4216 records, −15.9%):
+
+    clitic "'ds"/"'lls"        136+  ->    0
+    irregular past "saids"        4  ->    0
+    2nd person leaked            204  ->   10   (0.24%)
+    question asserted as fact    608  ->    4   (0.08%)
+    modal + inflected verb        --  ->    0   (20 regex hits, all of them
+                                                 "will focus"/"can address" --
+                                                 words that simply end in s)
+
+The 10 remaining second-person cases are "share ... with you so you can better
+understand Martin Mark" in USER turns, where "you" is the assistant and
+leaving it is arguably right.
+
+**The 4 escaped questions are both worth reading.** "What steps do you think
+you'll take to initiate these partnerships?" — the matrix "do you think" is
+inverted and correctly dropped, but the EMBEDDED "you'll take" is in
+declarative order and survives, carrying the fronted wh-object with it. And
+"When you joined the conservation group, did you find...?" is the case the
+per-clause design was built for and still gets half-wrong: the advcl is a
+genuine PRESUPPOSITION — the user did join — so dropping it would lose a real
+fact. What is wrong there is the stray "When" left in the span. That one wants
+a REPAIR, not a drop.
+
+**Deliberately not fixed today.** The u1 artifact was rebuilding against the
+current parser while I found these; changing `parse.py` now would leave the
+two artifacts built by different code, which is the exact "read what is on
+each side of the comparison" failure from e211/e218. Residual is 0.08%. It
+waits for the measurement.
