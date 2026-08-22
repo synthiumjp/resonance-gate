@@ -156,3 +156,132 @@ def test_were_agrees_with_the_singular_owner_even_in_the_past(ex):
     out = texts(ex, "You were born on 1996-08-02.", role="assistant")
     assert any("was born" in p for p in out), out
     assert not any("were born" in p for p in out), out
+
+
+# ---- A. shared subject in coordinated clauses (e240) ---------------------
+# UD basic deps do not propagate the subject to a `conj` head, so the second
+# half of a coordinated clause never got its own nsubj and the walker just
+# skipped it.
+
+def test_conjunct_inherits_the_subject(ex):
+    out = texts(ex, "I moved to Ohio in 2019 and started a new job.")
+    assert len(out) == 2, out
+    assert "Martin Mark started a new job" in out, out
+
+
+# ---- B. fronted modifiers (e240) ------------------------------------------
+# A pre-head modifier is attached before the subject in UD but rendered by
+# id, so it landed mid-clause: "is Interestingly also curious", "is
+# enhancing By integrating X Y". A sentence-initial discourse adverb is
+# dropped outright; a substantive pre-subject clause is moved to the end.
+
+def test_sentence_initial_adverb_is_dropped(ex):
+    out = " ".join(texts(ex, "Interestingly, I was also curious about "
+                             "finding recipes that focus solely on flavor."))
+    assert "interestingly" not in out.lower(), out
+    assert "also curious" in out, out
+
+
+def test_fronted_clause_moves_to_the_end(ex):
+    out = " ".join(texts(ex, "By integrating eco-friendly practices into "
+                             "my daily routine, I am enhancing my personal "
+                             "well-being."))
+    assert not out.lower().startswith("martin mark is enhancing by "
+                                       "integrating"), out
+    assert "well being by integrating" in out.lower(), out
+
+
+# ---- C. "not only" is not negation (e240) ---------------------------------
+# "I am not only enhancing X" was stored as "is not enhancing X" -- a fact
+# INVERSION, the worst class of defect here, since the record shares every
+# content word with the truth and states its opposite.
+
+def test_not_only_is_not_negation(ex):
+    out = texts(ex, "I am not only enhancing my well-being but also "
+                    "contributing to the planet.")
+    assert out
+    assert not any(" not " in f" {p} " for p in out), out
+    assert any("enhancing" in p for p in out), out
+
+
+# ---- D. the assistant's "I" is not the owner (e240) -----------------------
+# `allow` used to be FIRST|SECOND on an assistant turn, so the assistant's
+# own opinion was attributed to the user: "I think X" -> "Martin Mark
+# thinks X"; "I remember you expressing Z" -> "Martin Mark remembers Martin
+# Mark expressing Z".
+
+def test_assistant_opinion_is_not_attributed_to_the_user(ex):
+    out = texts(ex, "I think the Sphynx cat's behavior resonated with "
+                    "your need.", role="assistant")
+    assert not any(p.startswith("Martin Mark thinks") for p in out), out
+
+
+def test_embedded_second_person_clause_still_extracts(ex):
+    """The matrix "I remember" is the assistant's own claim and is dropped;
+    the embedded ccomp is about the user and survives on its own."""
+    out = texts(ex, "I remember you mentioned your preference for fresh "
+                    "smoothies.", role="assistant")
+    assert out == ["Martin Mark mentioned Martin Mark's preference for "
+                   "fresh smoothies"], out
+
+
+def test_matrix_clause_with_bare_first_person_subject_is_dropped(ex):
+    out = texts(ex, "You said you were born on 1996-08-02.", role="assistant")
+    assert any("was born" in p for p in out), out
+
+
+# ---- E. third-party subject with the owner inside the clause (e240) ------
+# A clause used to be emitted only when the subject WAS the owner or
+# owner-possessed. "Susan's encouragement was crucial during my venture"
+# and "My friend Thomas's support inspires me" produced nothing at all --
+# the whole reason Relationship-kind facts scored so badly.
+
+def test_poss_chain_reaches_the_owner_through_a_named_third_party(ex):
+    out = texts(ex, "My friend ThomasSusan's support inspires me to stay "
+                    "focused.")
+    assert out == ["Martin Mark's friend ThomasSusan's support inspires "
+                   "Martin Mark to stay focused"], out
+
+
+def test_third_party_subject_with_owner_elsewhere_in_the_clause(ex):
+    out = texts(ex, "Susan's emotional encouragement was crucial during "
+                    "my entrepreneurial venture.")
+    assert out == ["Susan's emotional encouragement was crucial during "
+                   "Martin Mark's entrepreneurial venture"], out
+
+
+def test_bare_pronoun_subject_is_not_treated_as_a_third_party(ex):
+    """"she" is unresolved coreference, not a third party the parser can
+    name -- rendering it verbatim would misattribute the antecedent."""
+    out = texts(ex, "She works with me every day.")
+    assert not any("She works" in p for p in out), out
+
+
+# ---- F. `_third`'s spelling guards (e238) ----------------------------------
+# `endswith("ed") or endswith("s")` is a SPELLING test, not a morphology one,
+# and it fired on ordinary present-tense verbs that happen to end that way:
+# "need", "focus", "discuss" were all left uninflected.
+
+@pytest.mark.parametrize("src,want", [
+    ("I need to focus on these areas.", "needs"),
+    ("I focus on quality.", "focuses"),
+    ("I discuss it with my team.", "discusses"),
+])
+def test_third_person_spelling_guard(ex, src, want):
+    out = " ".join(texts(ex, src))
+    assert want in out, out
+
+
+# ---- G. two interrogative escapes (e237) -----------------------------------
+
+def test_ccomp_under_an_interrogative_matrix_is_dropped(ex):
+    """"do you THINK" is the question; its complement is not a separate
+    assertion just because it shows no inversion of its own."""
+    out = texts(ex, "What steps do you think you'll take?", role="assistant")
+    assert out == [], out
+
+
+def test_wh_word_dropped_from_a_surviving_presupposition(ex):
+    out = texts(ex, "When you joined the conservation group, did you find "
+                    "it rewarding?", role="assistant")
+    assert out == ["Martin Mark joined the conservation group"], out
