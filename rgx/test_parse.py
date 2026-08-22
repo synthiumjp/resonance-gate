@@ -339,3 +339,80 @@ def test_wh_word_dropped_from_a_surviving_presupposition(ex):
     out = texts(ex, "When you joined the conservation group, did you find "
                     "it rewarding?", role="assistant")
     assert out == ["Martin Mark joined the conservation group"], out
+
+
+# ---- H. atom + full when a clause has a periphery (e243) -------------------
+# 132/315 judged misses on user 0 were the gold fact buried inside a longer
+# clause: "... dislikes formal wear because ... finds it restrictive and
+# prefer clothing that ..." vs gold "... dislikes formal wear". Surplus
+# records are precision-free on this benchmark, so both the atomic CORE and
+# the FULL clause are emitted when the clause has a periphery.
+
+def test_atom_and_full_are_both_emitted(ex):
+    out = ex.extract_turn(
+        "I dislike formal wear because I find it restrictive.")
+    # A third record ("Martin Mark finds it restrictive") also comes out,
+    # independently of Rule 1: the advcl is `advcl` -- one of CLAUSE_DEPS --
+    # so the main loop walks it as its OWN clause too, same as it always
+    # has. Rule 1 only concerns the core/full split of the FIRST clause.
+    assert len(out) >= 2, out
+    assert out[0].text == "Martin Mark dislikes formal wear", out
+    assert "because" in out[1].text, out
+    assert out[0].value == "formal wear" == out[1].value, out
+
+
+def test_no_periphery_emits_a_single_record(ex):
+    out = texts(ex, "I live in Columbus.")
+    assert len(out) == 1, out
+
+
+# ---- I. object control (e243) ----------------------------------------------
+# An xcomp/ccomp with no nsubj of its own inherits the matrix verb's OBJECT
+# as its logical subject -- "I remember you expressing skepticism..." --
+# but only for a gerund/participial complement; an infinitival xcomp is
+# control of a different, unstated subject ("I want to go").
+
+def test_object_control_gerund_complement(ex):
+    out = ex.extract_turn(
+        "I remember you expressing skepticism about integrating this new "
+        "preference into your daily life.", role="assistant")
+    # "integrating..." is itself an advcl of "expressing", so Rule 1 also
+    # splits this into a core + full pair -- both must satisfy the object-
+    # control assertions below.
+    assert out, out
+    assert all(r.text.startswith("Martin Mark expressed skepticism") or
+               r.text.startswith("Martin Mark expressing skepticism")
+               for r in out), out
+    assert all(r.evidential == "report" for r in out), out
+
+
+def test_infinitival_xcomp_is_not_object_control(ex):
+    out = texts(ex, "I want to go hiking.")
+    assert not any(t.startswith("Martin Mark go") for t in out), out
+
+
+# ---- J. named third-party subject (e243) -----------------------------------
+# 52/154 (u0) and 78/256 (u1) judged misses have a NAMED third party as the
+# source sentence's subject, in USER turns, with the owner nowhere in the
+# clause -- "WilsonRobert recommended a yoga class near the office". Rule E
+# (owner elsewhere in the clause) does not fire here, so the record was
+# simply dropped. A bare common-noun subject must not fire, and it is user
+# turns only -- an assistant's claim about a third party with no owner link
+# is not the same kind of grounded fact.
+
+def test_named_third_party_subject_is_kept(ex):
+    out = texts(ex, "WilsonRobert recommended a yoga class near the office.")
+    assert out == ["WilsonRobert recommended a yoga class near the office"], out
+    recs = ex.extract_turn(
+        "WilsonRobert recommended a yoga class near the office.")
+    assert recs[0].kind == "relationship", recs
+
+
+def test_generic_common_noun_subject_does_not_fire(ex):
+    out = texts(ex, "Cats are independent animals.")
+    assert out == [], out
+
+
+def test_named_third_party_is_user_turn_only(ex):
+    out = texts(ex, "WilsonRobert recommended a yoga class.", role="assistant")
+    assert out == [], out

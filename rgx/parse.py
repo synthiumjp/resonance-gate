@@ -105,7 +105,8 @@ def _third(word, lemma, feats=None):
         # need to..."). Stanza already labels tense/aspect/agreement; read
         # THAT instead of guessing from the letters. Kept as a fallback,
         # below, only for the rare token with no feats at all.
-        if "Tense=Past" in feats or "VerbForm=Part" in feats:
+        if ("Tense=Past" in feats or "VerbForm=Part" in feats
+                or "VerbForm=Ger" in feats):   # a gerund is not finite (e243)
             return word
         if "Person=3" in feats and "Number=Sing" in feats:
             return word       # already third-singular; nothing to do
@@ -432,6 +433,52 @@ def _third_party_owner(s, head, subj, allow):
                for t in s.clause_span(head))
 
 
+# e243, RULE 1: on user 0, 132/315 judged misses were the gold fact buried
+# inside a longer clause -- "dislikes formal wear because finds it
+# restrictive and prefer clothing that..." vs gold "dislikes formal wear".
+# Surplus records are precision-free on this benchmark, so both the atomic
+# CORE and the FULL clause are emitted when the clause has a periphery: an
+# adverbial/relative/complement clause or comma splice hanging off the
+# clause head, or an obl/nmod introduced by a subordinator-like case/mark
+# word ("because of the rain", "due to stress").
+PERIPHERY_DEPS = ("advcl", "acl", "acl:relcl", "ccomp", "parataxis")
+PERIPHERY_MARK_LEMMAS = {"because", "since", "although", "though", "while",
+                          "whereas", "so", "unless", "despite", "due"}
+
+
+def _periphery(s, head):
+    """-> set of ids of `head`'s children that make up the clause's
+    PERIPHERY (e243). These carry real content -- dropping them would lose
+    information a full-clause record still needs -- but they are not the
+    clause's core assertion, so a value filed under a slot should exclude
+    them even when the record's own text keeps them."""
+    ids = {c.id for c in s.children(head, PERIPHERY_DEPS)}
+    for c in s.children(head, ("obl", "nmod")):
+        markers = s.children(c, ("case", "mark"))
+        if any(m.lemma.lower() in PERIPHERY_MARK_LEMMAS for m in markers):
+            ids.add(c.id)
+    return ids
+
+
+# e243, RULE 3: 52/154 (u0) and 78/256 (u1) judged misses have a NAMED third
+# party as the source sentence's subject, in USER turns, with the owner
+# nowhere in the clause -- "WilsonRobert recommended a yoga class near the
+# office". Rule E (`_third_party_owner`, e240) does not fire here: the owner
+# is not elsewhere in the clause, so the record was simply dropped. A bare
+# common noun ("Cats are independent animals") must not fire -- only a
+# genuinely NAMED subject does.
+def _propn_subject(s, subj):
+    """Is `subj` (the clause's own subject) a NAMED entity -- PROPN itself,
+    or carrying a PROPN through `flat`/`compound`/`nmod:poss` ("my friend
+    Thomas" -> Thomas is nmod:poss of "friend", but here the search is on
+    the SUBJECT itself, e.g. "Thomas Jones" flat/compound, or "Thomas's
+    class" nmod:poss)."""
+    if subj.upos == "PROPN":
+        return True
+    return any(c.upos == "PROPN"
+               for c in s.children(subj, ("flat", "compound", "nmod:poss")))
+
+
 def extract(text, nlp, owner=None, role="user"):
     """-> [(proposition, kind)]. Deterministic, no model call."""
     return [(b, k) for b, k, _, _, _ in extract_keyed(text, nlp, owner, role)]
@@ -494,6 +541,7 @@ def extract_keyed(text, nlp, owner=None, role="user"):
                 continue
             subj = next(iter(s.children(head, ("nsubj", "nsubj:pass"))), None)
             donor = None
+            obj_ctrl = False
             if subj is None and head.deprel == "conj":
                 # A (e240): borrow the subject (and, below, the aux) from
                 # the nearest ancestor along the conj chain that has one.
@@ -501,6 +549,22 @@ def extract_keyed(text, nlp, owner=None, role="user"):
                 if donor is not None:
                     subj = next(iter(s.children(
                         donor, ("nsubj", "nsubj:pass"))), None)
+            if subj is None and head.deprel in ("xcomp", "ccomp"):
+                # e243, RULE 2: OBJECT CONTROL. "I remember you expressing
+                # skepticism..." -- "expressing" has no nsubj of its own;
+                # UD attaches the logical subject as the matrix verb's
+                # OBJECT instead. Restricted to a gerund/participial
+                # complement -- an infinitival xcomp ("I want to go", "I
+                # told my team to focus") is control of a DIFFERENT,
+                # unstated subject and must not gain a record here.
+                feats = head.feats or ""
+                if "VerbForm=Ger" in feats or "VerbForm=Part" in feats:
+                    matrix = s.w.get(head.head)
+                    if matrix is not None:
+                        mobj = next(iter(s.children(matrix, ("obj",))), None)
+                        if mobj is not None:
+                            subj = mobj
+                            obj_ctrl = True
             if subj is None:
                 continue
             if _interrogative(s, head, subj, is_q):
@@ -513,6 +577,15 @@ def extract_keyed(text, nlp, owner=None, role="user"):
             sp = _poss(s, subj, allow)
             is_self = subj.text.lower() in allow
             fdrop, ftail = _fronted(s, head, subj)
+            # e243, RULE 3: a NAMED third party as subject, with the owner
+            # nowhere in the clause -- "WilsonRobert recommended a yoga
+            # class near the office" -- fires in USER turns only. Computed
+            # once; shared by the copular and verbal branches below.
+            tpo = _third_party_owner(s, head, subj, allow)
+            named_tpo = (not tpo and role == "user"
+                         and _propn_subject(s, subj))
+
+            records = []  # [(body, kind, pred, value), ...] for this clause
 
             # ---- copular: the PREDICATE heads the clause, `cop` hangs off it
             if cop is not None:
@@ -521,24 +594,45 @@ def extract_keyed(text, nlp, owner=None, role="user"):
                 drop |= {c.id for c in s.children(head, ("aux", "aux:pass"))}
                 drop |= negdrop
                 drop |= fdrop
-                val = s.text(head, stop=drop, owner=o, second=second)
+                # e243, RULE 1: ATOM + FULL. The clause's PERIPHERY (an
+                # advcl/acl/ccomp/parataxis, or a because-like obl/nmod) is
+                # excluded from the CORE render but kept in the FULL one.
+                peri = _periphery(s, head)
+                val_full = s.text(head, stop=drop, owner=o, second=second)
+                val_core = (s.text(head, stop=drop | peri, owner=o, second=second)
+                            if peri else val_full)
+                ftxt = None
                 if ftail:
                     ftxt = " ".join(s.text(c, owner=o, second=second)
                                      for c in ftail)
-                    val = f"{val} {ftxt}".strip()
-                if not val:
+                    val_full = f"{val_full} {ftxt}".strip()
+                    val_core = f"{val_core} {ftxt}".strip()
+                if not val_full:
                     continue
+                if not val_core:                       # core guard, e243
+                    val_core, peri = val_full, set()
+
                 if sp is not None:                    # "my job is X"
                     slot = s.text(subj, stop={sp.id}, owner=o, second=second)
-                    body = f"{o}'s {slot} is {'not ' if neg else ''}{val}"
                     kind = "attr"
                     pred = _slug(slot)
-                    value = ("not " if neg else "") + val
+                    npfx = "not " if neg else ""
+                    value = npfx + val_core             # (a): core, e243
+                    if peri and val_core != val_full:
+                        records.append((f"{o}'s {slot} is {npfx}{val_core}",
+                                         kind, pred, value))
+                    records.append((f"{o}'s {slot} is {npfx}{val_full}",
+                                     kind, pred, value))
                 elif is_self:                          # "I am X"
-                    body = f"{o} is {'not ' if neg else ''}{val}"
                     kind = "attr"
                     pred = "is"
-                    value = ("not " if neg else "") + val
+                    npfx = "not " if neg else ""
+                    value = npfx + val_core             # (a): core, e243
+                    if peri and val_core != val_full:
+                        records.append((f"{o} is {npfx}{val_core}",
+                                         kind, pred, value))
+                    records.append((f"{o} is {npfx}{val_full}",
+                                     kind, pred, value))
                 elif subj.upos == "PROPN" and _poss(s, head, allow) is not None:
                     # "ThomasSusan is my Friend" -- the relation is the
                     # predicate noun, the named person is the subject
@@ -553,87 +647,112 @@ def extract_keyed(text, nlp, owner=None, role="user"):
                     pred = _slug(rel)
                     value = s.text(subj, owner=o, second=second) + (
                         ", " + desc if desc else "")
-                elif _third_party_owner(s, head, subj, allow):
-                    # E (e240): the subject is a third party, but the owner
-                    # sits elsewhere in the clause -- "Susan's emotional
-                    # encouragement was crucial during MY venture". The
-                    # subject's own agreement is already correct (it is not
-                    # the owner), so render the clause as Stanza gave it,
-                    # subject included, with no re-inflection.
+                    records.append((body, kind, pred, value))
+                elif tpo or named_tpo:
+                    # E (e240) / RULE 3 (e243): the subject is a third
+                    # party -- either the owner sits elsewhere in the
+                    # clause (E), or, in a user turn, the subject is
+                    # itself NAMED and the clause is kept regardless of
+                    # whether the owner appears at all (Rule 3). The
+                    # subject's own agreement is already correct (it is
+                    # not the owner), so render the clause as Stanza gave
+                    # it, subject included, with no re-inflection.
                     full_drop = (drop - {subj.id, cop.id})
                     body = s.text(head, stop=full_drop, owner=o, second=second)
                     if ftail:
                         body = f"{body} {ftxt}".strip()
-                    if not body:
-                        continue
-                    kind = ("relationship"
-                            if any(t.upos == "PROPN" for t in s.subtree(subj))
-                            else "event")
-                    pred = f"{_slug(subj.lemma)}_{cop.lemma.lower()}"
-                    value = val
-                else:
-                    continue
+                    if body:
+                        kind = ("relationship" if named_tpo or
+                                any(t.upos == "PROPN" for t in s.subtree(subj))
+                                else "event")
+                        pred = f"{_slug(subj.lemma)}_{cop.lemma.lower()}"
+                        value = val_full
+                        records.append((body, kind, pred, value))
             else:
                 # ---- verbal, including passive: one path, not three
                 args = [c for c in s.children(head)
                         if c.deprel in ARG_DEPS and c.id != head.id
                         and c.id not in negdrop and c.id not in fdrop]
                 if sp is None and not is_self:
-                    if not _third_party_owner(s, head, subj, allow):
-                        continue
-                    # E (e240): same third-party rule, verbal predicate.
-                    full_drop = {c.id for c in s.children(head, SEPARATE)}
-                    full_drop |= negdrop | fdrop
-                    body = s.text(head, stop=full_drop, owner=o, second=second)
-                    tail = " ".join(s.text(c, owner=o, second=second)
-                                     for c in sorted(args, key=lambda c: c.id))
+                    if tpo or named_tpo:
+                        # E (e240) / RULE 3 (e243), verbal predicate.
+                        full_drop = {c.id for c in s.children(head, SEPARATE)}
+                        full_drop |= negdrop | fdrop
+                        body = s.text(head, stop=full_drop, owner=o, second=second)
+                        tail = " ".join(s.text(c, owner=o, second=second)
+                                         for c in sorted(args, key=lambda c: c.id))
+                        if ftail:
+                            ftxt = " ".join(s.text(c, owner=o, second=second)
+                                             for c in ftail)
+                            body = f"{body} {ftxt}".strip()
+                            tail = f"{tail} {ftxt}".strip()
+                        if body:
+                            kind = ("relationship" if named_tpo or
+                                    any(t.upos == "PROPN" for t in s.subtree(subj))
+                                    else "event")
+                            pred = _pred_key(s, head, args, slot=subj.lemma)
+                            value = tail
+                            records.append((body, kind, pred, value))
+                else:
+                    # e243, RULE 1: ATOM + FULL, same split as the copular
+                    # branch above, on the clause's own ARG_DEPS children.
+                    peri = _periphery(s, head)
+                    args_sorted = sorted(args, key=lambda c: c.id)
+                    args_core = ([c for c in args_sorted if c.id not in peri]
+                                 if peri else args_sorted)
+                    tail_full = " ".join(s.text(c, owner=o, second=second)
+                                          for c in args_sorted)
+                    tail_core = (" ".join(s.text(c, owner=o, second=second)
+                                           for c in args_core)
+                                 if peri else tail_full)
                     if ftail:
                         ftxt = " ".join(s.text(c, owner=o, second=second)
                                          for c in ftail)
-                        body = f"{body} {ftxt}".strip()
-                        tail = f"{tail} {ftxt}".strip()
-                    if not body:
+                        tail_full = f"{tail_full} {ftxt}".strip()
+                        tail_core = f"{tail_core} {ftxt}".strip()
+                    tail_full = re.sub(r"\s+", " ", tail_full).strip(" ,.;:")
+                    tail_core = re.sub(r"\s+", " ", tail_core).strip(" ,.;:")
+                    if not tail_full or len(tail_full.split()) > 24:
                         continue
-                    kind = ("relationship"
-                            if any(t.upos == "PROPN" for t in s.subtree(subj))
-                            else "event")
-                    pred = _pred_key(s, head, args, slot=subj.lemma)
-                    value = tail
-                else:
-                    tail = " ".join(s.text(c, owner=o, second=second)
-                                     for c in sorted(args, key=lambda c: c.id))
-                    if ftail:
-                        tail += " " + " ".join(
-                            s.text(c, owner=o, second=second) for c in ftail)
-                    tail = re.sub(r"\s+", " ", tail).strip(" ,.;:")
-                    if not tail or len(tail.split()) > 24:
-                        continue
-                    aux = [c for c in s.children(head, ("aux", "aux:pass"))]
-                    if not aux and donor is not None:
-                        # A (e240): the conjunct that borrowed its SUBJECT
-                        # from the donor also has no aux of its own when the
-                        # donor's tense/aspect is what it is coordinated
-                        # under -- "I am ... enhancing X but also
-                        # contributing to Y" needs the donor's "am" (-> "is")
-                        # to say "is contributing", not "contributing".
-                        aux = s.children(donor, ("aux", "aux:pass"))
-                    if aux:
-                        verb = _third(aux[0].text, aux[0].lemma, aux[0].feats)
-                        if neg:
-                            verb += " not"
-                        verb += " " + " ".join(
-                            # same clitic problem as `_third`, one slot along
-                            a.lemma if a.text.startswith("'") else a.text
-                            for a in aux[1:] if a is not aux[0])
-                        verb = verb.strip() + " " + head.text
+                    if not tail_core or len(tail_core.split()) > 24:
+                        tail_core, peri = tail_full, set()  # core guard
+
+                    if obj_ctrl:
+                        # e243, RULE 2: the inherited subject is an OBJECT
+                        # CONTROL construction, not a finite clause -- the
+                        # aux/agreement machinery below assumes a subject
+                        # this clause's own verb agrees with, which does
+                        # not apply to a bare gerund/participle. Best-
+                        # effort past-tense inflection is not attempted;
+                        # the gerund/participle is kept as Stanza gave it.
+                        verb = ("not " + head.text) if neg else head.text
                     else:
-                        verb = _third(head.text, head.lemma, head.feats)
-                        if neg:
-                            verb = f"does not {head.lemma}"
+                        aux = [c for c in s.children(head, ("aux", "aux:pass"))]
+                        if not aux and donor is not None:
+                            # A (e240): the conjunct that borrowed its SUBJECT
+                            # from the donor also has no aux of its own when
+                            # the donor's tense/aspect is what it is
+                            # coordinated under -- "I am ... enhancing X but
+                            # also contributing to Y" needs the donor's "am"
+                            # (-> "is") to say "is contributing", not
+                            # "contributing".
+                            aux = s.children(donor, ("aux", "aux:pass"))
+                        if aux:
+                            verb = _third(aux[0].text, aux[0].lemma, aux[0].feats)
+                            if neg:
+                                verb += " not"
+                            verb += " " + " ".join(
+                                # same clitic problem as `_third`, one slot along
+                                a.lemma if a.text.startswith("'") else a.text
+                                for a in aux[1:] if a is not aux[0])
+                            verb = verb.strip() + " " + head.text
+                        else:
+                            verb = _third(head.text, head.lemma, head.feats)
+                            if neg:
+                                verb = f"does not {head.lemma}"
                     slot_txt = (s.text(subj, stop={sp.id}, owner=o, second=second)
                                 if sp is not None else None)
                     lead = o if sp is None else f"{o}'s {slot_txt}"
-                    body = f"{lead} {verb} {tail}"
                     # E (e240): the owner-possession chain can pass through a
                     # named third party -- "my FRIEND THOMAS's support" -- in
                     # which case the fact is a relationship, not a bare event.
@@ -643,26 +762,35 @@ def extract_keyed(text, nlp, owner=None, role="user"):
                                 for t in s.subtree(subj, stop={sp.id}))
                             else "event")
                     pred = _pred_key(s, head, args, slot=slot_txt)
-                    value = ("not " if neg else "") + tail
+                    npfx = "not " if neg else ""
+                    value = npfx + tail_core             # (a): core, e243
+                    if peri and tail_core != tail_full:
+                        records.append((f"{lead} {verb} {tail_core}",
+                                         kind, pred, value))
+                    records.append((f"{lead} {verb} {tail_full}",
+                                     kind, pred, value))
 
-            body = re.sub(r"\s+", " ", body).strip(" ,.;:")
-            # D (e240): a record that STILL carries a bare first-person
-            # token in an assistant turn is the assistant talking about
-            # itself, not the user -- the safety net for whatever a clause
-            # structure this walker did not anticipate lets through.
-            if second and _FIRST_RESIDUE.search(body):
-                continue
-            key = body.lower()[:90]
-            if body and key not in seen:
-                seen.add(key)
-                # e242: evidentiality is assistant-turn only -- a user's own
-                # "I remember I used to..." is not the assistant relaying a
-                # claim about the user, it is the user's own report.
-                evidential = None
-                if second and (hedge or _report_frame(s, head)
-                               or _generic_or_expl_frame(s, head)):
-                    evidential = "report"
-                out.append((body, kind, pred,
-                            re.sub(r"\s+", " ", value).strip(" ,.;:"),
-                            evidential))
+            for body, kind, pred, value in records:
+                body = re.sub(r"\s+", " ", body).strip(" ,.;:")
+                # D (e240): a record that STILL carries a bare first-person
+                # token in an assistant turn is the assistant talking about
+                # itself, not the user -- the safety net for whatever a
+                # clause structure this walker did not anticipate lets
+                # through.
+                if second and _FIRST_RESIDUE.search(body):
+                    continue
+                key = body.lower()[:90]
+                if body and key not in seen:
+                    seen.add(key)
+                    # e242: evidentiality is assistant-turn only -- a user's
+                    # own "I remember I used to..." is not the assistant
+                    # relaying a claim about the user, it is the user's own
+                    # report.
+                    evidential = None
+                    if second and (hedge or _report_frame(s, head)
+                                   or _generic_or_expl_frame(s, head)):
+                        evidential = "report"
+                    out.append((body, kind, pred,
+                                re.sub(r"\s+", " ", value).strip(" ,.;:"),
+                                evidential))
     return out
