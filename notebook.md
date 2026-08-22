@@ -12142,3 +12142,42 @@ provisional, excluded from the benchmark artifact. Measuring now.
 On the published table this is above Mem0/Mem0-Graph/Supermemory on the
 local judge; with e176's ~9.7pt frontier-judge discount, level with Mem0.
 Still a local judge, still two users. Do not quote beyond that.
+
+---
+
+## Entry 242 — 2026-08-23 (p2: the evidential frame rule, judged on both users. Hallucination resistance +13.7 / +22.4pt at p ≤ 5e-4; recall −3.3pt (p=0.07) / −1.4pt (p=0.37). F1 0.6727 → 0.6453 on u0, 0.5661 → 0.5444 on u1. It ships: what it removes is the assistant's false memories stored as the user's.)
+
+Rule (`22625b0`): in assistant turns, a clause under the assistant's
+first-person report verb (remember/notice/hear/think…), a generic subject
+(some people/others…) or an expletive ("it seems that you…"), or in a
+sentence opened by a hedge adverb (interestingly/apparently…), is tagged
+`evidential="report"`. Kept in the product store as provisional; excluded
+from the benchmark artifact. `csubj` clauses are now extracted at all
+(the "it seems that you…" case), which is the one confound in this round.
+Artifacts rebuilt from the tree; prompted arm reused; official definition.
+
+                         P        R        F1     interference acc.   records
+    u0 e240 (prev)     0.6875   0.6585   0.6727        46.8%           5869
+    u0 e242            0.6667   0.6253   0.6453        60.5%
+    u1 e240 (prev)     0.6780   0.4859   0.5661        32.4%           6062
+    u1 e242            0.6434   0.4719   0.5444        54.8%
+
+Paired on the same gold:
+    recall        u0 lost 37 / gained 22  p=0.067     u1 lost 26 / gained 19  p=0.37
+    interference  u0 excluded 20 / stored 3  p=5e-4   u1 excluded 37 / stored 4  p=1e-7
+
+The trade predicted in e241 from source-sentence shapes (−4pt recall, +23pt
+interference) came in at −3.3/−1.4 and +13.7/+22.4. The interference gain
+on u0 is smaller than the regex count of framed sentences (29) because the
+dependency climb reaches fewer frames than a surface regex sees — worth
+one read of the 46 still-stored distractors on u0 before adding patterns.
+
+Precision moved −2.1 / −3.5pt nominal, inside one SE on both (n=93, 129
+in-gold). Both F1s fall by ~2.5pt. This is the first change in the arc that
+costs the headline number on purpose: the benchmark cannot see a stored
+hallucination except in its separate interference column, and a user can.
+**Decision: ship the rule.** The handover table should quote both columns.
+
+Mac Studio (M3 Ultra) is now the CPU worker: the e243 artifacts were built
+there in ~12 min each while this box spent 2.5 h on the e242 ones under a
+load of 30. Judge stays here — one judge for the whole series.
