@@ -42,8 +42,28 @@ NEG_LEMMAS = {"not", "n't", "never", "no", "nor", "neither"}
 NOT_ONLY = {"only", "just", "merely", "simply"}
 FIRST = {"i", "me", "my", "mine", "myself", "we", "us", "our", "ours"}
 SECOND = {"you", "your", "yours", "yourself", "yourselves"}
+# e242: HaluMem's "interference" memories are the assistant FALSELY
+# remembering things about the user. On user 0, 29/66 stored-but-wrong
+# records sit under one of these three frames in the source sentence
+# (18/162 for legitimate assistant-sourced facts) -- the assistant is not
+# asserting, it is reporting a claim, a guess, or someone else's belief. The
+# clause is still extracted (dropping it would lose real content when the
+# hedge is accurate) but tagged `evidential="report"` so a consumer can
+# choose to discount or drop it.
+REPORT_VERBS = {"remember", "recall", "notice", "hear", "think", "believe",
+                 "imagine", "understand", "see", "know", "guess", "suppose",
+                 "feel", "sense", "gather", "assume", "suspect", "wonder"}
+GENERIC_SUBJ = {"people", "some", "others", "many", "one", "everyone",
+                "someone"}
+HEDGE_ADV = {"interestingly", "curiously", "apparently", "supposedly",
+             "reportedly", "perhaps"}
 CLAUSE_DEPS = ("root", "parataxis", "conj", "advcl", "acl", "acl:relcl",
-               "ccomp", "xcomp")
+               "ccomp", "xcomp", "csubj")
+# e242: "It seems that you have been sleeping better" parses the embedded
+# clause as `csubj` of "seems", not `ccomp` -- a clausal subject, not a
+# clausal complement, for a raising verb with an expletive subject. Folded
+# into the same embedding chain the evidentiality climb walks below.
+REPORT_CHAIN = ("ccomp", "xcomp", "advcl", "csubj")
 # Arguments only. `aux`/`cop` are realised in the verb phrase and `cc`/`mark`
 # are function words, so including them put the auxiliary and the negation
 # into the TAIL as well -- "Martin Mark does not like do n't boxing". And
@@ -300,6 +320,59 @@ def _ancestor_interrogative(s, head, is_question):
     return False
 
 
+def _report_frame(s, head):
+    """e242, rule (a): is `head` a ccomp/xcomp/advcl, at any depth, under a
+    verb whose own nsubj is first person and whose lemma is a REPORT_VERB --
+    "I remember you mentioned...", "I've noticed that your preference has
+    evolved...". Climbs the same way `_ancestor_interrogative` does, because
+    the embedding can be more than one clause deep."""
+    node = head
+    while node.deprel in REPORT_CHAIN:
+        parent = s.w.get(node.head)
+        if parent is None:
+            return False
+        nsubj = next(iter(s.children(parent, ("nsubj", "nsubj:pass"))), None)
+        if (nsubj is not None and nsubj.text.lower() in FIRST
+                and parent.lemma.lower() in REPORT_VERBS):
+            return True
+        node = parent
+    return False
+
+
+def _generic_or_expl_frame(s, head):
+    """e242, rule (b): is `head` a ccomp/xcomp/advcl, at any depth, under a
+    verb with a GENERIC subject ("people say...", "some think...") or an
+    expletive construction ("it seems that...", "it's fascinating to
+    consider that..." -- the governing clause has an `expl` child)."""
+    node = head
+    while node.deprel in REPORT_CHAIN:
+        parent = s.w.get(node.head)
+        if parent is None:
+            return False
+        nsubj = next(iter(s.children(parent, ("nsubj", "nsubj:pass"))), None)
+        if nsubj is not None and nsubj.lemma.lower() in GENERIC_SUBJ:
+            return True
+        if s.children(parent, ("expl",)):
+            return True
+        node = parent
+    return False
+
+
+def _hedge_sentence(s, sent):
+    """e242, rule (c): does the sentence open on a hedge adverb --
+    "Interestingly, your health status seems to have changed..."? Checked
+    once per sentence (like `_fronted`'s discourse-adverb drop), not per
+    clause."""
+    if not sent.words:
+        return False
+    first_id = sent.words[0].id
+    root = next((w for w in sent.words if w.deprel == "root"), None)
+    if root is None:
+        return False
+    return any(c.lemma.lower() in HEDGE_ADV and c.id == first_id
+               for c in s.children(root, ("advmod",)))
+
+
 def _conj_donor(s, head):
     """A (e240): UD basic deps do not propagate a subject to a `conj` head,
     so "I am not only enhancing my well-being but also contributing to the
@@ -361,7 +434,7 @@ def _third_party_owner(s, head, subj, allow):
 
 def extract(text, nlp, owner=None, role="user"):
     """-> [(proposition, kind)]. Deterministic, no model call."""
-    return [(b, k) for b, k, _, _ in extract_keyed(text, nlp, owner, role)]
+    return [(b, k) for b, k, _, _, _ in extract_keyed(text, nlp, owner, role)]
 
 
 def _pred_key(s, head, args, slot=None):
@@ -391,9 +464,13 @@ def _slug(text):
 
 
 def extract_keyed(text, nlp, owner=None, role="user"):
-    """-> [(proposition, kind, predicate_key, value)]. `predicate_key` is the
-    attribute name a slot store files the record under and `value` the
-    complement it stores there; `extract` drops both."""
+    """-> [(proposition, kind, predicate_key, value, evidential)].
+    `predicate_key` is the attribute name a slot store files the record
+    under and `value` the complement it stores there; `extract` drops all
+    three. `evidential` is "report" (e242) when an ASSISTANT-turn clause
+    sits under a report verb, a generic subject, an expletive, or a
+    sentence-initial hedge adverb, else None -- the assistant is relaying a
+    claim, not asserting one of its own."""
     o = owner or "The user"
     second = role == "assistant"
     # D (e240): in an assistant turn "I" is the ASSISTANT, not the user --
@@ -411,6 +488,7 @@ def extract_keyed(text, nlp, owner=None, role="user"):
         # Stanza breaks sentences at terminal punctuation, so the "?" -- if
         # there is one -- is at the end. Allow for a trailing quote.
         is_q = any(w.text == "?" for w in sent.words[-3:])
+        hedge = second and _hedge_sentence(s, sent)
         for head in sent.words:
             if head.deprel not in CLAUSE_DEPS:
                 continue
@@ -577,6 +655,14 @@ def extract_keyed(text, nlp, owner=None, role="user"):
             key = body.lower()[:90]
             if body and key not in seen:
                 seen.add(key)
+                # e242: evidentiality is assistant-turn only -- a user's own
+                # "I remember I used to..." is not the assistant relaying a
+                # claim about the user, it is the user's own report.
+                evidential = None
+                if second and (hedge or _report_frame(s, head)
+                               or _generic_or_expl_frame(s, head)):
+                    evidential = "report"
                 out.append((body, kind, pred,
-                            re.sub(r"\s+", " ", value).strip(" ,.;:")))
+                            re.sub(r"\s+", " ", value).strip(" ,.;:"),
+                            evidential))
     return out

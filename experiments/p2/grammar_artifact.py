@@ -36,6 +36,10 @@ def main():
                          "grammar_check.quality. e229: surplus records cost "
                          "recall because the integrity judge reads a session's "
                          "emissions as one blob.")
+    ap.add_argument("--keep-report", action="store_true",
+                    help="e242: keep assistant-turn clauses tagged "
+                         "evidential='report' (hearsay/hedge frames) instead "
+                         "of dropping them.")
     a = ap.parse_args()
     if a.user in TRAIN_USERS:
         raise SystemExit(f"REFUSING: user {a.user} is a TRAINING user.")
@@ -50,6 +54,12 @@ def main():
         import spacy
         import grammar_parse as G
         nlp = spacy.load("en_core_web_sm")
+    # e242: only the UD path (rgx/parse.py, via the grammar_ud shim) knows
+    # evidential; the spaCy path has no extract_keyed, so pad it to the same
+    # 5-tuple shape rather than branching the loop body below.
+    extract_fn = G.extract_keyed if hasattr(G, "extract_keyed") else (
+        lambda *args, **kw: ((p, k, None, None, None)
+                             for p, k in G.extract(*args, **kw)))
 
     user = [json.loads(l) for l in open(DATA, encoding="utf-8")][a.user]
     owner = None
@@ -69,8 +79,14 @@ def main():
             if not txt or (a.scope == "user" and t.get("role") != "user"):
                 continue
             nturns += 1
-            for p, kind in G.extract(txt, nlp, owner,
-                                     role=t.get("role", "user")):
+            for p, kind, _pred, _val, evi in extract_fn(
+                    txt, nlp, owner, role=t.get("role", "user")):
+                # e242: an assistant clause tagged "report" is the assistant
+                # relaying a claim (hearsay/hedge), not asserting its own --
+                # dropped by default, kept with --keep-report.
+                if evi == "report" and not a.keep_report:
+                    dropped["report"] += 1
+                    continue
                 if not a.no_check:
                     ok, why = C.prefilter(p, txt, owner)
                     if not ok:

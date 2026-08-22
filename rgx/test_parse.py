@@ -257,6 +257,60 @@ def test_bare_pronoun_subject_is_not_treated_as_a_third_party(ex):
     assert not any("She works" in p for p in out), out
 
 
+# ---- F. evidentiality: hearsay/hedge frames in assistant turns (e242) -----
+# HaluMem's "interference" memories are the assistant FALSELY remembering
+# things about the user. On user 0, 29/66 stored-but-wrong records sit under
+# an evidential/hedge frame in the source sentence, vs. 18/162 legitimate
+# assistant-sourced facts. Tagged, not dropped, so a consumer can choose.
+
+def test_report_verb_with_first_person_subject_is_tagged_report(ex):
+    out = ex.extract_turn(
+        "I remember you mentioned your preference for fresh smoothies.",
+        role="assistant")
+    assert len(out) == 1, out
+    assert "mentioned" in out[0].text
+    assert out[0].evidential == "report", out
+
+
+def test_report_verb_perfect_aspect_is_tagged_report(ex):
+    out = ex.extract_turn(
+        "I've noticed that your preference for classical music has evolved "
+        "to include its therapeutic benefits.", role="assistant")
+    matches = [r for r in out if "evolved" in r.text]
+    assert matches, out
+    assert matches[0].evidential == "report", out
+
+
+def test_plain_second_person_restatement_is_not_tagged(ex):
+    out = ex.extract_turn(
+        "Your approach to gaming now includes a cautious evaluation of "
+        "cognitive benefits.", role="assistant")
+    assert out
+    assert all(r.evidential is None for r in out), out
+
+
+def test_sentence_initial_hedge_adverb_is_tagged_report(ex):
+    out = ex.extract_turn(
+        "Interestingly, your health status seems to have changed to "
+        "Excellent.", role="assistant")
+    assert out
+    assert any(r.evidential == "report" for r in out), out
+
+
+def test_evidentiality_is_assistant_turn_only(ex):
+    out = ex.extract_turn("I remember I used to avoid skydiving.",
+                          role="user")
+    assert out
+    assert all(r.evidential is None for r in out), out
+
+
+def test_expletive_construction_is_tagged_report(ex):
+    out = ex.extract_turn("It seems that you have been sleeping better.",
+                          role="assistant")
+    assert out
+    assert any(r.evidential == "report" for r in out), out
+
+
 # ---- F. `_third`'s spelling guards (e238) ----------------------------------
 # `endswith("ed") or endswith("s")` is a SPELLING test, not a morphology one,
 # and it fired on ordinary present-tense verbs that happen to end that way:

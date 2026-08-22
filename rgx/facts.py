@@ -24,7 +24,7 @@ def to_fact(rec):
         return None
     return {"attribute": rec.predicate, "value": rec.value,
             "text": rec.text, "kind": rec.kind, "turn": rec.turn,
-            "role": rec.role}
+            "role": rec.role, "evidential": rec.evidential}
 
 
 def turn_hash(text, namespace=None):
