@@ -12090,3 +12090,55 @@ morphology and e237 escapes, rebuild both artifacts, judge with `--reuse`.
 Interference policy (tier assistant-sourced facts provisional until a user
 turn corroborates — the store already has the `asst` counter) is a separate
 experiment with a recall/interference trade-off, not part of this round.
+
+---
+
+## Entry 241 — 2026-08-22 (p2: the e240 parser round, judged on both users. u0 F1 0.5907 → 0.6727, u1 0.44 → 0.5661 (first u1 F1). Recall paired: u0 lost 27 / gained 88, p=9.9e-09; u1 lost 41 / gained 63, p=0.039. Precision flat at +39% records. The cost is in the interference column: 80% → 47% / 32%.)
+
+One measured change: rules A–G from e240 (shared-subject conj, fronted
+modifiers, "not only", assistant-I ≠ owner, third-party subjects, `_third`
+morphology, interrogative escapes). Artifacts rebuilt from the tree at
+`62d0568`; prompted arm reused; official recall definition throughout.
+
+                         P        R        F1      records   interference acc.
+    u0 prompted 14B    0.6735   0.2705   0.3860     997         85.5%
+    u0 parser, e239    0.6782   0.5233   0.5907    4216         80.6%
+    u0 parser, e240    0.6875   0.6585   0.6727    5869         46.8%
+    u1 prompted 14B    0.6529   0.2369   0.3477    1276         84.8%
+    u1 parser, e239       --    0.4418     --      4587         80.1%
+    u1 parser, e240    0.6780   0.4859   0.5661    6062         32.4%
+
+Paired on the same non-interference gold, new parser vs previous:
+u0 lost 27, gained 88, McNemar p=9.9e-09; u1 lost 41, gained 63, p=0.039.
+Precision unchanged within one SE on both users while the store grew 39%
+and 32% — §5k, fourth time. u1's prompted precision (0.6529) is measured
+for the first time; the previous u1 F1 in the handover (0.4895) was built
+on the all-gold recall and an unmeasured precision, so it is withdrawn in
+favour of this row.
+
+**The gain is not uniform.** u0 +13.5pt, u1 +4.4pt. u1 has more assistant
+restatement and less first-person narrative, and rules A/B/E are user-turn
+rules. Not yet diagnosed per rule — the artifacts were built as one change
+on purpose.
+
+**The cost is real and it is the interference column.** The parser now
+stores most of the assistant's false memories about the user. Read, not
+theorised (u0, source-sentence classification, no judge calls):
+
+    source sentence shape          stored distractors (66)   legitimate asst-sourced recalls (162)
+    evidential frame                        29                          18
+      ("I remember you…", "I've noticed…", "some people…")
+    irrealis (could/might/consider)         15                          32
+    plain restatement                       22                         112
+
+So a frame rule buys ~23pt of interference accuracy for ~4pt of recall;
+an irrealis rule is a bad trade; plain restatements are indistinguishable
+by grammar and belong to corroboration (the store's `asst` tier). The
+frame rule is built (e242, `22625b0`): clauses under the assistant's
+first-person report verbs, generic subjects or expletives, or a hedge
+adverb, are tagged `evidential="report"` — kept in the product as
+provisional, excluded from the benchmark artifact. Measuring now.
+
+On the published table this is above Mem0/Mem0-Graph/Supermemory on the
+local judge; with e176's ~9.7pt frontier-judge discount, level with Mem0.
+Still a local judge, still two users. Do not quote beyond that.
