@@ -12293,3 +12293,47 @@ LLM. Not designed yet, deliberately: `eval_rgp2` builds the update
 artifact as `mem.recall(memory_content)`, and until the renderer fix
 (`21df0cf`) those returns read "Martin Mark's is is open". The rerun
 decides how much of the 88–91% omission was rendering.
+
+---
+
+## Entry 246 — 2026-08-23 (p2: renderer fixed, re-judged end to end. QA level with the LLM extractor (59.8 vs 59.1), UPDATING 4.3% → 12.6% from rendering alone. The two gaps left are in the STORE path: it ingests hearsay as fact (interference 41% vs 87%) and loses recall between cache and artifact (0.24 vs 0.61).)
+
+    u0, official harness          LLM extr.   rgx broken   rgx fixed (21df0cf)
+    QA correct                      59.1%       60.4%        59.8%
+    QA hallucination                18.9%       15.9%        17.7%
+    QA omission                     22.0%       23.8%        22.6%
+    update correct                   4.3%        3.7%        12.6%
+    update omission                 91.3%       88.1%        77.0%
+    update hallucination             3.5%        8.1%         8.1%
+    store extraction F1             0.346       0.295        0.356
+    store recall / target acc.    .232/.678   .194/.612    .240/.689
+    store interference acc.         87.2%       40.0%        40.8%
+    stored facts (asserted)      1134 (260)  3464 (1130)  3464 (1130)
+
+Zero extraction calls in either arm (cache 2806 lines before and after).
+Judging the rgx store takes ~7 h with the GPU to itself — 3464 facts each
+scored alone in the accuracy phase.
+
+The update jump is the e245 suspicion confirmed: the update artifact is
+`recall(new_memory)`, and until now it returned "Martin Mark's is is open".
+No update mechanism exists yet; this is what the store already knew,
+rendered legibly. The remaining 77% omission is where a mechanism would go.
+
+**Store path, not parser, is now the bottleneck — two readings:**
+1. Interference 41% vs the LLM arm's 87%: the LLM arm read user turns only;
+   the rgx cache covers all turns and `ingest_user`/`build_facts` ignore the
+   `evidential` field the adapter writes, so the assistant's false memories
+   are stored and rendered as facts. The benchmark artifact (e242) drops
+   them; the product must too — or tier them as hearsay until a user turn
+   corroborates.
+2. Recall 0.24 at the store vs 0.61 at the artifact level, same parser,
+   same user. 6103 propositions → 3464 stored facts → per-session "new"
+   artifact. Where they go (value filters, attribute exclusions, cluster
+   merges, the session-incremental attribution) is not yet counted.
+
+Also read this entry: the 48 distractors still stored on u0 after e242 —
+9 fully, 39 partially; all but one assistant-sourced; the framed ones are
+gone and what remains is plain restatement repeated across the assistant's
+turn (corroboration, not grammar). Four regression tests added (89fbeef).
+Queued parser bug from that read: plural subject with owner possessive
+gets a singular verb ("your preferences reflect" → "reflects").
