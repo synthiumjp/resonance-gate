@@ -12181,3 +12181,47 @@ hallucination except in its separate interference column, and a user can.
 Mac Studio (M3 Ultra) is now the CPU worker: the e243 artifacts were built
 there in ~12 min each while this box spent 2.5 h on the e242 ones under a
 load of 30. Judge stays here — one judge for the whole series.
+
+---
+
+## Entry 243 — 2026-08-23 (p2: atom+full emission, object-control gerunds, named third-party subjects — BENCHMARK-NEUTRAL on both users, opposite-sign nulls. The diagnosed lever (named 3P subjects, 52/78 misses) did not convert: the records are there and match the gold's content, but the gold names the RELATION and the judge wants it. Kept on product grounds.)
+
+Artifacts built on the Mac (`8b30efa`), judged here against e242's
+artifacts, prompted arm reused, official definition.
+
+                         P        R        F1     interference acc.   records
+    u0 e242            0.6667   0.6253   0.6453        60.5%           5620
+    u0 e243            0.7092   0.6075   0.6544        61.3%           6103
+    u1 e242            0.6434   0.4719   0.5444        54.8%
+    u1 e243            0.6700   0.4880   0.5647        53.7%
+
+    paired recall   u0 lost 30 / gained 22  p=0.33     u1 lost 26 / gained 34  p=0.37
+
+Two nulls, opposite signs — the e239 shape. Blob grew only +4% chars
+(+9% records, shorter on average), so crowding is not the story.
+Precision up nominally on both (+4.3 / +2.7pt; n≈100 in-gold, inside one
+SE) — core records score better ALONE than the long ones they duplicate.
+
+**Why rule 3 did not score, read off the misses.** Every missed
+Relationship gold on u0 has a v5 record at 0.75–1.00 content overlap:
+
+    GOLD  Martin's colleague Joshua's collaborative approach positively influenced Martin's leadership style.
+    REC   Joshua's approach has definitely influenced Martin Mark's leadership style positively
+    GOLD  Martin's friend Susan provided crucial support and encouragement during his job transition…
+    REC   Susan's support and encouragement inspire Martin Mark to maintain Martin Mark's focus…
+
+The gold states the relation ("colleague", "friend"); the record does not,
+because it was said turns earlier ("Joshua is my colleague"). That is
+entity linking — e220 measured it at +0.6pt pooled and closed it for F1.
+Relationship gold is 27 of 575 points, so the ceiling was ~2pt all along;
+the e240 diagnosis counted the subjects correctly and mis-sized the prize.
+For the PRODUCT the linking is the point (a person node carrying its
+relation), and it belongs to the graph work, not the parser.
+
+Also seen in the read: "The support Martin Mark've received been crucial"
+— a clitic 've on a relative clause whose subject was shifted; agreement
+inside relative clauses is not done. Queued.
+
+**Decision: keep all three.** Atom+full gives the store a short `value`
+per slot; rule 3 stores the user's world (third parties) with receipts;
+object control is a correctness fix. Benchmark cost: none measurable.
