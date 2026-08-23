@@ -67,6 +67,23 @@ server on WSL :8090; Stanza rebuilds go to the Mac Studio (see memory
 cache, u0) — in flight at time of writing; then update-signal grammar
 (used to / no longer / from X to Y) against the updating metric.
 
+
+### Product path (e244–e247, 2026-08-23)
+
+End-to-end on u0 through the official harness, rgx cache vs the LLM cache,
+zero extraction calls: **QA 59.8% vs 59.1% correct, hallucination 17.7 vs
+18.9, updating 12.6% vs 4.3%** — the LLM leaves the write path at no QA
+cost. Found and fixed in the STORE path, not the parser: (1) facts rendered
+through the LLM-era template ("Martin Mark's is is open") — the proposition
+`text` now rides through ingest/cluster/graph (`21df0cf`); (2) hearsay
+ingested as fact — `evidential=report` mentions never corroborate, hearsay-
+only slots live in a separate tier (`d23fce8`); (3) the per-session artifact
+credited only first mentions while 35% of gold restates earlier facts — now
+credits any fact with a receipt in the session (`43c193b`); (4) the attribute
+exclusion regex matched "path" inside `career_paths`. Both arms re-judged
+after (3)+(4): see notebook e247 when it lands. Judging the rgx store takes
+~7 h on the WSL GPU; the accuracy phase scores every stored fact alone.
+
 ### Published comparison (do NOT quote yet)
 HaluMem-Medium extraction F1: Memobase 25.13 · Supermemory 56.90 · Mem0 57.31 ·
 Mem0-Graph 57.85 · MemOS 79.70 · MOSAIC 86.77. Our judge is local and e176
