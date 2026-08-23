@@ -295,11 +295,28 @@ def process_user(idx, user_data, cache_dir=DEFAULT_CACHE_DIR):
         # inflation of our count against theirs -- measured at 10.1% of
         # emissions, ratio 1.66x -> 1.49x.
         if os.environ.get("RG_EMIT_ONCE") == "1":
-            new_facts = [_fact_str(nd, owner=_owner) for nid, nd in cur_items
-                         if nid not in prev_state]
+            new_ids = {nid for nid, nd in cur_items if nid not in prev_state}
         else:
-            new_facts = [_fact_str(nd, owner=_owner) for nid, nd in cur_items
-                         if prev_state.get(nid) != nd["tier"]]
+            new_ids = {nid for nid, nd in cur_items
+                       if prev_state.get(nid) != nd["tier"]}
+        # RESTATEMENT CREDIT (entry 246): a read of the gold found 248/718
+        # gold memory points sit in a session LATER than the fact's first
+        # appearance -- a restatement earns nothing under new-only emission,
+        # while every other frame's per-session extractor lists it again
+        # every time it is said. A fact counts as "in this session" if any of
+        # its receipts is tagged this session's conv id (nd["convs"] keys are
+        # the f"s{si}" tags ingest_user writes), even when it isn't new or
+        # tier-changed. Order: new facts first (unchanged), then restated
+        # ones -- disjoint by construction (new_ids excluded), so no dedupe
+        # pass is needed. QA (search_memories/answer_question) is untouched:
+        # it already reads the whole as-of-session store, not this list.
+        sess_tag = f"s{k}"
+        restated_ids = {nid for nid, nd in cur_items
+                        if nid not in new_ids and sess_tag in nd["convs"]}
+        new_facts = [_fact_str(nd, owner=_owner) for nid, nd in cur_items
+                    if nid in new_ids]
+        new_facts += [_fact_str(nd, owner=_owner) for nid, nd in cur_items
+                     if nid in restated_ids]
         prev_state = cur_state
 
         new_session = {

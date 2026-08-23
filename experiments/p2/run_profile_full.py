@@ -59,9 +59,18 @@ _VACUOUS_VALUE = {"venv", "file", "files", "folder", "directory", "repo",
 # an OS is not a place
 _OS_WORDS = {"ubuntu", "linux", "windows", "macos", "debian", "arch", "wsl",
              "wsl2"}
-# transient/technical ATTRIBUTE patterns (current_venv, *_directory, ...)
-_EXCLUDE_ATTR_RX = re.compile(r"venv|directory|folder|path|filename|_file\b|"
-                              r"\bfile_", re.I)
+# transient/technical ATTRIBUTE patterns (current_venv, *_directory, ...).
+# Every alternative is bounded by (?<![a-z])...(?![a-z]) rather than \b:
+# predicate keys are underscore_joined ("optimism_about_exploring_new_
+# career_paths"), and \b does NOT fire at "_" (it is a \w character, same
+# class as a letter) -- so the old bare "path" alternative matched inside
+# "career_paths" too, silently dropping 45 real rgx facts on user 0. The
+# letter-class lookaround treats "_" (and string start/end) as a boundary
+# but a following/preceding LETTER (e.g. the "s" in "paths") as not, so
+# "model_path" still matches while "career_paths" no longer does.
+_EXCLUDE_ATTR_RX = re.compile(
+    r"(?<![a-z])(?:venv|directory|folder|path|filename)(?![a-z])"
+    r"|_file\b|\bfile_", re.I)
 # 2. machine/device tokens are not a LOCATION (studio = the ssh box, pc, nas).
 _DEVICE_WORDS = {"pc", "nas", "studio", "server", "host", "localhost", "laptop",
                  "desktop", "machine", "vm", "arc", "node", "box"}

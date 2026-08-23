@@ -213,3 +213,23 @@ def test_all_stopword_value_does_not_crash():
     # satisfy >=0.5 overlap against another empty set via len(&)==0, so they
     # stay separate rather than crashing.
     assert len(clusters) == 2
+
+
+# --------------------------------------------------------------------------
+# _EXCLUDE_ATTR_RX word-boundedness (entry 246): "path" must not match
+# inside "career_paths" -- underscore-joined predicate keys mean \b does not
+# fire at "_" (it is a \w character), so a bare "path" alternative silently
+# dropped every "...career_paths"-shaped attribute (45 real rgx facts on
+# user 0). Real file/dir-path attributes must still be caught.
+# --------------------------------------------------------------------------
+
+def test_exclude_attr_rx_keeps_career_paths_drops_model_path():
+    from run_profile_full import _EXCLUDE_ATTR_RX
+    kept = ["optimism_about_exploring_new_career_paths", "career_paths",
+            "pathway_to_success", "venvs"]
+    dropped = ["model_path", "current_directory", "current_venv",
+              "folder_name", "filename", "file_modified", "data_file"]
+    for attr in kept:
+        assert not _EXCLUDE_ATTR_RX.search(attr), attr
+    for attr in dropped:
+        assert _EXCLUDE_ATTR_RX.search(attr), attr
