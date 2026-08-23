@@ -87,6 +87,38 @@ def test_correction_confirm_promotes_provisional():
     assert m.g.audit()["pass"]
 
 
+def _memory_with_hearsay():
+    from test_wire import _hearsay_fact
+    facts = [_fact(41, "location", "melbourne", _convs(*range(10)))]
+    prov = [_fact(1, "allergy", "penicillin", _convs(30))]
+    hearsay = [_hearsay_fact(3, "location", "reykjavik", _convs(40, 41, 42))]
+    g = WireGraph.from_facts(facts, n_convs=50, provisional=prov, hearsay=hearsay)
+    return Memory(g)
+
+
+def test_hearsay_absent_from_profile_and_asserted_unconfirmed():
+    m = _memory_with_hearsay()
+    assert all(f["value"] != "reykjavik" for f in m.profile())
+    r = m.recall("reykjavik")
+    assert r["found"] is True
+    assert r["asserted"] == [] and r["unconfirmed"] == []
+    assert [f["value"] for f in r["hearsay"]] == ["reykjavik"]
+    assert r["hearsay"][0]["status"] == "hearsay"
+    assert r["hearsay"][0]["mentions"] == 3
+
+
+def test_hearsay_absent_from_context_block():
+    m = _memory_with_hearsay()
+    # recall() found the hearsay match (not abstention), but context_block's
+    # asserted/wired/unconfirmed lines must never render an assistant claim
+    # as if it were a stored user fact.
+    b = m.context_block(query="reykjavik")
+    assert "reykjavik" not in b
+    assert "UNKNOWN" in b            # do-not-invent rule still present
+    b2 = m.context_block()           # profile block (query=None)
+    assert "reykjavik" not in b2
+
+
 def test_context_block_is_verbatim_and_rule_bearing():
     m = _memory()
     b = m.context_block(query="melbourne")

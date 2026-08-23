@@ -49,9 +49,10 @@ class Memory:
         wiring -- so graph, report and recall stay consistent. The graph-level
         apply_corrections below remains for runtime (in-session) deny/confirm."""
         from run_wire import build_facts
-        facts, prov, n_convs, titles, _ = build_facts(conversations_path,
-                                                      min_mentions)
-        g = WireGraph.from_facts(facts, n_convs=n_convs, provisional=prov)
+        facts, prov, hearsay, n_convs, titles, _ = build_facts(
+            conversations_path, min_mentions)
+        g = WireGraph.from_facts(facts, n_convs=n_convs, provisional=prov,
+                                 hearsay=hearsay)
         return cls(g, titles)
 
     def apply_corrections(self, corrections):
@@ -107,7 +108,13 @@ class Memory:
                                   for e in d["path"]]}
                          for d in r["neighbourhood"]],
                "unconfirmed": [self._fact(p["node"], provisional=True)
-                               for p in r.get("provisional", [])]}
+                               for p in r.get("provisional", [])],
+               # entry 246: NOT surfaced in "asserted"/"unconfirmed" -- an
+               # assistant claim about the user is neither a corroborated nor
+               # an unconfirmed USER fact. Kept under its own key so a caller
+               # (the MCP surface) can show it on request, receipted, without
+               # it ever being volunteered as the user's own memory.
+               "hearsay": [self._fact(h["node"]) for h in r.get("hearsay", [])]}
         return out
 
     def profile(self, top=40):
@@ -185,6 +192,12 @@ class Memory:
         recs = sorted(nd["convs"].items(), key=lambda kv: kv[1], reverse=True)
         if nd.get("owner_confirmed"):
             status = "owner-confirmed"
+        elif nd["tier"] == "hearsay":
+            # entry 246: an assistant claim ABOUT the user, never asserted by
+            # the user -- distinct from "unconfirmed-single-mention" (which
+            # the user themself said once) so a caller can't mistake one for
+            # the other.
+            status = "hearsay"
         elif nd["tier"] == "provisional" or provisional:
             status = "unconfirmed-single-mention"
         else:

@@ -213,6 +213,10 @@ def correct_facts(facts, prov, corrections):
             # text across corrections, so a corrected fact still renders as
             # prose instead of falling back to the attribute/value atom.
             text = f[5] if len(f) > 5 else None
+            # entry 246: preserve the hearsay-mention count across corrections
+            # too (asserted/provisional facts may carry n_hearsay>0 alongside
+            # their real n -- "kept on the node, nothing else changes").
+            n_hearsay = f[6] if len(f) > 6 else 0
             dest, drop = tier, False
             for c in corrections:
                 if not _match(c, attr, label.lower()):
@@ -232,17 +236,17 @@ def correct_facts(facts, prov, corrections):
                     dest = "asserted"
                     log.append(("confirmed", f"{attr}={label}"))
             if not drop:
-                out[dest].append((n, attr, label, recs, toks, text))
+                out[dest].append((n, attr, label, recs, toks, text, n_hearsay))
     # merge facts that now share (attr, label) -- e.g. after a retype
     merged = {}
-    for n, attr, label, recs, toks, text in out["asserted"]:
+    for n, attr, label, recs, toks, text, n_hearsay in out["asserted"]:
         k = (attr, label)
         if k in merged:
             m = merged[k]
             merged[k] = (m[0] + n, attr, label, m[3] + recs, m[4] | toks,
-                        m[5] or text)
+                        m[5] or text, m[6] + n_hearsay)
         else:
-            merged[k] = (n, attr, label, recs, toks, text)
+            merged[k] = (n, attr, label, recs, toks, text, n_hearsay)
     facts_out = sorted(merged.values(), key=lambda f: -f[0])
     return facts_out, out["prov"], log
 
@@ -259,11 +263,18 @@ class WireGraph:
         self.n_convs = 1
         self.nodes = {}        # ASSERTED tier: corroborated, wired, volunteered
         self.provisional = {}  # PROVISIONAL tier: single-mention, direct-match only
+        # HEARSAY tier (entry 246): every mention of this slot/value came from
+        # an assistant clause tagged evidential=="report" -- the assistant's
+        # claim ABOUT the user, never something the user said. Stored (kept
+        # auditable with receipts) but never asserted, never wired, never
+        # volunteered in a profile/context/extraction read -- callers that
+        # want it ask for it explicitly (recall()'s "hearsay" key).
+        self.hearsay = {}
         self.edges = {}
         self.adj = defaultdict(dict)   # id -> {neighbour_id: edge}
 
     @staticmethod
-    def _mk_node(n, attr, label, recs, tier, toks=None, text=None):
+    def _mk_node(n, attr, label, recs, tier, toks=None, text=None, n_hearsay=0):
         """toks: the value-cluster's token UNION (all merged variants -- each a
         receipted real mention), so a query can match any variant, not just the
         winning label. Still non-generative: tokens come from stored mentions.
@@ -271,35 +282,57 @@ class WireGraph:
         text: the deterministic (rgx) extractor's full proposition for this
         fact, carried through from GROW (entry 244), or None for LLM-cache
         facts and any other caller that doesn't supply it. Renderers use it
-        in place of the "<owner>'s {attr} is {value}" template when present."""
+        in place of the "<owner>'s {attr} is {value}" template when present.
+
+        n_hearsay: count of mentions whose evidential=="report" (an assistant
+        clause relaying a claim ABOUT the user, not the user's own words;
+        entry 246). These never count toward `n` -- a hearsay-only slot
+        arrives here with n==0, tier=="hearsay"; n_mentions then falls back
+        to n_hearsay so a surfaced hearsay fact doesn't read as "x0 mentions".
+        Asserted/provisional nodes are unaffected (n is always >=1 there, so
+        `int(n) or ...` never reaches the fallback)."""
         convs = {}
         for date, cid in recs:
             convs.setdefault(cid, date)
         return {"id": f"{attr}={label}", "attr": attr, "value": label,
-                "n_mentions": int(n), "convs": convs, "tier": tier,
-                "toks": set(toks) if toks else _tokens(label),
-                "text": text}
+                "n_mentions": int(n) or int(n_hearsay), "convs": convs,
+                "tier": tier, "toks": set(toks) if toks else _tokens(label),
+                "text": text, "n_hearsay": int(n_hearsay)}
 
     # ---------------- construction ----------------
 
     @classmethod
-    def from_facts(cls, facts, n_convs, min_cooc=MIN_COOC, provisional=None):
+    def from_facts(cls, facts, n_convs, min_cooc=MIN_COOC, provisional=None,
+                   hearsay=None):
         """facts: [(n_mentions, attr, value_label, receipts)] with receipts a list
         of (date, conv_id) -- exactly the GROW layer's corroborated readout.
         n_convs: total conversations in the stream (the association base rate).
         provisional: same shape, the single-mention tail -- stored for direct
-        query match only, never wired, never volunteered."""
+        query match only, never wired, never volunteered.
+        hearsay: same shape, slots whose ONLY mentions are assistant hearsay
+        (evidential=="report", entry 246) -- n is 0, n_hearsay > 0. Stored for
+        audit/direct-request only: never wired, never volunteered in a
+        profile/context/extraction read, and (unlike provisional) never
+        promoted by further hearsay mentions."""
         g = cls(min_cooc)
         g.n_convs = max(int(n_convs), 1)
         for f in facts:
             nd = cls._mk_node(*f[:4], "asserted", toks=f[4] if len(f) > 4 else None,
-                              text=f[5] if len(f) > 5 else None)
+                              text=f[5] if len(f) > 5 else None,
+                              n_hearsay=f[6] if len(f) > 6 else 0)
             g.nodes[nd["id"]] = nd
         for f in (provisional or []):
             nd = cls._mk_node(*f[:4], "provisional", toks=f[4] if len(f) > 4 else None,
-                              text=f[5] if len(f) > 5 else None)
+                              text=f[5] if len(f) > 5 else None,
+                              n_hearsay=f[6] if len(f) > 6 else 0)
             if nd["id"] not in g.nodes:
                 g.provisional[nd["id"]] = nd
+        for f in (hearsay or []):
+            nd = cls._mk_node(*f[:4], "hearsay", toks=f[4] if len(f) > 4 else None,
+                              text=f[5] if len(f) > 5 else None,
+                              n_hearsay=f[6] if len(f) > 6 else 0)
+            if nd["id"] not in g.nodes and nd["id"] not in g.provisional:
+                g.hearsay[nd["id"]] = nd
         # W1: decide supersession ONCE, here, at write time -- not on every
         # read. Provisional nodes take part: a superseded job title is usually
         # single-mention, so excluding them would miss most of the changes.
@@ -430,14 +463,27 @@ class WireGraph:
         THE HYBRID: single-mention facts matching the query are returned under
         "provisional" -- labeled, receipted quotes, never assertions, never
         spread from. A provisional-only match is NOT abstention (the memory HAS
-        seen it, once); abstention means never seen at all."""
+        seen it, once); abstention means never seen at all.
+
+        HEARSAY (entry 246): slots whose only mentions are assistant hearsay
+        (evidential=="report") match under "hearsay" -- same shape as
+        "provisional" (labeled, receipted, never spread from), but never
+        promoted by further hearsay mentions (unlike provisional, which one
+        real user confirmation promotes). A hearsay-only match is also NOT
+        abstention: the memory has a receipted assistant claim, even though
+        it never asserts it as the user's own fact."""
         seeds = self.match(query)
         prov = [{"node": self.provisional[nid], "score": sc}
                 for sc, nid in self.match(query, store=self.provisional)]
+        hear = [{"node": self.hearsay[nid], "score": sc}
+                for sc, nid in self.match(query, store=self.hearsay)]
         if not seeds:
-            if prov:
+            if prov or hear:
+                note = ("unconfirmed: seen once, never corroborated" if prov
+                        else "hearsay only: an assistant claim about the "
+                             "user, never asserted by the user")
                 return {"seeds": [], "neighbourhood": [], "provisional": prov,
-                        "note": "unconfirmed: seen once, never corroborated"}
+                        "hearsay": hear, "note": note}
             return {"abstain": True, "query": query,
                     "reason": "no stored fact matches the query"}
         act = {nid: sc for sc, nid in seeds}
@@ -461,7 +507,8 @@ class WireGraph:
                  for nid in act if nid not in seed_ids]
         neigh.sort(key=lambda d: -d["activation"])
         return {"seeds": [self.nodes[nid] for _, nid in seeds],
-                "neighbourhood": neigh[:top], "provisional": prov}
+                "neighbourhood": neigh[:top], "provisional": prov,
+                "hearsay": hear}
 
     # ---------------- the acceptance test ----------------
 

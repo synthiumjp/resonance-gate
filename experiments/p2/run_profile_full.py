@@ -217,6 +217,11 @@ def _cluster(entries):
             smaller = min(len(toks), len(cl["core"])) or 1
             if len(toks & cl["core"]) / smaller >= 0.5:
                 cl["n"] += d["n"]
+                # hearsay tier (e246): mentions with evidential=="report" are
+                # counted separately (n_hearsay) and never in "n" -- summed
+                # across merges the same way "n" is, so a cluster's hearsay
+                # count reflects every merged variant's hearsay mentions.
+                cl["n_hearsay"] = cl.get("n_hearsay", 0) + d.get("n_hearsay", 0)
                 cl["toks"] |= toks
                 cl["recs"].extend(d["recs"])
                 placed = True
@@ -234,7 +239,10 @@ def _cluster(entries):
                              # processed in that order) -- not overwritten
                              # by later merges, so it stays the winning
                              # label's own proposition text.
-                             "text": d.get("text")})
+                             "text": d.get("text"),
+                             # entry 246: hearsay-mention count for this
+                             # (first) variant; see the merge branch above.
+                             "n_hearsay": d.get("n_hearsay", 0)})
     return clusters
 
 

@@ -59,8 +59,12 @@ def quarantine():
 def build_facts(path, min_mentions=2):
     """Corroborated facts with receipts, rebuilt from the cache exactly as
     run_profile_full readout (canon + hygiene + clustering). Returns
-    (facts, provisional, n_convs, titles, n_uncached) -- provisional is the
-    single-mention tail (kept for direct-match-only readout, the hybrid)."""
+    (facts, provisional, hearsay, n_convs, titles, n_uncached) -- provisional
+    is the single-mention tail (kept for direct-match-only readout, the
+    hybrid); hearsay (entry 246) is slots whose ONLY mentions are assistant
+    clauses tagged evidential=="report" (the assistant's claim ABOUT the
+    user, e.g. "I remember you saying...", not the user's own words) --
+    stored with receipts but never asserted or volunteered."""
     _sfx = ("_v5" if os.environ.get("RG_EXTRACT_V5")
             else "_v4" if os.environ.get("RG_EXTRACT_V4")
             else "_v3" if os.environ.get("RG_EXTRACT_V3")
@@ -111,22 +115,38 @@ def build_facts(path, min_mentions=2):
                 continue
             subj = fct.get("subject")   # v3 world facts namespace the slot
             key = f"{subj}:{a}" if subj else a
-            slots[key][v]["n"] += 1
+            # HEARSAY TIER (entry 246): a clause the rgx parser tagged
+            # evidential=="report" is an ASSISTANT clause relaying a claim
+            # ABOUT the user ("I remember you saying...", "some people find
+            # that you...") -- not the user's own words. It must never count
+            # toward "n" (corroboration), or the store treats the assistant's
+            # invention as if the user had said it themselves. Receipted
+            # regardless, so it stays auditable.
+            if fct.get("evidential") == "report":
+                slots[key][v]["n_hearsay"] = slots[key][v].get("n_hearsay", 0) + 1
+            else:
+                slots[key][v]["n"] += 1
             slots[key][v]["recs"].append((date, uuid))
             # rgx cache facts carry the full proposition in "text"; LLM cache
             # facts don't (entry 244). Keep the FIRST mention's text so
             # renderers can use it instead of the bare attribute/value atom.
             slots[key][v].setdefault("text", fct.get("text"))
-    facts, prov = [], []
+    facts, prov, hearsay = [], [], []
     for attr, entries in slots.items():
         for cl in PF._cluster(entries):
-            tgt = facts if cl["n"] >= min_mentions else prov
+            row = (cl["n"], attr, cl["label"], cl["recs"], cl["toks"],
+                  cl.get("text"), cl.get("n_hearsay", 0))
             # cl["toks"]: the cluster's merged-variant token union, so queries
             # match any receipted variant, not just the winning label
-            tgt.append((cl["n"], attr, cl["label"], cl["recs"], cl["toks"],
-                       cl.get("text")))
+            if cl["n"] == 0 and cl.get("n_hearsay", 0) > 0:
+                hearsay.append(row)       # hearsay-only: never asserted/prov
+            elif cl["n"] >= min_mentions:
+                facts.append(row)
+            else:
+                prov.append(row)
     facts.sort(key=lambda f: -f[0])
     prov.sort(key=lambda f: -f[0])
+    hearsay.sort(key=lambda f: -f[6])
     # OWNER-STATED seed facts (ground truth, e.g. entities in the user's world):
     # asserted directly (n=2), receipted "owner-stated". Merged below.
     owner_path = os.path.join(os.path.dirname(path), "owner_facts.jsonl")
@@ -155,7 +175,7 @@ def build_facts(path, min_mentions=2):
         from collections import Counter
         print("owner corrections applied:", dict(Counter(a for a, _ in log)))
     n_convs = len({u for _, u, _, _ in prose})
-    return facts, prov, n_convs, titles, uncached
+    return facts, prov, hearsay, n_convs, titles, uncached
 
 
 def _edge_lines(f, g, e, titles, max_recs=4):
@@ -186,12 +206,14 @@ def main():
     except Exception:
         pass
 
-    facts, prov, n_convs, titles, uncached = build_facts(path, min_mentions)
+    facts, prov, hearsay, n_convs, titles, uncached = build_facts(path, min_mentions)
     print(f"corroborated facts (>= {min_mentions} mentions): {len(facts)}  "
           f"+ {len(prov)} provisional (single-mention, direct-match only)  "
+          f"+ {len(hearsay)} hearsay-only (assistant claims, never asserted)  "
           f"over {n_convs} conversations  ({uncached} uncached turns skipped)")
 
-    g = WireGraph.from_facts(facts, n_convs=n_convs, provisional=prov)
+    g = WireGraph.from_facts(facts, n_convs=n_convs, provisional=prov,
+                             hearsay=hearsay)
     degs = sorted((len(g.adj[n]) for n in g.nodes), reverse=True)
     wired = sum(1 for d in degs if d)
     print(f"\n=== WIRE GRAPH ===")

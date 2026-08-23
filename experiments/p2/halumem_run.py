@@ -156,7 +156,20 @@ def ingest_user(user, cache_path, min_mentions=2):
                     continue
                 a = PF.reslot_attr(a, v)
                 key = f"{subj}:{a}" if subj else a
-                slots[key][v]["n"] += 1
+                # HEARSAY TIER (entry 246): a clause the rgx parser tagged
+                # evidential=="report" is an ASSISTANT clause relaying a
+                # claim ABOUT the user ("I remember you saying...", "some
+                # people find that you...") -- not the user's own words. It
+                # must never count toward "n" (corroboration), or the store
+                # treats the assistant's invention as if the user had said it
+                # themselves. Receipted regardless, so it stays auditable.
+                # LLM-cache facts have no "evidential" key -> always the
+                # non-hearsay branch, byte-for-byte the prior behaviour.
+                if fct.get("evidential") == "report":
+                    slots[key][v]["n_hearsay"] = (
+                        slots[key][v].get("n_hearsay", 0) + 1)
+                else:
+                    slots[key][v]["n"] += 1
                 slots[key][v]["recs"].append((date, f"s{si}"))
                 # Deterministic (rgx) cache facts carry the full proposition
                 # text alongside the predicate-key attribute; keep the FIRST
@@ -171,14 +184,22 @@ def ingest_user(user, cache_path, min_mentions=2):
                 # from something the user said (entry 190).
                 if not is_user:
                     slots[key][v]["asst"] = slots[key][v].get("asst", 0) + 1
-    facts, prov = [], []
+    facts, prov, hearsay = [], [], []
     for attr, entries in slots.items():
         for cl in PF._cluster(entries):
-            tgt = facts if cl["n"] >= min_mentions else prov
-            tgt.append((cl["n"], attr, cl["label"], cl["recs"], cl["toks"],
-                       cl.get("text")))
+            row = (cl["n"], attr, cl["label"], cl["recs"], cl["toks"],
+                  cl.get("text"), cl.get("n_hearsay", 0))
+            # entry 246: n==0 means every mention was hearsay (evidential==
+            # "report") -- stored, never asserted/provisional, never
+            # promoted by further hearsay mentions.
+            if cl["n"] == 0 and cl.get("n_hearsay", 0) > 0:
+                hearsay.append(row)
+            elif cl["n"] >= min_mentions:
+                facts.append(row)
+            else:
+                prov.append(row)
     g = WireGraph.from_facts(facts, n_convs=len(user["sessions"]),
-                             provisional=prov)
+                             provisional=prov, hearsay=hearsay)
     return Memory(g), n_turns
 
 
@@ -932,8 +953,8 @@ def main():
 
     mem, n_turns = ingest_user(user, cache_path, min_mentions)
     print(f"user {uidx}: {len(user['sessions'])} sessions, {n_turns} user turns "
-          f"-> {len(mem.g.nodes)} asserted + {len(mem.g.provisional)} provisional, "
-          f"{len(mem.g.edges)} edges")
+          f"-> {len(mem.g.nodes)} asserted + {len(mem.g.provisional)} provisional "
+          f"+ {len(mem.g.hearsay)} hearsay, {len(mem.g.edges)} edges")
     a = mem.g.audit()
     print(f"wire audit: {'PASS' if a['pass'] else 'FAIL'} "
           f"({a['n_pairs_checked']} pairs, {len(a['violations'])} violations)")

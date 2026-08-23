@@ -49,6 +49,33 @@ def _labels(clusters):
     return {c["label"] for c in clusters}
 
 
+def _hearsay_entries(*vals_and_n_hearsay):
+    """Same shape as _entries but for hearsay-only mentions (n==0,
+    n_hearsay>0, entry 246)."""
+    out = {}
+    for val, nh in vals_and_n_hearsay:
+        out[val] = {"n": 0, "n_hearsay": nh,
+                    "recs": [(f"2026-02-{i+1:02d}", f"h{i}") for i in range(nh)]}
+    return out
+
+
+def test_hearsay_mentions_summed_across_merges():
+    entries = _hearsay_entries(("melbourne", 2), ("melbourne australia", 1))
+    clusters = _cluster(entries)
+    assert len(clusters) == 1
+    cl = clusters[0]
+    assert cl["n"] == 0
+    assert cl["n_hearsay"] == 3
+    assert len(cl["recs"]) == 3
+
+
+def test_n_hearsay_defaults_to_zero_for_llm_style_entries():
+    # existing callers' entries have no "n_hearsay" key at all
+    entries = _entries(("melbourne", 3), ("melbourne australia", 1))
+    clusters = _cluster(entries)
+    assert clusters[0].get("n_hearsay", 0) == 0
+
+
 # --------------------------------------------------------------------------
 # short-value merging preserved (the ANY-shared-token case still holds when
 # the shared content genuinely is most of the smaller value)

@@ -209,6 +209,60 @@ def test_asserted_and_provisional_both_matched_are_separated():
     assert [p["node"]["id"] for p in r["provisional"]] == ["tool=opera"]
 
 
+# ---------------- hearsay tier (entry 246) ----------------
+
+def _hearsay_fact(n_hearsay, attr, label, convs):
+    """A slot whose only mentions are assistant hearsay: n==0 (never counted
+    toward corroboration), n_hearsay>0, receipted the same as any other
+    mention."""
+    return (0, attr, label, [(f"2026-01-{(i % 28) + 1:02d}", c)
+                             for i, c in enumerate(convs)], None, None, n_hearsay)
+
+
+def synthetic_graph_with_hearsay():
+    g_facts = [_fact(41, "location", "melbourne", _convs(*range(10)))]
+    prov = [_fact(1, "allergy", "penicillin", _convs(30))]
+    hearsay = [_hearsay_fact(3, "location", "reykjavik", _convs(40, 41, 42))]
+    return WireGraph.from_facts(g_facts, n_convs=50, provisional=prov,
+                                hearsay=hearsay)
+
+
+def test_hearsay_only_slot_is_stored_but_never_asserted_or_provisional():
+    g = synthetic_graph_with_hearsay()
+    assert "location=reykjavik" not in g.nodes
+    assert "location=reykjavik" not in g.provisional
+    assert "location=reykjavik" in g.hearsay
+    nd = g.hearsay["location=reykjavik"]
+    assert nd["tier"] == "hearsay"
+    assert nd["n_hearsay"] == 3
+    assert nd["n_mentions"] == 3          # falls back to n_hearsay (n==0)
+    assert len(nd["convs"]) == 3          # receipts kept, auditable
+
+
+def test_hearsay_never_wired_never_volunteered():
+    g = synthetic_graph_with_hearsay()
+    for a, b in g.edges:
+        assert a != "location=reykjavik" and b != "location=reykjavik"
+    r = g.spread("melbourne")
+    assert all(d["node"]["id"] != "location=reykjavik" for d in r["neighbourhood"])
+
+
+def test_hearsay_returned_under_its_own_key_on_direct_match():
+    g = synthetic_graph_with_hearsay()
+    r = g.spread("reykjavik")
+    assert r.get("abstain") is None                # NOT abstention: it was seen
+    assert r["seeds"] == [] and r["provisional"] == []
+    assert [h["node"]["id"] for h in r["hearsay"]] == ["location=reykjavik"]
+    assert "hearsay" in r["note"]
+
+
+def test_hearsay_key_present_but_empty_when_no_hearsay_stored():
+    g = synthetic_graph_with_provisional()   # no hearsay= passed
+    assert g.hearsay == {}
+    r = g.spread("melbourne")
+    assert r["hearsay"] == []
+
+
 # ---------------- fact-level owner corrections ----------------
 
 def test_correct_facts_deny_retype_confirm_and_merge():
@@ -461,3 +515,94 @@ def test_fuzz_random_graphs_never_wire_unsupported_links():
         if g.nodes:
             ri = ResonanceIndex(g, dim=2048, seed=trial)
             assert ri.crosstalk_audit()["pass"]
+
+
+# ---------------- ingest_user hearsay-tier plumbing (entry 246) -----------
+# Cache-only (h -> pre-baked facts), so ingest_user never calls a model: the
+# rgx "evidential" field is fed straight from the fixture, exactly the shape
+# rgx/facts.py.to_fact() writes for a real assistant hearsay clause.
+
+def _write_cache(cache_path, entries):
+    """entries: [(text, [fact_dict...])] -> one cache line per entry, hashed
+    the same way ingest_user hashes a USER-role turn (bare sha1 of the text --
+    the only role these tests use, so no namespace prefix)."""
+    import hashlib
+    import json
+    with open(cache_path, "w") as f:
+        for text, facts in entries:
+            h = hashlib.sha1(text.encode()).hexdigest()
+            f.write(json.dumps({"h": h, "f": facts}) + "\n")
+
+
+def test_ingest_user_hearsay_only_slot_excluded_from_asserted_and_provisional(tmp_path):
+    from halumem_run import ingest_user
+    cache_path = tmp_path / "cache.jsonl"
+    t1 = "I remember you saying you collect vintage stamps"
+    t2 = "as you mentioned before, you collect vintage stamps"
+    fact = [{"attribute": "hobby", "value": "collecting vintage stamps",
+            "evidential": "report"}]
+    _write_cache(cache_path, [(t1, fact), (t2, fact)])
+    user = {"sessions": [
+        {"start_time": "2026-01-01", "dialogue": [{"role": "user", "content": t1}]},
+        {"start_time": "2026-01-02", "dialogue": [{"role": "user", "content": t2}]},
+    ]}
+    mem, n_turns = ingest_user(user, str(cache_path), min_mentions=2)
+    assert n_turns == 2
+    extracted_ids = {nid for nid in mem.g.nodes} | {nid for nid in mem.g.provisional}
+    assert "hobby=collecting vintage stamps" not in extracted_ids   # never asserted/prov
+    assert "hobby=collecting vintage stamps" in mem.g.hearsay
+    nd = mem.g.hearsay["hobby=collecting vintage stamps"]
+    assert nd["tier"] == "hearsay" and nd["n_hearsay"] == 2
+    # context/extraction-facing surfaces must not show it either
+    b = mem.context_block()
+    assert "vintage stamps" not in b
+
+
+def test_ingest_user_mixed_user_and_hearsay_mentions_stays_provisional(tmp_path):
+    """One real user mention + two hearsay mentions of the same slot: the
+    hearsay mentions must not help promote it to asserted (min_mentions=2)."""
+    from halumem_run import ingest_user
+    cache_path = tmp_path / "cache.jsonl"
+    t_user = "I collect vintage stamps"
+    t_h1 = "I remember you saying you collect vintage stamps"
+    t_h2 = "as you mentioned before, you collect vintage stamps"
+    fact_user = [{"attribute": "hobby", "value": "collecting vintage stamps"}]
+    fact_hearsay = [{"attribute": "hobby", "value": "collecting vintage stamps",
+                     "evidential": "report"}]
+    _write_cache(cache_path, [(t_user, fact_user), (t_h1, fact_hearsay),
+                              (t_h2, fact_hearsay)])
+    user = {"sessions": [
+        {"start_time": "2026-01-01", "dialogue": [{"role": "user", "content": t_user}]},
+        {"start_time": "2026-01-02", "dialogue": [{"role": "user", "content": t_h1}]},
+        {"start_time": "2026-01-03", "dialogue": [{"role": "user", "content": t_h2}]},
+    ]}
+    mem, n_turns = ingest_user(user, str(cache_path), min_mentions=2)
+    nid = "hobby=collecting vintage stamps"
+    assert nid not in mem.g.nodes             # NOT asserted -- only 1 real mention
+    assert nid in mem.g.provisional            # provisional, same as before hearsay existed
+    nd = mem.g.provisional[nid]
+    assert nd["n_mentions"] == 1
+    assert nd["n_hearsay"] == 2                 # kept on the node, receipted
+    assert nid not in mem.g.hearsay
+
+
+def test_ingest_user_llm_style_facts_unchanged_without_evidential(tmp_path):
+    """Facts without an "evidential" key (the LLM cache shape) must behave
+    byte-for-byte as before the hearsay tier: every mention counts toward n,
+    nothing ever lands in the hearsay tier."""
+    from halumem_run import ingest_user
+    cache_path = tmp_path / "cache.jsonl"
+    t1 = "I work as a researcher"
+    t2 = "My job is researcher"
+    fact = [{"attribute": "occupation", "value": "researcher"}]
+    _write_cache(cache_path, [(t1, fact), (t2, fact)])
+    user = {"sessions": [
+        {"start_time": "2026-01-01", "dialogue": [{"role": "user", "content": t1}]},
+        {"start_time": "2026-01-02", "dialogue": [{"role": "user", "content": t2}]},
+    ]}
+    mem, n_turns = ingest_user(user, str(cache_path), min_mentions=2)
+    nid = "occupation=researcher"
+    assert nid in mem.g.nodes
+    nd = mem.g.nodes[nid]
+    assert nd["n_mentions"] == 2 and nd.get("n_hearsay", 0) == 0
+    assert mem.g.hearsay == {}
