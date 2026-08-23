@@ -416,3 +416,53 @@ def test_generic_common_noun_subject_does_not_fire(ex):
 def test_named_third_party_is_user_turn_only(ex):
     out = texts(ex, "WilsonRobert recommended a yoga class.", role="assistant")
     assert out == [], out
+
+
+# ---- K. evidentiality gaps found in stored distractors after e242 (e246) --
+# GAP 1: `evidential` was read from `_report_frame`/`_generic_or_expl_frame`/
+# `hedge` and attached per-body in the closing loop that runs over EVERY
+# branch's `records` (copular, verbal, third-party-subject) for the clause,
+# not inside any one branch -- so a hedge-adverb sentence rendered through
+# the third-party-subject branch (E/e240, Rule 3/e243) must still come out
+# tagged, and the fronted hedge adverb itself must not survive in the text.
+# GAP 2: `_generic_or_expl_frame`'s `expl` check climbs REPORT_CHAIN
+# (ccomp/xcomp/advcl/csubj) to ANY ancestor with an `expl` child regardless
+# of that ancestor's upos, so an ADJECTIVE predicate with expletive "It"
+# ("It's interesting how...", "It's fascinating to consider that...") is
+# caught the same as a verb ("it seems that...").
+
+def test_hedge_is_tagged_on_the_third_party_subject_branch(ex):
+    out = ex.extract_turn(
+        "Interestingly, this evolving preference signifies your interest "
+        "in exploring different pet species.", role="assistant")
+    assert out, out
+    assert all(r.evidential == "report" for r in out), out
+    assert not any("interestingly" in r.text.lower() for r in out), out
+
+
+def test_adjectival_expletive_ccomp_is_tagged_report(ex):
+    out = ex.extract_turn(
+        "It's interesting how you expressed a preference for films that "
+        "reinforce existing beliefs.", role="assistant")
+    matches = [r for r in out if r.text.startswith(
+        "Martin Mark expressed a preference for films")]
+    assert matches, out
+    assert all(r.evidential == "report" for r in matches), out
+
+
+def test_adjectival_expletive_xcomp_is_tagged_report(ex):
+    out = ex.extract_turn(
+        "It's fascinating to consider that your evolving preferences "
+        "reflect a deeper curiosity.", role="assistant")
+    matches = [r for r in out if r.text.startswith(
+        "Martin Mark's evolving preferences reflect")]
+    assert matches, out
+    assert all(r.evidential == "report" for r in matches), out
+
+
+def test_plain_second_person_no_expletive_is_not_tagged(ex):
+    out = ex.extract_turn(
+        "You expressed a preference for films that reinforce existing "
+        "beliefs.", role="assistant")
+    assert out, out
+    assert all(r.evidential is None for r in out), out
