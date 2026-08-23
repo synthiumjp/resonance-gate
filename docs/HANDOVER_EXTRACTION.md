@@ -93,6 +93,28 @@ paired comparisons but **not** against someone else's published table.
 
 ## 3. Immediate next steps, in order
 
+**Session close 2026-08-24 (entries e240–e248 all committed; tree clean apart
+from the pre-existing encoder/.emb_cache.npz).** Resume here:
+
+1. **Build labeled hearsay in the QA context** (NOT built — an agent was
+   stopped before starting): hearsay nodes (`mem.g.hearsay`) enter QA
+   retrieval labeled `HEARSAY (assistant said this; the user has not): <text>`,
+   appended after non-hearsay candidates; one composer-prompt sentence
+   (hearsay may support an answer only uncontradicted, never as the user's
+   own words); extraction artifact untouched; LLM arm byte-identical.
+2. **Then re-judge BOTH arms once** — that cycle measures labeled hearsay
+   AND the e248 context-renderer fix together (~11 h on the WSL GPU; chain
+   scripts to copy: `~/rg_private/halumem/qa_rerun2/chain.sh`).
+3. Backlog after that, in order: updating mechanism (evolution linking by
+   predicate key + proposition similarity — e245 says grammar can't do it),
+   plural agreement under owner possessives, u1 through the product path,
+   the frame patterns a surface regex sees but the dependency climb misses
+   (e242).
+
+Judge server (:8090) does not survive reboot — launch line below. Stanza
+rebuilds go to the Mac (memory `mac-studio-worker`, use `.venv312`).
+
+
 **Machine was restarted 2026-08-21 ~21:40 with the u1 fix-judge mid-run.**
 Everything below is resumable; nothing is lost except that one run's progress.
 Saved logs and verdicts: `~/rg_private/halumem/lora/e239_fixrun/`.
