@@ -12225,3 +12225,45 @@ inside relative clauses is not done. Queued.
 **Decision: keep all three.** Atom+full gives the store a short `value`
 per slot; rule 3 stores the user's world (third parties) with receipts;
 object control is a correctness fix. Benchmark cost: none measurable.
+
+---
+
+## Entry 244 — 2026-08-23 (p2: THE PRODUCT NUMBER. Zero-LLM extraction feeding the store, end to end through the official harness on u0: QA correct 60.4% vs 59.1% with the LLM extractor, hallucination 15.9% vs 18.9%, paired p=0.88. The LLM leaves the write path at no QA cost. And it did this while the store rendered its facts as "Martin Mark's is is open".)
+
+Two arms, same 164 questions, same flags as the official row
+(`RG_EXTRACT_V5 RG_PREFIX_NO_THINK RG_RETRIEVE_V3`; no gate), caches
+byte-identical before and after (zero extraction calls, verified), judged
+by the official `evaluation.py --frame rgp2`. The rgx cache was built on
+the Mac with the e243 parser over ALL turns; the LLM cache is the banked
+user-turn one, so `RG_INGEST_ALL_TURNS` is the one differing flag.
+
+                         stored facts        QA correct   halluc.   omission
+    LLM extractor     1134 (260 asserted)    97  59.1%    31 18.9%  36 22.0%
+    rgx extractor     3464 (1130 asserted)   99  60.4%    26 15.9%  39 23.8%
+
+    paired: both 78, LLM-only 19, rgx-only 21, neither 46 — McNemar p=0.875
+
+Indistinguishable on correctness, three fewer hallucinations. Updating:
+5/115 vs 5/135 correct, hallucination 4 vs 11 (n too small to read).
+Harness extraction F1 through the STORE: LLM 0.346, rgx 0.295 — not the
+artifact-level 0.65, because of what follows.
+
+**The store renders rgx facts wrongly.** `_fact_str` and the context
+renderer were written for the LLM's attribute names ("Martin Mark's
+{attribute} is {value}"). Fed the parser's predicate keys they produce:
+
+    Martin Mark's is is open
+    Martin Mark's consider is this change
+    Martin Mark's want is to ensure that martin mark's work supports …
+
+The adapter (`rgx/facts.py`) already writes the full proposition as
+`text` on every cache fact; `ingest_user`/`build_facts` keep only
+attribute/value. So the QA result above was obtained with the composer
+reading mangled facts, and the extraction artifact was judged on them.
+Next: carry `text` through ingest to the slot record and render it when
+present (attribute/value stay for slot logic: corroboration, conflicts,
+supersession). Then re-judge u0 end to end.
+
+Cost note: the rgx arm's judging took 15.9 h to the LLM arm's 4.2 h — the
+store is 3x larger, so every QA context is longer. Sharing the GPU with
+the e242/e243 judges did the rest.
