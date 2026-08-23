@@ -264,6 +264,29 @@ def test_supersedes_accumulates_in_order_across_a_chain():
     assert cur["supersedes"] == ["analyst", "lead"]
 
 
+def test_supersedes_prefers_the_retired_node_s_proposition_text():
+    """entry 244 follow-up: rgx facts carry a full proposition in "text";
+    "supersedes" is read verbatim by callers (eval_rgp2.py's "updated
+    from:" annotation), so a bare value like "since becoming the senior
+    director" (an ungrammatical fragment out of context) must not leak --
+    the retired node's own text should be used when present."""
+    old = _node("occupation", "since becoming the senior director", [1])
+    old["text"] = "Martin Mark has worked previously with Acme"
+    new = _node("occupation", "director of engineering", [40])
+    C.mark_current([old, new])
+    assert new["current"] and not old["current"]
+    assert new["supersedes"] == ["Martin Mark has worked previously with Acme"]
+
+
+def test_supersedes_falls_back_to_value_when_no_text():
+    """LLM-cache facts have no "text" -- unchanged from before."""
+    old = _node("occupation", "analyst", [1])
+    new = _node("occupation", "founder", [40])
+    C.mark_current([old, new])
+    cur = [x for x in (old, new) if x["current"]][0]
+    assert cur["supersedes"] == ["analyst"]
+
+
 def test_restatements_do_not_pollute_supersedes():
     nodes = [_node("city", "hobart", [1]), _node("city", "hobart", [5]),
              _node("city", "sydney", [9])]

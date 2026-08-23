@@ -229,7 +229,14 @@ def search_memories(mem, query, top=10):
         # B" is the whole content of an update gold point, and the id carries
         # the new value already.
         sb = str(f.get("superseded_by") or "")
-        newv = sb.split("=", 1)[1] if "=" in sb else ""
+        # entry 244 follow-up: the id only carries the winner's bare value
+        # ("attr=value"); look the winner node up in the store and prefer
+        # its own proposition text, same as every other renderer here.
+        winner = mem.g.nodes.get(sb) or mem.g.provisional.get(sb)
+        if winner and winner.get("text"):
+            newv = winner["text"]
+        else:
+            newv = sb.split("=", 1)[1] if "=" in sb else ""
         return base + (f" (SUPERSEDED by: {newv})" if newv else " (SUPERSEDED)")
 
     def _key(f):

@@ -361,6 +361,13 @@ def mark_current(nodes):
                 # hides the pair from anything that reads the store. The
                 # update judge asks for "all information points" of "updated
                 # X from A to B", so the current node has to carry A.
-                winner["supersedes"].append(nd.get("value"))
+                # entry 244 follow-up: prefer the retired node's own
+                # proposition text over its bare value -- "supersedes" is
+                # read verbatim by callers (eval_rgp2.py's "updated from:"
+                # annotation), and the raw value alone can be an ungrammatical
+                # fragment ("since becoming the senior director") where the
+                # full text reads as prose. Falls back to value when the node
+                # has no text (LLM-cache facts), unchanged from before.
+                winner["supersedes"].append(nd.get("text") or nd.get("value"))
                 n += 1
     return n

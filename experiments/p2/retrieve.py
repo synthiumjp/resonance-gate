@@ -82,6 +82,16 @@ def format_fact(d, owner=None):
     dt = dates[-1] if dates else "?"
     tag = (f"confirmed x{d['n_mentions']}" if d["n_mentions"] >= 2
            else "unconfirmed(once)")
+    # entry 244 follow-up: this renderer never got the entry-244 fix --
+    # every other renderer (memory_api.context_block, eval_rgp2._fact_str,
+    # eval_rgp2.search_memories._v) prefers the deterministic (rgx)
+    # extractor's full proposition ("text") over the attr/value atom, but
+    # this one -- used for the judged QA CONTEXT itself -- stayed on the
+    # old atom unconditionally, so the judged context leaked predicate-key
+    # attrs ("change_highlight: ...", "openness_to_exploring_..."). Use
+    # text whenever the node has one, regardless of RG_QA_PROPS.
+    if d.get("text"):
+        return f"[{tag}, {dt}] {d['text']}"
     if os.environ.get("RG_QA_PROPS") == "1":
         import propositions as _PR
         prop = _PR.render(d, owner=owner)

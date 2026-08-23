@@ -94,8 +94,21 @@ def change_history(mem, retrieved_facts):
               if any(m["id"] in retrieved_ids for m in c[1])]
     if not chains:
         return ""
-    lines = [f"{attr}: " + " -> ".join(f"{m['value']} ({_fmt_dates(m)})" for m in g)
-             for attr, g in chains]
+    # entry 244 follow-up: slot_chains() groups on the raw attr key, which
+    # for rgx facts can be a predicate-key fragment ("openness_to_..."),
+    # not just canonical slots ("employer"). Prefer each member's own
+    # proposition text over the bare "attr: value" atom -- when the chain
+    # carries text, drop the attr-as-header entirely (it would leak the
+    # predicate key) and let each dated point stand as its own sentence.
+    lines = []
+    for attr, g in chains:
+        if any(m.get("text") for m in g):
+            lines.append(" -> ".join(
+                f"{m.get('text') or attr + ': ' + m['value']} ({_fmt_dates(m)})"
+                for m in g))
+        else:
+            lines.append(f"{attr}: " + " -> ".join(
+                f"{m['value']} ({_fmt_dates(m)})" for m in g))
     return ("\nCHANGE HISTORY (attributes whose stored value evolved, "
             "oldest to newest; the last value is current):\n" + "\n".join(lines))
 

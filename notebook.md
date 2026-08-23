@@ -12383,3 +12383,30 @@ composer/QA omission tail (44 of 155), the updating mechanism (77% omission
 — evolution linking by predicate key + proposition similarity, the vector
 layer), labeled hearsay in context, plural agreement under owner
 possessives, and a second user through the product path.
+
+---
+
+## Entry 248 — 2026-08-24 (p2: the 44 QA omissions read, and they found the THIRD copy of the renderer bug. `retrieve.py:format_fact` — the function that builds every judged QA context line — never got the e244 text fix, so the composer answered from "change_highlight: martin mark's willingness…" fragments. Fixed; supersede and timeline annotations had the same leak.)
+
+Omission read (rgx3, n=44): 0 empty contexts, 0 composer refusals — every
+one had the right fact retrieved but rendered as `attr: value`, and half
+the "omissions" are answers that are correct but less specific than gold
+("Herbal teas." vs "Herbal teas with added health blends") because the
+composer read the key-value fragment, not the proposition.
+
+Root causes, counted: `format_fact` (100% of context lines; the e244 fix
+had reached `search_memories`/`context_block`/`_fact_str` but not the QA
+path `compose_answer → RV.format_fact`); `currency.mark_current` put the
+raw retired VALUE into "(updated from: …)"; `timeline.change_history`
+rendered predicate keys as headers. All now prefer node `text`; 2863/2863
+u0 rgx nodes carry it (no upstream loss); LLM-arm contexts byte-identical
+(no `text` on LLM facts). Tests: 99 across six p2 files + server 29.
+
+That is three separate renderers now caught serving predicate keys as
+English (e244 store artifact, e246 store recall(), e248 QA context). The
+lesson for the ledger: when a field changes meaning (attribute names →
+predicate keys), grep for EVERY consumer of the field before measuring
+anything — each missed renderer cost a judged cycle to find.
+
+Not re-judged yet, deliberately: batched with the labeled-hearsay-in-
+context change so the next 11 h judge cycle measures both.
