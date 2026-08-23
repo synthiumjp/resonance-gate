@@ -12267,3 +12267,29 @@ supersession). Then re-judge u0 end to end.
 Cost note: the rgx arm's judging took 15.9 h to the LLM arm's 4.2 h — the
 store is 3x larger, so every QA context is longer. Sharing the GPU with
 the e242/e243 judges did the rest.
+
+---
+
+## Entry 245 — 2026-08-23 (p2: what HaluMem's "updates" are, read before building anything. 72%/55% have NO linguistic update signal; 94% prose; mostly assistant restatement. Update-signal grammar would reach a fifth of the pool. And the update artifact is just `recall(new_memory)` — so the broken renderer is the first suspect for 88–91% omissions. Waiting for the rerun.)
+
+304 update gold points (u0 142, u1 162), all with original_memories. Best
+source sentence classified by signal:
+
+    u0  none 102 (asst 75 / user 26)  from-X-to-Y 14  new 13  now/recently 8  used-to 4  change-verb 1
+    u1  none  89 (asst 59 / user 30)  from-X-to-Y 34  new 18  now/recently 11 change-verb 9  used-to 1
+
+Only 6% of update gold has the benchmark's own "updated from 'a' to 'b'"
+shape; the rest is prose evolution: "Martin is exploring ways to balance…"
+updating "Martin reflected on the importance of balance…". Some explicit
+from-X-to-Y sentences are counterfactual ("if your career status had
+updated from 'manager' to 'senior manager'") — interference in update
+clothing; the frame rule's irrealis cousin, which e241 measured as a bad
+trade for recall and which here would be right.
+
+So updating is not a grammar problem. It is "which earlier proposition
+does this one evolve?" — same predicate key / subject plus proposition
+similarity, i.e. the vector+graph layer (MiniLM registry, typed edges), no
+LLM. Not designed yet, deliberately: `eval_rgp2` builds the update
+artifact as `mem.recall(memory_content)`, and until the renderer fix
+(`21df0cf`) those returns read "Martin Mark's is is open". The rerun
+decides how much of the 88–91% omission was rendering.
