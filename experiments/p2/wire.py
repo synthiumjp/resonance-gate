@@ -209,6 +209,10 @@ def correct_facts(facts, prov, corrections):
         for f in src:
             n, attr, label, recs = f[0], f[1], f[2], f[3]
             toks = set(f[4]) if len(f) > 4 and f[4] else _tokens(label)
+            # entry 244: preserve the deterministic extractor's proposition
+            # text across corrections, so a corrected fact still renders as
+            # prose instead of falling back to the attribute/value atom.
+            text = f[5] if len(f) > 5 else None
             dest, drop = tier, False
             for c in corrections:
                 if not _match(c, attr, label.lower()):
@@ -228,16 +232,17 @@ def correct_facts(facts, prov, corrections):
                     dest = "asserted"
                     log.append(("confirmed", f"{attr}={label}"))
             if not drop:
-                out[dest].append((n, attr, label, recs, toks))
+                out[dest].append((n, attr, label, recs, toks, text))
     # merge facts that now share (attr, label) -- e.g. after a retype
     merged = {}
-    for n, attr, label, recs, toks in out["asserted"]:
+    for n, attr, label, recs, toks, text in out["asserted"]:
         k = (attr, label)
         if k in merged:
             m = merged[k]
-            merged[k] = (m[0] + n, attr, label, m[3] + recs, m[4] | toks)
+            merged[k] = (m[0] + n, attr, label, m[3] + recs, m[4] | toks,
+                        m[5] or text)
         else:
-            merged[k] = (n, attr, label, recs, toks)
+            merged[k] = (n, attr, label, recs, toks, text)
     facts_out = sorted(merged.values(), key=lambda f: -f[0])
     return facts_out, out["prov"], log
 
@@ -258,16 +263,22 @@ class WireGraph:
         self.adj = defaultdict(dict)   # id -> {neighbour_id: edge}
 
     @staticmethod
-    def _mk_node(n, attr, label, recs, tier, toks=None):
+    def _mk_node(n, attr, label, recs, tier, toks=None, text=None):
         """toks: the value-cluster's token UNION (all merged variants -- each a
         receipted real mention), so a query can match any variant, not just the
-        winning label. Still non-generative: tokens come from stored mentions."""
+        winning label. Still non-generative: tokens come from stored mentions.
+
+        text: the deterministic (rgx) extractor's full proposition for this
+        fact, carried through from GROW (entry 244), or None for LLM-cache
+        facts and any other caller that doesn't supply it. Renderers use it
+        in place of the "<owner>'s {attr} is {value}" template when present."""
         convs = {}
         for date, cid in recs:
             convs.setdefault(cid, date)
         return {"id": f"{attr}={label}", "attr": attr, "value": label,
                 "n_mentions": int(n), "convs": convs, "tier": tier,
-                "toks": set(toks) if toks else _tokens(label)}
+                "toks": set(toks) if toks else _tokens(label),
+                "text": text}
 
     # ---------------- construction ----------------
 
@@ -281,10 +292,12 @@ class WireGraph:
         g = cls(min_cooc)
         g.n_convs = max(int(n_convs), 1)
         for f in facts:
-            nd = cls._mk_node(*f[:4], "asserted", toks=f[4] if len(f) > 4 else None)
+            nd = cls._mk_node(*f[:4], "asserted", toks=f[4] if len(f) > 4 else None,
+                              text=f[5] if len(f) > 5 else None)
             g.nodes[nd["id"]] = nd
         for f in (provisional or []):
-            nd = cls._mk_node(*f[:4], "provisional", toks=f[4] if len(f) > 4 else None)
+            nd = cls._mk_node(*f[:4], "provisional", toks=f[4] if len(f) > 4 else None,
+                              text=f[5] if len(f) > 5 else None)
             if nd["id"] not in g.nodes:
                 g.provisional[nd["id"]] = nd
         # W1: decide supersession ONCE, here, at write time -- not on every

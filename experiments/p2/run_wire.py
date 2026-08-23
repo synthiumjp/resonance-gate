@@ -113,13 +113,18 @@ def build_facts(path, min_mentions=2):
             key = f"{subj}:{a}" if subj else a
             slots[key][v]["n"] += 1
             slots[key][v]["recs"].append((date, uuid))
+            # rgx cache facts carry the full proposition in "text"; LLM cache
+            # facts don't (entry 244). Keep the FIRST mention's text so
+            # renderers can use it instead of the bare attribute/value atom.
+            slots[key][v].setdefault("text", fct.get("text"))
     facts, prov = [], []
     for attr, entries in slots.items():
         for cl in PF._cluster(entries):
             tgt = facts if cl["n"] >= min_mentions else prov
             # cl["toks"]: the cluster's merged-variant token union, so queries
             # match any receipted variant, not just the winning label
-            tgt.append((cl["n"], attr, cl["label"], cl["recs"], cl["toks"]))
+            tgt.append((cl["n"], attr, cl["label"], cl["recs"], cl["toks"],
+                       cl.get("text")))
     facts.sort(key=lambda f: -f[0])
     prov.sort(key=lambda f: -f[0])
     # OWNER-STATED seed facts (ground truth, e.g. entities in the user's world):

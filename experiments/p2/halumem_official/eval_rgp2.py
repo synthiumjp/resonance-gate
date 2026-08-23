@@ -144,7 +144,11 @@ def _fact_str(nd, owner=None):
     number unreproducible.
     """
     import propositions as PR
-    prop = PR.render(nd, owner=owner)
+    # entry 244: the deterministic (rgx) extractor carries its own full
+    # proposition through GROW into the node ("text"); use it verbatim
+    # instead of the attr/value template. LLM-cache nodes have no "text" ->
+    # falls through to the existing PR.render path unchanged.
+    prop = nd.get("text") or PR.render(nd, owner=owner)
     # RG_ARTIFACT_NO_TIER (entry 187): 76.8% of emitted strings ended in
     # "(provisional)" while gold memory points are clean prose. The tier is
     # RG's differentiator and belongs in the QA CONTEXT, where CAL rule 1
@@ -196,8 +200,16 @@ def search_memories(mem, query, top=10):
                         for f in r["asserted"] + r["unconfirmed"]])
 
     def _v(f, prefix=""):
-        base = f"{prefix}{f['attribute']}: {f['value']}"
-        if _SUPERSEDE:
+        # entry 244: rgx facts carry their own full proposition ("text") --
+        # use it verbatim instead of the attr/value atom or PR.render.
+        # LLM-cache facts have no "text" -> falls through unchanged.
+        if f.get("text"):
+            base = f"{prefix}{f['text']}"
+            if not _SUPERSEDE:
+                return base
+        else:
+            base = f"{prefix}{f['attribute']}: {f['value']}"
+        if _SUPERSEDE and not f.get("text"):
             prop = PR.render({"attr": f["attribute"], "value": f["value"]},
                              owner=_own)
             if prop:

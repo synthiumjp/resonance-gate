@@ -227,7 +227,7 @@ def test_correct_facts_deny_retype_confirm_and_merge():
          "new_attribute": "project"},
         {"action": "confirm", "attribute": "allergy", "value": "penicillin"},
     ])
-    d = {(a, l): n for n, a, l, _, _ in out_f}
+    d = {(a, l): n for n, a, l, _, *_ in out_f}
     assert ("location", "house") not in d
     assert ("location", "housefield lane") in d          # exact match protected it
     assert ("occupation", "hive-tracker") not in d       # retyped away
@@ -235,7 +235,7 @@ def test_correct_facts_deny_retype_confirm_and_merge():
     assert d[("allergy", "penicillin")] == 2             # promoted, +1 evidence
     assert out_p == []
     # receipts merged, never invented: project slot carries BOTH sources' convs
-    recs = next(r for n, a, l, r, _ in out_f if (a, l) == ("project", "hive-tracker"))
+    recs = next(r for n, a, l, r, *_ in out_f if (a, l) == ("project", "hive-tracker"))
     assert {c for _, c in recs} == set(_convs(3, 4, 5, 6))
     acts = sorted(a for a, _ in log)
     assert acts == ["confirmed", "denied", "retyped"]

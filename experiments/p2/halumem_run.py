@@ -158,6 +158,13 @@ def ingest_user(user, cache_path, min_mentions=2):
                 key = f"{subj}:{a}" if subj else a
                 slots[key][v]["n"] += 1
                 slots[key][v]["recs"].append((date, f"s{si}"))
+                # Deterministic (rgx) cache facts carry the full proposition
+                # text alongside the predicate-key attribute; keep the FIRST
+                # mention's text so the store can render prose instead of a
+                # bare "<owner>'s live_in is X" (entry 244). LLM cache facts
+                # have no "text" key -> stays None -> renderers fall back
+                # to the existing attribute/value path unchanged.
+                slots[key][v].setdefault("text", fct.get("text"))
                 # Provenance: which role sourced this mention. Kept so an
                 # assistant-only fact is auditable and can be tiered
                 # differently later, rather than silently indistinguishable
@@ -168,7 +175,8 @@ def ingest_user(user, cache_path, min_mentions=2):
     for attr, entries in slots.items():
         for cl in PF._cluster(entries):
             tgt = facts if cl["n"] >= min_mentions else prov
-            tgt.append((cl["n"], attr, cl["label"], cl["recs"], cl["toks"]))
+            tgt.append((cl["n"], attr, cl["label"], cl["recs"], cl["toks"],
+                       cl.get("text")))
     g = WireGraph.from_facts(facts, n_convs=len(user["sessions"]),
                              provisional=prov)
     return Memory(g), n_turns

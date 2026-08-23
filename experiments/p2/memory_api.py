@@ -190,6 +190,11 @@ class Memory:
         else:
             status = "corroborated"
         return {"attribute": nd["attr"], "value": nd["value"],
+                # entry 244: the deterministic (rgx) extractor's full
+                # proposition, when the node carries one; None for LLM-cache
+                # facts and any node built without it -- callers fall back
+                # to the attribute/value atom exactly as before.
+                "text": nd.get("text"),
                 "mentions": nd["n_mentions"], "status": status,
                 # W1: set at write time by currency.mark_current. Exposed so
                 # every consumer sees one verdict instead of re-deriving it.
@@ -209,8 +214,8 @@ class Memory:
         lines = []
         if query is None:
             for f in self.profile(top=max_facts):
-                lines.append(f"- {f['attribute']}: {f['value']}  "
-                             f"(x{f['mentions']} mentions)")
+                prop = f.get("text") or f"{f['attribute']}: {f['value']}"
+                lines.append(f"- {prop}  (x{f['mentions']} mentions)")
             head = "[MEMORY: corroborated profile of the user]"
         else:
             r = self.recall(query)
@@ -220,15 +225,16 @@ class Memory:
                         "details on this are UNKNOWN: say so rather than "
                         "guessing.\n" + _RULES)
             for f in r["asserted"][:max_facts]:
-                lines.append(f"- {f['attribute']}: {f['value']}  "
-                             f"(x{f['mentions']} mentions)")
+                prop = f.get("text") or f"{f['attribute']}: {f['value']}"
+                lines.append(f"- {prop}  (x{f['mentions']} mentions)")
             for w in r["wired"][:max_facts - len(lines)]:
                 f = w["fact"]
-                lines.append(f"- (linked) {f['attribute']}: {f['value']}  "
+                prop = f.get("text") or f"{f['attribute']}: {f['value']}"
+                lines.append(f"- (linked) {prop}  "
                              f"(x{f['mentions']}, co-occurs with the above)")
             for f in r["unconfirmed"][:3]:
-                lines.append(f"- UNCONFIRMED (seen once): {f['attribute']}: "
-                             f"{f['value']}")
+                prop = f.get("text") or f"{f['attribute']}: {f['value']}"
+                lines.append(f"- UNCONFIRMED (seen once): {prop}")
         block = head + "\n" + "\n".join(lines)
         cf = [c for c in self.conflicts()
               if query is None or any(t in c["attribute"]

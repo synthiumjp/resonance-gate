@@ -228,7 +228,13 @@ def _cluster(entries):
             # grow with every merge (the exact snowball this fix exists to
             # prevent). set(toks) copies.
             clusters.append({"label": val, "n": d["n"], "toks": set(toks),
-                             "core": set(toks), "recs": list(d["recs"])})
+                             "core": set(toks), "recs": list(d["recs"]),
+                             # entry 244: keep the FIRST mention's "text"
+                             # (the highest-n variant, since items are
+                             # processed in that order) -- not overwritten
+                             # by later merges, so it stays the winning
+                             # label's own proposition text.
+                             "text": d.get("text")})
     return clusters
 
 
@@ -322,7 +328,7 @@ def main():
             from collections import Counter
             print("owner corrections applied:",
                   dict(Counter(a for a, _ in clog)))
-        corr = [(n, a, l, r) for n, a, l, r, _ in corrected]
+        corr = [(n, a, l, r) for n, a, l, r, *_ in corrected]
         corr.sort(reverse=True)
 
     # redacted summary to stdout (safe for the shared session)
