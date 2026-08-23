@@ -12337,3 +12337,49 @@ gone and what remains is plain restatement repeated across the assistant's
 turn (corroboration, not grammar). Four regression tests added (89fbeef).
 Queued parser bug from that read: plural subject with owner possessive
 gets a singular verb ("your preferences reflect" → "reflects").
+
+---
+
+## Entry 247 — 2026-08-24 (p2: the store-path round, judged end to end on u0. Hearsay tier +15.2pt interference accuracy on the PRODUCT path; QA cost 6 questions, p=0.21 — noise. All three arms statistically indistinguishable on QA. And the MCP server now ingests conversation with zero model calls.)
+
+    u0, official harness       LLM arm    rgx (21df0cf)   rgx (+hearsay/receipt/regex)
+    QA correct                  58.5%        59.8%           56.1%
+    QA hallucination            18.3%        17.7%           17.1%
+    updating correct             3.5%        12.6%           10.9%
+    store extraction R          0.224        0.240           0.205
+    store interference acc.     84.8%        40.8%           56.0%
+
+    paired QA (result_type, n=155): rgx2 vs rgx3 11/5 p=0.21; llm2 vs rgx3 19/15 p=0.61;
+    llm2 vs rgx2 20/22 p=0.88. The LLM control rerun moved −0.6pt QA on identical
+    inputs — that is the judge's own noise floor.
+
+**Deviation to record: three changes measured as one bundle** (hearsay tier
+d23fce8, session-receipt credit 43c193b, EXCLUDE_ATTR_RX word bounds), so
+the recall line (0.240→0.205) is the NET of hearsay removal (expected −,
+e242) and restatement credit (expected +). The e211 rule says one variable;
+I bundled to save an 11 h judge cycle and the bundle's headline effect
+(interference +15.2pt at QA p=0.21) does not depend on the split. The
+split matters only if someone wants the receipt credit's isolated value —
+re-derivable from the artifacts on disk if ever needed.
+
+**Decision: keep the hearsay tier.** The false memories HaluMem plants are
+exactly what a memory product must not repeat back as the user's own; the
+QA cost is indistinguishable from noise on this n. Backlog, not built: keep
+hearsay in the QA context labeled as hearsay ("the assistant recalled…"),
+out of the extraction artifact — recovers whatever real facts hide in
+there without asserting them.
+
+**Also this entry: `sourcedrecall.profile_ingest` shipped (dcd564b).** The
+MCP server extracts from raw turns with rgx — zero model calls, hearsay
+tiered, negation preserved, receipts on every fact, idempotent by turn
+hash. Found on the way: the hearsay commit had broken the server's
+`_build()` (only the p2 suite was run before committing — both suites now
+required, memory updated), and the product's `build_facts` never read
+assistant turns at all; it now takes ONLY evidential=report clauses from
+them, into the hearsay tier.
+
+The parser/store loop is closed for this arc. Open, in order: the
+composer/QA omission tail (44 of 155), the updating mechanism (77% omission
+— evolution linking by predicate key + proposition similarity, the vector
+layer), labeled hearsay in context, plural agreement under owner
+possessives, and a second user through the product path.

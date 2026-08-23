@@ -80,8 +80,7 @@ ingested as fact — `evidential=report` mentions never corroborate, hearsay-
 only slots live in a separate tier (`d23fce8`); (3) the per-session artifact
 credited only first mentions while 35% of gold restates earlier facts — now
 credits any fact with a receipt in the session (`43c193b`); (4) the attribute
-exclusion regex matched "path" inside `career_paths`. Both arms re-judged
-after (3)+(4): see notebook e247 when it lands. Judging the rgx store takes
+exclusion regex matched "path" inside `career_paths`. Both arms re-judged (e247): hearsay tier costs no QA (p=0.21) and buys +15.2pt store interference accuracy; all arms level on QA. `sourcedrecall.profile_ingest` ships zero-LLM ingestion over MCP (dcd564b). Judging the rgx store takes
 ~7 h on the WSL GPU; the accuracy phase scores every stored fact alone.
 
 ### Published comparison (do NOT quote yet)
