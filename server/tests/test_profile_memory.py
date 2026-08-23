@@ -17,7 +17,11 @@ def _write_fixture(tmp_path):
     Facts are pre-extracted into profile_cache.jsonl, keyed by sha1 of the
     exact (stripped, 1800-char-truncated) turn text build_facts hashes --
     computed here via the loader itself so the hash can never drift from the
-    real truncation rule."""
+    real truncation rule. build_facts also walks the ASSISTANT's own turns
+    now (the hearsay pass, entry 246 completion) looking for evidential==
+    "report" clauses, so every prose assistant turn needs a cache entry too
+    (empty here -- none of this fixture's assistant turns are hearsay) or
+    uncached_turns would stop being 0."""
     convs = [
         {"uuid": "c1", "name": "Chat about life",
          "created_at": "2026-01-01T00:00:00Z",
@@ -44,7 +48,9 @@ def _write_fixture(tmp_path):
 
     import sourcedrecall.profile_memory  # noqa: F401 -- bridges sys.path onto p2
     import run_profile_full as PF
+    import run_wire as RW
     stream, _ = PF.load_stream_and_titles(str(conv_path))
+    astream = RW._load_assistant_stream(str(conv_path))
 
     facts_by_text = {
         "I live in Melbourne and work as a researcher.":
@@ -60,10 +66,15 @@ def _write_fixture(tmp_path):
         # human turn in the stream, so a key is needed to avoid a KeyError.
         "```\nnot prose, a code block\n```": [],
         "```\nanother code block\n```": [],
+        # assistant turns: no hearsay in this fixture, so empty facts --
+        # still need a cache entry or build_facts's assistant pass counts
+        # them uncached.
+        "Got it -- Melbourne, researcher. Anything else?": [],
+        "Sure thing.": [],
     }
     cache_path = tmp_path / "profile_cache.jsonl"
     with open(cache_path, "w") as f:
-        for _, _, _, text in stream:
+        for _, _, _, text in list(stream) + list(astream):
             h = hashlib.sha1(text.encode("utf-8")).hexdigest()
             f.write(json.dumps({"h": h, "f": facts_by_text[text]}) + "\n")
     return tmp_path

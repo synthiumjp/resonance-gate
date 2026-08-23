@@ -56,6 +56,30 @@ def quarantine():
     return list(_QUARANTINE)
 
 
+def _load_assistant_stream(path):
+    """Mirror of PF.load_stream_and_titles, but for the ASSISTANT's own
+    turns -- deliberately kept separate from the human `stream`/`prose` (never
+    folded into n_convs, never eligible for real corroboration). Exists
+    solely to feed the hearsay tier (entry 246): an assistant clause tagged
+    evidential=="report" is a receipted claim ABOUT the user, not the user's
+    own words -- see the filter in build_facts's assistant loop below."""
+    conv = json.load(open(path))
+    conv.sort(key=lambda c: c.get("created_at", ""))
+    stream = []
+    for i, c in enumerate(conv):
+        for m in (c.get("chat_messages") or []):
+            if (m.get("sender") or "").lower() != "assistant":
+                continue
+            txt = m.get("text") or m.get("content") or ""
+            if isinstance(txt, list):
+                txt = " ".join(str(x.get("text", "")) if isinstance(x, dict) else str(x)
+                               for x in txt)
+            if txt.strip():
+                stream.append((i, c.get("uuid", ""), c.get("created_at", "")[:10],
+                               txt.strip()[:1800]))
+    return stream
+
+
 def build_facts(path, min_mentions=2):
     """Corroborated facts with receipts, rebuilt from the cache exactly as
     run_profile_full readout (canon + hygiene + clustering). Returns
@@ -131,6 +155,44 @@ def build_facts(path, min_mentions=2):
             # facts don't (entry 244). Keep the FIRST mention's text so
             # renderers can use it instead of the bare attribute/value atom.
             slots[key][v].setdefault("text", fct.get("text"))
+
+    # ASSISTANT HEARSAY PASS (entry 246 completion): `prose` above is human-
+    # turns-only by design (load_stream_and_titles), so an assistant clause
+    # ("I remember you mentioning...") never reached the cache lookup above
+    # and the hearsay branch two paragraphs up was dead code against the real
+    # conversations.json pipeline. Walk the assistant's own turns separately;
+    # keep ONLY evidential=="report" clauses (a receipted claim ABOUT the
+    # user) -- anything else from the assistant is dropped outright, never
+    # counted toward "n", never merged into the human `prose`/n_convs.
+    for step, uuid, date, text in [s for s in _load_assistant_stream(path)
+                                   if _is_prose(s[3])]:
+        h = hashlib.sha1(text.encode("utf-8")).hexdigest()
+        if h not in cache:
+            uncached += 1
+            continue
+        for fct in cache[h]:
+            if fct.get("evidential") != "report":
+                continue
+            a = canon_attr(fct["attribute"])
+            v = re.sub(r"\s+", " ", str(fct["value"]).strip().lower())
+            if _WRITE_RULES is not None and v:
+                _act, _det = WR.decide(_WRITE_RULES, a, v)
+                if _act == "deny":
+                    _QUARANTINE.append({"attribute": a, "value": v,
+                                        "date": date, "conv": uuid,
+                                        "rule": _det["rule"]})
+                    continue
+                if _act == "retype":
+                    a = _det["new_attribute"]
+            if (not v or a in PF._EXCLUDE_ATTR or PF._EXCLUDE_ATTR_RX.search(a)
+                    or PF._reject_value(a, v)):
+                continue
+            subj = fct.get("subject")
+            key = f"{subj}:{a}" if subj else a
+            slots[key][v]["n_hearsay"] = slots[key][v].get("n_hearsay", 0) + 1
+            slots[key][v]["recs"].append((date, uuid))
+            slots[key][v].setdefault("text", fct.get("text"))
+
     facts, prov, hearsay = [], [], []
     for attr, entries in slots.items():
         for cl in PF._cluster(entries):

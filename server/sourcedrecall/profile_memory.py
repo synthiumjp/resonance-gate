@@ -1,13 +1,15 @@
 """profile_memory: bridges the p2 profile/world memory (experiments/p2) into
-this MCP server -- the dogfood-v1 READ + CORRECT slice. Live ingestion (turning
-new conversations into the extraction cache) is not in scope here; this module
-only ever REPLAYS an existing cache, so the request path stays LLM-free, same
-guarantee as the rest of this server.
+this MCP server -- the dogfood-v1 READ + CORRECT + INGEST slice. profile_ingest
+turns a conversation into new extraction-cache lines using rgx (the
+deterministic parser) and ONLY rgx -- NO language model anywhere in this
+module. Every other tool here only ever REPLAYS the cache Memory.load builds
+from, so the request/ingest path stays LLM-free end to end, same guarantee as
+the rest of this server.
 
-Five tools sit on top of experiments/p2's already-validated query contract
-(memory_api.Memory): profile_recall, profile_context, profile_correct,
-profile_status, profile_rehydrate. See mcp_server.py for the registered tool
-wrappers.
+Six tools sit on top of experiments/p2's already-validated query contract
+(memory_api.Memory) plus the rgx cache writer (rgx.facts): profile_recall,
+profile_context, profile_correct, profile_status, profile_rehydrate,
+profile_ingest. See mcp_server.py for the registered tool wrappers.
 
 REHYDRATION (the "virtual context window"): the fact graph built by Memory is
 a page table -- corroborated, receipted, but deliberately compressed. The raw
@@ -23,30 +25,42 @@ Env:
                   default that falls back to a real home path, so a forgetful
                   test run never touches a real user's data. Raises clearly the
                   first time any tool is called with it unset.
-  RG_EXTRACT_V2 / RG_EXTRACT_V3 / RG_EXTRACT_V4
+  RG_EXTRACT_V2 / RG_EXTRACT_V3 / RG_EXTRACT_V4 / RG_EXTRACT_V5
                   pass through unchanged to run_wire.build_facts's cache-file
-                  selection (profile_cache_v2/_v3/_v4.jsonl vs the base cache).
+                  selection (profile_cache_v2/_v3/_v4/_v5.jsonl vs the base
+                  cache) -- profile_ingest writes to the SAME cache file, via
+                  the same suffix rule, so what it writes is what the next
+                  reload reads.
+  SOURCEDRECALL_OWNER
+                  fallback owner_name for profile_ingest when the tool call
+                  doesn't pass one and no owner is otherwise discoverable
+                  (see profile_ingest's docstring for the full chain).
 
 Loading is a LAZY module-level singleton: the first tool call builds Memory
 from the cache (can take tens of seconds on a big export) and keeps it in
 process; reload() rebuilds it (also reachable via profile_status(reload=True)).
 """
 
+import datetime
 import json
 import os
 import sys
 import threading
+import uuid as _uuidlib
 
 # Packaging debt (v1): experiments/p2 is a script directory, not an installed
 # package. Bridge it onto sys.path here, and only here, so the rest of the
 # server never has to know p2 isn't packaged yet.
-_P2_ROOT = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
-    "experiments", "p2")
-if _P2_ROOT not in sys.path:
-    sys.path.insert(0, _P2_ROOT)
+_RG_ROOT = os.environ.get(
+    "RG_ROOT",
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+_P2_ROOT = os.path.join(_RG_ROOT, "experiments", "p2")
+for _p in (_RG_ROOT, _P2_ROOT):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
 
 from memory_api import Memory  # noqa: E402 -- after the sys.path bridge
+import rgx.facts as _rgx_facts  # noqa: E402 -- same bridge; the rgx package
 
 _VALID_ACTIONS = ("deny", "confirm", "retype")
 _SOURCE = "rg-p2-memory"
@@ -54,6 +68,10 @@ _SOURCE = "rg-p2-memory"
 _lock = threading.RLock()
 _state = {"mem": None, "audit_pass": None, "needs_reload": False,
           "uncached_turns": None, "transcripts": None}
+# profile_ingest's Extractor: a stanza pipeline load is tens of seconds, so
+# it's kept as a lazy module-level singleton, rebuilt only if owner_name
+# changes (one owner per server process, in practice).
+_ingest_state = {"extractor": None, "owner": None}
 
 
 class MemoryNotConfigured(RuntimeError):
@@ -79,15 +97,33 @@ def _corrections_path():
     return os.path.join(_data_dir(), "corrections.jsonl")
 
 
+def _owner_facts_path():
+    return os.path.join(_data_dir(), "owner_facts.jsonl")
+
+
+def _cache_suffix():
+    """Mirrors run_wire.build_facts's cache-file selection exactly, so what
+    profile_ingest writes is the file the next reload() actually reads."""
+    return ("_v5" if os.environ.get("RG_EXTRACT_V5")
+            else "_v4" if os.environ.get("RG_EXTRACT_V4")
+            else "_v3" if os.environ.get("RG_EXTRACT_V3")
+            else "_v2" if os.environ.get("RG_EXTRACT_V2") else "")
+
+
+def _cache_path():
+    return os.path.join(_data_dir(), f"profile_cache{_cache_suffix()}.jsonl")
+
+
 def _build():
     """One cache-only build: facts -> WireGraph -> Memory. Mirrors
     Memory.load's body exactly, except it keeps the uncached-turn count
     (Memory.load discards it) so profile_status can surface it."""
     from run_wire import build_facts  # local: needs the sys.path bridge above
     from wire import WireGraph
-    facts, prov, n_convs, titles, n_uncached = build_facts(
+    facts, prov, hearsay, n_convs, titles, n_uncached = build_facts(
         _conversations_path(), min_mentions=2)
-    g = WireGraph.from_facts(facts, n_convs=n_convs, provisional=prov)
+    g = WireGraph.from_facts(facts, n_convs=n_convs, provisional=prov,
+                              hearsay=hearsay)
     return Memory(g, titles), n_uncached
 
 
@@ -114,6 +150,163 @@ def _ensure_loaded():
         if _state["mem"] is None:
             _reload_locked()
         return _state["mem"]
+
+
+def _get_extractor(owner_name):
+    if (_ingest_state["extractor"] is None
+            or _ingest_state["owner"] != owner_name):
+        from rgx import Extractor
+        _ingest_state["extractor"] = Extractor(owner_name=owner_name)
+        _ingest_state["owner"] = owner_name
+    return _ingest_state["extractor"]
+
+
+def _discover_owner_name():
+    """Best-effort fallback for profile_ingest's owner_name chain, step 3:
+    owner_facts.jsonl (ground truth, if the owner has ever been seeded) first,
+    else the currently-loaded Memory's best-evidenced name= fact. Never
+    raises; None if nothing is found -- Extractor(owner_name=None) is a valid,
+    supported call (see rgx.Extractor), just without third-person name
+    substitution."""
+    owner_path = _owner_facts_path()
+    if os.path.exists(owner_path):
+        for line in open(owner_path):
+            if not line.strip():
+                continue
+            try:
+                d = json.loads(line)
+            except Exception:
+                continue
+            if str(d.get("attribute", "")).lower().strip() == "name":
+                v = str(d.get("value", "")).strip()
+                if v:
+                    return v
+    mem = _state.get("mem")
+    if mem is not None:
+        cands = [nd for nd in
+                 list(mem.g.nodes.values()) + list(mem.g.provisional.values())
+                 if nd.get("attr") == "name"]
+        if cands:
+            best = max(cands, key=lambda nd: nd.get("n_mentions", 0))
+            v = str(best.get("value", "")).strip()
+            if v:
+                return v.title()
+    return None
+
+
+def profile_ingest(turns, conversation_id=None, title=None, owner_name=None):
+    """Turn ONE conversation into new profile-memory facts -- the only WRITE
+    path in this module that runs an extractor, and it is rgx: a deterministic
+    parser, NOT a language model. No prompt, no sampling, no invented text --
+    a fact is either grounded in the turn's own words or it is not emitted.
+
+    turns: [{"role": "user"|"assistant", "content": str}, ...], one dialogue.
+
+    Steps, all under the module reload lock (same discipline as reload()):
+      (a) append (or create) this conversation's record in the data dir's
+          conversations.json, in the shape run_profile_full.load_stream_and_
+          titles reads (uuid, name, created_at, chat_messages:[{sender,text}]).
+      (b) run rgx.Extractor over every non-empty turn (owner_name from the
+          argument, else env SOURCEDRECALL_OWNER, else an existing profile's
+          own name if one is discoverable, else None) and append one cache
+          line per NEW turn (by sha1 of its truncated text -- the same hash
+          run_wire.build_facts looks up) to the cache file build_facts reads;
+          a turn already in the cache is skipped, never re-extracted.
+      (c) reload the profile memory, so the next profile_recall/profile_
+          context/profile_status sees the new facts immediately.
+      (d) return receipts: how many turns were seen, how many carried a new
+          (non-hearsay) fact, how many were hearsay (an assistant clause
+          reporting a claim ABOUT the user, see run_wire.build_facts), how
+          many turns were already cached and skipped, and model_calls=0 --
+          always 0, since nothing here is a model call.
+    """
+    turns = turns or []
+    if not turns:
+        # Safe no-op: nothing to append, nothing to extract, no reload
+        # forced, no extractor loaded. conversation_id is echoed back
+        # unchanged (None if not given) -- nothing was created.
+        return {"conversation_id": conversation_id, "turns": 0, "facts": 0,
+                "hearsay": 0, "skipped_cached": 0, "model_calls": 0}
+    with _lock:
+        data_dir = _data_dir()
+        os.makedirs(data_dir, exist_ok=True)
+
+        owner = (owner_name or os.environ.get("SOURCEDRECALL_OWNER")
+                  or _discover_owner_name())
+
+        conv_id = conversation_id or str(_uuidlib.uuid4())
+        created_at = datetime.datetime.now(datetime.timezone.utc).strftime(
+            "%Y-%m-%dT%H:%M:%SZ")
+
+        # ---- (a) conversations.json: append or create ----
+        conv_path = _conversations_path()
+        convs = []
+        if os.path.exists(conv_path):
+            try:
+                convs = json.load(open(conv_path))
+            except Exception:
+                convs = []
+        record = next((c for c in convs if c.get("uuid") == conv_id), None)
+        if record is None:
+            record = {"uuid": conv_id, "name": title or "(untitled)",
+                       "created_at": created_at, "chat_messages": []}
+            convs.append(record)
+        elif title:
+            record["name"] = title
+        chat_messages = record.setdefault("chat_messages", [])
+        for t in turns:
+            sender = "human" if t.get("role", "user") == "user" else "assistant"
+            chat_messages.append(
+                {"sender": sender, "text": str(t.get("content", ""))})
+        with open(conv_path, "w", encoding="utf-8") as fh:
+            json.dump(convs, fh)
+
+        # ---- (b) rgx extraction, cache-append, skip-if-already-cached ----
+        ex = _get_extractor(owner)
+        cache_path = _cache_path()
+        cached_hashes = set()
+        if os.path.exists(cache_path):
+            for line in open(cache_path):
+                try:
+                    cached_hashes.add(json.loads(line)["h"])
+                except Exception:
+                    pass
+
+        n_turns = n_facts = n_hearsay = n_skipped = 0
+        new_lines = []
+        for ti, t in enumerate(turns):
+            role = t.get("role", "user")
+            text = str(t.get("content", "")).strip()[:1800]
+            if not text:
+                continue
+            n_turns += 1
+            h = _rgx_facts.turn_hash(text)
+            if h in cached_hashes:
+                n_skipped += 1
+                continue
+            recs = ex.extract_turn(text, role=role, session=0, turn=ti)
+            facts = [f for f in (_rgx_facts.to_fact(r) for r in recs)
+                     if f is not None]
+            for f in facts:
+                if f.get("evidential") == "report":
+                    n_hearsay += 1
+                else:
+                    n_facts += 1
+            new_lines.append(json.dumps({"h": h, "f": facts}))
+            cached_hashes.add(h)
+
+        if new_lines:
+            with open(cache_path, "a", encoding="utf-8") as fh:
+                for line in new_lines:
+                    fh.write(line + "\n")
+
+        # ---- (c) reload ----
+        _reload_locked()
+
+    # ---- (d) receipts ----
+    return {"conversation_id": conv_id, "turns": n_turns, "facts": n_facts,
+            "hearsay": n_hearsay, "skipped_cached": n_skipped,
+            "model_calls": 0}
 
 
 # --------------------------------------------------------------- the tools

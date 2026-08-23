@@ -113,6 +113,26 @@ through the four MCP tools above, so provenance stays clean. This is a
 trust feature: you can *see* what the memory holds, in human-readable
 triples, unlike embedding-only competitors.
 
+## `profile_ingest` (deterministic extraction, no LLM)
+
+`profile_ingest(turns, conversation_id=None, title=None, owner_name=None)` is
+the one write path in the `profile_*` bridge (see `sourcedrecall/profile_memory.py`)
+that turns raw conversation into new facts. The extractor is **rgx** — a
+grammar-rule parser over a dependency parse — never a language model:
+
+- **Never invents content.** A fact is either grounded in the turn's own
+  words or it is not emitted. There is no sampling, no prompt, no paraphrase.
+- **Tags hearsay.** An assistant clause that reports a claim *about* the
+  user ("I remember you mentioning...") is extracted and receipted, but
+  filed under its own `hearsay` tier — never asserted or volunteered as the
+  user's own fact (see `profile_recall`'s `"hearsay"` key).
+- **Every fact carries receipts.** Session, turn index, role, and (once
+  wired) conversation id + date — the same provenance contract every other
+  fact in this store carries; ingestion doesn't relax it.
+- Re-ingesting a conversation is a safe no-op for turns already seen
+  (`skipped_cached` counts them, `model_calls` is always `0` — there is no
+  model call anywhere in this path, cached or fresh).
+
 ## Persistence
 
 State is a local snapshot (`arrays.npz` + `state.json`) written after every
