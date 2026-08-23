@@ -48,6 +48,25 @@ points, prompted arm reused across runs.
 
 **CORRECTION (e240): every recall above is UNDER-read.** HaluMem's official `evaluation.py` computes recall over non-interference gold only; our harness counted interference points. On the official definition the parser in the tree scores **u0 R 0.5233 / u1 R 0.4418** (prompted 0.2705 / 0.2369), implied u0 F1 ≈ 0.59. The harness now prints both. Interference (the assistant's false memories about the user) is stored 19–20% of the time by the parser and 0% by the prompted arm — diagnosed as the assistant's 'I' being mapped to the owner, fixed in the e240 parser round.
 
+
+### Current numbers — tree at `8b30efa`+ (e240–e243, 2026-08-23)
+
+Official definition (non-interference recall), local judge, prompted arm reused:
+
+| user | P | R | F1 | interference acc. | vs prompted F1 |
+|---|---|---|---|---|---|
+| u0 | 0.7092 | 0.6075 | **0.6544** | 61.3% | 0.3860 |
+| u1 | 0.6700 | 0.4880 | **0.5647** | 53.7% | 0.3477 |
+
+Arc: e240 parser round (+13.5 / +4.4pt recall, p=1e-8 / 0.04) → e242
+evidential frame rule (−3.3 / −1.4pt recall, +13.7 / +22.4pt interference
+accuracy, ships on product grounds) → e243 atom+full / object control /
+third-party subjects (null on both, kept). Notebook e240–e243. Judge
+server on WSL :8090; Stanza rebuilds go to the Mac Studio (see memory
+`mac-studio-worker`). Next: the end-to-end QA number (rgx cache vs LLM
+cache, u0) — in flight at time of writing; then update-signal grammar
+(used to / no longer / from X to Y) against the updating metric.
+
 ### Published comparison (do NOT quote yet)
 HaluMem-Medium extraction F1: Memobase 25.13 · Supermemory 56.90 · Mem0 57.31 ·
 Mem0-Graph 57.85 · MemOS 79.70 · MOSAIC 86.77. Our judge is local and e176
