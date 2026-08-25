@@ -35,9 +35,11 @@ def _models():
 class IndexV3:
     """Per-memory-state index: BM25 tables + dense embeddings + persona set."""
 
-    def __init__(self, mem):
+    def __init__(self, mem, facts=None):
         bi, _ = _models()
-        self.facts = list(mem.g.nodes.values()) + list(mem.g.provisional.values())
+        self.facts = (list(facts) if facts is not None
+                      else list(mem.g.nodes.values())
+                      + list(mem.g.provisional.values()))
         self.docs = [RV._stems(d["attr"]) | RV._stems(d["value"]) for d in self.facts]
         n = len(self.facts)
         from collections import Counter
@@ -62,6 +64,19 @@ class IndexV3:
         for d in self.facts:
             if d["attr"] == "name":
                 self.persona |= _tokens(d["value"])
+        # entry 249: the hearsay tier (entry 246 -- slots whose only mentions
+        # are assistant claims about the user) gets its OWN index, never this
+        # one. Mixing hearsay into `self.facts` would let an assistant claim
+        # displace a corroborated fact from the cross-encoder's top_n, and the
+        # measurement would then be of retrieval displacement rather than of
+        # the hearsay label. Built only under RG_HEARSAY, so with the flag
+        # unset this attribute is None and the index is byte-identical to the
+        # one that produced every banked number.
+        self.hearsay = None
+        if facts is None and os.environ.get("RG_HEARSAY") == "1":
+            hs = list(getattr(mem.g, "hearsay", {}).values())
+            if hs:
+                self.hearsay = IndexV3(mem, facts=hs)
 
 
 def retrieve_facts_v3(index, question, k=120, dense_k=20, top_n=None):

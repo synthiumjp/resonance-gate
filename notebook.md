@@ -12410,3 +12410,68 @@ anything — each missed renderer cost a judged cycle to find.
 
 Not re-judged yet, deliberately: batched with the labeled-hearsay-in-
 context change so the next 11 h judge cycle measures both.
+
+---
+
+## Entry 249 — 2026-08-25 (p2: labeled hearsay reaches the QA context. Also — an external red-team, a census that refutes its headline claim, and a correction to the handover's map of which harness is the judged one.)
+
+**The hearsay tier was not merely unlabeled in QA — it was absent.**
+`retrieve_v3.IndexV3.__init__` builds its index from
+`mem.g.nodes + mem.g.provisional`. `mem.g.hearsay` appears in neither, so
+since e246 the tier has been invisible to QA retrieval entirely. "Label the
+hearsay candidates" was therefore the wrong description of the work; there
+were no candidates to label.
+
+Built (RG_HEARSAY=1, off by default): hearsay gets its OWN IndexV3 via a new
+`facts=` override, is retrieved separately, and is appended to the context
+AFTER every corroborated line, each prefixed `HEARSAY (assistant said this;
+the user has not):`, plus exactly one CAL rule (rule 4) added only when
+hearsay lines are actually present. A separate index is the point: mixing
+hearsay into `self.facts` would let an assistant claim displace a
+corroborated fact from the cross-encoder's top_n, and the cycle would then
+measure retrieval displacement rather than the label. Flag off ⇒ no
+sub-index, context and rule block byte-identical. 5 new tests assert both
+states; 99 p2 + 56 rgx still green.
+
+**Correction to the handover.** It says the hearsay work needs "one
+composer-prompt sentence" and I claimed in-session that the QA path is
+non-generative and has no composer. The handover was right and I was wrong.
+`halumem_run.answer_question`/`_answer_plain` IS non-generative — but it is
+not the judged path. `chain.sh` runs `halumem_official/eval_rgp2.py`, whose
+`compose_answer` calls `llm_request(PROMPT_MEMZERO + CAL + extra)`. Two
+harnesses, and the non-judged one is the one that reads as authoritative
+from inside the tree. Worth a ledger line: `halumem_run.py` is the dev
+harness; `eval_rgp2.py` is the official adapter.
+
+**External red-team (ox-alpha, 1M ctx, `tools/ox_review.py`).** Two of its
+four headline findings did not survive checking:
+
+- *"`judge_answer` matches verdicts by substring; `incorrect` contains
+  `correct`."* The bug is real (`halumem_run.py:76`) but it is NOT the judge
+  behind any banked number — official `evaluation.py` dispatches on exact
+  equality (`== "Correct"`). Blast radius is the dev harness and
+  `two_judge.py`. Queued as hygiene, not a correction.
+- *"The hearsay tier is starved: `_report_frame` needs a first-person matrix
+  subject, so 'you mentioned…' escapes it — retag before the cycle."* The
+  premise is true (`parse.py:336`, `FIRST`), the conclusion is not. Census
+  over u0+u1 assistant turns (`tools/hearsay_census.py`, deterministic, zero
+  spend), 207 report frames: 69.6% reached by rule (a), 22.7% by rules
+  (b)/(c) — expletive/hedge — and **7.7% missed by all three**. My own first
+  cut said 70% missed and was wrong twice: it counted interrogatives ("How
+  do you see…?") as report frames, and it tested rule (a) alone. Lower bound
+  on the miss rate; call it under ~15%. No retagging before the cycle.
+
+What it got right and we had not: the confound is dissolvable for free.
+Answer strings are a pure function of (store, renderer, question), so the
+four configs (base / +hearsay / +e248 / +both) can be generated offline and
+diffed; every question whose string is byte-identical across configs can
+have its verdict COPIED exactly, not approximated. Judge +both, re-judge only
+the differing residue, get full factorial attribution for roughly the
+confounded plan's spend. Also: attribute canonicalisation (ledger's "THE
+LEVER") is missing from the queue despite being a prerequisite for the
+evolution linker queued ahead of it — e214's 161 attribute names for ~20
+concepts means linking on uncanonicalised keys is a null waiting to happen.
+
+Next: the four-config answer diff (free, and it sizes the cycle), then
+canonicalisation, then the cycle. NOT yet measured — no judge has seen any
+of this.

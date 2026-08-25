@@ -63,6 +63,27 @@ DEFAULT_CACHE_DIR = os.path.expanduser("~/rg_private/halumem")
 
 _TIMELINE = os.environ.get("RG_TIMELINE", "0") == "1"
 
+# Entry 249: surface the HEARSAY tier in the judged QA context, labeled.
+# Assistant claims about the user (evidential=="report", entry 246) are stored
+# in mem.g.hearsay and never corroborate a fact -- but retrieve_v3's index is
+# nodes+provisional, so until now they never reached QA retrieval AT ALL. This
+# retrieves them from their own index and appends them AFTER the corroborated
+# candidates, so they cannot displace a real fact from top_n.
+# OFF by default: it changes the judged context, so it has to be A/B-able.
+# NOTE: v3 path only -- that is what the chain runs (RG_RETRIEVE_V3=1). On the
+# non-v3 path the flag is a deliberate no-op rather than an untested surface.
+_HEARSAY = os.environ.get("RG_HEARSAY") == "1"
+_HEARSAY_N = int(os.environ.get("RG_HEARSAY_N", "3") or 3)
+
+HEARSAY_LABEL = "HEARSAY (assistant said this; the user has not): "
+# One rule, appended to CAL only when hearsay lines are actually present --
+# CAL itself stays byte-identical to the entry-110 text in every other case.
+HEARSAY_RULE = (
+    "\n4. Lines beginning 'HEARSAY' are things the ASSISTANT said about the "
+    "user, not things the user stated. Never repeat a HEARSAY line as the "
+    "user's own words. Use one only to support an answer that no memory above "
+    "contradicts, and never as the sole basis for a specific value.")
+
 # Inference-question gate (entry 179). HaluMem is two tasks: on retrieval
 # categories we score 64.1% correct / 15.0% halluc under the strict judge, on
 # inference categories 11.2% / 46.2%. RG is an evidence layer -- it retrieves
@@ -119,6 +140,17 @@ def compose_answer(mem, question, index):
         if section:
             context = context + "\n" + section
             extra = TL.TIMELINE_RULE
+    # entry 249: appended LAST, after every corroborated candidate, so the
+    # composer reads it as trailing weaker evidence rather than as a peer of
+    # the confirmed lines.
+    if _HEARSAY and _V3 and getattr(index, "hearsay", None) is not None:
+        hs = RV3.retrieve_facts_v3(index.hearsay, question, top_n=_HEARSAY_N)
+        if hs:
+            context = context + "\n" + "\n".join(
+                HEARSAY_LABEL + RV.format_fact(
+                    d, owner=getattr(index, "owner", None))
+                for d in hs[:_HEARSAY_N])
+            extra += HEARSAY_RULE
     try:
         answer = llm_request(PROMPT_MEMZERO.format(context=context,
                                                    question=question) + CAL + extra)
