@@ -12705,3 +12705,57 @@ runs TWO supersession implementations with DIFFERENT gates --
 `mark_current` tests `canon_state_attr(attr)` against SINGLE_VALUED (line
 317-319), `resolve()` tests the RAW attr (line 191). Write-time and read-time
 verdicts can therefore disagree. Not yet fixed; queued as hygiene.
+
+---
+
+## Entry 253 — 2026-08-26 (p2: autopsy of the 98 stage-(i) deaths. 54% of update gold is not carried by any single turn -- a real ceiling; ~45% of deaths ARE addressable.)
+
+Localised every u0 update point that never reached the store, against the
+dialogue and against the ACTUAL extraction cache (keyed by sha1 of turn text,
+so this is real emission, not a re-run). tools/update_miss_autopsy.py.
+
+| class | n | share | meaning |
+|---|---|---|---|
+| NOT_IN_DIALOGUE  | 53 | 54.1% | no turn carries it at >=0.6 containment |
+| EMITTED_OTHER    | 17 | 17.3% | turn read, records made, change clause missed |
+| PARTIAL          | 14 | 14.3% | we said it, differently (FORM) |
+| STORED_BUT_LOST  | 13 | 13.3% | extracted well, then filtered before the store |
+| EMITTED_NOTHING  |  1 |  1.0% | |
+
+**Addressable = 44 points = 44.9% of deaths = 31% of the whole axis.**
+NOT_IN_DIALOGUE is the honest ceiling: HaluMem's update gold is substantially
+ABSTRACTIVE -- synthesised across turns rather than stated in one. A
+single-clause walker cannot reach it by construction, and no representation
+work changes that.
+
+**Control run, and it corrected a speculation.** Over ALL 142 u0 update
+points (not just misses): 40.1% are carried by no single turn, and of those
+carried, **80% are ASSISTANT turns / 20% user**. The 80/20 split is IDENTICAL
+in the misses and in the whole population -- so we are NOT specifically
+failing on assistant turns; that is simply how this benchmark is written.
+Speculation checked and dropped.
+
+**A hypothesis I had, measured and mostly wrong.** Since 80% of update gold is
+assistant-carried and report-framed assistant clauses route to `mem.g.hearsay`
+(invisible to nodes+provisional), I expected the hearsay tier to be holding a
+large slice of the missing update gold. Measured: **5 of 98 (5.1%)**. Small.
+Not the explanation for STORED_BUT_LOST.
+
+STORED_BUT_LOST (13) is therefore extracted-then-FILTERED: the autopsy reads
+the raw cache while ingest applies `PF._EXCLUDE_ATTR`, check.py's prefilter/
+quality, and dedup. Which filter is dropping them is the open question and is
+cheap to answer.
+
+Note on benchmark shape for the ledger: on the BENCHMARK path
+(halumem_run.ingest_user, RG_INGEST_ALL_TURNS=1) non-report assistant clauses
+DO count toward n and become facts. On the PRODUCT path
+(run_wire.build_facts) every assistant clause that is not evidential=="report"
+is dropped outright. Two pipelines, opposite policies on the same content --
+which is defensible (a personal memory should not ingest the assistant's
+words as the user's) but means benchmark extraction numbers do NOT describe
+the product path's behaviour on assistant turns. Worth stating plainly
+wherever the extraction number is quoted.
+
+Next: construction-class clustering of the 44 addressable misses, then a
+parser round against the largest cluster. That is the work that has returned
+3-11pt per round, now aimed at a population of measured size.
