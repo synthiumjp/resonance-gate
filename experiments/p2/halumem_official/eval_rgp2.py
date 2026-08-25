@@ -110,6 +110,17 @@ HEARSAY_RULE = (
 # Opt-in: it changes the artifact, so it has to be A/B-able.
 _SUPERSEDE = os.environ.get("RG_SUPERSEDE") == "1"
 
+# Entry 250: the update artifact is filled by search_memories -> mem.recall(),
+# the plain BM25 tier, while QA rides the v3 index (dense + cross-encoder). The
+# v3 index was not even BUILT until after the update loop. So the worst-scoring
+# axis ran on the weaker retriever. Measured offline on u0's 142 gold update
+# points (tools/update_retrieval_ab.py, paired token-F1 SCREEN): coverage@0.5
+# 40.1% -> 52.8%, discordant 20:2, McNemar p=1.2e-4. NOTE it MISSED the 1.5x
+# ratio bar set before the run (came in 1.32x) -- shipped as a consistency fix
+# with a decisive paired test, NOT as a validated win. Opt-in: it changes a
+# judged artifact.
+_UPDATE_V3 = os.environ.get("RG_UPDATE_V3") == "1"
+
 _QGATE = None
 if os.environ.get("RG_QGATE"):
     try:
@@ -214,14 +225,17 @@ def extracted_memories_for(mem):
     return [_fact_str(nd, owner=owner) for nd in nodes]
 
 
-def search_memories(mem, query, top=10):
+def search_memories(mem, query, top=10, index=None):
     """"Get Dialogue Memory" / retrieval-for-update equivalent: our
     mem.recall(query), flattened to list[str] the way the official adapters
     return client.search() results. Never generates -- verbatim stored
     facts or an empty list."""
     r = mem.recall(query)
     if not r["found"]:
-        return []
+        if not (_UPDATE_V3 and index is not None):
+            return []
+        # the v3 path does not read `r`; an empty recall is not final for it
+        r = {"found": True, "asserted": [], "wired": [], "unconfirmed": []}
 
     # Entry 163 shipped proposition rendering for the extraction artifact and
     # this path never got it: search_memories has always had its own
@@ -284,6 +298,22 @@ def search_memories(mem, query, top=10):
 
     def _key(f):
         return 0 if f.get("current", True) else 1
+
+    if _UPDATE_V3 and index is not None:
+        # Same renderer, same tier prefixes -- only the SELECTION changes.
+        import retrieve_v3 as _RV3
+        def _adapt(nd):
+            return {"attribute": nd["attr"], "value": nd["value"],
+                    "text": nd.get("text"), "current": nd.get("current", True),
+                    "supersedes": nd.get("supersedes"),
+                    "superseded_by": nd.get("superseded_by")}
+        picked = _RV3.retrieve_facts_v3(index, query, top_n=top)
+        v3_ast = [_adapt(nd) for nd in picked
+                  if nd.get("tier") != "provisional"]
+        v3_unc = [_adapt(nd) for nd in picked
+                  if nd.get("tier") == "provisional"]
+        return ([_v(f) for f in v3_ast]
+                + [_v(f, "UNCONFIRMED: ") for f in v3_unc])[:top]
 
     ast = sorted(r["asserted"], key=_key) if _SUPERSEDE else r["asserted"]
     unc = sorted(r["unconfirmed"], key=_key) if _SUPERSEDE else r["unconfirmed"]
@@ -385,17 +415,32 @@ def process_user(idx, user_data, cache_dir=DEFAULT_CACHE_DIR):
         new_session["extracted_memories"] = new_facts
         new_session["add_dialogue_duration_ms"] = dur_ms
 
+        # Entry 250: build the index ONCE per session, BEFORE the update
+        # loop. It used to be built after, which is the whole reason the
+        # update artifact could only ever use the weaker recall() tier.
+        # Built lazily: sessions with neither update points nor questions
+        # must not pay for an index nobody reads.
+        index = None
+
+        def _index():
+            nonlocal index
+            if index is None:
+                index = RV3.IndexV3(mem) if _V3 else RV.build_index(mem)
+            return index
+
         for mpt in new_session["memory_points"]:
             if mpt.get("is_update") != "True" or not mpt.get("original_memories"):
                 continue
-            mpt["memories_from_system"] = search_memories(mem, mpt["memory_content"])
+            mpt["memories_from_system"] = search_memories(
+                mem, mpt["memory_content"],
+                index=_index() if _UPDATE_V3 else None)
 
         if "questions" not in session:
             new_user_data["sessions"].append(new_session)
             continue
 
         new_session["questions"] = []
-        index = RV3.IndexV3(mem) if _V3 else RV.build_index(mem)
+        _index()
         for qn, qa in enumerate(session["questions"]):
             t1 = time.time()
             answer, context = compose_answer(mem, qa["question"], index)

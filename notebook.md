@@ -12577,3 +12577,72 @@ Suites: 267 p2 + 62 rgx (from 99 + 56). Nothing here is judged.
 
 Next: RG_SUPERSEDE=1 (built, rubric-indicated, untested) ahead of the
 retrieval swap; attribute canonicalisation; then a cycle.
+
+---
+
+## Entry 251 — 2026-08-25 (p2: the update axis is gated by a 24-name allowlist, not by canonicalisation; RG_SUPERSEDE is dead; and the file the official run executes was a stale COPY.)
+
+**RG_SUPERSEDE is dead — 0/142.** The update judge's Correct criterion names
+"the original memory is effectively replaced or marked as outdated", and
+RG_SUPERSEDE renders exactly that, so it looked like the cheapest untested
+lever on the worst axis. Screened it first (tools/supersede_screen.py):
+the annotation fires on **0 of 142** u0 gold update points, and flipping the
+flag changes the output on 0 of them. An 11 h null, avoided for free.
+
+**Root cause, and it is not canonicalisation.** `currency.mark_current` gates
+everything on `if canon not in SINGLE_VALUED: continue`, where SINGLE_VALUED
+is a 24-name hand-written set (occupation, job_title, employer, income, age,
+city...). Measured coverage of the real stores: **0.2% of the rgx store's
+2863 nodes, 2.1% of the LLM store's 997**. Consequently exactly **1 node in
+each store** has a non-empty `supersedes`, and 2 are marked current=False.
+The axis cannot express "this replaced that" at all.
+
+This DISPROVES the ledger's "attribute canonicalisation is THE LEVER" framing
+as the prerequisite for updating. If key-space fragmentation were the gate,
+the LLM store -- 94 distinct attrs, top key `motivation` with 205 nodes --
+would supersede constantly. It supersedes once. Same allowlist, same result.
+
+**The deeper mismatch: the two stores are keyed on different things.**
+  rgx : 2863 nodes, 1785 distinct attrs, 84% singletons, and the names are
+        VERB LEMMAS from the clause walker -- think(69), is(51), plan(41),
+        hope(40), believe(39). Not slots. Merging the 69 `think` nodes would
+        be WRONG: they are 69 different thoughts.
+  LLM : 997 nodes, 94 attrs, genuine slot names -- motivation, plan, belief,
+        value, preference.
+So the deterministic extractor produces a PREDICATE-keyed store while all the
+supersession/updating machinery assumes a SLOT-keyed one. That is the real
+problem to design against, and "canonicalise attributes into slots" is not
+obviously the answer given the slot-keyed store fails identically.
+
+**Update retrieval A/B (tools/update_retrieval_ab.py), u0, all 142 points.**
+The update artifact used search_memories -> mem.recall() (plain BM25) while
+QA rode the v3 index -- which was not even BUILT until after the update loop.
+Paired token-F1 SCREEN (ordinal only, the proxy stays barred for accuracy):
+coverage@0.5 **40.1% -> 52.8%**, discordant 20:2, McNemar p=1.2e-4.
+**It MISSED the 1.5x ratio bar set before the run (came in 1.32x).** Recorded
+as a miss rather than quietly rebasing the threshold. Shipped anyway behind
+RG_UPDATE_V3 as a CONSISTENCY fix -- the worst axis had no business on the
+weaker retriever -- not as a validated win. Index is now built once per
+session, lazily, before the update loop. Flag OFF proven byte-identical to
+committed HEAD on 73 update points, 0 differences.
+
+### The file the official run executes was a stale copy
+
+`chain.sh` cd's to the HaluMem eval dir and runs `eval_rgp2.py` THERE. That
+is a separate copy (PATCHES.md: "eval/eval_rgp2.py (ADDED, copy in this
+dir)"), kept in sync by hand. It was byte-identical to repo commit cd34271 --
+i.e. **e248 state**: every change since, including all of e249, was absent
+from the file that actually runs. Nothing enforced the sync; e248's copy
+happened to have been made.
+
+Replaced the copy with a **symlink** to the repo file (backup at
+`eval_rgp2.py.e248.bak`), so the runtime and the tree cannot diverge again --
+the same principle as the rgx shims: the thing measured and the thing that
+ships are one file. Verified the harness imports through the symlink and sees
+_HEARSAY_MIN and _UPDATE_V3.
+
+This is the third instrument defect of the session and the most dangerous
+class: it would not have produced a wrong number, it would have produced a
+number for the WRONG CODE, silently.
+
+Suites 267 p2 + 62 rgx. Nothing judged.
