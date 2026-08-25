@@ -10,9 +10,12 @@ nothing in the store is unattributable.
     for r in records:
         print(r.text, "<-", r.role, "turn", r.turn)
 
-Measured against HaluMem-Medium on a held-out user, judged by the benchmark's
-own harness: recall 0.4609 against a prompted 14B's 0.2122 (+24.9pt, McNemar
-p=4.8e-23), with zero model calls at extraction time. Numbers, method and the
+Measured against HaluMem-Medium on held-out users, judged by the benchmark's
+own harness, on HaluMem's OFFICIAL recall definition (non-interference gold
+only): u0 F1 0.6544 / u1 0.5647, against a prompted 14B's 0.3860 / 0.3477,
+with zero model calls at extraction time. (Earlier drafts of this docstring
+quoted R 0.4609 vs 0.2122; those counted interference points, which the
+official definition excludes -- corrected in e240, see the handover.) Numbers, method and the
 things that did NOT work are in docs/EXPERIMENT_LEDGER.md -- including six
 instrument defects found along the way, five of which flattered the results.
 
@@ -20,6 +23,10 @@ Design commitments, in order of how much they cost to keep:
 
   NEVER INVENT CONTENT.  Every content word in a record must trace to the
       source turn. A slot NAME may come from our schema; a VALUE may not.
+      Enforced as a THRESHOLD, not an absolute: check.prefilter defaults to
+      min_grounded=0.85, so a value of seven content words tolerates one
+      ungrounded token and two fail it. Tighten that default before quoting
+      this line as a guarantee.
   NEVER INVERT A FACT.   Negation is preserved. "I don't like boxing" is not
       stored as "does like boxing" -- a defect that shipped here for a while
       and is invisible to token-overlap metrics, because the inverted sentence

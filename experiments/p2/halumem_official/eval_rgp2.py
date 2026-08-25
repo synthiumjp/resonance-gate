@@ -74,6 +74,16 @@ _TIMELINE = os.environ.get("RG_TIMELINE", "0") == "1"
 # non-v3 path the flag is a deliberate no-op rather than an untested surface.
 _HEARSAY = os.environ.get("RG_HEARSAY") == "1"
 _HEARSAY_N = int(os.environ.get("RG_HEARSAY_N", "3") or 3)
+# RELEVANCE FLOOR on the cross-encoder logit, and it is load-bearing. Without
+# it, retrieve_facts_v3 returns its top_n by RANK whatever the scores are, so
+# the first cut of this change appended 3 hearsay lines to 155 of 164 u0
+# questions -- 94.5%, i.e. to essentially every question that had any hearsay
+# in the store at all, on topic or not. Measured logits on u0 (164 questions,
+# tools/hearsay_threshold.py): top MAIN fact p25/p50 = -0.39/+1.83; top
+# HEARSAY p25/p50 = -4.16/-1.76. A floor of 0.0 is the reranker's own sign
+# for "relevant" and sits at about the main-fact p25, and takes hearsay from
+# 94.5% of questions to 26.8%. Tune with RG_HEARSAY_MIN.
+_HEARSAY_MIN = float(os.environ.get("RG_HEARSAY_MIN", "0.0") or 0.0)
 
 HEARSAY_LABEL = "HEARSAY (assistant said this; the user has not): "
 # One rule, appended to CAL only when hearsay lines are actually present --
@@ -144,7 +154,8 @@ def compose_answer(mem, question, index):
     # composer reads it as trailing weaker evidence rather than as a peer of
     # the confirmed lines.
     if _HEARSAY and _V3 and getattr(index, "hearsay", None) is not None:
-        hs = RV3.retrieve_facts_v3(index.hearsay, question, top_n=_HEARSAY_N)
+        hs = RV3.retrieve_facts_v3(index.hearsay, question, top_n=_HEARSAY_N,
+                                   min_score=_HEARSAY_MIN)
         if hs:
             context = context + "\n" + "\n".join(
                 HEARSAY_LABEL + RV.format_fact(

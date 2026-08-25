@@ -15,7 +15,18 @@ product promises --
     not in the block is unknown and must not be invented. The LLM stays the
     fallible creative client; the block is the stable substrate speaking.
 
-No model call anywhere in this module.
+No model call on the READ path -- load(), recall(), profile() and
+context_block() are pure python over the store, which is what "the stable
+substrate speaking" above means and what every QA number rests on.
+
+ONE EXCEPTION, corrected in e249: conflicts() calls consolidate.contradicts(),
+which lazy-loads a LOCAL NLI classifier (cross-encoder/nli-deberta-v3-xsmall,
+CPU) to decide whether two values of a slot can both hold. Nothing remote and
+nothing generative -- and it degrades to None, letting the caller fall back to
+the lexical path, if transformers is unavailable. But it is a model call, and
+this docstring claimed for a long time that there were none anywhere in the
+module. If you need a guaranteed model-free surface, use everything except
+conflicts().
 """
 
 import os

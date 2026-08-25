@@ -59,24 +59,44 @@ class _FakeIndex:
         self.hearsay = hearsay
 
 
-def _stub_retrieval(mod, facts, hearsay_facts):
-    """Stub both retrieval layers so only assembly is exercised."""
-    mod.RV3.retrieve_facts_v3 = (
-        lambda index, question, **kw:
-        hearsay_facts if index is not None and getattr(
-            index, "_is_hearsay", False) else facts)
-    mod.RV.format_fact = lambda d, owner=None: d["line"]
+@pytest.fixture(autouse=True)
+def _restore_patched_modules():
+    """RV/RV3 are REAL modules shared with the rest of the suite. Patching
+    them at module scope leaks into test_retrieve.py and made three of its
+    tests fail depending on file order. Snapshot and restore."""
+    saved = []
+    yield saved
+    # REVERSED: a test may patch the same attribute twice, in which case the
+    # second snapshot holds the FIRST stub, not the original. Unwinding
+    # forward would leave that stub installed and leak it into the rest of
+    # the suite -- which is exactly the failure this fixture exists to stop.
+    for mod_obj, name, orig in reversed(saved):
+        setattr(mod_obj, name, orig)
+
+
+def _stub_retrieval(mod, facts, hearsay_facts, saved):
+    """Stub both retrieval layers so only assembly is exercised. Every patch
+    is recorded so the autouse fixture can put the real function back."""
+    def _patch(target, name, value):
+        saved.append((target, name, getattr(target, name)))
+        setattr(target, name, value)
+
+    _patch(mod.RV3, "retrieve_facts_v3",
+           lambda index, question, **kw:
+           hearsay_facts if index is not None and getattr(
+               index, "_is_hearsay", False) else facts)
+    _patch(mod.RV, "format_fact", lambda d, owner=None: d["line"])
 
 
 FACTS = [{"line": "[confirmed x3, 2025-09-04] Martin Mark's job is engineer."}]
 HEARSAY = [{"line": "[unconfirmed(once), 2025-09-06] Martin Mark enjoys jazz."}]
 
 
-def test_hearsay_off_is_byte_identical():
+def test_hearsay_off_is_byte_identical(_restore_patched_modules):
     mod = _load(hearsay_on=False)
     hs_index = _FakeIndex(hearsay=object())
     hs_index._is_hearsay = False
-    _stub_retrieval(mod, FACTS, HEARSAY)
+    _stub_retrieval(mod, FACTS, HEARSAY, _restore_patched_modules)
 
     _, context = mod.compose_answer(mem=None, question="What is his job?",
                                     index=hs_index)
@@ -88,12 +108,12 @@ def test_hearsay_off_is_byte_identical():
     assert "HEARSAY" not in mod.CAL
 
 
-def test_hearsay_on_appends_labeled_lines_last():
+def test_hearsay_on_appends_labeled_lines_last(_restore_patched_modules):
     mod = _load(hearsay_on=True)
     hearsay_index = _FakeIndex(hearsay=None)
     hearsay_index._is_hearsay = True
     index = _FakeIndex(hearsay=hearsay_index)
-    _stub_retrieval(mod, FACTS, HEARSAY)
+    _stub_retrieval(mod, FACTS, HEARSAY, _restore_patched_modules)
 
     _, context = mod.compose_answer(mem=None, question="Does he like jazz?",
                                     index=index)
@@ -107,7 +127,7 @@ def test_hearsay_on_appends_labeled_lines_last():
     assert mod.HEARSAY_LABEL not in lines[0]
 
 
-def test_hearsay_rule_added_only_when_lines_present():
+def test_hearsay_rule_added_only_when_lines_present(_restore_patched_modules):
     mod = _load(hearsay_on=True)
     hearsay_index = _FakeIndex(hearsay=None)
     hearsay_index._is_hearsay = True
@@ -118,13 +138,13 @@ def test_hearsay_rule_added_only_when_lines_present():
     mod.llm_request = lambda p: captured.setdefault("p", p) or "stub"
 
     # no hearsay retrieved -> no rule
-    _stub_retrieval(mod, FACTS, [])
+    _stub_retrieval(mod, FACTS, [], _restore_patched_modules)
     mod.compose_answer(mem=None, question="q", index=index)
     assert "HEARSAY" not in captured["p"]
 
     # hearsay retrieved -> exactly one rule, appended once
     captured.clear()
-    _stub_retrieval(mod, FACTS, HEARSAY)
+    _stub_retrieval(mod, FACTS, HEARSAY, _restore_patched_modules)
     mod.compose_answer(mem=None, question="q", index=index)
     assert captured["p"].count(mod.HEARSAY_RULE) == 1
 

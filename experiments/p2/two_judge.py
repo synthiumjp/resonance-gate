@@ -30,7 +30,6 @@ Usage:
 import argparse
 import json
 import os
-import re
 import sys
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -77,11 +76,13 @@ def _gemma_judge(question, gold, answer_text):
 
 
 def _parse_verdict(txt):
-    txt = re.sub(r"<think>.*?</think>", "", txt, flags=re.DOTALL).strip().lower()
-    for v in ("correct", "hallucination", "omission"):
-        if v in txt:
-            return v
-    return "omission"
+    """Delegates to halumem_run.parse_verdict -- the single fixed parser
+    (word-boundary matching, negation-safe, returns HR.UNPARSEABLE instead
+    of silently coercing garbage to "omission"). Kept as a thin wrapper here
+    rather than re-inlined so both judges in this two-judge protocol are
+    scored by literally the same parsing code, not two copies that could
+    drift."""
+    return HR.parse_verdict(txt)
 
 
 def _judge_text(llm, question, gold, answer_text, no_think):
@@ -207,8 +208,10 @@ def _tally_report(verdicts, answers_by_key):
 def _print_tally(name, overall, by_type):
     n = sum(overall.values())
     print(f"\n-- {name} judge (n={n}) --")
-    for v in ("correct", "hallucination", "omission"):
+    for v in ("correct", "hallucination", "omission", HR.UNPARSEABLE):
         c = overall.get(v, 0)
+        if v == HR.UNPARSEABLE and c == 0:
+            continue  # keep the common case's output unchanged
         print(f"  {v:13s}: {c:4d}  ({100 * c / max(n, 1):.1f}%)")
     print(f"  by question type:")
     for t, d in sorted(by_type.items()):

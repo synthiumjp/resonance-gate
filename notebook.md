@@ -12475,3 +12475,105 @@ concepts means linking on uncanonicalised keys is a null waiting to happen.
 Next: the four-config answer diff (free, and it sizes the cycle), then
 canonicalisation, then the cycle. NOT yet measured — no judge has seen any
 of this.
+
+---
+
+## Entry 250 — 2026-08-25 (p2: the free context diff caught e249 appending hearsay to 94.5% of questions; the update axis turns out to have a SELECTION GATE, and two premises in our own ledger are wrong.)
+
+**The four-config context diff (tools/context_diff.py) paid for itself before
+any GPU time.** Answer contexts are a deterministic function of (store,
+renderer, question), so all four configs render offline. e248 changed
+rendering only and hearsay has its own index, so retrieval runs ONCE and the
+four contexts are four renderings of one fact list (verified hunk-by-hunk;
+`currency.mark_current` does mutate stored nodes at write time, but the
+mutated field `supersedes` has no reader on the QA-context path).
+
+u0, rgx arm, 164 questions: **e248 changes 100% of contexts, hearsay changed
+94.5%, identical-across-all-four = 0.** Two consequences:
+
+1. **The verdict-reuse plan is dead for this arm.** No context is
+   byte-identical across configs, so no verdict is copyable. e248 touching
+   100% is obvious in hindsight -- it fixed the renderer that builds every
+   line. Worth knowing for free rather than assuming.
+2. **e249 was defective.** 3 hearsay lines were appended to every question
+   whose store held any hearsay at all, on topic or not, because
+   `retrieve_facts_v3` returns top_n by RANK unconditionally -- it had no way
+   to say "nothing here is relevant". Correct for the main fact pool (a weak
+   best candidate is still the best available); wrong for an optional side
+   channel. Added `min_score`, an absolute cross-encoder floor, default None
+   so every banked path stays byte-identical.
+
+Floor chosen from measured logits, not guessed (tools/hearsay_threshold.py,
+u0, 164 q): top MAIN fact p25/p50 = -0.39/+1.83; top HEARSAY p25/p50 =
+-4.16/-1.76. Hearsay is systematically far less on-topic. `RG_HEARSAY_MIN`
+defaults to 0.0 -- the reranker's own sign for relevant, ~the main-fact p25.
+Re-diff confirms **94.5% -> 26.8%**.
+
+### The update axis is not what the ledger says it is
+
+**(a) The gold shape premise is wrong.** The ledger states HaluMem's update
+gold is "literally shaped X updated job_title from 'A' to 'B'", and
+`RG_SUPERSEDE` was built on it. Measured: **u0 7/142 (5%), u1 17/162 (10%)**.
+The rest are prose propositions where the new content REVISES the old (median
+old/new similarity 0.51-0.60). Also 30-39% of `original_memories` are in
+FIRST PERSON while our store is third-person by construction. (Caution: an
+initial read of the extreme tail suggested systemic gold corruption --
+identical old/new pairs, a timestamp as an original_memory. Measured
+properly those are 1% and 0%. Sample the distribution, not the tail.)
+
+**(b) The metric has a SELECTION GATE, and this is the bigger finding.**
+`evaluation.py:58-70`: a gold update point enters the update judge ONLY if
+`memories_from_system` is non-empty. Return nothing and the point is silently
+rerouted to the Memory Integrity judge (lenient 0/1/2) rather than counting as
+an Omission. Updating% is therefore computed over a subset WE SELECT by
+choosing what to retrieve for. Dataset-wide across 20 users,
+update_memory_num=339 against 3122 eligible points -- ~11% ever reached the
+axis. u0 is 135/142 so our own figure is not badly distorted, but the number
+is not comparable to anyone else's published updating score, and that belongs
+in §6b beside the artifact-recall caveat.
+
+**(c) The already-built experiment nobody ran.** The judge's Correct criterion
+says verbatim "The original memory is effectively replaced or marked as
+outdated." `RG_SUPERSEDE` emits exactly that and was OFF in the runs that
+produced 12.6% (grep on the result files: zero occurrences). NOTE the
+distinction (a) does not touch: (a) says mimicking gold's SENTENCE shape is
+misaimed; (c) is about whether OUR output marks the old value retired. The
+judge is handed `original_memories` separately, so it never needs us to
+restate the old value -- only to show we retired it. Different clauses; do not
+conflate them (I did, briefly).
+
+Axis is strictly categorical, no partial credit: "partially omitted" buckets
+as flat Omission.
+
+### Bugs fixed this round
+
+- **Verdict parser (`judge_answer`)**: matched by substring, and "incorrect"
+  contains "correct", tested FIRST -- every negated verdict scored correct.
+  Word-boundary match + explicit "not correct" scrub; unparseable output now
+  returns an UNPARSEABLE sentinel with a counter instead of being silently
+  coerced to omission. `two_judge.py` carried a SECOND copy of the same bug;
+  it now delegates. Scope: dev harness only -- official `evaluation.py`
+  dispatches on exact equality, so no banked number moves.
+- **Role-blind turn hashing**: real (sha1 of text, no role) but fixed as a
+  DETECTOR, not a rehash -- those hashes are the on-disk cache keys and
+  changing them invalidates every cached extraction. Measured 0 cross-role
+  duplicate texts across all 20 users (~59k turns), so it never fires today.
+- **Docstrings that lied** (all confirmed against code): `rgx/__init__`
+  advertised the pre-e240 R 0.4609/0.2122; `check.py` sold a "STAGE 2 model
+  entailment" that nothing calls (`verify()` is unreachable -- every ledger
+  number is STAGE 1 alone); `quality()` still cited e229's RETRACTED crowding
+  mechanism; "NEVER INVENT CONTENT" is a 0.85 threshold, not an absolute;
+  and `memory_api`'s "No model call anywhere in this module" is false --
+  `conflicts()` runs a local NLI transformer.
+- **My own test pollution**: test_hearsay_qa patched the shared `retrieve`
+  module without restoring, breaking 3 test_retrieve tests by file order.
+  The first fix was also wrong (unwound forward; a twice-patched attribute
+  then keeps the first stub). Reversed.
+- e238/e237 parser defects were **already fixed** by the e240 round --
+  verified through the real parser on all nine verbs and both interrogative
+  cases. 6 regression tests added, no code change. Off the backlog.
+
+Suites: 267 p2 + 62 rgx (from 99 + 56). Nothing here is judged.
+
+Next: RG_SUPERSEDE=1 (built, rubric-indicated, untested) ahead of the
+retrieval swap; attribute canonicalisation; then a cycle.

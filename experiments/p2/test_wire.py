@@ -606,3 +606,65 @@ def test_ingest_user_llm_style_facts_unchanged_without_evidential(tmp_path):
     nd = mem.g.nodes[nid]
     assert nd["n_mentions"] == 2 and nd.get("n_hearsay", 0) == 0
     assert mem.g.hearsay == {}
+
+
+# -- role_hash_guard: detector for the role-blind turn-hash defect ----------
+#
+# The turn-hash caches (cache_u*_v5.jsonl and friends) are deliberately keyed
+# by a BARE sha1(text) with no role prefix, so the cache stays valid across
+# runs. rgx's extraction is role-dependent, so a user turn and an assistant
+# turn that share byte-identical text would collide on that hash and the
+# second one served from cache would silently get the wrong role's
+# extraction. Measured zero collisions across all 20 HaluMem users (~59k
+# turns) -- latent, not firing today. role_hash_guard is the loud detector;
+# these tests construct the collision synthetically and assert it fires.
+
+def test_role_hash_guard_same_role_twice_does_not_fire():
+    from wire import role_hash_guard
+    seen = {}
+    assert role_hash_guard(seen, "deadbeef", "user", "hello") is False
+    assert role_hash_guard(seen, "deadbeef", "user", "hello") is False
+
+
+def test_role_hash_guard_cross_role_collision_fires():
+    from wire import role_hash_guard
+    seen = {}
+    assert role_hash_guard(seen, "deadbeef", "user", "i work as a researcher") is False
+    assert role_hash_guard(seen, "deadbeef", "assistant",
+                            "i work as a researcher") is True
+
+
+def test_role_hash_guard_warns_naming_the_colliding_text(capsys):
+    from wire import role_hash_guard
+    seen = {}
+    role_hash_guard(seen, "deadbeef", "user", "i work as a researcher")
+    role_hash_guard(seen, "deadbeef", "assistant", "i work as a researcher")
+    err = capsys.readouterr().err
+    assert "cross-role" in err
+    assert "user" in err and "assistant" in err
+    assert "i work as a researcher" in err
+
+
+def test_ingest_user_synthetic_cross_role_duplicate_triggers_detector(
+        tmp_path, monkeypatch, capsys):
+    """End-to-end: a user turn and an assistant turn with byte-identical
+    text, ingested in one pass via halumem_run.ingest_user (the real call
+    site), must trip role_hash_guard's warning -- this is the actual defect
+    scenario (RG_INGEST_ALL_TURNS=1, RG_ASSISTANT_PROMPT unset, so both
+    turns hash to the same bare sha1 and share the same cache entry)."""
+    from halumem_run import ingest_user
+    monkeypatch.setenv("RG_INGEST_ALL_TURNS", "1")
+    dup_text = "I live in melbourne and work as a researcher"
+    cache_path = tmp_path / "cache.jsonl"
+    fact = [{"attribute": "location", "value": "melbourne"}]
+    _write_cache(cache_path, [(dup_text, fact)])
+    user = {"sessions": [
+        {"start_time": "2026-01-01", "dialogue": [
+            {"role": "user", "content": dup_text},
+            {"role": "assistant", "content": dup_text},
+        ]},
+    ]}
+    ingest_user(user, str(cache_path), min_mentions=2)
+    err = capsys.readouterr().err
+    assert "cross-role turn-hash collision" in err
+    assert dup_text in err

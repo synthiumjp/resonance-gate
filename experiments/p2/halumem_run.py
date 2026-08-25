@@ -46,7 +46,7 @@ _CSFX = ("_v6" if os.environ.get("RG_EXTRACT_V6")
          else "_v4" if os.environ.get("RG_EXTRACT_V4") else "")
 from consistency import get_llm
 from wire import (WireGraph, _tokens, extract_dates, _STOP, _QWORDS, _MONTHS,
-                  _QUERY_SYNONYMS, _DATE_PREP, _is_dateish)
+                  _QUERY_SYNONYMS, _DATE_PREP, _is_dateish, role_hash_guard)
 from memory_api import Memory
 
 JUDGE = """You grade a memory system's answer to a question about a user.
@@ -65,6 +65,56 @@ Reply with exactly one word:
                    facts do not contain it"""
 
 
+# Bug fix (dev-harness verdict parser, ~e-post-247): the old parser matched
+# by bare substring, so "incorrect" and "not correct" -- both containing the
+# substring "correct" -- were graded as the "correct" verdict, and any
+# unparseable completion was silently coerced to "omission". Both defects
+# flatter results and the second violates the standing EXPERIMENT_LEDGER.md
+# rule ("assert scores are in the harness's own valid set" / e213) -- an
+# out-of-set score must not be silently coerced into one of the valid ones.
+#
+# SCOPE: this parser is used only by this dev harness (halumem_run.py) and
+# two_judge.py's local-judge pilot. The official HaluMem harness
+# (~/rg_private/halumem/official/HaluMem/eval/evaluation.py) dispatches on
+# EXACT equality and never calls this function -- no banked/official number
+# is affected by this bug or this fix.
+UNPARSEABLE = "unparseable"          # sentinel: NOT one of the 3 valid labels
+_unparseable_count = 0               # module-level counter, callers may read it
+
+_VALID_LABEL_RX = re.compile(r"\b(correct|hallucination|omission)\b")
+# "not correct" is two separate words; \bcorrect\b alone would still match
+# the second one as if the judge had said the bare "correct" verdict. Blank
+# it out before scanning so a negated "correct" cannot be misread as the
+# "correct" label. ("incorrect" already fails \bcorrect\b on its own -- the
+# character before "correct" inside "incorrect" is a word character, so
+# there is no \b there -- no special-casing needed for that one.)
+_NEGATED_CORRECT_RX = re.compile(r"\bnot\s+correct\b")
+
+
+def parse_verdict(txt):
+    """Parse ONE judge completion into 'correct' / 'hallucination' /
+    'omission', or the UNPARSEABLE sentinel if the completion does not
+    contain exactly one of those three words as a whole word (after
+    stripping negated "correct" and any <think> block). The judge is
+    prompted (see JUDGE above) to emit exactly one of the three words, with
+    max_tokens=10, so in the overwhelming case exactly one whole-word match
+    is found. If the completion is garbage, empty, contains a negated/
+    hedged "correct" with no other real label, or (pathologically) more
+    than one label, this deliberately does NOT guess -- it returns
+    UNPARSEABLE so callers can count it rather than silently misclassifying.
+    """
+    global _unparseable_count
+    txt = re.sub(r"<think>.*?</think>", "", txt, flags=re.DOTALL).strip().lower()
+    scrubbed = _NEGATED_CORRECT_RX.sub(" ", txt)
+    matches = set(_VALID_LABEL_RX.findall(scrubbed))
+    if len(matches) == 1:
+        return matches.pop()
+    _unparseable_count += 1
+    print(f"WARNING: unparseable judge verdict (#{_unparseable_count}): "
+          f"{txt[:200]!r}", file=sys.stderr)
+    return UNPARSEABLE
+
+
 def judge_answer(question, gold, answer_text):
     out = get_llm().create_chat_completion(
         messages=[{"role": "system", "content": "/no_think " + JUDGE},
@@ -72,11 +122,7 @@ def judge_answer(question, gold, answer_text):
                    f"QUESTION: {question}\nGOLD: {gold}\nSYSTEM: {answer_text}"}],
         max_tokens=10, temperature=0.0)
     txt = out["choices"][0]["message"]["content"]
-    txt = re.sub(r"<think>.*?</think>", "", txt, flags=re.DOTALL).strip().lower()
-    for v in ("correct", "hallucination", "omission"):
-        if v in txt:
-            return v
-    return "omission"
+    return parse_verdict(txt)
 
 
 def ingest_user(user, cache_path, min_mentions=2):
@@ -93,6 +139,7 @@ def ingest_user(user, cache_path, min_mentions=2):
     cf = open(cache_path, "a")
     slots = defaultdict(lambda: defaultdict(lambda: {"n": 0, "recs": []}))
     n_turns = 0
+    _seen_hash_role = {}  # role_hash_guard state, scoped to this ingest pass
     for si, sess in enumerate(user["sessions"]):
         date = str(sess.get("start_time", ""))[:12]
         for t in sess.get("dialogue", []):
@@ -132,8 +179,19 @@ def ingest_user(user, cache_path, min_mentions=2):
             # the blunt path reuses the extractions S0 already paid for.
             _ns = (not is_user
                    and os.environ.get("RG_ASSISTANT_PROMPT") == "1")
+            # Deliberately role-blind (bare sha1(text), no role prefix, except
+            # the opt-in "a:" namespace above) so this hash stays a stable
+            # cache key across runs -- see wire.role_hash_guard's docstring
+            # for why that's a correctness/cache-compatibility tradeoff, not
+            # an oversight, and for the detector that catches it if it bites.
             h = hashlib.sha1((("a:" + text) if _ns else text).encode()
                              ).hexdigest()
+            # Detector runs on the RAW (unprefixed) hash regardless of _ns,
+            # so it exercises the actual defect (bare-hash collision) rather
+            # than whatever this run happens to be namespacing around today.
+            role_hash_guard(_seen_hash_role, hashlib.sha1(text.encode())
+                             .hexdigest(), "user" if is_user else "assistant",
+                             text)
             if h in cache:
                 facts = cache[h]
             else:
@@ -977,13 +1035,18 @@ def main():
             print(f"  ...{i + 1}/{len(qs)} questions judged")
     n = sum(tally.values())
     print(f"\nQA (n={n}, local-judge PILOT numbers, two-judge validation owed):")
-    for v in ("correct", "hallucination", "omission"):
+    for v in ("correct", "hallucination", "omission", UNPARSEABLE):
+        if v == UNPARSEABLE and tally[v] == 0:
+            continue  # keep the common case's output unchanged
         print(f"  {v:13s}: {tally[v]:4d}  ({100 * tally[v] / max(n, 1):.1f}%)")
     print("\nby question type:")
     for t, d in sorted(by_type.items()):
         tn = sum(d.values())
-        print(f"  {t[:34]:34s} n={tn:3d}  correct {d['correct']:3d}  "
-              f"halluc {d['hallucination']:3d}  omit {d['omission']:3d}")
+        line = (f"  {t[:34]:34s} n={tn:3d}  correct {d['correct']:3d}  "
+                f"halluc {d['hallucination']:3d}  omit {d['omission']:3d}")
+        if d[UNPARSEABLE]:
+            line += f"  unparseable {d[UNPARSEABLE]:3d}"
+        print(line)
 
 
 if __name__ == "__main__":

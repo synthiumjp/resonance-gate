@@ -38,7 +38,7 @@ from run_crosssession import redact
 from run_belief import _is_prose
 from llm_profile import canon_attr
 import run_profile_full as PF
-from wire import WireGraph, ResonanceIndex, correct_facts
+from wire import WireGraph, ResonanceIndex, correct_facts, role_hash_guard
 
 # queries with no corroborated evidence in ANY profile of this kind -- the
 # abstention probe must return ABSTAIN on every one, never a guess.
@@ -113,8 +113,14 @@ def build_facts(path, min_mentions=2):
     prose = [s for s in stream if _is_prose(s[3])]
     slots = defaultdict(lambda: defaultdict(lambda: {"n": 0, "recs": []}))
     uncached = 0
+    _seen_hash_role = {}  # role_hash_guard state, scoped to this build_facts call
     for step, uuid, date, text in prose:
+        # Deliberately role-blind (bare sha1(text)) so this hash stays a
+        # stable key into profile_cache*.jsonl across runs -- see
+        # wire.role_hash_guard's docstring for why, and the detector below
+        # that catches it if a cross-role collision ever actually occurs.
         h = hashlib.sha1(text.encode("utf-8")).hexdigest()
+        role_hash_guard(_seen_hash_role, h, "user", text)
         if h not in cache:
             uncached += 1
             continue
@@ -166,7 +172,12 @@ def build_facts(path, min_mentions=2):
     # counted toward "n", never merged into the human `prose`/n_convs.
     for step, uuid, date, text in [s for s in _load_assistant_stream(path)
                                    if _is_prose(s[3])]:
+        # Same bare-hash rationale as the user-prose pass above -- this MUST
+        # be the identical hash function (cache compatibility), which is
+        # exactly why it can't tell this assistant turn's text apart from a
+        # byte-identical user turn's. role_hash_guard is the detector.
         h = hashlib.sha1(text.encode("utf-8")).hexdigest()
+        role_hash_guard(_seen_hash_role, h, "assistant", text)
         if h not in cache:
             uncached += 1
             continue

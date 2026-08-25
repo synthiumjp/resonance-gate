@@ -79,7 +79,8 @@ class IndexV3:
                 self.hearsay = IndexV3(mem, facts=hs)
 
 
-def retrieve_facts_v3(index, question, k=120, dense_k=20, top_n=None):
+def retrieve_facts_v3(index, question, k=120, dense_k=20, top_n=None,
+                      min_score=None, with_scores=False):
     """Retrieve evidence for one question.
 
     `k` is the BM25 CANDIDATE POOL, `top_n` is how many survive the
@@ -129,7 +130,19 @@ def retrieve_facts_v3(index, question, k=120, dense_k=20, top_n=None):
         return []
     ces = ce.predict([(question, index.texts[j]) for j in cand],
                      show_progress_bar=False)
-    return [index.facts[cand[i]] for i in np.argsort(-ces)[:top_n]]
+    order = np.argsort(-ces)[:top_n]
+    # entry 249: `min_score` is an ABSOLUTE relevance floor on the
+    # cross-encoder logit, not a rank cut. The ranked path above always
+    # returns top_n whatever the scores are -- correct for the main fact
+    # pool (those ARE the answer candidates, and a weak best candidate is
+    # still the best we have), but wrong for an optional side-channel like
+    # hearsay, where "nothing here is on topic" must be expressible.
+    # Default None keeps the banked behaviour byte-identical.
+    if min_score is not None:
+        order = [i for i in order if float(ces[i]) >= min_score]
+    if with_scores:
+        return [(index.facts[cand[i]], float(ces[i])) for i in order]
+    return [index.facts[cand[i]] for i in order]
 
 
 # As-of rule (entry 134): appended for date-anchored questions only.

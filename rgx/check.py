@@ -18,6 +18,10 @@ candidate the free stage kills is a model call not spent.
       yes/no per surviving candidate, no generation. MiniCheck-class verifiers
       at 770M match GPT-4-turbo at ~400x lower cost, so this is the cheap half
       of the system, not the expensive one.
+      NOT WIRED IN (e249). `verify()` below is implemented but nothing in the
+      shipped path calls it -- Extractor.extract_turn runs `prefilter` and
+      `quality` only, and every number in the ledger is STAGE 1 alone. Read
+      this section as the design, not as what runs.
 
 Why the order is not arbitrary: the parser emits 2.57 records per gold point
 against gold's ~1.0, so most candidates are surplus. Paying a model to read
@@ -152,10 +156,18 @@ def verify(prop, turn, ask):
 def quality(prop, turn, owner=None):
     """A deterministic 0-1 score for RANKING records when pruning.
 
-    e229 measured that surplus records cost RECALL: the integrity judge reads a
-    session's emissions as one blob, so extra records crowd out the ones it was
-    already matching. Pruning therefore needs an order, and the order has to
-    come from something we can compute without a model.
+    CAUTION (e249): the original rationale here cited e229's "crowding"
+    mechanism -- the integrity judge reads a session's emissions as one blob,
+    so surplus records crowd out matches. That mechanism is RETRACTED (e230,
+    ledger 5k): capping to 25 records/session cut 67% of records and cost
+    12.15pt of recall. If crowding were real, pruning would have helped; it
+    did the opposite. Over-emission does not cost precision either
+    (`target_accuracy` scores each record alone).
+
+    So this score is NOT a justification for pruning, and nothing in the
+    shipped path prunes on it. It survives as a cheap deterministic ORDERING
+    for callers that need one (display, tie-breaks, triage). Do not
+    reintroduce a cap on the strength of the retracted mechanism.
 
     Three signals, all cheap and all defensible:
       grounded   what fraction of the record's value words are in the source.

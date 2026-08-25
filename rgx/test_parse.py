@@ -320,6 +320,12 @@ def test_expletive_construction_is_tagged_report(ex):
     ("I need to focus on these areas.", "needs"),
     ("I focus on quality.", "focuses"),
     ("I discuss it with my team.", "discusses"),
+    ("I feed my dog every morning.", "feeds"),
+    ("I succeed at most things I try.", "succeeds"),
+    ("I proceed carefully with new projects.", "proceeds"),
+    ("I pass the test every time.", "passes"),
+    ("I address problems directly.", "addresses"),
+    ("I process my emotions through journaling.", "processes"),
 ])
 def test_third_person_spelling_guard(ex, src, want):
     out = " ".join(texts(ex, src))

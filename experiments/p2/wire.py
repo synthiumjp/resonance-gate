@@ -48,6 +48,7 @@ absorbs). Same shape as the extraction layer: a noisy proposer + a model-free ga
 
 import math
 import re
+import sys
 from collections import defaultdict
 
 MIN_COOC = 2        # an edge, like a node, must be corroborated
@@ -58,6 +59,38 @@ MATCH_MIN = 0.5     # a query token-grounding score below this is no match
 
 _STOP = {"the", "a", "an", "my", "of", "and", "in", "at", "to", "for", "with",
          "is", "was", "i", "am", "me", "current", "currently", "new", "some"}
+
+
+def role_hash_guard(seen, h, role, text):
+    """Detector for the role-blind turn-hash defect: ingest call sites hash a
+    turn's raw text with a BARE sha1 (no role prefix) so the hash can serve
+    as the extraction cache's on-disk key -- deliberately NOT role-scoped,
+    because the caches (cache_u*_v5.jsonl and friends, ~59k turns already
+    paid for) are keyed by that exact hash, and changing it would invalidate
+    every cached extraction. rgx's extraction is role-dependent (person-shift
+    differs for a user turn vs. an assistant turn), so if a user turn and an
+    assistant turn ever share byte-identical text, the second one to hit the
+    cache would silently be served the FIRST one's role's extraction.
+    Measured: zero cross-role duplicate turn texts across all 20 HaluMem
+    users (~59,000 turns) -- latent in the code, not currently firing.
+
+    This is the loud alternative to that silence: `seen` is a plain dict the
+    caller owns, scoped to one ingest pass (one user / one conversations.json
+    file), mapping hash -> the role it was first seen under. One dict lookup
+    and (on collision) one string compare -- no cost on the hot path, and it
+    never touches the hash itself, so no cache key changes. Call it once per
+    turn, right where the turn's hash is computed. Returns True (and prints a
+    warning naming the colliding text) if this hash was already seen under a
+    DIFFERENT role; False otherwise (including the common first-sight case).
+    """
+    prev = seen.get(h)
+    if prev is not None and prev != role:
+        print(f"WARNING: cross-role turn-hash collision -- hash {h[:12]} "
+              f"was extracted as role={prev!r}, now seen again as "
+              f"role={role!r}; text: {text[:200]!r}", file=sys.stderr)
+        return True
+    seen[h] = role
+    return False
 
 # QUERY-TIME SYNONYM BRIDGE (Fix 1). A static lexical table, not semantic
 # search: common question words map to the canonical attribute token a stored
