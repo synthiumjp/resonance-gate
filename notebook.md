@@ -12646,3 +12646,62 @@ class: it would not have produced a wrong number, it would have produced a
 number for the WRONG CODE, silently.
 
 Suites 267 p2 + 62 rgx. Nothing judged.
+
+---
+
+## Entry 252 — 2026-08-26 (p2: the update funnel. 69% of update gold never reaches the store, so the whole supersession/edge-store design is capped at ~17% of the axis. Updating% IS extraction coverage.)
+
+Before designing a better representation of change, measured where the 142 u0
+gold update points actually die (tools/update_funnel.py, descriptive
+containment>=0.6 -- a FUNNEL LOCALISER, never an accuracy number).
+
+| stage | rgx | LLM (control) |
+|---|---|---|
+| (i)   NEW content in store            | 31.0% | 7.7% |
+| (ii)  OLD content in store            | 38.0% | 15.5% |
+| both -> an edge is even expressible   | **16.9%** | **3.5%** |
+| (iii) search_memories non-empty       | 90.8% | 81.0% |
+| (iv)  NEW content in what was returned| 23.9% | 7.0% |
+| of those surviving (i), reach (iv)    | 77.3% | 90.9% |
+
+**69% of update points die at stage (i) on rgx, 92% on the LLM arm.** The new
+content was never extracted. Retrieval is NOT the bottleneck: once a fact is
+in the store it reaches the readout 77-91% of the time.
+
+**The control explains the headline.** rgx stores 31.0% of update-gold new
+content and scores 12.6%; the LLM arm stores 7.7% and scores 4.3%. Stage-(i)
+coverage tracks the score. Our 3x advantage on this axis is ALREADY fully
+explained by extraction coverage -- not by any supersession mechanism, which
+fires on ~0 nodes in both arms (e251). There is no update machinery working
+today; there is only extraction.
+
+**Consequence, and it kills a lot of queued work.** Any edge store, revision
+relation, canonicalisation scheme or renderer change operates on the 16.9% of
+points where both endpoints are stored. A perfect representation of change
+cannot touch the 69% that were never extracted. The ceiling on representation
+work is the gap between (iv) 23.9% and the current 12.6% -- and only part of
+that is addressable by representation at all.
+
+So the update axis is an EXTRACTION problem wearing a representation costume.
+That retro-explains why four architectural fixes on this axis died null
+(e211/e213/e214/W1b): every one of them operated downstream of a stage that
+loses two thirds of the population.
+
+**What this does NOT say:** it does not say change-linking is worthless for
+the PRODUCT. "What do I do now" answered from one current fact instead of
+eighteen historical ones is a real user-facing win independent of this
+benchmark. It says only that the benchmark axis will not move until
+extraction of change-bearing turns improves, and that building the edge store
+FOR the benchmark number would be misdirected.
+
+Next: characterise the 98 points that die at (i). Are the change-bearing
+turns present in the dialogue (the e-series recall analysis said 97% of
+extraction misses are present in the session), and what construction class
+are they? That is the same miss-alignment work that has returned 3-11pt per
+round, pointed at a population we now know is worth 69% of an axis.
+
+Also confirmed this round (external review, verified in the tree): currency.py
+runs TWO supersession implementations with DIFFERENT gates --
+`mark_current` tests `canon_state_attr(attr)` against SINGLE_VALUED (line
+317-319), `resolve()` tests the RAW attr (line 191). Write-time and read-time
+verdicts can therefore disagree. Not yet fixed; queued as hygiene.
