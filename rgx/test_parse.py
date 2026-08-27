@@ -472,3 +472,183 @@ def test_plain_second_person_no_expletive_is_not_tagged(ex):
         "beliefs.", role="assistant")
     assert out, out
     assert all(r.evidential is None for r in out), out
+
+
+# ---- render_defects: clitic_residue, bare_been, stray_complementizer,
+# advmod_between_verb_and_obj, plural_head_singular_agr (all found by
+# reading raw u0 output, none visible to token-overlap scoring)
+
+def test_embedded_perfect_clitic_is_expanded_not_left_raw(ex):
+    # "The support I've received from my network is..." -- "'ve" is the AUX
+    # of an acl:relcl ("received") that ends up embedded inside a LARGER
+    # copular span (the third-party-owner branch), not walked as its own
+    # clause's head aux -- the one spot `_third` already covered. Left raw,
+    # `_shift`'s `\bI\b` still matched the "I" inside "I've", producing
+    # "Martin Mark've received".
+    out = texts(ex, "The support I've received from my network is indeed "
+                     "a powerful force in navigating this transition.")
+    assert out, out
+    assert not any("'ve" in t for t in out), out
+    assert any("has received" in t for t in out), out
+
+
+def test_embedded_negation_clitic_reads_as_two_words(ex):
+    # "the fact that they don't exhibit..." is PERIPHERY kept in a FULL
+    # record, not this clause's own head -- its "n't" was never in any
+    # `negdrop` set and rendered as a literal, unspaced clitic.
+    out = texts(ex, "I find snakes unsettling due to their unpredictable "
+                     "movements and the fact that they don't exhibit the "
+                     "social behaviors in pets.")
+    assert out, out
+    assert not any("n't" in t for t in out), out
+    assert any("do not exhibit" in t for t in out), out
+
+
+def test_third_party_copular_keeps_its_perfect_aux(ex):
+    # bare_been: the third-party-owner copular branch un-drops subj/cop but
+    # used to leave the clause's own aux ("has") excluded, orphaning "been"
+    # with no perfect auxiliary: "Networking always been a key part...".
+    out = texts(ex, "Networking has always been a key part of my career "
+                     "development.")
+    assert out, out
+    assert any("has always been" in t for t in out), out
+    assert not any(t for t in out
+                   if "been" in t and "has been" not in t
+                   and "has always been" not in t), out
+
+
+def test_matrix_complementizer_does_not_leak_into_the_child_span(ex):
+    # stray_complementizer: "that"/"like" is a `mark` child of the embedded
+    # clause's OWN head (introducing it as a complement of the outer verb),
+    # not part of its predicate -- nothing excluded it from the walk.
+    out = texts(ex, "I believe that my journey is a testament to my "
+                     "resilience and determination to make a positive "
+                     "impact in the world.")
+    assert out, out
+    assert not any(" is that " in t for t in out), out
+    assert any(t.startswith("Martin Mark's journey is a testament")
+               for t in out), out
+
+
+def test_preverbal_adverb_stays_before_the_verb(ex):
+    # advmod_between_verb_and_obj: `lead + verb + tail` always put every arg
+    # AFTER the verb, so "I RECENTLY visited a sanctuary" (adverb before the
+    # verb) came out "visited RECENTLY a sanctuary".
+    out = texts(ex, "I recently visited a reptile sanctuary, and it was "
+                     "quite an experience.")
+    assert "Martin Mark recently visited a reptile sanctuary" in out, out
+
+
+def test_preverbal_adverb_on_a_possessed_subject(ex):
+    out = texts(ex, "My approach to gaming now includes a cautious "
+                     "evaluation of cognitive benefits.")
+    assert any("approach to gaming now includes" in t for t in out), out
+    assert not any("includes now" in t for t in out), out
+
+
+def test_plural_possessed_subject_keeps_plural_agreement(ex):
+    # plural_head_singular_agr: the verbal is_self/sp branch re-agreed the
+    # aux to 3rd-singular whenever `sp is not None` (a possessed subject),
+    # right even for "my job IS" but wrong for "my friends ... HAVE" --
+    # "friends and colleagues has played" shipped.
+    out = texts(ex, "My friends and colleagues have played a pivotal role "
+                     "in my journey.")
+    assert any("friends and colleagues have played" in t for t in out), out
+    assert not any("colleagues has played" in t for t in out), out
+
+
+def test_singular_possessed_subject_still_agrees(ex):
+    # The fix must not blunt the case it was never wrong about: a SINGULAR
+    # possessed subject's own aux was already agreeing correctly in the
+    # source, and must still show up unchanged (not un-agreed to a base
+    # form) now that `agree` gates on `is_self` instead of firing blindly.
+    out = texts(ex, "My colleague has completed the project for me.")
+    assert any("colleague has completed" in t for t in out), out
+
+
+# ---- owner_pronoun: opt-in pronominalisation of repeated owner mentions --
+
+def test_owner_pronoun_default_is_unchanged():
+    """The whole point of the default: two extractors, one with
+    owner_pronoun left at its default (None), must produce byte-identical
+    text to the pre-existing behaviour -- so every banked artifact stays
+    valid without anyone having to pass anything."""
+    plain = Extractor(owner_name="Martin Mark", check=False)
+    explicit_none = Extractor(owner_name="Martin Mark", check=False,
+                               owner_pronoun=None)
+    src = ("Susan's support inspires me to maintain my focus on promoting "
+           "well being in both my personal and professional life.")
+    assert texts(plain, src) == texts(explicit_none, src)
+    assert any("Martin Mark's focus" in t for t in texts(plain, src))
+
+
+def test_owner_pronoun_collapses_repeated_possessives():
+    ex = Extractor(owner_name="Martin Mark", check=False,
+                    owner_pronoun="his")
+    out = texts(ex, "My physical health remains stable due to my active "
+                     "lifestyle and focus on well being.")
+    assert out, out
+    t = out[0]
+    assert t.count("Martin Mark") == 1, t
+    assert "his active lifestyle" in t, t
+
+
+def test_owner_pronoun_object_position_after_first_mention():
+    ex = Extractor(owner_name="Martin Mark", check=False,
+                    owner_pronoun="his")
+    out = texts(ex, "Susan's support inspires me to maintain my focus on "
+                     "promoting well being in both my personal and "
+                     "professional life.")
+    assert out, out
+    t = out[0]
+    assert t.count("Martin Mark") == 1, t
+    assert "inspires Martin Mark" in t, t          # first mention: kept
+    assert "maintain his focus" in t, t            # subsequent possessive
+    assert "his personal" in t, t
+
+
+def test_owner_pronoun_never_inferred_default_is_their():
+    """DO NOT infer gender from the owner's name, ever. A caller that asks
+    for pronominalisation without saying which pronoun gets the neutral
+    default -- never a guess pulled from `owner_name`."""
+    ex = Extractor(owner_name="Martin Mark", check=False,
+                    owner_pronoun="their")
+    out = texts(ex, "My physical health remains stable due to my active "
+                     "lifestyle and focus on well being.")
+    assert out, out
+    assert "their active lifestyle" in out[0], out[0]
+    assert "his" not in out[0] and "her" not in out[0], out[0]
+
+
+def test_owner_pronoun_obj_is_derived_when_not_given():
+    ex = Extractor(owner_name="Martin Mark", check=False,
+                    owner_pronoun="her")
+    out = texts(ex, "Susan's support inspires me to maintain my focus on "
+                     "well being.")
+    assert out, out
+    assert "inspires Martin Mark" in out[0], out[0]
+    assert "her focus" in out[0], out[0]
+
+
+def test_owner_pronoun_does_not_mangle_an_identity_statement():
+    # "Martin Mark's name is Martin Mark" -- the second mention is the
+    # VALUE being asserted (the owner's own name), not a further reference
+    # to them. Pronominalising it produced "name is them", which (before
+    # the STOP-list fix in check.py, below) failed the grounding filter and
+    # silently dropped the record instead of just mis-wording it.
+    ex = Extractor(owner_name="Martin Mark", check=False,
+                    owner_pronoun="their")
+    out = texts(ex, "My name is Martin Mark.")
+    assert "Martin Mark's name is Martin Mark" in out, out
+
+
+def test_owner_pronoun_object_form_is_grounded(ex=None):
+    # him/them were missing from check.py's STOP set (only the possessive
+    # forms his/her/their/its were there) -- an object-pronoun mention that
+    # ends up as the record's only remaining content word failed the
+    # grounding prefilter and the record vanished, not just reworded.
+    ex = Extractor(owner_name="Martin Mark", check=True, owner_pronoun="his")
+    out = texts(ex, "Susan's support inspires me to maintain my focus on "
+                     "well being.")
+    assert out, out
+    assert any("his focus" in t for t in out), out

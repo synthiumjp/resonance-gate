@@ -132,6 +132,87 @@ def _third(word, lemma, feats=None):
     return w + "s"
 
 
+_CLITIC_WORD = {"'ve": "have", "'ll": "will", "'m": "am", "'re": "are"}
+
+
+def _expand_clitic(text, lemma=None):
+    """A detached clitic ("'ve", "'ll", "n't", ...) rendered as literal
+    punctuation survives the person shift's `\\b` word-boundary match on the
+    pronoun it once trailed -- the apostrophe is not a word character, so
+    `\\bI\\b` still matches the "I" inside "I've", producing "Martin
+    Mark've" (render_defects: clitic_residue). Expand it to a real word
+    wherever it is still raw by the time it reaches the page.
+
+    `_third` already handles the one spot that needed AGREEMENT as well as
+    expansion (the clause's own finite aux, e.g. "I've" -> "has"), so this
+    is a no-op there. It only catches what `_third` left alone -- an
+    embedded clause's own aux/negator, kept verbatim as part of a larger
+    span ("the fact that they do n't exhibit...", "the support I've
+    received... is a force").
+    """
+    w = text.lower()
+    if w == "n't":
+        return "not"
+    if w in _CLITIC_WORD:
+        return _CLITIC_WORD[w]
+    if w == "'d":
+        # Stanza lemmatises BOTH readings ("I'd like" / "I'd already left")
+        # as "would" (verified against real parses) -- "had" is not
+        # reliably recoverable from the parse, so this defaults to the
+        # modal reading, matching what `_third`'s own clitic branch (below)
+        # already assumed.
+        return "would" if lemma in (None, "would") else lemma
+    return text
+
+
+_PRONOUN_OBJ = {"his": "him", "her": "her", "their": "them"}
+
+
+def _pronominalize(text, owner_str, pronoun, pronoun_obj=None):
+    """Collapse every owner mention in `text` AFTER THE FIRST down to a
+    pronoun. The person shift (`_shift`, below) always writes out the
+    owner's full name, with no memory of what it already wrote earlier in
+    the SAME proposition -- each of the (up to a dozen) constituents making
+    up one rendered clause is shifted independently. The result repeats a
+    two-word name three, four, sometimes five times in one sentence
+    (render_defects: repeated_owner_possessive/repeated_owner_name), which
+    reads as broken regardless of any benchmark.
+
+    Opt-in (`pronoun` is None by default at every call site) and text-level:
+    it does not re-parse the clause, so "object position" is approximated
+    as "not the first mention" -- true for how this renderer actually
+    builds a proposition (the lead/subject slot is filled first, in every
+    branch), and confirmed against the real repeated-name examples in the
+    u0 cache.
+
+    One shape is deliberately EXEMPTED even after the first mention: an
+    IDENTITY statement, "Martin Mark's name is Martin Mark", uses the
+    owner's own name as the VALUE being asserted, not as a further
+    reference to them -- pronominalising it produces "name is them",
+    nonsense that (before the `him`/`them` STOP fix in check.py) used to
+    fail the grounding filter and vanish silently instead. Recognised by
+    shape: the mention is the last thing in the proposition, directly after
+    a copula, with nothing after it.
+    """
+    if not pronoun or not owner_str:
+        return text
+    obj = pronoun_obj or _PRONOUN_OBJ.get(pronoun, pronoun)
+    pat = re.compile(rf"\b{re.escape(owner_str)}(?:'s)?\b")
+    seen = []
+
+    def repl(m):
+        if not seen:
+            seen.append(True)
+            return m.group(0)
+        before = text[:m.start()].rstrip()
+        after = text[m.end():].strip(" .,;:")
+        if not after and re.search(r"\b(?:is|was|are|were|be)$", before, re.I):
+            return m.group(0)                      # identity value, not a mention
+        return pronoun if m.group(0).endswith("'s") else obj
+
+    return pat.sub(repl, text)
+
+
 def _shift(text, owner, second):
     o = owner or "the user"
     # D (e240): the assistant's own "I" is not the user's. Assistant-turn
@@ -214,6 +295,7 @@ class _S:
                 aux = self.children(t, ("aux", "aux:pass"))
                 if sub is not None and not aux and sub.text.lower() in shifted:
                     txt = _third(t.text, t.lemma, t.feats)
+            txt = _expand_clitic(txt, t.lemma)
             parts.append(txt)
         s = " ".join(parts)
         s = re.sub(r"\s+([',.;:])", r"\1", s).strip(" ,.;:")
@@ -510,14 +592,22 @@ def _slug(text):
     return re.sub(r"[^a-z0-9]+", "_", text.lower()).strip("_")
 
 
-def extract_keyed(text, nlp, owner=None, role="user"):
+def extract_keyed(text, nlp, owner=None, role="user",
+                   owner_pronoun=None, owner_pronoun_obj=None):
     """-> [(proposition, kind, predicate_key, value, evidential)].
     `predicate_key` is the attribute name a slot store files the record
     under and `value` the complement it stores there; `extract` drops all
     three. `evidential` is "report" (e242) when an ASSISTANT-turn clause
     sits under a report verb, a generic subject, an expletive, or a
     sentence-initial hedge adverb, else None -- the assistant is relaying a
-    claim, not asserting one of its own."""
+    claim, not asserting one of its own.
+
+    `owner_pronoun`: default None means UNCHANGED behaviour -- the owner's
+    full name every mention, exactly as always. Set it (e.g. "his"/"her"/
+    "their") to collapse every mention after the first, in a given
+    proposition, down to a pronoun (see `_pronominalize`). Never inferred
+    from the owner's name -- that is a decision only a caller may make, and
+    the caller must make it explicitly."""
     o = owner or "The user"
     second = role == "assistant"
     # D (e240): in an assistant turn "I" is the ASSISTANT, not the user --
@@ -592,6 +682,15 @@ def extract_keyed(text, nlp, owner=None, role="user"):
                 drop = {subj.id, cop.id}
                 drop |= {c.id for c in s.children(head, SEPARATE)}
                 drop |= {c.id for c in s.children(head, ("aux", "aux:pass"))}
+                # stray_complementizer: a `mark` child of `head` is the
+                # connective ("that"/"like") introducing THIS clause as a
+                # complement of some OUTER verb ("I believe THAT my journey
+                # is...") -- it is not part of the clause's own predicate,
+                # but nothing excluded it from the walk, so it leaked into
+                # the rendered span right after the copula: "is that a
+                # testament". The outer verb itself is never in play here
+                # (subtree only descends FROM head), only its connective.
+                drop |= {c.id for c in s.children(head, ("mark",))}
                 drop |= negdrop
                 drop |= fdrop
                 # e243, RULE 1: ATOM + FULL. The clause's PERIPHERY (an
@@ -657,7 +756,16 @@ def extract_keyed(text, nlp, owner=None, role="user"):
                     # subject's own agreement is already correct (it is
                     # not the owner), so render the clause as Stanza gave
                     # it, subject included, with no re-inflection.
-                    full_drop = (drop - {subj.id, cop.id})
+                    # bare_been: `drop` unconditionally excludes the head's
+                    # aux (needed by the is_self/sp branches below, which
+                    # hardcode their own "is"/"is not"), but THIS branch has
+                    # no hardcoded copula -- it renders the real one, so
+                    # dropping the aux orphaned "been" with no perfect
+                    # auxiliary ("Networking always been a key part...").
+                    # Put it back; `mark` (stray_complementizer) stays out.
+                    full_drop = (drop - {subj.id, cop.id}
+                                 - {c.id for c in
+                                    s.children(head, ("aux", "aux:pass"))})
                     body = s.text(head, stop=full_drop, owner=o, second=second)
                     if ftail:
                         body = f"{body} {ftxt}".strip()
@@ -677,6 +785,8 @@ def extract_keyed(text, nlp, owner=None, role="user"):
                     if tpo or named_tpo:
                         # E (e240) / RULE 3 (e243), verbal predicate.
                         full_drop = {c.id for c in s.children(head, SEPARATE)}
+                        full_drop |= {c.id for c in
+                                      s.children(head, ("mark",))}  # stray_complementizer
                         full_drop |= negdrop | fdrop
                         body = s.text(head, stop=full_drop, owner=o, second=second)
                         tail = " ".join(s.text(c, owner=o, second=second)
@@ -698,6 +808,21 @@ def extract_keyed(text, nlp, owner=None, role="user"):
                     # branch above, on the clause's own ARG_DEPS children.
                     peri = _periphery(s, head)
                     args_sorted = sorted(args, key=lambda c: c.id)
+                    # advmod_between_verb_and_obj: `lead` (the owner's
+                    # stand-in) is always rendered before `verb`, and every
+                    # arg after that -- so an adverb that sat BEFORE the
+                    # verb in the source ("I RECENTLY visited a sanctuary")
+                    # got shoved to the far end ("visited RECENTLY a
+                    # sanctuary"), because nothing distinguished it from a
+                    # genuinely post-verbal one. Pull it out of the arg list
+                    # and put it back where the subject/verb boundary was.
+                    preverb = sorted((c for c in args_sorted
+                                       if c.deprel == "advmod"
+                                       and subj.id < c.id < head.id),
+                                      key=lambda c: c.id)
+                    if preverb:
+                        args_sorted = [c for c in args_sorted
+                                       if c not in preverb]
                     args_core = ([c for c in args_sorted if c.id not in peri]
                                  if peri else args_sorted)
                     tail_full = " ".join(s.text(c, owner=o, second=second)
@@ -737,22 +862,41 @@ def extract_keyed(text, nlp, owner=None, role="user"):
                             # (-> "is") to say "is contributing", not
                             # "contributing".
                             aux = s.children(donor, ("aux", "aux:pass"))
+                        # plural_head_singular_agr: re-agreeing to 3rd-
+                        # singular is only correct when the OWNER'S NAME is
+                        # itself the rendered subject (`is_self`, sp is
+                        # None) -- when the subject is a POSSESSED noun
+                        # ("my friends", "my colleague's insights"), the
+                        # clause's real subject is that noun, whose number
+                        # the source sentence already agreed correctly.
+                        # Forcing singular turned "friends ... have played"
+                        # into "... has played".
+                        agree = is_self
                         if aux:
-                            verb = _third(aux[0].text, aux[0].lemma, aux[0].feats)
+                            verb = (_third(aux[0].text, aux[0].lemma, aux[0].feats)
+                                    if agree else aux[0].text)
+                            verb = _expand_clitic(verb, aux[0].lemma)
                             if neg:
                                 verb += " not"
                             verb += " " + " ".join(
                                 # same clitic problem as `_third`, one slot along
-                                a.lemma if a.text.startswith("'") else a.text
+                                _expand_clitic(a.text, a.lemma)
+                                if a.text.startswith("'") else a.text
                                 for a in aux[1:] if a is not aux[0])
                             verb = verb.strip() + " " + head.text
                         else:
-                            verb = _third(head.text, head.lemma, head.feats)
+                            verb = (_third(head.text, head.lemma, head.feats)
+                                    if agree else head.text)
                             if neg:
-                                verb = f"does not {head.lemma}"
+                                verb = (f"does not {head.lemma}" if agree
+                                        else f"do not {head.lemma}")
                     slot_txt = (s.text(subj, stop={sp.id}, owner=o, second=second)
                                 if sp is not None else None)
                     lead = o if sp is None else f"{o}'s {slot_txt}"
+                    if preverb:
+                        lead = f"{lead} " + " ".join(
+                            s.text(c, owner=o, second=second) for c in preverb)
+                        lead = re.sub(r"\s+", " ", lead).strip()
                     # E (e240): the owner-possession chain can pass through a
                     # named third party -- "my FRIEND THOMAS's support" -- in
                     # which case the fact is a relationship, not a bare event.
@@ -779,6 +923,9 @@ def extract_keyed(text, nlp, owner=None, role="user"):
                 # through.
                 if second and _FIRST_RESIDUE.search(body):
                     continue
+                if owner_pronoun:
+                    body = _pronominalize(body, o, owner_pronoun,
+                                           owner_pronoun_obj)
                 key = body.lower()[:90]
                 if body and key not in seen:
                     seen.add(key)
@@ -790,7 +937,9 @@ def extract_keyed(text, nlp, owner=None, role="user"):
                     if second and (hedge or _report_frame(s, head)
                                    or _generic_or_expl_frame(s, head)):
                         evidential = "report"
-                    out.append((body, kind, pred,
-                                re.sub(r"\s+", " ", value).strip(" ,.;:"),
-                                evidential))
+                    value = re.sub(r"\s+", " ", value).strip(" ,.;:")
+                    if owner_pronoun:
+                        value = _pronominalize(value, o, owner_pronoun,
+                                                owner_pronoun_obj)
+                    out.append((body, kind, pred, value, evidential))
     return out

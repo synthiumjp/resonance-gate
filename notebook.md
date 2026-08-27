@@ -12888,3 +12888,78 @@ diff caught e249 appending hearsay to 94.5% of questions, and the disposition
 log -- built to settle a three-way hypothesis about update gold -- found the
 text collision that turned out to be 46% of product-relevant recall loss.
 Neither was the question the instrument was built to answer.
+
+---
+
+## Entry 256 — 2026-08-27 (p2: render defects fixed -- 22.3% of records carried one, now 0.13% with pronominalisation. And the recall METRIC itself was under-counting.)
+
+### The metric was wrong before the numbers were
+
+The containment descriptor used for every recall figure in e252-e255 had no
+stemming, so it scored correct extractions as misses on morphology alone:
+
+    GOLD  Martin Mark Travel styles I like: Wellness retreats
+    OURS  Martin Mark likes wellness retreats        0.57 -> 0.71 stemmed
+
+On u0's user-carried PARTIAL cases that hid **5 of 31** genuinely covered gold
+points (11/31 -> 16/31 above threshold). Corrected (crude plural stem, owner
+tokens KEPT): u0 deaths **481 -> 444**, coverage **33.0% -> 38.2%**. Every
+coverage figure in e252-e255 is an under-count by roughly 5pt.
+
+Owner-token exclusion was TESTED AND REJECTED: dropping "Martin Mark" swings
+the metric the other way (median 0.57 -> 0.40) and over-penalises, because the
+subject is legitimate content. But the floor artifact it exposes is real --
+two unrelated facts about the same person reach ~0.4 containment automatically,
+so some of what e254 called PARTIAL is unrelated records, not near-misses.
+
+**Third instrument artifact caught in my own tooling this arc** (after the 66%
+clitic false-positive and the length-monotone McNemar). The pattern is stable
+enough to record as a law: a regex/overlap descriptor built quickly to
+LOCALISE a problem will mislead about its SIZE. Read the matches before
+believing the count.
+
+### Render defects (rgx/parse.py), u0, 2329 deduped turns
+
+| signature | before | fixes only | + owner_pronoun |
+|---|---|---|---|
+| clitic_residue | 95 (1.77%) | 0 | 0 |
+| bare_been | 59 (1.10%) | 0 | 0 |
+| stray_complementizer | 41 (0.76%) | 0 | 0 |
+| advmod_between_verb_and_obj | 11 (0.20%) | 0 | 0 |
+| plural_head_singular_agr | 18 (0.33%) | 6* | 6* |
+| repeated_owner_possessive | 939 (17.46%) | 943 | **0** |
+| repeated_owner_name | 479 (8.91%) | 487 | **0** |
+| **records with >=1 defect** | **1198 (22.28%)** | 1056 (19.61%) | **7 (0.13%)** |
+
+\* all 6 are false positives of the signature regex ("always has", "reads has"),
+not parser defects.
+
+Root causes, each diagnosed against the real parse:
+- clitic: an AUX clitic never has its own `nsubj` (it attaches to the head
+  verb), so it fell through per-token render as literal `'ve`, and `_shift`'s
+  `\bI\b` matched the "I" inside it.
+- bare_been: the third-party-owner copular branch un-drops `subj`/`cop` but
+  forgot the aux.
+- stray_complementizer: a `mark` child of the clause head was never excluded
+  from the walk.
+- advmod: `lead+verb+tail` always put every arg after the verb, losing a
+  PRE-verbal adverb's position.
+- plural agreement: the verbal branch re-agreed to 3rd-singular whenever the
+  subject was possessed, right for singular nouns, wrong for plural.
+
+**Pronominalisation is OPT-IN** (`Extractor(owner_pronoun=...)`, default None
+= unchanged). Gender is NEVER inferred from the name; the neutral default is
+`their`/`them` and a caller must state otherwise. The benchmark harness can
+pass it from persona_info's explicit `Gender:` field.
+
+Two bugs found while building it, neither scoped: pronominalisation corrupted
+identity statements ("Martin Mark's name is Martin Mark" -> "...is them"), and
+`check.py`'s STOP list was missing `him`/`them` (only possessives were there),
+so an object-pronominalised record could silently FAIL the grounding filter and
+vanish rather than merely reword. Both fixed; the STOP fix verified to produce
+zero diffs with the flag unset.
+
+Suites 77 rgx (from 62) + 267 p2. NOTE: the mechanical fixes change parser
+output unconditionally, so `cache_u0_v5.jsonl` is now stale relative to the
+parser -- that is deliberate, and tools/build_rgx_cache.py regenerates it.
+Nothing judged.

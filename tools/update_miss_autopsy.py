@@ -52,7 +52,28 @@ _STOP = {"the", "a", "an", "is", "are", "was", "were", "his", "her", "their",
 
 
 def toks(s):
-    return {w for w in _WORD.findall((s or "").lower()) if w not in _STOP}
+    """Content tokens, crudely stemmed.
+
+    STEMMING IS NOT OPTIONAL HERE. Without it this metric counts a correct
+    extraction as a miss on pure morphology:
+        gold "Martin Mark Travel styles I like: Wellness retreats"
+        ours "Martin Mark likes wellness retreats"          0.57 -> 0.71
+    because "likes" != "like" and "styles" != "style". On u0's user-carried
+    PARTIAL cases that artifact hid 5 of 31 genuinely-covered gold points
+    (11/31 -> 16/31 above threshold). Every coverage figure produced before
+    this was added is therefore an UNDER-count.
+
+    Owner tokens are deliberately KEPT: the subject is legitimate content of
+    the proposition, and dropping it swings the metric the other way.
+    """
+    out = set()
+    for w in _WORD.findall((s or "").lower()):
+        if w in _STOP:
+            continue
+        if len(w) > 3 and w.endswith("s") and not w.endswith("ss"):
+            w = w[:-1]
+        out.add(w)
+    return out
 
 
 def contained(gold, cand):

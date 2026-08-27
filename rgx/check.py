@@ -31,9 +31,18 @@ it.
 import re
 
 STOP = set("the a an is are was were be been being of to in on at for and or "
-           "with his her their its it he she they as by from that this what "
-           "which who i my me we our us you your not no do does did have has "
-           "had will would can could should may might must".split())
+           "with his her their its it he she they him them as by from that "
+           "this what which who i my me we our us you your not no do does "
+           "did have has had will would can could should may might "
+           "must".split())
+# "him"/"them" were missing here (only "his"/"her"/"their"/"its" -- the
+# POSSESSIVE forms, already needed elsewhere). `owner_pronoun` (Extractor)
+# can introduce either as the OBJECT-position pronoun ("his" -> "him",
+# "their" -> "them"), a token the source turn never contained -- ungrounded
+# by construction. Without this, a short proposition whose only remaining
+# content after pronominalising was the introduced pronoun ("Martin Mark's
+# name is them") failed the grounding check and was silently DROPPED, not
+# just reworded.
 
 _BAD_MORPH = re.compile(r"\b\w+ises\b|\bhas \w+ing\b|\bises\b|\b(?:is|has) "
                         r"(?:is|has|was)\b", re.I)

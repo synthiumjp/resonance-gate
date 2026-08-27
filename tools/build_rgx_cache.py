@@ -71,6 +71,14 @@ def main():
     ap.add_argument("--verify", help="compare against an existing cache "
                                      "instead of writing")
     ap.add_argument("--owner", help="override the owner name")
+    # `nargs="?"` + `const`: `--owner-pronoun` alone (no value) pronominalises
+    # WITHOUT guessing gender from the name -- "their"/"them", never inferred.
+    # Omitted entirely, this is None: unchanged default behaviour (the
+    # owner's full name every mention), so every banked cache stays valid.
+    ap.add_argument("--owner-pronoun", nargs="?", const="their", default=None,
+                     help="pronominalise repeated owner mentions ('his'/"
+                          "'her'/'their'); bare flag defaults to 'their', "
+                          "never guessed from the owner's name")
     args = ap.parse_args()
 
     from rgx import Extractor
@@ -84,8 +92,9 @@ def main():
             sys.exit(f"user {args.user} not in {DATA}")
 
     owner = args.owner or owner_of(rec)
-    print(f"user {args.user}: owner={owner!r}", file=sys.stderr)
-    ex = Extractor(owner_name=owner)
+    print(f"user {args.user}: owner={owner!r} "
+          f"owner_pronoun={args.owner_pronoun!r}", file=sys.stderr)
+    ex = Extractor(owner_name=owner, owner_pronoun=args.owner_pronoun)
 
     seen, lines, n_turns = set(), [], 0
     t0 = time.time()

@@ -69,9 +69,22 @@ class Extractor:
         substituted here, so a name it has never seen cannot be invented.
     check: apply the deterministic filters (grounding, well-formedness). Off
         only for debugging what the parser produced before filtering.
+    owner_pronoun: default None -- COMPLETELY UNCHANGED behaviour, the
+        owner's full name every mention. Set to "his"/"her"/"their" (etc.)
+        to collapse repeated owner mentions within one proposition down to
+        a pronoun after the first (render_defects: repeated_owner_
+        possessive/repeated_owner_name -- 29% of every u0 record). NEVER
+        inferred from `owner_name`: a caller that wants pronominalisation
+        without knowing the owner's gender should pass "their" explicitly
+        (tools/build_rgx_cache.py's --owner-pronoun does this when given
+        with no value), not leave this to guess from the name.
+    owner_pronoun_obj: the matching object-position pronoun ("him"/"her"/
+        "them"). Derived from `owner_pronoun` when left None.
     """
     owner_name: Optional[str] = None
     check: bool = True
+    owner_pronoun: Optional[str] = None
+    owner_pronoun_obj: Optional[str] = None
     _nlp: object = field(default=None, repr=False)
 
     def _parser(self):
@@ -87,7 +100,9 @@ class Extractor:
         from . import parse as G
         out = []
         for prop, kind, pred, val, evi in G.extract_keyed(
-                text, self._parser(), self.owner_name, role=role):
+                text, self._parser(), self.owner_name, role=role,
+                owner_pronoun=self.owner_pronoun,
+                owner_pronoun_obj=self.owner_pronoun_obj):
             if self.check:
                 ok, _why = C.prefilter(prop, text, self.owner_name)
                 if not ok:
