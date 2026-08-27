@@ -6,9 +6,12 @@ local GGUFs. This is for design review, gap-finding and adversarial critique
 of our REASONING. Anything it says is a lead to VERIFY against the tree, never
 a result to apply on trust.
 
-PRIVACY: `stealth/*` models on OpenRouter are free because prompts are logged
-and shared with the upstream lab. Do not send anything you would not publish.
-Pass --model with a paid slug if that matters for a given bundle.
+!! COST (2026-08-27): stealth/ox-alpha is NO LONGER FREE. Every call now
+   bills. This tool sends ~40-50k-token bundles, so a casual run is not
+   cheap. It refuses to run without --i-know-this-costs-money.
+
+PRIVACY: `stealth/*` models on OpenRouter log prompts and share them with the
+upstream lab. Do not send anything you would not publish.
 
 KEY, in precedence order:
   $OPENROUTER_API_KEY
@@ -172,6 +175,9 @@ def main():
     ap.add_argument("--out", default="ox_review_out.md")
     ap.add_argument("--dry-run", action="store_true",
                     help="write the payload to ox_payload.txt, send nothing")
+    ap.add_argument("--i-know-this-costs-money", action="store_true",
+                    help="required to send: ox-alpha stopped being free on "
+                         "2026-08-27 and these bundles are ~40-50k tokens")
     args = ap.parse_args()
 
     if args.prompt_file:
@@ -190,6 +196,11 @@ def main():
         print("dry run -- wrote ox_payload.txt, sent nothing", file=sys.stderr)
         return
 
+    if not getattr(args, "i_know_this_costs_money", False):
+        sys.exit("REFUSING TO SEND: stealth/ox-alpha is no longer free and "
+                 "this bundle is ~40-50k tokens. Re-run with --dry-run to "
+                 "inspect the payload, or --i-know-this-costs-money to bill "
+                 "it deliberately.")
     key = load_key()
     body = json.dumps({"model": args.model,
                        "messages": [{"role": "user", "content": content}]}).encode()

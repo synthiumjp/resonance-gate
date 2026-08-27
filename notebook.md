@@ -12759,3 +12759,81 @@ wherever the extraction number is quoted.
 Next: construction-class clustering of the 44 addressable misses, then a
 parser round against the largest cluster. That is the work that has returned
 3-11pt per round, now aimed at a population of measured size.
+
+---
+
+## Entry 254 — 2026-08-27 (p2: recall autopsy over ALL gold, then cut by carrying-turn role. 86% of the PRODUCT-relevant recall loss is pipeline and form, not parser coverage. The parser is not the bottleneck.)
+
+e253 autopsied the update slice only. Re-ran over all 718 u0 gold points
+(tools/update_miss_autopsy.py --all-points): 481 deaths at containment >=0.6.
+
+| class | all gold | share |
+|---|---|---|
+| NOT_IN_DIALOGUE | 162 | 33.7% |
+| PARTIAL | 106 | 22.0% |
+| STORED_BUT_LOST | 100 | 20.8% |
+| EMITTED_OTHER | 93 | 19.3% |
+| EMITTED_NOTHING | 20 | 4.2% |
+
+The unreachable fraction is **33.7% over all gold, not the 54% the update
+slice showed** -- update gold is abstractive by construction (it IS a revision
+of an earlier statement), so extrapolating from it overstated the ceiling.
+Sample the population you mean to act on.
+
+### The cut that matters: by carrying-turn ROLE
+
+HaluMem's gold is ~80% assistant-authored. The product deliberately refuses to
+store the assistant's claims as the user's facts (run_wire drops every
+assistant clause that is not evidential=="report"). So benchmark recall and
+product usefulness are measuring different things, and the split proves it.
+
+Excluding NOT_IN_DIALOGUE (whose role field is only a weak best-match and
+carries no meaning), the addressable populations are:
+
+| class | USER-carried (n=78) | ASSISTANT-carried (n=241) |
+|---|---|---|
+| STORED_BUT_LOST | 46% | 26% |
+| PARTIAL | 40% | 31% |
+| EMITTED_OTHER | 8% | 36% |
+| EMITTED_NOTHING | 6% | 6% |
+
+**86% of user-carried loss is STORED_BUT_LOST + PARTIAL -- pipeline and form.
+Parser blindness is 14% (11 of 78).** The mirror: assistant-carried loss is
+36% EMITTED_OTHER, so essentially ALL the parser-coverage work (the gerund
+rule, sibling non-emission, new emission rules generally) would serve
+assistant prose the product will not keep.
+
+**Consequence: the parser is not the product bottleneck.** The queued
+construction-rule work is benchmark work. The product work is the pipeline
+we already diagnosed in e250-e253:
+  - STORED_BUT_LOST mechanisms (disposition log, e253): hearsay tier 54%,
+    cluster-merge absorption 23%, same-value text collision 23%.
+  - PARTIAL: the text-collision fix alone screened at +4.38pt gold coverage
+    with the shuffled-gold null moving only +0.70pt.
+
+### Method note on that screen
+
+The screen's "strict dominance, 26 gained / 0 lost, McNemar p=3e-8" is NOT
+evidence of quality: in 97.8% of changed slots the longer text is a token
+SUPERSET of the shorter, so under a containment metric coverage can only rise.
+The paired test is uninformative by construction. What survives is the null
+control (real +4.38 vs null +0.70) and the hand-read (11 better / 3 neutral /
+1 worse of 15). Take the change; do not quote the p-value.
+
+### Also this round
+
+- `tools/build_rgx_cache.py`: the rgx cache had been built by an ad-hoc script
+  NOT in the tree, so the rgx arm's input was unreproducible. Now reproduces
+  the banked u0 cache with **0 semantic differences** across all 2329 entries
+  (289 keys differ only in `turn`, a provenance field no consumer reads).
+- Render-defect scan (tools/render_defects.py) over 6661 u0 records: 24.0%
+  carry >=1 defect, dominated by repeated_owner_possessive 19.2% ("Martin
+  Mark's health remains stable due to Martin Mark's active lifestyle") and
+  repeated_owner_name 9.8%. First cut of that scan reported 66% clitic
+  residue -- all false positives from legitimate possessive 's. Read the
+  matches before believing a regex.
+- Real-corpus extraction was proposed as the product probe and DECLINED;
+  partial output deleted. The user-turn slice above is the substitute and
+  needs no private data.
+
+Nothing judged.

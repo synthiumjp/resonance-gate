@@ -65,6 +65,10 @@ def main():
     ap.add_argument("--user", type=int, default=0)
     ap.add_argument("--cover", type=float, default=0.6)
     ap.add_argument("--examples", type=int, default=10)
+    ap.add_argument("--all-points", action="store_true",
+                    help="autopsy EVERY gold memory point, not just the "
+                         "is_update ones -- this is the general recall "
+                         "question, of which the update axis is one slice")
     ap.add_argument("--out", default=None)
     args = ap.parse_args()
 
@@ -94,8 +98,10 @@ def main():
 
     rows = []
     for k, session in enumerate(user_data["sessions"]):
-        pts = [mp for mp in session.get("memory_points", [])
-               if mp.get("is_update") == "True" and mp.get("original_memories")]
+        allp = session.get("memory_points", [])
+        pts = (allp if args.all_points else
+               [mp for mp in allp if mp.get("is_update") == "True"
+                and mp.get("original_memories")])
         if not pts:
             continue
         mem, _ = RG.ingest_user({"sessions": user_data["sessions"][:k + 1]},
