@@ -127,7 +127,24 @@ def judge_answer(question, gold, answer_text):
 
 def ingest_user(user, cache_path, min_mentions=2):
     """User-role turns -> extraction (cached) -> hygiene -> corroborated facts.
-    Session index is the conversation id (co-occurrence granularity)."""
+    Session index is the conversation id (co-occurrence granularity).
+
+    RG_DISPOSITION=<path> (opt-in diagnostic instrument, unset by default):
+    writes one JSONL line per extracted record describing which stage
+    accepted or dropped it and why (excluded-by-attr, dropped-by-prefilter/
+    quality, dropped-by-subject-hygiene, merged-into-existing-slot, became-
+    hearsay, became-provisional, became-asserted). Unset, every branch below
+    that touches `_disp*` is skipped (the guard is checked, nothing is
+    built or written) -- behaviour and performance are unchanged from
+    before this existed. See tools/disposition_report.py for the reader."""
+    _disp_path = os.environ.get("RG_DISPOSITION")
+    _disp_fh = open(_disp_path, "w") if _disp_path else None
+    _disp_pending = [] if _disp_fh else None
+
+    def _disp_write(row):
+        if _disp_fh:
+            _disp_fh.write(json.dumps(row) + "\n")
+
     cache = {}
     if os.path.exists(cache_path):
         for line in open(cache_path):
@@ -199,18 +216,53 @@ def ingest_user(user, cache_path, min_mentions=2):
                 cf.write(json.dumps({"h": h, "f": facts}) + "\n")
                 cf.flush()
                 cache[h] = facts
-            for fct in facts:
+            for _fi, fct in enumerate(facts):
                 a = canon_attr(fct["attribute"])
                 v = re.sub(r"\s+", " ", str(fct["value"]).strip().lower())
+                # rid: stable given a fixed cache + dialogue (turn_hash,
+                # session, position in that turn's extracted-fact list) --
+                # not a global uuid, but reproducible run to run.
+                _rid = f"{h}:{si}:{_fi}" if _disp_fh else None
+                _role = "user" if is_user else "assistant"
                 if (not v or a in PF._EXCLUDE_ATTR
                         or PF._EXCLUDE_ATTR_RX.search(a)
                         or PF._reject_value(a, v)):
+                    if _disp_fh:
+                        if not v:
+                            disp, reason = ("dropped-by-prefilter/quality",
+                                            "empty-value-after-normalize")
+                        elif a in PF._EXCLUDE_ATTR:
+                            disp, reason = ("excluded-by-attr",
+                                            f"attr-blocklist:{a}")
+                        elif PF._EXCLUDE_ATTR_RX.search(a):
+                            disp, reason = ("excluded-by-attr",
+                                            f"attr-regex:{a}")
+                        else:
+                            disp, reason = ("dropped-by-prefilter/quality",
+                                            "reject_value")
+                        _disp_write({
+                            "rid": _rid, "turn_hash": h, "session": si,
+                            "role": _role, "attr_raw": fct.get("attribute"),
+                            "attr_key": a, "value": v[:200],
+                            "text": fct.get("text"),
+                            "evidential": fct.get("evidential"),
+                            "disposition": disp, "reason": reason})
                     continue
                 subj = fct.get("subject")
                 # Slot hygiene, deterministic and applied before storage:
                 # a group is not a person, and an employer is not a job title.
                 # Both defects were found by reading the store (entry 209).
                 if PF.reject_subject_attr(subj, a):
+                    if _disp_fh:
+                        _disp_write({
+                            "rid": _rid, "turn_hash": h, "session": si,
+                            "role": _role, "attr_raw": fct.get("attribute"),
+                            "attr_key": a, "value": v[:200],
+                            "text": fct.get("text"),
+                            "evidential": fct.get("evidential"),
+                            "disposition": "dropped-by-subject-hygiene",
+                            "reason": f"non-person-subject:{subj},"
+                                      f"person-attr:{a}"})
                     continue
                 a = PF.reslot_attr(a, v)
                 key = f"{subj}:{a}" if subj else a
@@ -235,16 +287,56 @@ def ingest_user(user, cache_path, min_mentions=2):
                 # bare "<owner>'s live_in is X" (entry 244). LLM cache facts
                 # have no "text" key -> stays None -> renderers fall back
                 # to the existing attribute/value path unchanged.
-                slots[key][v].setdefault("text", fct.get("text"))
+                #
+                # OFFLINE SCREEN (candidate change, RG_TEXT_LONGEST): rgx
+                # emits both a short "atom" record and a fuller "full"
+                # record off the same clause, which often normalise to the
+                # same (key, v) slot -- the setdefault above keeps whichever
+                # arrives FIRST, so the short atom usually wins and the
+                # richer text is silently dropped (same defect the
+                # SAME-VALUE TEXT COLLISION disposition trace above already
+                # names). Opt-in flag keeps the LONGEST text seen instead.
+                # Unset (default) hits the untouched setdefault branch, so
+                # existing behaviour/caches are byte-for-byte unchanged.
+                if os.environ.get("RG_TEXT_LONGEST") == "1":
+                    _new_text = fct.get("text")
+                    _cur_text = slots[key][v].get("text")
+                    if _new_text and (not _cur_text
+                                       or len(_new_text) > len(_cur_text)):
+                        slots[key][v]["text"] = _new_text
+                else:
+                    slots[key][v].setdefault("text", fct.get("text"))
                 # Provenance: which role sourced this mention. Kept so an
                 # assistant-only fact is auditable and can be tiered
                 # differently later, rather than silently indistinguishable
                 # from something the user said (entry 190).
                 if not is_user:
                     slots[key][v]["asst"] = slots[key][v].get("asst", 0) + 1
+                if _disp_fh:
+                    # Final fate (asserted/provisional/hearsay, or merged
+                    # into a different value's cluster) is only known once
+                    # ALL turns are in and _cluster runs below -- defer.
+                    _disp_pending.append({
+                        "rid": _rid, "turn_hash": h, "session": si,
+                        "role": _role, "attr_raw": fct.get("attribute"),
+                        "attr_key": key, "value": v[:200],
+                        "text": fct.get("text"),
+                        "evidential": fct.get("evidential"),
+                        "_slot_key": key, "_slot_value": v})
     facts, prov, hearsay = [], [], []
+    # value -> cluster-index and cluster-index -> (tier, label), per key --
+    # built ONLY when RG_DISPOSITION is set (trace=True); the untouched
+    # `PF._cluster(entries)` call below is byte-identical to before this
+    # instrument existed, so the default (unset) path is unchanged.
+    _trace_map = {} if _disp_fh else None
+    _cluster_disp = {} if _disp_fh else None
     for attr, entries in slots.items():
-        for cl in PF._cluster(entries):
+        if _disp_fh:
+            clusters, vmap = PF._cluster(entries, trace=True)
+            _trace_map[attr] = vmap
+        else:
+            clusters = PF._cluster(entries)
+        for ci, cl in enumerate(clusters):
             row = (cl["n"], attr, cl["label"], cl["recs"], cl["toks"],
                   cl.get("text"), cl.get("n_hearsay", 0))
             # entry 246: n==0 means every mention was hearsay (evidential==
@@ -252,10 +344,57 @@ def ingest_user(user, cache_path, min_mentions=2):
             # promoted by further hearsay mentions.
             if cl["n"] == 0 and cl.get("n_hearsay", 0) > 0:
                 hearsay.append(row)
+                tier = "hearsay"
             elif cl["n"] >= min_mentions:
                 facts.append(row)
+                tier = "asserted"
             else:
                 prov.append(row)
+                tier = "provisional"
+            if _disp_fh:
+                _cluster_disp.setdefault(attr, {})[ci] = (
+                    tier, cl["label"], cl.get("text"))
+    if _disp_fh:
+        for p in _disp_pending:
+            key, v = p.pop("_slot_key"), p.pop("_slot_value")
+            ci = _trace_map.get(key, {}).get(v)
+            if ci is None:
+                # Should not happen (every accepted (key, v) is fed to
+                # _cluster above) -- named rather than silently mis-tagged.
+                p["disposition"] = "dropped-for-any-other-reason"
+                p["reason"] = "not-found-in-cluster-trace"
+                p["text_lost"] = None
+            else:
+                tier, label, node_text = _cluster_disp[key][ci]
+                # SAME-VALUE TEXT COLLISION (found by building this
+                # instrument, not asked for): _cluster only ever sees ONE
+                # entry for a given (key, v) string -- if TWO different
+                # records normalise to the identical v (e.g. rgx's short
+                # "atom" record and a fuller "full" record off the same
+                # clause both reduce to value=="open"), `slots[key][v]
+                # .setdefault("text", ...)` upstream keeps whichever
+                # record's text arrived FIRST and silently drops every
+                # other record's own (often more specific) text -- even
+                # though v == label, so this is NOT the merged-into-
+                # existing-slot case (that requires a DIFFERENT value).
+                # Flagged here regardless of tier since it is orthogonal
+                # to asserted/provisional/hearsay.
+                text_lost = bool(p.get("text")) and p.get("text") != node_text
+                if v != label:
+                    # G2: this value did not win its cluster -- a DIFFERENT
+                    # value (the cluster's first/highest-n variant) supplies
+                    # the stored label AND the stored "text"; this record's
+                    # own wording is not independently retrievable.
+                    p["disposition"] = "merged-into-existing-slot"
+                    p["reason"] = f"absorbed into cluster labeled {label!r} (tier={tier})"
+                else:
+                    p["disposition"] = f"became-{tier}"
+                    p["reason"] = ("own text discarded (same-value text "
+                                    f"collision); stored text is {node_text!r}"
+                                    if text_lost else "")
+                p["text_lost"] = text_lost
+            _disp_write(p)
+        _disp_fh.close()
     g = WireGraph.from_facts(facts, n_convs=len(user["sessions"]),
                              provisional=prov, hearsay=hearsay)
     return Memory(g), n_turns

@@ -12837,3 +12837,54 @@ control (real +4.38 vs null +0.70) and the hand-read (11 better / 3 neutral /
   needs no private data.
 
 Nothing judged.
+
+---
+
+## Entry 255 — 2026-08-27 (p2: the product-recall bottleneck is ONE LINE. RG_TEXT_LONGEST recovers 75% of user-carried STORED_BUT_LOST and +6.13pt of gold coverage.)
+
+Chased e254's 36 user-carried STORED_BUT_LOST points to their disposition.
+**All 36 carry `text_lost: True`, and 28 of them BECAME ASSERTED FACTS.** The
+fact was stored with the right attribute and value; `halumem_run.py:290`'s
+`slots[key][v].setdefault("text", ...)` kept a shorter co-normalising
+record's text and discarded the one that actually said the thing.
+
+Hypothesis checked and refuted on the way: that the hearsay tier was
+quarantining the user's own hedged statements ("I think...", "I feel..." --
+`think/feel/believe` ARE in REPORT_VERBS). It is not: **300 of 300 hearsay
+records come from assistant turns, 0 from user turns.** `_report_frame` also
+requires a SECOND-person clause subject, so a user's first-person hedge never
+qualifies. The tier is behaving as designed.
+
+### Before/after, all 718 u0 gold points
+
+| | BEFORE | AFTER (RG_TEXT_LONGEST=1) |
+|---|---|---|
+| gold points covered | 237 (33.0%) | **281 (39.1%)** |
+| deaths | 481 | 437 |
+| USER-CARRIED addressable | 78 | **50** |
+| — STORED_BUT_LOST | 36 | **9** |
+| — PARTIAL | 31 | 31 |
+| — parser classes | 11 | 10 |
+
+**+6.13pt gold coverage; 36% of the product-relevant addressable loss; 75% of
+user-carried STORED_BUT_LOST.** PARTIAL is untouched, which is the correct
+sanity check -- the fix restores a complete text where one existed and does
+nothing where none did.
+
+**Caveat, stated because the metric invites the error:** containment is
+length-monotone, so longer text mechanically scores higher. The reason to
+believe this is real is the screen's shuffled-gold null (real +4.38pt vs null
++0.70pt) plus the hand-read (11 better / 3 neutral / 1 worse of 15). This
++6.13pt carries the same bias and is NOT a judged gain. The e162/e173
+precedent for accepting a rendering change on a null-controlled descriptor is
+what licenses acting on it; the judged confirmation is still owed.
+
+Left OPT-IN. Flipping the default changes every banked artifact, and no judge
+has seen it. Recommended as the first item on the next judged row.
+
+**Method note for the ledger.** Both of this arc's largest findings came from
+INSTRUMENTING the pipeline, not from testing a theory about it: the context
+diff caught e249 appending hearsay to 94.5% of questions, and the disposition
+log -- built to settle a three-way hypothesis about update gold -- found the
+text collision that turned out to be 46% of product-relevant recall loss.
+Neither was the question the instrument was built to answer.

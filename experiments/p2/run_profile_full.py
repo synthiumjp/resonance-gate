@@ -195,9 +195,19 @@ def load_stream_and_titles(path):
     return stream, titles
 
 
-def _cluster(entries):
+def _cluster(entries, trace=False):
     """Merge one slot's values by content-token overlap; sum mentions and receipts.
     entries: {value: {"n": int, "recs": [(date, uuid)]}}. Returns list of dicts.
+
+    trace=False (default, byte-identical to before this arg existed): returns
+    just the cluster list, exactly as always.
+    trace=True (opt-in, RG_DISPOSITION instrumentation only -- see
+    halumem_run.ingest_user): ALSO returns {value: cluster_index}, i.e. which
+    returned cluster each input value ended up placed in -- so a caller can
+    tell a value that WON its cluster (value == clusters[i]["label"]) from
+    one that was ABSORBED into an existing cluster started by a different
+    value (the merge this docstring describes below). No default-path caller
+    passes trace=True, so this is purely additive.
 
     Merge criterion (fixed, see notebook entry 95): overlap must be a MAJORITY
     of the SMALLER token set -- len(toks & cl["core"]) / min(len(toks),
@@ -218,11 +228,12 @@ def _cluster(entries):
     variant, so every candidate is judged against the same original meaning."""
     items = sorted(entries.items(), key=lambda kv: -kv[1]["n"])
     clusters = []
+    vmap = {} if trace else None
     for val, d in items:
         toks = {t for t in re.findall(r"[a-z0-9]+", val.lower())
                 if t not in _STOP and len(t) > 1}
         placed = False
-        for cl in clusters:
+        for ci, cl in enumerate(clusters):
             smaller = min(len(toks), len(cl["core"])) or 1
             if len(toks & cl["core"]) / smaller >= 0.5:
                 cl["n"] += d["n"]
@@ -234,6 +245,8 @@ def _cluster(entries):
                 cl["toks"] |= toks
                 cl["recs"].extend(d["recs"])
                 placed = True
+                if trace:
+                    vmap[val] = ci
                 break
         if not placed:
             # "core" must be a SEPARATE set object from "toks" -- `cl["toks"]
@@ -252,6 +265,10 @@ def _cluster(entries):
                              # entry 246: hearsay-mention count for this
                              # (first) variant; see the merge branch above.
                              "n_hearsay": d.get("n_hearsay", 0)})
+            if trace:
+                vmap[val] = len(clusters) - 1
+    if trace:
+        return clusters, vmap
     return clusters
 
 
