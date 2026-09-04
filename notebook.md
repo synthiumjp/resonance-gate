@@ -13273,3 +13273,75 @@ ranks below 6th of 12 for its own question, because a small cross-encoder
 cannot connect "work" to "is at Lumen Health". That is a semantic gap, not a
 key-design or rendering one — the two cheap theories are already measured dead
 (e260).
+
+---
+
+## Entry 264 — 2026-09-04 (p2: the store was asserting facts the assistant only ASKED about. This arc set out to build coref and found three worse bugs underneath it.)
+
+### The diagnosis went somewhere other than where it was aimed
+
+Set out to attempt cross-turn coref — e262 measured deictic-empty records at
+16.7% of a real store and parked resolution as too dangerous. Before building,
+read **all 49** deictic-empty u0 records with their source turns.
+
+**Most of them are not pronoun problems.** They are other defects wearing a
+pronoun costume:
+
+| what it actually is | example |
+|---|---|
+| assistant QUESTION stored as a fact | `Are there specific workshops … Martin Mark're particularly interested in attending` |
+| EXPLETIVE "it", no referent exists | `Martin Mark seems it` ← "it seems like many have shifted…" |
+| phatic acknowledgement | `Martin Mark appreciates that` ← "I appreciate that." |
+| genuine resolvable anaphora | `Martin Mark can overcome them` ← "Challenges … we can overcome them" |
+
+Genuine referential anaphora is a small share on u0 and a real one in natural
+speech (e262's dogfood cases are all genuine). **Coref stays parked. These were
+underneath it.**
+
+### 1. A question's relative clause was stored as an assertion
+
+    assistant  "Are there specific workshops or seminars you're particularly
+                interested in attending?"
+    store      "<owner> is particularly interested in attending"
+
+The assistant ASKED; the store ASSERTED. This is the class e242's frame rule
+exists for, and **it is the most serious thing in the store — what it produces
+is plausible and wrong, not obviously broken.**
+
+Three escapes, each read off a real parse:
+
+- the interrogative climb covered **complements only** (`ccomp`/`xcomp`) and
+  stopped at the antecedent noun, so a relative clause hanging off a questioned
+  NP never inherited the question;
+- an **existential matrix** ("Are there…") has `there` as an expletive, so the
+  subject-aux inversion test had no subject to compare against — and in an
+  existential the inverted element **is** the head verb, with no separate aux;
+- a **subject-position wh-question** has no inversion at all and carries its
+  wh-word as a DETERMINER of the subject ("What specific aspects … are most
+  important to you?"), so it was stored verbatim.
+
+**`advcl` is deliberately NOT in the climb**, and the check stops at an `advcl`
+ancestor. An adverbial clause under a question is a PRESUPPOSITION and must
+survive it — "Since you moved to Albi, how are you settling in?" still yields
+"<owner> moved to Albi". That is e235's designed behaviour, documented in
+`_interrogative`'s own docstring, and broadening the climb would have taken it
+silently. **Reading the docstring of the thing I was about to widen is what
+caught it.**
+
+### 2. A finite aux was never agreed after the person shift
+
+The bug e243 queued as "agreement inside relative clauses is not done". UD
+attaches the subject to the head VERB, and the agreement rule asks for the
+token's OWN `nsubj`, so a finite aux inside a rendered span was never agreed:
+
+    "The support you've received"  ->  "The support <owner> HAVE received"
+
+**1.31% of u0 records** carry this pattern — the largest single population
+found in this arc.
+
+### State
+
+Suites 412. Dogfood metric unchanged (7/10 rank-1, 8/10 pool, 8/8 abstention) —
+that store contains no assistant questions of this shape, which is itself worth
+noting: **the dogfood set does not cover the defect class that produces false
+facts.** The next thing that set needs is assistant turns that ask.
