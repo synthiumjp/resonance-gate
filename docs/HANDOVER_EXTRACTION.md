@@ -93,7 +93,7 @@ paired comparisons but **not** against someone else's published table.
 
 ## 3. Immediate next steps, in order
 
-**Session close 2026-09-04 (e249–e264 committed).** The 2026-08-24 list that
+**Session close 2026-09-04 (e249–e267 committed).** The 2026-08-24 list that
 stood here is DONE and has been replaced: step 1 ("build labeled hearsay") was
 built in e249 and corrected in e250.
 
@@ -133,9 +133,13 @@ Resume here:
    Live options: a larger reranker (footprint cost), query expansion, or
    accepting it because `profile_context()` with no query hands the agent
    every fact anyway on a small store.
-5. **The dogfood set has a COVERAGE HOLE (e264):** it contains no assistant
-   turns that ASK, so it cannot see the defect class that produces false
-   facts. Add question-asking assistant turns before trusting it further.
+5. **The product harness is `tools/dogfood.py` (e265)** -- four axes: recall,
+   abstention, PURITY (nothing unasserted reaches the store) and tiering.
+   Purity and abstention are ENFORCED in `tools/test_dogfood.py`; they are
+   contracts, not targets. RUN IT BEFORE AND AFTER ANY WRITE-PATH CHANGE.
+   Known gap: its corpus has no possessive-antecedent case, so it cannot see
+   e267. The instrument goes stale one entry at a time -- extend the corpus
+   whenever a fix lands that it cannot measure.
 6. **Cross-turn coref, measured and parked (e262/e264).** Reading all 49
    deictic-empty u0 records showed the population is mostly OTHER defects --
    assistant questions stored as facts, expletive "it", phatic

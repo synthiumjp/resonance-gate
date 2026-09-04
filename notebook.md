@@ -13345,3 +13345,123 @@ Suites 412. Dogfood metric unchanged (7/10 rank-1, 8/10 pool, 8/8 abstention) �
 that store contains no assistant questions of this shape, which is itself worth
 noting: **the dogfood set does not cover the defect class that produces false
 facts.** The next thing that set needs is assistant turns that ask.
+
+---
+
+## Entry 265 — 2026-09-04 (p2: the harness gets a PURITY axis, and its first run caught the store asserting a counterfactual the user said was NOT happening.)
+
+e264 named the hole: the ad-hoc dogfood set had no assistant turns that ASK
+and no traps at all, so its metric read flat through two entries that fixed
+exactly the class it could not see. `tools/dogfood.py` now measures **four**
+axes, because a memory can fail in four ways and three are invisible if you
+only measure recall:
+
+| axis | what it asks |
+|---|---|
+| RECALL | is a stated fact retrievable by an ordinary question |
+| ABSTENTION | does a never-mentioned topic return an honest "never seen" |
+| **PURITY** | is anything the user never asserted in the store **at all** |
+| TIERING | is hearsay labeled, not passed off as the user's own |
+
+The corpus is written with the traps a real assistant sets: it ASKS, it
+SUGGESTS ("you might enjoy Zig"), it RECALLS things back ("I remember you
+mentioning you play the cello"), and the user speaks in counterfactuals and
+negations.
+
+### First run, first finding — a flat fabrication
+
+    user   "If I moved to Berlin I'd need to learn German, but that's not
+            happening any time soon."
+    store  "Alex Reyes moved to Berlin"
+
+`_conditional` keys on the **`mark` lemma**, which is exactly what separates a
+hypothetical from a presupposition — identical tree shape, opposite meaning:
+
+    "If I moved to Berlin ..."      mark=if      -> suppressed
+    "Since you moved to Albi ..."   mark=since   -> survives (e235's rule)
+    "When I moved to Berlin ..."    advmod=when  -> survives
+    "Whenever I travel I get anxious"            -> survives
+
+I included "whenever" by reflex and the narrowing test caught it: **habitual is
+not hypothetical**, and suppressing it would lose a real fact rather than
+prevent a fabrication.
+
+PURITY 8/10 → **10/10**. The other seven traps were already clean — the Zig and
+Haskell suggestions never became facts, the negated coffee fact stored as a
+negation, the cello hearsay sits in its tier with its receipt, and e264's
+question fix held.
+
+**Purity and abstention are now ENFORCED** (`tools/test_dogfood.py`). They are
+contracts, not quality targets — plus a recall FLOOR, so a change that guts
+recall to buy purity cannot pass silently.
+
+---
+
+## Entry 266 — 2026-09-04 (p2: e255's fix never reached the product path. FOURTH instance of the same pattern.)
+
+The harness's recall miss was not retrieval:
+
+    said    "I left my last job at Perrin because the commute was brutal,
+             almost 90 minutes each way."
+    stored  "<owner> left <owner>'s last job at Perrin"
+
+The REASON — the point of the sentence — was in the bin. rgx emits a short
+atom and a fuller record off the same clause; they normalise to the SAME slot,
+and `setdefault` keeps whichever arrives FIRST.
+
+**e255 found this and fixed it in `halumem_run.py` — the benchmark harness.**
+`run_wire.py`, the product path, carried the identical defect at two sites and
+`RG_TEXT_LONGEST` existed nowhere in it. e255 measured the fix at 75% of
+user-carried STORED_BUT_LOST and +6.13pt of gold coverage. **None of it ever
+reached a user.**
+
+| | e248 | e251 | e258 | e266 |
+|---|---|---|---|---|
+| what only reached one path | renderer | the run itself (stale copy) | retrieval v3 | text collision |
+
+Four instances. It is no longer a coincidence, and it should be the FIRST
+hypothesis whenever a product surface underperforms its benchmark twin.
+
+Product harness, v3 arm: recall **8/12 → 9/12**, purity and abstention held.
+Default flipped relative to the benchmark harness on purpose — e255 left it
+opt-in there because it changes every banked artifact, and the product path has
+no banked artifacts to protect. **This does not discharge e255's owed
+judgement**; the benchmark arm is untouched.
+
+---
+
+## Entry 267 — 2026-09-04 (p2: the one coref case that is safe to resolve.)
+
+e262 parked resolution as too dangerous; e264 read all 49 u0 cases and found
+most were other defects entirely. This is the residue — genuine anaphora —
+resolved only where all three conditions hold:
+
+- **same TURN** (one speaker, adjacent sentences; cross-turn is where a wrong
+  antecedent becomes a confident false memory)
+- **owner-POSSESSED** antecedent, so the subject renders as "<owner>'s car" —
+  a fact about the user's world by construction, with the link stated by the
+  user rather than inferred
+- **exactly ONE** candidate; two decline
+
+```
+"My car is a Volvo. It is very reliable."
+   -> <owner>'s car is a Volvo
+   -> <owner>'s car is very reliable        (was: nothing)
+
+"My car is a Volvo. My bike is red. It is very reliable."
+   -> the third clause is DROPPED, not guessed
+```
+
+**Deliberately out of scope, and stated rather than left implicit:** a
+common-noun antecedent the owner merely mentioned. "Mostly the billing service.
+It is written in Go." still yields nothing. Resolving it produces a fact about
+a THING rather than about the user — a change to what the store is FOR, not a
+defect fix, and not a decision to make quietly.
+
+The carry updates only after a sentence is fully walked, so a pronoun can never
+resolve to a noun from its own sentence.
+
+Suites 439. **Product harness unchanged on all four axes — its corpus has no
+possessive-antecedent case, which is the next thing that corpus needs.** The
+instrument is now one entry behind the code again, which is the state e264
+warned about.
