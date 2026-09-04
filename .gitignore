@@ -25,3 +25,4 @@ data-*batch*.zip
 private_chat/
 .venv-train/
 data/
+.aider*
