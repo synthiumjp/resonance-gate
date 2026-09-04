@@ -93,7 +93,7 @@ paired comparisons but **not** against someone else's published table.
 
 ## 3. Immediate next steps, in order
 
-**Session close 2026-09-04 (e249–e267 committed).** The 2026-08-24 list that
+**Session close 2026-09-04 (e249–e270 committed).** The 2026-08-24 list that
 stood here is DONE and has been replaced: step 1 ("build labeled hearsay") was
 built in e249 and corrected in e250.
 
@@ -140,7 +140,18 @@ Resume here:
    Known gap: its corpus has no possessive-antecedent case, so it cannot see
    e267. The instrument goes stale one entry at a time -- extend the corpus
    whenever a fix lands that it cannot measure.
-6. **Cross-turn coref, measured and parked (e262/e264).** Reading all 49
+6. **THE REFUSAL SUITE (e270) is the gate for non-assertion work.**
+   `rgx/refusal_cases.py` = CommitmentBank's four entailment-cancelling
+   operators x CheckList's test types; `tools/refusal_report.py` prints the
+   matrix, `rgx/test_refusal.py` gates it. ADD A ROW BEFORE FIXING A LEAK,
+   not after. Its DIR column (a matched declarative that must still assert)
+   is what separates real refusal from a parse failure, and its INV column
+   caught a branch shipped in e265 that had never fired once.
+   Empty cells to fill: modal MFT, negation INV, factivity INV, question OWED.
+7. **THE STORE NOW HOLDS THE USER'S WORLD (e269)**, not just their profile --
+   entities the owner links themselves to can be clause subjects. RG_WORLD=0
+   disables. Only USER turns establish an entity; that is the guard rail.
+8. **Cross-turn coref, measured and parked (e262/e264).** Reading all 49
    deictic-empty u0 records showed the population is mostly OTHER defects --
    assistant questions stored as facts, expletive "it", phatic
    acknowledgement. Genuine anaphora is small on the benchmark and real in

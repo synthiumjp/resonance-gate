@@ -13465,3 +13465,120 @@ Suites 439. **Product harness unchanged on all four axes — its corpus has no
 possessive-antecedent case, which is the next thing that corpus needs.** The
 instrument is now one entry behind the code again, which is the state e264
 warned about.
+
+---
+
+## Entry 268 — 2026-09-04 (p2: the harness corpus catches up with the code, and catches two bugs in its own probes.)
+
+Every entry after e261 was measured against a corpus containing no instance of
+what it changed, so the scorecard read flat while real defects were closed.
+e264 named that hole once and it **reopened three entries later**. Session 3 of
+the corpus now carries one case per fix, and extending it is part of landing a
+write-path change rather than a separate chore.
+
+    purity   10 -> 18 probes, all passing
+    recall   12 -> 16 questions
+
+**Two bugs in my own probes, both found by running it:**
+
+- `"What car do I drive?"` was an ABSTENTION probe, and session 3 now mentions
+  a car — so the *honest answer* became a recorded failure. An abstention probe
+  is only valid while nothing in the corpus mentions it: a maintenance
+  obligation the corpus did not previously have.
+- `"What did I learn last year?"` wanted the string `learned Postgres`; the
+  parser renders `uses Postgres which Alex Reyes learned last year`, which is
+  CORRECT. **The needle described a rendering, not a fact.**
+
+Ledger §4 again — third time this session the instrument, not the system, was
+what needed fixing.
+
+---
+
+## Entry 269 — 2026-09-04 (p2: the store holds the user's WORLD, not their profile. JP: "they KNOW the facts on themselves".)
+
+> "most people rely on facts about their world. they KNOW the facts on
+> themselves."
+
+That inverts the store's priority and explains why it felt thin. An
+owner-subject-only store keeps "Alex works on the billing service" — which the
+user already knows — and throws away "the billing service is written in Go",
+which is what they would actually forget and ask for. **Measured on the harness
+before building: every world fact was missing.**
+
+An entity joins the user's world when the OWNER links themselves to it: object
+or oblique of a clause the owner is the subject of, or owner-possessed. **Only
+USER turns establish** — that is the guard rail the whole mechanism rests on,
+and it is what keeps an assistant's "Cats are independent animals" and "There
+are several good databases available" out.
+
+Two scopes, split by risk:
+
+| | scope | why |
+|---|---|---|
+| explicit NP subject | across TURNS, by lemma | string identity, not a guess |
+| PRONOUN subject | same turn, exactly one candidate | cross-turn is where a wrong antecedent becomes a confident false memory (e262) |
+
+**Two bugs caught by testing rather than reasoning.** The entity was stored as
+its bare head, so records read "service is written in Go". And *"I have a dog
+and a cat. It is friendly."* resolved to **dog** — only the `obj` head was
+collected, so coordination left ONE candidate and the ambiguity check passed
+something it should have refused. Conjuncts now count separately.
+
+Purity 21/21 and abstention 7/7 held. `RG_WORLD=0` disables. **This is a change
+to what the store is FOR, made on the owner's explicit instruction, not a
+defect fix** — recorded that way on purpose.
+
+---
+
+## Entry 270 — 2026-09-04 (p2: a refusal SUITE. The invariance row proved a branch I shipped in e265 had never fired once.)
+
+This session fixed non-assertion leaks one at a time — e235 questions, e264
+questions inside questions, e265 conditionals — each found by tripping over it.
+**CommitmentBank** (de Marneffe/Simons/Tonhauser 2019) already organises the
+problem: speaker commitment under four ENTAILMENT-CANCELLING OPERATORS
+(negation, modal, question, conditional antecedent) crossed with the embedding
+predicate's factivity. **CheckList** (Ribeiro et al., ACL 2020) supplies the
+test structure. `rgx/refusal_cases.py` is that matrix.
+
+### The DIR row is the point
+
+An MFT that passes because the parser emitted nothing **proves nothing** — it
+is equally consistent with the parser failing on the sentence. Every irrealis
+frame is paired with a matched DECLARATIVE that must still assert. Six of this
+session's fixes had no such control.
+
+### Two real leaks on the first run
+
+**1. Anti-veridical complements.** "I doubt that I will move to Berlin" stored
+`<owner> will move to Berlin` — *the opposite of what was said*. Distinct from
+a merely non-factive predicate ("I think X"), which is a hedged assertion we
+keep. I would not have drawn that line without the taxonomy.
+
+**2. The invariance row earned itself immediately.** "If I moved to Berlin" was
+suppressed; "Supposing / Assuming / Provided I moved to Berlin" were not.
+Those words carry **no `mark` at all** — Stanza reads them as VERBS heading the
+advcl, with the conditional clause as their `ccomp`. e265 listed them as mark
+lemmas, **so that branch had never fired once.** I shipped it three entries ago
+believing it worked.
+
+**A test for one phrasing of an operator says nothing about the operator.**
+
+| capability | MFT | DIR | OWED | INV |
+|---|---|---|---|---|
+| conditional | 4/4 | 6/6 | 2/2 | **5/5** (was 2/5) |
+| factivity | **1/1** (was 0/1) | 2/2 | 1/1 | — |
+| modal | — | 3/3 | — | — |
+| negation | 1/1 | 3/3 | 1/1 | — |
+| question | 4/4 | 4/4 | — | 4/4 |
+
+**OWED keeps refusal honest**: a negation must still assert its negative, a
+factive predicate presupposes its complement ("I regret that I left Perrin"
+commits to leaving). A suite that only measured refusal would reward a parser
+that refused everything.
+
+One probe was substring-blind and I fixed the **probe**: "<owner> doubts that
+<owner> will move to Berlin" is a correct record containing the forbidden
+string.
+
+The empty cells are now visible rather than latent, which is the whole return
+on the structure.
