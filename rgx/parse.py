@@ -519,6 +519,25 @@ def _poss(s, word, allow):
 # resolving beats dropping: the record becomes "<owner> did not know Go".
 RELPRON = frozenset(("which", "that", "who", "whom"))
 
+
+def _cop_form(s, head):
+    """The copula to render for an owner-subject copular clause.
+
+    e263: the copular branch drops every `aux` child along with the copula,
+    so a PERFECT lost its aspect -- "I've been at Lumen Health for about three
+    years now" rendered as "<owner> IS at Lumen Health for about three years
+    now", which is not English and reads as a location rather than a tenure.
+    The verbal branch never had this bug ("I've worked at Acme" -> "has worked
+    at Acme"); only the copular one, which rebuilds its copula from a literal.
+
+    Same family as e256's `bare_been` (that branch un-dropped subj/cop and
+    forgot the aux). Returns "has been" for a perfect, else "is".
+    """
+    for c in s.children(head, ("aux", "aux:pass")):
+        if (c.lemma or c.text).lower() in ("have", "has", "'ve", "had"):
+            return "has been"
+    return "is"
+
 # Dependents that belong to an antecedent's NOUN PHRASE. Anything else (a
 # copula, a subject, a case marker, another clause) belongs to the clause the
 # antecedent happens to head, not to the referent being substituted in.
@@ -778,6 +797,7 @@ def extract_keyed(text, nlp, owner=None, role="user",
                 if not val_core:                       # core guard, e243
                     val_core, peri = val_full, set()
 
+                cform = _cop_form(s, head)
                 if sp is not None:                    # "my job is X"
                     slot = s.text(subj, stop={sp.id}, owner=o, second=second)
                     kind = "attr"
@@ -785,9 +805,9 @@ def extract_keyed(text, nlp, owner=None, role="user",
                     npfx = "not " if neg else ""
                     value = npfx + val_core             # (a): core, e243
                     if peri and val_core != val_full:
-                        records.append((f"{o}'s {slot} is {npfx}{val_core}",
+                        records.append((f"{o}'s {slot} {cform} {npfx}{val_core}",
                                          kind, pred, value))
-                    records.append((f"{o}'s {slot} is {npfx}{val_full}",
+                    records.append((f"{o}'s {slot} {cform} {npfx}{val_full}",
                                      kind, pred, value))
                 elif is_self:                          # "I am X"
                     kind = "attr"
@@ -795,9 +815,9 @@ def extract_keyed(text, nlp, owner=None, role="user",
                     npfx = "not " if neg else ""
                     value = npfx + val_core             # (a): core, e243
                     if peri and val_core != val_full:
-                        records.append((f"{o} is {npfx}{val_core}",
+                        records.append((f"{o} {cform} {npfx}{val_core}",
                                          kind, pred, value))
-                    records.append((f"{o} is {npfx}{val_full}",
+                    records.append((f"{o} {cform} {npfx}{val_full}",
                                      kind, pred, value))
                 elif subj.upos == "PROPN" and _poss(s, head, allow) is not None:
                     # "ThomasSusan is my Friend" -- the relation is the

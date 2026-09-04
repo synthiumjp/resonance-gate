@@ -727,3 +727,37 @@ def test_a_relationship_survives_a_deictic_complement(checked):
 def test_a_deictic_alongside_real_content_is_kept(checked):
     out = texts(checked, "I am a backend engineer there.")
     assert any("backend engineer" in p for p in out), out
+
+
+# ---- N. the copular perfect keeps its aspect (e263) ----------------------
+# The copular branch drops every `aux` child along with the copula and
+# rebuilds the copula from a literal "is", so a PERFECT lost its aspect:
+# "I've been at Lumen Health for about three years now" rendered as "<owner>
+# IS at Lumen Health for about three years now" -- not English, and it reads
+# as a location rather than a tenure. The verbal branch never had this bug.
+# Same family as e256's bare_been.
+
+def test_a_copular_perfect_keeps_has_been(ex):
+    out = texts(ex, "I've been at Lumen Health for about three years now.")
+    assert any(p.startswith("Martin Mark has been at Lumen Health") for p in out), out
+    assert not any("Mark is at Lumen" in p for p in out), out
+
+
+def test_a_copular_present_is_unchanged(ex):
+    out = texts(ex, "I am a backend engineer there.")
+    assert any("Martin Mark is a backend engineer" in p for p in out), out
+
+
+def test_the_perfect_reaches_the_possessed_slot_branch_too(ex):
+    out = texts(ex, "My commute has been brutal.")
+    assert any("Martin Mark's commute has been brutal" in p for p in out), out
+
+
+def test_a_possessed_slot_in_the_present_is_unchanged(ex):
+    out = texts(ex, "My job is stressful.")
+    assert any("Martin Mark's job is stressful" in p for p in out), out
+
+
+def test_the_verbal_perfect_is_untouched(ex):
+    out = texts(ex, "I've worked at Acme for two years.")
+    assert any("has worked at Acme" in p for p in out), out
