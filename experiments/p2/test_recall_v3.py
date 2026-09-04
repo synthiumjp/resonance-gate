@@ -111,4 +111,4 @@ def test_the_floor_comes_from_the_environment_when_unset(monkeypatch, mem):
 
 
 def test_the_default_floor_is_the_documented_pilot_value():
-    assert MA.FLOOR_V3 == -7.7
+    assert MA.FLOOR_V3 == -7.83

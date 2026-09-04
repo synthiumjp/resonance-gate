@@ -57,10 +57,24 @@ class _LazyRV3:
 
 _RV3 = _LazyRV3()
 
-# Cross-encoder score below which recall_v3 abstains. PILOT VALUE (e258):
-# fitted on the same 18 dogfood questions it was scored on, so it is an
-# operating point to re-derive on held-out data, not a constant to trust.
-FLOOR_V3 = -7.7
+# Cross-encoder score below which recall_v3 abstains.
+#
+# e260: with e259's garbage node gone, the two populations separate CLEANLY on
+# this store -- answerable questions score >= -7.72, never-mentioned ones
+# <= -7.94, no overlap, 18/18. Before the parser fix they overlapped (known-min
+# -7.72 vs unseen-max -7.45), because "<owner> did not know which" ranked first
+# for nearly every unanswerable question and dragged its scores up. Fixing a
+# render defect made the evidence signal separable; that is the finding, not
+# the number.
+#
+# Two margin-based alternatives were tested and are WORSE: top1-minus-median
+# and top1-minus-2nd both split 16/18 with overlapping populations.
+#
+# STILL A PILOT VALUE, and now openly fitted: the midpoint of an 18-point
+# sample on one synthetic store. Re-derive on held-out questions before
+# quoting it. What transfers is that an absolute floor on the cross-encoder
+# score is the right mechanism, not that it is -7.83.
+FLOOR_V3 = -7.83
 
 
 class Memory:
