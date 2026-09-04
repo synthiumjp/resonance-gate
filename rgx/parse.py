@@ -398,22 +398,62 @@ def _fronted(s, head, subj):
 # "whenever"/"when" are deliberately absent: they are HABITUAL, not
 # hypothetical. "Whenever I travel I get anxious" asserts a real pattern, and
 # suppressing it would lose a fact rather than prevent a fabrication.
-CONDITIONAL_MARKS = frozenset((
-    "if", "unless", "provided", "supposing", "assuming"))
+CONDITIONAL_MARKS = frozenset(("if", "unless"))
+
+# e270: "Supposing/Provided/Assuming I moved to Berlin" carries NO `mark` at
+# all -- Stanza reads the word as a VERB heading the advcl, with the
+# conditional clause as its `ccomp`. Listing those words as marks (which is
+# what e265 did) therefore never fired, and the refusal suite's INVARIANCE
+# row caught it: the "if" phrasing was suppressed and three paraphrases of the
+# same operator were not. That is exactly what an invariance test is for.
+CONDITIONAL_PREDICATES = frozenset((
+    "suppose", "provide", "assume", "imagine", "pretend"))
+
+# ANTI-VERIDICAL predicates: the speaker asserts the NEGATION of their
+# complement, so the complement must never be stored as a fact. "I doubt that
+# I will move to Berlin" stored "<owner> will move to Berlin" -- the opposite
+# of what was said. Distinct from a merely NON-factive predicate ("I think
+# X"), which is a hedged assertion we do keep. CommitmentBank's factivity
+# dimension is what separates them.
+ANTIVERIDICAL_VERBS = frozenset((
+    "doubt", "deny", "dispute", "disbelieve", "refute", "contest"))
 
 
 def _conditional(s, head):
-    """True when this clause is inside a hypothetical -- either it IS the
-    if-clause, or it is the consequent that hangs one off itself."""
-    def _marked(w):
-        return any((c.lemma or c.text).lower() in CONDITIONAL_MARKS
-                   for c in s.children(w, ("mark",)))
-    if head.deprel in ("advcl", "advcl:relcl") and _marked(head):
+    """True when this clause is inside a hypothetical -- it IS the if-clause,
+    it is the consequent that hangs one off itself, or it sits under a
+    conditional PREDICATE ("Supposing I moved...")."""
+    def _cond(w):
+        if any((c.lemma or c.text).lower() in CONDITIONAL_MARKS
+               for c in s.children(w, ("mark",))):
+            return True
+        return (w.deprel in ("advcl", "advcl:relcl")
+                and (w.lemma or "").lower() in CONDITIONAL_PREDICATES)
+    if head.deprel in ("advcl", "advcl:relcl") and _cond(head):
         return True
     for c in s.children(head, ("advcl", "advcl:relcl")):
-        if _marked(c):
+        if _cond(c):
+            return True
+    # the complement OF a conditional predicate is the hypothesis itself
+    if head.deprel in ("ccomp", "xcomp"):
+        parent = s.w.get(head.head)
+        if parent is not None and _cond(parent):
             return True
     return False
+
+
+def _antiveridical(s, head):
+    """True when this clause is the complement of a predicate whose speaker
+    asserts its NEGATION -- "I doubt that I will move to Berlin"."""
+    if head.deprel not in ("ccomp", "xcomp"):
+        return False
+    parent = s.w.get(head.head)
+    if parent is None:
+        return False
+    if (parent.lemma or "").lower() not in ANTIVERIDICAL_VERBS:
+        return False
+    subj = next(iter(s.children(parent, ("nsubj", "nsubj:pass"))), None)
+    return subj is not None
 
 
 def _interrogative(s, head, subj, is_question):
@@ -941,6 +981,8 @@ def extract_keyed(text, nlp, owner=None, role="user",
             if _interrogative(s, head, subj, is_q):
                 continue
             if _conditional(s, head):
+                continue
+            if _antiveridical(s, head):
                 continue
             if head.deprel in INTERROG_CHAIN and \
                     _ancestor_interrogative(s, head, is_q):
