@@ -82,15 +82,21 @@ def main():
 
     # INVARIANCE -- refusal survives rewording the marker
     inv = defaultdict(lambda: [0, 0])
-    for cap, needle, role, variants in INVARIANCE:
-        for v in variants:
+    for spec in INVARIANCE:
+        cap, needle, role = spec["capability"], spec["needle"], spec["role"]
+        unless = tuple(u.lower() for u in spec.get("unless", ()))
+        for v in spec["variants"]:
             out = texts(ex, v, role)
-            ok = needle.lower() not in " || ".join(out).lower()
+            bad = [o for o in out if needle.lower() in o.lower()]
+            if unless:
+                bad = [o for o in bad
+                       if not any(u in o.lower() for u in unless)]
+            ok = not bad
             inv[cap][1] += 1
             inv[cap][0] += ok
             if not ok:
                 fails.append(("INV", cap, "paraphrase", v,
-                              f"asserted {needle!r}", out))
+                              f"asserted {needle!r} unmarked", bad))
 
     print(f"{'capability':14s} {'MFT (refuses)':>14s} {'DIR (control)':>14s} "
           f"{'OWED (still asserts)':>21s} {'INV (paraphrase)':>17s}")

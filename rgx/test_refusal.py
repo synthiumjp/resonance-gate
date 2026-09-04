@@ -65,14 +65,18 @@ def test_the_frame_still_owes_its_own_fact(ex, c):
 
 
 @pytest.mark.parametrize(
-    "cap,needle,role,variant",
-    [(cap, n, r, v) for cap, n, r, vs in INVARIANCE for v in vs],
+    "cap,needle,role,unless,variant",
+    [(s["capability"], s["needle"], s["role"],
+      tuple(u.lower() for u in s.get("unless", ())), v)
+     for s in INVARIANCE for v in s["variants"]],
     ids=lambda x: x if isinstance(x, str) else None)
 def test_inv_refusal_survives_rewording_the_marker(ex, cap, needle, role,
-                                                    variant):
+                                                    unless, variant):
     """The invariance row is what caught e270: "if" was suppressed and three
     paraphrases of the same operator were not, because they carry no `mark`
     at all -- Stanza reads them as VERBS heading the clause."""
     out = _texts(ex, variant, role)
-    assert not any(needle.lower() in o.lower() for o in out), (
-        f"{variant!r} asserted {needle!r}: {out}")
+    bad = [o for o in out if needle.lower() in o.lower()]
+    if unless:
+        bad = [o for o in bad if not any(u in o.lower() for u in unless)]
+    assert not bad, f"{variant!r} asserted {needle!r} unmarked: {bad}"

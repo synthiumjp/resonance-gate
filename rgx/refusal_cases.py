@@ -191,6 +191,72 @@ CASES = [
          control_role="user", control_asserts="left Perrin",
          assert_instead="left Perrin"),
 
+    # ---- LOADED QUESTIONS: an assistant must not inject by presupposition --
+    # "When did you stop working at Perrin?" PRESUPPOSES that the user worked
+    # there and stopped. If the store inherited an assistant's presupposition,
+    # the assistant could write the user's memory by asking questions. These
+    # currently pass; the rows exist so that stays true.
+    dict(capability="question", operator="loaded question (change-of-state)",
+         role="assistant",
+         irrealis="When did you stop working at Perrin?",
+         must_not="Perrin",
+         control="I stopped working at Perrin.",
+         control_role="user", control_asserts="stopped working at Perrin"),
+
+    dict(capability="question", operator="loaded question (why-presupposition)",
+         role="assistant",
+         irrealis="Why did you leave Perrin?",
+         must_not="leave Perrin",
+         control="I left Perrin.",
+         control_role="user", control_asserts="left Perrin"),
+
+    dict(capability="question", operator="loaded question (how-long)",
+         role="assistant",
+         irrealis="How long have you been vegetarian?",
+         must_not="vegetarian",
+         control="I have been vegetarian for six years.",
+         control_role="user", control_asserts="has been vegetarian"),
+
+    # ---- MODAL: the modal must SURVIVE into the record ---------------------
+    # A modal is not refused -- "I might switch to Rust" is worth storing. What
+    # must never happen is the modal being dropped, leaving a bare assertion
+    # the speaker never made. `unless_contains` states exactly that.
+    dict(capability="modal", operator="epistemic (might)",
+         role="user",
+         irrealis="I might switch to Rust next year.",
+         must_not="switch to Rust", unless_contains="might",
+         control="I switched to Rust.",
+         control_role="user", control_asserts="switched to Rust",
+         assert_instead="might switch to Rust"),
+
+    dict(capability="modal", operator="epistemic (may)",
+         role="user",
+         irrealis="I may move to Berlin.",
+         must_not="move to Berlin", unless_contains="may",
+         control="I moved to Berlin.",
+         control_role="user", control_asserts="moved to Berlin",
+         assert_instead="may move to Berlin"),
+
+    dict(capability="modal", operator="ability (could)",
+         role="user",
+         irrealis="I could take the Perrin offer.",
+         must_not="take the Perrin offer", unless_contains="could",
+         control="I took the Perrin offer.",
+         control_role="user", control_asserts="took the Perrin offer",
+         assert_instead="could take the Perrin offer"),
+
+    # ---- the user's OWN question still presupposes ------------------------
+    # Symmetric with the loaded-question rows above: an assistant's
+    # presupposition must NOT be inherited, but the user's own is theirs to
+    # make. Same tree shape, opposite disposition, decided by ROLE.
+    dict(capability="question", operator="user's own presupposition",
+         role="user",
+         irrealis="Since I moved to Albi, how do I get residency?",
+         must_not=None,
+         control="I moved to Albi.",
+         control_role="user", control_asserts="moved to Albi",
+         assert_instead="moved to Albi"),
+
     dict(capability="factivity", operator="assistant hearsay (report frame)",
          role="assistant",
          irrealis="I remember you mentioning that you play the cello.",
@@ -201,18 +267,57 @@ CASES = [
 
 # INVARIANCE: refusal must survive rewording the MARKER, not just the one
 # phrasing a bug happened to be found in.
+# `unless` is required for negation: EVERY correct negated record contains its
+# own positive as a substring ("<owner> no longer drinks coffee" contains
+# "drinks coffee"). What must not exist is the positive standing free of any
+# negator, so the test asks for the negator rather than for the absence of the
+# verb.
 INVARIANCE = [
-    ("conditional", "moved to Berlin", "user", [
-        "If I moved to Berlin I would need German.",
-        "If I were to move to Berlin I would need German.",
-        "Supposing I moved to Berlin, I would need German.",
-        "Assuming I moved to Berlin, I would need German.",
-        "Provided I moved to Berlin, I would need German.",
-    ]),
-    ("question", "interested in Rust", "assistant", [
-        "Are you interested in Rust?",
-        "Would you be interested in Rust?",
-        "Is there any chance you're interested in Rust?",
-        "Could you be interested in Rust?",
-    ]),
+    dict(capability="conditional", needle="moved to Berlin", role="user",
+         variants=[
+             "If I moved to Berlin I would need German.",
+             "If I were to move to Berlin I would need German.",
+             "Supposing I moved to Berlin, I would need German.",
+             "Assuming I moved to Berlin, I would need German.",
+             "Provided I moved to Berlin, I would need German.",
+         ]),
+    dict(capability="question", needle="interested in Rust", role="assistant",
+         variants=[
+             "Are you interested in Rust?",
+             "Would you be interested in Rust?",
+             "Is there any chance you're interested in Rust?",
+             "Could you be interested in Rust?",
+         ]),
+    dict(capability="negation", needle="drink", role="user",
+         unless=("not", "never", "no longer", "hardly", "stopped", "n't"),
+         variants=[
+             "I don't drink coffee.",
+             "I no longer drink coffee.",
+             "I have never drunk coffee.",
+             "I hardly ever drink coffee.",
+             "I stopped drinking coffee.",
+         ]),
+    # e271: this row found a real leak. A fronted epistemic adverb was being
+    # dropped as a discourse adverb, so "Perhaps I will switch to Rust" stored
+    # a plain future the speaker never asserted.
+    dict(capability="modal", needle="switch to Rust", role="user",
+         unless=("might", "may", "could", "perhaps", "maybe", "possibly",
+                 "probably", "presumably", "potentially"),
+         variants=[
+             "I might switch to Rust.",
+             "I may switch to Rust.",
+             "Perhaps I will switch to Rust.",
+             "Maybe I will switch to Rust.",
+             "Possibly I will switch to Rust.",
+             "I could switch to Rust.",
+         ]),
+    dict(capability="factivity", needle="left Perrin", role="user",
+         unless=("doubt", "deny", "denies", "dispute", "disputes",
+                 "contest", "refute"),
+         variants=[
+             "I deny that I left Perrin.",
+             "I dispute that I left Perrin.",
+             "I doubt that I left Perrin.",
+             "I refute that I left Perrin.",
+         ]),
 ]

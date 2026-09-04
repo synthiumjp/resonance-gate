@@ -58,6 +58,17 @@ GENERIC_SUBJ = {"people", "some", "others", "many", "one", "everyone",
                 "someone"}
 HEDGE_ADV = {"interestingly", "curiously", "apparently", "supposedly",
              "reportedly", "perhaps"}
+
+# e271: EPISTEMIC adverbs are not discourse adverbs. `_fronted` drops a
+# sentence-initial advmod outright because "Interestingly"/"However" carry no
+# content for a memory record -- true for those, false for these, which change
+# the speaker's COMMITMENT. "Perhaps I will switch to Rust" was stored as
+# "<owner> will switch to Rust": a plain future the speaker never asserted.
+# Found by the refusal suite's modal INVARIANCE row, which is the row that
+# exists to catch one phrasing of an operator being handled and another not.
+EPISTEMIC_ADV = {"perhaps", "maybe", "possibly", "probably", "likely",
+                 "presumably", "potentially", "conceivably", "seemingly",
+                 "arguably"}
 CLAUSE_DEPS = ("root", "parataxis", "conj", "advcl", "acl", "acl:relcl",
                "ccomp", "xcomp", "csubj")
 # e242: "It seems that you have been sleeping better" parses the embedded
@@ -375,15 +386,21 @@ def _fronted(s, head, subj):
     A post-subject adverb ("was ALSO curious") is already in a sane position
     and is untouched.
     """
-    drop_ids, tail = set(), []
+    drop_ids, tail, hedge = set(), [], []
     for c in s.children(head, ("advmod",)):
         if c.id < subj.id:
             drop_ids.add(c.id)
+            # e271: dropped from its fronted POSITION either way, but an
+            # epistemic adverb is handed back so the caller can re-place it
+            # rather than lose it.
+            if (c.lemma or c.text).lower() in EPISTEMIC_ADV:
+                hedge.append(c)
     for c in s.children(head, ("advcl", "obl", "nmod")):
         if c.id < subj.id:
             drop_ids.add(c.id)
             tail.append(c)
-    return drop_ids, sorted(tail, key=lambda c: c.id)
+    return drop_ids, sorted(tail, key=lambda c: c.id), \
+        sorted(hedge, key=lambda c: c.id)
 
 
 # e265: IRREALIS. "If I moved to Berlin I'd need to learn German, but that's
@@ -1011,7 +1028,7 @@ def extract_keyed(text, nlp, owner=None, role="user",
                             and role == "user"):
                         world_carried = next(iter(turn_world.values()))
             is_self = subj.text.lower() in allow
-            fdrop, ftail = _fronted(s, head, subj)
+            fdrop, ftail, fhedge = _fronted(s, head, subj)
             # e243, RULE 3: a NAMED third party as subject, with the owner
             # nowhere in the clause -- "WilsonRobert recommended a yoga
             # class near the office" -- fires in USER turns only. Computed
@@ -1028,6 +1045,13 @@ def extract_keyed(text, nlp, owner=None, role="user",
             # e259: resolve this clause's relative pronoun to its antecedent
             # before ANY render call below reads it.
             s._swap = _relcl_swap(s, head)
+            if fhedge:
+                # e271: the adverb was SENTENCE-INITIAL, so its capital is
+                # positional, not lexical -- mid-record it must be lower case
+                # ("Alex Reyes Perhaps will switch"). Reuses e259's swap.
+                s._swap = dict(s._swap)
+                for c in fhedge:
+                    s._swap[c.id] = c.text.lower()
             if world_carried is not None:
                 # e269: render the resolved world entity in place of the
                 # pronoun, so the record reads "The billing service is
@@ -1081,6 +1105,9 @@ def extract_keyed(text, nlp, owner=None, role="user",
                     val_core, peri = val_full, set()
 
                 cform = _cop_form(s, head)
+                if fhedge:      # e271
+                    cform = (" ".join(c.text.lower() for c in fhedge)
+                             + " " + cform)   # swap keeps case consistent
                 if sp is not None or carried is not None:   # "my job is X"
                     slot = (carried if carried is not None
                             else s.text(subj, stop={sp.id}, owner=o,
@@ -1192,6 +1219,8 @@ def extract_keyed(text, nlp, owner=None, role="user",
                                        if c.deprel == "advmod"
                                        and subj.id < c.id < head.id),
                                       key=lambda c: c.id)
+                    if fhedge:  # e271: re-placed, not dropped
+                        preverb = list(fhedge) + preverb
                     if preverb:
                         args_sorted = [c for c in args_sorted
                                        if c not in preverb]
