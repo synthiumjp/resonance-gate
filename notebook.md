@@ -13680,3 +13680,66 @@ work?" ranks "works from home" over "has been at Lumen Health"; connecting
 "work" to an employer NAME needs knowledge the parser does not have and this
 reranker cannot supply. Three cheap theories for it are already measured dead
 (e260, e272).
+
+---
+
+## Entry 273 — 2026-09-04 (p2: a CURRENCY axis, and it found the store merging a fact with its own negation.)
+
+The harness measured four axes and updating was **none of them** — while
+updating is the system's worst measured column (12.6% vs Zep 47.3%). A memory
+that cannot update is not a LIVING memory, which is the whole product claim.
+
+Added the fifth axis — a fact asserted early, superseded later, probed both
+ways: the CURRENT value must come back, and the stale one must not come back
+FIRST. **It failed 2 of 3 immediately.**
+
+### Three defects, and the third is the serious one
+
+**1. Nobody was reading the user's own cessations.** `mark_current` gates on a
+24-name allowlist covering 0.2% of the rgx store (e251), so on the product path
+essentially nothing is ever marked stale. But the user TELLS us — "I sold the
+Volvo" — and the parser already extracts that cleanly (`pred=sell`,
+`val="the Volvo"`). `mark_ceased` reads the signal rather than inferring one
+from recency. It marks; it never deletes.
+
+**2. Dates cannot order one sitting.** Every conversation in a session shares a
+date, so "stated before" was unorderable and the pass skipped everything
+silently. Ordering now uses ingestion ordinals.
+
+**3. THE STORE MERGED A FACT WITH ITS OWN NEGATION.**
+
+    "a vegetarian"             toks {vegetarian}
+    "no longer a vegetarian"   toks {longer, vegetarian}
+    overlap / smaller = 1.0  ->  MERGED, and the POSITIVE wins the label
+                                 because it has more mentions
+
+The user said they had stopped and the store kept the opposite, with the
+cessation record silently absorbed.
+
+**Ledger §5l says "token overlap cannot see a negation". It recorded that about
+INSTRUMENTS.** Nobody checked `_cluster` — the same algorithm deciding what the
+store BELIEVES. Polarity is now read off the raw string, because the stopword
+list removes exactly the words that carry it ("no", "not").
+
+| | before | after |
+|---|---|---|
+| current value returned | 0/3 | **3/3** |
+| stale kept off rank 1 | 1/3 | **3/3** |
+
+recall 17/20, abstention 7/7, purity 21/21 — all held.
+
+### Two decisions worth recording
+
+**Superseded facts are DEMOTED, never hidden**, on both read paths. "You told
+me X, then Y" is a better answer than silence, and hiding a receipt would be
+the same class of dishonesty as inventing one.
+
+**The currency TESTS run on the v3 arm** — not to flatter them. The
+token-overlap default cannot retrieve these facts at all (e258: 5/10 vs 9/10),
+so there the probe would measure the retriever, not currency.
+
+### And a pattern to name
+
+Third probe of mine invalidated by my own corpus extension (e268, e272, e273).
+It is not carelessness: **a recall needle names a fact, and facts change.** It
+is a maintenance obligation of the harness, not a surprise each time.
