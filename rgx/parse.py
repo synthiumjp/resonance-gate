@@ -385,6 +385,36 @@ def _fronted(s, head, subj):
     return drop_ids, sorted(tail, key=lambda c: c.id)
 
 
+# e265: IRREALIS. "If I moved to Berlin I'd need to learn German, but that's
+# not happening any time soon" stored "<owner> moved to Berlin" -- a flat
+# fabrication of the thing the user explicitly said was NOT happening. A
+# conditional is not an assertion, and neither is its consequent.
+#
+# Keyed on the `mark` lemma, which is what separates a hypothetical from a
+# presupposition. "Since you moved to Albi" (mark=since) and "When I moved to
+# Berlin" (advmod=when, no mark at all) are both FACTUAL and must survive --
+# same shape in the tree, different word, opposite meaning.
+# "whenever"/"when" are deliberately absent: they are HABITUAL, not
+# hypothetical. "Whenever I travel I get anxious" asserts a real pattern, and
+# suppressing it would lose a fact rather than prevent a fabrication.
+CONDITIONAL_MARKS = frozenset((
+    "if", "unless", "provided", "supposing", "assuming"))
+
+
+def _conditional(s, head):
+    """True when this clause is inside a hypothetical -- either it IS the
+    if-clause, or it is the consequent that hangs one off itself."""
+    def _marked(w):
+        return any((c.lemma or c.text).lower() in CONDITIONAL_MARKS
+                   for c in s.children(w, ("mark",)))
+    if head.deprel in ("advcl", "advcl:relcl") and _marked(head):
+        return True
+    for c in s.children(head, ("advcl", "advcl:relcl")):
+        if _marked(c):
+            return True
+    return False
+
+
 def _interrogative(s, head, subj, is_question):
     """A clause that ASKS is not a clause that ASSERTS.
 
@@ -797,6 +827,8 @@ def extract_keyed(text, nlp, owner=None, role="user",
             if subj is None:
                 continue
             if _interrogative(s, head, subj, is_q):
+                continue
+            if _conditional(s, head):
                 continue
             if head.deprel in INTERROG_CHAIN and \
                     _ancestor_interrogative(s, head, is_q):
