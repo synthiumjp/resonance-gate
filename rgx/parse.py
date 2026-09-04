@@ -440,16 +440,30 @@ def _conditional(s, head):
     """True when this clause is inside a hypothetical -- it IS the if-clause,
     it is the consequent that hangs one off itself, or it sits under a
     conditional PREDICATE ("Supposing I moved...")."""
+    def _concessive(w):
+        """"EVEN if X, Y" ASSERTS Y -- it is a concession, not a hypothesis.
+        e276: "Even if it is raining, I always go for a run every morning"
+        produced NOTHING, because the main clause was suppressed along with
+        the if-clause."""
+        return any((c.lemma or c.text).lower() == "even"
+                   for c in s.children(w, ("advmod",)))
+
     def _cond(w):
         if any((c.lemma or c.text).lower() in CONDITIONAL_MARKS
                for c in s.children(w, ("mark",))):
             return True
         return (w.deprel in ("advcl", "advcl:relcl")
                 and (w.lemma or "").lower() in CONDITIONAL_PREDICATES)
-    if head.deprel in ("advcl", "advcl:relcl") and _cond(head):
+
+    # e276: the head's OWN mark is checked whatever its deprel. A conditional
+    # with no separate main clause is a ROOT carrying the mark itself, and it
+    # was never examined: "If only I had studied medicine instead of law"
+    # asserted "<owner> had studied medicine" -- the exact opposite of the
+    # regret being expressed.
+    if _cond(head):
         return True
     for c in s.children(head, ("advcl", "advcl:relcl")):
-        if _cond(c):
+        if _cond(c) and not _concessive(c):
             return True
     # the complement OF a conditional predicate is the hypothesis itself
     if head.deprel in ("ccomp", "xcomp"):
@@ -503,6 +517,24 @@ def _interrogative(s, head, subj, is_question):
     if is_question and any("PronType=Int" in (c.feats or "")
                            for c in s.children(subj)):
         return True
+    # e276: an INDIRECT question carries no "?" -- "I wonder what city I moved
+    # to when I was a kid" stored "<owner> moved what city to".
+    #
+    # NARROW ON PURPOSE. The first version fired on ANY interrogative word in
+    # an argument and broke FIVE existing tests: this codebase deliberately
+    # keeps wh-clauses that sit under a declarative ("I know what I want",
+    # "When I moved to Berlin I learned German"), and e235/e237 tested that
+    # intent explicitly. One adversarial example is not grounds for
+    # overturning it. So this fires only under a WONDERING matrix verb, where
+    # the speaker is stating that they do NOT know.
+    if head.deprel in ("ccomp", "xcomp"):
+        matrix = s.w.get(head.head)
+        if (matrix is not None
+                and (matrix.lemma or "").lower() in WONDER_VERBS
+                and any("PronType=Int" in (t.feats or "")
+                        for a in s.children(head, ARG_DEPS)
+                        for t in s.subtree(a))):
+            return True
     if is_question:
         av = s.children(head, ("aux", "aux:pass", "cop"))
         if av and min(a.id for a in av) < subj.id:
@@ -664,6 +696,11 @@ def _poss(s, word, allow):
 # resolving beats dropping: the record becomes "<owner> did not know Go".
 RELPRON = frozenset(("which", "that", "who", "whom"))
 
+# e276: matrix verbs whose complement is a question the speaker is NOT
+# answering. Distinct from "know"/"remember", where the complement IS asserted.
+WONDER_VERBS = frozenset((
+    "wonder", "ask", "unsure", "question", "guess", "forget"))
+
 
 def _cop_form(s, head):
     """The copula to render for an owner-subject copular clause.
@@ -679,8 +716,24 @@ def _cop_form(s, head):
     forgot the aux). Returns "has been" for a perfect, else "is".
     """
     for c in s.children(head, ("aux", "aux:pass")):
-        if (c.lemma or c.text).lower() in ("have", "has", "'ve", "had"):
+        lem = (c.lemma or c.text).lower()
+        if lem in ("have", "has", "'ve", "had"):
             return "has been"
+        # e276: a FUTURE copular collapsed to the present -- "I will be a
+        # manager next year" stored "<owner> IS a manager next year", a claim
+        # about now that the speaker made about later.
+        if lem in ("will", "'ll", "shall"):
+            return "will be"
+        if lem == "would":
+            return "would be"
+    # e276: and so did the PAST. "I was very anxious during college" stored
+    # "<owner> IS very anxious during college" -- sitting beside "feels much
+    # calmer now" from the same turn, two contradictory present-tense claims.
+    # e263 handled only the perfect; its docstring documented that scope, but
+    # a documented gap that inverts a truth value is still an inversion.
+    cop = next(iter(s.children(head, ("cop",))), None)
+    if cop is not None and "Tense=Past" in (cop.feats or ""):
+        return "was"
     return "is"
 
 # Dependents that belong to an antecedent's NOUN PHRASE. Anything else (a
@@ -819,13 +872,29 @@ def _poss_antecedent(carry, subj):
 
 
 def _collect_poss(s, allow, out):
-    """Record every owner-possessed nominal in this sentence, by head lemma."""
+    """Record candidate antecedents for a later pronoun.
+
+    e276: this recorded only OWNER-POSSESSED nominals, so "My friend has a
+    cat. It is very playful." saw exactly one candidate ("friend") and
+    confidently attributed the CAT's playfulness to the FRIEND. A direct
+    object is a perfectly good antecedent for "it" -- usually a better one --
+    so it counts as a COMPETING candidate and the ambiguity check declines.
+
+    A copular complement is deliberately NOT counted: in "My car is a Volvo"
+    the Volvo IS the car, not a second entity, and counting it would break
+    the case this rule exists for.
+    """
     for w in s.w.values():
-        if w.upos not in ("NOUN", "PROPN"):
+        if w.upos not in ("NOUN", "PROPN") or not w.lemma:
             continue
-        if _poss(s, w, allow) is None:
-            continue
-        out[w.lemma.lower()] = w
+        if _poss(s, w, allow) is not None:
+            out[w.lemma.lower()] = w
+        elif w.deprel in ("obj", "iobj", "conj"):
+            # `conj` included so "a dog and a cat" yields TWO candidates and
+            # the ambiguity check declines -- collecting only the obj head
+            # left one and produced a confident wrong guess (the same defect
+            # _collect_world already guards, e269).
+            out.setdefault(w.lemma.lower(), w)
 
 
 def _third_party_owner(s, head, subj, allow):

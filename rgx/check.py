@@ -70,6 +70,13 @@ def _content(s):
     return out
 
 
+def _short_source(s):
+    """Short source tokens (2 chars) that `_content` excludes. Source side
+    only -- these are never treated as record content."""
+    return [w for w in re.findall(r"[a-z]+", str(s).lower())
+            if len(w) == 2 and w not in STOP]
+
+
 def _stems(words):
     """Crude stemming so inflected forms match their source ("lives"/"live")."""
     out = set()
@@ -191,9 +198,28 @@ def prefilter(prop, turn, owner=None, min_grounded=0.85, min_content=1,
         body = m.group(1)
     vc = [w for w in _content(body) if w not in own] or pc
 
-    src = _stems(_content(turn))
-    ungrounded = [w for w in vc if w not in src and w[:-1] not in src
-                  and (w + "s") not in src]
+    # e276: `_content` drops tokens of 2 characters or fewer, which is right
+    # for deciding what in the RECORD counts as content to check -- but wrong
+    # for the SOURCE side, which should represent everything the speaker
+    # actually said. "go", "do", "be" were invisible, so the person shift's
+    # "goes"/"does" read as invented content and the record was dropped.
+    # The length filter belongs on the candidate, not on the evidence.
+    src = _stems(_content(turn) + _short_source(turn))
+    # e276: `_stems` refuses to strip a suffix that would leave fewer than 3
+    # characters, so "goes" never reduced to "go" and a correctly person-
+    # shifted verb was rejected as INVENTED CONTENT -- "Even if it is raining,
+    # I always go for a run" produced nothing at all, blamed on the
+    # conditional rule until the filter was checked.
+    #
+    # Stripped from the CANDIDATE, not added to the source: growing `src`
+    # makes grounding more permissive, which is the wrong direction for a
+    # filter whose job is to catch invented content.
+    def _ok(w):
+        if w in src or w[:-1] in src or (w + "s") in src:
+            return True
+        return w.endswith("es") and w[:-2] in src
+
+    ungrounded = [w for w in vc if not _ok(w)]
     pc = vc
     frac = 1.0 - (len(ungrounded) / max(1, len(pc)))
     if frac < min_grounded:

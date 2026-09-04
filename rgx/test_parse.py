@@ -999,3 +999,69 @@ def test_a_relative_pronoun_antecedent_beats_the_world_carry(ex):
                     "millions of people.")
     assert any("a disease affects millions" in p for p in out), out
     assert not any("a doctor affects millions" in p for p in out), out
+
+
+# ---- T. the rest of the adversarial-review findings (e276) ---------------
+
+def test_a_past_copular_stays_past(ex):
+    """"I was very anxious during college" stored "IS very anxious during
+    college", beside "feels much calmer now" from the same turn -- two
+    contradictory present-tense claims. e263 handled only the perfect."""
+    out = texts(ex, "I was very anxious during college, but I feel much "
+                    "calmer now.")
+    assert any("was very anxious" in p for p in out), out
+    assert not any("is very anxious" in p for p in out), out
+
+
+def test_a_future_copular_stays_future(ex):
+    out = texts(ex, "I will be a manager next year.")
+    assert any("will be a manager" in p for p in out), out
+    assert not any("Mark is a manager" in p for p in out), out
+
+
+def test_a_root_clause_conditional_is_not_asserted(ex):
+    """"If only I had studied medicine" asserted that he DID -- the exact
+    opposite of the regret. A conditional with no separate main clause is a
+    ROOT carrying the mark itself, and the head's own mark was never checked."""
+    assert texts(ex, "If only I had studied medicine instead of law.") == []
+
+
+def test_even_if_is_concessive_and_the_main_clause_survives(ex):
+    """"EVEN if X, Y" asserts Y. Suppressing it lost the fact entirely."""
+    out = texts(ex, "Even if it is raining, I always go for a run every "
+                    "morning.")
+    assert any("goes for a run" in p for p in out), out
+
+
+def test_an_object_competes_as_an_antecedent(ex):
+    """"My friend has a cat. It is very playful." attributed the CAT's
+    playfulness to the FRIEND, because only owner-possessed nominals counted
+    as candidates and there was therefore exactly one."""
+    out = texts(ex, "My friend has a cat. It is very playful.")
+    assert not any("playful" in p for p in out), out
+
+
+def test_a_copular_complement_does_not_compete(ex):
+    """In "My car is a Volvo" the Volvo IS the car, not a second entity."""
+    out = texts(ex, "My car is a Volvo. It is very reliable.")
+    assert any("car is very reliable" in p for p in out), out
+
+
+def test_an_indirect_question_under_a_wondering_verb_is_not_asserted(ex):
+    out = texts(ex, "I wonder what city I moved to when I was a kid.")
+    assert not any("moved what city" in p for p in out), out
+
+
+def test_a_wh_complement_under_a_KNOWING_verb_still_survives(ex):
+    """Narrow on purpose: the first version of the fix fired on any wh-word
+    and broke five tests asserting e235/e237's deliberate design."""
+    out = texts(ex, "I know what I want.")
+    assert out, out
+
+
+def test_a_short_verb_is_grounded_after_the_person_shift(ex):
+    """`_content` dropped 2-character tokens from the SOURCE side, so "go"
+    was invisible and the shift's "goes" read as invented content -- the
+    whole record was silently dropped."""
+    out = texts(ex, "I go to the gym on Tuesdays.")
+    assert any("goes to the gym" in p for p in out), out
