@@ -468,6 +468,11 @@ def mark_ceased(g, owner=None, order=None):
                     continue
                 nd["current"] = False
                 nd["superseded_by"] = cid
+                # e274: distinguishes "the USER said this ended" from "a
+                # heuristic decided this is stale". Only the former resolves a
+                # conflict -- a heuristic's guess is exactly what the conflict
+                # surface exists to ASK about instead of silently picking.
+                nd["ceased"] = True
                 ceased.append((nid, cid))
                 break
     return ceased

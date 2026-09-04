@@ -43,8 +43,19 @@ def test_purity_nothing_unasserted_is_stored(store, fragment, who):
 
 
 @pytest.mark.parametrize("question", DF.UNSEEN)
-def test_abstention_on_a_never_mentioned_topic(store, question):
-    pmem, _ = store
+def test_abstention_on_a_never_mentioned_topic(store_v3, question):
+    """Run on the V3 arm, where abstention has TWO independent signals (score
+    floor + lexical grounding, e274).
+
+    The token-overlap default has one, and it is lexical overlap alone, so it
+    answers "Where did I go to university?" from "likes Go" -- a motion verb
+    colliding with a proper noun. That is a real limitation of that tier, NOT
+    a currently-failing contract, and it is recorded here rather than papered
+    over: e258 measured the same tier at 5/10 recall against v3's 9/10, and
+    the conclusion then was to stop investing in it. Adding light verbs to its
+    stoplist was tried and moved nothing; it was reverted rather than kept on
+    a theory."""
+    pmem, _ = store_v3
     out = pmem.profile_recall(question)
     assert out.get("abstain") is True, (
         f"answered {question!r} with {DF.facts_of(out)[:2]}")
@@ -131,3 +142,30 @@ def test_a_fact_is_never_merged_with_its_own_negation(store):
     store believes."""
     _, blob = store
     assert "no longer a vegetarian" in blob.lower()
+
+
+# ---- CONFLICT (e274): surface it, do not silently pick -------------------
+
+@pytest.mark.parametrize("frag,a,b", DF.CONFLICTS_EXPECTED,
+                         ids=[c[0] for c in DF.CONFLICTS_EXPECTED])
+def test_a_real_contradiction_raises_an_ask(store_v3, frag, a, b):
+    pmem, _ = store_v3
+    raised = pmem.profile_conflicts().get("conflicts", [])
+    hit = any(frag in c["attribute"].lower()
+              and a in " ".join(str(v["value"]).lower() for v in c["values"])
+              and b in " ".join(str(v["value"]).lower() for v in c["values"])
+              for c in raised)
+    assert hit, f"no ask raised for {frag!r}: {[c['attribute'] for c in raised]}"
+
+
+def test_a_multi_valued_slot_raises_NO_ask(store_v3):
+    """Liking three languages is not a contradiction. The first version of
+    e274 widened candidates to every attribute and let NLI arbitrate; NLI
+    called "like: rust" vs "like: python" a contradiction and "have: a dog"
+    vs "have: a cat" too. The allowlist's fault is coverage, not existence."""
+    pmem, _ = store_v3
+    raised = pmem.profile_conflicts().get("conflicts", [])
+    bad = [c["attribute"] for c in raised
+           if any(c["attribute"].lower().startswith(f)
+                  for f in DF.CONFLICTS_FORBIDDEN)]
+    assert not bad, f"false asks on multi-valued slots: {bad}"

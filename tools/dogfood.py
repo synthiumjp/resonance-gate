@@ -131,6 +131,17 @@ SESSIONS = [
    "I sold the Volvo. I drive a Skoda now."},
   {"role": "user", "content":
    "I am no longer a vegetarian, I started eating fish again."}],
+
+ # --- session 6: a CONTRADICTION with no cessation -------------------------
+ # The user changes a single-valued fact without saying the old one ended.
+ # Nothing can decide this from the text, so the store must SURFACE it rather
+ # than silently pick -- which is what the server README promises.
+ [{"role": "user", "content":
+   "My main editor is Vim."},
+  {"role": "user", "content":
+   "My main editor is Emacs."},
+  {"role": "user", "content":
+   "I like Go. I like Rust. I like Python."}],
 ]
 
 # ---------------------------------------------------------------- the probes
@@ -220,6 +231,13 @@ CURRENCY = [
     ("What car do I drive?",    "Skoda",  "Volvo"),
     ("Am I a vegetarian?",      "no longer a vegetarian", "has been a vegetarian"),
 ]
+
+
+# CONFLICT: (attribute fragment, the two values that cannot both be current).
+# A single-valued slot with two live values must raise an ASK. A multi-valued
+# one must not -- liking three languages is not a contradiction.
+CONFLICTS_EXPECTED = [("editor", "vim", "emacs")]
+CONFLICTS_FORBIDDEN = ["like", "have"]
 
 
 def build(tmp, v3):
@@ -322,12 +340,37 @@ def main():
             cur_rows.append((q, fresh, stale, has_new, has_stale,
                              got[0][:58] if got else "-"))
 
+        # ---- CONFLICT
+        try:
+            raised = pmem.profile_conflicts().get("conflicts", [])
+        except Exception:
+            raised = []
+        by_attr = {c["attribute"].lower():
+                   {str(v["value"]).lower() for v in c["values"]}
+                   for c in raised}
+        conf_ok = 0
+        conf_rows = []
+        for frag, a, b in CONFLICTS_EXPECTED:
+            hit = any(frag in at and a in " ".join(vs) and b in " ".join(vs)
+                      for at, vs in by_attr.items())
+            conf_ok += hit
+            if not hit:
+                conf_rows.append(f"missing ask for {frag!r} ({a} vs {b})")
+        false_asks = [at for at in by_attr
+                      if any(at.startswith(f) for f in CONFLICTS_FORBIDDEN)]
+        for at in false_asks:
+            conf_rows.append(f"FALSE ask on multi-valued {at!r}: {by_attr[at]}")
+
         n = len(ANSWERABLE)
         print(f"\n  RECALL      rank-1 {r1}/{n}   in-pool {pool}/{n}")
         print(f"  ABSTENTION  {abst}/{len(UNSEEN)} honest on never-mentioned topics")
         print(f"  PURITY      {pure}/{len(MUST_NOT_ASSERT)} things nobody asserted stayed out of the store")
         print(f"  CURRENCY    {cur_new}/{len(CURRENCY)} return the CURRENT value   "
               f"{cur_stale}/{len(CURRENCY)} keep the stale one off rank 1")
+        print(f"  CONFLICT    {conf_ok}/{len(CONFLICTS_EXPECTED)} real contradictions raised an ask   "
+              f"{len(false_asks)} false asks on multi-valued slots")
+        for r in conf_rows:
+            print(f"      {r}")
         for q, fresh, stale, hn, hs, first in cur_rows:
             if hn and not hs:
                 continue

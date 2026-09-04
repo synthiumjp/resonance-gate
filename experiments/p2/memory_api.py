@@ -83,6 +83,40 @@ _RV3 = _LazyRV3()
 FLOOR_V3 = -7.83
 
 
+# e274: WHICH PREDICATE KEYS HOLD ONE VALUE.
+#
+# `consolidate.SINGLE_VALUED` is a 24-name allowlist written for the LLM
+# extractor's slot names. The deterministic parser keys on PREDICATES
+# (`live_in`, `favourite_language`), none of which are in it, so "I live in
+# Berlin" then "I live in Munich" raised no conflict at all -- two equally
+# current facts and an agent left to pick. The server README promises the
+# opposite: "surfaces conflicts rather than silently picking".
+#
+# The first attempt simply widened the candidate set to every attribute with
+# two distinct values and let NLI arbitrate. MEASURED, THAT IS WORSE: NLI
+# called "like: rust" vs "like: python" a contradiction, and "have: a dog" vs
+# "have: a cat". The allowlist was doing real work -- restricting NLI to slots
+# where substitution is the NORM. Its fault is coverage, not existence.
+#
+# So this extends it on a linguistic signal instead. A SUPERLATIVE or
+# uniqueness modifier ("favourite", "main", "primary", "current") makes a slot
+# single-valued by construction, and a handful of predicates are inherently
+# unique. Everything else keeps accumulating, which is correct: a person may
+# like many languages and own several pets.
+_UNIQUE_MODIFIERS = ("favourite", "favorite", "main", "primary", "current",
+                     "best", "preferred", "usual", "only")
+_UNIQUE_PREDS = frozenset((
+    "live_in", "born_in", "bear_in", "name", "age", "birth_date",
+    "marry_to", "married_to", "reside_in"))
+
+
+def _single_valued(attr):
+    a = (attr or "").lower()
+    if a in _UNIQUE_PREDS:
+        return True
+    return any(m in a for m in _UNIQUE_MODIFIERS)
+
+
 # e272: SUBJECT-POSITION RE-RANK.
 #
 # Every remaining recall miss on the product harness had the same shape: the
@@ -113,6 +147,31 @@ SUBJECT_BONUS = 6.0     # plateau on the dogfood set; below it, monotone
 # -- "you told me X, but that was before you told me Y" is a better answer
 # than silence.
 STALE_PENALTY = 20.0
+
+
+def _stem(t):
+    return t[:-1] if t.endswith("s") and len(t) > 4 else t
+
+
+def _grounded(query, hits):
+    """True when any candidate shares a content word with the question.
+
+    Deliberately weak: ONE shared token is enough. This is a floor on
+    evidence, not a relevance judgement -- the reranker does relevance. Its
+    job is to catch the case where the store simply holds nothing about the
+    topic and the reranker returned its least-bad guess anyway.
+    """
+    import re as _re
+    q = {_stem(t) for t in _re.findall(r"[a-z]+", (query or "").lower())
+         if t not in _RERANK_STOP and len(t) > 2}
+    if not q:
+        return True             # nothing to ground against; defer to the floor
+    for h in hits:
+        text = h.get("text") or f"{h.get('attr')} {h.get('value')}"
+        ts = {_stem(t) for t in _re.findall(r"[a-z]+", text.lower())}
+        if q & ts:
+            return True
+    return False
 
 
 def _subject_bonus(query, text, bonus=None):
@@ -290,6 +349,24 @@ class Memory:
         # was never shown to do.
         if not scored or max(sc for _, sc in scored) < floor:
             return self._abstain(query)
+        # e274: LEXICAL GROUNDING, a second and independent abstention signal.
+        #
+        # The score floor degrades as the store grows -- max-of-N rises with N
+        # -- and it does so silently. Measured on this store at 14 nodes the
+        # two populations separated cleanly (e260, 18/18); at 38 nodes nothing
+        # separates them cleanly and the best absolute cutoff costs one false
+        # answer in seven ("What is my favourite film?" -> "Alex Reyes likes
+        # Go"). A real store has thousands of nodes, so tuning the constant
+        # further would be fitting noise.
+        #
+        # Grounding does not degrade that way: if NO retrieved record shares a
+        # content word with the question, we hold no evidence about the topic,
+        # however the reranker scored it. Measured here: 7/7 unseen rejected,
+        # 19/20 answerable kept. Required TOGETHER with the floor, never
+        # instead of it -- two independent signals, both must pass.
+        if os.environ.get("RG_GROUNDING") != "0" and not _grounded(
+                query, [h for h, _ in scored[:3]]):
+            return self._abstain(query)
         kept = list(scored)
         # e272: reorder ONLY what already cleared the floor, then truncate.
         if rerank:
@@ -365,8 +442,20 @@ class Memory:
         #    narrative slots accumulate rather than substitute.
         chains = []
         by_attr = {}
+        # e274: candidate slots were restricted to C.SINGLE_VALUED, a 24-name
+        # allowlist that covers 0.2% of the rgx store (e251). The deterministic
+        # parser keys on PREDICATES (`live_in`, `favourite_language`), none of
+        # which are in it, so "I live in Berlin" then "I live in Munich" raised
+        # nothing at all -- two equally-current facts and an agent left to pick.
+        # The server README promises the opposite: "surfaces conflicts rather
+        # than silently picking".
+        #
+        # Any attribute holding two or more DISTINCT values is now a candidate;
+        # NLI remains the arbiter, which is what keeps the surface honest --
+        # "I like Go" and "I like Rust" are both true and NLI says so.
+        wide = os.environ.get("RG_CONFLICT_WIDE") != "0"
         for n in store:
-            if n["attr"] in C.SINGLE_VALUED:
+            if n["attr"] in C.SINGLE_VALUED or (wide and _single_valued(n["attr"])):
                 by_attr.setdefault(n["attr"], []).append(n)
         for attr, nodes in by_attr.items():
             # Only CORROBORATED values can raise a conflict. Without this the
@@ -377,7 +466,22 @@ class Memory:
             # single unconfirmed mention is not evidence of a change; it is
             # usually an extraction error, and the write-policy/quarantine
             # path is where those belong.
-            nodes = [n for n in nodes if n.get("n_mentions", 1) >= 2]
+            # The >=2 gate was calibrated against the LLM extractor, whose
+            # `location` slot held cafes, an OS name and a username -- 2,836
+            # asks on the owner profile. The deterministic parser keys on the
+            # predicate the user actually used, so a single mention is far more
+            # often a real statement than an extraction error, and a user
+            # states a self-fact ONCE (ledger P2). Re-measured rather than
+            # assumed: ledger 6c.
+            floor = 1 if wide else 2
+            # `ceased`, NOT `current is False`: a fact the USER said had ended
+            # is resolved and asking about it would be noise. A fact a
+            # HEURISTIC demoted is precisely what this surface exists to ask
+            # about -- filtering on `current` would let the heuristic silently
+            # pick, which is the behaviour the README promises we do not.
+            nodes = [n for n in nodes
+                     if n.get("n_mentions", 1) >= floor
+                     and not n.get("ceased")]
             nodes = sorted(nodes, key=lambda n: -n.get("n_mentions", 1))[:6]
             seen = set()
             for a, b in itertools.combinations(nodes, 2):

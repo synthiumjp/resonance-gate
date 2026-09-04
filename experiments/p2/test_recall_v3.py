@@ -184,3 +184,31 @@ def test_one_incidental_token_is_not_enough_to_promote():
 
 def test_the_bonus_needs_a_contentful_query():
     assert MA._subject_bonus("What is it?", "anything at all") == 0.0
+
+
+# ---- e274: grounding is a SECOND abstention signal, ANDed with the floor --
+
+def test_a_high_scoring_but_ungrounded_hit_abstains(monkeypatch, mem):
+    """The score floor degrades as the store grows (max-of-N rises with N);
+    grounding does not. If no candidate shares a content word with the
+    question, we hold no evidence about the topic however it was scored."""
+    _stub(monkeypatch, mem, [("a", 5.0)])          # well above the floor
+    assert mem.recall_v3("What is my favourite film?")["abstain"] is True
+
+
+def test_a_grounded_hit_is_returned(monkeypatch, mem):
+    _stub(monkeypatch, mem, [("a", -1.0)])
+    out = mem.recall_v3("What am I allergic to?")
+    assert out["abstain"] is False
+
+
+def test_grounding_can_be_switched_off(monkeypatch, mem):
+    _stub(monkeypatch, mem, [("a", 5.0)])
+    monkeypatch.setenv("RG_GROUNDING", "0")
+    assert mem.recall_v3("What is my favourite film?")["abstain"] is False
+
+
+def test_a_contentless_query_defers_to_the_floor(monkeypatch, mem):
+    """Nothing to ground against is not evidence of absence."""
+    _stub(monkeypatch, mem, [("a", -1.0)])
+    assert mem.recall_v3("What is it?")["abstain"] is False
