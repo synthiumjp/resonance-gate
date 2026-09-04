@@ -13582,3 +13582,50 @@ string.
 
 The empty cells are now visible rather than latent, which is the whole return
 on the structure.
+
+---
+
+## Entry 271 — 2026-09-04 (p2: filling the matrix found a hedge being erased. Four of five empty cells were already correct — which is what a matrix is for.)
+
+Filled the five cells e270 left visible. **Four documented behaviour that was
+already right**; an unfilled cell is an unknown, not a pass. The fifth found a
+real leak.
+
+### A fronted epistemic adverb was dropped
+
+    "Perhaps I will switch to Rust."  ->  "<owner> will switch to Rust"
+
+A plain future the speaker never asserted. `_fronted` drops a sentence-initial
+advmod outright on the reasoning that "Interestingly"/"However" carry no
+content for a memory record. True for a DISCOURSE adverb, **false for an
+EPISTEMIC one**, which changes the speaker's commitment — the same distinction
+CommitmentBank draws, arrived at from the other direction.
+
+Fixed by RE-PLACING rather than dropping: it becomes pre-verbal ("<owner>
+perhaps will switch to Rust") or folds into the copula ("<owner> possibly is a
+vegetarian"). Its sentence-initial capital is positional, not lexical, so
+e259's swap lower-cases it mid-record.
+
+**Second time in two entries the INVARIANCE row caught an operator handled in
+one phrasing and not another.** That is now its track record rather than its
+rationale.
+
+### A symmetry, not a rule
+
+    ASSISTANT  "When did you stop working at Perrin?"   -> asserts nothing
+    USER       "Since I moved to Albi, how do I ...?"   -> asserts "moved to Albi"
+
+Same tree shape, opposite disposition, decided by **role**. An assistant must
+not be able to write the user's memory by asking a loaded question; the user's
+own presupposition is theirs to make.
+
+| capability | MFT | DIR | OWED | INV |
+|---|---|---|---|---|
+| conditional | 4/4 | 6/6 | 2/2 | 5/5 |
+| factivity | 1/1 | 2/2 | 1/1 | 4/4 |
+| modal | 3/3 | 6/6 | 3/3 | 6/6 |
+| negation | 1/1 | 3/3 | 1/1 | 5/5 |
+| question | 7/7 | 8/8 | 1/1 | 4/4 |
+
+Suites 530. **Note what this session has NOT guarded: recall.** Fifteen entries
+on purity and refusal, and 7 of 20 recall probes still miss.
