@@ -45,6 +45,24 @@ _RULES = ("[MEMORY RULES] The facts above are corroborated from the user's own "
           "you: say you don't know rather than guessing.")
 
 
+def _rv3():
+    import retrieve_v3
+    return retrieve_v3
+
+
+class _LazyRV3:
+    def __getattr__(self, k):
+        return getattr(_rv3(), k)
+
+
+_RV3 = _LazyRV3()
+
+# Cross-encoder score below which recall_v3 abstains. PILOT VALUE (e258):
+# fitted on the same 18 dogfood questions it was scored on, so it is an
+# operating point to re-derive on held-out data, not a constant to trust.
+FLOOR_V3 = -7.7
+
+
 class Memory:
     """Read-side memory over the wired, corroborated profile."""
 
@@ -127,6 +145,83 @@ class Memory:
                # it ever being volunteered as the user's own memory.
                "hearsay": [self._fact(h["node"]) for h in r.get("hearsay", [])]}
         return out
+
+    def recall_v3(self, query, top_n=8, min_score=None):
+        """The product read path under RG_PROFILE_V3 (e258).
+
+        `recall()` seeds from `wire.match` -- token overlap between the query
+        and a node's attr+value tokens, widened by a fixed synonym table. That
+        is the retrieval the PRODUCT has always shipped. Retrieval v3 (BM25 u
+        dense bge-small, cross-encoder rerank) has been the measured champion
+        since e132 and was only ever wired into the benchmark QA path.
+
+        THE SCORE FLOOR IS NOT OPTIONAL. Wired without one, v3 answers every
+        question -- including every question about something never mentioned
+        (dogfood store, e258: abstention on 8 unseen topics went 8/8 -> 0/8,
+        and a garbage node ranked first for nearly all of them). Honest
+        abstention is the product, so v3 without a floor is a REGRESSION even
+        though its pool recall is far better. The floor restores it: the
+        cross-encoder's own score separates known from unseen (KNOWN median
+        -4.69, UNSEEN median -8.59 on that store).
+
+        `min_score` defaults to RG_PROFILE_V3_FLOOR, else FLOOR_V3. That
+        default was SELECTED ON THE SAME 18 QUESTIONS IT WAS SCORED ON --
+        it is a pilot operating point, not a validated constant, and it needs
+        a held-out set and the real harness before anyone quotes it.
+
+        Rank order is preserved across tiers. An earlier draft bucketed the
+        hits into asserted-then-unconfirmed, which threw away the reranker's
+        ordering and dropped rank-1 correctness from 7/10 to 1/10 -- the
+        retriever was fine and the wiring destroyed it.
+        """
+        nodes, prov = self.g.nodes, self.g.provisional
+        if not nodes and not prov:
+            return self._abstain(query)
+        floor = min_score
+        if floor is None:
+            env = os.environ.get("RG_PROFILE_V3_FLOOR")
+            floor = float(env) if env else FLOOR_V3
+        idx = self._index_v3()
+        scored = _RV3.retrieve_facts_v3(idx, query, k=120, dense_k=20,
+                                        top_n=top_n, with_scores=True)
+        kept = [(h, sc) for h, sc in scored if sc >= floor]
+        if not kept:
+            return self._abstain(query)
+        # rank order preserved; `tier` says which store a fact came from so a
+        # caller can still tell corroborated from single-mention.
+        facts, unconfirmed = [], []
+        for h, sc in kept:
+            nid = h.get("id")
+            if nid in nodes:
+                f = self._fact(nodes[nid])
+            elif nid in prov:
+                f = self._fact(prov[nid], provisional=True)
+            else:
+                continue
+            f["score"] = round(float(sc), 4)
+            facts.append(f)
+            if f.get("status") == "unconfirmed-single-mention":
+                unconfirmed.append(f)
+        if not facts:
+            return self._abstain(query)
+        return {"found": True, "abstain": False, "query": query,
+                "asserted": [f for f in facts if f not in unconfirmed],
+                "ranked": facts, "wired": [],
+                "unconfirmed": unconfirmed, "hearsay": [],
+                "retrieval": "v3", "floor": floor}
+
+    def _abstain(self, query):
+        return {"found": False, "abstain": True, "query": query,
+                "answer": "no stored fact matches -- never seen"}
+
+    def _index_v3(self):
+        """Cache one IndexV3 per memory state. Invalidated by node count --
+        every write path rebuilds the Memory object, so identity is enough."""
+        key = (len(self.g.nodes), len(self.g.provisional))
+        if getattr(self, "_v3_key", None) != key:
+            self._v3 = _RV3.IndexV3(self)
+            self._v3_key = key
+        return self._v3
 
     def profile(self, top=40):
         """The corroborated profile, most-evidenced first. Receipted."""

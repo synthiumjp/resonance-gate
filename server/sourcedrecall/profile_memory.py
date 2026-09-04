@@ -312,9 +312,18 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None):
 # --------------------------------------------------------------- the tools
 
 def profile_recall(query):
+    """RG_PROFILE_V3=1 routes the read through retrieval v3 (e258): the
+    champion retriever measured since e132, which until now only ever ran on
+    the benchmark QA path. The product shipped token overlap. Off by default
+    -- it loads two small local models (~150MB, non-generative) on first use,
+    so the zero-model request-path guarantee changes shape and that is the
+    caller's decision, not ours."""
     mem = _ensure_loaded()
     with _lock:
-        out = mem.recall(query)
+        if os.environ.get("RG_PROFILE_V3") == "1":
+            out = mem.recall_v3(query)
+        else:
+            out = mem.recall(query)
     out["source"] = _SOURCE
     return out
 
