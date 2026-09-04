@@ -666,6 +666,44 @@ def _relcl_swap(s, head):
     return {c.id: text for c in rels}
 
 
+# e267: SAME-TURN PRONOUN SUBJECTS with an owner-POSSESSED antecedent.
+# "My car is a Volvo. It is very reliable." stored the first clause and threw
+# the second away: `It` is a bare pronoun subject, which the walker refuses
+# (rightly -- rendering an unresolved antecedent misattributes it).
+#
+# Restricted to the ONLY case where the antecedent is unambiguous and the
+# rendering is honest:
+#   * same TURN (one speaker, adjacent sentences -- not cross-turn, where a
+#     wrong antecedent becomes a confident false memory, e262);
+#   * the antecedent is OWNER-POSSESSED ("my car"), so the resolved subject
+#     is "<owner>'s car" -- a fact about the user's world by construction;
+#   * EXACTLY ONE such antecedent is in scope. Two candidates decline.
+# A common-noun antecedent the owner merely mentioned ("the billing service")
+# is deliberately NOT in scope: resolving it produces a fact about a thing
+# rather than about the user, which is a change to what the store is FOR and
+# not a defect fix.
+_PRON_SUBJ = frozenset(("it", "they", "this", "that", "these", "those"))
+
+
+def _poss_antecedent(carry, subj):
+    """-> the carried owner-possessed noun for this pronoun subject, or None."""
+    if subj.upos != "PRON" or subj.text.lower() not in _PRON_SUBJ:
+        return None
+    if len(carry) != 1:
+        return None
+    return next(iter(carry.values()))
+
+
+def _collect_poss(s, allow, out):
+    """Record every owner-possessed nominal in this sentence, by head lemma."""
+    for w in s.w.values():
+        if w.upos not in ("NOUN", "PROPN"):
+            continue
+        if _poss(s, w, allow) is None:
+            continue
+        out[w.lemma.lower()] = w
+
+
 def _third_party_owner(s, head, subj, allow):
     """E (e240): the SUBJECT need not be the owner, or owner-possessed, for
     a clause to be about the owner's world -- "Susan's emotional
@@ -788,12 +826,15 @@ def extract_keyed(text, nlp, owner=None, role="user",
     allow = SECOND if second else FIRST
     out, seen = [], set()
 
+    poss_carry = {}          # e267: owner-possessed nominals seen so far
     for sent in nlp(text).sentences:
         s = _S(sent)
         # Stanza breaks sentences at terminal punctuation, so the "?" -- if
         # there is one -- is at the end. Allow for a trailing quote.
         is_q = any(w.text == "?" for w in sent.words[-3:])
         hedge = second and _hedge_sentence(s, sent)
+        sent_poss = {}
+        _collect_poss(s, allow, sent_poss)
         for head in sent.words:
             s._swap = {}
             if head.deprel not in CLAUSE_DEPS:
@@ -836,6 +877,13 @@ def extract_keyed(text, nlp, owner=None, role="user",
             cop = next(iter(s.children(head, ("cop",))), None)
             neg, negdrop = _negated(s, head)
             sp = _poss(s, subj, allow)
+            # e267: a bare pronoun subject with exactly ONE owner-possessed
+            # antecedent carried from an earlier sentence of THIS turn.
+            carried = None
+            if sp is None:
+                anc = _poss_antecedent(poss_carry, subj)
+                if anc is not None:
+                    carried = anc.text
             is_self = subj.text.lower() in allow
             fdrop, ftail = _fronted(s, head, subj)
             # e243, RULE 3: a NAMED third party as subject, with the owner
@@ -887,8 +935,10 @@ def extract_keyed(text, nlp, owner=None, role="user",
                     val_core, peri = val_full, set()
 
                 cform = _cop_form(s, head)
-                if sp is not None:                    # "my job is X"
-                    slot = s.text(subj, stop={sp.id}, owner=o, second=second)
+                if sp is not None or carried is not None:   # "my job is X"
+                    slot = (carried if carried is not None
+                            else s.text(subj, stop={sp.id}, owner=o,
+                                        second=second))
                     kind = "attr"
                     pred = _slug(slot)
                     npfx = "not " if neg else ""
@@ -1118,4 +1168,7 @@ def extract_keyed(text, nlp, owner=None, role="user",
                         value = _pronominalize(value, o, owner_pronoun,
                                                 owner_pronoun_obj)
                     out.append((body, kind, pred, value, evidential))
+        # e267_CARRY_UPDATE: only AFTER the whole sentence is walked, so a
+        # pronoun never resolves to a noun from its own sentence.
+        poss_carry.update(sent_poss)
     return out

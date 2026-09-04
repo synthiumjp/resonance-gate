@@ -840,3 +840,46 @@ def test_a_statement_before_a_question_still_extracts(ex):
     out = texts(ex, "You mentioned you work at Acme. Is that right?",
                 role="assistant")
     assert any("works at Acme" in p for p in out), out
+
+
+# ---- Q. same-turn pronoun subject, owner-possessed antecedent (e267) -----
+# "My car is a Volvo. It is very reliable." stored the first clause and threw
+# the second away -- a bare pronoun subject is refused, rightly, because
+# rendering an unresolved antecedent misattributes it. Restricted to the only
+# case where the antecedent is unambiguous AND the rendering is honest: same
+# TURN, OWNER-POSSESSED antecedent, EXACTLY ONE candidate.
+
+def test_a_pronoun_resolves_to_a_single_owner_possessed_antecedent(ex):
+    out = texts(ex, "My car is a Volvo. It is very reliable.")
+    assert any("Martin Mark's car is very reliable" in p for p in out), out
+
+
+def test_it_works_for_a_second_owner_possessed_noun(ex):
+    out = texts(ex, "My commute is long. It is exhausting.")
+    assert any("Martin Mark's commute is exhausting" in p for p in out), out
+
+
+def test_TWO_candidates_DECLINE_rather_than_guess(ex):
+    """A wrong antecedent is a confident false memory. Ambiguity must lose
+    the fact, never invent one."""
+    out = texts(ex, "My car is a Volvo. My bike is red. It is very reliable.")
+    assert not any("very reliable" in p for p in out), out
+
+
+def test_a_non_possessed_antecedent_stays_out_of_scope(ex):
+    """Resolving "the billing service" would make the store hold facts about
+    THINGS rather than about the user -- a change to what the store is for,
+    not a defect fix."""
+    out = texts(ex, "Mostly the billing service. It is written in Go.")
+    assert out == [], out
+
+
+def test_a_pronoun_cannot_resolve_within_its_own_sentence(ex):
+    """The carry updates only after a sentence is fully walked."""
+    out = texts(ex, "It is very reliable, my car.")
+    assert not any("car is very reliable" in p for p in out), out
+
+
+def test_the_first_sentence_is_unaffected(ex):
+    out = texts(ex, "My car is a Volvo. It is very reliable.")
+    assert any("Martin Mark's car is a Volvo" in p for p in out), out
