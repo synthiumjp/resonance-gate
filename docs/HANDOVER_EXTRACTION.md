@@ -93,7 +93,7 @@ paired comparisons but **not** against someone else's published table.
 
 ## 3. Immediate next steps, in order
 
-**Session close 2026-09-04 (e249–e260 committed).** The 2026-08-24 list that
+**Session close 2026-09-04 (e249–e263 committed).** The 2026-08-24 list that
 stood here is DONE and has been replaced: step 1 ("build labeled hearsay") was
 built in e249 and corrected in e250.
 
@@ -123,10 +123,26 @@ Resume here:
    myself. It has already earned its keep -- e258 and e259 both came from it
    and nine entries of benchmark decomposition surfaced neither -- but it is
    not evidence at this size.
-4. **The reranker attractor (open).** All 3 remaining rank-1 misses are
-   "Alex Reyes works from home" winning every work-related query because it
-   lexically contains the query word, outranking the employer and job-title
-   facts.
+4. **The reranker attractor -- THE remaining bottleneck, characterised
+   (e263).** The employer fact ranks BELOW 6th of 12 for "Where do I work?";
+   "Alex Reyes works from home" wins every work-related query because it
+   contains the query word. This is a SEMANTIC gap -- a small cross-encoder
+   cannot connect "work" to "is at Lumen Health". The two cheap theories are
+   already measured dead: indexing propositions (e260, negative twice) and
+   copular attribute keys (e260, the misses are ordering not collision).
+   Live options: a larger reranker (footprint cost), query expansion, or
+   accepting it because `profile_context()` with no query hands the agent
+   every fact anyway on a small store.
+5. **Cross-turn coref, measured and parked (e262).** 16.7% of a real store is
+   deictic-empty vs 0.74% of the benchmark. Those records are now REJECTED,
+   not resolved -- a wrong antecedent is a confident false memory. The
+   population is measured so a coref effort has a target.
+
+**e261-e263 changed the product surface:** `profile_context()` now renders
+single-mention facts labeled UNCONFIRMED (it was handing agents 2 of 14
+facts), deictic-empty records are dropped at write time, and the copular
+perfect keeps its aspect. The last two change parser output UNCONDITIONALLY --
+add them to the stale-artifact list in item 1.
 
 **Closed, do not reopen:** `RG_INDEX_TEXT` (indexing the proposition instead
 of `attr: value`) -- null in e258, null AND separation-destroying in e260.

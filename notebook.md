@@ -13156,3 +13156,120 @@ second time that warning held.
 Strictly better on every axis, abstention fully preserved. Suites 384.
 Still n=18 on one synthetic store, still no judge, and the floor is openly
 fitted to the same 18 points it is scored on.
+
+---
+
+## Entry 261 — 2026-09-04 (p2: the block an agent actually receives held 2 of 14 facts, and its own rules described a tier it never rendered.)
+
+`profile_context()` is the single most product-visible surface in the system —
+the text injected into an agent's prompt. It rendered **corroborated facts
+only**. People state a self-fact ONCE, so on the e258 dogfood store that is
+**2 lines out of 14 facts**. Employer, job title, manager, allergy, reason for
+leaving: all stored, all correctly rendered, none handed to the agent.
+
+Ledger P2 measured this as "88% of the store is provisional" and read it as a
+STORE-QUALITY problem to be solved with confidence estimation (PT-CSFT). It is
+also, and far more cheaply, a **RENDERING** problem. The facts exist; the block
+dropped them.
+
+| | before | after |
+|---|---|---|
+| no-query path | 2 lines | 14 lines, single-mentions labeled UNCONFIRMED |
+| `profile_context("Where do I work?")` | *"Nothing stored matches this topic"* | the stored facts |
+
+The query path used `recall()` even under `RG_PROFILE_V3`, so the injected
+block and an explicit `profile_recall` could disagree about what was stored,
+and the block's "nothing matches" was simply **false**. Both now route through
+one retriever.
+
+**The rules text was also wrong, and had been since the block was written.** It
+said "The facts above are corroborated" while the query path rendered
+UNCONFIRMED lines beside them — describing one tier for a block that shows two.
+Rewritten so every line states its own standing and the rules say what each
+standing MEANS, including an explicit instruction not to state an unconfirmed
+fact back as settled.
+
+`profile()` still returns corroborated facts only; provisional facts come from
+a separate `provisional_profile()` and are never merged in.
+
+---
+
+## Entry 262 — 2026-09-04 (p2: deictic-empty records are not stored. 16.7% of a real store, 0.74% of the benchmark — and the first version of the fix was a net regression.)
+
+"I like it a lot actually" stored `<owner> likes it a lot actually`: a fact
+whose complement is an unresolved referent. Not merely useless — it competes
+for retrieval rank against real facts and invites a reader to supply the
+missing referent, which is the one failure this system exists to prevent
+(§5l restated: an unresolvable referent is the same argument as a dropped
+negation).
+
+| corpus | deictic-empty |
+|---|---|
+| real conversational store | **3 / 18 (16.67%)** |
+| HaluMem u0 | 49 / 6661 (0.74%) |
+
+**A 23× gap — the e259 pattern a third time.** Natural speech is full of
+deixis; the benchmark's prose is not. The extraction memory's standing "coref
+is NOT a lever" was measured where this is 0.74%.
+
+**Cross-turn resolution is deliberately NOT attempted.** It is the better
+answer, and a wrong antecedent is a confident false memory — the worst outcome
+for an evidence layer. Rejecting is the honest floor, and the population is now
+measured so a future coref effort has a target rather than an intuition.
+
+### The first version was a net regression and the dogfood caught it
+
+Filtering on the VALUE alone dropped `<owner>'s manager Priya suggested it` —
+the only record in that store carrying the manager relation.
+
+| | before | value-only | + relationship exempt |
+|---|---|---|---|
+| rank-1 correct | 7/10 | **6/10** | 7/10 |
+| correct in top-3 | 8/10 | **7/10** | 8/10 |
+
+**A relationship's content is its PARTICIPANTS, not its complement.** Exempted.
+Net: neutral on the metric, two noise records gone from an 18-fact store. Ships
+on the e239 precedent.
+
+---
+
+## Entry 263 — 2026-09-04 (p2: the copular perfect lost its aspect, and it is part of why the employer fact never surfaces.)
+
+The copular branch drops every `aux` child along with the copula, then rebuilds
+the copula from a literal `"is"`. So a perfect came out present:
+
+    I've been at Lumen Health for about three years now
+      -> "<owner> IS at Lumen Health for about three years now"
+
+Not English — and with the aspect gone the record reads as a **location**
+rather than a **tenure**, which is part of why it never surfaces for "Where do
+I work?" (e260's open attractor). The VERBAL branch never had the bug: "I've
+worked at Acme" already rendered "has worked at Acme". Only the copular one,
+which reconstructs its copula instead of rendering it — the same family as
+e256's `bare_been`.
+
+`_cop_form` reaches all four copular render sites. Present tense and possessed
+slots are unchanged. Neutral on the dogfood retrieval metric, as a grammar fix
+should be; ships because it is correct.
+
+4.01% of u0 records carry a copular "is" beside a duration/since phrase. That
+is an **upper bound** on the affected population, not a measurement — many are
+legitimately present tense.
+
+### Where the arc stands
+
+The eight questions that opened e258, run through the product now:
+
+    5 of 8 ABSTAINED  ->  0 of 8 abstain
+
+Still wrong on two ("Where do I work?" and "What is my job title?" both return
+`works from home`), and one is wrong for a new reason: `Do I like Go?` returns
+"did not know Go" because e262 removed "likes it a lot actually" as
+deictic-empty. Both the old and new answers are unhelpful; the real one needs
+cross-turn coref, which e262 measured and deliberately parked.
+
+**The remaining bottleneck is singular and characterised:** the employer fact
+ranks below 6th of 12 for its own question, because a small cross-encoder
+cannot connect "work" to "is at Lumen Health". That is a semantic gap, not a
+key-design or rendering one — the two cheap theories are already measured dead
+(e260).
