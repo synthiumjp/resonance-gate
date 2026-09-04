@@ -83,6 +83,24 @@ SESSIONS = [
   {"role": "user", "content":
    "I got promoted to senior engineer last month. Also I'm allergic to "
    "peanuts, in case you ever suggest recipes."}],
+
+ # --- session 3: the cases e262-e267 fixed, which the corpus could not see --
+ # Every entry after e261 was measured against a corpus with no instance of
+ # what it changed, so the scorecard read flat while real defects were being
+ # closed. e264 named that hole once and it reopened three entries later, so
+ # extending this corpus is now part of landing a write-path fix.
+ [{"role": "user", "content":
+   "My car is a Volvo. It is very reliable, I have never had trouble with it."},
+  {"role": "assistant", "content":
+   "The support you've received from your network is a powerful force."},
+  {"role": "user", "content":
+   "My bike is red and my scooter is blue. It is my favourite."},
+  {"role": "user", "content":
+   "I've been a vegetarian since 2019."},
+  {"role": "user", "content":
+   "I use Postgres, which I learned last year."},
+  {"role": "user", "content":
+   "I like it a lot actually."}],
 ]
 
 # ---------------------------------------------------------------- the probes
@@ -100,11 +118,18 @@ ANSWERABLE = {
     "What am I learning?":              "Rust",
     "Do I drink coffee?":               "coffee",
     "Do I travel for work?":            "travel",
+    # e267: a pronoun resolved to a single owner-possessed antecedent
+    "What is my car like?":             "car is very reliable",
+    "What car do I drive?":             "car is a Volvo",
+    # e263: the copular perfect keeps its aspect
+    "Am I a vegetarian?":               "has been a vegetarian",
+    # e259: a relative pronoun resolved to its antecedent
+    "What did I learn last year?":      "Postgres",
 }
 
 # ABSTENTION: never mentioned by anyone, in any turn.
 UNSEEN = [
-    "What car do I drive?", "Do I have any children?", "What is my blood type?",
+    "Do I have any children?", "What is my blood type?",
     "Where did I go to university?", "What is my favourite film?",
     "What city was I born in?", "Do I have a dog?", "What is my salary?",
 ]
@@ -128,6 +153,18 @@ MUST_NOT_ASSERT = [
     # assistant RECALL about the user is hearsay, never the user's own fact
     ("plays the cello",         "assistant hearsay; user never said it"),
     ("play the cello",          "assistant hearsay; user never said it"),
+    # e267: TWO owner-possessed candidates -- must decline, never guess
+    ("bike is my favourite",    "ambiguous antecedent: bike or scooter"),
+    ("scooter is my favourite", "ambiguous antecedent: bike or scooter"),
+    ("bike is Alex",            "ambiguous antecedent, resolved anyway"),
+    ("scooter is Alex",         "ambiguous antecedent, resolved anyway"),
+    # e262: a complement that is only an unresolved referent
+    ("likes it a lot",          "deictic-empty; no referent in scope"),
+    # e264: an aux must agree after the person shift, never read "have"
+    ("Reyes have received",     "aux not agreed after the person shift"),
+    ("Reyes've",                "clitic survived the person shift"),
+    # e263: a copular perfect must not flatten to the present
+    ("Reyes is a vegetarian since", "copular perfect flattened to present"),
 ]
 
 
