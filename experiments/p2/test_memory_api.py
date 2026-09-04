@@ -130,9 +130,14 @@ def test_context_block_is_verbatim_and_rule_bearing():
     # unconfirmed singles are labeled in the block
     b3 = m.context_block(query="penicillin")
     assert "UNCONFIRMED (seen once)" in b3
-    # profile block
+    # profile block. e261: the header claims "corroborated" ONLY when the
+    # block is corroborated-only; this fixture has provisional facts too, and
+    # they are now rendered (labeled) instead of being dropped, so the header
+    # is the broader one and the single-mention facts must be present.
     b4 = m.context_block()
-    assert "corroborated profile" in b4 and "location: melbourne" in b4
+    assert b4.startswith("[MEMORY: profile of the user]")
+    assert "location: melbourne" in b4
+    assert "UNCONFIRMED (seen once)" in b4
 
 
 def test_conflicts_and_clarification():

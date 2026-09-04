@@ -38,9 +38,15 @@ if _HERE not in sys.path:
 
 from wire import WireGraph
 
-_RULES = ("[MEMORY RULES] The facts above are corroborated from the user's own "
-          "history; each shows its mention count. Lines marked UNCONFIRMED were "
-          "seen once and are not established -- if one matters, ask the user to "
+# e261: this said "The facts above are corroborated" while the block rendered
+# UNCONFIRMED lines beside them -- the rules described one tier and the block
+# showed two. Every line now states its own standing, and the rules say what
+# each standing means rather than asserting one for all of them.
+_RULES = ("[MEMORY RULES] Every line above is a stored fact from the user's own "
+          "history, never an inference. A line with a mention count is "
+          "CORROBORATED (the user said it more than once). A line marked "
+          "UNCONFIRMED was seen once and is not established -- you may use it, "
+          "but do not state it back as settled; if it matters, ask the user to "
           "confirm it. Anything about the user NOT listed here is UNKNOWN to "
           "you: say you don't know rather than guessing.")
 
@@ -343,31 +349,65 @@ class Memory:
     def context_block(self, query=None, max_facts=15):
         """Verbatim receipted block for prompt injection. If `query` is given,
         the block is the recall neighbourhood; else the top-of-profile. Empty
-        memory -> an explicit do-not-invent block, never silence."""
+        memory -> an explicit do-not-invent block, never silence.
+
+        e261: THE NO-QUERY PATH USED TO RENDER CORROBORATED FACTS ONLY. On a
+        real store that is almost nothing -- people state a self-fact ONCE, so
+        12 of 14 nodes in the e258 dogfood store were single-mention and an
+        agent was handed two lines out of fourteen facts. Ledger P2 measured
+        the same thing on the benchmark (88% provisional) and read it as a
+        store-quality problem; it is also, and more urgently, a RENDERING
+        problem, because this block is what an agent actually sees.
+
+        Single-mention facts are now rendered under an explicit UNCONFIRMED
+        label, after every corroborated line, within the same budget. That is
+        the honest shape: the block never claims corroboration it does not
+        have, and the RULES text already told the reader what an UNCONFIRMED
+        line means -- it referenced a category this path never emitted.
+        """
         lines = []
         if query is None:
             for f in self.profile(top=max_facts):
                 prop = f.get("text") or f"{f['attribute']}: {f['value']}"
                 lines.append(f"- {prop}  (x{f['mentions']} mentions)")
-            head = "[MEMORY: corroborated profile of the user]"
+            n_corr = len(lines)
+            for f in self.provisional_profile(top=max_facts - len(lines)):
+                prop = f.get("text") or f"{f['attribute']}: {f['value']}"
+                lines.append(f"- UNCONFIRMED (seen once): {prop}")
+            head = ("[MEMORY: profile of the user]" if len(lines) > n_corr
+                    else "[MEMORY: corroborated profile of the user]")
+            if not lines:
+                return ("[MEMORY] Nothing is stored about the user yet. Treat "
+                        "every detail about them as UNKNOWN: say so rather "
+                        "than guessing.\n" + _RULES)
         else:
-            r = self.recall(query)
+            r = self._recall_for_context(query)
             head = f"[MEMORY: stored facts relevant to the current message]"
             if not r["found"]:
                 return ("[MEMORY] Nothing stored matches this topic. The user's "
                         "details on this are UNKNOWN: say so rather than "
                         "guessing.\n" + _RULES)
-            for f in r["asserted"][:max_facts]:
-                prop = f.get("text") or f"{f['attribute']}: {f['value']}"
-                lines.append(f"- {prop}  (x{f['mentions']} mentions)")
-            for w in r["wired"][:max_facts - len(lines)]:
-                f = w["fact"]
-                prop = f.get("text") or f"{f['attribute']}: {f['value']}"
-                lines.append(f"- (linked) {prop}  "
-                             f"(x{f['mentions']}, co-occurs with the above)")
-            for f in r["unconfirmed"][:3]:
-                prop = f.get("text") or f"{f['attribute']}: {f['value']}"
-                lines.append(f"- UNCONFIRMED (seen once): {prop}")
+            if r.get("ranked"):
+                # v3 path: rank order is the evidence order, so it is kept.
+                # The tier still shows on every line.
+                for f in r["ranked"][:max_facts]:
+                    prop = f.get("text") or f"{f['attribute']}: {f['value']}"
+                    if f.get("status") == "unconfirmed-single-mention":
+                        lines.append(f"- UNCONFIRMED (seen once): {prop}")
+                    else:
+                        lines.append(f"- {prop}  (x{f['mentions']} mentions)")
+            else:
+                for f in r["asserted"][:max_facts]:
+                    prop = f.get("text") or f"{f['attribute']}: {f['value']}"
+                    lines.append(f"- {prop}  (x{f['mentions']} mentions)")
+                for w in r["wired"][:max_facts - len(lines)]:
+                    f = w["fact"]
+                    prop = f.get("text") or f"{f['attribute']}: {f['value']}"
+                    lines.append(f"- (linked) {prop}  "
+                                 f"(x{f['mentions']}, co-occurs with the above)")
+                for f in r["unconfirmed"][:max(0, max_facts - len(lines))]:
+                    prop = f.get("text") or f"{f['attribute']}: {f['value']}"
+                    lines.append(f"- UNCONFIRMED (seen once): {prop}")
         block = head + "\n" + "\n".join(lines)
         cf = [c for c in self.conflicts()
               if query is None or any(t in c["attribute"]
@@ -378,3 +418,20 @@ class Memory:
             for c in cf[:3]:
                 block += f"\n- {c['ask']}"
         return block + "\n" + _RULES
+
+    def _recall_for_context(self, query):
+        """Same retriever the product's recall uses, so the injected block and
+        an explicit profile_recall never disagree about what is stored."""
+        if os.environ.get("RG_PROFILE_V3") == "1":
+            return self.recall_v3(query)
+        return self.recall(query)
+
+    def provisional_profile(self, top=40):
+        """Single-mention facts, most-evidenced first. Receipted, and NEVER
+        merged into `profile()` -- a caller that asks for the corroborated
+        profile must keep getting exactly that."""
+        if top <= 0:
+            return []
+        nodes = sorted(self.g.provisional.values(),
+                       key=lambda d: -d["n_mentions"])
+        return [self._fact(nd, provisional=True) for nd in nodes[:top]]
