@@ -421,6 +421,39 @@ warning down twice. The lesson that generalises: an instrument built to
 localise a problem must be re-validated every time the system under it
 changes, and "my measurement says X" is a claim about the measurement first.
 
+## 5q. A measurement axis cannot find what you did not think to test (e276/e277)
+
+Six axes -- recall, abstention, PURITY, tiering, currency, conflict -- read
+**21/21 purity and 9/9 abstention** while SEVEN false-fact classes were live,
+two of them straight polarity inversions ("WilsonRobert is not a fan of jazz"
+stored as "IS a fan"). Ninety minutes of adversarial review by four reviewers
+found more than a full day of building those axes.
+
+The axes are not worthless -- they caught e258, e259, e273 and are now
+regression guards. But they encode what I ALREADY suspected. **Budget
+adversarial review as a recurring activity, not a one-off audit at the end.**
+
+Two corollaries, both earned the same evening:
+- **The strongest safety net was an OLD entry's tests.** Wiring the hearsay
+  tier into `recall_v3` instantly re-introduced e250's defect (hearsay
+  appended to unrelated questions); e250's tests caught it in minutes.
+- **A reviewer's finding is not automatically a defect.** One "indirect
+  question" fix broke five tests asserting e235/e237's deliberate design. One
+  adversarial example does not outrank tested intent.
+
+## 5r. A validated fix behind a flag nobody sets has not shipped (e277)
+
+e258 concluded "the product never got the retriever we validated" and then
+shipped v3 behind `RG_PROFILE_V3=1` -- set by no server startup path, no
+README, no install instruction. **e258's own conclusion was therefore still
+true after e258.** Same shape: `RG_HEARSAY` built an index `recall_v3` never
+read, so the flag was inert exactly where it mattered and worked on the
+benchmark.
+
+FIFTH and SIXTH instances of 5m. The rule to apply: after wiring a capability,
+**check what the DEFAULT does**, and check it from the surface a user actually
+calls -- not from the test that sets the flag.
+
 ## 6. Open, in priority order
 
 | # | Item | Status |

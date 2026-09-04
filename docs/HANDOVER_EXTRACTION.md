@@ -93,7 +93,7 @@ paired comparisons but **not** against someone else's published table.
 
 ## 3. Immediate next steps, in order
 
-**Session close 2026-09-04 (e249–e275 committed).** The 2026-08-24 list that
+**Session close 2026-09-04 (e249–e277 committed).** The 2026-08-24 list that
 stood here is DONE and has been replaced: step 1 ("build labeled hearsay") was
 built in e249 and corrected in e250.
 
@@ -107,6 +107,15 @@ question including all 8 about things never mentioned -- so it ships with an
 absolute cross-encoder score floor (`RG_PROFILE_V3=1`, `FLOOR_V3=-7.83`).
 
 Resume here:
+
+0. **THE CACHE IS REBUILT AND WAITING.** `qa_rgx/cache_u0_v5.jsonl.new`
+   (2329 lines, 10 min to build; old banked as `.bak_e247`). Diff of the two:
+   **41% of turns changed output**, raw fact count -17.5%, but by SLOT it is
+   635 gone / 756 added / 322 rephrased = **net +121**. Move `.new` into place
+   before running. The chain runs both arms in ~10.5h; e247's flags; parser as
+   the single variable. NOTE (e277 audit): `eval_rgp2.py` calls
+   `retrieve_facts_v3` directly, so the judged row measures the PARSER and
+   none of recall_v3's floor/grounding/rerank/stale-demotion.
 
 1. **The judged row. Eleven entries overdue.** Nothing has been judged since
    e247. e256's parser fixes AND e259's relative-pronoun fix are
