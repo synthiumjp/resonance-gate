@@ -1056,8 +1056,21 @@ def extract_keyed(text, nlp, owner=None, role="user",
                 # e269: render the resolved world entity in place of the
                 # pronoun, so the record reads "The billing service is
                 # written in Go" rather than "It is written in Go".
-                s._swap = dict(s._swap)
-                s._swap[subj.id] = world_carried
+                #
+                # e276 [FACT INVERSION]: this used to overwrite whatever
+                # _relcl_swap had just decided. "that" is both a RELPRON and a
+                # _PRON_SUBJ, so in a SUBJECT relative clause ("a disease THAT
+                # affects millions") the ids collide and the world entity
+                # replaced the correct antecedent:
+                #     "I met a doctor who treats a disease that affects
+                #      millions of people"  ->  "a doctor affects millions"
+                # e259's antecedent is read off THIS clause and always wins;
+                # the world carry is a fallback for an unresolved pronoun.
+                if subj.id not in s._swap:
+                    s._swap = dict(s._swap)
+                    s._swap[subj.id] = world_carried
+                else:
+                    world_carried = None
 
             # e269: whatever this clause links the owner to joins their world
             # and can be the SUBJECT of a later clause, in this turn or a
@@ -1162,7 +1175,21 @@ def extract_keyed(text, nlp, owner=None, role="user",
                     # dropping the aux orphaned "been" with no perfect
                     # auxiliary ("Networking always been a key part...").
                     # Put it back; `mark` (stray_complementizer) stays out.
-                    full_drop = (drop - {subj.id, cop.id}
+                    # e276 [FACT INVERSION]: `drop` carries `negdrop`, and
+                    # the two branches above compensate by re-adding a literal
+                    # "not " prefix (`npfx`). THIS branch renders the clause
+                    # as Stanza gave it and has no such prefix -- so the
+                    # negation was simply deleted and the store asserted the
+                    # OPPOSITE of what was said:
+                    #     "WilsonRobert is not a fan of jazz"
+                    #        -> "WilsonRobert is a fan of jazz"
+                    #     "The billing service is not written in Go"
+                    #        -> "The billing service is written in Go"
+                    # Ledger 5l calls this the worst class there is: the false
+                    # record shares every content word with the true one, so
+                    # no overlap metric can see it. Un-drop the negation here;
+                    # it renders in place, which is what this branch is for.
+                    full_drop = (drop - {subj.id, cop.id} - negdrop
                                  - {c.id for c in
                                     s.children(head, ("aux", "aux:pass"))})
                     body = s.text(head, stop=full_drop, owner=o, second=second)
@@ -1186,7 +1213,14 @@ def extract_keyed(text, nlp, owner=None, role="user",
                         full_drop = {c.id for c in s.children(head, SEPARATE)}
                         full_drop |= {c.id for c in
                                       s.children(head, ("mark",))}  # stray_complementizer
-                        full_drop |= negdrop | fdrop
+                        # e276 [FACT INVERSION]: negdrop was here too, with
+                        # no `npfx` to compensate -- same defect as the
+                        # copular branch above, on the passive/verbal path:
+                        #   "The billing service is not written in Go"
+                        #      -> "The billing service is written in Go"
+                        # This branch renders the clause verbatim, so the
+                        # negation must stay in it.
+                        full_drop |= fdrop
                         body = s.text(head, stop=full_drop, owner=o, second=second)
                         tail = " ".join(s.text(c, owner=o, second=second)
                                          for c in sorted(args, key=lambda c: c.id))

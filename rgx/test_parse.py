@@ -950,3 +950,52 @@ def test_the_world_can_be_switched_off(ex, monkeypatch):
     monkeypatch.setenv("RG_WORLD", "0")
     out = texts(ex, "I work on the billing service. It is written in Go.")
     assert not any("written in Go" in p for p in out), out
+
+
+# ---- S. FACT INVERSION regressions, found by adversarial review (e276) ----
+# Two independent reviewers found the same class in the same region: a clause
+# whose subject is a third party or a world entity lost its NEGATION, so the
+# store asserted the OPPOSITE of what was said. Ledger 5l names this the worst
+# class there is -- the false record shares every content word with the true
+# one, so no overlap metric can see it, and the six-axis product harness
+# scored 21/21 on purity while this was live.
+
+def test_third_party_copular_negation_survives(ex):
+    out = texts(ex, "WilsonRobert is not a fan of jazz.")
+    assert any("is not a fan" in p for p in out), out
+    assert not any("WilsonRobert is a fan" in p for p in out), out
+
+
+def test_third_party_verbal_negation_survives(ex):
+    out = texts(ex, "WilsonRobert does not like jazz.")
+    assert any("does not like jazz" in p for p in out), out
+
+
+def test_world_subject_passive_negation_survives(ex):
+    ex.reset_world()
+    ex.extract_turn("I work on the billing service.", role="user")
+    out = [r.text for r in ex.extract_turn(
+        "The billing service is not written in Go.", role="user")]
+    ex.reset_world()
+    assert any("is not written in Go" in p for p in out), out
+    assert not any(p.endswith("is written in Go") for p in out), out
+
+
+def test_the_positive_form_is_unaffected(ex):
+    ex.reset_world()
+    ex.extract_turn("I work on the billing service.", role="user")
+    out = [r.text for r in ex.extract_turn(
+        "The billing service is written in Go.", role="user")]
+    ex.reset_world()
+    assert any("is written in Go" in p for p in out), out
+
+
+def test_a_relative_pronoun_antecedent_beats_the_world_carry(ex):
+    """"that" is both a RELPRON and a _PRON_SUBJ, so in a SUBJECT relative
+    clause the ids collided and e269's world entity overwrote e259's correct
+    antecedent: "a disease that affects millions" became "a doctor affects
+    millions". The antecedent is read off THIS clause and always wins."""
+    out = texts(ex, "I met a doctor who treats a disease that affects "
+                    "millions of people.")
+    assert any("a disease affects millions" in p for p in out), out
+    assert not any("a doctor affects millions" in p for p in out), out
