@@ -13743,3 +13743,131 @@ so there the probe would measure the retriever, not currency.
 Third probe of mine invalidated by my own corpus extension (e268, e272, e273).
 It is not carelessness: **a recall needle names a fact, and facts change.** It
 is a maintenance obligation of the harness, not a surprise each time.
+
+---
+
+## Entry 274 — 2026-09-04 (p2: a CONFLICT axis — and the abstention floor turns out to DEGRADE AS THE STORE GROWS.)
+
+The server README promises the store "surfaces conflicts rather than silently
+picking". **It did not.** "I live in Berlin" then "I live in Munich" produced
+two equally-current facts, no ask, and an agent left to choose.
+
+Cause: conflict candidates were restricted to `consolidate.SINGLE_VALUED`, a
+24-name allowlist written for the LLM extractor's slot names. The deterministic
+parser keys on PREDICATES (`live_in`, `favourite_language`) — none are in it.
+
+### The obvious fix is worse, and measuring said so
+
+Widening candidates to every attribute with two distinct values and letting NLI
+arbitrate produced false asks immediately: **NLI calls "like: rust" vs "like:
+python" a contradiction**, and "have: a dog" vs "have: a cat". The allowlist was
+doing real work — restricting NLI to slots where substitution is the NORM. Its
+fault is coverage, not existence.
+
+Extended on a **linguistic** signal instead: a superlative or uniqueness
+modifier ("favourite", "main", "primary", "current", "only") makes a slot
+single-valued by construction, plus a few inherently-unique predicates.
+Everything else accumulates, which is correct — a person may like many
+languages.
+
+Also corrected mid-build: I first filtered conflict candidates on
+`current is not False`, which let CURRENCY **silently resolve what the conflict
+surface exists to ASK about**. Now filtered on `ceased` — what the USER said
+ended is resolved; what a HEURISTIC demoted is exactly what should be asked.
+
+### The bigger finding
+
+Adding session 6 grew the store 14 → 38 nodes and abstention fell 7/7 → 6/7:
+*"What is my favourite film?"* answered *"Alex Reyes likes Go"*.
+
+| separator | 14 nodes | 38 nodes |
+|---|---|---|
+| absolute top-1 | **18/18 CLEAN** | 26/27, no clean split |
+| top1 − median | 16/18 | 25/27 |
+| top1 − 2nd | 16/18 | 24/27 |
+
+**max-of-N rises with N.** e260's clean separation was a property of a SMALL
+store, and I would have gone on trusting it. Tuning the constant further would
+be fitting noise — a real store has thousands of nodes.
+
+So abstention now needs **two independent signals, ANDed**: the score floor,
+plus LEXICAL GROUNDING. If no retrieved record shares a content word with the
+question, we hold no evidence about the topic however it scored. Grounding does
+not degrade with size.
+
+**The cost is real and is not buried:** "What is my job title?" abstained,
+because "title" appears nowhere in "is a backend engineer there". One true
+answer lost to prevent one false one.
+
+One fix tried and REVERTED: light verbs in the token-overlap stoplist, to stop
+"go to university" matching "likes Go". It moved nothing, so it went.
+
+---
+
+## Entry 275 — 2026-09-04 (p2: paraphrase grounding — and FIVE of the failures I had been chasing were my own stale probes.)
+
+JP: *"it needs to be usable."* The two most basic questions a memory should
+answer were both failing. **One of them was failing because of a probe I
+wrote.**
+
+### "Where do I work?" was never a semantic limit
+
+I called that question an unfixable semantic gap for **six entries**. e273 made
+the user LEAVE Lumen Health; I never updated the needle. The store correctly
+answers *"works at Acme now"* and the harness reported a miss.
+
+Same class, five times: the car (e268), the vegetarian (e273), the dog, the
+employer, this. So I fixed the CLASS. `check_probes()` refuses to let the
+scorecard be read while a recall needle names a value CURRENCY lists as
+superseded, or an UNSEEN question names something the corpus talks about.
+
+Its first run flagged two of **its own** false alarms — "blood TYPE",
+"FAVOURITE film", generic question nouns rather than topics. Tightened: a
+self-check that cries wolf gets ignored, which is worse than none.
+
+### Lexical grounding rejects paraphrase, which is what real questions are
+
+e274's gate abstained on "What is my role at work?" because it shares no
+content word with "is a backend engineer there". The corpus had exactly ONE
+such case, so lexical-only looked almost free — **a corpus weakness read as
+evidence.** With six paraphrase questions added:
+
+| | dense cosine |
+|---|---|
+| answerable, not lexically grounded | 0.639 – 0.748 |
+| never mentioned | 0.506 – 0.600 |
+
+Grounding is now LEXICAL **or** DENSE (≥ 0.62). The lexical route is kept, not
+replaced: two cheap independent signals degrade more gracefully than one tuned
+constant, which is e274's whole lesson applied to itself.
+
+### One probe was MISFILED, not stale
+
+"What is my partner's job?" sat in UNSEEN, which the file defines as "never
+mentioned by anyone" — but the partner IS mentioned. It tests ATTRIBUTE-level
+abstention (known entity, unknown attribute), a real and different property.
+Counting it as abstention made that number mean two things at once. Moved to
+`PARTIAL_KNOWLEDGE`, documented rather than deleted.
+
+| axis | |
+|---|---|
+| RECALL | 17/20 → **19/26** rank-1, 18/20 → **24/26** in pool |
+| ABSTENTION | 9/9 |
+| PURITY | 21/21 |
+| CURRENCY | 3/3, 3/3 |
+| CONFLICT | 1/1, 0 false asks |
+
+Two genuine gaps remain, both pure paraphrase: "Do I own any pets?" (store says
+dog and cat) and "How do I commute?" (store says works from home).
+
+### The thing to record, because it is about how I work
+
+**Five of the failures I chased this session were my instrument, not the
+system.** I built probes fast to localise problems and then trusted their
+counts — precisely what ledger §4 warns about, done five times in one session
+after writing the warning down twice. The store has been better than my
+measurements said for several entries.
+
+The honest read of today: **the product improved less than the scorecard
+movement suggests, and was better than it looked to begin with.** The
+self-check is the structural answer; the habit it guards against is mine.
