@@ -79,3 +79,55 @@ def test_a_causal_clause_keeps_its_reason(store):
     dropped."""
     _, blob = store
     assert "commute" in blob.lower(), blob
+
+
+# ---- CURRENCY (e273): a LIVING memory must supersede ---------------------
+# These run on the V3 arm. Not to flatter them: the token-overlap default
+# cannot RETRIEVE these facts at all (e258 measured it at 5/10 against v3's
+# 9/10), so on that path there is nothing to order and the probe would be
+# measuring the retriever, not currency. The demotion itself is implemented on
+# BOTH paths -- a superseded fact ranks last wherever it surfaces.
+
+
+@pytest.fixture(scope="module")
+def store_v3():
+    tmp = tempfile.mkdtemp(prefix="rg-dogfood-v3-")
+    try:
+        pmem = DF.build(tmp, v3=True)
+        pmem.profile_status()
+        mem = pmem._state["mem"]
+        nodes = list(mem.g.nodes.values()) + list(mem.g.provisional.values())
+        yield pmem, " || ".join((d.get("text") or "") for d in nodes)
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+@pytest.mark.parametrize("q,fresh,stale", DF.CURRENCY,
+                         ids=[c[0] for c in DF.CURRENCY])
+def test_the_current_value_is_returned(store_v3, q, fresh, stale):
+    pmem, _ = store_v3
+    got = DF.facts_of(pmem.profile_recall(q))
+    assert any(fresh.lower() in g.lower() for g in got[:3]), (
+        f"{q!r} did not return the current value {fresh!r}: {got[:3]}")
+
+
+@pytest.mark.parametrize("q,fresh,stale", DF.CURRENCY,
+                         ids=[c[0] for c in DF.CURRENCY])
+def test_the_stale_value_is_not_returned_first(store_v3, q, fresh, stale):
+    """Demoted, never hidden: a receipt is permanent and "you told me X, then
+    Y" beats silence. What must never happen is the stale value coming back
+    FIRST, as though it still held."""
+    pmem, _ = store_v3
+    got = DF.facts_of(pmem.profile_recall(q))
+    assert not (got and stale.lower() in got[0].lower()), (
+        f"{q!r} returned the superseded {stale!r} first: {got[0]}")
+
+
+def test_a_fact_is_never_merged_with_its_own_negation(store):
+    """e273: `_cluster` merges values by token overlap, so "a vegetarian" and
+    "no longer a vegetarian" scored 1.0 and merged -- with the POSITIVE
+    winning the label because it had more mentions. Ledger 5l recorded this
+    about instruments; the clusterer is the same algorithm deciding what the
+    store believes."""
+    _, blob = store
+    assert "no longer a vegetarian" in blob.lower()

@@ -124,6 +124,9 @@ def _build():
         _conversations_path(), min_mentions=2)
     g = WireGraph.from_facts(facts, n_convs=n_convs, provisional=prov,
                               hearsay=hearsay)
+    import currency as _CU          # e273: read the user's own cessations
+    if os.environ.get("RG_CESSATION") != "0":
+        _CU.mark_ceased(g, order={c: i for i, c in enumerate(titles or {})})
     return Memory(g, titles), n_uncached
 
 

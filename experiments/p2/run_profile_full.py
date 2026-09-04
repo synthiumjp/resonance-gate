@@ -195,6 +195,21 @@ def load_stream_and_titles(path):
     return stream, titles
 
 
+# e273: markers that flip or cancel a value. Read off the RAW string, not the
+# token set, because the stopword list removes exactly the words that carry
+# polarity ("no", "not").
+_NEG_MARKERS = (" not ", "n't", " no ", " never ", "no longer", "not any more",
+                "not anymore", " former", " ex-", "used to", " stopped ",
+                " quit ", " nor ")
+
+
+def _polarity(val):
+    """-> 1 for a plain value, 0 for one carrying a negation/cessation marker.
+    Two values of different polarity are DIFFERENT facts and never merge."""
+    v = f" {(val or '').lower().strip()} "
+    return 0 if any(m in v for m in _NEG_MARKERS) else 1
+
+
 def _cluster(entries, trace=False):
     """Merge one slot's values by content-token overlap; sum mentions and receipts.
     entries: {value: {"n": int, "recs": [(date, uuid)]}}. Returns list of dicts.
@@ -232,8 +247,20 @@ def _cluster(entries, trace=False):
     for val, d in items:
         toks = {t for t in re.findall(r"[a-z0-9]+", val.lower())
                 if t not in _STOP and len(t) > 1}
+        pol = _polarity(val)
         placed = False
         for ci, cl in enumerate(clusters):
+            # e273: NEVER merge across polarity. "a vegetarian" and "no longer
+            # a vegetarian" share every content token, so the overlap test
+            # scores them 1.0 and merges them -- and the positive wins the
+            # label because it has more mentions. The user said they had
+            # STOPPED and the store kept the opposite.
+            #
+            # Ledger 5l ("token overlap cannot see a negation") recorded this
+            # about INSTRUMENTS. Nobody checked the clusterer, which is the
+            # same algorithm deciding what the store believes.
+            if cl["pol"] != pol:
+                continue
             smaller = min(len(toks), len(cl["core"])) or 1
             if len(toks & cl["core"]) / smaller >= 0.5:
                 cl["n"] += d["n"]
@@ -255,7 +282,8 @@ def _cluster(entries, trace=False):
             # grow with every merge (the exact snowball this fix exists to
             # prevent). set(toks) copies.
             clusters.append({"label": val, "n": d["n"], "toks": set(toks),
-                             "core": set(toks), "recs": list(d["recs"]),
+                             "core": set(toks), "pol": pol,
+                             "recs": list(d["recs"]),
                              # entry 244: keep the FIRST mention's "text"
                              # (the highest-n variant, since items are
                              # processed in that order) -- not overwritten

@@ -371,3 +371,103 @@ def mark_current(nodes):
                 winner["supersedes"].append(nd.get("text") or nd.get("value"))
                 n += 1
     return n
+
+
+# ---------------------------------------------------------------------------
+# e273: CESSATION. The user says when something ENDS, and nobody was listening.
+#
+# `mark_current` gates on SINGLE_VALUED, a 24-name allowlist that covers 0.2%
+# of the rgx store (e251), so on the product path essentially nothing is ever
+# marked stale. The product harness makes the consequence visible: "I sold the
+# Volvo. I drive a Skoda now." and "What car do I drive?" still answers Volvo.
+#
+# But the user TOLD us. "I left Lumen Health", "I sold the Volvo", "I am no
+# longer a vegetarian" are cessation statements, and the deterministic parser
+# already extracts them cleanly (pred=leave val="Lumen Health"). This reads
+# that signal instead of inferring one -- evidence, not a heuristic about
+# recency.
+#
+# What it does NOT do is delete anything. A receipt is permanent; a stale fact
+# stays in the store, marked, so it can still be quoted with its date. Hiding
+# it would be the same class of dishonesty as inventing one.
+
+CESSATION_PREDS = frozenset((
+    "leave", "quit", "sell", "stop", "end", "cancel", "resign", "drop",
+    "abandon", "discontinue", "unsubscribe", "delete", "retire"))
+
+_CESSATION_PHRASES = ("no longer", "not any more", "not anymore",
+                      "used to", "no more")
+
+_NOISE = frozenset("""
+a an the my your his her their its this that these those of at in on for to
+and or but not no longer any more anymore now last month year week job
+""".split())
+
+
+def _content(text):
+    import re
+    return {t for t in re.findall(r"[a-z0-9]+", (text or "").lower())
+            if t not in _NOISE and len(t) > 2}
+
+
+def _latest(nd, order=None):
+    """Latest mention, as an ORDINAL when conversation order is known.
+
+    Dates alone are not enough: a user can state a fact and supersede it in
+    the same day, which is exactly what happens in one sitting with an
+    assistant, and `convs` then gives both nodes the same string. `order`
+    maps conversation id -> ingestion ordinal, which is a real sequence.
+    """
+    convs = nd.get("convs", {}) or {}
+    if order:
+        ords = [order[c] for c in convs if c in order]
+        if ords:
+            return max(ords)
+    ds = sorted(convs.values())
+    return ds[-1] if ds else ""
+
+
+def mark_ceased(g, owner=None, order=None):
+    """Mark nodes a later cessation statement has ended. Returns the list of
+    (ceased_node_id, cessation_node_id) pairs it set, for the caller to log.
+
+    Deliberately conservative:
+      * the cessation record must be strictly LATER than the node it ends;
+      * EVERY content token of the cessation's object must appear in the
+        node's text, so "sold the Volvo" ends "car is a Volvo" and not
+        "bike is red";
+      * a node is never ended by itself, and never by another cessation.
+    """
+    stores = [g.nodes, g.provisional]
+    ceased = []
+    cess = []
+    for st in stores:
+        for nid, nd in st.items():
+            attr = (nd.get("attr") or "").lower()
+            val = (nd.get("value") or "").lower()
+            text = (nd.get("text") or "").lower()
+            is_cess = (attr.split("_")[0] in CESSATION_PREDS
+                       or any(p in val for p in _CESSATION_PHRASES)
+                       or any(p in text for p in _CESSATION_PHRASES))
+            if is_cess:
+                toks = _content(nd.get("value")) or _content(nd.get("text"))
+                if toks:
+                    cess.append((nid, nd, toks, _latest(nd, order)))
+    if not cess:
+        return ceased
+    for st in stores:
+        for nid, nd in st.items():
+            ndate = _latest(nd, order)
+            hay = f"{nd.get('text') or ''} {nd.get('value') or ''}".lower()
+            for cid, cnd, toks, cdate in cess:
+                if cid == nid:
+                    continue
+                if cdate == "" or ndate == "" or ndate >= cdate:
+                    continue
+                if not toks.issubset(_content(hay)):
+                    continue
+                nd["current"] = False
+                nd["superseded_by"] = cid
+                ceased.append((nid, cid))
+                break
+    return ceased

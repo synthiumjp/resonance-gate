@@ -108,6 +108,11 @@ what who where when which why how do does did is are was were am be been the
 a an my your our i me we us of in on at for to about know any there thing
 """.split())
 SUBJECT_BONUS = 6.0     # plateau on the dogfood set; below it, monotone
+# e273: how far a superseded fact drops. Large enough to lose to any current
+# fact that matched at all, small enough that a stale fact still beats nothing
+# -- "you told me X, but that was before you told me Y" is a better answer
+# than silence.
+STALE_PENALTY = 20.0
 
 
 def _subject_bonus(query, text, bonus=None):
@@ -123,6 +128,16 @@ def _subject_bonus(query, text, bonus=None):
     # TWO content tokens, not one: a single incidental match ("work" in "works
     # from home") is exactly the distractor this is meant to demote.
     return b * hits if hits >= 2 else 0.0
+
+
+def _mark_ceased(g, titles=None):
+    if os.environ.get("RG_CESSATION") == "0":
+        return
+    import currency
+    # `titles` is insertion-ordered by ingestion, which is the only real
+    # sequence available when several conversations share a date (e273).
+    order = {c: i for i, c in enumerate(titles or {})}
+    currency.mark_ceased(g, order=order or None)
 
 
 class Memory:
@@ -144,6 +159,7 @@ class Memory:
             conversations_path, min_mentions)
         g = WireGraph.from_facts(facts, n_convs=n_convs, provisional=prov,
                                  hearsay=hearsay)
+        _mark_ceased(g, titles)
         return cls(g, titles)
 
     def apply_corrections(self, corrections):
@@ -189,8 +205,15 @@ class Memory:
         if r.get("abstain"):
             return {"found": False, "abstain": True, "query": query,
                     "answer": "no stored fact matches -- never seen"}
+        # e273: a superseded fact ranks last on THIS path too. Currency is a
+        # correctness property -- "you told me X" when the user has since said
+        # otherwise is wrong regardless of which retriever found it -- so it
+        # cannot live only in recall_v3. Demoted, never dropped.
+        def _stale_last(nodes):
+            return sorted(nodes, key=lambda nd: nd.get("current") is False)
+
         out = {"found": True, "abstain": False, "query": query,
-               "asserted": [self._fact(nd) for nd in r["seeds"]],
+               "asserted": [self._fact(nd) for nd in _stale_last(r["seeds"])],
                "wired": [{"fact": self._fact(d["node"]),
                           "activation": round(d["activation"], 3),
                           "hops": d["hops"],
@@ -199,7 +222,9 @@ class Memory:
                                   for e in d["path"]]}
                          for d in r["neighbourhood"]],
                "unconfirmed": [self._fact(p["node"], provisional=True)
-                               for p in r.get("provisional", [])],
+                               for p in sorted(
+                                   r.get("provisional", []),
+                                   key=lambda p: p["node"].get("current") is False)],
                # entry 246: NOT surfaced in "asserted"/"unconfirmed" -- an
                # assistant claim about the user is neither a corroborated nor
                # an unconfirmed USER fact. Kept under its own key so a caller
@@ -268,8 +293,12 @@ class Memory:
         kept = list(scored)
         # e272: reorder ONLY what already cleared the floor, then truncate.
         if rerank:
-            kept.sort(key=lambda p: -(p[1] + _subject_bonus(
-                query, p[0].get("text") or "")))
+            # e273: a fact the user has since ENDED ranks below one that still
+            # holds. Demoted, never hidden -- the receipt is permanent and a
+            # caller can still see it, labeled, below the current answer.
+            kept.sort(key=lambda p: -(
+                p[1] + _subject_bonus(query, p[0].get("text") or "")
+                - (STALE_PENALTY if p[0].get("current") is False else 0.0)))
         kept = kept[:top_n]
         # rank order preserved; `tier` says which store a fact came from so a
         # caller can still tell corroborated from single-mention.

@@ -119,6 +119,18 @@ SESSIONS = [
   {"role": "user", "content":
    "My team owns the checkout flow. The checkout flow is the oldest code in "
    "the company."}],
+
+ # --- session 5: things CHANGE. The axis the harness could not see ---------
+ # Updating is the system's measured worst column (12.6% vs Zep 47.3%) and
+ # nothing here tested it. A memory that cannot update is not a LIVING memory,
+ # which is the whole product claim. Each fact below was asserted in an
+ # earlier session and is superseded here.
+ [{"role": "user", "content":
+   "I left Lumen Health last month. I work at Acme now."},
+  {"role": "user", "content":
+   "I sold the Volvo. I drive a Skoda now."},
+  {"role": "user", "content":
+   "I am no longer a vegetarian, I started eating fish again."}],
 ]
 
 # ---------------------------------------------------------------- the probes
@@ -138,9 +150,12 @@ ANSWERABLE = {
     "Do I travel for work?":            "travel",
     # e267: a pronoun resolved to a single owner-possessed antecedent
     "What is my car like?":             "car is very reliable",
-    "What car do I drive?":             "car is a Volvo",
+    "What car do I drive?":             "Skoda",
     # e263: the copular perfect keeps its aspect
-    "Am I a vegetarian?":               "has been a vegetarian",
+    # superseded in session 5 -- the CURRENT answer is the negative. Third
+    # time a corpus extension has invalidated one of my own probes (e268,
+    # e272, e273): a recall needle names a fact, and facts change.
+    "Am I a vegetarian?":               "no longer a vegetarian",
     # e259: a relative pronoun resolved to its antecedent
     "What did I learn last year?":      "Postgres",
     # --- the user's WORLD (session 4). People know their own facts; what
@@ -193,6 +208,17 @@ MUST_NOT_ASSERT = [
     ("Cats are independent",    "generic knowledge, nobody's world"),
     ("independent animals",     "generic knowledge, nobody's world"),
     ("several good databases",  "assistant generic, user never said it"),
+]
+
+
+# CURRENCY: (question, the value that is now TRUE, the value that is STALE).
+# The new value must be retrievable; the stale one must not be handed back as
+# though it still holds. Both may legitimately be in the store -- a receipt is
+# permanent -- so what is measured is what RECALL returns, not what is stored.
+CURRENCY = [
+    ("Where do I work?",        "Acme",   "Lumen Health"),
+    ("What car do I drive?",    "Skoda",  "Volvo"),
+    ("Am I a vegetarian?",      "no longer a vegetarian", "has been a vegetarian"),
 ]
 
 
@@ -279,10 +305,39 @@ def main():
                 impure.append((frag, who))
         pure = len(MUST_NOT_ASSERT) - len(impure)
 
+        # ---- CURRENCY
+        cur_new = cur_stale = 0
+        cur_rows = []
+        for q, fresh, stale in CURRENCY:
+            got = facts_of(pmem.profile_recall(q))
+            top3 = " || ".join(got[:3]).lower()
+            has_new = fresh.lower() in top3
+            # A superseded fact is DEMOTED, not hidden -- a receipt is
+            # permanent and "you told me X, then Y" is a better answer than
+            # silence. What must never happen is the stale value coming back
+            # FIRST, as though it still held.
+            has_stale = bool(got) and stale.lower() in got[0].lower()
+            cur_new += has_new
+            cur_stale += not has_stale
+            cur_rows.append((q, fresh, stale, has_new, has_stale,
+                             got[0][:58] if got else "-"))
+
         n = len(ANSWERABLE)
         print(f"\n  RECALL      rank-1 {r1}/{n}   in-pool {pool}/{n}")
         print(f"  ABSTENTION  {abst}/{len(UNSEEN)} honest on never-mentioned topics")
         print(f"  PURITY      {pure}/{len(MUST_NOT_ASSERT)} things nobody asserted stayed out of the store")
+        print(f"  CURRENCY    {cur_new}/{len(CURRENCY)} return the CURRENT value   "
+              f"{cur_stale}/{len(CURRENCY)} keep the stale one off rank 1")
+        for q, fresh, stale, hn, hs, first in cur_rows:
+            if hn and not hs:
+                continue
+            flag = []
+            if not hn:
+                flag.append(f"missing {fresh!r}")
+            if hs:
+                flag.append(f"STALE {stale!r} returned FIRST")
+            print(f"      {q:28s} {'; '.join(flag)}")
+            print(f"          top: {first}")
         if args.verbose or misses:
             print("\n  recall misses:")
             for q, needle, first in misses:
