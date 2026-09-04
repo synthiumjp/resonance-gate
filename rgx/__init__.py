@@ -104,7 +104,8 @@ class Extractor:
                 owner_pronoun=self.owner_pronoun,
                 owner_pronoun_obj=self.owner_pronoun_obj):
             if self.check:
-                ok, _why = C.prefilter(prop, text, self.owner_name)
+                ok, _why = C.prefilter(prop, text, self.owner_name,
+                                       value=val, kind=kind)
                 if not ok:
                     continue
             out.append(Record(text=prop, kind=kind, session=session,

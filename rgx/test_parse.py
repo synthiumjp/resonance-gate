@@ -689,3 +689,41 @@ def test_relative_pronoun_resolution_on_a_proper_noun(ex):
 def test_a_clause_with_no_relative_pronoun_is_unchanged(ex):
     out = texts(ex, "I bought a car, which was expensive.")
     assert any("bought a car" in p for p in out), out
+
+
+# ---- M. deictic-empty values are not stored (e262) -----------------------
+# "I like it a lot actually" stored "<owner> likes it a lot actually" -- a
+# fact whose complement is an unresolved referent. 16.67% of a real
+# conversational store, 0.71% of HaluMem u0. Cross-turn resolution is the
+# better answer and is deliberately NOT attempted: a wrong antecedent is a
+# confident false memory, the worst outcome for an evidence layer.
+
+# The `ex` fixture runs with check=False -- it exercises the PARSER. These
+# assert a FILTER, so they need the checked extractor the product uses.
+
+@pytest.fixture(scope="module")
+def checked(ex):
+    return Extractor(owner_name="Martin Mark", check=True, _nlp=ex._nlp)
+
+
+def test_a_deictic_only_complement_is_not_stored(checked):
+    assert texts(checked, "I like it a lot actually.") == []
+    assert texts(checked, "I don't miss it much.") == []
+
+
+def test_the_same_sentence_with_a_real_complement_is_kept(checked):
+    out = texts(checked, "I like Go a lot actually.")
+    assert any("likes Go" in p for p in out), out
+
+
+def test_a_relationship_survives_a_deictic_complement(checked):
+    """A relationship's content is its PARTICIPANTS. Rejecting these cost
+    more than the empty records were worth: the manager relation lived only
+    in a record whose value was "it"."""
+    out = texts(checked, "My manager Priya suggested it.")
+    assert any("manager Priya" in p for p in out), out
+
+
+def test_a_deictic_alongside_real_content_is_kept(checked):
+    out = texts(checked, "I am a backend engineer there.")
+    assert any("backend engineer" in p for p in out), out

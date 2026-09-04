@@ -83,11 +83,64 @@ def _stems(words):
     return out
 
 
-def prefilter(prop, turn, owner=None, min_grounded=0.85, min_content=1):
-    """-> (keep: bool, reason: str). No model call."""
+# e262: DEICTIC-EMPTY VALUES. "I like it a lot actually" stores "<owner> likes
+# it a lot actually" -- a fact whose complement is an unresolved referent. It
+# is not merely useless: it competes for retrieval rank against real facts,
+# and it invites a reader to supply the missing referent themselves, which is
+# the one failure this system exists to prevent (ledger 5l: a store that ships
+# the negation of a fact is worse than one that ships nothing; an unresolvable
+# referent is the same argument).
+#
+# Cross-turn resolution is the better answer and is NOT attempted here -- a
+# wrong antecedent produces a confident false memory, the worst possible
+# outcome for an evidence layer. Rejecting is the honest floor, and the
+# disposition is logged so a future coref effort has a measured target.
+#
+# Measured: 16.67% of a real conversational store, 0.71% of the HaluMem u0
+# corpus. The 23x gap is the e259 pattern again -- natural speech is full of
+# deixis and the benchmark's prose is not.
+_DEICTIC = frozenset("""
+it its this that these those them they there then here one ones
+""".split())
+
+# Words that cannot carry the content of a fact on their own.
+_VALUE_FILLER = _DEICTIC | frozenset("""
+a an the of to in on at for with and or but not no very much lot lots
+actually really quite too also now still just so more most well
+""".split())
+
+
+def _deictic_empty(value):
+    """True when a value's only content is an unresolved referent."""
+    v = str(value or "").lower()
+    toks = re.findall(r"[a-z']+", v)
+    if not toks:
+        return False
+    if not any(t in _DEICTIC for t in toks):
+        return False
+    return not [t for t in toks if t not in _VALUE_FILLER]
+
+
+def prefilter(prop, turn, owner=None, min_grounded=0.85, min_content=1,
+              value=None, kind=None):
+    """-> (keep: bool, reason: str). No model call.
+
+    `value` and `kind` are the record's complement and type when the caller
+    has them (rgx.Extractor does). Supplied, they enable the deictic-empty
+    check above; omitted, behaviour is exactly as before.
+
+    RELATIONSHIP records are EXEMPT, and measuring is what found that: a
+    relationship's content is its PARTICIPANTS, not its complement. "<owner>'s
+    manager Priya suggested it" has a deictic-empty value and is the only
+    record in its store carrying the manager relation. Rejecting it cost more
+    than every empty record it removed was worth -- rank-1 7/10 -> 6/10,
+    pool 9/10 -> 7/10 on the dogfood set."""
     text = str(prop).strip()
     if not text:
         return False, "empty"
+    if (value is not None and kind != "relationship"
+            and _deictic_empty(value)):
+        return False, "deictic-empty value (unresolved referent)"
 
     # "user" is a subject token too -- gold writes the name point as "User's
     # name is X", and counting "user" as content made it ungrounded.
