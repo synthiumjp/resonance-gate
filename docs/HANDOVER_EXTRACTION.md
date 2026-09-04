@@ -93,23 +93,56 @@ paired comparisons but **not** against someone else's published table.
 
 ## 3. Immediate next steps, in order
 
-**Session close 2026-08-24 (entries e240–e248 all committed; tree clean apart
-from the pre-existing encoder/.emb_cache.npz).** Resume here:
+**Session close 2026-09-04 (e249–e260 committed).** The 2026-08-24 list that
+stood here is DONE and has been replaced: step 1 ("build labeled hearsay") was
+built in e249 and corrected in e250.
 
-1. **Build labeled hearsay in the QA context** (NOT built — an agent was
-   stopped before starting): hearsay nodes (`mem.g.hearsay`) enter QA
-   retrieval labeled `HEARSAY (assistant said this; the user has not): <text>`,
-   appended after non-hearsay candidates; one composer-prompt sentence
-   (hearsay may support an answer only uncontradicted, never as the user's
-   own words); extraction artifact untouched; LLM arm byte-identical.
-2. **Then re-judge BOTH arms once** — that cycle measures labeled hearsay
-   AND the e248 context-renderer fix together (~11 h on the WSL GPU; chain
-   scripts to copy: `~/rg_private/halumem/qa_rerun2/chain.sh`).
-3. Backlog after that, in order: updating mechanism (evolution linking by
-   predicate key + proposition similarity — e245 says grammar can't do it),
-   plural agreement under owner possessives, u1 through the product path,
-   the frame patterns a surface regex sees but the dependency climb misses
-   (e242).
+**THE HEADLINE CHANGE: the PRODUCT read path was never given retrieval v3
+(e258).** Dogfooding the shipped MCP surface, 5 of 8 ordinary questions
+abstained -- including "Where do I work?" when the user said it in turn 1. The
+facts were in the store and correctly rendered; `profile_recall` was running
+token overlap while retrieval v3 (champion since e132) ran only on the
+benchmark QA path. Wiring it in NAIVELY is a regression -- it answers every
+question including all 8 about things never mentioned -- so it ships with an
+absolute cross-encoder score floor (`RG_PROFILE_V3=1`, `FLOOR_V3=-7.83`).
+
+Resume here:
+
+1. **The judged row. Eleven entries overdue.** Nothing has been judged since
+   e247. e256's parser fixes AND e259's relative-pronoun fix are
+   UNCONDITIONAL, so every banked artifact is stale and the backlog compounds
+   with each entry. Judge server `:8090` does not survive reboot (launch line
+   below); chain `~/rg_private/halumem/qa_rerun2/chain.sh`, ~11 h on the WSL
+   GPU. First variable: `RG_TEXT_LONGEST` (e255) -- +6.13pt gold coverage on a
+   SCREEN only, length-monotone biased, judged confirmation owed.
+2. **Re-derive the v3 floor on held-out questions.** -7.83 is openly fitted on
+   the same 18 dogfood questions it was scored on. What transfers is that an
+   ABSOLUTE floor on the cross-encoder score is the right mechanism (margin
+   variants split 16/18 with overlapping populations, e260) -- not the value.
+3. **A real product-quality set.** The dogfood harness is 18 questions I wrote
+   myself. It has already earned its keep -- e258 and e259 both came from it
+   and nine entries of benchmark decomposition surfaced neither -- but it is
+   not evidence at this size.
+4. **The reranker attractor (open).** All 3 remaining rank-1 misses are
+   "Alex Reyes works from home" winning every work-related query because it
+   lexically contains the query word, outranking the employer and job-title
+   facts.
+
+**Closed, do not reopen:** `RG_INDEX_TEXT` (indexing the proposition instead
+of `attr: value`) -- null in e258, null AND separation-destroying in e260.
+Copular attribute-key canonicalisation as a RETRIEVAL lever -- the misses it
+would target are reranker ordering, not key collision (e260, and e251 said so
+first).
+
+**Opt-in flags built but UNJUDGED:** `RG_HEARSAY`, `RG_TEXT_LONGEST`,
+`owner_pronoun`, `RG_PROFILE_V3` (+`RG_PROFILE_V3_FLOOR`), plus entity linking
+(e257, `rgx/entities.py`, 0.72% of records -- a product mechanism, NOT a
+benchmark lever: e220/e243 size it at ~0.6-2pt).
+
+**The method note that earned itself this arc:** e258 and e259 both came from
+USING the product, not from measuring it. e259 is 0.06% of the benchmark
+corpus and 14% of a real store. A defect can be negligible on HaluMem and
+dominant in the product.
 
 Judge server (:8090) does not survive reboot — launch line below. Stanza
 rebuilds go to the Mac (memory `mac-studio-worker`, use `.venv312`).

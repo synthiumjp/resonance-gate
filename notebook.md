@@ -12963,3 +12963,196 @@ Suites 77 rgx (from 62) + 267 p2. NOTE: the mechanical fixes change parser
 output unconditionally, so `cache_u0_v5.jsonl` is now stale relative to the
 parser -- that is deliberate, and tools/build_rgx_cache.py regenerates it.
 Nothing judged.
+
+---
+
+## Entry 257 — 2026-09-04 (p2: a person registry with receipts, and the instrument that sizes it at 0.72% of records. The unique-name gate I proposed stealing fires ZERO times.)
+
+Read an external system's method section for a technique worth taking:
+Codebase-Memory (arXiv:2603.27277 §3.4) resolves a call site to a definition
+through a prioritised cascade of strategies, each carrying its own confidence,
+falling back to fuzzy string similarity. Mention → entity is the same shape as
+call-site → definition, and entity resolution has been owed since e243.
+
+**Shape taken, evidence not.** That paper gives no ablation and no precision
+number for its cascade; the "strategies 1–3 resolve ~80% of calls" line is an
+unsourced observation. So `rgx/entities.py` borrows the architecture and
+measures its own.
+
+**Where we deliberately stop.** Their strategies 5 (suffix, 0.55) and 6 (fuzzy,
+0.30–0.40) GUESS when nothing structured matches. A wrong person link renders a
+fact the user never stated, which is the one thing this system exists not to
+do. Ours declines and logs the decline, so the population that would need
+guessing is measurable rather than assumed.
+
+### The instrument refuted the proposal that motivated it
+
+u0, 6661 records, `tools/entity_disposition.py`:
+
+| strategy | fires | note |
+|---|---|---|
+| exact | 3 | |
+| alias | 79 | the CamelCase fold, `WilliamsJoshua` ≡ `Joshua` |
+| **unique** | **0** | **the gate I recommended stealing** |
+| **ambiguous** | **0** | **no disambiguation population exists** |
+| unknown | 302 | |
+| owner | 15,550 | **97.6% of all name-shaped mentions** |
+
+**48 of 6661 records rewritten (0.72%).** There are three people in this user's
+entire world. Their strategy 4 discriminates among candidates; with three
+distinct first names there is nothing to discriminate. All the work is done by
+the alias merge, which is closer to their strategy 2.
+
+Two findings that were not the question. The owner is 97.6% of mentions —
+e256's repeated-owner defect confirmed by an independent instrument. And the
+store CONTRADICTS ITSELF about one person: `ThomasSusan` is friend ×5 and
+colleague ×2. Left bare by default (`min_confidence=1.0`) rather than rendered
+under a relation the receipts disagree about.
+
+**Not a benchmark lever, and it must not be sold as one.** e220 measured entity
+linking at +0.6pt pooled; e243 sized the ceiling at ~2pt (27 of 575 gold
+points). It is a product mechanism: a person node carrying its relation with
+receipts.
+
+**Fourth instrument artifact this arc.** "unknown" read 1847 (8.2%) until the
+non-name filter went in — "This" 362, "By" 280, "The" 200 are capitalised.
+Corrected to 302 (1.9%). Read the matches before believing the count.
+
+---
+
+## Entry 258 — 2026-09-04 (p2: I used the product. Five of eight ordinary questions abstained — and the read path was never given the retriever we validated in e132.)
+
+Stopped measuring the benchmark and used the shipped MCP surface the way a
+person would: two ordinary conversations (16 turns, 18 facts, **0 model
+calls**), then the questions someone actually asks about themselves.
+
+**Five of eight abstained**, including *"Where do I work?"* when the user said
+"I've been at Lumen Health for about three years, I'm a backend engineer there"
+in turn one. The profile block an agent receives was two lines, one of them
+`Alex Reyes did not know which`.
+
+### It is not extraction
+
+Employer, job title, reason-for-leaving and prior-language are all in the
+store, correctly rendered. Ask with the STORE's words and they come back; ask
+with the USER's words and it abstains:
+
+    "Where do I work?"              -> ABSTAIN
+    "Lumen Health"                  -> Alex Reyes is at Lumen Health for about three years now
+    "Why did I leave my last job?"  -> ABSTAIN
+    "commute brutal"                -> Alex Reyes left because the commute was brutal...
+
+`profile_recall` → `wire.match`: token overlap plus a fixed synonym table.
+**Retrieval v3 has been the measured champion since e132 and was only ever
+wired into the benchmark QA path.** Same shape as e248's renderer bug — a
+validated fix landing on one path and not the others.
+
+### And wiring it in naively makes the product WORSE
+
+Measured through the real `profile_recall` API, 10 answerable + 8
+never-mentioned questions:
+
+| | token overlap | v3, no floor | v3 + floor |
+|---|---|---|---|
+| rank-1 correct | 5/10 | **1/10** | 7/10 |
+| correct in top-3 | 5/10 | 9/10 | 8/10 |
+| **abstains on unseen** | **8/8** | **0/8** | 7/8 |
+
+v3 with no floor answers EVERY question including all eight about things never
+mentioned. Honest abstention is the product; better pool recall does not pay
+for losing it. Two wiring defects, both mine:
+
+- **no score floor.** The cross-encoder's own score separates known from unseen
+  (KNOWN median −4.69 vs UNSEEN −8.59).
+- **bucketing hits into asserted-then-unconfirmed** threw away the reranker's
+  ordering: rank-1 7/10 → 1/10. The retriever was fine; the wiring broke it.
+
+Ships opt-in `RG_PROFILE_V3=1` (+ `RG_PROFILE_V3_FLOOR`). n=18, one synthetic
+store, no judge — a pilot, not a result.
+
+**Method note.** Every finding in this entry came from USING the thing. Nine
+entries of benchmark decomposition did not surface a single one of them.
+
+---
+
+## Entry 259 — 2026-09-04 (p2: relative pronouns resolve to their antecedent. 0.06% of the benchmark, 14% of a real store, and it was the retrieval attractor.)
+
+`CLAUSE_DEPS` contains `acl:relcl`, so a relative clause is walked as a clause
+in its own right — and its relative pronoun rendered LITERALLY as an argument.
+The referent is the clause head's own UD parent, so it is recoverable and
+resolving beats dropping:
+
+    did not know which  ->  did not know Go
+    learned which       ->  learned Postgres
+    enjoyed which       ->  enjoyed a book
+
+The antecedent renders as a NOUN PHRASE (`NP_MODS` whitelist). First attempt
+gave "did not know It's in Go" — `Go` is the copular ROOT of its own clause, so
+an unrestricted subtree render dragged the clause in.
+
+**Why no benchmark run would have found it.** 4 of 6661 records on u0 (0.06%).
+In the e258 dogfood store it was 2 of 14 nodes, and `did not know which` ranked
+FIRST for nearly every unanswerable question — the single node responsible for
+the remaining abstention leak. Natural speech uses relative clauses; HaluMem's
+synthetic prose barely does. **A defect can be negligible on the benchmark and
+dominant in the product.**
+
+Implementation: `Sent.text()` gains a `swap` map bound per-clause, so the
+substitution reaches all 15 render call sites without threading a parameter
+through each. Empty for every non-relative clause, so the default path is
+byte-identical.
+
+---
+
+## Entry 260 — 2026-09-04 (p2: fixing the parser made an evidence signal three layers away SEPARABLE. And indexing propositions is negative, measured twice.)
+
+### The finding
+
+With e259's garbage node gone, the cross-encoder's top-1 score splits
+answerable from never-mentioned with **NO overlap, 18/18**: answerable
+≥ −7.72, never-mentioned ≤ −7.94. **Before the parser fix the same two
+populations overlapped** (−7.72 vs −7.45), because `did not know which` ranked
+first for nearly every unanswerable question and dragged those scores up.
+
+A render defect was corrupting an evidence-sufficiency signal in a different
+subsystem. `FLOOR_V3` −7.7 → −7.83; the old value sat above known-min and was
+cutting a true positive ("What is my job title?" at −7.72).
+
+### Three things I was wrong about, all caught by measuring
+
+**Margin floors are worse, not more robust.** I expected top1−median to
+generalise better than an absolute threshold:
+
+| separator | best split | populations |
+|---|---|---|
+| absolute top-1 | **18/18** | clean |
+| top1 − pool median | 16/18 | overlap |
+| top1 − 2nd hit | 16/18 | overlap |
+
+**`RG_INDEX_TEXT` is negative, measured twice.** Null in e258; re-tested here
+because e259 changed the store underneath it (§6c). Null again on rank-1 and
+pool — and it DESTROYS the separation (known-min −9.28 below unseen-max −8.22).
+Every proposition starts with the owner's name, so the constant prefix
+compresses exactly the score differences the floor depends on: the same
+owner-token artifact e256 found with a different instrument. **Branch closed,
+not parked.**
+
+**The attribute-key theory was about to cost a day.** Employer, job title and
+allergy all key on `is`, and rebuilding copular keys was the obvious next move.
+Then I read the three remaining rank-1 misses: all of them are
+`Alex Reyes works from home` winning every work-related query because it
+lexically contains "work". That is reranker quality, not key design. e251
+already warned that canonicalisation is not obviously the answer; this is the
+second time that warning held.
+
+### State
+
+| | token overlap (default) | v3 + floor |
+|---|---|---|
+| rank-1 correct | 5/10 | **7/10** |
+| correct in top-3 | 5/10 | **9/10** |
+| abstains on unseen | 8/8 | **8/8** |
+
+Strictly better on every axis, abstention fully preserved. Suites 384.
+Still n=18 on one synthetic store, still no judge, and the floor is openly
+fitted to the same 18 points it is scored on.

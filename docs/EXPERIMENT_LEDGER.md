@@ -247,6 +247,12 @@ Unadjusted, same benchmark, same split:
     updating          RG 2.9 -> 8.1 (e215) | Memobase 5.20, Mem0 25.50,
                       Zep 47.28, MemOS 62.11
 
+**PRODUCT NOTE (e258): these are BENCHMARK numbers and the product read path
+was not running the benchmark's retriever.** `profile_recall` shipped token
+overlap while retrieval v3 ran only on the QA path; on a dogfood store that is
+5/10 vs 7/10 rank-1 and 5/10 vs 9/10 in top-3. Nothing in §5e measures what a
+user experiences.
+
 **On QA we are MID-PACK — level with Mem0 and Zep, behind only the two
 leaders.** Entry 117 said so in July. e211 wrongly applied e176's −9.67pt
 frontier-judge penalty to OUR number alone to claim "~45–47, below the pack";
@@ -354,6 +360,37 @@ fixes independent of the shelved composer.
 **Proxy calibration, measured:** offline coverage reads 46.3% of non-update
 gold where the JUDGE scores integrity recall 27.8% on the same store — the
 proxy over-reads by ~18pt. Never quote an offline coverage figure as "recall".
+
+## 5m. The benchmark cannot see a defect the product trips over (e258-e260)
+
+`"It's in Go, which I didn't know before I joined"` rendered as `<owner> did
+not know which`. That defect is **4 of 6661 records on u0 (0.06%)** and **2 of
+14 nodes in a real dogfood store (14%)**, where it ranked FIRST for nearly
+every unanswerable question. HaluMem's synthetic prose barely uses relative
+clauses; conversation does.
+
+Three consequences, all measured:
+
+1. **Dogfooding found in one session what nine entries of benchmark
+   decomposition did not.** e258 (the product read path never got retrieval
+   v3) and e259 (the relative pronoun) both came from USING the thing.
+2. **A render defect corrupted an evidence signal three layers away.** With
+   the garbage node gone the cross-encoder's score separates answerable from
+   never-mentioned cleanly, 18/18; before it, the populations overlapped.
+   Nothing about the retriever changed.
+3. **A validated component reaching only one path is now a THIRD confirmed
+   instance** (e248 renderer, e251 stale run copy, e258 retrieval). Assume it
+   for anything validated on the benchmark path until checked.
+
+## 5n. Owner-token prefixes compress the scores a floor depends on
+
+`RG_INDEX_TEXT` -- indexing the full proposition instead of `attr: value` --
+is null on rank-1 and pool AND destroys the abstention separation (known-min
+-9.28 falls below unseen-max -8.22, e260). Every proposition begins with the
+owner's name, so a constant prefix flattens exactly the differences the floor
+reads. e256 hit the same artifact from a different direction (97.6% of
+name-shaped mentions are the owner). **Measured twice, under different
+upstream conditions. Closed.**
 
 ## 6. Open, in priority order
 
