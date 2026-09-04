@@ -652,3 +652,40 @@ def test_owner_pronoun_object_form_is_grounded(ex=None):
                      "well being.")
     assert out, out
     assert any("his focus" in t for t in out), out
+
+
+# ---- L. relative pronouns resolved to their antecedent (e259) ------------
+# A relative clause is walked as a clause in its own right, so its relative
+# pronoun rendered LITERALLY as an argument: "It's in Go, which I didn't know
+# before I joined" produced "<owner> did not know which" -- a meaningless
+# record that also acted as a retrieval attractor in the product store (e258,
+# it ranked first for nearly every unanswerable question). The antecedent is
+# the clause head's own UD parent, so it is recoverable.
+
+def test_relative_pronoun_object_resolves_to_its_antecedent(ex):
+    out = texts(ex, "It's in Go, which I didn't know before I joined.")
+    assert any("did not know Go" in p for p in out), out
+    assert not any("know which" in p for p in out), out
+
+
+def test_antecedent_is_a_noun_phrase_not_the_clause_it_heads(ex):
+    """`Go` is the copular ROOT of "It's in Go", so an unrestricted render of
+    its subtree gave "did not know It's in Go"."""
+    out = texts(ex, "It's in Go, which I didn't know before I joined.")
+    assert not any("know It" in p or "know 's" in p for p in out), out
+
+
+def test_the_antecedent_keeps_its_determiner(ex):
+    out = texts(ex, "She recommended a book, which I enjoyed.")
+    assert any("enjoyed a book" in p for p in out), out
+
+
+def test_relative_pronoun_resolution_on_a_proper_noun(ex):
+    out = texts(ex, "I use Postgres, which I learned last year.")
+    assert any("learned Postgres" in p for p in out), out
+    assert not any("learned which" in p for p in out), out
+
+
+def test_a_clause_with_no_relative_pronoun_is_unchanged(ex):
+    out = texts(ex, "I bought a car, which was expensive.")
+    assert any("bought a car" in p for p in out), out

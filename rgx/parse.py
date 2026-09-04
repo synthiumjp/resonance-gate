@@ -239,6 +239,10 @@ class _S:
 
     def __init__(self, sent):
         self.w = {x.id: x for x in sent.words}
+        # e259: per-clause relative-pronoun substitution, set by the clause
+        # walk. Empty for every clause that is not a relative clause, so the
+        # default render path is byte-identical to before.
+        self._swap = {}
         self.kids = {}
         for x in sent.words:
             self.kids.setdefault(x.head, []).append(x)
@@ -271,10 +275,16 @@ class _S:
                     stack.append(c)
         return out
 
-    def text(self, word, stop=(), owner=None, second=False):
+    def text(self, word, stop=(), owner=None, second=False, swap=None):
+        """`swap`: {token id -> replacement string}. Used to substitute a
+        relative pronoun for its antecedent (e259) -- the token is still in
+        the span, so grounding and agreement are unaffected, but what it
+        renders as comes from elsewhere in the sentence."""
         toks = [t for t in self.subtree(word, stop) if t.upos != "PUNCT"]
         if not toks:
             return ""
+        if swap is None:
+            swap = self._swap
         # The person shift is a string pass and cannot see that it has just
         # made a verb's subject singular, so "because I find" became
         # "because Martin Mark find". Agreement is decided HERE, where the
@@ -285,6 +295,9 @@ class _S:
         parts = []
         for t in toks:
             txt = t.text
+            if swap and t.id in swap:
+                parts.append(swap[t.id])
+                continue
             if owner and t.upos in ("VERB", "AUX"):
                 sub = next(iter(self.children(t, ("nsubj", "nsubj:pass"))),
                            None)
@@ -498,6 +511,55 @@ def _poss(s, word, allow):
     return None
 
 
+# e259: relative pronouns. A relative clause is walked as a clause in its own
+# right (CLAUSE_DEPS contains "acl:relcl"), so its relative pronoun rendered
+# LITERALLY as an argument -- "It's in Go, which I didn't know before I
+# joined" produced "<owner> did not know which". The pronoun's referent is the
+# clause head's own UD parent (the antecedent), so it is recoverable, and
+# resolving beats dropping: the record becomes "<owner> did not know Go".
+RELPRON = frozenset(("which", "that", "who", "whom"))
+
+# Dependents that belong to an antecedent's NOUN PHRASE. Anything else (a
+# copula, a subject, a case marker, another clause) belongs to the clause the
+# antecedent happens to head, not to the referent being substituted in.
+NP_MODS = ("det", "amod", "compound", "nummod", "flat", "nmod:poss",
+           "nmod:tmod", "goeswith")
+
+
+def _relcl_swap(s, head):
+    """{relative-pronoun id -> antecedent text} for an `acl:relcl` clause.
+
+    Returns {} when the clause is not a relative clause, carries no relative
+    pronoun, or the antecedent cannot be rendered -- callers then behave
+    exactly as before. The antecedent is rendered WITHOUT the relative clause
+    itself (stop={head.id}), otherwise "a book, which I enjoyed" would expand
+    the pronoun into a copy of its own clause.
+    """
+    if head.deprel != "acl:relcl":
+        return {}
+    ante = s.w.get(head.head)
+    if ante is None:
+        return {}
+    rels = [c for c in s.children(head)
+            if c.upos == "PRON" and c.text.lower() in RELPRON]
+    if not rels:
+        return {}
+    # Render the antecedent as a NOUN PHRASE, not as whatever clause it may
+    # head. "It's in Go, which I didn't know" has `Go` as the copular ROOT, so
+    # its subtree is the whole clause and an unrestricted render produced
+    # "<owner> did not know It's in Go". Only nominal modifiers come along.
+    stop = {head.id}
+    stop |= {c.id for c in s.children(ante) if c.deprel not in NP_MODS}
+    saved, s._swap = s._swap, {}
+    try:
+        text = s.text(ante, stop=stop)
+    finally:
+        s._swap = saved
+    if not text:
+        return {}
+    return {c.id: text for c in rels}
+
+
 def _third_party_owner(s, head, subj, allow):
     """E (e240): the SUBJECT need not be the owner, or owner-possessed, for
     a clause to be about the owner's world -- "Susan's emotional
@@ -627,6 +689,7 @@ def extract_keyed(text, nlp, owner=None, role="user",
         is_q = any(w.text == "?" for w in sent.words[-3:])
         hedge = second and _hedge_sentence(s, sent)
         for head in sent.words:
+            s._swap = {}
             if head.deprel not in CLAUSE_DEPS:
                 continue
             subj = next(iter(s.children(head, ("nsubj", "nsubj:pass"))), None)
@@ -674,6 +737,10 @@ def extract_keyed(text, nlp, owner=None, role="user",
             tpo = _third_party_owner(s, head, subj, allow)
             named_tpo = (not tpo and role == "user"
                          and _propn_subject(s, subj))
+
+            # e259: resolve this clause's relative pronoun to its antecedent
+            # before ANY render call below reads it.
+            s._swap = _relcl_swap(s, head)
 
             records = []  # [(body, kind, pred, value), ...] for this clause
 
