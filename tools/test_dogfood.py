@@ -69,3 +69,13 @@ def test_recall_has_not_collapsed(store):
                if any(needle.lower() in g.lower()
                       for g in DF.facts_of(pmem.profile_recall(q))))
     assert hits >= 6, f"only {hits}/{len(DF.ANSWERABLE)} answerable questions hit"
+
+
+def test_a_causal_clause_keeps_its_reason(store):
+    """e266: rgx emits a short atom and a fuller record off one clause, and
+    they collide on the same slot. First-wins kept the atom, so "I left my
+    last job at Perrin because the commute was brutal" stored only "left ...
+    at Perrin" -- the REASON, which is the point of the sentence, was
+    dropped."""
+    _, blob = store
+    assert "commute" in blob.lower(), blob

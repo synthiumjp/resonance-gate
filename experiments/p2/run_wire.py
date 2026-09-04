@@ -80,6 +80,35 @@ def _load_assistant_stream(path):
     return stream
 
 
+def _keep_text(slot, new_text):
+    """Choose the proposition text for a (key, value) slot.
+
+    e266: rgx emits both a short "atom" and a fuller record off the same
+    clause, and they often normalise to the SAME slot -- so `setdefault` kept
+    whichever arrived FIRST, which is usually the atom, and the richer text was
+    silently dropped. "I left my last job at Perrin because the commute was
+    brutal" stored only "<owner> left <owner>'s last job at Perrin"; the REASON,
+    which is the whole point of the sentence, went in the bin.
+
+    e255 found this and fixed it in halumem_run.py -- the BENCHMARK harness.
+    The product path (this file) kept the defect. That is the FOURTH time a
+    validated fix reached one path and not the others (e248 renderer, e251
+    stale run copy, e258 retrieval, this). Ledger 5m.
+
+    RG_TEXT_LONGEST=0 forces the old first-wins behaviour; unset or 1 keeps the
+    longest. The default is flipped RELATIVE TO the benchmark harness on
+    purpose: e255 left it opt-in there because turning it on changes every
+    banked artifact, and the product path has no banked artifacts to protect.
+    """
+    import os as _os
+    if _os.environ.get("RG_TEXT_LONGEST") == "0":
+        slot.setdefault("text", new_text)
+        return
+    cur = slot.get("text")
+    if new_text and (not cur or len(new_text) > len(cur)):
+        slot["text"] = new_text
+
+
 def build_facts(path, min_mentions=2):
     """Corroborated facts with receipts, rebuilt from the cache exactly as
     run_profile_full readout (canon + hygiene + clustering). Returns
@@ -158,9 +187,9 @@ def build_facts(path, min_mentions=2):
                 slots[key][v]["n"] += 1
             slots[key][v]["recs"].append((date, uuid))
             # rgx cache facts carry the full proposition in "text"; LLM cache
-            # facts don't (entry 244). Keep the FIRST mention's text so
-            # renderers can use it instead of the bare attribute/value atom.
-            slots[key][v].setdefault("text", fct.get("text"))
+            # facts don't (entry 244). e266: keep the LONGEST, not the first --
+            # see _keep_text.
+            _keep_text(slots[key][v], fct.get("text"))
 
     # ASSISTANT HEARSAY PASS (entry 246 completion): `prose` above is human-
     # turns-only by design (load_stream_and_titles), so an assistant clause
@@ -202,7 +231,7 @@ def build_facts(path, min_mentions=2):
             key = f"{subj}:{a}" if subj else a
             slots[key][v]["n_hearsay"] = slots[key][v].get("n_hearsay", 0) + 1
             slots[key][v]["recs"].append((date, uuid))
-            slots[key][v].setdefault("text", fct.get("text"))
+            _keep_text(slots[key][v], fct.get("text"))
 
     facts, prov, hearsay = [], [], []
     for attr, entries in slots.items():
