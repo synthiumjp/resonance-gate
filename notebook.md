@@ -13629,3 +13629,54 @@ own presupposition is theirs to make.
 
 Suites 530. **Note what this session has NOT guarded: recall.** Fifteen entries
 on purity and refusal, and 7 of 20 recall probes still miss.
+
+---
+
+## Entry 272 — 2026-09-04 (p2: recall 13/20 → 16/20 on a GRAMMATICAL signal, and the fix could not work until it exposed an error in e258's floor.)
+
+Fifteen entries on purity and refusal had left recall unguarded. Every
+remaining miss on the product harness had **one shape**:
+
+    "What language is the billing service in?"
+       1. Alex works on the billing service      <- matches, answers nothing
+       2. the billing service is written in Go   <- the answer
+
+The distinction is **grammatical, not lexical**: the answer carries the queried
+entity as its SUBJECT, the distractor as an object. A cross-encoder this small
+does not reliably see that; a lead-position check does, for free. It requires
+**two** content tokens in the record's lead — a single incidental match ("work"
+in "works from home") is precisely the distractor being demoted.
+
+### The fix changed nothing twice, and chasing why found the real bug
+
+**e258 applied the abstention floor to EVERY record.** The known/unseen
+separation it rests on was only ever measured on the **top-1** raw score
+(answerable ≥ −7.72, never-mentioned ≤ −7.94). Nothing validated per-record
+filtering, and it was silently deleting true answers that ranked low —
+including the exact record the re-rank existed to promote.
+
+**The floor now decides WHETHER to answer; the re-rank decides the order.**
+That keeps precisely the property that was measured and stops the floor doing
+a job no evidence gave it. One existing test asserted the old behaviour and was
+REVERSED rather than deleted, with the reason in its docstring.
+
+The other reason it changed nothing first time: the pool fetched equalled the
+pool returned, and the answer was at rank 9 of a top-8. **A re-rank cannot
+promote what the retriever already truncated.**
+
+| | before | after |
+|---|---|---|
+| rank-1 | 13/20 | **16/20** |
+| in pool | 16/20 | **19/20** |
+| abstention | 7/7 | 7/7 |
+| purity | 21/21 | 21/21 |
+
+Two guarantees hold by construction rather than by measurement: the re-rank
+runs after the floor, so it can never make a never-mentioned topic answerable;
+and the wider pool is fetched explicitly rather than hoped for.
+
+**The single remaining miss is a stated LIMIT, not a queued bug.** "Where do I
+work?" ranks "works from home" over "has been at Lumen Health"; connecting
+"work" to an employer NAME needs knowledge the parser does not have and this
+reranker cannot supply. Three cheap theories for it are already measured dead
+(e260, e272).
