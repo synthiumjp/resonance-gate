@@ -86,6 +86,11 @@ class Extractor:
     owner_pronoun: Optional[str] = None
     owner_pronoun_obj: Optional[str] = None
     _nlp: object = field(default=None, repr=False)
+    # e269: entities the owner has linked themselves to, carried ACROSS turns
+    # so "I work on the billing service" in turn 3 lets "The billing service
+    # is written in Go" in turn 9 be stored. Per-Extractor, and an Extractor
+    # is per-owner; call reset_world() to process a different person.
+    _world: dict = field(default_factory=dict, repr=False)
 
     def _parser(self):
         if self._nlp is None:
@@ -102,7 +107,8 @@ class Extractor:
         for prop, kind, pred, val, evi in G.extract_keyed(
                 text, self._parser(), self.owner_name, role=role,
                 owner_pronoun=self.owner_pronoun,
-                owner_pronoun_obj=self.owner_pronoun_obj):
+                owner_pronoun_obj=self.owner_pronoun_obj,
+                world=self._world):
             if self.check:
                 ok, _why = C.prefilter(prop, text, self.owner_name,
                                        value=val, kind=kind)
@@ -113,6 +119,10 @@ class Extractor:
                               evidential=evi,
                               quality=C.quality(prop, text, self.owner_name)))
         return out
+
+    def reset_world(self):
+        """Forget the accumulated world (e269). Call between owners."""
+        self._world = {}
 
     def extract(self, dialogue, session=0):
         """dialogue: [{"role": ..., "content": ...}] for ONE session."""

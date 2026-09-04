@@ -32,6 +32,7 @@ every negated fact (e228). Here it is read by lemma, and tested.
 
 Deterministic. No model call. Stanza runs on CPU at ~0.16s/sentence.
 """
+import os
 import re
 
 NEG_LEMMAS = {"not", "n't", "never", "no", "nor", "neither"}
@@ -684,9 +685,75 @@ def _relcl_swap(s, head):
 # not a defect fix.
 _PRON_SUBJ = frozenset(("it", "they", "this", "that", "these", "those"))
 
+# e269: THE USER'S WORLD, not the user's profile.
+#
+# JP: "most people rely on facts about their world. they KNOW the facts on
+# themselves." A store keyed on owner-subject clauses keeps "Alex works on the
+# billing service" -- which the user already knows -- and throws away "the
+# billing service is written in Go", which is the thing they would actually
+# forget and ask for.
+#
+# An entity joins the user's world when the OWNER links themselves to it: it
+# is the object/oblique of a clause the owner is the subject of ("I work on
+# the billing service"), or it is owner-possessed ("my car"). Only USER turns
+# establish, so an assistant's generic ("Cats are independent animals",
+# "There are several good databases available") never creates one and can
+# never attach to one.
+#
+# This is a change to what the store is FOR, made deliberately and on the
+# owner's instruction -- not a defect fix. RG_WORLD=0 disables it.
+_WORLD_LINK_DEPS = ("obj", "iobj", "obl", "obl:unmarked", "nmod")
+
+
+def _np_text(s, w):
+    """The entity's own noun phrase -- head plus nominal modifiers only.
+    Storing the bare head lost the modifier: "I work on the billing service"
+    yielded the entity "service", and the record read "service is written in
+    Go" instead of "the billing service is written in Go"."""
+    stop = {c.id for c in s.children(w) if c.deprel not in NP_MODS}
+    saved, s._swap = s._swap, {}
+    try:
+        return s.text(w, stop=stop)
+    finally:
+        s._swap = saved
+
+
+def _collect_world(s, head, subj, is_self, sp, out):
+    """Record entities this clause links the owner to.
+
+    COORDINATION COUNTS AS SEPARATE CANDIDATES. "I have a dog and a cat" must
+    put BOTH in scope, so a following "It is friendly" sees two candidates and
+    declines. Collecting only the `obj` head left one candidate and produced a
+    confident wrong guess -- caught by testing the coordination case."""
+    if not (is_self or sp is not None):
+        return
+    deps = _WORLD_LINK_DEPS + (("obj", "iobj") if sp is not None else ())
+    for c in s.children(head, deps):
+        if c.upos not in ("NOUN", "PROPN") or not c.lemma:
+            continue
+        out.setdefault(c.lemma.lower(), _np_text(s, c))
+        for sib in s.children(c, ("conj",)):
+            if sib.upos in ("NOUN", "PROPN") and sib.lemma:
+                out.setdefault(sib.lemma.lower(), _np_text(s, sib))
+
+
+def _world_subject(s, subj, world, role):
+    """True when this clause's subject is an entity the owner established."""
+    if role != "user" or not world:
+        return False
+    if subj.upos not in ("NOUN", "PROPN"):
+        return False
+    return bool(subj.lemma) and subj.lemma.lower() in world
+
 
 def _poss_antecedent(carry, subj):
-    """-> the carried owner-possessed noun for this pronoun subject, or None."""
+    """-> the carried antecedent for this pronoun subject, or None.
+
+    `carry` holds candidates established EARLIER IN THIS TURN only. Cross-turn
+    pronoun resolution is deliberately not attempted: a wrong antecedent is a
+    confident false memory (e262). An explicit noun-phrase subject matches
+    across turns (e269) because that is string identity, not a guess.
+    """
     if subj.upos != "PRON" or subj.text.lower() not in _PRON_SUBJ:
         return None
     if len(carry) != 1:
@@ -799,7 +866,7 @@ def _slug(text):
 
 
 def extract_keyed(text, nlp, owner=None, role="user",
-                   owner_pronoun=None, owner_pronoun_obj=None):
+                   owner_pronoun=None, owner_pronoun_obj=None, world=None):
     """-> [(proposition, kind, predicate_key, value, evidential)].
     `predicate_key` is the attribute name a slot store files the record
     under and `value` the complement it stores there; `extract` drops all
@@ -827,6 +894,10 @@ def extract_keyed(text, nlp, owner=None, role="user",
     out, seen = [], set()
 
     poss_carry = {}          # e267: owner-possessed nominals seen so far
+    turn_world = {}          # e269: entities established in THIS turn only --
+                             # the only ones a PRONOUN may resolve to
+    if world is None:        # e269: the owner's world, carried across TURNS
+        world = {}
     for sent in nlp(text).sentences:
         s = _S(sent)
         # Stanza breaks sentences at terminal punctuation, so the "?" -- if
@@ -880,10 +951,23 @@ def extract_keyed(text, nlp, owner=None, role="user",
             # e267: a bare pronoun subject with exactly ONE owner-possessed
             # antecedent carried from an earlier sentence of THIS turn.
             carried = None
+            world_carried = None
             if sp is None:
                 anc = _poss_antecedent(poss_carry, subj)
                 if anc is not None:
                     carried = anc.text
+                elif not poss_carry:
+                    # e269: no owner-possessed candidate, but the owner may
+                    # have established exactly one world entity this turn.
+                    # Renders as the entity itself ("The billing service is
+                    # written in Go"), not as "<owner>'s ..." -- the owner
+                    # linked to it, they do not own it.
+                    if (subj.upos == "PRON"
+                            and subj.text.lower() in _PRON_SUBJ
+                            and len(turn_world) == 1
+                            and os.environ.get("RG_WORLD") != "0"
+                            and role == "user"):
+                        world_carried = next(iter(turn_world.values()))
             is_self = subj.text.lower() in allow
             fdrop, ftail = _fronted(s, head, subj)
             # e243, RULE 3: a NAMED third party as subject, with the owner
@@ -893,10 +977,30 @@ def extract_keyed(text, nlp, owner=None, role="user",
             tpo = _third_party_owner(s, head, subj, allow)
             named_tpo = (not tpo and role == "user"
                          and _propn_subject(s, subj))
+            # e269: a subject the OWNER established as part of their world.
+            world_subj = (not tpo and not named_tpo
+                          and os.environ.get("RG_WORLD") != "0"
+                          and (_world_subject(s, subj, world, role)
+                               or world_carried is not None))
 
             # e259: resolve this clause's relative pronoun to its antecedent
             # before ANY render call below reads it.
             s._swap = _relcl_swap(s, head)
+            if world_carried is not None:
+                # e269: render the resolved world entity in place of the
+                # pronoun, so the record reads "The billing service is
+                # written in Go" rather than "It is written in Go".
+                s._swap = dict(s._swap)
+                s._swap[subj.id] = world_carried
+
+            # e269: whatever this clause links the owner to joins their world
+            # and can be the SUBJECT of a later clause, in this turn or a
+            # later one. Collected before the branches so a clause can
+            # establish and use in one pass ("I work on the billing service.
+            # It is written in Go").
+            if role == "user":
+                _collect_world(s, head, subj, is_self, sp, world)
+                _collect_world(s, head, subj, is_self, sp, turn_world)
 
             records = []  # [(body, kind, pred, value), ...] for this clause
 
@@ -973,7 +1077,7 @@ def extract_keyed(text, nlp, owner=None, role="user",
                     value = s.text(subj, owner=o, second=second) + (
                         ", " + desc if desc else "")
                     records.append((body, kind, pred, value))
-                elif tpo or named_tpo:
+                elif tpo or named_tpo or world_subj:
                     # E (e240) / RULE 3 (e243): the subject is a third
                     # party -- either the owner sits elsewhere in the
                     # clause (E), or, in a user turn, the subject is
@@ -1008,7 +1112,7 @@ def extract_keyed(text, nlp, owner=None, role="user",
                         if c.deprel in ARG_DEPS and c.id != head.id
                         and c.id not in negdrop and c.id not in fdrop]
                 if sp is None and not is_self:
-                    if tpo or named_tpo:
+                    if tpo or named_tpo or world_subj:
                         # E (e240) / RULE 3 (e243), verbal predicate.
                         full_drop = {c.id for c in s.children(head, SEPARATE)}
                         full_drop |= {c.id for c in

@@ -883,3 +883,70 @@ def test_a_pronoun_cannot_resolve_within_its_own_sentence(ex):
 def test_the_first_sentence_is_unaffected(ex):
     out = texts(ex, "My car is a Volvo. It is very reliable.")
     assert any("Martin Mark's car is a Volvo" in p for p in out), out
+
+
+# ---- R. the user's WORLD, not the user's profile (e269) ------------------
+# JP: "most people rely on facts about their world. they KNOW the facts on
+# themselves." An owner-subject-only store keeps "Alex works on the billing
+# service" -- which the user already knows -- and throws away "the billing
+# service is written in Go", which is what they would actually forget.
+# An entity joins the world when the OWNER links themselves to it.
+
+def test_a_world_entity_can_be_the_subject_of_a_later_clause(ex):
+    out = texts(ex, "I work on the billing service. It is written in Go.")
+    assert any("billing service is written in Go" in p for p in out), out
+
+
+def test_the_entity_keeps_its_modifiers(ex):
+    """Storing the bare head gave the entity "service", and the record read
+    "service is written in Go"."""
+    out = texts(ex, "I work on the billing service. It is written in Go.")
+    assert not any(p.startswith("service is") for p in out), out
+
+
+def test_a_world_entity_persists_across_turns(ex):
+    ex.reset_world()
+    ex.extract_turn("I work on the billing service.", role="user")
+    out = [r.text for r in ex.extract_turn(
+        "The billing service is written in Go.", role="user")]
+    ex.reset_world()
+    assert any("billing service is written in Go" in p for p in out), out
+
+
+def test_generic_knowledge_never_becomes_a_world_fact(ex):
+    """The guard rail the whole mechanism rests on."""
+    out = texts(ex, "Cats are independent animals.", role="assistant")
+    assert out == [], out
+    out = texts(ex, "There are several good databases available.",
+                role="assistant")
+    assert not any("databases" in p for p in out), out
+
+
+def test_an_assistant_turn_cannot_establish_a_world_entity(ex):
+    ex.reset_world()
+    ex.extract_turn("There are several good databases available.",
+                    role="assistant")
+    out = [r.text for r in ex.extract_turn(
+        "The databases are slow.", role="user")]
+    ex.reset_world()
+    assert out == [], out
+
+
+def test_coordination_gives_TWO_candidates_and_declines(ex):
+    """"I have a dog and a cat" must put BOTH in scope. Collecting only the
+    obj head left one candidate and produced a confident wrong guess."""
+    out = texts(ex, "I have a dog and a cat. It is friendly.")
+    assert not any("friendly" in p for p in out), out
+
+
+def test_an_owner_possessed_antecedent_still_renders_as_possessed(ex):
+    """e267's case must not be swallowed by e269's -- the owner OWNS a car,
+    they merely work on a billing service."""
+    out = texts(ex, "My car is a Volvo. It is very reliable.")
+    assert any("Martin Mark's car is very reliable" in p for p in out), out
+
+
+def test_the_world_can_be_switched_off(ex, monkeypatch):
+    monkeypatch.setenv("RG_WORLD", "0")
+    out = texts(ex, "I work on the billing service. It is written in Go.")
+    assert not any("written in Go" in p for p in out), out

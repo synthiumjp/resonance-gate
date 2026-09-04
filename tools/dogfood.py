@@ -101,6 +101,24 @@ SESSIONS = [
    "I use Postgres, which I learned last year."},
   {"role": "user", "content":
    "I like it a lot actually."}],
+
+ # --- session 4: THE USER'S WORLD, not the user's profile -------------------
+ # People already KNOW the facts about themselves. What they need a memory for
+ # is their WORLD -- the systems, projects and things around them, which is
+ # exactly what an owner-subject-only store throws away. The guard rail is
+ # that an entity must be one the USER established as theirs; generic world
+ # knowledge from either speaker stays out.
+ [{"role": "user", "content":
+   "I work on the billing service. It is written in Go and it handles about "
+   "ten thousand invoices a day."},
+  {"role": "assistant", "content":
+   "Cats are independent animals. There are several good databases available."},
+  {"role": "user", "content":
+   "We use Postgres for the main database. The main database is replicated "
+   "across three regions."},
+  {"role": "user", "content":
+   "My team owns the checkout flow. The checkout flow is the oldest code in "
+   "the company."}],
 ]
 
 # ---------------------------------------------------------------- the probes
@@ -125,6 +143,12 @@ ANSWERABLE = {
     "Am I a vegetarian?":               "has been a vegetarian",
     # e259: a relative pronoun resolved to its antecedent
     "What did I learn last year?":      "Postgres",
+    # --- the user's WORLD (session 4). People know their own facts; what
+    # they forget is the systems around them.
+    "What is the billing service written in?":   "billing service is written in Go",
+    "How many invoices does billing handle?":    "ten thousand invoices",
+    "Is the main database replicated?":          "replicated across three regions",
+    "What do I know about the checkout flow?":   "checkout flow is the oldest code",
 }
 
 # ABSTENTION: never mentioned by anyone, in any turn.
@@ -165,6 +189,10 @@ MUST_NOT_ASSERT = [
     ("Reyes've",                "clitic survived the person shift"),
     # e263: a copular perfect must not flatten to the present
     ("Reyes is a vegetarian since", "copular perfect flattened to present"),
+    # GENERIC world knowledge is not the user's world, from either speaker
+    ("Cats are independent",    "generic knowledge, nobody's world"),
+    ("independent animals",     "generic knowledge, nobody's world"),
+    ("several good databases",  "assistant generic, user never said it"),
 ]
 
 
