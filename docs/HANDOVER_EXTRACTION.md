@@ -93,7 +93,7 @@ paired comparisons but **not** against someone else's published table.
 
 ## 3. Immediate next steps, in order
 
-**Session close 2026-09-04 (e249–e270 committed).** The 2026-08-24 list that
+**Session close 2026-09-04 (e249–e275 committed).** The 2026-08-24 list that
 stood here is DONE and has been replaced: step 1 ("build labeled hearsay") was
 built in e249 and corrected in e250.
 

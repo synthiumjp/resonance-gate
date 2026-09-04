@@ -392,6 +392,35 @@ reads. e256 hit the same artifact from a different direction (97.6% of
 name-shaped mentions are the owner). **Measured twice, under different
 upstream conditions. Closed.**
 
+## 5o. An absolute score threshold degrades as the store grows (e274)
+
+The v3 abstention floor separated answerable from never-mentioned questions
+**cleanly, 18/18, at 14 store nodes**. At 38 nodes nothing separates them
+cleanly and the best absolute cutoff costs one false answer in seven --
+max-of-N rises with N. Two margin variants are worse at both sizes.
+
+**Any constant fitted on a small store is a property of that store.** The fix
+is not a better constant but a SECOND independent signal: grounding (lexical
+or dense) does not degrade with size, and is ANDed with the floor. A real
+store has thousands of nodes; e260's confidence in the clean split was
+misplaced and is corrected here.
+
+## 5p. A probe names a FACT, and facts change (e275)
+
+Five "system failures" chased this session were stale probes: the car (e268),
+the vegetarian (e273), the dog, the employer, and "Where do I work?" -- which
+was called an unfixable semantic limit for six entries while the store
+answered it correctly. Every corpus extension can invalidate a needle.
+
+`tools/dogfood.py:check_probes()` is the structural guard: a recall needle may
+not name a value CURRENCY lists as superseded, and an UNSEEN question may not
+name something the corpus discusses. It runs before every scorecard.
+
+This is §4 again, committed five times in one session **after** writing the
+warning down twice. The lesson that generalises: an instrument built to
+localise a problem must be re-validated every time the system under it
+changes, and "my measurement says X" is a claim about the measurement first.
+
 ## 6. Open, in priority order
 
 | # | Item | Status |
