@@ -147,7 +147,7 @@ SESSIONS = [
 # ---------------------------------------------------------------- the probes
 # RECALL: ordinary phrasings, and the substring that identifies a correct hit.
 ANSWERABLE = {
-    "Where do I work?":                 "Lumen Health",
+    "Where do I work?":                 "Acme",     # superseded in session 5
     "What is my job title?":            "backend engineer",
     "Who is my manager?":               "Priya",
     "What am I allergic to?":           "allergic to peanuts",
@@ -175,13 +175,39 @@ ANSWERABLE = {
     "How many invoices does billing handle?":    "ten thousand invoices",
     "Is the main database replicated?":          "replicated across three regions",
     "What do I know about the checkout flow?":   "checkout flow is the oldest code",
+    # e275: PARAPHRASE. Real questions rarely reuse the stored fact's words.
+    # The corpus had exactly one such case, which is why lexical grounding
+    # looked almost free -- a corpus weakness read as evidence.
+    "Do I own any pets?":               "dog",
+    "What is my role at work?":         "backend engineer",
+    "Which company employs me?":        "Acme",     # superseded in session 5
+    "What do I eat?":                   "fish",
+    "How do I commute?":                "home",
+    "What is my beverage of choice?":   "tea",
 }
 
 # ABSTENTION: never mentioned by anyone, in any turn.
 UNSEEN = [
     "Do I have any children?", "What is my blood type?",
     "Where did I go to university?", "What is my favourite film?",
-    "What city was I born in?", "Do I have a dog?", "What is my salary?",
+    "What city was I born in?", "What is my salary?",
+    "What instrument do I play?", "Which gym do I go to?",
+    "When is my birthday?",
+]
+
+# KNOWN LIMITATION, deliberately NOT counted as abstention: a question about
+# an entity the store DOES know, asking for an attribute it does NOT hold.
+# "What is my partner's job?" returns "partner Sam works from home too" --
+# related, true, and not an answer. UNSEEN above is defined as "never
+# mentioned by anyone", and the partner IS mentioned, so scoring this as an
+# abstention failure measured the wrong thing.
+#
+# It is a real property and worth fixing (an agent should say "I know Sam
+# works from home, not what their job is"), but it is ATTRIBUTE-level
+# abstention, not topic-level, and folding it into the abstention count would
+# make that number mean two different things.
+PARTIAL_KNOWLEDGE = [
+    ("What is my partner's job?", "Sam", "job"),
 ]
 
 # PURITY: strings that must NOT appear anywhere in the asserted store. Each is
@@ -240,6 +266,46 @@ CONFLICTS_EXPECTED = [("editor", "vim", "emacs")]
 CONFLICTS_FORBIDDEN = ["like", "have"]
 
 
+def check_probes():
+    """Guard against the failure mode that has now bitten five times: a recall
+    needle names a FACT, and facts change. Every corpus extension can silently
+    invalidate a needle -- the car, the vegetarian, the dog, the employer --
+    and each time the harness reported a system failure that was really a
+    probe failure.
+
+    Two rules, both cheap:
+      * no ANSWERABLE needle may name a value CURRENCY lists as stale;
+      * no UNSEEN question may share a distinctive word with the corpus.
+    Returns a list of complaints; empty means the probes are self-consistent.
+    """
+    import re
+    bad = []
+    stale = {s.lower() for _, _, s in CURRENCY}
+    for q, needle in ANSWERABLE.items():
+        for st in stale:
+            if st in needle.lower():
+                bad.append(f"ANSWERABLE {q!r} wants {needle!r}, which CURRENCY "
+                           f"lists as superseded")
+    corpus = " ".join(t["content"].lower()
+                      for sess in SESSIONS for t in sess)
+    # Generic question nouns are not topics: "What is my blood TYPE" is about
+    # blood, and "favourite film" is about film. Without these the check
+    # flagged both because the corpus says "type systems" and "favourite
+    # language" -- a self-check that cries wolf gets ignored, which is worse
+    # than not having one.
+    common = set("""what who where when which how do does did is are was were
+                 my i me a an the of in on at for to about any have has go
+                 play am be been there thing type kind sort favourite favorite
+                 name number""".split())
+    for q in UNSEEN:
+        toks = {t for t in re.findall(r"[a-z]+", q.lower())
+                if t not in common and len(t) > 3}
+        hit = [t for t in toks if re.search(rf"\b{t}s?\b", corpus)]
+        if hit:
+            bad.append(f"UNSEEN {q!r} mentions {hit} -- the corpus talks about it")
+    return bad
+
+
 def build(tmp, v3):
     os.environ["RG_MEMORY_DIR"] = os.path.join(tmp, "mem")
     os.environ["SOURCEDRECALL_STATE"] = os.path.join(tmp, "state")
@@ -276,6 +342,13 @@ def main():
     ap.add_argument("--show-store", action="store_true")
     ap.add_argument("--verbose", action="store_true")
     args = ap.parse_args()
+
+    complaints = check_probes()
+    if complaints:
+        print("PROBE SELF-CHECK FAILED -- fix the harness before reading it:")
+        for c in complaints:
+            print(f"  {c}")
+        print()
 
     tmp = tempfile.mkdtemp(prefix="rg-dogfood-")
     try:

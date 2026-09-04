@@ -191,9 +191,31 @@ def test_the_bonus_needs_a_contentful_query():
 def test_a_high_scoring_but_ungrounded_hit_abstains(monkeypatch, mem):
     """The score floor degrades as the store grows (max-of-N rises with N);
     grounding does not. If no candidate shares a content word with the
-    question, we hold no evidence about the topic however it was scored."""
+    question AND nothing is semantically close, we hold no evidence about the
+    topic however it was scored.
+
+    Both routes are stubbed off here deliberately: the stub index carries no
+    embeddings, and `_dense_grounded` DEFERS (returns True) when the signal is
+    missing -- a missing signal must never be read as evidence of absence. So
+    the dense route is disabled explicitly to test the lexical one."""
     _stub(monkeypatch, mem, [("a", 5.0)])          # well above the floor
+    monkeypatch.setattr(MA, "_dense_grounded", lambda *a, **k: False)
     assert mem.recall_v3("What is my favourite film?")["abstain"] is True
+
+
+def test_dense_grounding_alone_is_enough(monkeypatch, mem):
+    """Paraphrase: "What is my role at work?" shares no content word with "is
+    a backend engineer there", and lexical-only grounding rejected it."""
+    _stub(monkeypatch, mem, [("a", -1.0)])
+    monkeypatch.setattr(MA, "_grounded", lambda *a, **k: False)
+    monkeypatch.setattr(MA, "_dense_grounded", lambda *a, **k: True)
+    assert mem.recall_v3("What is my role at work?")["abstain"] is False
+
+
+def test_a_missing_dense_signal_defers_rather_than_abstains(monkeypatch, mem):
+    """An index with no embeddings must not be read as "nothing matches"."""
+    _stub(monkeypatch, mem, [("a", -1.0)])
+    assert MA._dense_grounded(object(), "anything") is True
 
 
 def test_a_grounded_hit_is_returned(monkeypatch, mem):

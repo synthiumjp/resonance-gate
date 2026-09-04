@@ -153,6 +153,41 @@ def _stem(t):
     return t[:-1] if t.endswith("s") and len(t) > 4 else t
 
 
+# e275: DENSE GROUNDING THRESHOLD. Lexical grounding alone rejects PARAPHRASE,
+# which is what real questions are: "What is my role at work?" shares no
+# content word with "is a backend engineer there". The corpus had exactly one
+# such case, so lexical-only looked almost free -- a corpus weakness read as
+# evidence. With a proper paraphrase set the two populations are:
+#
+#   answerable, not lexically grounded   0.639 .. 0.748
+#   never mentioned                      0.506 .. 0.600
+#
+# 0.62 sits between them. Openly fitted, on 13 points, one store -- the same
+# caveat as every constant in this file, and the reason the LEXICAL route is
+# kept as well rather than replaced: two cheap independent signals degrade
+# more gracefully than one tuned one.
+DENSE_GROUND = 0.62
+
+
+def _dense_grounded(index, query, threshold=None):
+    """True when the best stored fact is semantically close to the question.
+
+    Returns True (defers) if the index has no embeddings -- a missing signal
+    must never be read as evidence of absence.
+    """
+    thr = DENSE_GROUND if threshold is None else threshold
+    emb = getattr(index, "emb", None)
+    if emb is None or len(emb) == 0:
+        return True
+    try:
+        import numpy as np
+        bi, _ = _RV3._models()
+        qv = bi.encode([query], normalize_embeddings=True)[0]
+        return float(np.max(emb @ qv)) >= thr
+    except Exception:
+        return True
+
+
 def _grounded(query, hits):
     """True when any candidate shares a content word with the question.
 
@@ -364,9 +399,13 @@ class Memory:
         # however the reranker scored it. Measured here: 7/7 unseen rejected,
         # 19/20 answerable kept. Required TOGETHER with the floor, never
         # instead of it -- two independent signals, both must pass.
-        if os.environ.get("RG_GROUNDING") != "0" and not _grounded(
-                query, [h for h, _ in scored[:3]]):
-            return self._abstain(query)
+        # Grounded LEXICALLY or DENSELY -- either is enough. Lexical catches
+        # the shared-word case for free; dense catches paraphrase, which is
+        # what a real question usually is (e275).
+        if os.environ.get("RG_GROUNDING") != "0":
+            if not (_grounded(query, [h for h, _ in scored[:3]])
+                    or _dense_grounded(idx, query)):
+                return self._abstain(query)
         kept = list(scored)
         # e272: reorder ONLY what already cleared the floor, then truncate.
         if rerank:
