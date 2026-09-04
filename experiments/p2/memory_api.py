@@ -83,6 +83,48 @@ _RV3 = _LazyRV3()
 FLOOR_V3 = -7.83
 
 
+# e272: SUBJECT-POSITION RE-RANK.
+#
+# Every remaining recall miss on the product harness had the same shape: the
+# record containing the question's WORDS beat the record containing its
+# ANSWER.
+#
+#   "What language is the billing service in?"
+#      1. Alex works on the billing service        <- matches, answers nothing
+#      2. the billing service is written in Go     <- the answer
+#
+# The distinction is grammatical, not lexical: the answer has the queried
+# entity as its SUBJECT, the distractor has it as an object. A cross-encoder
+# this small does not reliably see that; a lead-position check does, for free.
+#
+# APPLIED AFTER THE FLOOR, NEVER BEFORE. The bonus only reorders records that
+# already cleared the abstention threshold on their RAW score, so it cannot
+# make a never-mentioned topic answerable. That is a structural guarantee
+# rather than a measured one -- the alternative (boost, then floor) tested
+# identically on 7 unseen questions, which is not enough evidence to rest an
+# abstention promise on.
+_RERANK_STOP = frozenset("""
+what who where when which why how do does did is are was were am be been the
+a an my your our i me we us of in on at for to about know any there thing
+""".split())
+SUBJECT_BONUS = 6.0     # plateau on the dogfood set; below it, monotone
+
+
+def _subject_bonus(query, text, bonus=None):
+    """How much to lift a record whose SUBJECT REGION answers the query."""
+    import re as _re
+    b = SUBJECT_BONUS if bonus is None else bonus
+    q = [t for t in _re.findall(r"[a-z]+", (query or "").lower())
+         if t not in _RERANK_STOP]
+    if len(q) < 2:
+        return 0.0
+    lead = " ".join((text or "").lower().split()[:5])
+    hits = sum(1 for t in q if t in lead)
+    # TWO content tokens, not one: a single incidental match ("work" in "works
+    # from home") is exactly the distractor this is meant to demote.
+    return b * hits if hits >= 2 else 0.0
+
+
 class Memory:
     """Read-side memory over the wired, corroborated profile."""
 
@@ -202,11 +244,33 @@ class Memory:
             env = os.environ.get("RG_PROFILE_V3_FLOOR")
             floor = float(env) if env else FLOOR_V3
         idx = self._index_v3()
+        # e272: fetch a WIDER pool than we return, because the re-rank below
+        # cannot promote a record the retriever already truncated away. The
+        # first version of this reordered the top-8 and changed nothing --
+        # the answer was at rank 9.
+        rerank = os.environ.get("RG_SUBJECT_RERANK") != "0"
+        pool = max(top_n * 4, 24) if rerank else top_n
         scored = _RV3.retrieve_facts_v3(idx, query, k=120, dense_k=20,
-                                        top_n=top_n, with_scores=True)
-        kept = [(h, sc) for h, sc in scored if sc >= floor]
-        if not kept:
+                                        top_n=pool, with_scores=True)
+        # e272 CORRECTION TO e258: the floor is an ABSTENTION decision, not a
+        # per-record filter. The separation it rests on was measured on the
+        # TOP-1 raw score (answerable >= -7.72, never-mentioned <= -7.94);
+        # nothing ever validated applying it to every record, and doing so
+        # silently discarded true answers that happened to rank low --
+        # "the billing service is written in Go" scored under the floor and
+        # was dropped before the re-rank could promote it.
+        #
+        # Gate on the best raw score; then return the pool. This keeps exactly
+        # the property that was measured and stops the floor doing a job it
+        # was never shown to do.
+        if not scored or max(sc for _, sc in scored) < floor:
             return self._abstain(query)
+        kept = list(scored)
+        # e272: reorder ONLY what already cleared the floor, then truncate.
+        if rerank:
+            kept.sort(key=lambda p: -(p[1] + _subject_bonus(
+                query, p[0].get("text") or "")))
+        kept = kept[:top_n]
         # rank order preserved; `tier` says which store a fact came from so a
         # caller can still tell corroborated from single-mention.
         facts, unconfirmed = [], []

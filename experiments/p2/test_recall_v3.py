@@ -67,10 +67,17 @@ def test_a_hit_above_the_floor_is_returned(monkeypatch, mem):
     assert out["ranked"][0]["text"] == "Alex is allergic to peanuts"
 
 
-def test_the_floor_filters_per_hit_not_all_or_nothing(monkeypatch, mem):
+def test_a_low_scoring_hit_is_NOT_filtered_out(monkeypatch, mem):
+    """REVERSED IN e272, deliberately. This test used to assert the opposite
+    -- that the floor removes each hit below it. That was e258's design and it
+    was wrong: the known/unseen separation was only ever measured on the TOP-1
+    score, so per-record filtering was doing a job no measurement supported,
+    and it discarded true answers that ranked low. The floor now decides
+    WHETHER to answer; the re-rank decides the order."""
     _stub(monkeypatch, mem, [("a", -1.0), ("b", -9.0)])
-    out = mem.recall_v3("q", min_score=-7.7)
-    assert [f["value"] for f in out["ranked"]] == ["allergic to peanuts"]
+    out = mem.recall_v3("q", min_score=-7.83)
+    assert [f["value"] for f in out["ranked"]] == [
+        "allergic to peanuts", "lumen health"]
 
 
 def test_rank_order_survives_the_tier_split(monkeypatch, mem):
@@ -112,3 +119,68 @@ def test_the_floor_comes_from_the_environment_when_unset(monkeypatch, mem):
 
 def test_the_default_floor_is_the_documented_pilot_value():
     assert MA.FLOOR_V3 == -7.83
+
+
+# ---- e272: the floor gates ABSTENTION, the re-rank orders what survives ---
+
+def test_the_floor_is_a_top1_decision_not_a_per_record_filter(monkeypatch, mem):
+    """e258 applied the floor to every record. The separation it rests on was
+    only ever measured on the TOP-1 score, and per-record filtering silently
+    discarded true answers that ranked low -- which is what stopped the e272
+    re-rank from being able to promote one."""
+    _stub(monkeypatch, mem, [("a", -1.0), ("b", -20.0)])
+    out = mem.recall_v3("q", min_score=-7.83)
+    assert out["abstain"] is False
+    assert [f["value"] for f in out["ranked"]] == [
+        "allergic to peanuts", "lumen health"]
+
+
+def test_everything_below_the_floor_still_abstains(monkeypatch, mem):
+    _stub(monkeypatch, mem, [("a", -9.0), ("b", -9.5)])
+    assert mem.recall_v3("q", min_score=-7.83)["abstain"] is True
+
+
+def test_the_subject_rerank_promotes_a_subject_position_answer(monkeypatch, mem):
+    """"What language is the billing service in?" -- the distractor mentions
+    the entity as an OBJECT, the answer has it as SUBJECT."""
+    nodes = {"x": _node("x", "work_on", "billing service",
+                        "Alex works on the billing service"),
+             "y": _node("y", "is", "written in go",
+                        "the billing service is written in Go")}
+    m = MA.Memory(_FakeGraph(nodes, {}), {})
+    monkeypatch.setattr(m, "_index_v3", lambda: object())
+    monkeypatch.setattr(MA._RV3, "retrieve_facts_v3",
+                        lambda i, q, **kw: [(nodes["x"], -4.0),
+                                            (nodes["y"], -9.0)],
+                        raising=False)
+    out = m.recall_v3("What language is the billing service in?")
+    assert out["ranked"][0]["text"] == "the billing service is written in Go"
+
+
+def test_the_rerank_can_be_switched_off(monkeypatch, mem):
+    nodes = {"x": _node("x", "work_on", "billing service",
+                        "Alex works on the billing service"),
+             "y": _node("y", "is", "written in go",
+                        "the billing service is written in Go")}
+    m = MA.Memory(_FakeGraph(nodes, {}), {})
+    monkeypatch.setenv("RG_SUBJECT_RERANK", "0")
+    monkeypatch.setattr(m, "_index_v3", lambda: object())
+    monkeypatch.setattr(MA._RV3, "retrieve_facts_v3",
+                        lambda i, q, **kw: [(nodes["x"], -4.0),
+                                            (nodes["y"], -9.0)],
+                        raising=False)
+    out = m.recall_v3("What language is the billing service in?")
+    assert out["ranked"][0]["text"] == "Alex works on the billing service"
+
+
+def test_one_incidental_token_is_not_enough_to_promote():
+    """"work" appearing in "works from home" is exactly the distractor this
+    is meant to demote -- a single content-token match must not fire."""
+    assert MA._subject_bonus("Where do I work?",
+                             "Alex Reyes works from home") == 0.0
+    assert MA._subject_bonus("What language is the billing service in?",
+                             "the billing service is written in Go") > 0.0
+
+
+def test_the_bonus_needs_a_contentful_query():
+    assert MA._subject_bonus("What is it?", "anything at all") == 0.0
