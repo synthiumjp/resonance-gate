@@ -761,3 +761,82 @@ def test_a_possessed_slot_in_the_present_is_unchanged(ex):
 def test_the_verbal_perfect_is_untouched(ex):
     out = texts(ex, "I've worked at Acme for two years.")
     assert any("has worked at Acme" in p for p in out), out
+
+
+# ---- O. a finite aux agrees with its HEAD's shifted subject (e264) -------
+# UD attaches a subject to the head VERB, not to the aux, so the agreement
+# rule -- which asks for the token's OWN nsubj -- never fired on a finite aux
+# inside a rendered span: "The support you've received" shifted to "The
+# support Martin Mark have received". e243 saw this and queued it
+# ("agreement inside relative clauses is not done"); it is 1.31% of u0.
+
+def test_aux_in_a_relative_clause_agrees_after_the_shift(ex):
+    out = texts(ex, "The support you've received from your network is a "
+                    "powerful force.", role="assistant")
+    assert any("Martin Mark has received" in p for p in out), out
+    assert not any("Mark have received" in p for p in out), out
+    assert not any("Mark've" in p for p in out), out
+
+
+def test_the_same_holds_for_a_first_person_relative_clause(ex):
+    out = texts(ex, "The insights I've gained have helped me a lot.")
+    assert any("Martin Mark has gained" in p for p in out), out
+
+
+def test_a_main_clause_aux_is_still_agreed(ex):
+    out = texts(ex, "I've worked at Acme for two years.")
+    assert any("has worked at Acme" in p for p in out), out
+
+
+def test_an_aux_whose_head_subject_is_not_shifted_is_left_alone(ex):
+    """Only a subject the shift rewrites triggers agreement."""
+    out = texts(ex, "The reports they've filed are late.", role="user")
+    assert not any("they has" in p for p in out), out
+
+
+# ---- P. a question's relative clause is not a fact about the user (e264) --
+# THE MOST SERIOUS DEFECT CLASS: what leaks here is not noise but a plausible
+# FALSE fact. The assistant ASKS "Are there specific workshops you're
+# particularly interested in?" and the store ASSERTED "<owner> is particularly
+# interested in attending". Two escapes: the interrogative climb covered
+# complements only (ccomp/xcomp) and stopped at the antecedent noun, and an
+# existential matrix ("Are there...") has `there` as an expletive so the
+# inversion test never saw a subject to compare against.
+
+def test_a_relative_clause_under_an_existential_question_is_not_asserted(ex):
+    out = texts(ex, "Are there specific workshops or seminars you're "
+                    "particularly interested in attending?", role="assistant")
+    assert out == [], out
+
+
+def test_a_relative_clause_under_a_plain_existential_question(ex):
+    out = texts(ex, "Are there specific strategies you plan to employ to "
+                    "maintain this balance?", role="assistant")
+    assert out == [], out
+
+
+def test_a_subject_position_wh_question_is_not_stored_verbatim(ex):
+    """No subject-aux inversion to detect, and the wh-word is a DETERMINER of
+    the subject rather than the subject itself."""
+    out = texts(ex, "What specific aspects of relaxation are most important "
+                    "to you?", role="assistant")
+    assert out == [], out
+
+
+def test_a_presupposition_still_survives_its_question(ex):
+    """e235's designed behaviour: an advcl under a question is presupposed,
+    not asked. Broadening the climb must not take this with it."""
+    out = texts(ex, "Since you moved to Albi, how are you settling in?",
+                role="assistant")
+    assert any("moved to Albi" in p for p in out), out
+
+
+def test_an_ordinary_relative_clause_is_untouched(ex):
+    out = texts(ex, "I bought a car, which was expensive.")
+    assert any("bought a car" in p for p in out), out
+
+
+def test_a_statement_before_a_question_still_extracts(ex):
+    out = texts(ex, "You mentioned you work at Acme. Is that right?",
+                role="assistant")
+    assert any("works at Acme" in p for p in out), out

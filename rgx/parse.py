@@ -301,6 +301,23 @@ class _S:
             if owner and t.upos in ("VERB", "AUX"):
                 sub = next(iter(self.children(t, ("nsubj", "nsubj:pass"))),
                            None)
+                # e264: AN AUX HAS NO nsubj OF ITS OWN -- UD attaches the
+                # subject to the head VERB. The rule below asks for the
+                # token's own nsubj, so a finite aux inside a span was never
+                # agreed: "The support you've received" shifted to "The
+                # support Martin Mark have received". e243 saw this and
+                # queued it ("agreement inside relative clauses is not
+                # done"); it is 1.31% of u0 records.
+                if sub is None and t.deprel in ("aux", "aux:pass"):
+                    headw = self.w.get(t.head)
+                    if headw is not None:
+                        hsub = next(iter(self.children(
+                            headw, ("nsubj", "nsubj:pass"))), None)
+                        if (hsub is not None
+                                and hsub.text.lower() in shifted):
+                            parts.append(_expand_clitic(
+                                _third(t.text, t.lemma, t.feats), t.lemma))
+                            continue
                 # An auxiliary carries the finiteness, so the verb under it
                 # stays bare: "how I might measure" must not become "might
                 # measures". The aux itself is agreed if it needs it, and
@@ -391,11 +408,42 @@ def _interrogative(s, head, subj, is_question):
     """
     if "PronType=Int" in (head.feats or "") or "PronType=Int" in (subj.feats or ""):
         return True
+    # e264: a SUBJECT-POSITION wh-question has no inversion to detect and the
+    # wh-word is a DETERMINER of the subject, not the subject itself: "What
+    # specific aspects of relaxation are most important to you?" stored the
+    # question verbatim as a fact.
+    if is_question and any("PronType=Int" in (c.feats or "")
+                           for c in s.children(subj)):
+        return True
     if is_question:
         av = s.children(head, ("aux", "aux:pass", "cop"))
         if av and min(a.id for a in av) < subj.id:
             return True
+        # e264: in an EXISTENTIAL question the inverted element IS the head
+        # verb -- "Are there specific workshops...?" has no separate aux for
+        # the test above to find, so the matrix clause itself was emitted as
+        # "Are there specific workshops ... <owner> are particularly
+        # interested in attending". Head precedes subject, plus an expletive,
+        # is the inversion.
+        if head.id < subj.id and next(iter(s.children(head, ("expl",))), None):
+            return True
     return False
+
+
+# e264: a relative or adverbial clause hanging off a QUESTION is not an
+# assertion either. The climb used to cover complements only (ccomp/xcomp),
+# so "Are there specific workshops [that] you're interested in?" leaked its
+# relative clause out as a fact about the user. This is the same class the
+# e242 frame rule exists for -- the assistant's words becoming the user's
+# memories -- and it is the most serious defect class in the store, because
+# what it produces is not noise but a plausible FALSE fact.
+# NOT advcl: an adverbial clause under a question is a PRESUPPOSITION and
+# must survive it -- "Since you moved to Albi, how are you settling in?" still
+# yields "<owner> moved to Albi" (e235's designed behaviour, see
+# _interrogative). A relative clause is different: "Are there specific
+# workshops you're interested in?" QUESTIONS the noun phrase its relative
+# clause modifies, so the clause is asked, not presupposed.
+INTERROG_CHAIN = ("ccomp", "xcomp", "acl", "acl:relcl")
 
 
 def _ancestor_interrogative(s, head, is_question):
@@ -405,13 +453,22 @@ def _ancestor_interrogative(s, head, is_question):
     though the complement clause itself shows no subject-aux inversion --
     that inversion happened one clause up, on "think"."""
     node = head
-    while node.deprel in ("ccomp", "xcomp"):
+    for _ in range(6):                      # bounded: chat clauses are shallow
         parent = s.w.get(node.head)
         if parent is None:
             return False
         psubj = next(iter(s.children(parent, ("nsubj", "nsubj:pass"))), None)
         if psubj is not None and _interrogative(s, parent, psubj, is_question):
             return True
+        # e264: an EXISTENTIAL interrogative matrix ("Are there specific
+        # workshops...?") has `there` as an expletive, not an nsubj, so the
+        # inversion check above never sees a subject to compare against.
+        if is_question and next(iter(s.children(parent, ("expl",))), None):
+            return True
+        # An advcl ancestor is a presupposition boundary -- do not inherit a
+        # question across one.
+        if parent.deprel == "advcl":
+            return False
         node = parent
     return False
 
@@ -741,7 +798,7 @@ def extract_keyed(text, nlp, owner=None, role="user",
                 continue
             if _interrogative(s, head, subj, is_q):
                 continue
-            if head.deprel in ("ccomp", "xcomp") and \
+            if head.deprel in INTERROG_CHAIN and \
                     _ancestor_interrogative(s, head, is_q):
                 continue
             cop = next(iter(s.children(head, ("cop",))), None)
