@@ -1,5 +1,5 @@
-"""sourcedrecall MCP server (stdio). Exposes four tools over the Resonance
-Gate rg-1.1 VSA substrate, plus six profile_* tools (dogfood-v1) that bridge
+"""sourcedrecall MCP server (stdio). Exposes four substrate tools over the Resonance
+Gate rg-1.1 VSA substrate, plus nine profile_* tools (dogfood-v1) that bridge
 the p2 world/profile memory (experiments/p2) in as a read+correct+rehydrate+
 ingest slice — see sourcedrecall/profile_memory.py. NO language model
 anywhere in this server, ingestion included — no mouth, no extractor that

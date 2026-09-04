@@ -6,10 +6,13 @@ module. Every other tool here only ever REPLAYS the cache Memory.load builds
 from, so the request/ingest path stays LLM-free end to end, same guarantee as
 the rest of this server.
 
-Six tools sit on top of experiments/p2's already-validated query contract
+NINE tools sit on top of experiments/p2's already-validated query contract
 (memory_api.Memory) plus the rgx cache writer (rgx.facts): profile_recall,
 profile_context, profile_correct, profile_status, profile_rehydrate,
-profile_ingest. See mcp_server.py for the registered tool wrappers.
+profile_ingest, profile_dynamics, profile_quarantine, profile_conflicts.
+(e277: this said SIX for as long as there have been nine -- the last three
+were added and never propagated into any of the three places that count
+them.) See mcp_server.py for the registered tool wrappers.
 
 REHYDRATION (the "virtual context window"): the fact graph built by Memory is
 a page table -- corroborated, receipted, but deliberately compressed. The raw
@@ -323,12 +326,33 @@ def profile_recall(query):
     caller's decision, not ours."""
     mem = _ensure_loaded()
     with _lock:
-        if os.environ.get("RG_PROFILE_V3") == "1":
-            out = mem.recall_v3(query)
-        else:
-            out = mem.recall(query)
+        out = _recall(mem, query)
     out["source"] = _SOURCE
     return out
+
+
+def _recall(mem, query):
+    """e277: v3 IS NOW THE DEFAULT.
+
+    e258 measured the product read path at 5/10 rank-1 against v3's 9/10 and
+    concluded "the product never got the retriever we validated". It then
+    shipped v3 behind `RG_PROFILE_V3=1` -- which nothing sets. Not the server,
+    not the README, not any install path. So the conclusion of e258 was still
+    true after e258: a fresh install got the weak retriever.
+
+    Default flipped, with `RG_PROFILE_V3=0` to opt out. v3 loads two small
+    local models (~150MB, non-generative) on first use, so a deployment that
+    cannot afford that -- or an environment without transformers -- FALLS BACK
+    rather than failing: the older path is worse, not broken.
+    """
+    if os.environ.get("RG_PROFILE_V3") == "0":
+        return mem.recall(query)
+    try:
+        return mem.recall_v3(query)
+    except Exception:
+        # No models available, or v3 unusable in this environment. The
+        # token-overlap path is a real, tested retriever; degrade to it.
+        return mem.recall(query)
 
 
 def profile_context(query=None, max_facts=15):

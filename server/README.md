@@ -12,12 +12,24 @@ deviation log, and the collision-fix result; swap in the Zenodo DOI here once
 minted). sourcedrecall is the product shipped from that substrate; the
 research artifact and paper keep the Resonance Gate name.
 
-There is **no language model in the request path** — no mouth, no
-extractor, no judge. The only model anywhere in the server is the
-registry's MiniLM sentence-embedding **encoder**: a deterministic
-string→vector map, non-generative, loaded lazily the first time a novel
-string is written. It cannot generate text and it cannot hallucinate a
-fact — this is a correctness property, not just a feature.
+**No GENERATIVE model is in the request path** — no mouth, no extractor, no
+judge. Nothing in this server can write a sentence, so nothing in it can
+invent a fact. That is the correctness property, and it holds.
+
+The precise claim, corrected (e277 — the previous wording said MiniLM was the
+only model anywhere, and that has not been true for some time):
+
+| model | where | what it does |
+|---|---|---|
+| MiniLM sentence-encoder | registry writes | string→vector, deterministic |
+| `bge-small` + `ms-marco-MiniLM` cross-encoder | `profile_recall` / `profile_context` retrieval (default since e277) | ranks stored facts |
+| `nli-deberta-v3-xsmall` | `profile_conflicts`, and `profile_context` via `conflicts()` | decides whether two stored values contradict |
+
+All three are **non-generative classifiers/encoders**: they score or embed
+text that is already stored, and none can emit a token of prose. Set
+`RG_PROFILE_V3=0` to drop the retrieval pair (falls back to pure-python token
+overlap) and `RG_NLI=0` to drop the NLI (conflict detection falls back to the
+lexical path). With both set, MiniLM really is the only model present.
 
 > Stores explicit structured facts you write. Does NOT extract facts from
 > conversation (no LLM inside — nothing to hallucinate). Detects

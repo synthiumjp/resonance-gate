@@ -1,4 +1,4 @@
-"""The MCP wiring: the four substrate tools plus the five profile_* (p2
+"""The MCP wiring: the four substrate tools plus the nine profile_* (p2
 memory bridge) tools registered, and a call through the registered tool
 round-trips to the substrate."""
 

@@ -100,7 +100,9 @@ SESSIONS = [
   {"role": "user", "content":
    "I use Postgres, which I learned last year."},
   {"role": "user", "content":
-   "I like it a lot actually."}],
+   "I like it a lot actually."},
+  {"role": "user", "content":
+   "I have a dog and a cat at home."}],
 
  # --- session 4: THE USER'S WORLD, not the user's profile -------------------
  # People already KNOW the facts about themselves. What they need a memory for
@@ -191,8 +193,20 @@ UNSEEN = [
     "Do I have any children?", "What is my blood type?",
     "Where did I go to university?", "What is my favourite film?",
     "What city was I born in?", "What is my salary?",
-    "What instrument do I play?", "Which gym do I go to?",
-    "When is my birthday?",
+    "Which gym do I go to?", "When is my birthday?",
+]
+
+# HEARSAY-ONLY: the ASSISTANT mentioned it and the user never confirmed it.
+# Not abstention -- UNSEEN above means "never mentioned by ANYONE", and the
+# assistant is somebody. e249 settled this on the other read path: the memory
+# HAS seen the topic, it just holds no assertion. It must come back LABELED,
+# never as the user's own fact.
+#
+# `check_probes()` did not catch this one, because "play" sits in its
+# stopword list -- a judgement call made to stop false alarms, which also
+# hides real contamination. Worth knowing about the guard.
+HEARSAY_ONLY = [
+    ("What instrument do I play?", "cello"),
 ]
 
 # KNOWN LIMITATION, deliberately NOT counted as abstention: a question about
@@ -281,11 +295,31 @@ def check_probes():
     import re
     bad = []
     stale = {s.lower() for _, _, s in CURRENCY}
+    corpus_l = " ".join(t["content"].lower()
+                        for sess in SESSIONS for t in sess)
     for q, needle in ANSWERABLE.items():
         for st in stale:
             if st in needle.lower():
                 bad.append(f"ANSWERABLE {q!r} wants {needle!r}, which CURRENCY "
                            f"lists as superseded")
+        # e277: THE CHECK THAT WOULD HAVE CAUGHT THE PETS PROBE. "Do I own any
+        # pets?" wanted "dog"; the corpus contained no dog, no cat and no pet.
+        # It was moved from UNSEEN to ANSWERABLE on my belief that the corpus
+        # mentioned one -- that was a TEST FILE, not the corpus -- and it then
+        # ran as a permanent false miss AND was written up in the notebook as
+        # a real capability gap. A needle must have lexical support in the
+        # corpus, or it is a probe for a fact that does not exist.
+        nt = [t for t in re.findall(r"[a-z]+", needle.lower()) if len(t) > 2]
+        # ALL tokens, not ANY: a needle is quoted from a record, so every
+        # content word in it should appear in the source. `any` let one
+        # incidental match excuse the whole needle -- "Kind of Blue" passed
+        # because the corpus says "kind of", which is precisely how the pets
+        # probe survived.
+        missing = [t for t in nt if not re.search(rf"\b{t}", corpus_l)]
+        if nt and missing:
+            bad.append(f"ANSWERABLE {q!r} wants {needle!r}: {missing} appear "
+                       f"NOWHERE in the corpus -- a probe for a fact that "
+                       f"does not exist")
     corpus = " ".join(t["content"].lower()
                       for sess in SESSIONS for t in sess)
     # Generic question nouns are not topics: "What is my blood TYPE" is about
@@ -298,8 +332,10 @@ def check_probes():
                  play am be been there thing type kind sort favourite favorite
                  name number""".split())
     for q in UNSEEN:
+        # e277: was `len(t) > 3`, which silently excluded every three-letter
+        # topic -- gym, car, dog, job. The exact words this check exists for.
         toks = {t for t in re.findall(r"[a-z]+", q.lower())
-                if t not in common and len(t) > 3}
+                if t not in common and len(t) >= 3}
         hit = [t for t in toks if re.search(rf"\b{t}s?\b", corpus)]
         if hit:
             bad.append(f"UNSEEN {q!r} mentions {hit} -- the corpus talks about it")

@@ -1,0 +1,45 @@
+{
+  "model": "llamacpp:/usr/share/ollama/.ollama/models/blobs/sha256-a8cc1361f3145dc01f6d77c6c82c9116b9ffe3c97b34716fe20418455876c40e",
+  "n": 60,
+  "tp": 38,
+  "fp": 0,
+  "fn": 0,
+  "tn": 22,
+  "precision": 1.0,
+  "recall": 1.0,
+  "by_class": {
+    "clean_template": {
+      "n": 10,
+      "correct": 10
+    },
+    "clean_leadin": {
+      "n": 8,
+      "correct": 8
+    },
+    "direct": {
+      "n": 10,
+      "correct": 10
+    },
+    "negation": {
+      "n": 8,
+      "correct": 8
+    },
+    "implication": {
+      "n": 8,
+      "correct": 8
+    },
+    "temporal": {
+      "n": 8,
+      "correct": 8
+    },
+    "attribution": {
+      "n": 4,
+      "correct": 4
+    },
+    "tricky_negative": {
+      "n": 4,
+      "correct": 4
+    }
+  },
+  "parse_errors": 0
+}

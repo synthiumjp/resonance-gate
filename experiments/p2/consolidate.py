@@ -26,6 +26,7 @@ Three mechanisms, one per source paper:
 The abstraction step is the ONLY part that calls a model, it runs offline
 (idle-time), and it never touches the answer path.
 """
+import os
 import json
 from collections import defaultdict
 
@@ -252,6 +253,12 @@ def _nli():
     """Lazy-load; returns None if transformers is unavailable so callers can
     fall back to the lexical path rather than failing."""
     global _NLI
+    if os.environ.get("RG_NLI") == "0":
+        # e277: an explicit opt-out. `conflicts()` is reached from
+        # `context_block()` on EVERY call, so a deployment that needs the
+        # "no transformer in the request path" guarantee can have it -- at the
+        # cost of conflict detection falling back to the lexical path.
+        return None
     if _NLI is None:
         try:
             import warnings

@@ -80,7 +80,19 @@ _RV3 = _LazyRV3()
 # sample on one synthetic store. Re-derive on held-out questions before
 # quoting it. What transfers is that an absolute floor on the cross-encoder
 # score is the right mechanism, not that it is -7.83.
-FLOOR_V3 = -7.83
+# e277: MEASURED INERT, AND COSTLY. With grounding on (the shipped default),
+# sweeping this from -9.5 to -6.0 leaves abstention at exactly 9/9 the whole
+# way; disabling it entirely leaves abstention 9/9 AND recovers a true answer
+# (pool 24/26 -> 25/26). Grounding accounts for 100% of the abstention
+# property on this store; the floor accounts for none of it and suppresses
+# one real fact.
+#
+# e274/e275 described the two as "independent signals, both pulling weight".
+# That was true when written -- of the 14-node store -- and stopped being true
+# without anyone re-checking. Default is now None (off). The mechanism stays,
+# because 5o's argument cuts both ways: grounding is also unvalidated at
+# scale, and if it fails on a real store this is the belt to re-fasten.
+FLOOR_V3 = None
 
 
 # e274: WHICH PREDICATE KEYS HOLD ONE VALUE.
@@ -382,8 +394,10 @@ class Memory:
         # Gate on the best raw score; then return the pool. This keeps exactly
         # the property that was measured and stops the floor doing a job it
         # was never shown to do.
-        if not scored or max(sc for _, sc in scored) < floor:
-            return self._abstain(query)
+        if not scored:
+            return self._abstain(query, idx)
+        if floor is not None and max(sc for _, sc in scored) < floor:
+            return self._abstain(query, idx)
         # e274: LEXICAL GROUNDING, a second and independent abstention signal.
         #
         # The score floor degrades as the store grows -- max-of-N rises with N
@@ -405,7 +419,7 @@ class Memory:
         if os.environ.get("RG_GROUNDING") != "0":
             if not (_grounded(query, [h for h, _ in scored[:3]])
                     or _dense_grounded(idx, query)):
-                return self._abstain(query)
+                return self._abstain(query, idx)
         kept = list(scored)
         # e272: reorder ONLY what already cleared the floor, then truncate.
         if rerank:
@@ -432,14 +446,63 @@ class Memory:
             if f.get("status") == "unconfirmed-single-mention":
                 unconfirmed.append(f)
         if not facts:
-            return self._abstain(query)
+            return self._abstain(query, idx)
         return {"found": True, "abstain": False, "query": query,
                 "asserted": [f for f in facts if f not in unconfirmed],
                 "ranked": facts, "wired": [],
-                "unconfirmed": unconfirmed, "hearsay": [],
+                "unconfirmed": unconfirmed,
+                "hearsay": self._hearsay_v3(idx, query),
                 "retrieval": "v3", "floor": floor}
 
-    def _abstain(self, query):
+    def _hearsay_v3(self, idx, query, top_n=3):
+        """Assistant claims ABOUT the user, receipted, never asserted.
+
+        e277: this was hardcoded `[]`. The tier built in e246/e249 simply
+        never surfaced on the product path, and `RG_HEARSAY=1` paid the cost
+        of building the sub-index that nothing then read -- the flag was inert
+        where it mattered and worked on the benchmark. FIFTH instance of the
+        pathology ledger 5m names, and the only one I wrote myself.
+        """
+        sub = getattr(idx, "hearsay", None)
+        if sub is None:
+            return []
+        try:
+            hits = _RV3.retrieve_facts_v3(sub, query, k=60, dense_k=10,
+                                          top_n=top_n)
+        except Exception:
+            return []
+        # e277: HEARSAY NEEDS THE SAME GROUNDING GATE AS EVERYTHING ELSE.
+        # `retrieve_facts_v3` returns its top_n by RANK unconditionally, so
+        # without this the cello turns up under "When is my birthday?" -- and
+        # e250 already caught exactly this, appending hearsay to 94.5% of
+        # questions. Re-introduced here the moment the tier was wired in, and
+        # caught only because that entry left tests behind.
+        store = getattr(self.g, "hearsay", {}) or {}
+        out = []
+        for h in hits:
+            nd = store.get(h.get("id"))
+            if nd is None:
+                continue
+            if not (_grounded(query, [h]) or _dense_grounded(sub, query)):
+                continue
+            out.append(self._fact(nd))
+        return out
+
+    def _abstain(self, query, idx=None):
+        """e277: HEARSAY-ONLY IS NOT ABSTENTION.
+
+        e249 established this on the other read path: if the assistant said
+        something about the user and the user never confirmed it, the memory
+        HAS seen the topic -- it just holds no assertion. Saying "never seen"
+        there is false, and it throws away a receipt the caller may want.
+        recall_v3 abstained before ever consulting the hearsay tier."""
+        hs = self._hearsay_v3(idx, query) if idx is not None else []
+        if hs:
+            return {"found": False, "abstain": False, "query": query,
+                    "asserted": [], "ranked": [], "wired": [],
+                    "unconfirmed": [], "hearsay": hs, "retrieval": "v3",
+                    "note": ("hearsay only: an assistant claim about the "
+                             "user, never asserted by the user")}
         return {"found": False, "abstain": True, "query": query,
                 "answer": "no stored fact matches -- never seen"}
 
@@ -658,9 +721,14 @@ class Memory:
     def _recall_for_context(self, query):
         """Same retriever the product's recall uses, so the injected block and
         an explicit profile_recall never disagree about what is stored."""
-        if os.environ.get("RG_PROFILE_V3") == "1":
+        # e277: v3 is the DEFAULT here too, so the injected context block and
+        # an explicit profile_recall cannot disagree about which retriever ran.
+        if os.environ.get("RG_PROFILE_V3") == "0":
+            return self.recall(query)
+        try:
             return self.recall_v3(query)
-        return self.recall(query)
+        except Exception:
+            return self.recall(query)
 
     def provisional_profile(self, top=40):
         """Single-mention facts, most-evidenced first. Receipted, and NEVER

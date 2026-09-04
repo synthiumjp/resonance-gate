@@ -117,8 +117,23 @@ def test_the_floor_comes_from_the_environment_when_unset(monkeypatch, mem):
     assert mem.recall_v3("q")["abstain"] is False
 
 
-def test_the_default_floor_is_the_documented_pilot_value():
-    assert MA.FLOOR_V3 == -7.83
+def test_the_floor_is_OFF_by_default(monkeypatch, mem):
+    """e277 REVERSES e260/e274. The floor was measured INERT with grounding
+    on -- sweeping it -9.5..-6.0 left abstention at exactly 9/9 throughout,
+    and disabling it recovered a true answer. It was described as one of two
+    signals "both pulling weight"; that was true of a 14-node store and
+    stopped being true without anyone re-checking. The mechanism stays for
+    when grounding proves insufficient at scale."""
+    assert MA.FLOOR_V3 is None
+    _stub(monkeypatch, mem, [("a", -50.0)])
+    monkeypatch.setattr(MA, "_grounded", lambda *a, **k: True)
+    monkeypatch.setattr(MA, "_dense_grounded", lambda *a, **k: True)
+    assert mem.recall_v3("What am I allergic to?")["abstain"] is False
+
+
+def test_an_explicit_floor_is_still_honoured(monkeypatch, mem):
+    _stub(monkeypatch, mem, [("a", -50.0)])
+    assert mem.recall_v3("q", min_score=-7.83)["abstain"] is True
 
 
 # ---- e272: the floor gates ABSTENTION, the re-rank orders what survives ---

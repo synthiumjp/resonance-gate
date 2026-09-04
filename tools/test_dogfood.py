@@ -169,3 +169,32 @@ def test_a_multi_valued_slot_raises_NO_ask(store_v3):
            if any(c["attribute"].lower().startswith(f)
                   for f in DF.CONFLICTS_FORBIDDEN)]
     assert not bad, f"false asks on multi-valued slots: {bad}"
+
+
+# ---- HEARSAY reaches the product path (e277) -----------------------------
+
+@pytest.mark.parametrize("q,needle", DF.HEARSAY_ONLY, ids=[c[0] for c in DF.HEARSAY_ONLY])
+def test_hearsay_is_returned_labeled_not_as_the_users_own_fact(store_v3, q, needle):
+    """recall_v3 hardcoded `hearsay: []` -- the tier built in e246/e249 never
+    surfaced on the product path at all, and RG_HEARSAY paid to build an index
+    nothing read. Fifth instance of the one-path pathology (ledger 5m)."""
+    import os
+    if os.environ.get("RG_HEARSAY") != "1":
+        pytest.skip("hearsay tier is opt-in; RG_HEARSAY=1 to exercise it")
+    pmem, _ = store_v3
+    out = pmem.profile_recall(q)
+    hs = [f["text"] for f in (out.get("hearsay") or [])]
+    assert any(needle in h.lower() for h in hs), hs
+    assert not any(needle in f["text"].lower()
+                   for f in (out.get("asserted") or [])), "asserted as fact"
+
+
+def test_a_hearsay_only_topic_is_not_reported_as_never_seen(store_v3):
+    """e249: hearsay-only is NOT abstention. The memory has seen the topic."""
+    import os
+    if os.environ.get("RG_HEARSAY") != "1":
+        pytest.skip("hearsay tier is opt-in")
+    pmem, _ = store_v3
+    out = pmem.profile_recall("Do I play the cello?")
+    assert out.get("abstain") is False
+    assert out.get("found") is False        # seen, but nothing ASSERTED

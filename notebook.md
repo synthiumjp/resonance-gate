@@ -13871,3 +13871,99 @@ measurements said for several entries.
 The honest read of today: **the product improved less than the scorecard
 movement suggests, and was better than it looked to begin with.** The
 self-check is the structural answer; the habit it guards against is mine.
+
+---
+
+## Entry 276/277 — 2026-09-04 (p2: an adversarial review found SEVEN false-fact classes the six-axis harness could not see, and two of them were inversions.)
+
+Four sonnet reviewers, non-overlapping briefs, all told to verify by running
+code. **Ninety minutes found more false-fact classes than a full day of
+building measurement.** PURITY read 21/21 and ABSTENTION 9/9 throughout.
+
+### The two inversions (e276)
+
+    "WilsonRobert is not a fan of jazz."   -> "WilsonRobert IS a fan of jazz"
+    "The billing service is not written in Go." -> "...IS written in Go"
+
+`drop` carries `negdrop`; the `is_self` and possessed branches compensate with
+a literal `"not "` prefix. The third-party and world branches render verbatim
+and had **no such prefix**, so the negation was deleted. Latent since e240 for
+third parties — **I widened it into a new path with e269 this morning.**
+
+Second: `"that"` is both a RELPRON and a `_PRON_SUBJ`, so in a SUBJECT
+relative clause the token ids collide and e269's world-carry overwrote e259's
+antecedent — "a disease that affects millions" became **"a doctor affects
+millions"**.
+
+### The rest (e276b)
+
+| | stored | |
+|---|---|---|
+| past copular | `is very anxious during college` | beside "feels much calmer now" from the same turn |
+| future copular | `is a manager next year` | |
+| "If only I had studied medicine" | `had studied medicine` | exact inversion of the regret |
+| "Even if it's raining, I always run" | *nothing* | main clause suppressed with the if-clause |
+| "My friend has a cat. It is playful." | `friend is very playful` | wrong entity |
+| "I wonder what city I moved to" | `moved what city to` | |
+
+**Found while fixing, and worse than what I was looking for:** `_content`
+drops 2-character tokens from the SOURCE side of grounding, so `"go"` was
+invisible and the shift's `"goes"` read as *invented content*. **"I go to the
+gym on Tuesdays" produced nothing at all.** Silent, on any short verb.
+
+**One fix REVERTED.** The indirect-question rule first fired on any wh-word
+and broke five tests: this codebase deliberately keeps wh-clauses under a
+declarative, and e235/e237 tested that intent. One adversarial example is not
+grounds for overturning tested design.
+
+### The audits (e277)
+
+- **`FLOOR_V3` was inert AND costly.** Sweeping −9.5..−6.0 left abstention at
+  exactly 9/9 throughout; disabling it entirely left 9/9 and *recovered a true
+  answer*. e274/e275 called the floor and grounding "two independent signals,
+  both pulling weight" — true of a 14-node store, false since, unchecked.
+  **Default is now None.** The mechanism stays: §5o cuts both ways, and
+  grounding is equally unvalidated at scale.
+- **`recall_v3` hardcoded `hearsay: []`** — the tier from e246/e249 never
+  surfaced on the product path, and `RG_HEARSAY=1` paid to build an index
+  nothing read. **Fifth instance of the §5m pathology, and the only one I
+  wrote myself.** Wiring it in immediately re-introduced e250's defect (the
+  cello answering "When is my birthday?"), caught only because e250 left tests.
+- **`RG_PROFILE_V3` was set NOWHERE.** e258 concluded "the product never got
+  the retriever we validated" and then shipped the fix behind a flag no
+  install path sets — so e258's conclusion was still true after e258. **v3 is
+  now the default**, with fallback rather than failure where models are absent.
+- **"No language model in the request path" was false.** `context_block` calls
+  `conflicts()` on every invocation → an NLI transformer. The *safety*
+  property holds (all three models are non-generative; none can emit prose),
+  the *claim* did not. README corrected with a table; `RG_NLI=0` added.
+- **`check_probes()` had the blind spots it was built to close**: a `len > 3`
+  filter that excluded gym/car/dog/job, and an `any()` that let one incidental
+  token excuse a whole needle. Both fixed; verified against constructed bad
+  probes.
+
+### CORRECTION to e275
+
+e275 said: *"Two genuine gaps remain, both pure paraphrase: 'Do I own any
+pets?' (store says dog and cat)..."* — **this was false.** The corpus
+contained no dog, cat or pet; I moved the probe from UNSEEN to ANSWERABLE
+believing otherwise (that was a TEST FILE, not the corpus), and then wrote the
+non-existent store contents into the notebook and reported them. The corpus
+now has the sentence; the guard now refuses a needle with no corpus support.
+
+| axis | |
+|---|---|
+| RECALL | 20/26 rank-1, **26/26 in pool** |
+| ABSTENTION | 9/9 |
+| PURITY | 21/21 |
+| CURRENCY | 3/3, 3/3 |
+| CONFLICT | 1/1, 0 false |
+
+Suites 569 (43 more with `RG_HEARSAY=1`).
+
+### What this says about the method
+
+The axes test what I thought to test. They cannot find what I did not think
+of, and **six of them at 100% told me nothing about seven live false-fact
+classes.** Adversarial review is not a one-off audit to run at the end; on
+this evidence it finds more per hour than building another measurement axis.
