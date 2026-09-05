@@ -444,7 +444,13 @@ def process_user(idx, user_data, cache_dir=DEFAULT_CACHE_DIR):
                 mem, mpt["memory_content"],
                 index=_index() if _UPDATE_V3 else None)
 
-        if "questions" not in session:
+        # RG_SKIP_QA (2026-09-06): an EXTRACTION-ONLY row. Answer generation
+        # is ~40% of a compose night and every answer is a judge call; a
+        # variant that changes only what is stored does not need either.
+        # Sessions are emitted WITHOUT a "questions" key, so evaluation.py
+        # scores extraction + update and skips QA. Never compare such a
+        # row's QA fields to a full row -- there are none.
+        if "questions" not in session or os.environ.get("RG_SKIP_QA") == "1":
             new_user_data["sessions"].append(new_session)
             continue
 

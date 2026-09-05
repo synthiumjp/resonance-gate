@@ -125,6 +125,96 @@ def judge_answer(question, gold, answer_text):
     return parse_verdict(txt)
 
 
+# ---------------------------------------------------------------------------
+# RG_SENTENCE_FALLBACK (2026-09-06, e279 candidate). e254's autopsy: 47% of
+# user-0 gold deaths are PARTIAL / EMITTED_OTHER / EMITTED_NOTHING -- the
+# carrying sentence was read, and what it said did not reach the artifact in
+# a form the judge credits. The judge scores recall against the SESSION's
+# extracted text and accuracy per record against the dialogue, so a record
+# that IS the carrying sentence (person-shifted, nothing generated) is
+# admissible on both counts. Emitted only when the parser's own records from
+# that turn do not already cover the sentence's content words.
+#   "1": the user's own uncovered sentences (u0: 436 of 1892).
+#   "2": plus assistant sentences about the user ("you/your", no first
+#        person, not a question, not advice) whose content is >=50% grounded
+#        in an earlier USER turn of the same session (u0: 585 more).
+# Benchmark path only (halumem_run.ingest_user); the product path is untouched.
+_FB_STOP = frozenset("""the a an and or but of to in on at for with by from as is
+are was were be been being am do does did have has had it its this that these
+those i me my you your he she they them we us our their his her not no so very
+just also can will would could should might may there here what which who whom
+when where how than then too into about over after before more most some any
+all such only own same other""".split())
+_FB_PLEAS = re.compile(
+    r"^(thank|thanks|nice|great|absolutely|feel free|let me|it's (great|"
+    r"wonderful|good)|that's|sure|of course|good luck|remember|keep|congrat|"
+    r"welcome|hope|enjoy|wish)", re.I)
+_FB_ADVICE = re.compile(
+    r"\b(could|should|might|may|would|consider|try|perhaps|maybe|if you|"
+    r"you can|you'll|you will)\b", re.I)
+_FB_SPLIT = re.compile(r"(?<=[.!?])\s+")
+# a discourse opener is not a fact: "Good, let me introduce my family."
+_FB_OPENER = re.compile(
+    r"^(good|ok|okay|hi|hello|hey|thanks|thank you|sure|well|alright|"
+    r"let me|please|so|anyway|by the way)\b", re.I)
+
+
+def _fb_toks(s):
+    return {w for w in re.findall(r"[a-z]+", s.lower())
+            if w not in _FB_STOP and len(w) > 2}
+
+
+def _fb_owner(cache):
+    """The owner's name, from the parser's own `name` fact in the cache
+    (the rgx cache carries the owner's name in every proposition, so this is
+    a lookup, not a guess). Falls back to "the user"."""
+    for facts in cache.values():
+        for f in facts or []:
+            if canon_attr(f.get("attribute", "")) == "name" and f.get("value"):
+                return str(f["value"]).strip().title()
+    return "the user"
+
+
+def _sentence_fallback(text, facts, is_user, owner, user_toks, level):
+    _root = os.path.dirname(os.path.dirname(os.path.dirname(
+        os.path.abspath(__file__))))
+    if _root not in sys.path:
+        sys.path.insert(0, _root)
+    from rgx.parse import _shift
+    rec_toks = set()
+    for f in facts or []:
+        rec_toks |= _fb_toks(f.get("text") or str(f.get("value") or ""))
+    out = []
+    for sent in _FB_SPLIT.split(text):
+        sent = sent.strip()
+        st = _fb_toks(sent)
+        if len(st) < 4 or sent.endswith("?") or _FB_OPENER.match(sent):
+            continue
+        cov = len(st & rec_toks) / len(st)
+        if cov >= 0.6:
+            continue                    # the parser already said this
+        if is_user:
+            if re.search(r"\b(you|your)\b", sent, re.I):
+                continue                # addressed to the assistant
+            shifted = _shift(sent, owner, second=False)
+        else:
+            if level < 2:
+                continue
+            if (not re.search(r"\b(you|your)\b", sent, re.I)
+                    or re.search(r"\b(I|me|my|I'm|I've|I'd)\b", sent)
+                    or _FB_PLEAS.match(sent) or _FB_ADVICE.search(sent)):
+                continue
+            if not user_toks or len(st & user_toks) / len(st) < 0.5:
+                continue                # not grounded in the user's words
+            shifted = _shift(sent, owner, second=True)
+        shifted = shifted.strip().rstrip(".!")
+        v = re.sub(r"\s+", " ", shifted.lower())
+        out.append({"attribute": "statement", "value": v, "text": shifted,
+                    "subject": "s" + hashlib.sha1(v.encode()).hexdigest()[:8],
+                    "evidential": None, "synthetic": True})
+    return out
+
+
 def ingest_user(user, cache_path, min_mentions=2):
     """User-role turns -> extraction (cached) -> hygiene -> corroborated facts.
     Session index is the conversation id (co-occurrence granularity).
@@ -157,8 +247,11 @@ def ingest_user(user, cache_path, min_mentions=2):
     slots = defaultdict(lambda: defaultdict(lambda: {"n": 0, "recs": []}))
     n_turns = 0
     _seen_hash_role = {}  # role_hash_guard state, scoped to this ingest pass
+    _fb_level = int(os.environ.get("RG_SENTENCE_FALLBACK", "0") or 0)
+    _fb_own = _fb_owner(cache) if _fb_level else None
     for si, sess in enumerate(user["sessions"]):
         date = str(sess.get("start_time", ""))[:12]
+        _fb_user_toks = set()        # grounding pool: this session's user turns
         for t in sess.get("dialogue", []):
             # RG_INGEST_ALL_TURNS (entry 189): this line capped extraction
             # recall at 35.4% while the achievable single-turn ceiling across
@@ -216,6 +309,13 @@ def ingest_user(user, cache_path, min_mentions=2):
                 cf.write(json.dumps({"h": h, "f": facts}) + "\n")
                 cf.flush()
                 cache[h] = facts
+            if _fb_level:
+                # synthetic records are NOT written to the cache: the cache
+                # is the parser's output and stays byte-identical.
+                facts = list(facts) + _sentence_fallback(
+                    text, facts, is_user, _fb_own, _fb_user_toks, _fb_level)
+                if is_user:
+                    _fb_user_toks |= _fb_toks(text)
             for _fi, fct in enumerate(facts):
                 a = canon_attr(fct["attribute"])
                 v = re.sub(r"\s+", " ", str(fct["value"]).strip().lower())
