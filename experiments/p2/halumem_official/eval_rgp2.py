@@ -41,6 +41,15 @@ import time
 _P2 = "/home/jp/rg/experiments/p2"
 if _P2 not in sys.path:
     sys.path.insert(0, _P2)
+# 2026-09-06: this file is reached through a SYMLINK from HaluMem/eval/, and
+# Python puts the symlink's RESOLVED directory on sys.path[0], not the
+# directory the harness runs from -- so the harness-local `llms` / `prompts`
+# modules were not importable and the chain died on line 58 in under a
+# second. The judge then "passed" on cached results. Put the launch directory
+# back where a plain script would have had it.
+_CWD = os.getcwd()
+if os.path.exists(os.path.join(_CWD, "llms.py")) and _CWD not in sys.path:
+    sys.path.insert(0, _CWD)
 
 # v4 (events/plans) extraction schema -- matches the caches we were given
 # (cache_u{i}_v4.jsonl, one per HaluMem-Medium user, covering every turn).
