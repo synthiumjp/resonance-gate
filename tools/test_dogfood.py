@@ -197,4 +197,10 @@ def test_a_hearsay_only_topic_is_not_reported_as_never_seen(store_v3):
     pmem, _ = store_v3
     out = pmem.profile_recall("Do I play the cello?")
     assert out.get("abstain") is False
-    assert out.get("found") is False        # seen, but nothing ASSERTED
+    # Review 2026-09-05: `found` means the memory has SEEN the topic -- the
+    # contract `recall()` has carried since e246 and the one
+    # server/tests/test_profile_ingest.py asserts. e277 wrote False here and
+    # the two retrievers disagreed on the one field a caller branches on.
+    assert out.get("found") is True
+    assert not out.get("asserted")          # seen, but nothing ASSERTED
+    assert out.get("hearsay")

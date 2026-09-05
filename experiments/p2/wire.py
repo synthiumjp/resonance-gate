@@ -519,10 +519,24 @@ class WireGraph:
                         "hearsay": hear, "note": note}
             return {"abstain": True, "query": query,
                     "reason": "no stored fact matches the query"}
-        act = {nid: sc for sc, nid in seeds}
-        path = {nid: [] for _, nid in seeds}
-        hops = {nid: 0 for _, nid in seeds}
-        frontier = [nid for _, nid in seeds]
+        neigh = self.neighbourhood({nid: sc for sc, nid in seeds},
+                                   max_hops=max_hops, decay=decay,
+                                   a_min=a_min, top=top)
+        return {"seeds": [self.nodes[nid] for _, nid in seeds],
+                "neighbourhood": neigh, "provisional": prov,
+                "hearsay": hear}
+
+    def neighbourhood(self, seed_act, max_hops=2, decay=DECAY, a_min=A_MIN,
+                      top=20):
+        """Spread activation from `seed_act` ({node_id: activation}) over the
+        receipted edges and return the activated neighbourhood, seeds
+        excluded, strongest first. Factored out of `spread` (review
+        2026-09-05) so a retriever other than `match` -- recall_v3 -- can
+        seed the same walk instead of hardcoding `wired: []`."""
+        act = {nid: sc for nid, sc in seed_act.items() if nid in self.nodes}
+        path = {nid: [] for nid in act}
+        hops = {nid: 0 for nid in act}
+        frontier = list(act)
         seed_ids = set(frontier)
         for hop in range(1, max_hops + 1):
             nxt = []
@@ -539,9 +553,7 @@ class WireGraph:
                   "hops": hops[nid], "path": path[nid]}
                  for nid in act if nid not in seed_ids]
         neigh.sort(key=lambda d: -d["activation"])
-        return {"seeds": [self.nodes[nid] for _, nid in seeds],
-                "neighbourhood": neigh[:top], "provisional": prov,
-                "hearsay": hear}
+        return neigh[:top]
 
     # ---------------- the acceptance test ----------------
 

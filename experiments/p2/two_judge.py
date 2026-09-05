@@ -42,7 +42,15 @@ if _HERE not in sys.path:
 # here (answers-stage ingest is pure cache replay, never calls extraction)
 # but kept so a future cache MISS would fail loud in the right system, not
 # silently extract under v3 rules.
-os.environ.setdefault("RG_EXTRACT_V4", "1")
+#
+# Review 2026-09-05: ONLY when run as a script. As an import-time side effect
+# this leaked into every process that imported the module -- test_judge_parse
+# imports it, and the leaked flag pointed the SERVER's cache path at a
+# `_v4` file that does not exist, failing 8 server tests whenever the two
+# files shared a pytest run. A library import must not rewrite the
+# environment of the program that imported it.
+if __name__ == "__main__":
+    os.environ.setdefault("RG_EXTRACT_V4", "1")
 
 import halumem_run as HR
 from halumem_run import JUDGE, answer_question, ingest_user

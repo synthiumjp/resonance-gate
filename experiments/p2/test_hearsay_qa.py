@@ -65,6 +65,13 @@ def _restore_patched_modules():
     them at module scope leaks into test_retrieve.py and made three of its
     tests fail depending on file order. Snapshot and restore."""
     saved = []
+    # Review 2026-09-05: `_load` writes RG_RETRIEVE_V3 / RG_EXTRACT_V5 /
+    # RG_HEARSAY straight into os.environ and nothing put them back. The
+    # leaked RG_EXTRACT_V5 made server/tests/test_profile_memory.py look for
+    # a `_v5` cache file and fail 8 tests whenever this file ran first, and
+    # the leaked RG_HEARSAY made the full suite report the same count with
+    # or without the flag. Snapshot the environment too.
+    env = dict(os.environ)
     yield saved
     # REVERSED: a test may patch the same attribute twice, in which case the
     # second snapshot holds the FIRST stub, not the original. Unwinding
@@ -72,6 +79,8 @@ def _restore_patched_modules():
     # the suite -- which is exactly the failure this fixture exists to stop.
     for mod_obj, name, orig in reversed(saved):
         setattr(mod_obj, name, orig)
+    os.environ.clear()
+    os.environ.update(env)
 
 
 def _stub_retrieval(mod, facts, hearsay_facts, saved):

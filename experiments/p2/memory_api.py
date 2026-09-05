@@ -449,10 +449,38 @@ class Memory:
             return self._abstain(query, idx)
         return {"found": True, "abstain": False, "query": query,
                 "asserted": [f for f in facts if f not in unconfirmed],
-                "ranked": facts, "wired": [],
+                "ranked": facts, "wired": self._wired_v3(kept),
                 "unconfirmed": unconfirmed,
                 "hearsay": self._hearsay_v3(idx, query),
                 "retrieval": "v3", "floor": floor}
+
+    def _wired_v3(self, kept):
+        """The receipted co-occurrence neighbourhood of the corroborated hits.
+
+        Review 2026-09-05: recall_v3 hardcoded `wired: []` while the MCP
+        docstring promised the field, and e277 made recall_v3 the default --
+        so the field went dead for every caller on the same day. Seeds are the
+        CORROBORATED hits only (the provisional tier is never wired, by
+        invariant); each seeds at activation 1.0 because cross-encoder logits
+        are not on the [0, 1] scale `spread` assumes."""
+        # Seed from the RANK-1 corroborated hit only. v3 returns a wide pool
+        # (in a small store, every node), so seeding from all hits leaves no
+        # node to be a neighbour and the field is empty exactly where the
+        # old path filled it. "Wired" answers: what is receipted as
+        # co-occurring with THE answer -- the paths carry the edge receipts.
+        walk = getattr(self.g, "neighbourhood", None)
+        top = next((h.get("id") for h, _ in kept
+                    if h.get("id") in self.g.nodes), None)
+        if top is None or walk is None:
+            return []
+        seeds = {top: 1.0}
+        return [{"fact": self._fact(d["node"]),
+                 "activation": round(d["activation"], 3),
+                 "hops": d["hops"],
+                 "via": [{"edge": f"{e['a']} <-> {e['b']}",
+                          "shared_conversations": e["cooc"]}
+                         for e in d["path"]]}
+                for d in walk(seeds)]
 
     def _hearsay_v3(self, idx, query, top_n=3):
         """Assistant claims ABOUT the user, receipted, never asserted.
@@ -498,7 +526,11 @@ class Memory:
         recall_v3 abstained before ever consulting the hearsay tier."""
         hs = self._hearsay_v3(idx, query) if idx is not None else []
         if hs:
-            return {"found": False, "abstain": False, "query": query,
+            # `found` means the memory has SEEN the topic -- same contract as
+            # `recall()`, whose hearsay-only return is found=True. e277 wrote
+            # False here, which made the two retrievers disagree on the one
+            # field a caller branches on (review 2026-09-05).
+            return {"found": True, "abstain": False, "query": query,
                     "asserted": [], "ranked": [], "wired": [],
                     "unconfirmed": [], "hearsay": hs, "retrieval": "v3",
                     "note": ("hearsay only: an assistant claim about the "
@@ -509,9 +541,23 @@ class Memory:
     def _index_v3(self):
         """Cache one IndexV3 per memory state. Invalidated by node count --
         every write path rebuilds the Memory object, so identity is enough."""
-        key = (len(self.g.nodes), len(self.g.provisional))
+        hear = getattr(self.g, "hearsay", {}) or {}
+        key = (len(self.g.nodes), len(self.g.provisional), len(hear))
         if getattr(self, "_v3_key", None) != key:
-            self._v3 = _RV3.IndexV3(self)
+            idx = _RV3.IndexV3(self)
+            # Review 2026-09-05: IndexV3 builds its hearsay sub-index only
+            # under RG_HEARSAY=1 so the BENCHMARK index stays byte-identical
+            # to the banked one. Nothing on the product path sets that flag,
+            # so e277's "hearsay is now wired" was true of a sub-index that
+            # was never built here -- `_hearsay_v3` always saw None. The
+            # product path builds it unconditionally; the benchmark path
+            # (eval_rgp2 -> IndexV3 directly) is untouched.
+            if idx.hearsay is None and hear:
+                try:
+                    idx.hearsay = _RV3.IndexV3(self, facts=list(hear.values()))
+                except Exception:
+                    idx.hearsay = None
+            self._v3 = idx
             self._v3_key = key
         return self._v3
 
