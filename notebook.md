@@ -14045,3 +14045,56 @@ Two Mem0 `.mdx` files and an untested `e5/` sit in the tree from e277.
 
 Suites 627 + 1 (`test_mcp_layer` in `~/rg/.venv`), `server/tests` included
 from now on. Nothing judged. GPU idle throughout; all of this is CPU.
+
+## Entry 279 — 2026-09-06 (p2: JP says chase extraction. The judged baseline is running; the first candidate is a SENTENCE FALLBACK, sized before it was built.)
+
+JP: "I think we can chase. We need to be clever." Ledger §5e has us at
+extraction F1 ~0.56 (u0, own judge) against MemOS 79.7 / MOSAIC 86.8, and
+e189 measured the ceiling: 35% of gold sits in single user turns, 87% across
+both roles. e254's autopsy over all 718 u0 gold points, re-run today against
+the rebuilt cache: 437 deaths (was 481) -- NOT_IN_DIALOGUE 32%, EMITTED_OTHER
+23%, PARTIAL 21%, STORED_BUT_LOST 21%, EMITTED_NOTHING 3%. Reachable deaths
+are carried 56 by user turns, 242 by assistant turns.
+
+### The judge scores sentences, so emit sentences
+
+`evaluation.py`: recall is per gold point against the SESSION's extracted
+text as one block; accuracy is per record against the dialogue. Both admit a
+record that is simply the carrying sentence, person-shifted -- nothing
+generated, the user's (or assistant's) own words. `RG_SENTENCE_FALLBACK` in
+`halumem_run.ingest_user`, benchmark path only, cache untouched:
+
+| gate | u0 count |
+|---|---|
+| user sentences, >=4 content words, not a question, not an opener, parser records cover <60% of content words | 436 of 1892 |
+| assistant sentences with you/your, no first person, not a question, not advice, not a pleasantry, uncovered, >=50% of content words in an earlier USER turn of the session | 585 |
+| assistant sentences already covered by the parser | 2044 |
+
+Level 1 = the first row (the defensible one: the user said it). Level 2 adds
+the second. Over all of u0, level 2 is 806 records, 21% of the artifact, and
+they read like HaluMem gold reads: "Moving towards a career that reflects
+Martin Mark's values and aspirations is a significant achievement." As
+memories they are evaluative fluff; as benchmark records they are the shape
+the gold was written from. The judge decides which. Precision is the risk:
+every record is a judge call and an "is this a fact" verdict.
+
+`RG_SKIP_QA=1` makes an extraction-only row: sessions carry no `questions`
+key, so no answers are generated or judged. Roughly halves a night. Never
+compare such a row's QA block to a full row -- it has none.
+
+### The night
+
+Baseline `qa-rgx4` (full row, current parser, e247 flags, rgx arm first)
+launched 09:01 after two false starts: the eval script is reached through a
+symlink and lost the harness-local `llms` module (fixed, ceb1579), and the
+judge caches per version name so re-using `qa-rgx3` would have judged
+nothing. `qa-llm3` follows as the fixed baseline. Then, automatically, three
+extraction-only variants against `qa-rgx4`: `-fb1`, `-fb2`, `-tl`
+(RG_TEXT_LONGEST, e255's +6.13pt screen, judged confirmation owed since
+then). One variable each. A purpose-built watcher reads the judge server log
+for liveness because the compose log only prints every 25 questions.
+
+Expected: baseline flat (e239/e243 precedent). fb1 recall up a little,
+precision flat. fb2 recall up more, precision down -- how much decides
+whether the assistant's evaluative restatements are a lever or a trap. tl
+confirms or kills a screen.
