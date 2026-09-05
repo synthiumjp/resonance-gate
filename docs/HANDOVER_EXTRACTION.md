@@ -91,171 +91,138 @@ paired comparisons but **not** against someone else's published table.
 
 ---
 
-## 3. Immediate next steps, in order
+## 3. START HERE — state at 2026-09-05, and what to do first
 
-**Session close 2026-09-04 (e249–e277 committed).** The 2026-08-24 list that
-stood here is DONE and has been replaced: step 1 ("build labeled hearsay") was
-built in e249 and corrected in e250.
+**Session closed 2026-09-05 with e249–e277 committed, tree clean, 569 tests
+green** (43 more under `RG_HEARSAY=1`). Nothing is running. No judged run has
+happened since e247 — 28 entries ago, nine of them unconditional parser
+changes.
 
-**THE HEADLINE CHANGE: the PRODUCT read path was never given retrieval v3
-(e258).** Dogfooding the shipped MCP surface, 5 of 8 ordinary questions
-abstained -- including "Where do I work?" when the user said it in turn 1. The
-facts were in the store and correctly rendered; `profile_recall` was running
-token overlap while retrieval v3 (champion since e132) ran only on the
-benchmark QA path. Wiring it in NAIVELY is a regression -- it answers every
-question including all 8 about things never mentioned -- so it ships with an
-absolute cross-encoder score floor (`RG_PROFILE_V3=1`, `FLOOR_V3=-7.83`).
+### 3.0 Read this before touching anything
 
-Resume here:
+- `notebook.md` entries **e257–e277** are the current arc. e276/e277 is the
+  most important: an adversarial review found SEVEN false-fact classes that
+  all six measurement axes scored 100% on.
+- `docs/EXPERIMENT_LEDGER.md` **§5m, §5o, §5p, §5q, §5r** are the laws earned
+  in that arc. They will save you a day each.
 
-0. **THE CACHE IS REBUILT AND WAITING.** `qa_rgx/cache_u0_v5.jsonl.new`
-   (2329 lines, 10 min to build; old banked as `.bak_e247`). Diff of the two:
-   **41% of turns changed output**, raw fact count -17.5%, but by SLOT it is
-   635 gone / 756 added / 322 rephrased = **net +121**. Move `.new` into place
-   before running. The chain runs both arms in ~10.5h; e247's flags; parser as
-   the single variable. NOTE (e277 audit): `eval_rgp2.py` calls
-   `retrieve_facts_v3` directly, so the judged row measures the PARSER and
-   none of recall_v3's floor/grounding/rerank/stale-demotion.
+### 3.1 The two instruments — RUN BOTH BEFORE AND AFTER ANY CHANGE
 
-1. **The judged row. Eleven entries overdue.** Nothing has been judged since
-   e247. e256's parser fixes AND e259's relative-pronoun fix are
-   UNCONDITIONAL, so every banked artifact is stale and the backlog compounds
-   with each entry. Judge server `:8090` does not survive reboot (launch line
-   below); chain `~/rg_private/halumem/qa_rerun2/chain.sh`, ~11 h on the WSL
-   GPU. First variable: `RG_TEXT_LONGEST` (e255) -- +6.13pt gold coverage on a
-   SCREEN only, length-monotone biased, judged confirmation owed.
-2. **Re-derive the v3 floor on held-out questions.** -7.83 is openly fitted on
-   the same 18 dogfood questions it was scored on. What transfers is that an
-   ABSOLUTE floor on the cross-encoder score is the right mechanism (margin
-   variants split 16/18 with overlapping populations, e260) -- not the value.
-3. **A real product-quality set.** The dogfood harness is 18 questions I wrote
-   myself. It has already earned its keep -- e258 and e259 both came from it
-   and nine entries of benchmark decomposition surfaced neither -- but it is
-   not evidence at this size.
-4. **The reranker attractor -- THE remaining bottleneck, characterised
-   (e263).** The employer fact ranks BELOW 6th of 12 for "Where do I work?";
-   "Alex Reyes works from home" wins every work-related query because it
-   contains the query word. This is a SEMANTIC gap -- a small cross-encoder
-   cannot connect "work" to "is at Lumen Health". The two cheap theories are
-   already measured dead: indexing propositions (e260, negative twice) and
-   copular attribute keys (e260, the misses are ordering not collision).
-   Live options: a larger reranker (footprint cost), query expansion, or
-   accepting it because `profile_context()` with no query hands the agent
-   every fact anyway on a small store.
-5. **The product harness is `tools/dogfood.py` (e265)** -- four axes: recall,
-   abstention, PURITY (nothing unasserted reaches the store) and tiering.
-   Purity and abstention are ENFORCED in `tools/test_dogfood.py`; they are
-   contracts, not targets. RUN IT BEFORE AND AFTER ANY WRITE-PATH CHANGE.
-   Known gap: its corpus has no possessive-antecedent case, so it cannot see
-   e267. The instrument goes stale one entry at a time -- extend the corpus
-   whenever a fix lands that it cannot measure.
-6. **THE REFUSAL SUITE (e270) is the gate for non-assertion work.**
-   `rgx/refusal_cases.py` = CommitmentBank's four entailment-cancelling
-   operators x CheckList's test types; `tools/refusal_report.py` prints the
-   matrix, `rgx/test_refusal.py` gates it. ADD A ROW BEFORE FIXING A LEAK,
-   not after. Its DIR column (a matched declarative that must still assert)
-   is what separates real refusal from a parse failure, and its INV column
-   caught a branch shipped in e265 that had never fired once.
-   Empty cells to fill: modal MFT, negation INV, factivity INV, question OWED.
-7. **THE STORE NOW HOLDS THE USER'S WORLD (e269)**, not just their profile --
-   entities the owner links themselves to can be clause subjects. RG_WORLD=0
-   disables. Only USER turns establish an entity; that is the guard rail.
-8. **Cross-turn coref, measured and parked (e262/e264).** Reading all 49
-   deictic-empty u0 records showed the population is mostly OTHER defects --
-   assistant questions stored as facts, expletive "it", phatic
-   acknowledgement. Genuine anaphora is small on the benchmark and real in
-   natural speech. 16.7% of a real store is
-   deictic-empty vs 0.74% of the benchmark. Those records are now REJECTED,
-   not resolved -- a wrong antecedent is a confident false memory. The
-   population is measured so a coref effort has a target.
+    ~/rg_private/halumem/official/.venv/bin/python tools/dogfood.py --v3
+    ~/rg_private/halumem/official/.venv/bin/python tools/refusal_report.py
+    ~/rg_private/halumem/official/.venv/bin/python -m pytest rgx/ experiments/p2 tools/ -q
 
-**e261-e263 changed the product surface:** `profile_context()` now renders
-single-mention facts labeled UNCONFIRMED (it was handing agents 2 of 14
-facts), deictic-empty records are dropped at write time, and the copular
-perfect keeps its aspect. The last two change parser output UNCONDITIONALLY --
-add them to the stale-artifact list in item 1.
+`tools/dogfood.py` is the PRODUCT harness — six axes over a synthetic
+conversation: recall, abstention, PURITY (nothing unasserted reaches the
+store), tiering, CURRENCY (a superseded fact must not come back first) and
+CONFLICT (a real contradiction raises an ask; a multi-valued slot does not).
+It self-checks its own probes first (`check_probes()`) and refuses to be read
+while they are inconsistent — five stale probes in one session earned that.
 
-**Closed, do not reopen:** `RG_INDEX_TEXT` (indexing the proposition instead
-of `attr: value`) -- null in e258, null AND separation-destroying in e260.
-Copular attribute-key canonicalisation as a RETRIEVAL lever -- the misses it
-would target are reranker ordering, not key collision (e260, and e251 said so
-first).
+`rgx/refusal_cases.py` is the REFUSAL matrix: CommitmentBank's four
+entailment-cancelling operators × CheckList's test types. **Add a row BEFORE
+fixing a non-assertion leak, not after.** Its DIR column (a matched
+declarative that must still assert) is what separates real refusal from a
+parse failure; its INV column has twice caught an operator handled in one
+phrasing and not another.
 
-**Opt-in flags built but UNJUDGED:** `RG_HEARSAY`, `RG_TEXT_LONGEST`,
-`owner_pronoun`, `RG_PROFILE_V3` (+`RG_PROFILE_V3_FLOOR`), plus entity linking
-(e257, `rgx/entities.py`, 0.72% of records -- a product mechanism, NOT a
-benchmark lever: e220/e243 size it at ~0.6-2pt).
+Current: recall 20/26 rank-1 · 26/26 in pool, abstention 9/9, purity 21/21,
+currency 3/3·3/3, conflict 1/1·0 false. Refusal matrix all cells pass.
 
-**The method note that earned itself this arc:** e258 and e259 both came from
-USING the product, not from measuring it. e259 is 0.06% of the benchmark
-corpus and 14% of a real store. A defect can be negligible on HaluMem and
-dominant in the product.
+### 3.2 The judged row — STAGED, NOT RUN
 
-Judge server (:8090) does not survive reboot — launch line below. Stanza
-rebuilds go to the Mac (memory `mac-studio-worker`, use `.venv312`).
+JP said hold. Everything is ready:
 
+- **The cache is rebuilt** with the current parser:
+  `~/rg_private/halumem/qa_rgx/cache_u0_v5.jsonl.new` (2329 lines, 10 min to
+  build via `tools/build_rgx_cache.py --user 0`). Old banked as `.bak_e247`.
+  **Move `.new` into place before running.**
+- **What the parser changes did**, measured from that diff: 41% of turns
+  changed output; raw fact count −17.5%; but by SLOT, 635 gone / 756 added /
+  322 rephrased = **net +121**. It is not the pruning the raw count suggests.
+- **Judge server `:8090` does not survive a reboot.** Launch line is in §3.6
+  below. Verify it responds before starting the chain.
+- **The chain**: `~/rg_private/halumem/qa_rerun2/chain.sh`, both arms, ~10.5h
+  (llm 3h04, rgx 7h28 — from its own log). Use e247's flags, so the PARSER is
+  the single variable. Do NOT add `RG_TEXT_LONGEST` / `RG_HEARSAY` /
+  `owner_pronoun` to the same run; one night, one question (§6c).
+- **KNOWN LIMIT of that run (e277 audit):** `eval_rgp2.py:146` calls
+  `retrieve_facts_v3` DIRECTLY, so the judged row exercises none of
+  `recall_v3`'s floor / grounding / subject-rerank / stale-demotion. It
+  answers the parser question and nothing about this session's retrieval work.
+  Do not report it as "the session, judged".
+- Launch a QUALITY sentinel from the start, not a liveness watcher (memory
+  `quality-sentinels-not-liveness-watchers`).
+- A NULL result is the likely and good outcome: e239 and e243 both came back
+  benchmark-neutral for this class of correctness fix. Flat = nine changes
+  discharged and the stale-artifact debt cleared.
 
-**Machine was restarted 2026-08-21 ~21:40 with the u1 fix-judge mid-run.**
-Everything below is resumable; nothing is lost except that one run's progress.
-Saved logs and verdicts: `~/rg_private/halumem/lora/e239_fixrun/`.
+### 3.3 Run another adversarial review — this is now a standing activity
 
-### State as of the restart
+Four sonnet agents, non-overlapping, all told to VERIFY BY RUNNING CODE and to
+report what they could NOT break. Ninety minutes found more than a day of
+building measurement axes (§5q). The first round's briefs were: attack the
+recent parser changes; audit the measurement claims; red-team the store for
+false facts; audit architecture and dead code. **There is no reason to think
+one round exhausted it.**
 
-rgx tests need stanza — run them with `~/rg_private/halumem/official/.venv/bin/python -m pytest rgx/`; `~/rg/.venv` fails all of them with ModuleNotFoundError.
+Sonnet or haiku only, never fable/opus (memory `subagents-sonnet-or-haiku-only`).
 
-| | u0 | u1 |
-|---|---|---|
-| baseline judged (pre-fix parser) | done, e233 | done, e237 |
-| artifact rebuilt with fixed parser | `artifact_u0_ud_v2.json` | `artifact_u1_ud_v2.json` |
-| fix judged — RECALL | **done, e239**: 0.4609→0.4522, p=0.60 | **done, e239**: 0.3820→0.3866, p=0.78 |
-| fix judged — precision | done: 0.7099→0.6782, inside 1 SE | **not run** (least informative number; optional) |
+### 3.4 Open defects, verified and NOT fixed
 
-**The recall question is SETTLED on both users: two nulls with opposite
-signs.** Step 1 below is now optional — it only recovers u1's precision, and
-u0's precision came back inside its own standard error. Prefer step 2.
+- **Attribute-level abstention.** "What is my partner's job?" returns "Sam
+  works from home" — related, true, not an answer. Recorded as
+  `PARTIAL_KNOWLEDGE` in `tools/dogfood.py`, deliberately outside the
+  abstention count so that number keeps one meaning.
+- **Cross-turn coreference.** 16.7% of a real store (e262), parked. `coref/`
+  (untracked) already has centering + binding; Lee et al. 2013's
+  precision-ranked sieve is the right architecture — rules that can only
+  REJECT, never propose.
+- **Temporal reasoning.** Dates are stored and completely unused.
+- **Entity resolution at scale.** u0 has three people with distinct names; the
+  disambiguation population has never existed in any test we have run.
+- **Two paraphrase recall gaps** remain at rank 1 (pool is 26/26).
 
-### 1. (Optional) u1 precision only
+### 3.5 Where I would go next, and the caveat on that
 
-The GGUF judge server must be up on :8090 first — it does NOT survive a
-reboot:
+**The auditable-memory loop: browser + rehydrate + correct, wired end to end.**
+`server/sourcedrecall/browser.py`, `profile_rehydrate` and `profile_correct`
+(deny/confirm/retype) all exist and are half-wired.
 
-```
-~/rg/.venv/bin/python -m llama_cpp.server   --model /usr/share/ollama/.ollama/models/blobs/sha256-a8cc1361f3145dc01f6d77c6c82c9116b9ffe3c97b34716fe20418455876c40e   --n_gpu_layers -1 --n_ctx 16384 --port 8090 --host 127.0.0.1 --chat_format chatml
-```
+The argument: we will not beat MemOS at 79.7 extraction F1. A store at 0.65
+that the user can SEE AND FIX is more useful than one at 0.85 they cannot
+inspect — it turns imperfect extraction from a defeat into a survivable
+condition, and it is the only thing on the list a person could actually use.
+It also plays to the one structural advantage: nothing here can generate, so
+the store is a document rather than an opaque model.
 
-Then, from `~/rg_private/halumem/official/HaluMem/eval`:
+**CAVEAT, and take it seriously:** that is architectural reasoning, and §5g
+says architectural reasoning is not evidence of a lever. It was wrong four
+times in one day. Build the THINNEST version a person can click through and
+let that decide, rather than designing the whole thing.
 
-```
-RG_EXTRACT_V5=1 RG_PREFIX_NO_THINK=1 PYTHONUNBUFFERED=1   ~/rg_private/halumem/official/.venv/bin/python   /home/jp/rg/experiments/p2/lora_judge_ab.py   --user 1 --label grammar --limit-accuracy 300   --reuse ~/rg_private/halumem/lora/e239_fixrun/verdicts_u1_ud.json   --save ~/rg_private/halumem/lora/e239_fixrun/verdicts_u1_fix.json   --lora-artifact ~/rg_private/halumem/lora/artifact_u1_ud_v2.json
-```
+**Do NOT build:** more measurement axes, more thresholds, more benchmark
+chasing. There is more instrument than evidence already.
 
-`--reuse` skips the prompted arm (0 calls). ~75 min, and it will re-judge
-integrity you already have — pass `--reuse .../verdicts_u1_fix.json` instead
-to skip straight to accuracy. `chain_fix.sh` and `watch_chain.py` in
-`e239_fixrun/` run the whole thing end to end.
+### 3.6 Ops
 
-### 2. Then fix the queued parser defects (e238 + e237), as ONE measured change
+Judge server (GGUF, does not survive reboot):
 
-Superseded by e240: defects A–G are being fixed as one round; see notebook e240.
+    ~/rg/.venv/bin/python -m llama_cpp.server \
+      --model /usr/share/ollama/.ollama/models/blobs/sha256-a8cc1361f3145dc01f6d77c6c82c9116b9ffe3c97b34716fe20418455876c40e \
+      --n_gpu_layers -1 --n_ctx 16384 --port 8090 --host 127.0.0.1 --chat_format chatml
 
-Both are diagnosed with examples; neither is written yet. The saved artifacts are frozen files, so step 1 can run at any time regardless of tree changes.
+`rgx` tests need stanza: use `~/rg_private/halumem/official/.venv/bin/python`;
+`~/rg/.venv` has no stanza. The 16GB card is shared with the Windows desktop
+under WSL — long runs belong overnight. Stanza rebuilds can go to the Mac
+Studio (memory `mac-studio-worker`).
 
-* **`_third`'s spelling guards (e238).** `w.endswith("ed") or w.endswith("s")`
-  catches need/feed/succeed/proceed and focus/pass/discuss/address/process.
-  ~0.7% of records on both users. Replace the test with the UD features
-  `_third` already receives. **And the `-es` branch needs `"s"` added** or
-  "focus" becomes "focuss" — that branch was never reached before.
-* **Two interrogative escapes (e237),** 0.08% of records. One is an embedded
-  declarative inside a question ("What steps do you think you'll take?"). One
-  is a genuine PRESUPPOSITION ("When you joined the conservation group, did
-  you find...?") — the user did join, so that one wants the stray "When"
-  stripped, not the clause dropped.
-
-### 3. Then cut an rgx release
-
-The package currently on disk has all four e234/e236 fixes and is measured
-benchmark-neutral on u0. That is the first version whose shipped output
-matches what the ledger claims.
+**Flags that changed default in e277:** `RG_PROFILE_V3` is now ON (v3 is the
+product retriever; `=0` opts out, and it falls back rather than failing where
+models are absent). `FLOOR_V3` is now `None` — measured inert AND costly.
+`RG_NLI=0` restores the strict no-transformer guarantee at the cost of
+conflict detection. `RG_TEXT_LONGEST` defaults ON in the product path and OFF
+in the benchmark harness, deliberately (e266).
 
 ## 4. Standing rules earned this session — do not relearn these
 
