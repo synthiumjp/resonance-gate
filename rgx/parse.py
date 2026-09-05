@@ -320,7 +320,11 @@ class _S:
                 # support Martin Mark have received". e243 saw this and
                 # queued it ("agreement inside relative clauses is not
                 # done"); it is 1.31% of u0 records.
-                if sub is None and t.deprel in ("aux", "aux:pass"):
+                # Review 2026-09-05: a COPULA has the same shape -- its
+                # subject hangs off the predicate, not off it -- and was
+                # never agreed: "My mom says I'm lazy" rendered "... says
+                # <owner> am lazy".
+                if sub is None and t.deprel in ("aux", "aux:pass", "cop"):
                     headw = self.w.get(t.head)
                     if headw is not None:
                         hsub = next(iter(self.children(
@@ -339,7 +343,7 @@ class _S:
                     txt = _third(t.text, t.lemma, t.feats)
             txt = _expand_clitic(txt, t.lemma)
             parts.append(txt)
-        s = " ".join(parts)
+        s = " ".join(p for p in parts if p)      # a swap may delete a token
         s = re.sub(r"\s+([',.;:])", r"\1", s).strip(" ,.;:")
         return _shift(s, owner, second) if owner else s
 
@@ -471,6 +475,94 @@ def _conditional(s, head):
         if parent is not None and _cond(parent):
             return True
     return False
+
+
+# Review 2026-09-05: FACTIVE predicates presuppose their complement, so it
+# survives negation of the matrix ("I don't regret that I left Perrin" still
+# commits to leaving). Everything NOT on this list is treated as non-factive
+# under negation -- including "know", whose first-person negated use ("I
+# don't know that I'm a good cook") is a hedge, not a presupposition.
+FACTIVE_VERBS = frozenset((
+    "regret", "realize", "realise", "remember", "forget", "notice",
+    "discover", "admit", "acknowledge", "appreciate", "resent", "mind",
+    "recognize", "recognise"))
+
+
+def _negated_matrix(s, head):
+    """True when this clause is the complement of a NEGATED non-factive
+    matrix predicate. CommitmentBank's central case: negation on the matrix
+    cancels the complement's entailment. The complement was being emitted as
+    its own record regardless -- "I wouldn't say I'm a vegetarian" stored
+    "<owner> is a vegetarian", "It's not true that I moved to Berlin" stored
+    "<owner> moved to Berlin", "I never said I was a vegetarian" stored
+    "<owner> was a vegetarian". Three inversions, one missing rule (review
+    2026-09-05). The matrix record itself ("<owner> would not say ...") is
+    untouched: it is the honest hedge.
+
+    `csubj` covers the extraposed form ("It's not true THAT ..."), where UD
+    hangs the complement off the predicate adjective as a clausal subject."""
+    if head.deprel not in ("ccomp", "xcomp", "csubj"):
+        return False
+    parent = s.w.get(head.head)
+    if parent is None:
+        return False
+    if (parent.lemma or parent.text or "").lower() in FACTIVE_VERBS:
+        return False
+    neg, _ = _negated(s, parent)
+    return neg
+
+
+# Non-veridical attitude / report predicates: the speaker does not commit to
+# the complement by using them. Deliberately excludes the semi-factives
+# ("know", "remember", "notice", "see", "understand"), which presuppose.
+ATTITUDE_VERBS = frozenset((
+    "say", "tell", "think", "believe", "feel", "claim", "insist", "suggest",
+    "argue", "reckon", "assume", "suspect", "guess", "suppose", "imagine",
+    "hear", "expect", "hope", "want", "wish", "figure", "bet"))
+
+
+def _third_party_matrix(s, head, allow, role):
+    """True when this clause is the complement of a non-veridical attitude
+    verb whose subject is someone OTHER than the owner, in a user turn.
+    "My mom says I'm lazy" stored "<owner> is lazy"; "My friend thinks I
+    should quit my job" stored the bare "<owner> should quit <owner>'s job",
+    a friend's advice indistinguishable from the owner's own plan (review
+    2026-09-05). The matrix record ("<owner>'s mom says ...") is the honest
+    form and is unaffected. The owner's OWN attitude ("I'd say I'm a
+    vegetarian") still lets its complement through -- that is their hedge
+    to make. Assistant turns are handled by e242's report frame, not here."""
+    if role != "user" or head.deprel not in ("ccomp", "xcomp"):
+        return False
+    parent = s.w.get(head.head)
+    if parent is None:
+        return False
+    if (parent.lemma or parent.text or "").lower() not in ATTITUDE_VERBS:
+        return False
+    psubj = next(iter(s.children(parent, ("nsubj", "nsubj:pass"))), None)
+    if psubj is None:
+        return False
+    return psubj.text.lower() not in allow
+
+
+def _preconj_negation(s, subj):
+    """-> (is_negated, swap). Negation carried on the SUBJECT: "Neither my
+    wife nor I like horror movies" rendered "<owner>'s Neither wife nor
+    <owner> like horror movies" -- an un-negated verb with the negators left
+    lying in the noun phrase. UD attaches "neither" as `cc:preconj` of the
+    first conjunct and "nor" as `cc` of the second; `_negated` only looks at
+    the verb's own advmod/det children. Report the polarity so the verb is
+    negated, and swap the markers so the subject reads "X and Y" (review
+    2026-09-05)."""
+    pre = [c for c in s.children(subj, ("cc:preconj",))
+           if (c.lemma or c.text).lower() == "neither"]
+    if not pre:
+        return False, {}
+    swap = {c.id: "" for c in pre}
+    for conj in s.children(subj, ("conj",)):
+        for cc in s.children(conj, ("cc",)):
+            if (cc.lemma or cc.text).lower() == "nor":
+                swap[cc.id] = "and"
+    return True, swap
 
 
 def _antiveridical(s, head):
@@ -726,6 +818,12 @@ def _cop_form(s, head):
             return "will be"
         if lem == "would":
             return "would be"
+        # Review 2026-09-05: every other modal collapsed to "is" -- "I might
+        # be interested in learning Swift" stored "<owner> IS interested in
+        # learning Swift". The verbal branch keeps its modal ("might switch
+        # to Rust", tested since e270); only the rebuilt copula lost it.
+        if lem in ("might", "may", "could", "should", "must", "can", "ought"):
+            return f"{lem} be"
     # e276: and so did the PAST. "I was very anxious during college" stored
     # "<owner> IS very anxious during college" -- sitting beside "feels much
     # calmer now" from the same turn, two contradictory present-tense claims.
@@ -1070,11 +1168,17 @@ def extract_keyed(text, nlp, owner=None, role="user",
                 continue
             if _antiveridical(s, head):
                 continue
+            if _negated_matrix(s, head):
+                continue
+            if _third_party_matrix(s, head, allow, role):
+                continue
             if head.deprel in INTERROG_CHAIN and \
                     _ancestor_interrogative(s, head, is_q):
                 continue
             cop = next(iter(s.children(head, ("cop",))), None)
             neg, negdrop = _negated(s, head)
+            pneg, pswap = _preconj_negation(s, subj)
+            neg = neg or pneg
             sp = _poss(s, subj, allow)
             # e267: a bare pronoun subject with exactly ONE owner-possessed
             # antecedent carried from an earlier sentence of THIS turn.
@@ -1114,6 +1218,9 @@ def extract_keyed(text, nlp, owner=None, role="user",
             # e259: resolve this clause's relative pronoun to its antecedent
             # before ANY render call below reads it.
             s._swap = _relcl_swap(s, head)
+            if pswap:
+                s._swap = dict(s._swap)
+                s._swap.update(pswap)
             if fhedge:
                 # e271: the adverb was SENTENCE-INITIAL, so its capital is
                 # positional, not lexical -- mid-record it must be lower case

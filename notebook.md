@@ -13967,3 +13967,81 @@ The axes test what I thought to test. They cannot find what I did not think
 of, and **six of them at 100% told me nothing about seven live false-fact
 classes.** Adversarial review is not a one-off audit to run at the end; on
 this evidence it finds more per hour than building another measurement axis.
+
+## Entry 278 — 2026-09-05 (p2: an independent review of e249–e277, and the same-day fix pass. Two server tests were failing on HEAD; the harness passed a system that stores nothing.)
+
+JP: "opus has been driving it and making mistakes" -- review with sonnet/haiku
+only. Four reviewers, non-overlapping (parser / product read path /
+instruments / docs+hygiene), every top finding re-run by hand. Full list in
+`docs/REVIEW_2026-09-05.md`; this entry records what changed.
+
+### What the handover's "569 green" was not saying
+
+- The test command omitted `server/tests`. Two tests there **failed on
+  HEAD**, both broken by e277's default flip to v3, both passing with
+  `RG_PROFILE_V3=0`. Nobody ran the directory that would have said so.
+- e277 said the hearsay tier was "now wired". `IndexV3` only built the
+  sub-index under `RG_HEARSAY=1`, which nothing in `server/` sets, so
+  `_hearsay_v3` always saw `None`. Sixth §5m instance, claimed fixed in the
+  entry that named the fifth.
+- `recall_v3` hardcoded `wired: []` while the MCP docstring promised the
+  field. Dead for every caller from the day v3 became the default.
+- Two import-time environment writes (`two_judge.py` set `RG_EXTRACT_V4` at
+  import; `test_hearsay_qa.py` wrote three flags and never restored them)
+  pointed the server at a cache file that does not exist. Eight server tests
+  failed whenever the files shared a run. A library import must not rewrite
+  its importer's environment.
+- Abstention was 8/8, not the 9/9 in three documents; "43 more tests under
+  RG_HEARSAY=1" was a file's total, the real increment is 2.
+
+### Fixed (657592a, this commit)
+
+Read path: hearsay sub-index built on the product path regardless of the
+benchmark flag; `wired` computed by spreading from the rank-1 corroborated hit
+(`Graph.neighbourhood`, factored out of `spread`); hearsay-only returns
+`found=True`, the contract `recall()` has carried since e246 -- e277 wrote
+False and the two retrievers disagreed on the one field a caller branches on.
+
+Parser, five rules, each with its refusal row added FIRST and shown failing:
+
+| input | before | after |
+|---|---|---|
+| "It's not true that I moved to Berlin." | `moved to Berlin` | nothing |
+| "I wouldn't say I'm a vegetarian." | `is a vegetarian` | `would not say ... is a vegetarian` |
+| "I never said I was a vegetarian." | `was a vegetarian` | nothing |
+| "Neither my wife nor I like horror movies." | `'s Neither wife nor ... like` | `'s wife and ... do not like horror movies` |
+| "My mom says I'm lazy." | `is lazy` | `'s mom says ... is lazy` only |
+| "My friend thinks I should quit my job." | bare `should quit` | matrix record only |
+| "I might be interested in learning Swift." | `is interested` | `might be interested` |
+
+`_negated_matrix`: a ccomp/xcomp/csubj under a NEGATED non-factive matrix is
+not asserted (CommitmentBank's central case; FACTIVE_VERBS keep theirs, so "I
+don't regret that I left Perrin" still stores leaving). `_third_party_matrix`:
+the complement of an attitude verb whose subject is not the owner is that
+person's claim. `_preconj_negation`: neither/nor on the subject negates the
+verb. `_cop_form` keeps every modal, not just "would". An embedded copula is
+agreed like an embedded aux ("says Alex Reyes am lazy" -> "is lazy").
+
+Harness: the exit gate now fails when any stated fact is missing from the
+pool (a store-nothing system exited PASS before); an abstention that still
+carries a payload is a leak; `check_probes` requires a word match, not a
+prefix ("commut aller engin" passed).
+
+### Still open, verified
+
+Superseded facts render as CORROBORATED in `context_block` with no marker.
+The fallback retriever abstains on "Where do I work?". `obl:unmarked` and
+sole-adverb clauses produce nothing ("I run five miles every day", "I no
+longer smoke"). Purity is a 21-string denylist; recall is a substring match.
+Two Mem0 `.mdx` files and an untested `e5/` sit in the tree from e277.
+
+| | |
+|---|---|
+| RECALL | 20/26 rank-1, 26/26 pool |
+| ABSTENTION | 8/8 |
+| PURITY | 21/21 |
+| CURRENCY / CONFLICT | 3/3·3/3, 1/1·0 |
+| refusal matrix | all cells, 11 rows added |
+
+Suites 627 + 1 (`test_mcp_layer` in `~/rg/.venv`), `server/tests` included
+from now on. Nothing judged. GPU idle throughout; all of this is CPU.

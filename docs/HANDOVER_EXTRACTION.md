@@ -110,7 +110,11 @@ changes.
 
     ~/rg_private/halumem/official/.venv/bin/python tools/dogfood.py --v3
     ~/rg_private/halumem/official/.venv/bin/python tools/refusal_report.py
-    ~/rg_private/halumem/official/.venv/bin/python -m pytest rgx/ experiments/p2 tools/ -q
+    ~/rg_private/halumem/official/.venv/bin/python -m pytest rgx/ experiments/p2 tools/ server/tests -q
+    ~/rg/.venv/bin/python -m pytest server/tests/test_mcp_layer.py -q   # needs `mcp`; the stanza venv lacks it
+
+`server/tests` was NOT in this command until 2026-09-05, and two of its tests
+were failing on HEAD while the handover said "569 green". Never drop it again.
 
 `tools/dogfood.py` is the PRODUCT harness — six axes over a synthetic
 conversation: recall, abstention, PURITY (nothing unasserted reaches the
@@ -126,8 +130,15 @@ declarative that must still assert) is what separates real refusal from a
 parse failure; its INV column has twice caught an operator handled in one
 phrasing and not another.
 
-Current: recall 20/26 rank-1 · 26/26 in pool, abstention 9/9, purity 21/21,
-currency 3/3·3/3, conflict 1/1·0 false. Refusal matrix all cells pass.
+Current: recall 20/26 rank-1 · 26/26 in pool, abstention 8/8 (e275 removed a
+probe; "9/9" in older entries is stale), purity 21/21, currency 3/3·3/3,
+conflict 1/1·0 false. Refusal matrix all cells pass (11 rows added 2026-09-05).
+The gate now fails on three properties: purity, abstention, and every stated
+fact present in the pool -- before 2026-09-05 a store-nothing system passed.
+
+**Read `docs/REVIEW_2026-09-05.md`** before trusting any number above: it
+lists what each axis can and cannot see (purity is a 21-string denylist;
+recall matches by substring).
 
 ### 3.2 The judged row — STAGED, NOT RUN
 
@@ -170,12 +181,22 @@ Sonnet or haiku only, never fable/opus (memory `subagents-sonnet-or-haiku-only`)
 
 ### 3.4 Open defects, verified and NOT fixed
 
+- **From the 2026-09-05 review, still open** (`docs/REVIEW_2026-09-05.md`
+  §A4, §C, §D): superseded facts render as CORROBORATED in `context_block`
+  with no staleness marker; the fallback retriever abstains on "Where do I
+  work?"; `obl:unmarked` arguments are dropped ("I run five miles every
+  day" -> nothing); pre-verbal adverb as sole argument dropped ("I no longer
+  smoke" -> nothing); coordinated adjective predicates lose the second
+  conjunct; perfect+negation word order ("has been not to Europe"); purity
+  is a denylist and recall is a substring match; three divergent
+  single-valued-slot allowlists; non-atomic `conversations.json` writes.
+
 - **Attribute-level abstention.** "What is my partner's job?" returns "Sam
   works from home" — related, true, not an answer. Recorded as
   `PARTIAL_KNOWLEDGE` in `tools/dogfood.py`, deliberately outside the
   abstention count so that number keeps one meaning.
 - **Cross-turn coreference.** 16.7% of a real store (e262), parked. `coref/`
-  (untracked) already has centering + binding; Lee et al. 2013's
+  (committed in feea1fc, untested) already has centering + binding; Lee et al. 2013's
   precision-ranked sieve is the right architecture — rules that can only
   REJECT, never propose.
 - **Temporal reasoning.** Dates are stored and completely unused.

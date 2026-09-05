@@ -315,7 +315,13 @@ def check_probes():
         # incidental match excuse the whole needle -- "Kind of Blue" passed
         # because the corpus says "kind of", which is precisely how the pets
         # probe survived.
-        missing = [t for t in nt if not re.search(rf"\b{t}", corpus_l)]
+        # Review 2026-09-05: a LEFT boundary alone made this a prefix test --
+        # "commut aller engin" passed on "commute"/"allergic"/"engineer".
+        # Allow only a short inflectional suffix, so a stem still matches its
+        # own forms and nothing else.
+        missing = [t for t in nt
+                   if not re.search(rf"\b{t}(?:s|es|ed|d|ing|ly|er|ers)?\b",
+                                    corpus_l)]
         if nt and missing:
             bad.append(f"ANSWERABLE {q!r} wants {needle!r}: {missing} appear "
                        f"NOWHERE in the corpus -- a probe for a fact that "
@@ -420,8 +426,12 @@ def main():
         leaks = []
         for q in UNSEEN:
             out = pmem.profile_recall(q)
-            if not out.get("abstain"):
-                got = facts_of(out)
+            got = facts_of(out)
+            # Review 2026-09-05: the flag alone was trusted. A response that
+            # says abstain=True and still carries facts in `ranked`/`asserted`
+            # scored as honest; the payload is what a caller renders, so it
+            # is what this axis has to read.
+            if not out.get("abstain") or got:
                 leaks.append((q, got[0][:60] if got else "-"))
         abst = len(UNSEEN) - len(leaks)
 
@@ -502,9 +512,14 @@ def main():
             print("\n  PURITY FAILURES (a fact nobody asserted is in the store):")
             for frag, who in impure:
                 print(f"    {frag!r:28s} <- {who}")
-        rc = 0 if not impure and not leaks else 1
-        print(f"\n  {'PASS' if rc == 0 else 'FAIL'} on the two properties that must never regress "
-              f"(purity, abstention)")
+        # Review 2026-09-05: the gate read purity and abstention only, so a
+        # system that stored NOTHING and abstained on everything exited PASS.
+        # Every fact the user stated must at least be in the retrieved pool;
+        # that is an invariant of the product, not a tuned threshold.
+        lost = pool < n
+        rc = 0 if not impure and not leaks and not lost else 1
+        print(f"\n  {'PASS' if rc == 0 else 'FAIL'} on the three properties that must never regress "
+              f"(purity, abstention, every stated fact in the pool)")
         return rc
     finally:
         shutil.rmtree(tmp, ignore_errors=True)

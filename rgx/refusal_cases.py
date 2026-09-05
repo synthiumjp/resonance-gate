@@ -162,6 +162,95 @@ CASES = [
          control="I have worked at Perrin.",
          control_role="user", control_asserts="has worked at Perrin"),
 
+    # ---- NEGATION OVER THE MATRIX PREDICATE (review 2026-09-05) ----------
+    # CommitmentBank's core case: negation on a NON-FACTIVE matrix cancels
+    # the complement's entailment. "I wouldn't say I'm a vegetarian" stored
+    # "<owner> is a vegetarian" -- the complement standing alone, as if the
+    # speaker had asserted it. Three surface forms, one operator.
+    dict(capability="negation", operator="metalinguistic (it's not true that)",
+         role="user",
+         irrealis="It's not true that I moved to Berlin.",
+         must_not="moved to Berlin",
+         control="It is true that I moved to Berlin.",
+         control_role="user", control_asserts="moved to Berlin"),
+
+    dict(capability="negation", operator="negated non-factive matrix (wouldn't say)",
+         role="user",
+         irrealis="I wouldn't say I'm a vegetarian.",
+         must_not="is a vegetarian", unless_contains="say",
+         control="I'd say I'm a vegetarian.",
+         control_role="user", control_asserts="is a vegetarian"),
+
+    dict(capability="negation", operator="negated non-factive matrix (never said)",
+         role="user",
+         irrealis="I never said I was a vegetarian.",
+         must_not="was a vegetarian", unless_contains="said",
+         control="I said I was a vegetarian.",
+         control_role="user", control_asserts="was a vegetarian"),
+
+    # the FACTIVE counterpart must SURVIVE negation of its matrix
+    dict(capability="negation", operator="negated factive matrix -- presupposes",
+         role="user",
+         irrealis="I don't regret that I left Perrin.",
+         must_not=None,
+         control="I regret that I left Perrin.",
+         control_role="user", control_asserts="left Perrin",
+         assert_instead="left Perrin"),
+
+    # negation carried on the SUBJECT, not the verb
+    dict(capability="negation", operator="neither/nor coordinated subject",
+         role="user",
+         irrealis="Neither my wife nor I like horror movies.",
+         must_not="like horror movies", unless_contains="not",
+         control="My wife and I like horror movies.",
+         control_role="user", control_asserts="like horror movies",
+         assert_instead="not like horror movies"),
+
+    # ---- THIRD-PARTY ATTITUDE (review 2026-09-05) --------------------------
+    # The complement of a NON-FACTIVE attitude/report verb whose subject is
+    # someone OTHER than the owner is that person's claim, not the owner's
+    # fact. "My mom says I'm lazy" stored "<owner> is lazy"; "My friend thinks
+    # I should quit my job" stored "<owner> should quit <owner>'s job" -- a
+    # friend's advice indistinguishable from the owner's own plan. The matrix
+    # record ("<owner>'s mom says ...") is the honest form and must stay.
+    dict(capability="factivity", operator="third-party report (my mom says)",
+         role="user",
+         irrealis="My mom says I'm lazy.",
+         must_not="is lazy", unless_contains="says",
+         control="I'm lazy.",
+         control_role="user", control_asserts="is lazy"),
+
+    dict(capability="factivity", operator="third-party attitude (my friend thinks)",
+         role="user",
+         irrealis="My friend thinks I should quit my job.",
+         must_not="should quit", unless_contains="thinks",
+         control="I should quit my job.",
+         control_role="user", control_asserts="should quit"),
+
+    dict(capability="factivity", operator="generic-subject attitude (people think)",
+         role="user",
+         irrealis="People think I'm rude.",
+         must_not="is rude", unless_contains="think",
+         control="I'm rude.",
+         control_role="user", control_asserts="is rude"),
+
+    # the owner's OWN attitude verb still lets the complement through
+    dict(capability="factivity", operator="owner's own report (I'd say)",
+         role="user",
+         irrealis="I'd say I'm a vegetarian.",
+         must_not=None,
+         control="I'm a vegetarian.",
+         control_role="user", control_asserts="is a vegetarian",
+         assert_instead="is a vegetarian"),
+
+    # a modal inside an ASSISTANT report frame must survive into the record
+    dict(capability="modal", operator="modal under a report frame (assistant)",
+         role="assistant",
+         irrealis="I heard you might be interested in learning Swift.",
+         must_not="interested in learning Swift", unless_contains="might",
+         control="I am interested in learning Swift.",
+         control_role="user", control_asserts="interested in learning Swift"),
+
     # ---- FACTIVITY: the embedding predicate -------------------------------
     # A NON-FACTIVE attitude verb does not commit its speaker to the
     # complement; a FACTIVE one presupposes it, even under negation.
@@ -310,6 +399,17 @@ INVARIANCE = [
              "Maybe I will switch to Rust.",
              "Possibly I will switch to Rust.",
              "I could switch to Rust.",
+         ]),
+    # review 2026-09-05: negation over the matrix predicate, five wordings
+    dict(capability="negation", needle="vegetarian", role="user",
+         unless=("not", "never", "n't", "doubt"),
+         variants=[
+             "I wouldn't say I'm a vegetarian.",
+             "I don't think I'm a vegetarian.",
+             "I never said I was a vegetarian.",
+             "It's not true that I'm a vegetarian.",
+             "I'm not sure I'm a vegetarian.",
+             "I can't say I'm a vegetarian.",
          ]),
     dict(capability="factivity", needle="left Perrin", role="user",
          unless=("doubt", "deny", "denies", "dispute", "disputes",
