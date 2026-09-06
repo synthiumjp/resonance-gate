@@ -14215,3 +14215,25 @@ run; the lexical route up to 403 nodes without a structural exploit.
 | RECALL / PURITY / CURRENCY / CONFLICT | unchanged |
 
 Baseline judge still running (accuracy ~15% at 12:00).
+
+### e281b — names ground nothing, generalised; and where attribute-level abstention actually lives
+
+Extended the owner rule to every name the retrieved records know (a
+capitalised, non-initial token in a record text: Sam, Priya, Acme), on both
+routes. A question that shares only a name with a record is about a known
+entity, not answered by it. "Who is Sam?" still answers: a question that IS
+the entity defers rather than refuses.
+
+    PARTIAL  0/6 -> 1/6      RECALL 20/26 unchanged     ABSTENTION 12/12
+
+One of six. The other five share a COMMON noun with the record -- dog, car,
+database, work, partner -- and the record genuinely is about that topic; what
+it lacks is the ATTRIBUTE asked for (breed, colour, favourite, years, job). A
+lexical focus-noun test was designed and not shipped: on the 26 answerable
+probes it would refuse "What is my job title?" (record: "is a backend
+engineer"), "Which company employs me?" ("works at Acme"), "Do I own any
+pets?" ("has a dog and a cat") -- four false refusals to buy five true ones,
+with a dense threshold as the only rescue. §5g and §5o both say no. The fix
+that would not be a threshold is a question-to-attribute mapping read off the
+store's own keys, which is a design task, not a gate tweak. Left open,
+measured, and visible on every dogfood run.

@@ -204,13 +204,27 @@ def _guess_owner(nodes, min_share=0.4):
     return name if n / len(texts) >= min_share else None
 
 
-def _strip_owner(query, owner):
-    """The query without the owner's name tokens, for the dense route -- the
-    name inflates cosine against every record the same way."""
+def _entity_names(hits):
+    """Capitalised, non-initial tokens in the retrieved records: the names the
+    store knows (e281b). Lower-cased, unstemmed."""
     import re as _re
-    if not owner:
+    out = set()
+    for h in hits or []:
+        for w in _re.findall(r"(?<!^)(?<=\s)[A-Z][a-z]+", h.get("text") or ""):
+            out.add(w.lower())
+    return out
+
+
+def _strip_owner(query, owner, extra_names=()):
+    """The query without the owner's name tokens (and any `extra_names`, the
+    entities the retrieved records mention), for the dense route -- a name
+    inflates cosine against every record that carries it, whatever was asked."""
+    import re as _re
+    names = set(extra_names or ())
+    if owner:
+        names |= {t for t in _re.findall(r"[a-z]+", str(owner).lower())}
+    if not names:
         return query
-    names = {t for t in _re.findall(r"[a-z]+", str(owner).lower())}
     kept = [w for w in (query or "").split()
             if _re.sub(r"[^a-z]", "", _re.sub(r"'s\b", "", w.lower()))
             not in names]
@@ -291,6 +305,21 @@ def _grounded(query, hits, owner=None):
     q = {_stem(t) for t in _re.findall(r"[a-z]+", (query or "").lower())
          if t not in _RERANK_STOP and len(t) > 2}
     q -= _owner_stems(owner)    # e281: the owner's name grounds nothing
+    # e281b: nor does anyone else's. A capitalised token that is not
+    # sentence-initial in a retrieved record is a NAME the store knows (Sam,
+    # Priya, Acme); sharing it says the question is about a known entity,
+    # not that the record answers what was asked -- "What is Sam's salary?"
+    # grounded on "partner Sam works from home". With the names gone the
+    # question must share a real content word, or hold nothing but names,
+    # in which case it defers ("Who is Sam?" still answers).
+    names = set()
+    for h in hits:
+        text = h.get("text") or ""
+        for w in _re.findall(r"(?<!^)(?<=\s)[A-Z][a-z]+", text):
+            names.add(_stem(w.lower()))
+    if q and q <= names:
+        return True             # the question IS the entity; nothing else to ground
+    q -= names
     if not q:
         return True             # nothing to ground against; defer to the floor
     for h in hits:
@@ -501,8 +530,10 @@ class Memory:
         # what a real question usually is (e275).
         if os.environ.get("RG_GROUNDING") != "0":
             own = getattr(idx, "owner", None)
-            if not (_grounded(query, [h for h, _ in scored[:3]], owner=own)
-                    or _dense_grounded(idx, _strip_owner(query, own))):
+            top3 = [h for h, _ in scored[:3]]
+            if not (_grounded(query, top3, owner=own)
+                    or _dense_grounded(idx, _strip_owner(
+                        query, own, _entity_names(top3)))):
                 return self._abstain(query, idx, gate="grounding")
         kept = list(scored)
         # e272: reorder ONLY what already cleared the floor, then truncate.
