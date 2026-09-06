@@ -140,7 +140,14 @@ fact present in the pool -- before 2026-09-05 a store-nothing system passed.
 lists what each axis can and cannot see (purity is a 21-string denylist;
 recall matches by substring).
 
-### 3.2 The judged row — STAGED, NOT RUN
+### 3.2 The judged row — HALF RUN (2026-09-06), resume with one script
+
+`qa-rgx4` (current parser) is judged: extraction null vs e247 (p=0.56), QA
++6pt at p=0.053 with a two-variable caveat (notebook e279). `qa-llm3` needs
+its judge pass re-run; three extraction-only variants (`RG_SENTENCE_FALLBACK`
+1 and 2, `RG_TEXT_LONGEST`) are queued behind it. Start the judge server
+(§3.6), then `~/rg_private/halumem/qa_rerun2/chain_resume.sh`. Everything
+below this line describes the original staging and is kept for the flags.
 
 JP said hold. Everything is ready:
 

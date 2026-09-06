@@ -14237,3 +14237,18 @@ with a dense threshold as the only rescue. §5g and §5o both say no. The fix
 that would not be a threshold is a question-to-attribute mapping read off the
 store's own keys, which is a design task, not a gate tweak. Left open,
 measured, and visible on every dogfood run.
+
+### e279, paused 17:30 — JP needs the VRAM
+
+Stopped cleanly: judge server killed, chain and judge workers killed, both
+watchers stopped. Safe on disk: `qa-rgx4` complete and judged; `qa-llm3`
+compose output (1,216 records). Lost: ~45 min of the llm3 judge pass (the
+harness checkpoints per user only at the end). To resume, start the judge
+server (§3.6) and run `~/rg_private/halumem/qa_rerun2/chain_resume.sh`: it
+re-judges llm3 (~2 h 15) then runs fb1 / fb2 / tl (~4-6 h). Arm the watcher
+with `watch_chain.sh <chain log> "<versions>"` from the scratchpad, or
+rewrite it -- it is not in the tree.
+
+Note for the ops list: `pkill -f <pattern>` matched the shell's own command
+line and killed it (exit 144) before reaching the targets -- the sentinel's
+incident 3, met again. Kill by PID from a bracketed `ps | grep "[e]val..."`.
