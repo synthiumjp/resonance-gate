@@ -14134,3 +14134,84 @@ nodes (§5s). Hundreds of nodes do not need it.
 
 Suites 632 + 1. Baseline `qa-rgx4` compose took 22 min (the 7.5 h figure was
 judge time); judge running.
+
+## Entry 281 — 2026-09-06 (p2: the grounding gate red-teamed. The owner's name grounded every question; attribute-level abstention is 0 of 6; a probe list from e275 had never been scored.)
+
+e280's matrix said grounding was the only gate refusing anything, so one
+sonnet reviewer attacked that predicate alone, on the real dogfood store
+(built through the server's own ingest) plus seeded synthetic stores of 20,
+100 and 500 nodes. Every finding below was re-run by hand.
+
+### The owner's name is a content word -- CRITICAL, fixed
+
+Every rendered fact begins with the owner's name. `_grounded` stemmed
+"alex"/"reyes" like any other token, so a question that NAMES the owner
+shared a word with every record in the store:
+
+    "What is Alex Reyes's blood type?"   -> found=True, receipts attached,
+                                             top: "Alex Reyes uses Postgres..."
+    "Does Alex Reyes have any children?" -> same record
+    "What is Alex's salary?"             -> "...left last job at Perrin..."
+
+The dense route agreed, because the name inflates cosine against every
+record equally. Fix: the owner's stems are removed from the question before
+the lexical test and the name is stripped before embedding. The first version
+of the fix was INERT on the real store -- `IndexV3.owner` comes from a `name`
+fact, and the dogfood corpus never says "My name is", so it was None. The
+server knows the owner (it hands the same name to the extractor) and now
+passes it to `Memory`; a text-prefix guess (most common leading capitalised
+bigram over >=40% of record texts) covers stores with neither. Verified the
+fix does not eat a real shared word ("Does Martin Mark use Postgres?" still
+grounds).
+
+### Attribute-level abstention is 0 of 6 -- NOT fixed, now visible
+
+    "What is Sam's salary?"          -> "partner Sam works from home too"
+    "What breed is my dog?"          -> "has a dog and a cat at home"
+    "What colour is my car?"         -> "scooter is blue"
+    "What is my favourite database?" -> "uses Postgres for the main database"
+
+Both routes test whether the TOPIC is present, never whether any record
+answers what was ASKED. The reviewer's "incidental shared word" class ("my
+favourite kind of work" grounding on "works from home") is this same defect,
+not a separate one. `PARTIAL_KNOWLEDGE` was written in e275 to hold exactly
+this class -- and **was never scored**: defined, commented, read by nothing.
+It is now six rows and a reported line, deliberately outside the gate so the
+abstention count keeps one meaning. 0/6 is the honest number.
+
+### §5o generalises to DENSE_GROUND
+
+Seeded synthetic stores (seed 20260906), 20 fixed never-mentioned probes:
+
+| nodes | lexical false answers | dense | worst cosine |
+|---|---|---|---|
+| 20 | 0/20 | 0/20 | 0.559 |
+| 98 | 0/20 | 0/20 | 0.617 |
+| 403 | 0/20 | 1/20 | 0.625 |
+
+Max-of-N cosine rises with N and crosses 0.62 around 400 nodes on vocabulary
+chosen to be DISJOINT from the probes. The floor was switched off for this
+reason in e277; the dense threshold has the same shape and is still on.
+Recorded, not acted on: the fix is attribute-aware refusal, not a new
+constant.
+
+### Smaller
+
+- `_stem` never stripped the plural of a 3-letter noun ("dogs"/"dog",
+  "cars"/"car", "jobs"/"job"): fixed, `len > 3`.
+- A one-word phrasing difference flips a refusal at the dense boundary
+  ("Who's my boss?" 0.599 refused; "boss?" 0.639 answered). Real, narrow.
+- Write-path: a shared boilerplate tail merged eight distinct cities into one
+  node in the reviewer's synthetic store (`_cluster`). Out of scope here;
+  logged for the store review.
+
+Could not break: the eight disjoint-vocabulary UNSEEN probes, 8/8 on every
+run; the lexical route up to 403 nodes without a structural exploit.
+
+| | |
+|---|---|
+| ABSTENTION | 12/12 (4 name the owner), all by `grounding` |
+| PARTIAL | 0/6 abstain on a known topic's unknown attribute -- open |
+| RECALL / PURITY / CURRENCY / CONFLICT | unchanged |
+
+Baseline judge still running (accuracy ~15% at 12:00).

@@ -130,7 +130,17 @@ def _build():
     import currency as _CU          # e273: read the user's own cessations
     if os.environ.get("RG_CESSATION") != "0":
         _CU.mark_ceased(g, order={c: i for i, c in enumerate(titles or {})})
-    return Memory(g, titles), n_uncached
+    # e281: the server knows the owner (it hands the same name to the
+    # extractor); give it to the Memory so grounding can ignore the name.
+    # Without this the dogfood store had no `name` fact, the index's owner was
+    # None, and "What is Alex Reyes's blood type?" grounded on every record.
+    owner = _ingest_state.get("owner")
+    if not owner:
+        try:
+            owner = _discover_owner_name()
+        except Exception:
+            owner = None
+    return Memory(g, titles, owner=owner), n_uncached
 
 
 def _reload_locked():

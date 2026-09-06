@@ -222,6 +222,25 @@ HEARSAY_ONLY = [
 # make that number mean two different things.
 PARTIAL_KNOWLEDGE = [
     ("What is my partner's job?", "Sam", "job"),
+    # e281 (grounding red-team): the store knows the TOPIC, not the attribute
+    ("What is my favourite database?", "Postgres", "favourite"),
+    ("How many years have I worked in tech?", "works", "years"),
+    ("What breed is my dog?", "dog", "breed"),
+    ("What colour is my car?", "Skoda", "colour"),
+    ("What is Sam's salary?", "Sam", "salary"),
+]
+
+# e281: NEVER-MENTIONED topics whose question NAMES THE OWNER. Every rendered
+# fact begins with the owner's name, so a question carrying it shared a
+# "content word" with every record and grounding let it through: "What is
+# Alex Reyes's blood type?" came back found=True, receipts attached, on a
+# record about Postgres. Kept apart from UNSEEN because check_probes() must
+# not object to the shared name; scored WITH it, because these are leaks.
+UNSEEN_NAMED = [
+    "What is Alex Reyes's blood type?",
+    "Does Alex Reyes have any children?",
+    "What is Alex's salary?",
+    "Where did Alex Reyes go to university?",
 ]
 
 # PURITY: strings that must NOT appear anywhere in the asserted store. Each is
@@ -425,7 +444,7 @@ def main():
         # ---- ABSTENTION
         leaks = []
         gates = {}        # e280: which named gate refused each unseen question
-        for q in UNSEEN:
+        for q in UNSEEN + UNSEEN_NAMED:
             out = pmem.profile_recall(q)
             got = facts_of(out)
             if out.get("abstain") and not got:
@@ -437,7 +456,17 @@ def main():
             # is what this axis has to read.
             if not out.get("abstain") or got:
                 leaks.append((q, got[0][:60] if got else "-"))
-        abst = len(UNSEEN) - len(leaks)
+        abst = len(UNSEEN) + len(UNSEEN_NAMED) - len(leaks)
+        # e281: PARTIAL_KNOWLEDGE was defined in e275 and never scored -- a
+        # list nobody read. Reported, NOT gated: attribute-level abstention is
+        # a known open defect and folding it into the count above would make
+        # that number mean two things.
+        partial_answered = []
+        for q, ent, attr in PARTIAL_KNOWLEDGE:
+            out = pmem.profile_recall(q)
+            got = facts_of(out)
+            if not out.get("abstain") and got:
+                partial_answered.append((q, got[0][:58]))
 
         # ---- PURITY
         impure = []
@@ -486,7 +515,10 @@ def main():
 
         n = len(ANSWERABLE)
         print(f"\n  RECALL      rank-1 {r1}/{n}   in-pool {pool}/{n}")
-        print(f"  ABSTENTION  {abst}/{len(UNSEEN)} honest on never-mentioned topics")
+        print(f"  ABSTENTION  {abst}/{len(UNSEEN) + len(UNSEEN_NAMED)} honest on never-mentioned topics "
+              f"({len(UNSEEN_NAMED)} name the owner)")
+        print(f"  PARTIAL     {len(PARTIAL_KNOWLEDGE) - len(partial_answered)}/{len(PARTIAL_KNOWLEDGE)} "
+              f"abstain on a known topic's UNKNOWN attribute   (known limit, not gated)")
         if gates:
             # e280: a refusal is an empty result set decided by a named gate.
             # Which gate does the work is the read-path refusal matrix.

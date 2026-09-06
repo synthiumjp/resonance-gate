@@ -297,3 +297,41 @@ def test_a_hit_names_no_gate(monkeypatch, mem):
     _stub(monkeypatch, mem, [("a", 5.0)])
     out = mem.recall_v3("what car do i drive?")
     assert out["abstain"] is False and "gate" not in out
+
+
+# ---- e281: the owner's name grounds nothing; short plurals stem -----------
+
+def test_the_owners_name_is_not_a_content_word(monkeypatch, mem):
+    """Every record starts with the owner's name, so a question that names
+    the owner shared a token with every record and grounded on anything."""
+    monkeypatch.setitem(mem.g.nodes, "a", {**mem.g.nodes["a"],
+                                          "text": "Martin Mark uses Postgres"})
+    _stub(monkeypatch, mem, [("a", 5.0)])
+    monkeypatch.setattr(MA, "_dense_grounded", lambda *a, **k: False)
+    idx = _StubIndex(); idx.owner = "Martin Mark"
+    monkeypatch.setattr(mem, "_index_v3", lambda: idx)   # one instance, keeps owner
+    out = mem.recall_v3("What is Martin Mark's blood type?")
+    _assert_empty_refusal(out, "grounding")
+
+
+def test_a_real_shared_word_still_grounds_with_the_name_present(monkeypatch, mem):
+    # the stub snapshots node texts, so set the text BEFORE stubbing
+    monkeypatch.setitem(mem.g.nodes, "a", {**mem.g.nodes["a"],
+                                          "text": "Martin Mark uses Postgres"})
+    _stub(monkeypatch, mem, [("a", 5.0)])
+    monkeypatch.setattr(MA, "_dense_grounded", lambda *a, **k: False)
+    idx = _StubIndex(); idx.owner = "Martin Mark"
+    monkeypatch.setattr(mem, "_index_v3", lambda: idx)
+    assert mem.recall_v3("Does Martin Mark use Postgres?")["abstain"] is False
+
+
+def test_strip_owner_removes_only_the_name():
+    assert MA._strip_owner("What is Alex Reyes's blood type?", "Alex Reyes") == \
+        "What is blood type?"
+    assert MA._strip_owner("blood type", None) == "blood type"
+
+
+def test_short_plurals_share_a_stem():
+    for a, b in (("dogs", "dog"), ("cars", "car"), ("jobs", "job"), ("gyms", "gym")):
+        assert MA._stem(a) == MA._stem(b) == b
+    assert MA._stem("bus") == "bus" and MA._stem("gas") == "gas"

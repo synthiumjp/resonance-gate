@@ -162,7 +162,59 @@ STALE_PENALTY = 20.0
 
 
 def _stem(t):
-    return t[:-1] if t.endswith("s") and len(t) > 4 else t
+    # e281: was `len(t) > 4`, so a 3-letter noun never lost its plural --
+    # "dogs"/"dog", "cars"/"car", "jobs"/"job" shared no stem and the lexical
+    # route could not ground exactly the short everyday nouns it exists for.
+    return t[:-1] if t.endswith("s") and len(t) > 3 else t
+
+
+def _owner_stems(owner):
+    """The owner's name as stems, so grounding can ignore it. e281: every
+    rendered fact begins with the owner's name, so any question that names
+    the owner shared a "content word" with every record in the store --
+    "What is Alex Reyes's blood type?" grounded on "Alex Reyes uses Postgres"
+    and came back found=True with receipts. A name is not evidence about a
+    topic."""
+    import re as _re
+    if not owner:
+        return set()
+    return {_stem(t) for t in _re.findall(r"[a-z]+", str(owner).lower())}
+
+
+def _guess_owner(nodes, min_share=0.4):
+    """The owner's name read off the store itself: the rgx renderer starts
+    every owner-subject proposition with the owner's full name, so the most
+    common leading two-word prefix of the record texts IS the name when it
+    carries at least `min_share` of them. Used only when no caller supplied
+    the owner and no `name` fact exists (e281: the dogfood store had neither,
+    so the name-based lookup returned None and the fix was inert)."""
+    import re as _re
+    from collections import Counter
+    texts = [nd.get("text") or "" for nd in nodes if nd.get("text")]
+    if len(texts) < 3:
+        return None
+    c = Counter()
+    for t in texts:
+        w = _re.findall(r"[A-Za-z][a-z]+", t)
+        if len(w) >= 2 and w[0][0].isupper() and w[1][0].isupper():
+            c[f"{w[0]} {w[1]}"] += 1
+    if not c:
+        return None
+    name, n = c.most_common(1)[0]
+    return name if n / len(texts) >= min_share else None
+
+
+def _strip_owner(query, owner):
+    """The query without the owner's name tokens, for the dense route -- the
+    name inflates cosine against every record the same way."""
+    import re as _re
+    if not owner:
+        return query
+    names = {t for t in _re.findall(r"[a-z]+", str(owner).lower())}
+    kept = [w for w in (query or "").split()
+            if _re.sub(r"[^a-z]", "", _re.sub(r"'s\b", "", w.lower()))
+            not in names]
+    return " ".join(kept) or query
 
 
 # e275: DENSE GROUNDING THRESHOLD. Lexical grounding alone rejects PARAPHRASE,
@@ -227,7 +279,7 @@ def _dense_grounded(index, query, threshold=None):
         return True
 
 
-def _grounded(query, hits):
+def _grounded(query, hits, owner=None):
     """True when any candidate shares a content word with the question.
 
     Deliberately weak: ONE shared token is enough. This is a floor on
@@ -238,6 +290,7 @@ def _grounded(query, hits):
     import re as _re
     q = {_stem(t) for t in _re.findall(r"[a-z]+", (query or "").lower())
          if t not in _RERANK_STOP and len(t) > 2}
+    q -= _owner_stems(owner)    # e281: the owner's name grounds nothing
     if not q:
         return True             # nothing to ground against; defer to the floor
     for h in hits:
@@ -276,9 +329,12 @@ def _mark_ceased(g, titles=None):
 class Memory:
     """Read-side memory over the wired, corroborated profile."""
 
-    def __init__(self, graph, titles=None):
+    def __init__(self, graph, titles=None, owner=None):
         self.g = graph
         self.titles = titles or {}
+        # e281: the owner's name, when the caller knows it (the server does:
+        # it hands the same name to the extractor). Grounding must ignore it.
+        self.owner = owner
 
     @classmethod
     def load(cls, conversations_path, min_mentions=2):
@@ -444,8 +500,9 @@ class Memory:
         # the shared-word case for free; dense catches paraphrase, which is
         # what a real question usually is (e275).
         if os.environ.get("RG_GROUNDING") != "0":
-            if not (_grounded(query, [h for h, _ in scored[:3]])
-                    or _dense_grounded(idx, query)):
+            own = getattr(idx, "owner", None)
+            if not (_grounded(query, [h for h, _ in scored[:3]], owner=own)
+                    or _dense_grounded(idx, _strip_owner(query, own))):
                 return self._abstain(query, idx, gate="grounding")
         kept = list(scored)
         # e272: reorder ONLY what already cleared the floor, then truncate.
@@ -538,7 +595,9 @@ class Memory:
             nd = store.get(h.get("id"))
             if nd is None:
                 continue
-            if not (_grounded(query, [h]) or _dense_grounded(sub, query)):
+            own = getattr(sub, "owner", None)
+            if not (_grounded(query, [h], owner=own)
+                    or _dense_grounded(sub, _strip_owner(query, own))):
                 continue
             out.append(self._fact(nd))
         return out
@@ -593,6 +652,14 @@ class Memory:
                     idx.hearsay = _RV3.IndexV3(self, facts=list(hear.values()))
                 except Exception:
                     idx.hearsay = None
+            # e281: the owner's name, for grounding to ignore. Caller-supplied
+            # first, then the index's own `name` fact, then read off the texts.
+            own = (getattr(self, "owner", None) or getattr(idx, "owner", None)
+                   or _guess_owner(list(self.g.nodes.values())
+                                   + list(self.g.provisional.values())))
+            idx.owner = own
+            if idx.hearsay is not None:
+                idx.hearsay.owner = getattr(idx.hearsay, "owner", None) or own
             self._v3 = idx
             self._v3_key = key
         return self._v3
