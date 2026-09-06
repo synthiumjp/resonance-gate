@@ -14252,3 +14252,47 @@ rewrite it -- it is not in the tree.
 Note for the ops list: `pkill -f <pattern>` matched the shell's own command
 line and killed it (exit 144) before reaching the targets -- the sentinel's
 incident 3, met again. Kill by PID from a bracketed `ps | grep "[e]val..."`.
+
+### e279 result, part 2 — the LLM arm re-judged (00:24, 2026-09-07). QA parity; the extraction gap is FORM, and the judge just measured it.
+
+Four rows, user 0. Old code = 24 Aug compose; new code = today's.
+
+| | llm2 (old) | llm3 (new) | rgx3 (old) | rgx4 (new) |
+|---|---|---|---|---|
+| QA correct | 58.5 | 59.8 | 56.1 | 62.2 |
+| QA hallucination | 18.3 | 16.5 | 17.1 | 15.2 |
+| extraction recall (score 2 only) | 0.224 | 0.235 | 0.205 | 0.201 |
+| weighted recall (credits partials) | 0.512 | 0.513 | 0.568 | 0.560 |
+| target accuracy | 0.675 | 0.672 | 0.688 | 0.690 |
+| interference accuracy | 0.848 | 0.864 | 0.560 | 0.560 |
+| update correct | 3.5 | 5.2 | 10.9 | 9.2 |
+
+**Attribution of the +6pt QA.** Code effect (llm2 → llm3, same store): +3/−1,
+p=0.63, about one point. The rest is the extractor. But the same-code
+comparison is the one that matters: rgx4 vs llm3, 22 gained / 18 lost,
+**p=0.64 -- parity.** The parser answers as well as the LLM cache under
+today's code, with fewer hallucinations (15.2 vs 16.5) and zero model calls
+at write time. Not better. The e247 row understated the parser by ~5 points
+because it was composed on older code.
+
+**The extraction gap is form, and now it has a judge number.** The
+integrity judge scores each gold point 0 / 1 / 2 (missing / partial / full).
+HaluMem's `recall` counts only 2s. Paired on 578 shared gold points:
+
+| | llm3 only | rgx4 only | p |
+|---|---|---|---|
+| score >= 1 (said it at all) | 24 | **118** | <0.0001 |
+| score == 2 (said it fully) | 65 | 54 | 0.36 |
+
+The parser reaches 94 more gold points than the LLM extractor and gets
+PARTIAL credit for them: 378 of 587 points at score 1 vs 282 of 602. On full
+credit the two are indistinguishable. So the published recall column, where
+we trail MemOS by 50+ points, is a form metric on a store that already
+touches more of the gold than the LLM arm does. e254 estimated form at 21% of
+deaths by containment; the judge says the partial-to-full conversion is
+worth up to 378 points on 587 -- the whole axis. That is what fb1 / fb2 are
+for, and they are being judged now.
+
+**Interference accuracy 0.56 vs 0.86** is the cost of over-emission that
+§5k could not see: the parser keeps what the benchmark plants as
+distractors. Watch this column on the fb rows.
