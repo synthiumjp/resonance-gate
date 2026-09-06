@@ -249,3 +249,51 @@ def test_a_contentless_query_defers_to_the_floor(monkeypatch, mem):
     """Nothing to ground against is not evidence of absence."""
     _stub(monkeypatch, mem, [("a", -1.0)])
     assert mem.recall_v3("What is it?")["abstain"] is False
+
+
+# ---- e280: a refusal is an EMPTY RESULT SET decided by a NAMED gate --------
+
+_NO_PAYLOAD = ("ranked", "asserted", "unconfirmed", "wired")
+
+
+def _assert_empty_refusal(out, gate):
+    assert out["abstain"] is True and out["found"] is False
+    assert out["gate"] == gate
+    for k in _NO_PAYLOAD:
+        assert not out.get(k), f"abstention carried a payload under {k!r}"
+
+
+def test_the_empty_store_gate_is_named_and_empty():
+    MA.gate_reset()
+    empty = MA.Memory(_FakeGraph({}, {}), {})
+    _assert_empty_refusal(empty.recall_v3("anything"), "empty-store")
+    assert MA.gate_report()["empty-store"] == 1
+
+
+def test_the_floor_gate_is_named_and_empty(monkeypatch, mem):
+    MA.gate_reset()
+    _stub(monkeypatch, mem, [("a", -9.0), ("b", -9.5)])
+    out = mem.recall_v3("what car do i drive?", min_score=-7.7)
+    _assert_empty_refusal(out, "score-floor")
+    assert MA.gate_report()["score-floor"] == 1
+
+
+def test_the_grounding_gate_is_named_and_empty(monkeypatch, mem):
+    MA.gate_reset()
+    _stub(monkeypatch, mem, [("a", 5.0)])
+    monkeypatch.setattr(MA, "_dense_grounded", lambda *a, **k: False)
+    out = mem.recall_v3("What is my favourite film?")
+    _assert_empty_refusal(out, "grounding")
+    assert MA.gate_report() == {**{g: 0 for g in MA.GATES}, "grounding": 1}
+
+
+def test_the_no_candidates_gate_is_named_and_empty(monkeypatch, mem):
+    MA.gate_reset()
+    _stub(monkeypatch, mem, [])
+    _assert_empty_refusal(mem.recall_v3("what car do i drive?"), "no-candidates")
+
+
+def test_a_hit_names_no_gate(monkeypatch, mem):
+    _stub(monkeypatch, mem, [("a", 5.0)])
+    out = mem.recall_v3("what car do i drive?")
+    assert out["abstain"] is False and "gate" not in out

@@ -424,9 +424,13 @@ def main():
 
         # ---- ABSTENTION
         leaks = []
+        gates = {}        # e280: which named gate refused each unseen question
         for q in UNSEEN:
             out = pmem.profile_recall(q)
             got = facts_of(out)
+            if out.get("abstain") and not got:
+                g = out.get("gate") or "(unnamed)"
+                gates[g] = gates.get(g, 0) + 1
             # Review 2026-09-05: the flag alone was trusted. A response that
             # says abstain=True and still carries facts in `ranked`/`asserted`
             # scored as honest; the payload is what a caller renders, so it
@@ -483,6 +487,11 @@ def main():
         n = len(ANSWERABLE)
         print(f"\n  RECALL      rank-1 {r1}/{n}   in-pool {pool}/{n}")
         print(f"  ABSTENTION  {abst}/{len(UNSEEN)} honest on never-mentioned topics")
+        if gates:
+            # e280: a refusal is an empty result set decided by a named gate.
+            # Which gate does the work is the read-path refusal matrix.
+            print("              refused by: " + ", ".join(
+                f"{g} x{n}" for g, n in sorted(gates.items(), key=lambda kv: -kv[1])))
         print(f"  PURITY      {pure}/{len(MUST_NOT_ASSERT)} things nobody asserted stayed out of the store")
         print(f"  CURRENCY    {cur_new}/{len(CURRENCY)} return the CURRENT value   "
               f"{cur_stale}/{len(CURRENCY)} keep the stale one off rank 1")

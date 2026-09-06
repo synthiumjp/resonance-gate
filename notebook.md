@@ -14098,3 +14098,39 @@ Expected: baseline flat (e239/e243 precedent). fb1 recall up a little,
 precision flat. fb2 recall up more, precision down -- how much decides
 whether the assistant's evaluative restatements are a lever or a trap. tl
 confirms or kills a screen.
+
+## Entry 280 — 2026-09-06 (p2: "a refusal is an empty result set, not a model being humble" -- the read path gets named gates, and the matrix shows one gate doing all the work.)
+
+JP shared a post on a PubMed knowledge graph built with zero model calls
+(929M edges in 10.8 min on 26 cores; six refusal gates evaluated before the
+generator; an agentic layer measured at −2.5pt and published as a null).
+Ledger §5s records it. JP: "Let's incorporate."
+
+**Incorporated.** `recall_v3`'s five abstention decisions are now named gates
+(`memory_api.GATES`: empty-store, no-candidates, score-floor, grounding,
+no-renderable). Every refusal names its gate in the returned dict, carries no
+payload (tested for all four `ranked`/`asserted`/`unconfirmed`/`wired` keys),
+and increments a per-process counter. `dogfood.py` prints the read-path
+refusal matrix under the abstention line.
+
+**What the matrix said on its first run:**
+
+    ABSTENTION  8/8 honest on never-mentioned topics
+                refused by: grounding x8
+
+Every refusal is grounding. Since e277 set `FLOOR_V3 = None` (inert on this
+store, measured), grounding is the ONLY gate refusing anything on the product
+read path. e274 argued abstention needs TWO independent signals; e277 measured
+the floor contributing nothing and switched it off. Both were right on this
+store. The matrix makes the consequence visible: abstention is one predicate
+deep, and §5o says a lexical/dense grounding test is as unvalidated at scale
+as the floor was. This is the next thing to attack adversarially -- not with
+more probes I write, but with the sonnet battery against the grounding
+predicate specifically.
+
+**Deferred with a trigger.** CSR arrays for the receipted co-occurrence walk:
+not until `neighbourhood()` exceeds 5 ms median or a store passes 10,000
+nodes (§5s). Hundreds of nodes do not need it.
+
+Suites 632 + 1. Baseline `qa-rgx4` compose took 22 min (the 7.5 h figure was
+judge time); judge running.

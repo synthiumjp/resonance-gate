@@ -454,6 +454,41 @@ FIFTH and SIXTH instances of 5m. The rule to apply: after wiring a capability,
 **check what the DEFAULT does**, and check it from the surface a user actually
 calls -- not from the test that sets the flag.
 
+## 5s. A refusal is an empty result set, not a model being humble (e280)
+
+Reference: a LinkedIn post (2026-09, "AI-Augmented Architect", shared by JP
+2026-09-06) on a PubMed knowledge graph -- 40M documents, 929,824,202 edges in
+10.8 minutes on 26 CPU cores, zero model calls, because MeSH annotations and
+citation links already ship in the XML: "building the graph stopped being an
+extraction problem and became a parsing problem". Six refusal gates, five of
+them plain numpy predicates evaluated before the generator is invoked. They
+built a LangGraph agentic loop on top, measured it (rescued 2, broke 3
+controls, −2.5pt, 69% of answers used no refinement), and published the null
+with a pre-registered hypothesis rejected at 0.497 AUROC. Final 83.2% on 600
+held-out questions. Graph databases rejected after audit (1-5 ms per CREATE
+= 14-56 h); compressed sparse row arrays instead, 2.9 ms load, 7.6 µs expand.
+
+What it says for us, and what changed:
+
+- **Refusal is a property of the RESULT SET, tested by inspecting the result
+  set.** The 2026-09-05 review found `dogfood.py` trusting an `abstain` flag
+  over a non-empty payload; that is now a leak. `recall_v3`'s abstentions are
+  decided by five NAMED gates (`memory_api.GATES`), the returned dict names
+  the gate, and dogfood prints the read-path refusal matrix (which gate, how
+  often). That is the same structure the parser has in `refusal_cases.py`.
+- **Their agentic-layer null is our e210** (inference gate: 0.7 hallucinations
+  removed per correct answer lost, left off) and our §5g. Pre-register the
+  expectation, publish the null. e279 wrote its expectation before the run.
+- **The ceiling differs.** Their edges were curated by humans; HaluMem's gold
+  is model-written abstractive prose, so a parsing-only system faces a ~32%
+  unreachable share (e254/e279) that their corpus does not have. Do not read
+  their 83.2% as a target for ours.
+- **CSR for the receipted co-occurrence walk: DEFERRED with a trigger.**
+  `wire.Graph.neighbourhood` is a Python dict walk; at hundreds of nodes it is
+  irrelevant. Trigger: when a real store's `neighbourhood()` exceeds 5 ms
+  median, or the store passes 10,000 nodes, build indptr/indices arrays
+  (NumPy only) and keep the path bookkeeping in Python. Not before.
+
 ## 6. Open, in priority order
 
 | # | Item | Status |

@@ -180,6 +180,33 @@ def _stem(t):
 # more gracefully than one tuned one.
 DENSE_GROUND = 0.62
 
+# ---------------------------------------------------------------------------
+# THE GATES (e280). A refusal is an EMPTY RESULT SET, not a model being
+# humble: every abstention on the v3 read path is decided by one of these
+# named predicates BEFORE any renderer or model sees the query, and the
+# returned dict names the gate that fired. `GATE_COUNTS` accumulates per
+# process so a harness can print a read-path refusal matrix -- which gate,
+# how often -- the way rgx/refusal_cases.py does for the parser. Order is
+# the order they are evaluated in recall_v3.
+GATES = (
+    "empty-store",       # nothing stored at all
+    "no-candidates",     # retrieval returned nothing
+    "score-floor",       # best raw cross-encoder score under FLOOR_V3 (off by default)
+    "grounding",         # no retrieved record shares a content word, and none is dense-close
+    "no-renderable",     # candidates existed but none resolved to a stored node
+)
+GATE_COUNTS = {g: 0 for g in GATES}
+
+
+def gate_report():
+    """{gate: refusals so far in this process}. Reset with gate_reset()."""
+    return dict(GATE_COUNTS)
+
+
+def gate_reset():
+    for g in GATE_COUNTS:
+        GATE_COUNTS[g] = 0
+
 
 def _dense_grounded(index, query, threshold=None):
     """True when the best stored fact is semantically close to the question.
@@ -369,7 +396,7 @@ class Memory:
         """
         nodes, prov = self.g.nodes, self.g.provisional
         if not nodes and not prov:
-            return self._abstain(query)
+            return self._abstain(query, gate="empty-store")
         floor = min_score
         if floor is None:
             env = os.environ.get("RG_PROFILE_V3_FLOOR")
@@ -395,9 +422,9 @@ class Memory:
         # the property that was measured and stops the floor doing a job it
         # was never shown to do.
         if not scored:
-            return self._abstain(query, idx)
+            return self._abstain(query, idx, gate="no-candidates")
         if floor is not None and max(sc for _, sc in scored) < floor:
-            return self._abstain(query, idx)
+            return self._abstain(query, idx, gate="score-floor")
         # e274: LEXICAL GROUNDING, a second and independent abstention signal.
         #
         # The score floor degrades as the store grows -- max-of-N rises with N
@@ -419,7 +446,7 @@ class Memory:
         if os.environ.get("RG_GROUNDING") != "0":
             if not (_grounded(query, [h for h, _ in scored[:3]])
                     or _dense_grounded(idx, query)):
-                return self._abstain(query, idx)
+                return self._abstain(query, idx, gate="grounding")
         kept = list(scored)
         # e272: reorder ONLY what already cleared the floor, then truncate.
         if rerank:
@@ -446,7 +473,7 @@ class Memory:
             if f.get("status") == "unconfirmed-single-mention":
                 unconfirmed.append(f)
         if not facts:
-            return self._abstain(query, idx)
+            return self._abstain(query, idx, gate="no-renderable")
         return {"found": True, "abstain": False, "query": query,
                 "asserted": [f for f in facts if f not in unconfirmed],
                 "ranked": facts, "wired": self._wired_v3(kept),
@@ -516,8 +543,14 @@ class Memory:
             out.append(self._fact(nd))
         return out
 
-    def _abstain(self, query, idx=None):
+    def _abstain(self, query, idx=None, gate=None):
         """e277: HEARSAY-ONLY IS NOT ABSTENTION.
+
+        e280: `gate` names the predicate that refused (see GATES). The
+        abstention it returns carries NO payload -- no ranked, asserted or
+        unconfirmed facts -- and the harness checks that invariant, because
+        a flag that says "abstained" over a list of facts is the one thing a
+        caller cannot be trusted to ignore.
 
         e249 established this on the other read path: if the assistant said
         something about the user and the user never confirmed it, the memory
@@ -535,7 +568,10 @@ class Memory:
                     "unconfirmed": [], "hearsay": hs, "retrieval": "v3",
                     "note": ("hearsay only: an assistant claim about the "
                              "user, never asserted by the user")}
+        if gate is not None:
+            GATE_COUNTS[gate] = GATE_COUNTS.get(gate, 0) + 1
         return {"found": False, "abstain": True, "query": query,
+                "gate": gate,
                 "answer": "no stored fact matches -- never seen"}
 
     def _index_v3(self):
