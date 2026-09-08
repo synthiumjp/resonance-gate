@@ -14296,3 +14296,45 @@ for, and they are being judged now.
 **Interference accuracy 0.56 vs 0.86** is the cost of over-emission that
 §5k could not see: the parser keeps what the benchmark plants as
 distractors. Watch this column on the fb rows.
+
+## Entry 282 — 2026-09-09 (p2: the judge remembers its own verdicts. A crash cost six hours; it now costs minutes, and a variant costs only its delta.)
+
+The machine rebooted at 07:41 on 2026-09-07, 88% through fb1's accuracy pass
+(6h01 of ~6h50). `evaluation.py` checkpoints a user only when that user
+finishes, so all of it was lost. That is the second run this stack has lost to
+an environment event, and the first was the same shape (the judge server does
+not survive a reboot).
+
+**One cache, at the one place all four stages meet.** Integrity, accuracy,
+update and QA all reach the model through `llm_request` /
+`llm_request_for_json`, so the verdict cache lives there and covers every
+stage. Key: (model, call shape, exact prompt) -- a changed prompt or a
+different judge can never hit. One JSONL shard per PID, so the
+ProcessPoolExecutor workers never interleave a line; a torn line is a miss,
+never a crash; `RG_JUDGE_CACHE=0` opts out. Nine tests, all with the client
+stubbed, so they need no GPU and no judge: a repeat costs no call, a verdict
+survives a process restart, the two call shapes do not share an entry, a
+different model never hits.
+
+**The second payoff is the one that matters tonight.** An extraction VARIANT
+re-asks the judge the same question about every record it did not change --
+on user 0 that is ~3,900 records at 5.5s each. fb1/fb2/tl differ from each
+other in 10-20% of records, so the first arm pays full price and the other
+two pay their delta.
+
+**A test-harness lesson, mine.** Two of the nine tests failed on first run
+against correct code: the `_load` helper hardcoded `OPENAI_MODEL` and
+`RG_JUDGE_CACHE`, the exact two variables those tests vary. An instrument
+that overwrites its own independent variable -- §5q's shape, one level down.
+Fixed by parameterising, and the docstring says why.
+
+**Also in the tree now**: `tools/run_judged.sh` (starts the judge, waits for
+it, runs the arms) and `tools/watch_chain.sh`. Both were scratchpad scripts
+under /tmp and the reboot wiped them. `llms.py` is now a tracked file
+symlinked into the HaluMem checkout, like `eval_rgp2.py`, so the patch cannot
+drift out of the run.
+
+Suites 645 (+9). Variants scheduled for 21:00 tonight via a systemd user
+timer (`systemctl --user list-timers`), started earlier than the previous
+23:00 because the first arm pays full price against a cold cache -- and if it
+overruns, resuming is now nearly free, which is the whole point.
