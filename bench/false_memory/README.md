@@ -155,6 +155,16 @@ Mem0 took about 15 minutes per scenario for part of this run (a busy CPU, no
 prefix cache hit) and Ollama was restarted twice by something else on the
 machine, so the Mem0 step was resumed after clearing its failed rows.
 
+### Blind set v3, second sourcedrecall run
+
+After a paraphrase-recall round tuned on a separate, readable dev set
+(cases_dev_paraphrase.jsonl: 17 -> 34 of 64), sourcedrecall at 84af55c was
+run once more on cases_v3 (`results_v3_r2/`; Mem0 and RAG copied from
+`results_v3/`). Control recall 8 -> 9/23, side recall 3 -> 4/8, false
+memory 4 -> 5/30. Item level: one control improved, one stale case got
+worse (audited as a real false memory: the old fact was returned unmarked
+next to the new one). The dev-set gains mostly did not transfer.
+
 ## Reading the results (what the numbers do and do not say)
 
 * Class a (denials, hedges, questions, conditionals, reported opinions): no system returned an asserting line, including sourcedrecall at `03e0b24`. This class does not separate the systems on this set.
