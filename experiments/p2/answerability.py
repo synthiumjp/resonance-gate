@@ -120,6 +120,10 @@ def read_question(q):
         if ent in ("i", "me", ""):
             ent = None
         if i == 5:                       # "what is my X": X may be "favourite Y"
+            # "what is my daughter called" -> (daughter, name)
+            m = re.match(r"^(.+?)\s+(?:called|named)$", att)
+            if m:
+                return (m.group(1), "name")
             words = att.split()
             if words and words[0] in ("favourite", "favorite") and len(words) > 1:
                 return (" ".join(words[1:]), "favourite")
