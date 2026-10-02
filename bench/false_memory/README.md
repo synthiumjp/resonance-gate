@@ -6,7 +6,7 @@ Three systems, 72 synthetic scenarios, local models only, no network calls at ru
 
 | system | what it is |
 |---|---|
-| `sourcedrecall` | this repo's `server/sourcedrecall/profile_memory.py`: a deterministic parser (`rgx`, stanza dependency parse) writes facts with the user's own quote and date; no model call at ingest. `results/` holds the run at RG commit `36aea17` (sourcedrecall 0.3.4); the first run, at `03e0b24`, is kept in `results/raw_sourcedrecall_03e0b24.jsonl` (see Results by version). |
+| `sourcedrecall` | this repo's `server/sourcedrecall/profile_memory.py`: a deterministic parser (`rgx`, stanza dependency parse) writes facts with the user's own quote and date; no model call at ingest. `results/` holds the run at RG commit `9d853d7` (after 0.3.4: retrieval changes for large stores, same numbers as `36aea17`); the first run, at `03e0b24`, is kept in `results/raw_sourcedrecall_03e0b24.jsonl` (see Results by version). |
 | `mem0` | Mem0 open source, `mem0ai==2.2.1`, fully local (below). |
 | `rag` | Control with no extraction: every user message stored verbatim, top-3 by `BAAI/bge-small-en-v1.5` cosine. |
 

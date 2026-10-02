@@ -7,9 +7,9 @@
    "ingest_cost": {
     "messages": 108,
     "model_calls": 0,
-    "seconds": 13.3,
+    "seconds": 13.9,
     "calls_per_message": 0.0,
-    "seconds_per_message": 0.123,
+    "seconds_per_message": 0.129,
     "scenarios_with_error": 0
    },
    "views": {
