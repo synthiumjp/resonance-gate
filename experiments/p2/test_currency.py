@@ -313,3 +313,69 @@ def test_overlapping_but_different_values_are_still_a_revision():
     C.mark_current(nodes)
     cur = [x for x in nodes if x["current"]][0]
     assert cur["supersedes"] == ["8210 usd"]
+
+
+# ---- 2026-10-02: STATE CHANGES on the parser's own predicate keys ---------
+
+class _G:
+    def __init__(self, nodes):
+        self.nodes, self.provisional = nodes, {}
+
+
+def _n(nid, attr, value, conv, text=None, source=None):
+    return {"id": nid, "attr": attr, "value": value, "convs": {conv: "2026-10-02"},
+            "text": text or value, "source": source or text or value}
+
+
+ORDER = {"c1": 0, "c2": 1}
+
+
+def test_a_later_move_replaces_where_you_live():
+    """The stranger's test: 'I moved to Brunswick' left 'lives in Fitzroy'
+    current, and 'Where do I live?' answered Fitzroy."""
+    g = _G({"a": _n("a", "live_in", "in Fitzroy", "c1"),
+            "b": _n("b", "move_to", "to Brunswick", "c2")})
+    out = C.mark_state_changes(g, order=ORDER)
+    assert out == [("a", "b")]
+    assert g.nodes["a"]["current"] is False and g.nodes["a"]["ceased"] is True
+    assert g.nodes["b"].get("current", True) is True
+
+
+def test_a_restatement_is_not_a_change():
+    g = _G({"a": _n("a", "move_to", "to Brunswick", "c1"),
+            "b": _n("b", "live_in", "in Brunswick now", "c2")})
+    assert C.mark_state_changes(g, order=ORDER) == []
+
+
+def test_two_statements_in_one_conversation_are_not_ordered():
+    g = _G({"a": _n("a", "live_in", "in Fitzroy", "c1"),
+            "b": _n("b", "move_to", "to Brunswick", "c1")})
+    assert C.mark_state_changes(g, order=ORDER) == []
+
+
+def test_also_means_a_second_job_not_a_new_one():
+    """Found by the first run of this pass: 'I also joined the Alfred'
+    marked St Vincent's 'no longer true'."""
+    g = _G({"a": _n("a", "work_as", "as a nurse at St Vincent's", "c1"),
+            "b": _n("b", "join", "the Alfred as a ward manager", "c2",
+                    source="I also joined the Alfred as a ward manager.")})
+    assert C.mark_state_changes(g, order=ORDER) == []
+
+
+def test_a_new_job_replaces_the_old_employer():
+    g = _G({"a": _n("a", "work_at", "at Acme", "c1"),
+            "b": _n("b", "get", "a job at Canva", "c2")})
+    assert C.mark_state_changes(g, order=ORDER) == [("a", "b")]
+
+
+def test_a_plan_never_enters_a_family():
+    """'thinking about moving to X' is filed under think, not move_to."""
+    g = _G({"a": _n("a", "live_in", "in Fitzroy", "c1"),
+            "b": _n("b", "think", "about moving to Brunswick", "c2")})
+    assert C.mark_state_changes(g, order=ORDER) == []
+
+
+def test_hobbies_never_participate():
+    g = _G({"a": _n("a", "like", "jazz", "c1"),
+            "b": _n("b", "like", "techno", "c2")})
+    assert C.mark_state_changes(g, order=ORDER) == []

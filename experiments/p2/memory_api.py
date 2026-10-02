@@ -403,6 +403,10 @@ def _mark_ceased(g, titles=None):
     # sequence available when several conversations share a date (e273).
     order = {c: i for i, c in enumerate(titles or {})}
     currency.mark_ceased(g, order=order or None)
+    # 2026-10-02: a later move / new job replaces the old residence/employer.
+    # ONE hook for both loaders (Memory.load and the server's _build) -- the
+    # server used to call currency directly, the §5m shape waiting to happen.
+    currency.mark_state_changes(g, order=order or None)
 
 
 class Memory:
@@ -596,7 +600,35 @@ class Memory:
             kept.sort(key=lambda p: -(
                 p[1] + _subject_bonus(query, p[0].get("text") or "")
                 - (STALE_PENALTY if p[0].get("current") is False else 0.0)))
-        kept = kept[:top_n]
+        # 2026-10-02: RETURN WHAT ANSWERS, NOT THE WHOLE POOL. A fresh user
+        # with eight facts got all eight back for every question (new-user
+        # install test) and the agent had to pick. Keep the re-rank's first
+        # choice, then only candidates whose RAW score is within
+        # RG_RECALL_MARGIN of the best raw score in the pool. PILOT VALUE: 4.0
+        # was chosen on the 26 dogfood questions, where the right answer sat
+        # at most 3.42 below the top -- re-check on held-out probes before
+        # trusting it. Measured over the whole pool BEFORE truncation, so a
+        # superseded fact that answers strongly (demoted by STALE_PENALTY)
+        # still sets the bar instead of letting weak neighbours fill the list.
+        _margin = float(os.environ.get("RG_RECALL_MARGIN", RECALL_MARGIN))
+        if _margin >= 0 and len(kept) > 1:
+            _best = max(sc for _, sc in kept)
+            kept = kept[:1] + [p for p in kept[1:]
+                               if p[1] >= _best - _margin]
+        # A superseded fact that answers is shown WITH what replaced it: "you
+        # lived in Fitzroy (no longer true); you moved to Brunswick". Without
+        # this the replacement could be cut and the stale fact stand alone.
+        _ids = {h.get("id") for h, _ in kept}
+        _out = []
+        for h, sc in kept:
+            nd = nodes.get(h.get("id")) or prov.get(h.get("id")) or {}
+            rid = nd.get("superseded_by")
+            if (nd.get("current") is False and rid and rid not in _ids
+                    and (rid in nodes or rid in prov)):
+                _out.append(({"id": rid}, sc))
+                _ids.add(rid)
+            _out.append((h, sc))
+        kept = _out[:top_n]
         # rank order preserved; `tier` says which store a fact came from so a
         # caller can still tell corroborated from single-mention.
         facts, unconfirmed = [], []
@@ -614,21 +646,6 @@ class Memory:
                 unconfirmed.append(f)
         if not facts:
             return self._abstain(query, idx, gate="no-renderable")
-        # 2026-10-02: RETURN WHAT ANSWERS, NOT THE WHOLE POOL. A fresh user
-        # with eight facts got all eight back for every question (new-user
-        # install test) and the agent had to pick. Keep the first fact, then
-        # only facts whose raw score is within RG_RECALL_MARGIN of the best:
-        # a confident answer leads the rest by 6-15 points and comes back
-        # alone; an uncertain one keeps its neighbours. PILOT VALUE: 4.0 was
-        # chosen on the 26 dogfood questions, where the right answer sat at
-        # most 3.42 below the top -- re-check on held-out probes before
-        # trusting it, exactly as FLOOR_V3 should have been.
-        _margin = float(os.environ.get("RG_RECALL_MARGIN", RECALL_MARGIN))
-        if _margin >= 0 and len(facts) > 1:
-            _best = max(f["score"] for f in facts)
-            facts = facts[:1] + [f for f in facts[1:]
-                                 if f["score"] >= _best - _margin]
-            unconfirmed = [f for f in unconfirmed if f in facts]
         return {"found": True, "abstain": False, "query": query,
                 "asserted": [f for f in facts if f not in unconfirmed],
                 "ranked": facts, "wired": self._wired_v3(kept),

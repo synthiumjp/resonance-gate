@@ -130,9 +130,8 @@ def _build():
                               hearsay=hearsay)
     from memory_api import _attach_sources
     _attach_sources(g, sources)
-    import currency as _CU          # e273: read the user's own cessations
-    if os.environ.get("RG_CESSATION") != "0":
-        _CU.mark_ceased(g, order={c: i for i, c in enumerate(titles or {})})
+    from memory_api import _mark_ceased   # endings AND state changes, one hook
+    _mark_ceased(g, titles)
     # e281: the server knows the owner (it hands the same name to the
     # extractor); give it to the Memory so grounding can ignore the name.
     # Without this the dogfood store had no `name` fact, the index's owner was
@@ -213,7 +212,25 @@ def _discover_owner_name():
     return None
 
 
-def profile_ingest(turns, conversation_id=None, title=None, owner_name=None):
+def _iso_date(date):
+    """Normalise a caller's date to the sortable form conversations.json
+    uses. Raises ValueError on something that is not a date -- a silently
+    mis-ordered history is worse than a refused call."""
+    d = str(date).strip()
+    try:
+        if len(d) == 10:
+            return datetime.datetime.strptime(d, "%Y-%m-%d").strftime(
+                "%Y-%m-%dT00:00:00Z")
+        dt = datetime.datetime.fromisoformat(d.replace("Z", "+00:00"))
+        if dt.tzinfo is not None:
+            dt = dt.astimezone(datetime.timezone.utc)
+        return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+    except ValueError:
+        raise ValueError(f"date must be ISO, e.g. 2026-09-25 -- got {date!r}")
+
+
+def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
+                   date=None):
     """Turn ONE conversation into new profile-memory facts -- the only WRITE
     path in this module that runs an extractor, and it is rgx: a deterministic
     parser, NOT a language model. No prompt, no sampling, no invented text --
@@ -254,8 +271,15 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None):
                   or _discover_owner_name())
 
         conv_id = conversation_id or str(_uuidlib.uuid4())
-        created_at = datetime.datetime.now(datetime.timezone.utc).strftime(
-            "%Y-%m-%dT%H:%M:%SZ")
+        # 2026-10-02: when the conversation HAPPENED, if the caller knows.
+        # Conversation order (and so which statement is "no longer true")
+        # follows this; stamping every import with the import time made a
+        # week-old chat indistinguishable from today's.
+        if date:
+            created_at = _iso_date(date)
+        else:
+            created_at = datetime.datetime.now(datetime.timezone.utc).strftime(
+                "%Y-%m-%dT%H:%M:%SZ")
 
         # ---- (a) conversations.json: append or create ----
         conv_path = _conversations_path()

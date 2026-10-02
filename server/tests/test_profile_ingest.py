@@ -174,3 +174,40 @@ def test_two_turns_are_two_mentions(pm):
     out = pm.profile_recall("Where do I live?")
     leeds = [f for f in (out.get("ranked") or []) if "Leeds" in (f.get("text") or "")]
     assert leeds and leeds[0]["mentions"] == 2, leeds
+
+
+def test_a_move_makes_the_old_address_no_longer_true(pm):
+    """The second stranger test: after 'I moved to Brunswick', 'Where do I
+    live?' still answered Fitzroy, unmarked."""
+    U = lambda c: {"role": "user", "content": c}
+    pm.profile_ingest([U("I live in Fitzroy.")], conversation_id="d1",
+                      owner_name="Dana Cole", date="2026-09-25")
+    pm.profile_ingest([U("Big news, I moved to Brunswick last weekend.")],
+                      conversation_id="d2", owner_name="Dana Cole",
+                      date="2026-10-02")
+    out = pm.profile_recall("Where do I live?")
+    ranked = out["ranked"]
+    assert "Brunswick" in ranked[0]["text"] and ranked[0]["current"] is True
+    fitz = [f for f in ranked if "Fitzroy" in f["text"]]
+    assert fitz and fitz[0]["current"] is False
+    assert "(no longer true)" in pm.profile_context("where do I live")["block"]
+
+
+def test_an_older_conversation_imported_later_stays_older(pm):
+    """Order follows when a conversation HAPPENED, not when it was imported."""
+    U = lambda c: {"role": "user", "content": c}
+    pm.profile_ingest([U("Big news, I moved to Brunswick last weekend.")],
+                      conversation_id="n", owner_name="Dana Cole",
+                      date="2026-10-02")
+    pm.profile_ingest([U("I live in Fitzroy.")], conversation_id="o",
+                      owner_name="Dana Cole", date="2026-09-01")
+    ranked = pm.profile_recall("Where do I live?")["ranked"]
+    fitz = [f for f in ranked if "Fitzroy" in f["text"]]
+    assert fitz and fitz[0]["current"] is False
+
+
+def test_a_bad_date_is_refused_not_misfiled(pm):
+    import pytest as _pt
+    with _pt.raises(ValueError):
+        pm.profile_ingest([{"role": "user", "content": "I live in Leeds."}],
+                          owner_name="Dana Cole", date="last tuesday")

@@ -476,3 +476,110 @@ def mark_ceased(g, owner=None, order=None):
                 ceased.append((nid, cid))
                 break
     return ceased
+
+
+# ---------------------------------------------------------------------------
+# 2026-10-02: STATE CHANGES. "I moved to Brunswick" did not supersede "I live
+# in Fitzroy" -- found by a stranger installing the product, not by the
+# harness. `mark_current` keys on SINGLE_VALUED slot names from the LLM
+# extractor ("residence", "employer"); the deterministic parser files the same
+# facts under its own predicate keys ("live_in", "move_to", "work_at",
+# "join"), so on the product path nothing was ever superseded by a later
+# value -- only by an explicit ending ("I quit", "no longer").
+#
+# A STATE FAMILY is one thing a person has exactly one of at a time, read off
+# the parser's own keys. Some members HOLD the state ("I live in X"), some
+# ENTER it ("I moved to X", "I joined X"); a later member with a different
+# value replaces an earlier one. Deliberately small: two families, both ones
+# where "could a reasonable person hold two at once?" is mostly no. Hedged
+# plans never enter a family -- "I'm thinking about moving to Brunswick" is
+# filed under `think`, not `move_to`, by the parser itself.
+
+_PLACE_NOISE = frozenset("""
+in at to on from the a an now again currently anymore any more last this next
+week weekend month year years ago recently just finally back there here
+""".split())
+
+STATE_FAMILIES = {
+    "residence": {
+        "preds": {"live_in", "reside_in", "move_to", "relocate_to",
+                  "settle_in"},
+    },
+    "employer": {
+        # work_as carries the employer only when its value says "at X"
+        "preds": {"work_at", "work_for", "join", "start_at", "employ_by"},
+        "job_preds": {"get", "start", "land", "take", "accept", "work_as"},
+    },
+}
+
+
+def _place_tokens(value):
+    return {t for t in re.findall(r"[a-z0-9']+", (value or "").lower())
+            if t not in _PLACE_NOISE and len(t) > 1}
+
+
+def _family_value(attr, value):
+    """-> (family, token set of the state's value) or (None, None)."""
+    a = (attr or "").lower().split(":")[-1]
+    v = (value or "").lower()
+    for fam, spec in STATE_FAMILIES.items():
+        if a in spec["preds"]:
+            toks = _place_tokens(v)
+            return (fam, toks) if toks else (None, None)
+        if a in spec.get("job_preds", ()):
+            # "a new job at the Alfred", "as a nurse at St Vincent's"
+            m = re.search(r"\bat\s+(.+)$", v)
+            if m and (a == "work_as" or "job" in v or "role" in v
+                      or "position" in v):
+                toks = _place_tokens(m.group(1))
+                return (fam, toks) if toks else (None, None)
+    return None, None
+
+
+# "I ALSO joined the Alfred" is a second job, not a change of job -- found by
+# the first test of this pass, which marked St Vincent's "no longer true".
+_ADDITIVE = re.compile(r"\b(also|as well|too|second job|another job|"
+                       r"side job|part[- ]time|on the side|in addition)\b")
+
+
+def mark_state_changes(g, order=None):
+    """Mark facts a LATER statement in the same state family replaced.
+    Returns [(old_node_id, new_node_id)].
+
+    Conservative, like mark_ceased:
+      * the replacing fact must be strictly LATER (by conversation order);
+        two statements in one conversation are not ordered here;
+      * values must actually differ -- neither token set contains the other,
+        so "lives in Brunswick now" is a restatement of "moved to Brunswick",
+        not a change;
+      * nothing is deleted: the old fact stays, marked current=False with
+        superseded_by, and renders "(no longer true)".
+    The user SAID the state changed, so the old fact is also marked `ceased`
+    -- which, by e274's rule, resolves a would-be conflict instead of asking.
+    """
+    members = {}
+    for st in (g.nodes, g.provisional):
+        for nid, nd in st.items():
+            fam, toks = _family_value(nd.get("attr"), nd.get("value"))
+            if fam:
+                said = f"{nd.get('text') or ''} {nd.get('source') or ''}"
+                members.setdefault(fam, []).append(
+                    (nid, nd, toks, _latest(nd, order),
+                     bool(_ADDITIVE.search(said.lower()))))
+    changed = []
+    for fam, items in members.items():
+        for nid, nd, toks, when, _add in items:
+            if nd.get("current") is False:
+                continue
+            later = [(cid, ctoks, cwhen) for cid, _c, ctoks, cwhen, cadd in items
+                     if cid != nid and cwhen != "" and when != ""
+                     and cwhen > when and not cadd
+                     and not (ctoks <= toks or toks <= ctoks)]
+            if not later:
+                continue
+            cid = max(later, key=lambda x: x[2])[0]
+            nd["current"] = False
+            nd["superseded_by"] = cid
+            nd["ceased"] = True
+            changed.append((nid, cid))
+    return changed
