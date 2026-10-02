@@ -440,11 +440,16 @@ _QUESTION_FAMILIES = [
 
 
 # a question about someone else: "my brother", a name, he/she/they
+# 2026-10-02: only PEOPLE and animals make a question about someone else --
+# "my beverage of choice" is the user's
 _ABOUT_OTHER = re.compile(
-    r"\bmy\s+(?!(?:job|work|role|title|diet|car|address|age|home|place|"
-    r"house|flat|apartment|kids|children|employer|career|occupation|"
-    r"profession|relationship|current|new|old|favou?rite|own)\b)[a-z]+|"
-    r"\b(he|she|they|his|her|their|him|them)\b|(?<!^)\b(?!I\b)[A-Z][a-z]+", )
+    r"\bmy\s+(?:sister|brother|mum|mom|dad|mother|father|wife|husband|"
+    r"partner|boyfriend|girlfriend|fiance|fiancee|friend|friends|boss|manager|"
+    r"colleague|colleagues|coworker|son|daughter|kid|child|baby|neighbour|"
+    r"neighbor|flatmate|roommate|cousin|aunt|uncle|niece|nephew|grandma|"
+    r"grandpa|grandmother|grandfather|parents|teacher|doctor|dentist|"
+    r"landlord|client|dog|cat|pet)s?\b|"
+    r"\b(he|she|they|his|her|their|him|them)\b|(?<!^)\b(?!I\b)[A-Z][a-z]+")
 
 
 def _family_grounded(query, hits):
@@ -464,6 +469,29 @@ def _family_grounded(query, hits):
         if fams & asked:
             return True
     return False
+
+
+def _type_grounded(query, hits):
+    """2026-10-02: a question that asks for a TYPE ("Which food do I
+    dislike?", "What is my beverage of choice?") is grounded by a record
+    that holds a thing of that type, with the question's own verb and
+    polarity (answer_type.py, WordNet is-a). Only for questions about the
+    user."""
+    if os.environ.get("RG_ANSWER_TYPE") == "0":
+        return False
+    if _ABOUT_OTHER.search((query or "").strip()):
+        return False
+    try:
+        import answer_type as _AT
+    except Exception:
+        return False
+    qt = _AT.question_type(query)
+    if not qt:
+        return False
+    verbs = _AT.question_verbs(query, qt[0])
+    pres = _AT.is_presence(query)
+    return any(_AT.has_type(h.get("source") or h.get("value") or h.get("text"),
+                            qt[0], qt[1], verbs, possess=pres) for h in hits)
 
 
 def _grounded(query, hits, owner=None):
@@ -867,7 +895,8 @@ class Memory:
             if not (_grounded(query, top3, owner=own)
                     or _dense_grounded(idx, _strip_owner(
                         query, own, _entity_names(top3)), among=top3)
-                    or _family_grounded(query, [h for h, _ in scored[:10]])):
+                    or _family_grounded(query, [h for h, _ in scored[:10]])
+                    or _type_grounded(query, [h for h, _ in scored[:40]])):
                 return self._abstain(query, idx, gate="grounding")
         kept = list(scored)
         # 2026-10-02: scoping -- another project's facts are not this one's.
@@ -954,6 +983,24 @@ class Memory:
         # attribute: "What is my partner's job?" must not come back as
         # "partner Sam works from home". Answering facts go first; if none
         # answers, refuse and say what IS known about the entity.
+        # 2026-10-02: a question asking for a checkable TYPE is answered only
+        # by a record of that type ("What sport do I play?" is not answered
+        # by "plays the cello")
+        if os.environ.get("RG_ANSWER_TYPE") != "0" and not _ABOUT_OTHER.search(query):
+            try:
+                import answer_type as _AT
+                qt = _AT.question_type(query)
+            except Exception:
+                qt = None
+            if qt and qt[0] in _AT.CHECKABLE:
+                vb = _AT.question_verbs(query, qt[0])
+                typed = [f for f in facts if _AT.has_type(
+                    f.get("said") or f.get("value") or f.get("text"),
+                    qt[0], qt[1], vb, possess=_AT.is_presence(query))]
+                if not typed:
+                    return self._abstain(query, idx, gate="attribute",
+                                         known_about=[], asked=(None, qt[0]))
+                facts = typed + [f for f in facts if f not in typed]
         if os.environ.get("RG_ANSWERABILITY") != "0":
             import answerability as _AN
             qr = _AN.read_question(query)
@@ -1132,8 +1179,10 @@ class Memory:
         # at home" at -5.2, while "I can't stand cilantro" answered "Which
         # food do I dislike?" at -5.4). A quoted sentence must share a
         # content word with the question; paraphrase-only matches are lost.
-        hits = [(h, sc) for h, sc in hits if _grounded(query, [h], owner=own)
-                and _shares_content(query, h["value"], own)]
+        hits = [(h, sc) for h, sc in hits
+                if (_grounded(query, [h], owner=own)
+                    and _shares_content(query, h["value"], own))
+                or _type_grounded(query, [h])]
         if not hits:
             return []
         try:

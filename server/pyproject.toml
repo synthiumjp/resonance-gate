@@ -21,6 +21,7 @@ dependencies = [
     "torch",
     "transformers",
     "stanza>=1.10",
+    "nltk>=3.8",
 ]
 
 [project.scripts]

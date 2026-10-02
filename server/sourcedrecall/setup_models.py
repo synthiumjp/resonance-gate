@@ -84,6 +84,16 @@ def main(argv=None):
                for _w, name, _k in HF_MODELS)
     print(f"      -> {hfc.HF_HUB_CACHE} ({_mb(ours)} for these {len(HF_MODELS)} models)")
 
+    # WordNet: what TYPE of thing a question asks for (tea is a beverage,
+    # Leeds is a city). Optional -- without it those checks are skipped.
+    print("[+] WordNet (answer types) -- ~11 MB", flush=True)
+    try:
+        import nltk
+        nltk.download("wordnet", quiet=True)
+        print("      -> done")
+    except Exception as e:
+        print(f"      -> skipped ({e.__class__.__name__}); answer types off")
+
     print(f"\nDone in {time.time() - t0:.0f} s. The server will now run fully "
           "offline.")
     return 0

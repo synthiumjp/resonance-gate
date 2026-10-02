@@ -185,6 +185,7 @@ def test_the_rerank_can_be_switched_off(monkeypatch, mem):
     # isolates this mechanism from the 2026-10-02 answerability check,
     # whose stub texts here do not supply the asked attribute
     monkeypatch.setenv("RG_ANSWERABILITY", "0")
+    monkeypatch.setenv("RG_ANSWER_TYPE", "0")
     nodes = {"x": _node("x", "work_on", "billing service",
                         "Alex works on the billing service"),
              "y": _node("y", "is", "written in go",
@@ -236,6 +237,7 @@ def test_dense_grounding_alone_is_enough(monkeypatch, mem):
     # isolates this mechanism from the 2026-10-02 answerability check,
     # whose stub texts here do not supply the asked attribute
     monkeypatch.setenv("RG_ANSWERABILITY", "0")
+    monkeypatch.setenv("RG_ANSWER_TYPE", "0")
     _stub(monkeypatch, mem, [("a", -1.0)])
     monkeypatch.setattr(MA, "_grounded", lambda *a, **k: False)
     monkeypatch.setattr(MA, "_dense_grounded", lambda *a, **k: True)
@@ -258,6 +260,7 @@ def test_grounding_can_be_switched_off(monkeypatch, mem):
     # isolates this mechanism from the 2026-10-02 answerability check,
     # whose stub texts here do not supply the asked attribute
     monkeypatch.setenv("RG_ANSWERABILITY", "0")
+    monkeypatch.setenv("RG_ANSWER_TYPE", "0")
     _stub(monkeypatch, mem, [("a", 5.0)])
     monkeypatch.setenv("RG_GROUNDING", "0")
     assert mem.recall_v3("What is my favourite film?")["abstain"] is False
@@ -312,6 +315,7 @@ def test_the_no_candidates_gate_is_named_and_empty(monkeypatch, mem):
 
 
 def test_a_hit_names_no_gate(monkeypatch, mem):
+    monkeypatch.setenv("RG_ANSWER_TYPE", "0")   # the stub record is no car
     _stub(monkeypatch, mem, [("a", 5.0)])
     out = mem.recall_v3("what car do i drive?")
     assert out["abstain"] is False and "gate" not in out
