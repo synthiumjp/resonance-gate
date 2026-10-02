@@ -220,3 +220,17 @@ def test_a_fresh_install_answers_never_seen_not_a_file_error(pm):
     assert out["found"] is False and out["abstain"] is True
     assert "Nothing is stored" in pm.profile_context()["block"]
     assert pm.profile_status()["asserted"] == 0
+
+
+def test_re_ingesting_a_conversation_does_not_duplicate_it(pm):
+    """Documented as a safe no-op; it appended every message again. A
+    session-end hook re-sends the whole transcript on every resume."""
+    import json
+    turns = [{"role": "user", "content": "I live in Leeds."},
+             {"role": "assistant", "content": "Leeds is lovely."}]
+    pm.profile_ingest(list(turns), conversation_id="r1", owner_name="Ada Byron")
+    pm.profile_ingest(list(turns) + [{"role": "user", "content": "I cycle to work."}],
+                      conversation_id="r1", owner_name="Ada Byron")
+    convs = json.load(open(pm._conversations_path()))
+    msgs = [m["text"] for m in convs[0]["chat_messages"]]
+    assert msgs == ["I live in Leeds.", "Leeds is lovely.", "I cycle to work."]

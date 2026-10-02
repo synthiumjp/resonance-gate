@@ -304,12 +304,26 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
         elif title:
             record["name"] = title
         chat_messages = record.setdefault("chat_messages", [])
+        # 2026-10-02: re-ingesting a conversation was documented as a safe
+        # no-op but appended every message again; only the extraction was
+        # skipped. A session-end hook re-sends the WHOLE transcript every
+        # time a session is resumed and ended, so the store grew a copy per
+        # resume. Messages already in this conversation are not appended
+        # again (matched by sender + exact text).
+        have = {(m.get("sender"), m.get("text")) for m in chat_messages}
         for t in turns:
             sender = "human" if t.get("role", "user") == "user" else "assistant"
-            chat_messages.append(
-                {"sender": sender, "text": str(t.get("content", ""))})
-        with open(conv_path, "w", encoding="utf-8") as fh:
+            msg = {"sender": sender, "text": str(t.get("content", ""))}
+            if (msg["sender"], msg["text"]) in have:
+                continue
+            have.add((msg["sender"], msg["text"]))
+            chat_messages.append(msg)
+        # atomic: a crash mid-write must not leave half a memory (review
+        # 2026-09-05 E, non-atomic conversations.json)
+        _tmp = conv_path + ".tmp"
+        with open(_tmp, "w", encoding="utf-8") as fh:
             json.dump(convs, fh)
+        os.replace(_tmp, conv_path)
 
         # ---- (b) rgx extraction, cache-append, skip-if-already-cached ----
         ex = _get_extractor(owner)
