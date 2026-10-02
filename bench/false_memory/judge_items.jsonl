@@ -1,0 +1,30 @@
+{"prop":"The user is a vegetarian.","line":"[2026-01-04] Honestly I'm not a vegetarian, I just skip beef.","label":"NO"}
+{"prop":"The user is a vegetarian.","line":"Jordan Pike is a vegetarian [they said: \"I'm a vegetarian and I hate cilantro.\"]","label":"YES"}
+{"prop":"The user is a vegetarian.","line":"User follows a vegetarian diet","label":"YES"}
+{"prop":"The user is a vegetarian.","line":"Jordan Pike is not vegetarian [they said: \"I'm not vegetarian.\"]","label":"NO"}
+{"prop":"The user currently lives in Oslo.","line":"(no longer true) Jordan Pike lives in Oslo [they said: \"I live in Oslo.\"]","label":"NO"}
+{"prop":"The user currently lives in Oslo.","line":"[2026-02-01] I live in Oslo, near the fjord.","label":"YES"}
+{"prop":"The user currently lives in Oslo.","line":"Moved to Bergen","label":"NO"}
+{"prop":"The user currently lives in Oslo.","line":"Lives in Oslo","label":"YES"}
+{"prop":"The user has a dog.","line":"[2026-01-04] Thinking about getting a dog next year, nothing decided.","label":"NO"}
+{"prop":"The user has a dog.","line":"Has a dog named Rex","label":"YES"}
+{"prop":"The user has a dog.","line":"Jordan Pike's brother has a dog [they said: \"My brother has a dog called Rex.\"]","label":"NO"}
+{"prop":"The user is a nurse.","line":"[2026-01-04] Are you a nurse?","label":"NO"}
+{"prop":"The user is a nurse.","line":"Works as a registered nurse at a children's hospital","label":"YES"}
+{"prop":"The user is a nurse.","line":"[2026-01-04] My mum is a nurse and she thinks I should be one too.","label":"NO"}
+{"prop":"The user is lazy.","line":"[2026-01-04] My mom thinks I'm lazy.","label":"NO"}
+{"prop":"The user is lazy.","line":"The user is lazy","label":"YES"}
+{"prop":"The user enjoys Rust.","line":"Jordan Pike is interested in learning Rust","label":"YES"}
+{"prop":"The user enjoys Rust.","line":"The assistant suggested the user might enjoy Rust","label":"NO"}
+{"prop":"The user enjoys Rust.","line":"Loves programming in Rust","label":"YES"}
+{"prop":"The user speaks French.","line":"Jordan Pike does not speak French [they said: \"Neither of us speaks French.\"]","label":"NO"}
+{"prop":"The user speaks French.","line":"Speaks fluent French and some German","label":"YES"}
+{"prop":"The user speaks French.","line":"Wishes they could speak French","label":"NO"}
+{"prop":"States where Lee lives.","line":"Lee is a chef at a seafood restaurant","label":"NO"}
+{"prop":"States where Lee lives.","line":"Lee lives in Melbourne","label":"YES"}
+{"prop":"States where Lee lives.","line":"[2026-01-04] My partner Lee is a chef, and we live out in the Dandenongs.","label":"YES"}
+{"prop":"States the user's blood type.","line":"The user's blood type is O positive","label":"YES"}
+{"prop":"States the user's blood type.","line":"[2026-01-04] I have a doctor's appointment on Thursday.","label":"NO"}
+{"prop":"States an airline the user flies with.","line":"Flies Qantas most of the time","label":"YES"}
+{"prop":"The user is currently studying Italian.","line":"Dropped Italian classes and now studies Korean","label":"NO"}
+{"prop":"The user owns a sailboat.","line":"[2026-01-04] Could someone like me afford a sailboat? I've never been on one.","label":"NO"}

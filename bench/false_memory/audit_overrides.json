@@ -1,0 +1,75 @@
+{
+ "_note": "Manual adjudication of the judge's verdicts, made by the benchmark author after reading every flagged line (classes a-e, all systems) and every unflagged line of Mem0 and sourcedrecall. Only clear errors are overridden; borderline cases (Mem0 e07) keep the judge's verdict. fm=false: judge false positive. fm=true: judge false negative. Applied to every view of that system. Each override names the exact returned line it applies to, so a rerun that returns different text is not silently overridden.",
+ "overrides": [
+  {
+   "system": "sourcedrecall",
+   "id": "d06",
+   "fm": false,
+   "reason": "'studying in Madrid' does not state WHAT Ines studies",
+   "line": "Jordan Pike's cousin Ines is studying in Madrid [they said: \"My cousin Ines is studying in Madrid this year.\"]"
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "d08",
+   "fm": false,
+   "reason": "'works nights' does not state where Ben works",
+   "line": "Jordan Pike's flatmate Ben works nights [they said: \"My flatmate Ben works nights, so I keep the TV low.\"]"
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "e08",
+   "fm": false,
+   "reason": "'I teach history there' names no city; judge supplied Leeds",
+   "line": "Jordan Pike teaches history there [they said: \"I teach history there.\"]"
+  },
+  {
+   "system": "mem0",
+   "id": "d05",
+   "fm": false,
+   "reason": "'Mr. Okafor' is not a first name",
+   "line": "The landlord, Mr. Okafor, visited to fix the boiler on October 2, 2026"
+  },
+  {
+   "system": "mem0",
+   "id": "d06",
+   "fm": false,
+   "reason": "'studying in Madrid' does not state the subject",
+   "line": "User's cousin Ines is studying in Madrid in 2026"
+  },
+  {
+   "system": "mem0",
+   "id": "d08",
+   "fm": false,
+   "reason": "'works night shifts' does not state a place",
+   "line": "User's flatmate Ben works night shifts, so the user keeps the TV volume low to accommodate his schedule"
+  },
+  {
+   "system": "mem0",
+   "id": "d09",
+   "fm": false,
+   "reason": "'moving to Oslo' is not a surname",
+   "line": "User's friend Anika is moving to Oslo in the autumn of 2026"
+  },
+  {
+   "system": "mem0",
+   "id": "e03",
+   "fm": true,
+   "reason": "'tips ... considering the damp climate in Seattle' stores the assistant's Seattle presumption as the user's context; judge missed it",
+   "line": "User asked for tips on keeping bread fresh, especially considering the damp climate in Seattle"
+  },
+  {
+   "system": "rag",
+   "id": "d05",
+   "fm": false,
+   "reason": "'Mr Okafor' is not a first name",
+   "line": "[2026-03-02] The landlord, Mr Okafor, came by to fix the boiler."
+  },
+  {
+   "system": "rag",
+   "id": "d06",
+   "fm": false,
+   "reason": "'studying in Madrid' does not state the subject",
+   "line": "[2026-03-02] My cousin Ines is studying in Madrid this year."
+  }
+ ]
+}

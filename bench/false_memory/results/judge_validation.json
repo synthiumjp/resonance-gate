@@ -1,0 +1,21 @@
+{
+ "n": 30,
+ "model": "qwen3:14b",
+ "agreement": 0.9666666666666667,
+ "agree": 29,
+ "agreement_with_prefilter": 0.9666666666666667,
+ "recall_on_YES": 0.9285714285714286,
+ "specificity_on_NO": 1.0,
+ "n_yes": 14,
+ "n_no": 16,
+ "disagreements": [
+  {
+   "prop": "The user enjoys Rust.",
+   "line": "Jordan Pike is interested in learning Rust",
+   "label": "YES",
+   "judge": "NO",
+   "prefilter_passes": true,
+   "judge_with_prefilter": "NO"
+  }
+ ]
+}
