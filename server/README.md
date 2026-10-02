@@ -116,6 +116,11 @@ Agents can do the same with the `profile_forget`, `profile_confirm` and
 `profile_export` tools. Editing `MEMORY.md` by hand does not change the
 memory; it is regenerated.
 
+Things said in passing ("I'm eating keto today", "I'm so tired") are kept
+in their own section. They are labelled in answers, drop out of the session
+summary after three days, and never replace a lasting fact: "I'm in Sydney
+this week" does not change where you live.
+
 ## Projects
 
 Facts about you (health, family, home, job, diet, tastes) are available
@@ -150,8 +155,17 @@ harness). It hands the work to a background process and returns at once; a
 log goes to `$TMPDIR/sourcedrecall-hook.log`. Resuming a session and ending
 it again only adds the new turns. `session-start` adds nothing while the
 memory is empty.
-With `SOURCEDRECALL_BRIEFING=off` it adds nothing at all, and sessions are
-still stored.
+
+When a session starts you see a line listing what was saved since you last
+looked, in your own words, for example:
+
+    sourcedrecall saved 2 new things: "I moved to Brunswick last weekend.",
+    "I'm allergic to penicillin.". Ask Claude to forget any of them, or see
+    ~/.sourcedrecall/conversations/MEMORY.md.
+
+`SOURCEDRECALL_NOTICE=off` turns that line off. `SOURCEDRECALL_BRIEFING=off`
+stops the summary Claude gets at the start of a session; sessions are still
+stored and the tools still work.
 
 Coding sessions will add whatever you say about yourself in them, as well as
 some statements about the work. Use `profile_correct` to remove anything you

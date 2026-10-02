@@ -20,7 +20,8 @@ What it adds:
   and related tools
 - a SessionEnd hook that stores the session
 - a SessionStart hook that adds the memory summary (the `briefing` option
-  turns it off; the tools still work)
+  turns it off; the tools still work) and shows you what was saved since
+  you last looked
 
 Memory is kept in `~/.sourcedrecall/conversations` and is not removed when
 the plugin is uninstalled. Full documentation: `server/README.md` in the

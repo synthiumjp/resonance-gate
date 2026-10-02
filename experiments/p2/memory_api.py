@@ -381,8 +381,16 @@ def gate_reset():
         GATE_COUNTS[g] = 0
 
 
-def _dense_grounded(index, query, threshold=None):
-    """True when the best stored fact is semantically close to the question.
+def _dense_grounded(index, query, threshold=None, among=None):
+    """True when a stored fact is semantically close to the question.
+
+    `among`: only these facts (the ones about to be returned) count.
+    2026-10-02 (tools/scale_test.py): over the WHOLE store the best
+    similarity rises with its size, the scale creep ledger 5o warned about.
+    At 395 facts "Where did Alex Reyes go to university?" passed on 0.628 to
+    a filler fact ("went to Lyon a while ago") and then returned a different
+    one, the Perrin job. A fact that is not returned is no evidence for the
+    one that is.
 
     Returns True (defers) if the index has no embeddings -- a missing signal
     must never be read as evidence of absence.
@@ -395,6 +403,13 @@ def _dense_grounded(index, query, threshold=None):
         import numpy as np
         bi, _ = _RV3._models()
         qv = bi.encode([query], normalize_embeddings=True)[0]
+        if among is not None:
+            ids = {id(h) for h in among}
+            rows = [i for i, f in enumerate(getattr(index, "facts", []))
+                    if id(f) in ids]
+            if not rows:
+                return False
+            emb = emb[rows]
         return float(np.max(emb @ qv)) >= thr
     except Exception:
         return True
@@ -700,7 +715,7 @@ class Memory:
             top3 = [h for h, _ in scored[:3]]
             if not (_grounded(query, top3, owner=own)
                     or _dense_grounded(idx, _strip_owner(
-                        query, own, _entity_names(top3)))
+                        query, own, _entity_names(top3)), among=top3)
                     or _family_grounded(query, [h for h, _ in scored[:10]])):
                 return self._abstain(query, idx, gate="grounding")
         kept = list(scored)
@@ -775,7 +790,8 @@ class Memory:
             import answerability as _AN
             qr = _AN.read_question(query)
             if qr:
-                ok = [f for f in facts if _AN.answers(f, qr)]
+                ok = [f for f in facts
+                      if _AN.answers(f, qr, owner=getattr(idx, "owner", None))]
                 if not ok:
                     known = [f for f in facts
                              if qr[0] and _AN._mentions(

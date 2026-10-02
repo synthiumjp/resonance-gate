@@ -145,7 +145,7 @@ def _mentions(text, ent):
     return any(re.search(rf"\b{re.escape(w)}s?\b", tl) for w in words) if words else True
 
 
-def answers(fact, q_read):
+def answers(fact, q_read, owner=None):
     """Does this fact (a recall dict with text/said/attribute/value) supply
     what the question asks?"""
     ent, att = q_read
@@ -165,8 +165,20 @@ def answers(fact, q_read):
     if kind == "colour":
         return bool(toks & _COLOURS)
     if kind == "name":
-        caps = set(re.findall(r"(?<!^)(?<=\s)[A-Z][a-z]+", text))
-        return bool(re.search(r"\b(called|named|name is)\b", tl)) or len(caps) > 1
+        # 2026-10-02 (tools/scale_test.py): "any two capitalised words" let
+        # "What is Priya's last name?" be answered by "Alex Reyes's manager
+        # Priya suggested it" -- the capitals were the owner's own name. A
+        # name answers when it is introduced as one, or stands right after
+        # the entity ("Priya Sharma", "my cat Tom").
+        if re.search(r"\b(called|named|name is)\b", tl):
+            return True
+        own = {w.lower() for w in re.findall(r"[A-Za-z]+", owner or "")}
+        for w in [w for w in re.findall(r"[a-z]+", ent or "") if len(w) > 2]:
+            for m in re.finditer(rf"\b{re.escape(w)}s?\b\s+([A-Z][a-z]+)", text,
+                                 re.I):
+                if m.group(1).lower() not in own and m.group(1)[0].isupper():
+                    return True
+        return False
     if kind == "number":
         return bool(re.search(r"\d", tl) or toks & _NUMBER_WORDS)
     if kind == "time":

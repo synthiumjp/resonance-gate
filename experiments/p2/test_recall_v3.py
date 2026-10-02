@@ -449,3 +449,27 @@ def test_the_entity_must_be_the_one_asked_about():
     qr = AN.read_question("What colour is my car?")
     assert not AN.answers({"text": "Alex's scooter is blue"}, qr)
     assert AN.answers({"text": "Alex's car is blue"}, qr)
+
+
+def test_dense_grounding_counts_only_the_facts_returned():
+    """tools/scale_test.py: over the whole store the best similarity rises
+    with its size; a close fact that is not returned grounds nothing."""
+    import numpy as np
+    import memory_api as M
+
+    class Idx:
+        facts = [{"t": "a"}, {"t": "b"}]
+        emb = np.array([[1.0, 0.0], [0.0, 1.0]])
+
+    class Bi:
+        def encode(self, qs, normalize_embeddings=True):
+            return np.array([[1.0, 0.0]])
+    orig = M._RV3._models
+    M._RV3._models = lambda: (Bi(), None)
+    try:
+        idx = Idx()
+        assert M._dense_grounded(idx, "q", threshold=0.9)
+        assert M._dense_grounded(idx, "q", threshold=0.9, among=[idx.facts[0]])
+        assert not M._dense_grounded(idx, "q", threshold=0.9, among=[idx.facts[1]])
+    finally:
+        M._RV3._models = orig
