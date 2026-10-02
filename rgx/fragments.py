@@ -81,11 +81,22 @@ def _candidate(sentence):
     w = m.group(1).lower()
     if w.endswith("ing"):
         return "ing"
+    if w == "been":                 # "Been rehearsing hard all week"
+        return "been"
     if w in STATE_ADJ:
         return "adj"
     if w.endswith("ed") or w in _IRREGULAR_PAST:
         return "past"
     return None
+
+
+def _has_noun_arg(root, words):
+    """A noun argument on the root or on a verb coordinated with it
+    ("rehearsing hard and working on business plans")."""
+    heads = {root.id} | {w.id for w in words
+                         if w.head == root.id and w.deprel == "conj"}
+    return any(w.head in heads and w.deprel in _ARG_DEPS
+               and w.upos in ("NOUN", "PROPN") for w in words)
 
 
 def _accept(head, nlp):
@@ -107,6 +118,17 @@ def _accept(head, nlp):
     oroot = next((w for w in orig if w.deprel == "root"), None)
     if shape == "past" and (oroot is None or oroot.xpos != "VBD"):
         return None
+    if shape == "been":
+        # judged as the -ing shape on "I've been <...>"
+        new = "I've " + head[0].lower() + head[1:]
+        words = nlp(new).sentences[0].words
+        root = next((w for w in words if w.deprel == "root"), None)
+        if (root is None or root.xpos != "VBG"
+                or not any(w.head == root.id and w.deprel.startswith("nsubj")
+                           and w.text == "I" for w in words)
+                or not _has_noun_arg(root, words)):
+            return None
+        return new
     if any(w.deprel.startswith(("nsubj", "csubj", "expl"))
            or (w.upos in ("VERB", "AUX") and "VerbForm=Fin" in (w.feats or "")
                and not (shape == "past" and w is oroot))
@@ -127,8 +149,7 @@ def _accept(head, nlp):
            for w in words):
         return None
     if root.xpos in ("VBG", "VBD") and (root.xpos == "VBD") == (shape == "past"):
-        ok = any(w.head == root.id and w.deprel in _ARG_DEPS
-                 and w.upos in ("NOUN", "PROPN") for w in words)
+        ok = _has_noun_arg(root, words)
     else:
         ok = root.text.lower() in STATE_ADJ
     return new if ok else None

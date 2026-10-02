@@ -1327,7 +1327,19 @@ def extract_keyed(text, nlp, owner=None, role="user",
             s._swap = {}
             if head.deprel not in CLAUSE_DEPS:
                 continue
-            subj = next(iter(s.children(head, ("nsubj", "nsubj:pass"))), None)
+            # nsubj:outer: "My art is about expressing my trans experience"
+            # (LoCoMo dev audit, 2026-10-02) -- the subject of a copula whose
+            # predicate is itself a clause
+            subj = next(iter(s.children(head, ("nsubj", "nsubj:pass",
+                                                "nsubj:outer"))), None)
+            if subj is None and role == "user":
+                # a clause as subject, the user as object: "Bringing others
+                # comfort ... brings me such joy"
+                cs = next(iter(s.children(head, ("csubj",))), None)
+                if cs is not None and any(
+                        c.text.lower() in allow
+                        for c in s.children(head, ("obj", "iobj"))):
+                    subj = cs
             donor = None
             obj_ctrl = False
             if subj is None and head.deprel == "conj":
@@ -1492,7 +1504,12 @@ def extract_keyed(text, nlp, owner=None, role="user",
                 # the rendered span right after the copula: "is that a
                 # testament". The outer verb itself is never in play here
                 # (subtree only descends FROM head), only its connective.
-                drop |= {c.id for c in s.children(head, ("mark",))}
+                # 2026-10-02: only a mark BEFORE the copula is that outer
+                # connective; one after it is the predicate's own -- "My goal
+                # is TO finish the marathon", "My art is ABOUT expressing..."
+                # rendered "is finish", "is expressing".
+                drop |= {c.id for c in s.children(head, ("mark",))
+                         if c.id < cop.id}
                 drop |= negdrop
                 drop |= fdrop
                 # e243, RULE 1: ATOM + FULL. The clause's PERIPHERY (an

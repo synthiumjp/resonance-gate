@@ -1280,3 +1280,21 @@ def test_a_name_introduced_with_called_joins_the_world():
     e.reset_world()
     e.extract_turn("We adopted a beagle called Waffles.", role="user")
     assert "waffles" in e._world
+
+
+# ---- LoCoMo dev audit (conversations 0-1 only), 2026-10-02 ----------------
+
+@pytest.mark.parametrize("turn,want", [
+    ("My art is about expressing my trans experience.",
+     "Martin Mark's art is about expressing Martin Mark's trans experience"),
+    ("My goal is to finish the marathon.", "Martin Mark's goal is to finish the marathon"),
+    ("Bringing others comfort and helping them grow brings me such joy.",
+     "Bringing others comfort and helping them grow brings Martin Mark such joy"),
+])
+def test_locomo_dev_shapes(ex, turn, want):
+    assert want in texts(ex, turn)
+
+
+def test_a_mark_before_the_copula_is_still_dropped(ex):
+    out = texts(ex, "I believe that my journey is a testament to persistence.")
+    assert "Martin Mark's journey is a testament to persistence" in out

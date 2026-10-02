@@ -122,3 +122,9 @@ def test_a_fragment_after_a_sentence_about_someone_else_is_theirs(ex, turn):
                                   "Can you summarise this?"])
 def test_a_fragment_answering_a_task_is_material_not_news(ex, prev):
     assert run(ex, "Worked at Ford for 30 years. Married in 1965.", prev=prev) == []
+
+
+def test_been_fragment(ex):
+    out = [r.text for r in run(ex, "Been rehearsing hard and working on business plans.")]
+    assert "Dana Cole has been working on business plans" in out
+    assert run(ex, "Been there.") == [] and run(ex, "Been thinking about it.") == []
