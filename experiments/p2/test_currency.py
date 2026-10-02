@@ -1,5 +1,7 @@
 """Supersession must resolve changing attributes without discarding knowledge."""
 import os
+
+import pytest
 import sys
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -379,3 +381,45 @@ def test_hobbies_never_participate():
     g = _G({"a": _n("a", "like", "jazz", "c1"),
             "b": _n("b", "like", "techno", "c2")})
     assert C.mark_state_changes(g, order=ORDER) == []
+
+
+# ---- 2026-10-02: the general inventory -- role, diet, status, age, car, kids
+
+def _pair(a1, v1, a2, v2):
+    return _G({"a": _n("a", a1, v1, "c1"), "b": _n("b", a2, v2, "c2")})
+
+
+@pytest.mark.parametrize("old,new", [
+    (("is", "a nurse"), ("is", "a ward manager now")),
+    (("work_as", "as a software engineer"), ("become", "a team lead")),
+    (("is", "vegetarian"), ("go", "vegan")),
+    (("is", "vegetarian"), ("eat", "meat again")),
+    (("is", "single"), ("marry_in", "in June")),
+    (("is", "34 years old"), ("turn", "35")),
+    (("drive", "a Volvo"), ("drive", "a Skoda now")),
+    (("drive", "a Volvo"), ("buy", "a Tesla")),
+    (("have", "two kids"), ("have", "three kids now")),
+])
+def test_a_later_value_replaces_a_single_valued_state(old, new):
+    g = _pair(*old, *new)
+    assert C.mark_state_changes(g, order=ORDER) == [("a", "b")]
+
+
+@pytest.mark.parametrize("old,new", [
+    (("is", "a nurse"), ("is", "now a senior nurse at the Alfred")),  # restated
+    (("is", "a nurse"), ("is", "a huge fan of jazz")),                 # not a role
+    (("is", "a teacher"), ("is", "a runner")),                         # hobby
+    (("is", "vegetarian"), ("is", "a morning person")),
+    (("drive", "a Volvo"), ("buy", "a new kettle")),
+    (("like", "jazz"), ("like", "techno")),                            # multi-valued
+])
+def test_things_that_are_not_a_change_of_the_same_state(old, new):
+    assert C.mark_state_changes(_pair(*old, *new), order=ORDER) == []
+
+
+def test_a_role_and_an_employer_from_one_sentence_change_independently():
+    """'I work as a nurse at St Vincent's' states both; a later new role at
+    the same place replaces the role and leaves the employer current."""
+    g = _G({"a": _n("a", "work_as", "as a nurse at St Vincent's", "c1"),
+            "b": _n("b", "is", "a ward manager at St Vincent's now", "c2")})
+    assert C.mark_state_changes(g, order=ORDER) == [("a", "b")]

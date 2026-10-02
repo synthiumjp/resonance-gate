@@ -500,17 +500,55 @@ in at to on from the a an now again currently anymore any more last this next
 week weekend month year years ago recently just finally back there here
 """.split())
 
-STATE_FAMILIES = {
-    "residence": {
-        "preds": {"live_in", "reside_in", "move_to", "relocate_to",
-                  "settle_in"},
-    },
-    "employer": {
-        # work_as carries the employer only when its value says "at X"
-        "preds": {"work_at", "work_for", "join", "start_at", "employ_by"},
-        "job_preds": {"get", "start", "land", "take", "accept", "work_as"},
-    },
-}
+# Role nouns. Matched on the HEAD of the predicate noun phrase only, so "a
+# huge fan of jazz" is not a job and "a senior nurse at the Alfred" is a
+# nurse. Deliberately a closed list: a role that is missing here is simply
+# not tracked, while a non-role that slipped in ("runner") would make a
+# hobby supersede a job.
+_ROLES = frozenset("""
+nurse doctor physician surgeon gp dentist pharmacist paramedic midwife therapist
+physiotherapist psychologist psychiatrist counsellor counselor vet veterinarian
+teacher tutor lecturer professor principal librarian researcher scientist
+engineer developer programmer architect designer analyst consultant manager
+director lead supervisor coordinator administrator assistant secretary
+receptionist clerk accountant auditor bookkeeper lawyer solicitor barrister
+paralegal judge journalist editor writer author translator photographer artist
+musician chef cook baker barista waiter waitress bartender cashier retailer
+salesperson recruiter marketer founder ceo cto cfo coo owner freelancer
+contractor intern apprentice student pilot driver mechanic electrician plumber
+carpenter builder labourer laborer gardener cleaner carer caregiver officer
+firefighter soldier detective farmer technician operator nanny
+""".split())
+_DIETS = frozenset("vegetarian vegan pescatarian carnivore omnivore keto paleo".split())
+_STATUS = {"single": "single", "married": "married", "engaged": "engaged",
+           "divorced": "divorced", "separated": "separated",
+           "widowed": "widowed", "dating": "dating"}
+_CAR_BRANDS = frozenset("""
+volvo skoda tesla toyota honda mazda subaru nissan ford holden hyundai kia
+volkswagen vw audi bmw mercedes porsche jeep lexus mitsubishi suzuki renault
+peugeot citroen fiat mini jaguar landrover rivian polestar byd mg
+""".split())
+_NUM_WORDS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6,
+              "seven": 7, "eight": 8, "nine": 9, "ten": 10}
+_HEAD_STOP = re.compile(r"\b(of|at|in|for|with|who|that|which|from|on|to|"
+                        r"because|since|and|but)\b")
+_LEAD = re.compile(r"^(?:now|currently|still|finally|officially|also|"
+                   r"actually|really)\s+")
+_TRAIL = re.compile(r"\s+(?:now|again|anymore|any more|these days|"
+                    r"currently|too|as well|nowadays)$")
+
+
+def _head_phrase(value):
+    """The predicate noun phrase up to its first preposition or clause,
+    without leading/trailing time adverbs: 'now a senior nurse at the
+    Alfred' -> 'a senior nurse'."""
+    v = (value or "").lower().strip(" .!,")
+    v = _LEAD.sub("", v)
+    m = _HEAD_STOP.search(v)
+    if m:
+        v = v[:m.start()]
+    v = _TRAIL.sub("", v.strip())
+    return v.strip()
 
 
 def _place_tokens(value):
@@ -518,28 +556,94 @@ def _place_tokens(value):
             if t not in _PLACE_NOISE and len(t) > 1}
 
 
-def _family_value(attr, value):
-    """-> (family, token set of the state's value) or (None, None)."""
+_RES_PREDS = {"live_in", "reside_in", "move_to", "relocate_to", "settle_in"}
+_EMP_PREDS = {"work_at", "work_for", "join", "start_at", "employ_by"}
+_JOB_PREDS = {"get", "start", "land", "take", "accept", "work_as"}
+
+
+def _families(attr, value):
+    """-> [(family, value key)] for the single-valued states this fact
+    states. A fact can state two ("I work as a nurse at St Vincent's" is a
+    role AND an employer). The key is what two facts must share to be the
+    same value; a later fact in the family with a different key replaces an
+    earlier one."""
     a = (attr or "").lower().split(":")[-1]
     v = (value or "").lower()
-    for fam, spec in STATE_FAMILIES.items():
-        if a in spec["preds"]:
-            toks = _place_tokens(v)
-            return (fam, toks) if toks else (None, None)
-        if a in spec.get("job_preds", ()):
-            # "a new job at the Alfred", "as a nurse at St Vincent's"
-            m = re.search(r"\bat\s+(.+)$", v)
-            if m and (a == "work_as" or "job" in v or "role" in v
-                      or "position" in v):
-                toks = _place_tokens(m.group(1))
-                return (fam, toks) if toks else (None, None)
-    return None, None
+    out = []
+    neg = bool(re.match(r"^(not|no longer)\b", v.strip()))
+    if a in _RES_PREDS:
+        t = _place_tokens(v)
+        if t:
+            out.append(("residence", frozenset(t)))
+    if a in _EMP_PREDS:
+        t = _place_tokens(v)
+        if t:
+            out.append(("employer", frozenset(t)))
+    if a in _JOB_PREDS:
+        m = re.search(r"\bat\s+(.+)$", v)
+        if m and (a == "work_as" or "job" in v or "role" in v or "position" in v):
+            t = _place_tokens(m.group(1))
+            if t:
+                out.append(("employer", frozenset(t)))
+    head = _head_phrase(re.sub(r"^as\s+", "", v) if a == "work_as" else v)
+    hw = re.findall(r"[a-z]+", head)
+    if a in ("is", "become", "work_as", "train_as", "qualify_as") and hw \
+            and hw[-1] in _ROLES and not neg:
+        # the role noun plus the modifier just before it: 'ward manager',
+        # 'team lead', but 'senior nurse' == 'nurse'
+        role = hw[-1]
+        if len(hw) >= 2 and hw[-2] not in ("a", "an", "the", "senior",
+                                           "junior", "head", "new", "full",
+                                           "time", "part"):
+            role = f"{hw[-2]} {role}"
+        out.append(("role", frozenset([role])))
+    if a in ("is", "become", "go", "turn") and hw and hw[-1] in _DIETS:
+        out.append(("diet", frozenset([("not " if neg else "") + hw[-1]])))
+    if a == "eat" and re.search(r"\b(meat|chicken|beef|fish|pork)\b", v) \
+            and not neg:
+        out.append(("diet", frozenset(["eats meat"])))
+    if a in ("is", "become", "get") and hw and hw[-1] in _STATUS:
+        out.append(("relationship status",
+                    frozenset([("not " if neg else "") + _STATUS[hw[-1]]])))
+    if a.startswith("marry") and not neg:
+        out.append(("relationship status", frozenset(["married"])))
+    if a in ("is", "turn"):
+        m = re.fullmatch(r"(\d{1,3})(?:\s+years?\s+old)?", head)
+        if m and 0 < int(m.group(1)) < 120:
+            out.append(("age", frozenset([m.group(1)])))
+    if a in ("drive", "buy", "own", "get"):
+        brands = set(re.findall(r"[a-z]+", v)) & _CAR_BRANDS
+        if brands or (a == "drive" and hw):
+            out.append(("car", frozenset(brands or hw[-1:])))
+    if a == "have":
+        m = re.search(r"\b(\d+|" + "|".join(_NUM_WORDS) +
+                      r")\s+(kids|children|sons|daughters)\b", v)
+        if m:
+            n = m.group(1)
+            out.append(("number of children",
+                        frozenset([str(_NUM_WORDS.get(n, n))])))
+    return out
+
+
+def _family_value(attr, value):
+    """Back-compat: the first family, as (family, token set)."""
+    fams = _families(attr, value)
+    return (fams[0][0], set(fams[0][1])) if fams else (None, None)
 
 
 # "I ALSO joined the Alfred" is a second job, not a change of job -- found by
 # the first test of this pass, which marked St Vincent's "no longer true".
 _ADDITIVE = re.compile(r"\b(also|as well|too|second job|another job|"
                        r"side job|part[- ]time|on the side|in addition)\b")
+
+
+def _different(fam, a, b):
+    """Place and employer values are token sets ('in Brunswick now' ~ 'to
+    Brunswick'): different only if neither contains the other. The other
+    families hold one normalised key, compared exactly."""
+    if fam in ("residence", "employer"):
+        return not (a <= b or b <= a)
+    return a != b
 
 
 def mark_state_changes(g, order=None):
@@ -560,21 +664,20 @@ def mark_state_changes(g, order=None):
     members = {}
     for st in (g.nodes, g.provisional):
         for nid, nd in st.items():
-            fam, toks = _family_value(nd.get("attr"), nd.get("value"))
-            if fam:
-                said = f"{nd.get('text') or ''} {nd.get('source') or ''}"
+            said = f"{nd.get('text') or ''} {nd.get('source') or ''}"
+            additive = bool(_ADDITIVE.search(said.lower()))
+            for fam, key in _families(nd.get("attr"), nd.get("value")):
                 members.setdefault(fam, []).append(
-                    (nid, nd, toks, _latest(nd, order),
-                     bool(_ADDITIVE.search(said.lower()))))
+                    (nid, nd, set(key), _latest(nd, order), additive))
     changed = []
     for fam, items in members.items():
         for nid, nd, toks, when, _add in items:
-            if nd.get("current") is False:
+            if nd.get("current") is False and nd.get("superseded_by"):
                 continue
             later = [(cid, ctoks, cwhen) for cid, _c, ctoks, cwhen, cadd in items
                      if cid != nid and cwhen != "" and when != ""
                      and cwhen > when and not cadd
-                     and not (ctoks <= toks or toks <= ctoks)]
+                     and _different(fam, toks, ctoks)]
             if not later:
                 continue
             cid = max(later, key=lambda x: x[2])[0]
