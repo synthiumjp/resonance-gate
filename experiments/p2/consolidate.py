@@ -43,14 +43,19 @@ GIST_PROMPT = (
 
 
 def _emb(texts, model=None):
-    from sentence_transformers import SentenceTransformer
     global _BI
     try:
         _BI
     except NameError:
         _BI = None
     if _BI is None:
-        _BI = model or SentenceTransformer("BAAI/bge-small-en-v1.5", device="cpu")
+        import ort_models as _O
+        if model is None and _O.use_onnx(_O.EMBEDDER):
+            _BI = _O.Encoder(_O.EMBEDDER)
+        else:
+            from sentence_transformers import SentenceTransformer
+            _BI = model or SentenceTransformer("BAAI/bge-small-en-v1.5",
+                                               device="cpu")
     return _BI.encode(texts, batch_size=256, show_progress_bar=False,
                       normalize_embeddings=True)
 
@@ -263,10 +268,14 @@ def _nli():
         try:
             import warnings
             warnings.filterwarnings("ignore")
-            from transformers import pipeline
-            _NLI = pipeline("text-classification",
-                            model="cross-encoder/nli-deberta-v3-xsmall",
-                            device=-1, top_k=None)
+            import ort_models as _O
+            if _O.use_onnx(_O.CONFLICT):
+                _NLI = _O.NLI(_O.CONFLICT)
+            else:
+                from transformers import pipeline
+                _NLI = pipeline("text-classification",
+                                model="cross-encoder/nli-deberta-v3-xsmall",
+                                device=-1, top_k=None)
         except Exception:
             _NLI = False
     return _NLI or None

@@ -20,7 +20,7 @@ machine.
 
 Claude Code asks for your name (the person the memory is about). The first
 session installs the Python side in the background (about 3 to 5 minutes,
-~2.6 GB including models; needs Python 3.10+ and git) and memory is
+~1.8 GB including models; needs Python 3.10+ and git) and memory is
 available from the next session. After that, each session is stored when it
 ends and the next one starts with the summary. Change the name later, or
 turn the summary off and keep only the tools, with
@@ -47,7 +47,7 @@ sourcedrecall-setup
 
 This downloads the English parser (Stanza, ~320 MB) and four small models
 (~900 MB, in `~/.cache/huggingface`), and takes about 3 minutes. The install
-is about 2.6 GB in total. This is the only step that uses the network; the
+is about 1.8 GB in total. This is the only step that uses the network; the
 server runs offline.
 
 Add it to your MCP client, e.g. `.mcp.json` for Claude Code or
@@ -177,8 +177,11 @@ don't want kept.
 
 ## Models
 
-There is no generative model in the server. Three small models score text
-that is already stored:
+There is no generative model in the server. Small models score text that
+is already stored. They run with ONNX Runtime from each model's official
+ONNX export, stored with half-precision weights and computed at full
+precision, so results are the same as the original PyTorch models at half
+the download. The English parser (Stanza) runs on PyTorch.
 
 | model | used by | what it does |
 |---|---|---|

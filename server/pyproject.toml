@@ -17,10 +17,12 @@ authors = [{ name = "Jon-Paul Cacioli" }]
 dependencies = [
     "mcp>=1.0,<2",
     "numpy",
-    "sentence-transformers",
-    "torch",
-    "transformers",
+    "torch",                # the Stanza parser runs on it
     "stanza>=1.10",
+    "onnxruntime>=1.17",    # embedder, re-ranker, conflict checker
+    "onnx>=1.15",
+    "tokenizers>=0.15",
+    "huggingface_hub",
     "nltk>=3.8",
 ]
 

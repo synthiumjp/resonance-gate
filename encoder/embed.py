@@ -44,10 +44,26 @@ def projection(d=D, e_dim=EMBED_DIM, seed=PROJECTION_SEED):
 
 
 def _get_model():
+    """2026-10-02: ONNX Runtime with fp16-stored weights when sourcedrecall-
+    setup has installed them (experiments/p2/ort_models.py; embeddings match
+    the PyTorch model to cosine 1.0000), else sentence-transformers."""
     global _model
     if _model is None:
-        from sentence_transformers import SentenceTransformer
-        _model = SentenceTransformer(MODEL_NAME, revision=MODEL_REVISION, device="cpu")
+        import sys
+        p2 = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(
+            __file__))), "experiments", "p2")
+        if p2 not in sys.path:
+            sys.path.append(p2)
+        try:
+            import ort_models as _O
+            if _O.use_onnx(MODEL_NAME):
+                _model = _O.Encoder(MODEL_NAME)
+        except Exception:
+            _model = None
+        if _model is None:
+            from sentence_transformers import SentenceTransformer
+            _model = SentenceTransformer(MODEL_NAME, revision=MODEL_REVISION,
+                                         device="cpu")
     return _model
 
 

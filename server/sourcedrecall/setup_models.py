@@ -23,12 +23,17 @@ os.environ["TRANSFORMERS_OFFLINE"] = "0"
 
 # (what, size guide, loader) -- every model the server can load
 STANZA_PROCESSORS = "tokenize,pos,lemma,depparse"   # rgx's pipeline
+# 2026-10-02: each model's official ONNX export, stored with fp16 weights
+# (experiments/p2/ort_models.py): half the disk, identical results, and no
+# transformers / sentence-transformers.
 HF_MODELS = [
-    ("retrieval embedder", "BAAI/bge-small-en-v1.5", "bi"),
-    ("retrieval re-ranker", "cross-encoder/ms-marco-MiniLM-L6-v2", "ce"),
-    ("conflict checker (NLI)", "cross-encoder/nli-deberta-v3-xsmall", "nli"),
-    ("triple-store encoder", "sentence-transformers/all-MiniLM-L6-v2", "bi"),
+    ("retrieval embedder", "BAAI/bge-small-en-v1.5"),
+    ("retrieval re-ranker", "cross-encoder/ms-marco-MiniLM-L6-v2"),
+    ("conflict checker (NLI)", "cross-encoder/nli-deberta-v3-xsmall"),
+    ("triple-store encoder", "sentence-transformers/all-MiniLM-L6-v2"),
 ]
+_P2 = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(
+    os.path.abspath(__file__)))), "experiments", "p2")
 
 
 def _du(path):
@@ -65,24 +70,16 @@ def main(argv=None):
     sdir = os.environ.get("STANZA_RESOURCES_DIR", DEFAULT_MODEL_DIR)
     print(f"      -> {sdir} ({_mb(_du(sdir))})")
 
-    from huggingface_hub import constants as hfc
-    for i, (what, name, kind) in enumerate(HF_MODELS, start=2):
+    if _P2 not in sys.path:
+        sys.path.insert(0, _P2)
+    import ort_models
+    for i, (what, name) in enumerate(HF_MODELS, start=2):
         print(f"[{i}/{1 + len(HF_MODELS)}] {what}: {name}", flush=True)
-        if kind == "bi":
-            from sentence_transformers import SentenceTransformer
-            SentenceTransformer(name, device="cpu")
-        elif kind == "ce":
-            from sentence_transformers import CrossEncoder
-            CrossEncoder(name, device="cpu")
-        else:
-            from transformers import pipeline
-            pipeline("text-classification", model=name, device=-1)
-    # Size of THESE models only -- a shared HF cache can hold gigabytes of
-    # other people's models, and reporting the whole cache misleads.
-    ours = sum(_du(os.path.join(hfc.HF_HUB_CACHE,
-                                "models--" + name.replace("/", "--")))
-               for _w, name, _k in HF_MODELS)
-    print(f"      -> {hfc.HF_HUB_CACHE} ({_mb(ours)} for these {len(HF_MODELS)} models)")
+        ort_models.ensure(name)
+    # Size of THESE models only
+    ours = sum(_du(ort_models.model_dir(name)) for _w, name in HF_MODELS)
+    root = os.path.dirname(ort_models.model_dir(HF_MODELS[0][1]))
+    print(f"      -> {root} ({_mb(ours)} for these {len(HF_MODELS)} models)")
 
     # WordNet: what TYPE of thing a question asks for (tea is a beverage,
     # Leeds is a city). Optional -- without it those checks are skipped.

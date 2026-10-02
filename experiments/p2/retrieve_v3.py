@@ -26,9 +26,15 @@ _bi = _ce = None
 def _models():
     global _bi, _ce
     if _bi is None:
-        from sentence_transformers import CrossEncoder, SentenceTransformer
-        _bi = SentenceTransformer("BAAI/bge-small-en-v1.5", device="cpu")
-        _ce = CrossEncoder("cross-encoder/ms-marco-MiniLM-L6-v2", device="cpu")
+        # 2026-10-02: ONNX Runtime with fp16-stored weights when setup has
+        # installed them (ort_models.py; identical rankings), else PyTorch
+        import ort_models as _O
+        if _O.use_onnx(_O.EMBEDDER) and _O.use_onnx(_O.RERANKER):
+            _bi, _ce = _O.Encoder(_O.EMBEDDER), _O.CrossEncoder(_O.RERANKER)
+        else:
+            from sentence_transformers import CrossEncoder, SentenceTransformer
+            _bi = SentenceTransformer("BAAI/bge-small-en-v1.5", device="cpu")
+            _ce = CrossEncoder("cross-encoder/ms-marco-MiniLM-L6-v2", device="cpu")
     return _bi, _ce
 
 
