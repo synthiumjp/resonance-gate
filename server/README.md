@@ -120,6 +120,11 @@ Passwords, PINs, API keys, tokens, card numbers and similar are replaced by
 `[secret removed]` before anything is written, including the stored
 transcript.
 
+When nothing stored is known to answer a question, recall still returns the
+closest things you said, at most three, labelled "possibly related" and with
+`found: false`, so the agent can use one if it clearly answers and otherwise
+say it doesn't know. They are never taken from another project.
+
 Things said in passing ("I'm eating keto today", "I'm so tired") are kept
 in their own section. They are labelled in answers, drop out of the session
 summary after three days, and never replace a lasting fact: "I'm in Sydney

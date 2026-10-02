@@ -586,6 +586,14 @@ def _third_party_matrix(s, head, allow, role):
     if (parent.lemma or parent.text or "").lower() not in ATTITUDE_VERBS:
         return False
     psubj = next(iter(s.children(parent, ("nsubj", "nsubj:pass"))), None)
+    # 2026-10-03 (false-memory bench a04): "My dad KEEPS telling me I'm too
+    # stubborn" -- the attitude verb is itself a complement and its subject
+    # sits on the verb above it, so climb the xcomp/ccomp chain
+    up = parent
+    while psubj is None and up is not None and up.deprel in ("xcomp", "ccomp"):
+        up = s.w.get(up.head)
+        if up is not None:
+            psubj = next(iter(s.children(up, ("nsubj", "nsubj:pass"))), None)
     if psubj is None:
         return False
     return psubj.text.lower() not in allow

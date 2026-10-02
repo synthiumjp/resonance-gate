@@ -201,6 +201,11 @@ class SourcedRecallAdapter:
         lines = []
         if r.get("found") and not r.get("abstain"):
             lines = [self._fact_line(f) for f in r.get("ranked", [])[:TOP_K]]
+        elif r.get("related"):
+            # sourcedrecall >= 0.4.1 returns labelled candidates when nothing
+            # is confirmed; they reach the agent, so they are scored
+            lines = ["(possibly related, not confirmed) " + self._fact_line(f)
+                     for f in r["related"][:TOP_K]]
         blk = self.pm.profile_context(q)["block"]
         ctx = [ln[2:] for ln in blk.splitlines() if ln.startswith("- ")]
         return {"lines": lines, "views": {"context": ctx}}

@@ -77,6 +77,27 @@
    "fm": false,
    "reason": "'studying in Madrid' does not state WHAT Ines studies (same line as above; from sourcedrecall 0.3.2 the time phrase 'this year' is kept)",
    "line": "Jordan Pike's cousin Ines is studying in Madrid this year [they said: \"My cousin Ines is studying in Madrid this year.\"]"
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "d05",
+   "fm": false,
+   "reason": "'Mr Okafor' is not a first name (a labelled candidate, quoting the user)",
+   "line": "(possibly related, not confirmed) (their words) \"The landlord, Mr Okafor, came by to fix the boiler.\""
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "e08",
+   "fm": false,
+   "reason": "'I teach history there' names no city; judge supplied Leeds",
+   "line": "(possibly related, not confirmed) (their words) \"I teach history there.\""
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "a04",
+   "fm": false,
+   "reason": "attributed to the dad ('dad keeps telling ... is too stubborn'), returned next to the user's own 'I think he's exaggerating'; a report, not an assertion",
+   "line": "Jordan Pike's dad keeps telling Jordan Pike Jordan Pike is too stubborn for Jordan Pike's own good [they said: \"My dad keeps telling me I'm too stubborn for my own good.\"]"
   }
  ]
 }

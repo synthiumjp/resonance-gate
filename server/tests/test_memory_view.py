@@ -219,3 +219,28 @@ def test_hypotheticals_and_other_people_are_not_quoted(pm, said, q):
                       date="2026-03-02")
     r = pm.profile_recall(q)
     assert not any(f.get("status") == "verbatim" for f in r.get("ranked") or [])
+
+
+# ---- candidates when nothing is confirmed (2026-10-03) ---------------------
+
+def test_an_unconfirmed_question_gets_labelled_candidates(pm):
+    pm.profile_ingest([U("I'm in my second year of a law degree at Monash.")],
+                      conversation_id="a", owner_name="Jordan Pike", date="2026-03-02")
+    r = pm.profile_recall("Which university do I attend?")
+    assert r["found"] is False and r["abstain"] is True
+    rel = r.get("related") or []
+    assert 1 <= len(rel) <= 3 and all(f.get("related") for f in rel)
+    assert any("Monash" in (f.get("text") or "") for f in rel)
+    block = pm.profile_context("Which university do I attend?")["block"]
+    assert "(possibly related)" in block and "Monash" in block
+
+
+def test_nothing_is_offered_from_another_project(pm, tmp_path):
+    proj = tmp_path / "proj"
+    (proj / ".git").mkdir(parents=True)
+    pm.profile_ingest([U("The billing service is written in Go.")], conversation_id="a",
+                      owner_name="Jordan Pike", date="2026-03-02", scope=str(proj))
+    other = tmp_path / "other"
+    other.mkdir()
+    r = pm.profile_recall("What language is the billing service in?", scope=str(other))
+    assert "billing" not in str(r.get("related"))

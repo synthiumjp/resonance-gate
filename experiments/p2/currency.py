@@ -448,6 +448,20 @@ def _infer_owner(g):
     return None
 
 
+def _named_others(text, owner=None):
+    """Names introduced with "named"/"called" or as "my <relation> <Name>"."""
+    import re
+    own = {w.lower() for w in re.findall(r"[A-Za-z]+", owner or "")}
+    out = set()
+    for m in re.finditer(r"\b(?:named|called|(?:dog|cat|friend|sister|brother|"
+                         r"girlfriend|boyfriend|wife|husband|partner|son|"
+                         r"daughter|colleague|boss|manager|neighbour|neighbor)"
+                         r")\s+([A-Z][a-z]+)", text or ""):
+        if m.group(1).lower() not in own:
+            out.add(m.group(1).lower())
+    return out
+
+
 def _names(text, owner=None):
     """Capitalised words that are not the first word or the owner's name,
     lower-cased."""
@@ -537,8 +551,10 @@ def mark_ceased(g, owner=None, order=None):
                 if cid == nid:
                     continue
                 # "a dog named Rex and a cat named Tom": Tom's death does
-                # not end Rex
-                if by_name and _names(nd.get("text"), owner) - toks:
+                # not end Rex. Only names INTRODUCED as names count -- a
+                # place in the same fact ("...a trip to Japan") is not a
+                # second person (false-memory bench b05)
+                if by_name and _named_others(nd.get("text"), owner) - toks:
                     continue
                 if cdate == "" or ndate == "" or ndate >= cdate:
                     continue

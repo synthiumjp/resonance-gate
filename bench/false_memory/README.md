@@ -165,6 +165,25 @@ memory 4 -> 5/30. Item level: one control improved, one stale case got
 worse (audited as a real false memory: the old fact was returned unmarked
 next to the new one). The dev-set gains mostly did not transfer.
 
+### Candidates when nothing is confirmed (sourcedrecall 0.4.1)
+
+From 0.4.1, when grounding cannot confirm an answer sourcedrecall returns at
+most three closest records labelled "possibly related" (`found: false`).
+The adapter scores them as returned lines, because the agent sees them.
+Audited, with the two bug fixes found by reading the new flags (reported
+speech through "keeps telling"; a place mistaken for a second person when a
+breakup should end a fact) and three judge errors overridden:
+
+| | v1 (read) before | v1 after | blind v3 before | blind v3 after | Mem0 v3 | RAG v3 |
+|---|---|---|---|---|---|---|
+| false memory, a-e | 4/60 | 4/60 | 5/30 | 6/30 | 9/30 | 8/30 |
+| control recall (f) | 15/16 | 16/16 | 9/23 | 19/23 | 23/23 | 23/23 |
+| returned nothing on c+d | 19/20 | 8/20 | 9/12 | 6/12 | 0/12 | 0/12 |
+
+Results: `results_rel/` (v1) and `results_v3_rel/` (v3). The v3 run uses
+audit_overrides_v3.json as it stood; its new flagged lines were not
+re-audited (the set stays blind to the developer).
+
 ## Reading the results (what the numbers do and do not say)
 
 * Class a (denials, hedges, questions, conditionals, reported opinions): no system returned an asserting line, including sourcedrecall at `03e0b24`. This class does not separate the systems on this set.

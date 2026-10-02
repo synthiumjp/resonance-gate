@@ -1324,3 +1324,10 @@ def test_british_spelling_is_not_malformed(checked):
     """_BAD_MORPH's \\w+ises dropped "practises", "organises" (2026-10-03)."""
     assert any("practises cello" in p
                for p in texts(checked, "I practise cello every evening before dinner."))
+
+
+def test_reported_speech_through_a_chain_stays_reported(checked):
+    """bench a04: "My dad keeps telling me I'm too stubborn" stored "<owner>
+    is too stubborn"; the attitude verb's subject sits one verb up."""
+    out = texts(checked, "My dad keeps telling me I'm too stubborn for my own good.")
+    assert not any(p.startswith("Martin Mark is too stubborn") for p in out), out

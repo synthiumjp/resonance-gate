@@ -20,6 +20,8 @@ export FM_RESULTS=${FM_RESULTS:-}
 mkdir -p "$FM_SCRATCH" "${FM_RESULTS:-results}"
 export MEM0_TELEMETRY=False   # HF is offline for rag/ours (set per step); Mem0 may fetch fastembed's BM25 model once
 CAP=(systemd-run --user --scope -p MemoryMax=6G -p MemorySwapMax=0)   # memory cap for heavy steps
+# no user systemd (e.g. right after a WSL restart): run uncapped rather than fail
+systemd-run --user --scope true >/dev/null 2>&1 || CAP=()
 steps=("$@"); [ ${#steps[@]} -eq 0 ] && steps=(cases rag ours mem0 validate score)
 for s in "${steps[@]}"; do
   echo "=== $s $(date +%T)"

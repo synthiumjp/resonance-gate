@@ -516,3 +516,13 @@ def test_a_death_ends_only_what_names_who_died(old_text, cess_text):
     g = _G({"a": _n("a", "x", "", "c1", text=old_text),
             "b": _n("b", "die", "", "c2", text=cess_text)})
     assert C.mark_ceased(g, order=ORDER) == []
+
+
+def test_a_place_in_the_old_fact_is_not_a_second_person():
+    """bench b05: "...a trip to Japan" made the guard think the fact named
+    someone besides Elise, so the breakup ended nothing."""
+    g = _G({"a": _n("a", "x", "", "c1",
+                    text="Jordan Pike's girlfriend Elise and Jordan Pike are planning a trip to Japan"),
+            "b": _n("b", "elise_split_over", "", "c2",
+                    text="Elise and Jordan Pike split up over the weekend")})
+    assert ("a", "b") in C.mark_ceased(g, order=ORDER)
