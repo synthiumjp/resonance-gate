@@ -96,9 +96,23 @@ class Extractor:
     def _parser(self):
         if self._nlp is None:
             import stanza
-            self._nlp = stanza.Pipeline(
-                "en", processors="tokenize,pos,lemma,depparse",
-                use_gpu=False, verbose=False)
+            # 2026-10-02: REUSE_RESOURCES -- never touch the network at
+            # runtime. Stanza's default re-fetches resources.json on every
+            # Pipeline() (a network call per server start) and downloads
+            # missing models silently; a memory server that promises nothing
+            # leaves the machine cannot do either. Models are installed once
+            # by `sourcedrecall-setup`.
+            try:
+                self._nlp = stanza.Pipeline(
+                    "en", processors="tokenize,pos,lemma,depparse",
+                    use_gpu=False, verbose=False,
+                    download_method=stanza.DownloadMethod.REUSE_RESOURCES)
+            except Exception as e:
+                raise RuntimeError(
+                    "The English parser models are not installed. Run "
+                    "`sourcedrecall-setup` once (or, without the server: "
+                    "python -c \"import stanza; stanza.download('en', "
+                    "processors='tokenize,pos,lemma,depparse')\")") from e
         return self._nlp
 
     def extract_turn(self, text, role="user", session=0, turn=0):

@@ -1,43 +1,111 @@
 # sourcedrecall
 
-**sourcedrecall** is a local, LLM-free MCP memory server. It stores explicit
-structured facts as `(subject, relation, object)` triples and answers
-queries against them.
+A small, local memory for AI agents. It listens to your conversations, keeps
+what **you** said -- in your own words, with when you said it -- and gives
+your agent a short, honest briefing: what it knows, what has changed, and
+that anything else is unknown.
 
-It is built on the **Resonance Gate** substrate — a vector-symbolic (VSA)
-memory in which retrieval and confidence are the same operation, and whose
-near-synonym collision detection is measured, not asserted. Resonance Gate is
-a pre-registered study: [OSF 95e2q](https://osf.io/95e2q/) (registration,
-deviation log, and the collision-fix result; swap in the Zenodo DOI here once
-minted). sourcedrecall is the product shipped from that substrate; the
-research artifact and paper keep the Resonance Gate name.
+- **Local.** Runs on your machine over MCP (Claude Code, Claude Desktop, any
+  MCP client). Nothing leaves it.
+- **Nothing is generated.** Facts are read out of your sentences by a
+  deterministic grammar parser, never written by a language model, so the
+  memory cannot invent something you did not say. Every fact keeps the
+  sentence it came from.
+- **Honest.** Ask about something you never mentioned and it says so. Change
+  your mind and the old fact is marked *no longer true*.
 
-**No GENERATIVE model is in the request path** — no mouth, no extractor, no
-judge. Nothing in this server can write a sentence, so nothing in it can
-invent a fact. That is the correctness property, and it holds.
+## Quick start
 
-The precise claim, corrected (e277 — the previous wording said MiniLM was the
-only model anywhere, and that has not been true for some time):
+```bash
+git clone <this repo> rg && cd rg
+python3 -m venv .venv && . .venv/bin/activate
+# CPU torch first: otherwise pip pulls ~4 GB of CUDA wheels this never uses
+pip install torch --index-url https://download.pytorch.org/whl/cpu
+pip install -e ./server
+```
 
-| model | where | what it does |
+Use `-e` (editable): the server loads its memory code from this checkout.
+Then download the models, once:
+
+```bash
+sourcedrecall-setup
+```
+
+That fetches the English parser (Stanza, ~320 MB) and four small
+non-generative models (~600 MB, cached under `~/.cache/huggingface`) and
+reports where each went. It is the only step that touches the network: the
+server itself runs fully offline.
+
+Add it to your MCP client, e.g. `.mcp.json` for Claude Code or
+`claude_desktop_config.json` for Claude Desktop:
+
+```json
+{
+  "mcpServers": {
+    "sourcedrecall": {
+      "command": "/absolute/path/to/rg/.venv/bin/sourcedrecall",
+      "env": { "SOURCEDRECALL_OWNER": "Your Name" }
+    }
+  }
+}
+```
+
+`SOURCEDRECALL_OWNER` is whose memory this is; facts are written about that
+person. Memory lives in `~/.sourcedrecall/conversations` (set
+`RG_MEMORY_DIR` to move it).
+
+## The tools you will use
+
+| tool | what it does |
+|---|---|
+| `profile_ingest(turns, owner_name)` | store one conversation: `turns` is `[{"role": "user"\|"assistant", "content": "..."}]`. Only what the **user** asserts becomes a fact; questions, hypotheticals, hedges and other people's opinions do not. |
+| `profile_context(query=None)` | the briefing to put in your agent's prompt -- everything, or just what bears on `query` |
+| `profile_recall(query)` | look one thing up; returns the answering facts with their quotes and dates, or an honest "never seen" |
+| `profile_correct(action, attribute, value)` | `deny` a fact that is wrong, `confirm` one that is right |
+
+Your agent has to call `profile_ingest` to remember a conversation -- ask it
+to at the end of a chat, or wire it into a hook.
+
+What the agent receives from `profile_context`:
+
+```
+[MEMORY: what the user has told you]
+- Dana Cole works as a nurse at St Vincent's  ["I work as a nurse at St Vincent's and I live in Fitzroy." · 2026-10-02]
+- Dana Cole is allergic to penicillin  ["I'm allergic to penicillin, which matters at work." · 2026-10-02]
+- (no longer true) Dana Cole drinks coffee  ["I drink a lot of coffee." · 2026-09-01]
+[MEMORY RULES] Each line is something the user told you: a short summary, then their exact words in quotes, and when. Lines marked (no longer true) were replaced by something they said later. Anything about the user not listed here is UNKNOWN: say you don't know rather than guessing.
+```
+
+## What is (and is not) inside
+
+**No generative model is in the request path** -- nothing in this server can
+write a sentence, so nothing in it can invent a fact. Three small
+non-generative models score text that is already stored:
+
+| model | used by | what it does |
 |---|---|---|
-| MiniLM sentence-encoder | registry writes | string→vector, deterministic |
-| `bge-small` + `ms-marco-MiniLM` cross-encoder | `profile_recall` / `profile_context` retrieval (default since e277) | ranks stored facts |
-| `nli-deberta-v3-xsmall` | `profile_conflicts`, and `profile_context` via `conflicts()` | decides whether two stored values contradict |
+| `bge-small` + `ms-marco-MiniLM` cross-encoder | `profile_recall`, `profile_context` | ranks stored facts against a question |
+| `nli-deberta-v3-xsmall` | `profile_conflicts`, `profile_context` | decides whether two stored values contradict |
+| MiniLM sentence encoder | the explicit-triples tools below | string -> vector |
 
-All three are **non-generative classifiers/encoders**: they score or embed
-text that is already stored, and none can emit a token of prose. Set
-`RG_PROFILE_V3=0` to drop the retrieval pair (falls back to pure-python token
-overlap) and `RG_NLI=0` to drop the NLI (conflict detection falls back to the
-lexical path). With both set, MiniLM really is the only model present.
+`RG_PROFILE_V3=0` drops the retrieval pair (falls back to token overlap);
+`RG_NLI=0` drops the NLI model; `RG_PREWARM=0` stops the server loading them
+in the background at startup.
 
-> Stores explicit structured facts you write. Does NOT extract facts from
-> conversation (no LLM inside — nothing to hallucinate). Detects
-> contradictory writes under synonymous keys (validated on synthetic pairs;
-> real-world validation pending). Returns honest "no match" when nothing is
-> stored. Surfaces conflicts rather than silently picking.
+Built on the **Resonance Gate** research substrate, a pre-registered study:
+[OSF 95e2q](https://osf.io/95e2q/).
 
-## The four tools
+---
+
+## Advanced: explicit triples (four more tools)
+
+Separately from conversation memory, the server can store facts you hand it
+already structured, as `(subject, relation, object)` triples. These four
+tools do not read conversations and do not share storage with the
+`profile_*` tools (they live in `SOURCEDRECALL_STATE`, default
+`~/.sourcedrecall`).
+
+### The four triple tools
 
 ### `remember(subject, relation, object, source="caller-stated")`
 
@@ -155,7 +223,10 @@ Everything is local: no network calls, no API keys, no telemetry. The
 embedding model is used from the local Hugging Face cache only — the
 server sets `HF_HUB_OFFLINE=1` and `TRANSFORMERS_OFFLINE=1` by default.
 
-## Install / run
+## Install / run (older notes)
+
+The **Quick start** at the top supersedes this section; it is kept for the
+running-from-a-research-venv details.
 
 The server is Python (`mcp`, `numpy`, `sentence-transformers`, `torch` —
 see `pyproject.toml`). The `rg` substrate itself is a set of numpy-only
@@ -194,12 +265,9 @@ Either way, `RG_ROOT=/ABS/PATH/TO/rg` is **required** — even in an isolated
 uvx/pipx environment, the server still reads the numpy-only substrate from
 the repo on disk (v1 does not bundle it into the wheel).
 
-Note: the MiniLM model (`sentence-transformers/all-MiniLM-L6-v2`) must be
-present in the local Hugging Face cache before first use — the server runs
-fully offline (`HF_HUB_OFFLINE=1`), so an uncached model means the first
-novel write fails loudly rather than silently phoning home. Prime the cache
-once (e.g. by loading `sentence-transformers/all-MiniLM-L6-v2` in a normal,
-non-offline Python session) and every write and recall after that is local.
+Note: every model must be present locally before first use -- the server
+runs fully offline (`HF_HUB_OFFLINE=1`). `sourcedrecall-setup` installs them
+all.
 
 Substitute your actual absolute path for `/ABS/PATH/TO/rg` everywhere
 above and below.

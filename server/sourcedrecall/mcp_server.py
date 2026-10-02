@@ -14,7 +14,9 @@ Env:
   SOURCEDRECALL_STATE          state dir (default ~/.sourcedrecall)
   SOURCEDRECALL_BROWSER_PORT   read-only browser port (default 7071; 0 disables)
   RG_ROOT                      Resonance Gate repo root (default: repo containing this file)
-  RG_MEMORY_DIR                p2 data dir for the profile_* tools (see profile_memory.py)
+  RG_MEMORY_DIR                conversation-memory data dir for the profile_* tools
+                               (default when run as a server: $SOURCEDRECALL_STATE/conversations)
+  RG_PREWARM                   0 = do not load models in the background at startup
   SOURCEDRECALL_OWNER          fallback owner_name for profile_ingest (see profile_memory.py)
 """
 
@@ -221,7 +223,55 @@ def profile_ingest(turns: list[dict], conversation_id: str = None,
     return pmem.profile_ingest(turns, conversation_id, title, owner_name)
 
 
+def _default_memory_dir():
+    """2026-10-02, from the new-user install test: RG_MEMORY_DIR was required
+    and documented only in a docstring, so the first profile_* call failed.
+    The LIBRARY still refuses to guess (profile_memory._data_dir raises, so a
+    forgetful test can never touch a real user's data); the SERVER, which is
+    what a person actually runs, now defaults it beside SOURCEDRECALL_STATE."""
+    if not os.environ.get("RG_MEMORY_DIR"):
+        d = os.path.join(STATE_DIR, "conversations")
+        os.makedirs(d, exist_ok=True)
+        os.environ["RG_MEMORY_DIR"] = d
+    return os.environ["RG_MEMORY_DIR"]
+
+
+def _prewarm():
+    """Load the retrieval and conflict models (and the parser, when the owner
+    is known) in the background at startup. The new-user test measured a 4 s
+    stall on the first question after a restart, with no message; the user's
+    first question is the worst moment for it. RG_PREWARM=0 skips this."""
+    def run():
+        try:
+            pmem.profile_status()            # loads the store from disk
+        except Exception:
+            pass
+        try:
+            import retrieve_v3
+            retrieve_v3._models()            # bge-small + cross-encoder
+        except Exception:
+            pass
+        if os.environ.get("RG_NLI") != "0":
+            try:
+                import consolidate
+                consolidate._nli()
+            except Exception:
+                pass
+        owner = os.environ.get("SOURCEDRECALL_OWNER")
+        if owner:
+            try:
+                pmem._get_extractor(owner)._parser()   # stanza
+            except Exception:
+                pass
+    if os.environ.get("RG_PREWARM") != "0":
+        import threading
+        threading.Thread(target=run, name="sourcedrecall-prewarm",
+                         daemon=True).start()
+
+
 def main():
+    _default_memory_dir()
+    _prewarm()
     if BROWSER_PORT:
         try:
             start_browser(service, BROWSER_PORT)

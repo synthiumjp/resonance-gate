@@ -7,15 +7,23 @@ requires-python = ">=3.10"
 # at runtime (RG_ROOT); these are the server + registry-encoder deps. There is
 # NO generative model dependency — sentence-transformers is the registry's
 # non-generative string->vector encoder.
+# 2026-10-02 (new-user install test): stanza was missing -- profile_ingest
+# needs it for the deterministic parser -- and mcp was unpinned, so pip took
+# mcp 2.x, which no longer has mcp.server.fastmcp, and the server would not
+# start. Install CPU torch first (see README) or pip pulls ~4 GB of CUDA
+# wheels this server never uses.
 dependencies = [
-    "mcp>=1.0",
+    "mcp>=1.0,<2",
     "numpy",
     "sentence-transformers",
     "torch",
+    "transformers",
+    "stanza>=1.10",
 ]
 
 [project.scripts]
 sourcedrecall = "sourcedrecall.mcp_server:main"
+sourcedrecall-setup = "sourcedrecall.setup_models:main"
 
 [build-system]
 requires = ["hatchling"]
