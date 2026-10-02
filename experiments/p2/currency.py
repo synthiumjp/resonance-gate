@@ -613,6 +613,16 @@ def _families(attr, value):
         t = _place_tokens(v)
         if t:
             out.append(("employer", frozenset(t)))
+    # "I do freight scheduling for a shipping firm": a job described by what
+    # the person does for an organisation
+    m = re.search(r"\bfor (?:a|an|the) ((?:\w+ ){0,3}(?:firm|company|agency|"
+                  r"business|startup|bank|hospital|school|council|charity|"
+                  r"studio|consultancy|corporation|organi[sz]ation|clinic|"
+                  r"university|newspaper|nonprofit|ngo))\b", v)
+    if a in ("do", "handle", "run", "manage", "work") and m and not neg:
+        t = _place_tokens(m.group(1))
+        if t:
+            out.append(("employer", frozenset(t)))
     if a in _JOB_PREDS:
         m = re.search(r"\bat\s+(.+)$", v)
         if m and (a == "work_as" or "job" in v or "role" in v or "position" in v):

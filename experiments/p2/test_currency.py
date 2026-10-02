@@ -476,3 +476,9 @@ def test_an_ending_names_what_it_ends(old_text, cess_attr, cess_value, cess_text
     g = _G({"a": _n("a", "x", "", "c1", text=old_text),
             "b": _n("b", cess_attr, cess_value, "c2", text=cess_text)})
     assert ("a", "b") in C.mark_ceased(g, order=ORDER)
+
+
+def test_a_job_described_by_what_you_do_for_an_organisation():
+    fams = dict(C._families("do", "freight scheduling for a shipping firm"))
+    assert "employer" in fams
+    assert C._families("do", "the dishes for the family") == []
