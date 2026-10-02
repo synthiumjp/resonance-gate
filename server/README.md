@@ -180,6 +180,32 @@ Coding sessions will add whatever you say about yourself in them, as well as
 some statements about the work. Use `profile_correct` to remove anything you
 don't want kept.
 
+## Other agents and models
+
+Nothing in the memory calls a language model, and what it returns is plain
+text, so any model can use it.
+
+Any MCP client (Claude Desktop, Cursor, Windsurf, Cline, Continue, Zed,
+Goose, VS Code agent mode, Gemini CLI, Codex CLI) runs the same server: point
+it at the `sourcedrecall` command with `SOURCEDRECALL_OWNER` set, as in the
+manual install above. Each client documents where its MCP config lives.
+
+Without MCP, use the command line from any script or harness:
+
+```bash
+# store a conversation: JSON Lines (or a JSON array) of {"role", "content"}
+cat chat.jsonl | sourcedrecall-memory ingest --id chat-42 --date 2026-03-02
+
+# what to put in any model's prompt, for one question or in general
+sourcedrecall-memory context "Where do I live?"
+sourcedrecall-memory context
+
+# what is stored about a question (--json for the full result)
+sourcedrecall-memory recall "Which university do I attend?"
+```
+
+Re-sending a conversation with the same `--id` adds only new messages.
+
 ## Models
 
 There is no generative model in the server. Small models score text that
