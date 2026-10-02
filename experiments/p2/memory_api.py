@@ -532,6 +532,31 @@ def _norm_sent(t):
     return re.sub(r"\s+", " ", (t or "").strip().lower()).strip(" .!?")
 
 
+# review round 3: hypotheticals, hedges and other people's sentences were
+# quoted as answers ("Am I rich?" -> "If I were rich I would quit...", "Do I
+# have kids?" -> "My sister Anna ... has two kids").
+_IRREALIS = re.compile(
+    r"\b(if|unless|imagine|suppose|supposing|pretend|wish|hope|hoping|"
+    r"would|wouldn't|could|might|maybe|perhaps|probably|possibly|someday|"
+    r"one day|thinking about|thinking of|considering|planning to|plan to|"
+    r"want to|wanna|gonna|going to|dream|dreamed|dreamt|joke|joking|kidding|"
+    r"in theory|hypothetically)\b", re.I)
+_OTHER_LED = re.compile(
+    r"^\W*(?:he|she|they|it|everyone|everybody|nobody|people|someone|"
+    r"my (?:sister|brother|mum|mom|dad|mother|father|wife|husband|partner|"
+    r"boyfriend|girlfriend|friend|friends|boss|manager|colleague|colleagues|"
+    r"son|daughter|kids|children|neighbour|neighbor|flatmate|roommate|"
+    r"cousin|aunt|uncle|grandma|grandpa|grandmother|grandfather|doctor|"
+    r"teacher|dog|cat)|(?!I\b)[A-Z][a-z]+\s+(?:is|was|has|had|lives|works|"
+    r"said|says|thinks|went|got|loves|likes|and))\b", re.I)
+
+
+def _quotable(sent):
+    """A sentence the user may be quoted on: not a hypothetical or hedge,
+    and not led by someone else."""
+    return not (_IRREALIS.search(sent) or _OTHER_LED.match(sent))
+
+
 def _denied_sentence(sent, values, sources=()):
     n = _norm_sent(sent)
     if any(src and _norm_sent(src) == n for src in sources):
@@ -558,7 +583,7 @@ def _unparsed_sentences(conversations_path, g):
     except Exception:
         return []
     # what the user asked to forget is never quoted back
-    denied = []
+    denied, denied_said = [], []
     try:
         import json as _json
         cpath = os.path.join(os.path.dirname(conversations_path),
@@ -569,8 +594,11 @@ def _unparsed_sentences(conversations_path, g):
                     c = _json.loads(line)
                 except ValueError:
                     continue
-                if c.get("action") == "deny" and c.get("value"):
-                    denied.append(str(c["value"]))
+                if c.get("action") == "deny":
+                    if c.get("said"):
+                        denied_said.append(str(c["said"]))
+                    if c.get("value"):
+                        denied.append(str(c["value"]))
     except OSError:
         pass
     out = {}
@@ -579,10 +607,11 @@ def _unparsed_sentences(conversations_path, g):
             continue
         for sent in _SENT_SPLIT.split(text.strip()):
             n = _norm_sent(sent)
-            if "[secret removed]" in sent:
+            if "[secret removed]" in sent or not _quotable(sent):
                 continue
             if (not n or n in used or sent.strip().endswith("?")
-                    or len(n.split()) < 4 or _denied_sentence(sent, denied)):
+                    or len(n.split()) < 4
+                    or _denied_sentence(sent, denied, denied_said)):
                 continue
             prev = out.get(n)
             if prev is None or (date or "") > (prev["date"] or ""):
@@ -677,6 +706,14 @@ class Memory:
             act = c.get("action")
             attr = str(c.get("attribute", "")).lower().strip()
             sub = str(c.get("value", "")).lower().strip()
+            if act == "deny" and getattr(self, "unparsed", None):
+                before = len(self.unparsed)
+                self.unparsed = [u for u in self.unparsed
+                                 if not _denied_sentence(
+                                     u["value"], [sub] if attr == "said" else [],
+                                     [c.get("said")])]
+                if len(self.unparsed) < before:
+                    applied.append(("denied-quote", attr))
             for store in (self.g.nodes, self.g.provisional):
                 for nid in [k for k, d in store.items()
                             if d["attr"] == attr and sub in d["value"].lower()]:

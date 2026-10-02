@@ -187,3 +187,35 @@ def test_a_forgotten_fact_is_not_quoted_back(pm):
     pm.profile_forget(hit["id"])
     r = pm.profile_recall("Am I allergic to anything?")
     assert "penicillin" not in str(r.get("ranked"))
+
+
+def test_a_forgotten_fact_stays_forgotten_after_a_reload(pm):
+    pm.profile_ingest([U("I take medication for my anxiety every morning.")],
+                      conversation_id="a", owner_name="Jordan Pike", date="2026-03-02")
+    hit = pm.profile_recall("What medication do I take?")["ranked"][0]
+    pm.profile_forget(hit["id"])
+    pm._state["mem"] = None
+    assert "medication" not in str(pm.profile_recall("What medication do I take?").get("ranked"))
+
+
+def test_a_quote_can_be_forgotten_by_its_id(pm):
+    pm.profile_ingest([U("I study marine biology at the University of Queensland.")],
+                      conversation_id="a", owner_name="Jordan Pike", date="2026-03-02")
+    q = pm.profile_recall("What do I study?")["ranked"][0]
+    assert pm.profile_forget(q["id"])["forgotten"]
+    assert not pm.profile_recall("What do I study?")["found"]
+    pm._state["mem"] = None
+    assert not pm.profile_recall("What do I study?")["found"]
+
+
+@pytest.mark.parametrize("said,q", [
+    ("If I were rich I would quit my job and travel the world.", "Am I rich?"),
+    ("Imagine if I had a pet tiger, that would be wild.", "Do I have a pet tiger?"),
+    ("My sister Anna lives in Boston and she has two kids.", "Do I have kids?"),
+    ("Everyone at work eats sushi on Fridays.", "Do I eat sushi?"),
+])
+def test_hypotheticals_and_other_people_are_not_quoted(pm, said, q):
+    pm.profile_ingest([U(said)], conversation_id="a", owner_name="Jordan Pike",
+                      date="2026-03-02")
+    r = pm.profile_recall(q)
+    assert not any(f.get("status") == "verbatim" for f in r.get("ranked") or [])

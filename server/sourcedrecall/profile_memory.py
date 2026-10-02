@@ -472,7 +472,8 @@ def profile_context(query=None, max_facts=15, scope=None):
     return {"block": block}
 
 
-def profile_correct(action, attribute, value, new_attribute=None, exact=False):
+def profile_correct(action, attribute, value, new_attribute=None, exact=False,
+                    said=None):
     """Append one correction to corrections.jsonl (owner-authored ground
     truth, per wire.correct_facts). deny/confirm apply immediately to the live
     graph (Memory.apply_corrections is node-level -- retype is not, it needs a
@@ -490,6 +491,10 @@ def profile_correct(action, attribute, value, new_attribute=None, exact=False):
         correction["exact"] = True
     if action == "retype":
         correction["new_attribute"] = new_attribute
+    if said:
+        # the sentence the fact came from: a forgotten fact's words must not
+        # come back as a quote after a reload (review round 3)
+        correction["said"] = said
 
     with _lock:
         data_dir = _data_dir()
@@ -791,11 +796,23 @@ def _find(fact_id):
 
 
 def profile_forget(fact_id):
-    """Remove one fact by its id (as shown in recall results and MEMORY.md)."""
+    """Remove one fact by its id (as shown in recall results and MEMORY.md).
+    A quoted sentence ("their words", ids starting with "u") can be
+    forgotten the same way."""
     f = _find(fact_id)
     if f is None:
-        return {"forgotten": False, "error": f"no fact with id {fact_id}"}
-    out = profile_correct("deny", f["attribute"], f["value"], exact=True)
+        mem = _ensure_loaded()
+        u = next((x for x in getattr(mem, "unparsed", []) or []
+                  if x.get("id") == fact_id), None)
+        if u is None:
+            return {"forgotten": False, "error": f"no fact with id {fact_id}"}
+        profile_correct("deny", "said", u["value"], exact=True, said=u["value"])
+        _export_quietly()
+        return {"forgotten": True, "fact": {"id": fact_id, "text": None,
+                                            "said": u["value"]},
+                "applied": "live"}
+    out = profile_correct("deny", f["attribute"], f["value"], exact=True,
+                          said=f.get("said"))
     if f["_tier"] == "hearsay":
         # live deny covers the asserted and single-mention tiers; the
         # hearsay tier is rebuilt from the corrections file

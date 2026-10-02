@@ -1298,3 +1298,23 @@ def test_locomo_dev_shapes(ex, turn, want):
 def test_a_mark_before_the_copula_is_still_dropped(ex):
     out = texts(ex, "I believe that my journey is a testament to persistence.")
     assert "Martin Mark's journey is a testament to persistence" in out
+
+
+# ---- review round 3 ---------------------------------------------------------
+
+@pytest.mark.parametrize("turn,want,bad", [
+    ("My only regret is that I never went to college.",
+     "regret is that Martin Mark never went to college", "regret is not"),
+    ("I have never been to Paris.", "Martin Mark has not been to Paris", "been not"),
+    ("The clinic won't see me until May.", "The clinic will not see Martin Mark until May",
+     "wo not"),
+])
+def test_review3_negation_rendering(ex, turn, want, bad):
+    out = texts(ex, turn)
+    assert any(want in p for p in out), out
+    assert not any(bad in p for p in out), out
+
+
+@pytest.mark.parametrize("turn", ["Maybe cooking makes me happy.", "Cooking makes me."])
+def test_review3_weak_third_party_clauses_are_dropped(ex, turn):
+    assert texts(ex, turn) == []

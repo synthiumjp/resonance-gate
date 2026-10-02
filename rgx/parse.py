@@ -1336,9 +1336,17 @@ def extract_keyed(text, nlp, owner=None, role="user",
                 # a clause as subject, the user as object: "Bringing others
                 # comfort ... brings me such joy"
                 cs = next(iter(s.children(head, ("csubj",))), None)
-                if cs is not None and any(
+                # needs something besides the user ("Cooking makes me." says
+                # nothing) and no hedge ("Maybe cooking makes me happy")
+                if (cs is not None and any(
                         c.text.lower() in allow
-                        for c in s.children(head, ("obj", "iobj"))):
+                        for c in s.children(head, ("obj", "iobj")))
+                        and any(c.text.lower() not in allow for c in
+                                s.children(head, ("obj", "xcomp", "obl")))
+                        and not any((c.lemma or "").lower() in
+                                    ("maybe", "perhaps", "probably",
+                                     "possibly") for c in
+                                    s.children(head, ("advmod",)))):
                     subj = cs
             donor = None
             obj_ctrl = False
@@ -1493,6 +1501,14 @@ def extract_keyed(text, nlp, owner=None, role="user",
 
             # ---- copular: the PREDICATE heads the clause, `cop` hangs off it
             if cop is not None:
+                # review round 3: "My only regret is that I NEVER went to
+                # college" -- a negation inside a clausal predicate (after
+                # its own mark) belongs to that clause; lifting it to the
+                # copula gave "regret is not that ... went", an inversion.
+                inner_mark = [c for c in s.children(head, ("mark",))
+                              if c.id > cop.id]
+                if neg and inner_mark and head.upos == "VERB" and not pneg:
+                    neg, negdrop = False, set()
                 drop = {subj.id, cop.id}
                 drop |= {c.id for c in s.children(head, SEPARATE)}
                 drop |= {c.id for c in s.children(head, ("aux", "aux:pass"))}
@@ -1531,6 +1547,11 @@ def extract_keyed(text, nlp, owner=None, role="user",
                     val_core, peri = val_full, set()
 
                 cform = _cop_form(s, head)
+                # "I have never been to Paris" read "has been not to Paris"
+                if neg and " " in cform:
+                    first, rest = cform.split(" ", 1)
+                    cform = f"{first} not {rest}"
+                    neg = False
                 if fhedge:      # e271
                     cform = (" ".join(c.text.lower() for c in fhedge)
                              + " " + cform)   # swap keeps case consistent
@@ -1655,7 +1676,18 @@ def extract_keyed(text, nlp, owner=None, role="user",
                     records.append((body, "event",
                                     _pred_key(s, head, rest), tail))
                 elif sp is None and not is_self:
-                    if tpo or named_tpo or world_subj:
+                    # review round 3: "Maybe cooking makes me happy" lost
+                    # its hedge here, and "Cooking makes me." said nothing
+                    hedged_tp = any((c.lemma or c.text).lower() in
+                                    ("maybe", "perhaps", "probably", "possibly")
+                                    for c in (list(fhedge or [])
+                                              + list(s.children(head, ("advmod",)))))
+                    only_owner = (tpo and not any(
+                        c.text.lower() not in allow for c in args
+                        if c.upos not in ("PUNCT", "CCONJ", "SCONJ")))
+                    if (tpo or named_tpo or world_subj) and (hedged_tp or only_owner):
+                        pass
+                    elif tpo or named_tpo or world_subj:
                         # E (e240) / RULE 3 (e243), verbal predicate.
                         full_drop = {c.id for c in s.children(head, SEPARATE)}
                         full_drop |= {c.id for c in
@@ -1845,6 +1877,10 @@ def extract_keyed(text, nlp, owner=None, role="user",
 
             for body, kind, pred, value in records:
                 body = re.sub(r"\s+", " ", body).strip(" ,.;:")
+                # "won't" / "can't" split as "wo" / "ca" + "n't"
+                body = re.sub(r"\bwo not\b", "will not", body)
+                body = re.sub(r"\bca not\b", "cannot", body)
+                body = re.sub(r"\bsha not\b", "shall not", body)
                 # D (e240): a record that STILL carries a bare first-person
                 # token in an assistant turn is the assistant talking about
                 # itself, not the user -- the safety net for whatever a
