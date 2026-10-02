@@ -156,6 +156,8 @@ def _build():
             owner = None
     mem = Memory(g, titles, owner=owner)
     mem.conv_scopes = conv_scopes
+    from memory_api import _unparsed_sentences
+    mem.unparsed = _unparsed_sentences(_conversations_path(), g)
     return mem, n_uncached
 
 

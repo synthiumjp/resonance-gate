@@ -103,6 +103,13 @@ a 6, c 6, d 6, e 6). Audited, rate [95% CI] (k/n):
 | control recall (f) | 13/15 | 13/15 | 15/15 | 15/15 |
 | true-fact side recall, a/b/e | 5/11 | 5/11 | 11/11 | 11/11 |
 
+sourcedrecall 0.3.7 (adds the user's own words when no parsed fact answers,
+and later unparsed sentences after an older fact) scores the same on this
+set: false memory 3/37, controls 13/15, side recall 5/11
+(`results_v2_vb/`). On the read v1 set it moved controls 14 -> 15/16 and
+side recall 6 -> 7/11. A quoted sentence must share a content word with the
+question, so paraphrase-only answers are still missed.
+
 Results are in `results_v2/` (0.3.5, all three systems) and
 `results_v2_036/` (0.3.6; Mem0 and RAG copied from `results_v2/`). Judge
 audit: every flagged line and every unflagged Mem0 and sourcedrecall line

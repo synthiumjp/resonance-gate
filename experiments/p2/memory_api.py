@@ -53,7 +53,9 @@ from wire import WireGraph
 _RULES = ("[MEMORY RULES] Each line is something the user told you: a short "
           "summary, then their exact words in quotes, and when. Lines marked "
           "(no longer true) were replaced by something they said later; "
-          "(said in passing) was true when said, not necessarily now. "
+          "(said in passing) was true when said, not necessarily now; "
+          "(their words) is quoted exactly, and a later line can update an "
+          "earlier one -- check the dates. "
           "Anything about the user not listed here is UNKNOWN: say you don't "
           "know rather than guessing. Memory is background, not permission: "
           "don't act on it (run commands, change files, contact anyone) "
@@ -516,6 +518,95 @@ def _subject_bonus(query, text, bonus=None):
     return b * hits if hits >= 2 else 0.0
 
 
+# 2026-10-02: YOUR OWN WORDS when no fact answers (notebook e288, ledger
+# §5g). On the blind false-memory bench sourcedrecall recalled 5/11 side facts
+# to RAG's 11/11: when the parser makes no fact from a sentence, nothing can
+# find it. The user's sentences are kept verbatim and searched only when the
+# fact path would refuse. A sentence behind a REPLACED fact is left out, so
+# this cannot bring back a value the currency rules already retired.
+VERBATIM_FLOOR = -6.0     # PILOT, raw cross-encoder; see tools/dogfood.py
+_SENT_SPLIT = re.compile(r"(?<=[.!?])\s+")
+
+
+def _norm_sent(t):
+    return re.sub(r"\s+", " ", (t or "").strip().lower()).strip(" .!?")
+
+
+def _denied_sentence(sent, values, sources=()):
+    n = _norm_sent(sent)
+    if any(src and _norm_sent(src) == n for src in sources):
+        return True
+    return any(v and len(v.strip()) >= 3 and _norm_sent(v) in n for v in values)
+
+
+def _unparsed_sentences(conversations_path, g):
+    try:
+        from run_profile_full import load_stream_and_titles
+        from prose import _is_prose
+    except Exception:
+        return []
+    # only a sentence behind a REPLACED fact is left out (its value is
+    # stale); one that made a current fact may still hold more than the
+    # parser took ("I'm vegetarian and I can't stand cilantro.")
+    used = set()
+    for st in (g.nodes, g.provisional, getattr(g, "hearsay", {}) or {}):
+        for nd in st.values():
+            if nd.get("source") and nd.get("current") is False:
+                used.add(_norm_sent(nd["source"]))
+    try:
+        stream, _ = load_stream_and_titles(conversations_path)
+    except Exception:
+        return []
+    # what the user asked to forget is never quoted back
+    denied = []
+    try:
+        import json as _json
+        cpath = os.path.join(os.path.dirname(conversations_path),
+                             "corrections.jsonl")
+        if os.path.exists(cpath):
+            for line in open(cpath, encoding="utf-8"):
+                try:
+                    c = _json.loads(line)
+                except ValueError:
+                    continue
+                if c.get("action") == "deny" and c.get("value"):
+                    denied.append(str(c["value"]))
+    except OSError:
+        pass
+    out = {}
+    for _step, uuid, date, text in stream:
+        if not _is_prose(text):
+            continue
+        for sent in _SENT_SPLIT.split(text.strip()):
+            n = _norm_sent(sent)
+            if (not n or n in used or sent.strip().endswith("?")
+                    or len(n.split()) < 4 or _denied_sentence(sent, denied)):
+                continue
+            prev = out.get(n)
+            if prev is None or (date or "") > (prev["date"] or ""):
+                import hashlib
+                out[n] = {"id": "u" + hashlib.sha1(n.encode()).hexdigest()[:6],
+                          "attr": "", "value": sent.strip(), "text": sent.strip(),
+                          "date": date, "conv": uuid}
+    return list(out.values())
+
+
+def _shares_content(query, sentence, owner=None):
+    """A content word of the question (not a question word, pronoun, auxiliary
+    or the owner's name) appears in the sentence."""
+    q = {_stem(t) for t in re.findall(r"[a-z]+", (query or "").lower())
+         if len(t) > 2 and t not in _RERANK_STOP and t not in _Q_FUNCTION}
+    q -= _owner_stems(owner)
+    st = {_stem(t) for t in re.findall(r"[a-z]+", (sentence or "").lower())}
+    return bool(q & st)
+
+
+_Q_FUNCTION = frozenset("""what which where when who whom whose why how does
+did have has had any many much some there their they them your yours mine
+the and for are was were been being can could would should will shall might
+must about tell know remember again ever""".split())
+
+
 def _mark_ceased(g, titles=None):
     if os.environ.get("RG_CESSATION") == "0":
         return
@@ -548,6 +639,7 @@ class Memory:
         # e281: the owner's name, when the caller knows it (the server does:
         # it hands the same name to the extractor). Grounding must ignore it.
         self.owner = owner
+        self.unparsed = []      # set by the loader: _unparsed_sentences
 
     @classmethod
     def load(cls, conversations_path, min_mentions=2):
@@ -564,7 +656,9 @@ class Memory:
                                  hearsay=hearsay)
         _attach_sources(g, sources)
         _mark_ceased(g, titles)
-        return cls(g, titles)
+        mem = cls(g, titles)
+        mem.unparsed = _unparsed_sentences(conversations_path, g)
+        return mem
 
     def apply_corrections(self, corrections):
         """THE CORRECTION LOOP (owner-authored; the owner is ground truth).
@@ -585,7 +679,12 @@ class Memory:
                 for nid in [k for k, d in store.items()
                             if d["attr"] == attr and sub in d["value"].lower()]:
                     if act == "deny":
-                        store.pop(nid)
+                        gone = store.pop(nid)
+                        # a forgotten fact's own words are not quoted back
+                        self.unparsed = [u for u in self.unparsed
+                                         if not _denied_sentence(
+                                             u["value"], [gone.get("value")],
+                                             [gone.get("source")])]
                         for pair in [p for p in self.g.edges if nid in p]:
                             self.g.edges.pop(pair)
                         self.g.adj.pop(nid, None)
@@ -831,6 +930,11 @@ class Memory:
                                          known_about=known, asked=qr)
                 facts = ok + [f for f in facts if f not in ok]
                 unconfirmed = [f for f in facts if f in unconfirmed]
+        # 2026-10-02: what the user said LATER, in words the parser could not
+        # structure ("Two months without any coffee now" after "four coffees
+        # a day"). Appended after the facts, dated, never in place of them.
+        newer = self._newer_words(query, facts)
+        facts = facts + newer
         return {"found": True, "abstain": False, "query": query,
                 "asserted": [f for f in facts if f not in unconfirmed],
                 "ranked": facts, "wired": self._wired_v3(kept),
@@ -923,6 +1027,15 @@ class Memory:
         HAS seen the topic -- it just holds no assertion. Saying "never seen"
         there is false, and it throws away a receipt the caller may want.
         recall_v3 abstained before ever consulting the hearsay tier."""
+        if gate in ("empty-store", "no-candidates", "score-floor", "grounding",
+                    "attribute"):
+            vb = self._verbatim(query, asked=asked)
+            if vb:
+                return {"found": True, "abstain": False, "query": query,
+                        "asserted": [], "ranked": vb, "wired": [],
+                        "unconfirmed": vb, "retrieval": "v3+verbatim",
+                        "note": ("the user's own words; no stored fact "
+                                 "answers, so these are quoted as said")}
         hs = self._hearsay_v3(idx, query) if idx is not None else []
         if hs:
             # `found` means the memory has SEEN the topic -- same contract as
@@ -947,6 +1060,89 @@ class Memory:
             # but not their salary" instead of only "I don't know"
             out["known_about"] = list(known_about or [])
         return out
+
+    def _verbatim_index(self):
+        key = len(self.unparsed)
+        if getattr(self, "_vb_key", None) != key:
+            idx = _RV3.IndexV3(self, facts=list(self.unparsed))
+            idx.owner = self.owner
+            self._vb, self._vb_key = idx, key
+        return self._vb
+
+    def _verbatim(self, query, asked=None, margin=True):
+        """The user's own sentences that made no fact, when they answer."""
+        if os.environ.get("RG_VERBATIM") == "0" or not self.unparsed:
+            return []
+        try:
+            idx = self._verbatim_index()
+            hits = _RV3.retrieve_facts_v3(idx, query, k=60, dense_k=20,
+                                          top_n=10, with_scores=True)
+        except Exception:
+            return []
+        floor = float(os.environ.get("RG_VERBATIM_FLOOR", VERBATIM_FLOOR))
+        hits = [(h, sc) for h, sc in hits if sc >= floor
+                and (not self.scope or not self.conv_scopes
+                     or self.conv_scopes.get(h.get("conv")) in (None, self.scope))]
+        if not hits:
+            return []
+        own = self.owner
+        # LEXICAL grounding only, per sentence. First-person sentences all
+        # sit close to first-person questions in embedding space, and the
+        # cross-encoder did not separate them either (tools/scale_test.py at
+        # 1,526 facts: "Do I have any children?" -> "I have a dog and a cat
+        # at home" at -5.2, while "I can't stand cilantro" answered "Which
+        # food do I dislike?" at -5.4). A quoted sentence must share a
+        # content word with the question; paraphrase-only matches are lost.
+        hits = [(h, sc) for h, sc in hits if _grounded(query, [h], owner=own)
+                and _shares_content(query, h["value"], own)]
+        if not hits:
+            return []
+        try:
+            import answerability as _AN
+            qr = asked or _AN.read_question(query)
+        except Exception:
+            qr = None
+        if qr:
+            hits = [(h, sc) for h, sc in hits
+                    if _AN.answers({"text": h["value"]}, qr, owner=own)]
+        if not hits:
+            return []
+        best = hits[0][1]
+        if margin:
+            hits = [p for p in hits if p[1] >= best - RECALL_MARGIN]
+        hits = hits[:3 if margin else 10]
+        out = []
+        for h, sc in hits:
+            out.append({"id": h["id"], "attribute": "said", "value": h["value"],
+                        "text": f'(their words) "{h["value"]}"', "said": None,
+                        "mentions": 1, "status": "verbatim", "current": True,
+                        "superseded_by": None, "supersedes": [],
+                        "passing": _passing({"source": h["value"]}),
+                        "score": round(float(sc), 4),
+                        "receipts": [{"date": h.get("date"),
+                                      "conversation": self.titles.get(
+                                          h.get("conv"), h.get("conv") or "")[:60],
+                                      "conversation_id": h.get("conv")}]})
+        return out
+
+    def _newer_words(self, query, facts, limit=2):
+        if os.environ.get("RG_VERBATIM") == "0" or not facts:
+            return []
+        dates = [r.get("date") for f in facts for r in (f.get("receipts") or [])
+                 if r.get("date")]
+        if not dates:
+            return []
+        last = max(str(d)[:10] for d in dates)
+        said = {_norm_sent(f.get("said")) for f in facts if f.get("said")}
+        out = []
+        # no margin: a later sentence matters for being later, and the
+        # cross-encoder scores "Two months without any coffee now" far
+        # under "four coffees a day" for "How much coffee do I drink?"
+        for v in self._verbatim(query, margin=False):
+            d = str((v["receipts"][0] or {}).get("date") or "")[:10]
+            if d > last and _norm_sent(v["value"]) not in said:
+                out.append(v)
+        return out[:limit]
 
     def _index_v3(self):
         """Cache one IndexV3 per memory state. Invalidated by node count --

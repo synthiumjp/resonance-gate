@@ -151,3 +151,39 @@ def test_a_question_about_someone_else_is_not_grounded_by_the_users_job(pm):
     pm.profile_ingest([U("I'm a barista at Seven Seeds.")], conversation_id="a",
                       owner_name="Jordan Pike", date="2026-03-02")
     assert not pm.profile_recall("What does my brother do for work?")["found"]
+
+
+# ---- the user's own words when no fact answers (2026-10-02) ---------------
+
+def test_a_sentence_the_parser_missed_is_quoted_when_it_answers(pm):
+    pm.profile_ingest([U("I study marine biology at the University of Queensland.")],
+                      conversation_id="a", owner_name="Jordan Pike", date="2026-03-02")
+    r = pm.profile_recall("What do I study?")
+    assert r["found"] and "marine biology" in r["ranked"][0]["text"]
+    assert r["ranked"][0]["status"] == "verbatim"
+
+
+def test_a_near_sentence_is_not_an_answer(pm):
+    pm.profile_ingest([U("I have a dog and a cat at home."),
+                       U("My friend Dev lives in Leiden.")],
+                      conversation_id="a", owner_name="Jordan Pike", date="2026-03-02")
+    for q in ("Do I have any children?", "What city was I born in?"):
+        assert not pm.profile_recall(q)["found"], q
+
+
+def test_a_later_unparsed_sentence_follows_the_older_fact(pm):
+    pm.profile_ingest([U("I get through roughly four coffees a day, it's a problem.")],
+                      conversation_id="a", owner_name="Jordan Pike", date="2026-03-02")
+    pm.profile_ingest([U("Two months without any coffee now. Switched to tea.")],
+                      conversation_id="b", owner_name="Jordan Pike", date="2026-03-09")
+    texts = [f["text"] for f in pm.profile_recall("How much coffee do I drink?")["ranked"]]
+    assert any("Two months without any coffee" in t for t in texts)
+
+
+def test_a_forgotten_fact_is_not_quoted_back(pm):
+    pm.profile_ingest([U("I'm allergic to penicillin.")], conversation_id="a",
+                      owner_name="Jordan Pike", date="2026-03-02")
+    hit = pm.profile_recall("Am I allergic to anything?")["ranked"][0]
+    pm.profile_forget(hit["id"])
+    r = pm.profile_recall("Am I allergic to anything?")
+    assert "penicillin" not in str(r.get("ranked"))
