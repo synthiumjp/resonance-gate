@@ -22,3 +22,32 @@ def default_memory_dir():
         os.makedirs(d, exist_ok=True)
         os.environ["RG_MEMORY_DIR"] = d
     return os.environ["RG_MEMORY_DIR"]
+
+
+def project_scope(path):
+    """The project a directory belongs to: its git root if it is inside a
+    repository, else the directory itself (2026-10-02, scoping). None for
+    no path. Subdirectories of one repository are one project."""
+    if not path:
+        return None
+    p = os.path.realpath(os.path.expanduser(str(path)))
+    cur = p
+    while True:
+        if os.path.exists(os.path.join(cur, ".git")):
+            return cur
+        parent = os.path.dirname(cur)
+        if parent == cur:
+            return p
+        cur = parent
+
+
+def current_scope(explicit=None):
+    """The scope to read in: an explicit one, else SOURCEDRECALL_SCOPE, else
+    the project Claude Code is running in (CLAUDE_PROJECT_DIR, which it sets
+    for MCP servers and hooks). None means no scoping: everything is
+    visible. SOURCEDRECALL_SCOPING=0 turns scoping off."""
+    if os.environ.get("SOURCEDRECALL_SCOPING") == "0":
+        return None
+    raw = (explicit or os.environ.get("SOURCEDRECALL_SCOPE")
+           or os.environ.get("CLAUDE_PROJECT_DIR"))
+    return project_scope(raw) if raw else None

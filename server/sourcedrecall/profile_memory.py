@@ -139,6 +139,11 @@ def _build():
     _attach_sources(g, sources)
     from memory_api import _mark_ceased   # endings AND state changes, one hook
     _mark_ceased(g, titles)
+    try:
+        conv_scopes = {c.get("uuid"): c.get("scope")
+                       for c in json.load(open(_conversations_path()))}
+    except Exception:
+        conv_scopes = {}
     # e281: the server knows the owner (it hands the same name to the
     # extractor); give it to the Memory so grounding can ignore the name.
     # Without this the dogfood store had no `name` fact, the index's owner was
@@ -149,7 +154,9 @@ def _build():
             owner = _discover_owner_name()
         except Exception:
             owner = None
-    return Memory(g, titles, owner=owner), n_uncached
+    mem = Memory(g, titles, owner=owner)
+    mem.conv_scopes = conv_scopes
+    return mem, n_uncached
 
 
 def _reload_locked():
@@ -237,7 +244,7 @@ def _iso_date(date):
 
 
 def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
-                   date=None):
+                   date=None, scope=None):
     """Turn ONE conversation into new profile-memory facts -- the only WRITE
     path in this module that runs an extractor, and it is rgx: a deterministic
     parser, NOT a language model. No prompt, no sampling, no invented text --
@@ -301,6 +308,11 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
             record = {"uuid": conv_id, "name": title or "(untitled)",
                        "created_at": created_at, "chat_messages": []}
             convs.append(record)
+        # 2026-10-02: the project this conversation happened in (a path), so
+        # its facts about the world stay in that project. None: no scope.
+        if scope and not record.get("scope"):
+            from sourcedrecall.paths import project_scope
+            record["scope"] = project_scope(scope)
         elif title:
             record["name"] = title
         chat_messages = record.setdefault("chat_messages", [])
@@ -376,15 +388,25 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
 
 # --------------------------------------------------------------- the tools
 
-def profile_recall(query):
+def _set_scope(mem, scope):
+    from sourcedrecall.paths import current_scope
+    mem.scope = current_scope(scope)
+
+
+def profile_recall(query, scope=None):
     """RG_PROFILE_V3=1 routes the read through retrieval v3 (e258): the
     champion retriever measured since e132, which until now only ever ran on
     the benchmark QA path. The product shipped token overlap. Off by default
     -- it loads two small local models (~150MB, non-generative) on first use,
     so the zero-model request-path guarantee changes shape and that is the
-    caller's decision, not ours."""
+    caller's decision, not ours.
+
+    `scope`: the project to read in (2026-10-02). Default: the project Claude
+    Code is running in, if any; facts about the world from other projects are
+    hidden, facts about the user are not."""
     mem = _ensure_loaded()
     with _lock:
+        _set_scope(mem, scope)
         out = _recall(mem, query)
     out["source"] = _SOURCE
     return out
@@ -414,9 +436,10 @@ def _recall(mem, query):
         return mem.recall(query)
 
 
-def profile_context(query=None, max_facts=15):
+def profile_context(query=None, max_facts=15, scope=None):
     mem = _ensure_loaded()
     with _lock:
+        _set_scope(mem, scope)
         block = mem.context_block(query, max_facts)
     return {"block": block}
 
@@ -640,10 +663,24 @@ def export_markdown(path=None):
     facts = _all_facts(mem)
     def by_date(f):
         return (f.get("receipts") or [{}])[0].get("date", "")
-    about = [f for f in facts if f["_tier"] != "hearsay" and f.get("current") is not False
-             and _owner_subject(f.get("text"), owner)]
-    world = [f for f in facts if f["_tier"] != "hearsay" and f.get("current") is not False
-             and not _owner_subject(f.get("text"), owner)]
+    # 2026-10-02: facts bound to a project (its world, and work statements
+    # made in it) are listed under that project
+    nodes = {}
+    for store in (mem.g.nodes, mem.g.provisional):
+        for nd in store.values():
+            nodes[mem._fact(nd)["id"]] = nd
+    def _project(f):
+        nd = nodes.get(f["id"])
+        return mem.project_of(nd) if nd is not None else None
+    live = [f for f in facts if f["_tier"] != "hearsay" and f.get("current") is not False]
+    by_project = {}
+    for f in live:
+        pr = _project(f)
+        if pr:
+            by_project.setdefault(pr, []).append(f)
+    unbound = [f for f in live if not _project(f)]
+    about = [f for f in unbound if _owner_subject(f.get("text"), owner)]
+    world = [f for f in unbound if not _owner_subject(f.get("text"), owner)]
     gone = [f for f in facts if f["_tier"] != "hearsay" and f.get("current") is False]
     heard = [f for f in facts if f["_tier"] == "hearsay"]
     lines = [f"# Memory{': ' + owner if owner else ''}", "",
@@ -652,10 +689,13 @@ def export_markdown(path=None):
              "`sourcedrecall-memory forget <id>` or ask your assistant to forget "
              "it. Editing this file does not change the memory; it is rewritten "
              "after every change.", ""]
-    for title, group in (("About you", about),
-                         ("No longer true", gone),
-                         ("Other things you mentioned", world),
-                         ("Said by the assistant, never confirmed by you", heard)):
+    groups = [("About you", about), ("No longer true", gone),
+              ("Other things you mentioned", world)]
+    for proj in sorted(by_project):
+        groups.append((f"Project: {os.path.basename(proj) or proj} ({proj})",
+                       by_project[proj]))
+    groups.append(("Said by the assistant, never confirmed by you", heard))
+    for title, group in groups:
         if not group:
             continue
         lines += [f"## {title}", ""]

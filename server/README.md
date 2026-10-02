@@ -73,7 +73,7 @@ Add it to your MCP client, e.g. `.mcp.json` for Claude Code or
 | `profile_ingest(turns, owner_name, date=None)` | store one conversation. `turns` is `[{"role": "user"\|"assistant", "content": "..."}]`. Only statements the user makes become facts; questions, hypotheticals, hedges and other people's opinions don't. |
 | `profile_context(query=None)` | the summary to put in your agent's prompt: everything, or only what relates to `query` |
 | `profile_recall(query)` | look something up. Returns the matching facts with quotes and dates, or "never seen". |
-| `profile_correct(action, attribute, value)` | `deny` a wrong fact, `confirm` a right one |
+| `profile_forget(fact_id)` | remove a fact by the id shown in results and `MEMORY.md` |
 
 The agent has to call `profile_ingest` for a conversation to be stored. In
 Claude Code the hooks below do this automatically.
@@ -97,6 +97,33 @@ Example output after two conversations a week apart
 
 Each line has the parser's summary and the original sentence. If the two
 disagree, go by the sentence.
+
+## Seeing and editing the memory
+
+Every change rewrites `MEMORY.md` in the memory directory: what you said
+about yourself, what is no longer true, things you mentioned (grouped by
+project), and anything the assistant said about you that you never
+confirmed. Each line has your exact words, the date and a short id.
+
+```bash
+sourcedrecall-memory show            # print it
+sourcedrecall-memory forget a3f9c1   # remove a fact
+sourcedrecall-memory confirm a3f9c1  # mark a fact as confirmed
+```
+
+Agents can do the same with the `profile_forget`, `profile_confirm` and
+`profile_export` tools. Editing `MEMORY.md` by hand does not change the
+memory; it is regenerated.
+
+## Projects
+
+Facts about you (health, family, home, job, diet, tastes) are available
+everywhere. Facts about a project, and what you said about your work in it
+("I work on the billing service", "the billing service is written in Go"),
+are only shown in that project. In Claude Code the project is the
+repository you are working in; the tools also take a `scope` argument.
+Conversations stored outside any project are shown everywhere. Set
+`SOURCEDRECALL_SCOPING=0` to turn this off.
 
 ## Automatic capture in Claude Code
 
@@ -367,6 +394,9 @@ Conversation memory:
   car", "no longer"). Two statements in the same conversation are not
   ordered against each other.
 - Outside Claude Code, the agent has to call `profile_ingest` itself.
+- A pronoun that refers back to something in an earlier sentence is often
+  not resolved ("I maintain the checkout service. It is written in Rust."
+  stores only the first sentence).
 - A question asked in the first few seconds after the server starts can
   take about 4 s while models load. After that, queries take tens of
   milliseconds.

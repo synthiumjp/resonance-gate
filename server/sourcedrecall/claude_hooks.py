@@ -105,7 +105,22 @@ def _setup_env(owner):
     return profile_memory
 
 
-def ingest_session(transcript_path, session_id, owner=None):
+def _cwd_of(transcript_path):
+    try:
+        with open(transcript_path, encoding="utf-8") as fh:
+            for line in fh:
+                try:
+                    o = json.loads(line)
+                except ValueError:
+                    continue
+                if o.get("cwd"):
+                    return o["cwd"]
+    except OSError:
+        pass
+    return None
+
+
+def ingest_session(transcript_path, session_id, owner=None, cwd=None):
     """The worker: store one session. Safe to repeat -- a resumed session
     re-sends its whole transcript and only new turns are added."""
     turns, first_ts = read_transcript(transcript_path)
@@ -114,21 +129,25 @@ def ingest_session(transcript_path, session_id, owner=None):
     pm = _setup_env(owner)
     title = next(t["content"] for t in turns if t["role"] == "user")
     title = " ".join(title.split())[:60]
+    from sourcedrecall.paths import current_scope
     return pm.profile_ingest(turns, conversation_id=f"claude-code:{session_id}",
                              title=title,
                              owner_name=os.environ.get("SOURCEDRECALL_OWNER"),
-                             date=first_ts)
+                             date=first_ts,
+                             scope=current_scope(cwd or _cwd_of(transcript_path)))
 
 
 def session_end(event, owner=None, sync=False):
     path, sid = event.get("transcript_path"), event.get("session_id")
     if not path or not sid or not os.path.exists(path):
         return {"stored": False, "reason": "no transcript"}
+    cwd = event.get("cwd")
     if sync:
-        return ingest_session(path, sid, owner)
+        return ingest_session(path, sid, owner, cwd)
     job = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False,
                                       prefix="sourcedrecall-job-")
-    json.dump({"transcript_path": path, "session_id": sid, "owner": owner}, job)
+    json.dump({"transcript_path": path, "session_id": sid, "owner": owner,
+               "cwd": cwd}, job)
     job.close()
     log = os.path.join(tempfile.gettempdir(), "sourcedrecall-hook.log")
     with open(log, "a") as lf:
@@ -149,7 +168,9 @@ def session_start(event, owner=None, max_facts=15):
     st = pm.profile_status()
     if not (st.get("asserted") or st.get("provisional")):
         return None
-    block = pm.profile_context(None, max_facts)["block"]
+    from sourcedrecall.paths import current_scope
+    block = pm.profile_context(None, max_facts,
+                               scope=current_scope(event.get("cwd")))["block"]
     return {"hookSpecificOutput": {"hookEventName": "SessionStart",
                                    "additionalContext": block[:9500]}}
 
@@ -166,7 +187,7 @@ def main(argv=None):
         job = json.load(open(a.job))
         try:
             out = ingest_session(job["transcript_path"], job["session_id"],
-                                 job.get("owner"))
+                                 job.get("owner"), job.get("cwd"))
             print(json.dumps({"session": job["session_id"], **out}), flush=True)
         finally:
             os.unlink(a.job)

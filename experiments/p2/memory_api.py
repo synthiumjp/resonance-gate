@@ -30,6 +30,7 @@ conflicts().
 """
 
 import os
+import re
 import sys
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -270,8 +271,24 @@ GATES = (
     "grounding",         # no retrieved record shares a content word, and none is dense-close
     "no-renderable",     # candidates existed but none resolved to a stored node
     "attribute",         # the entity is known, but no fact supplies what was asked
+    "other-scope",       # only facts from other projects matched
 )
 GATE_COUNTS = {g: 0 for g in GATES}
+
+
+# What makes a statement about the user PERSONAL, so it follows them across
+# projects (2026-10-02, scoping). Deliberately broad: a missed personal fact
+# only stays in its project, while a work fact wrongly marked personal leaks
+# into every project -- the complaint scoping exists to fix.
+_PERSONAL_KINDS = re.compile(
+    r"\b(allerg\w*|intoleran\w*|health|doctor|diagnos\w*|medication|pregnan\w*|"
+    r"partner|wife|husband|spouse|girlfriend|boyfriend|son|daughter|kids?|"
+    r"children|child|baby|mother|father|mum|mom|dad|parents?|sister|brother|"
+    r"family|friend|dog|cat|pets?|birthday|born|grew up|lives?|living|moved|"
+    r"home|house|apartment|flat|vegetarian|vegan|diet|eats?|drinks?|married|"
+    r"single|divorced|engaged|hobb\w*|likes?|loves?|enjoys?|hates?|dislikes?|"
+    r"prefers?|favou?rite|plays? the|speaks?|learning|studies|studying|"
+    r"name is|years old|age)\b")
 
 
 def fact_id(nd):
@@ -424,6 +441,15 @@ class Memory:
     def __init__(self, graph, titles=None, owner=None):
         self.g = graph
         self.titles = titles or {}
+        # 2026-10-02, SCOPING: the most common complaint about AI memory is
+        # facts from one context leaking into another (work into personal,
+        # one project into the next). `scope` is the context being read in
+        # (a project path, or None for no scoping); `conv_scopes` maps each
+        # conversation to the context it happened in. Facts about the user
+        # are visible everywhere; facts about the world are visible only in
+        # the scope they were said in. See _visible.
+        self.scope = None
+        self.conv_scopes = {}
         # e281: the owner's name, when the caller knows it (the server does:
         # it hands the same name to the extractor). Grounding must ignore it.
         self.owner = owner
@@ -601,6 +627,14 @@ class Memory:
                         query, own, _entity_names(top3)))):
                 return self._abstain(query, idx, gate="grounding")
         kept = list(scored)
+        # 2026-10-02: scoping -- another project's facts are not this one's.
+        if self.scope and self.conv_scopes:
+            _before = len(kept)
+            kept = [p for p in kept
+                    if self._visible(nodes.get(p[0].get("id"))
+                                     or prov.get(p[0].get("id")) or {})]
+            if _before and not kept:
+                return self._abstain(query, idx, gate="other-scope")
         # e272: reorder ONLY what already cleared the floor, then truncate.
         if rerank:
             # e273: a fact the user has since ENDED ranks below one that still
@@ -742,7 +776,7 @@ class Memory:
         out = []
         for h in hits:
             nd = store.get(h.get("id"))
-            if nd is None:
+            if nd is None or not self._visible(nd):
                 continue
             own = getattr(sub, "owner", None)
             if not (_grounded(query, [h], owner=own)
@@ -827,7 +861,7 @@ class Memory:
         # review 2026-09-05 A4: this sorted by mentions alone, so a fact the
         # user had since replaced rendered FIRST, as current. Superseded facts
         # now sort last (and render "(no longer true)").
-        nodes = sorted(self.g.nodes.values(),
+        nodes = sorted((d for d in self.g.nodes.values() if self._visible(d)),
                        key=lambda d: (d.get("current") is False,
                                       -d["n_mentions"]))
         return [self._fact(nd) for nd in nodes[:top]]
@@ -924,6 +958,49 @@ class Memory:
                         + ". Which is current (or are both true)?"),
             })
         return out
+
+    def _personal(self, nd):
+        """Is this fact ABOUT the user (owner-subject or owner-possessed)?"""
+        owner = getattr(self, "owner", None)
+        if not owner:
+            idx = getattr(self, "_v3", None)
+            owner = getattr(idx, "owner", None) if idx is not None else None
+        t = (nd.get("text") or "").strip()
+        return bool(owner) and (t.startswith(owner + " ") or t.startswith(owner + "'s"))
+
+    def _personal_kind(self, nd):
+        """Is this the kind of fact that belongs to the person wherever they
+        are -- health, family, home, job, diet, tastes -- rather than to the
+        work in front of them? A statement about the user made inside a
+        project ("works on the billing service") stays in that project."""
+        try:
+            import currency
+            if currency._families(nd.get("attr"), nd.get("value")):
+                return True
+        except Exception:
+            pass
+        return bool(_PERSONAL_KINDS.search((nd.get("text") or "").lower()))
+
+    def project_of(self, nd):
+        """The project a fact is bound to, or None if it shows everywhere."""
+        if not self.conv_scopes:
+            return None
+        scopes = {self.conv_scopes.get(c) for c in (nd.get("convs") or {})}
+        if None in scopes or not scopes:
+            return None                       # said outside any project
+        if self._personal(nd) and self._personal_kind(nd):
+            return None                       # about the person: global
+        return sorted(scopes)[0]
+
+    def _visible(self, nd):
+        """With no current scope, everything shows. Otherwise a fact shows if
+        it is not bound to a project, or is bound to this one."""
+        if not self.scope or not self.conv_scopes or not nd:
+            return True
+        scopes = {self.conv_scopes.get(c) for c in (nd.get("convs") or {})}
+        if self.scope in scopes:
+            return True
+        return self.project_of(nd) is None
 
     def _fact(self, nd, provisional=False):
         recs = sorted(nd["convs"].items(), key=lambda kv: kv[1], reverse=True)
@@ -1044,7 +1121,8 @@ class Memory:
         profile must keep getting exactly that."""
         if top <= 0:
             return []
-        nodes = sorted(self.g.provisional.values(),
+        nodes = sorted((d for d in self.g.provisional.values()
+                        if self._visible(d)),
                        key=lambda d: (d.get("current") is False,
                                       -d["n_mentions"]))
         return [self._fact(nd, provisional=True) for nd in nodes[:top]]
