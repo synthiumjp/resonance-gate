@@ -14390,3 +14390,90 @@ question -- does sentence-level emission convert partials to fulls on REAL
 targets, at what interference cost -- but their readout must split by
 `memory_source` from the start, and the "how much is form" number needs a
 labelled sample of 60+ score-1 points, not my inference.
+
+## Entry 284 — 2026-10-02 (back after three weeks: a backcheck of e278-e282, and Jev -- a hosted "System One" decision model -- arrived with our thesis on its label.)
+
+### Where things stood
+
+The 21:00 run on 2026-09-09 composed fb1, started its judge, and died with
+the machine. The new verdict cache (e282) banked 1,702 verdicts, so that work
+is not lost. No other activity in three weeks.
+
+### Backcheck: three sonnet reviewers on everything changed since the last review
+
+1. **e279's "form gap" was overstated** -- corrected in e283.
+2. **e278's parser rules over-corrected.** No new inversions in ~110 probes,
+   but true facts lost. Two total losses ("I can't believe I got the job",
+   "I never knew I had a brother" -> nothing stored) are fixed: incredulity
+   and past-tense *know* presuppose their complement. The third-party rule
+   ("The doctor told me I have diabetes" no longer stores the bare fact) was
+   checked through the product read path: the attributed record answers "Do I
+   have diabetes?" at rank 1, so the rule keeps the honest form by design.
+   Seven refusal rows lock both in. Still open, pre-existing: "I didn't know
+   I was allergic to shellfish until last year" stores "was allergic ...
+   until last year" -- Stanza attaches the NPI *until* to the complement, so
+   it reads as an allergy that ended. Medical facts are where this matters.
+3. **Two silent-failure paths in the run stack**, closed before they cost a
+   result: a re-judged version re-aggregated stale per-user checkpoints and
+   reported them as fresh; a dead judge recorded None scores and the chain
+   said COMPLETE. Plus: the verdict-cache key could not tell two judges apart
+   (fixed without orphaning the banked shards), the watcher missed earlier
+   tracebacks, `wired` did not seed from rank 1. `tools/check_judged.py`
+   now refuses a row that is >2% unscored or older than its input.
+
+Suites 670 (+25). Dogfood and refusal matrix green and unchanged.
+
+### Jev
+
+TypeSafe AI, launched 2026-09-15 ($40M seed): a proprietary, HOSTED
+"System One" model. It never generates text; it answers typed questions
+(choice / score / yes-no) about supplied state with a probability per option,
+in 70-500 ms. Described by an independent tester as a modern BERT-style
+classifier; 97.1% vs 97.6% for a fine-tuned model on 3,000 Croatian texts,
+zero-shot. Fastest-adopted model in Vercel AI Gateway history. No weights, no
+paper, no architecture disclosed.
+
+Memory systems built on it within a fortnight:
+- **Jev-Mem** (UT Dallas, arXiv 2609.23986): stores the ORIGINAL observation
+  text; Jev decides typing, relation edges, query routing, retrieval budget
+  and stopping. LoCoMo 0.777 vs 0.700 for the best baseline, 6.6x faster
+  build. Judge gpt-4o-mini. **No ablations. No abstention handling.**
+- **JevMem** (github atmaneayoubdev/jev-mem): write-time Jev judgments
+  (supersedes / contradicts / duplicates / refines / prompt-injection /
+  durability), read-time intent + relevance, a deterministic versioned
+  policy, memories never deleted. 91.7% vs 80.1% dense top-10 on a
+  SYNTHETIC 396-case set; stale-or-poisoned context 3.3% vs 31.8%. Calls the
+  hosted API ~26 times per query.
+- Open local equivalents: **Von** (395M ModernBERT encoder, CPU, <15 ms,
+  "drop-in" for Jev); **AgentJev-0.6B** (Qwen3-0.6B head, Apache-2.0, ECE
+  0.169 -- poorly calibrated on its own benchmark).
+
+**What it means for RG.** The decisions those systems make with Jev are our
+decisions -- currency, contradiction, relevance-before-the-model, refusal as
+an empty result -- and the field just converged on "selection, not
+generation". Our conceptual niche is no longer empty. What remains ours:
+local and offline; write-time COMMITMENT analysis (what the speaker actually
+asserted -- neither Jev memory system does this; they store the sentence and
+leave it to the reader); measured refusal; auditable receipts.
+
+**And one thing they do better, which this session's review makes concrete.**
+Jev-Mem stores the observation verbatim. Every inversion class we have fixed
+since e240 lives in the step where we REWRITE the user's words into a
+proposition -- a negation prefix lost in rendering (e276), a pronoun swapped
+for the wrong antecedent (e276), "neither ... nor" left lying in the noun
+phrase (e278), a modal collapsed to "is" (e278). A verbatim store cannot
+invert what it does not rewrite; the parser's errors would degrade to wrong
+LABELS (tier, key, polarity) on a sentence that is still exactly what was
+said. That is architectural reasoning (§5g) and unmeasured. The thinnest test:
+render each record's source sentence in the read path alongside the
+proposition, and re-run dogfood, the refusal matrix and a red-team.
+
+**Calibration is JP's field.** Validity Scaling (arXiv 2604.17707) found
+models that APPEAR well calibrated scoring AUROC ~0.36 on selective
+prediction; the Resonance Gate result says store-membership is not
+correctness. "Calibrated" is a vendor claim until screened. If RG adopts a
+System-One decision (the obvious one: "does THIS record answer THIS
+question", which is exactly the PARTIAL_KNOWLEDGE gap, 1/6), it should be a
+local model screened with JP's protocol on a labelled set of our own
+decisions -- not the hosted API, which would break the product's local
+guarantee and the no-paid-inference rule.
