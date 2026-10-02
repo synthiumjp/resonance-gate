@@ -488,6 +488,14 @@ def _conditional(s, head):
     # regret being expressed.
     if _cond(head):
         return True
+    # 2026-10-02: "In case I get the bonus, ..." stored "<owner> gets the
+    # bonus". "in case" makes only its OWN clause hypothetical -- "I packed
+    # an umbrella in case it rains" still packed the umbrella.
+    for m in s.children(head, ("mark",)):
+        if (m.lemma or "").lower() == "in" and any(
+                (f.lemma or "").lower() == "case"
+                for f in s.children(m, ("fixed",))):
+            return True
     for c in s.children(head, ("advcl", "advcl:relcl")):
         if _cond(c) and not _concessive(c):
             return True

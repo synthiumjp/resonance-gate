@@ -469,6 +469,12 @@ CASES = [
          must_not="quit", unless_contains="joked",
          control="I quit.",
          control_role="user", control_asserts="quit"),
+    dict(capability="conditional", operator="in case",
+         role="user",
+         irrealis="In case I get the bonus, I'll buy a motorbike.",
+         must_not="gets the bonus", unless_contains="in case",
+         control="I got the bonus.",
+         control_role="user", control_asserts="got the bonus"),
     # subjectless fragments (rgx.fragments)
     dict(capability="question", operator="fragment question, denied",
          role="user",
