@@ -74,6 +74,9 @@ def test_a_low_scoring_hit_is_NOT_filtered_out(monkeypatch, mem):
     score, so per-record filtering was doing a job no measurement supported,
     and it discarded true answers that ranked low. The floor now decides
     WHETHER to answer; the re-rank decides the order."""
+    # isolates the FLOOR / ORDER semantics from the 2026-10-02 recall
+    # margin, which is tested on its own below
+    monkeypatch.setenv("RG_RECALL_MARGIN", "-1")
     _stub(monkeypatch, mem, [("a", -1.0), ("b", -9.0)])
     out = mem.recall_v3("q", min_score=-7.83)
     assert [f["value"] for f in out["ranked"]] == [
@@ -83,6 +86,9 @@ def test_a_low_scoring_hit_is_NOT_filtered_out(monkeypatch, mem):
 def test_rank_order_survives_the_tier_split(monkeypatch, mem):
     """The provisional fact outranks both asserted ones: it must stay first
     in `ranked`. Bucketing by tier is what broke this."""
+    # isolates the FLOOR / ORDER semantics from the 2026-10-02 recall
+    # margin, which is tested on its own below
+    monkeypatch.setenv("RG_RECALL_MARGIN", "-1")
     _stub(monkeypatch, mem, [("c", 5.0), ("a", 1.0), ("b", 0.5)])
     out = mem.recall_v3("q", min_score=-7.7)
     assert [f["value"] for f in out["ranked"]] == [
@@ -143,6 +149,9 @@ def test_the_floor_is_a_top1_decision_not_a_per_record_filter(monkeypatch, mem):
     only ever measured on the TOP-1 score, and per-record filtering silently
     discarded true answers that ranked low -- which is what stopped the e272
     re-rank from being able to promote one."""
+    # isolates the FLOOR / ORDER semantics from the 2026-10-02 recall
+    # margin, which is tested on its own below
+    monkeypatch.setenv("RG_RECALL_MARGIN", "-1")
     _stub(monkeypatch, mem, [("a", -1.0), ("b", -20.0)])
     out = mem.recall_v3("q", min_score=-7.83)
     assert out["abstain"] is False
@@ -363,3 +372,36 @@ def test_a_ceased_fact_never_seeds_wired():
     g = _WalkGraph({"b": {"id": "b", "current": False}})
     MA.Memory(g, {})._wired_v3([({"id": "b"}, 9.0)])
     assert g.seeds == []
+
+
+# ---- 2026-10-02: recall returns what answers, not the whole pool ----------
+
+def test_a_confident_answer_comes_back_alone(monkeypatch, mem):
+    monkeypatch.delenv("RG_RECALL_MARGIN", raising=False)
+    _stub(monkeypatch, mem, [("a", 5.0), ("b", -7.0), ("c", -8.0)])
+    out = mem.recall_v3("what am I allergic to?")
+    assert [f["value"] for f in out["ranked"]] == ["allergic to peanuts"]
+
+
+def test_close_neighbours_are_kept(monkeypatch, mem):
+    monkeypatch.delenv("RG_RECALL_MARGIN", raising=False)
+    _stub(monkeypatch, mem, [("a", -3.0), ("b", -4.5), ("c", -12.0)])
+    out = mem.recall_v3("q")
+    assert [f["value"] for f in out["ranked"]] == [
+        "allergic to peanuts", "lumen health"]
+
+
+def test_the_first_answer_is_never_cut(monkeypatch, mem):
+    """The re-rank may put a lower RAW score first; the cut is relative to
+    the best raw score but never removes the fact the re-rank chose."""
+    monkeypatch.delenv("RG_RECALL_MARGIN", raising=False)
+    monkeypatch.setenv("RG_SUBJECT_RERANK", "0")
+    _stub(monkeypatch, mem, [("a", -9.0), ("b", 2.0)])
+    out = mem.recall_v3("q", min_score=-20)
+    assert out["ranked"][0]["value"] == "allergic to peanuts"
+
+
+def test_the_margin_can_be_switched_off(monkeypatch, mem):
+    monkeypatch.setenv("RG_RECALL_MARGIN", "-1")
+    _stub(monkeypatch, mem, [("a", 5.0), ("b", -7.0), ("c", -8.0)])
+    assert len(mem.recall_v3("q")["ranked"]) == 3

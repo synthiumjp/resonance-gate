@@ -42,13 +42,18 @@ from wire import WireGraph
 # UNCONFIRMED lines beside them -- the rules described one tier and the block
 # showed two. Every line now states its own standing, and the rules say what
 # each standing means rather than asserting one for all of them.
-_RULES = ("[MEMORY RULES] Every line above is a stored fact from the user's own "
-          "history, never an inference. A line with a mention count is "
-          "CORROBORATED (the user said it more than once). A line marked "
-          "UNCONFIRMED was seen once and is not established -- you may use it, "
-          "but do not state it back as settled; if it matters, ask the user to "
-          "confirm it. Anything about the user NOT listed here is UNKNOWN to "
-          "you: say you don't know rather than guessing.")
+# 2026-10-02: rewritten after a new-user install test. The old rules told the
+# agent to treat every single-mention fact as UNCONFIRMED and to "ask the user
+# to confirm it" -- and since people state facts about themselves once, that
+# was nearly every line: an assistant that keeps asking "can you confirm you're
+# a nurse?" about something the user just said. A first-hand statement is good
+# evidence; what an agent actually needs is the user's words, how recent they
+# are, and whether they have since been replaced.
+_RULES = ("[MEMORY RULES] Each line is something the user told you: a short "
+          "summary, then their exact words in quotes, and when. Lines marked "
+          "(no longer true) were replaced by something they said later. "
+          "Anything about the user not listed here is UNKNOWN: say you don't "
+          "know rather than guessing.")
 
 
 def _rv3():
@@ -246,6 +251,10 @@ def _strip_owner(query, owner, extra_names=()):
 # more gracefully than one tuned one.
 DENSE_GROUND = 0.62
 
+# 2026-10-02: recall returns facts within this many raw cross-encoder points
+# of the best one (pilot value, see recall_v3). Negative disables the cut.
+RECALL_MARGIN = 4.0
+
 # ---------------------------------------------------------------------------
 # THE GATES (e280). A refusal is an EMPTY RESULT SET, not a model being
 # humble: every abstention on the v3 read path is decided by one of these
@@ -277,23 +286,32 @@ def _attach_sources(g, sources):
 
 
 def _render_fact(f, max_quote=200):
-    """One context-block line body: the proposition, then the sentence it was
-    read from, verbatim.
+    """One context-block line body: summary, then the evidence in brackets.
 
-    2026-10-02. The proposition is a REWRITE of the user's words (third
-    person, owner's name substituted, clause extracted) and every inversion
-    class fixed since e240 lived in that rewrite -- a negation lost in
-    rendering, a pronoun bound to the wrong antecedent, "neither ... nor" left
-    in the noun phrase. The quote is what was actually said, so a reader
-    holding both can never be told the opposite. RG_CONTEXT_QUOTES=0 renders
-    the proposition alone."""
+        Alex Reyes works at Acme  ["I work at Acme as a backend engineer." · 2026-10-02]
+        (no longer true) Alex Reyes is a vegetarian  ["I'm vegetarian." · said 2x · 2026-09-01]
+
+    2026-10-02. The summary is a REWRITE of the user's words (third person,
+    owner's name substituted, clause extracted) and every inversion class
+    fixed since e240 lived in that rewrite -- a negation lost in rendering, a
+    pronoun bound to the wrong antecedent, "neither ... nor" left in the noun
+    phrase. The quote is what was actually said, so a reader holding both can
+    never be told the opposite. RG_CONTEXT_QUOTES=0 omits the quote."""
     prop = f.get("text") or f"{f['attribute']}: {f['value']}"
+    if f.get("current") is False:
+        prop = "(no longer true) " + prop
+    ev = []
     said = (f.get("said") or "").strip()
-    if not said or os.environ.get("RG_CONTEXT_QUOTES") == "0":
-        return prop
-    if len(said) > max_quote:
-        said = said[:max_quote - 3].rstrip() + "..."
-    return f'{prop}  [said: "{said}"]'
+    if said and os.environ.get("RG_CONTEXT_QUOTES") != "0":
+        if len(said) > max_quote:
+            said = said[:max_quote - 3].rstrip() + "..."
+        ev.append(f'"{said}"')
+    if (f.get("mentions") or 0) > 1:
+        ev.append(f"said {f['mentions']}x")
+    recs = f.get("receipts") or []
+    if recs and recs[0].get("date"):
+        ev.append(str(recs[0]["date"]))
+    return f"{prop}  [{' · '.join(ev)}]" if ev else prop
 
 
 def gate_report():
@@ -596,6 +614,21 @@ class Memory:
                 unconfirmed.append(f)
         if not facts:
             return self._abstain(query, idx, gate="no-renderable")
+        # 2026-10-02: RETURN WHAT ANSWERS, NOT THE WHOLE POOL. A fresh user
+        # with eight facts got all eight back for every question (new-user
+        # install test) and the agent had to pick. Keep the first fact, then
+        # only facts whose raw score is within RG_RECALL_MARGIN of the best:
+        # a confident answer leads the rest by 6-15 points and comes back
+        # alone; an uncertain one keeps its neighbours. PILOT VALUE: 4.0 was
+        # chosen on the 26 dogfood questions, where the right answer sat at
+        # most 3.42 below the top -- re-check on held-out probes before
+        # trusting it, exactly as FLOOR_V3 should have been.
+        _margin = float(os.environ.get("RG_RECALL_MARGIN", RECALL_MARGIN))
+        if _margin >= 0 and len(facts) > 1:
+            _best = max(f["score"] for f in facts)
+            facts = facts[:1] + [f for f in facts[1:]
+                                 if f["score"] >= _best - _margin]
+            unconfirmed = [f for f in unconfirmed if f in facts]
         return {"found": True, "abstain": False, "query": query,
                 "asserted": [f for f in facts if f not in unconfirmed],
                 "ranked": facts, "wired": self._wired_v3(kept),
@@ -737,7 +770,12 @@ class Memory:
 
     def profile(self, top=40):
         """The corroborated profile, most-evidenced first. Receipted."""
-        nodes = sorted(self.g.nodes.values(), key=lambda d: -d["n_mentions"])
+        # review 2026-09-05 A4: this sorted by mentions alone, so a fact the
+        # user had since replaced rendered FIRST, as current. Superseded facts
+        # now sort last (and render "(no longer true)").
+        nodes = sorted(self.g.nodes.values(),
+                       key=lambda d: (d.get("current") is False,
+                                      -d["n_mentions"]))
         return [self._fact(nd) for nd in nodes[:top]]
 
     def conflicts(self):
@@ -889,21 +927,18 @@ class Memory:
         lines = []
         if query is None:
             for f in self.profile(top=max_facts):
-                prop = _render_fact(f)
-                lines.append(f"- {prop}  (x{f['mentions']} mentions)")
+                lines.append(f"- {_render_fact(f)}")
             n_corr = len(lines)
             for f in self.provisional_profile(top=max_facts - len(lines)):
-                prop = _render_fact(f)
-                lines.append(f"- UNCONFIRMED (seen once): {prop}")
-            head = ("[MEMORY: profile of the user]" if len(lines) > n_corr
-                    else "[MEMORY: corroborated profile of the user]")
+                lines.append(f"- {_render_fact(f)}")
+            head = "[MEMORY: what the user has told you]"
             if not lines:
                 return ("[MEMORY] Nothing is stored about the user yet. Treat "
                         "every detail about them as UNKNOWN: say so rather "
                         "than guessing.\n" + _RULES)
         else:
             r = self._recall_for_context(query)
-            head = f"[MEMORY: stored facts relevant to the current message]"
+            head = "[MEMORY: what the user has told you about this]"
             if not r["found"]:
                 return ("[MEMORY] Nothing stored matches this topic. The user's "
                         "details on this are UNKNOWN: say so rather than "
@@ -912,23 +947,15 @@ class Memory:
                 # v3 path: rank order is the evidence order, so it is kept.
                 # The tier still shows on every line.
                 for f in r["ranked"][:max_facts]:
-                    prop = _render_fact(f)
-                    if f.get("status") == "unconfirmed-single-mention":
-                        lines.append(f"- UNCONFIRMED (seen once): {prop}")
-                    else:
-                        lines.append(f"- {prop}  (x{f['mentions']} mentions)")
+                    lines.append(f"- {_render_fact(f)}")
             else:
                 for f in r["asserted"][:max_facts]:
-                    prop = _render_fact(f)
-                    lines.append(f"- {prop}  (x{f['mentions']} mentions)")
+                    lines.append(f"- {_render_fact(f)}")
                 for w in r["wired"][:max_facts - len(lines)]:
                     f = w["fact"]
-                    prop = _render_fact(f)
-                    lines.append(f"- (linked) {prop}  "
-                                 f"(x{f['mentions']}, co-occurs with the above)")
+                    lines.append(f"- (linked) {_render_fact(f)}")
                 for f in r["unconfirmed"][:max(0, max_facts - len(lines))]:
-                    prop = _render_fact(f)
-                    lines.append(f"- UNCONFIRMED (seen once): {prop}")
+                    lines.append(f"- {_render_fact(f)}")
         block = head + "\n" + "\n".join(lines)
         cf = [c for c in self.conflicts()
               if query is None or any(t in c["attribute"]
@@ -959,5 +986,6 @@ class Memory:
         if top <= 0:
             return []
         nodes = sorted(self.g.provisional.values(),
-                       key=lambda d: -d["n_mentions"])
+                       key=lambda d: (d.get("current") is False,
+                                      -d["n_mentions"]))
         return [self._fact(nd, provisional=True) for nd in nodes[:top]]

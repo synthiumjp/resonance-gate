@@ -122,22 +122,22 @@ def test_hearsay_absent_from_context_block():
 def test_context_block_is_verbatim_and_rule_bearing():
     m = _memory()
     b = m.context_block(query="melbourne")
-    assert "location: melbourne" in b and "x41" in b
+    assert "location: melbourne" in b and "said 41x" in b
     assert "UNKNOWN" in b and "don't know" in b  # the do-not-invent rule
     # abstain -> explicit do-not-invent block, never silence
     b2 = m.context_block(query="favourite colour")
     assert "Nothing stored matches" in b2 and "UNKNOWN" in b2
-    # unconfirmed singles are labeled in the block
+    # a single mention renders WITHOUT a repeat count (2026-10-02 contract)
     b3 = m.context_block(query="penicillin")
-    assert "UNCONFIRMED (seen once)" in b3
+    assert "penicillin" in b3 and "said " not in b3.split("[MEMORY RULES]")[0]
     # profile block. e261: the header claims "corroborated" ONLY when the
     # block is corroborated-only; this fixture has provisional facts too, and
     # they are now rendered (labeled) instead of being dropped, so the header
     # is the broader one and the single-mention facts must be present.
     b4 = m.context_block()
-    assert b4.startswith("[MEMORY: profile of the user]")
+    assert b4.startswith("[MEMORY: what the user has told you]")
     assert "location: melbourne" in b4
-    assert "UNCONFIRMED (seen once)" in b4
+    assert "penicillin" in b4      # single-mention facts are rendered too
 
 
 def test_conflicts_and_clarification():

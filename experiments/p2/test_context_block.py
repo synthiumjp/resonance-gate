@@ -44,18 +44,22 @@ def test_single_mention_facts_reach_the_block(mem):
     assert "backend engineer" in block
 
 
-def test_they_are_labeled_unconfirmed_not_passed_off_as_corroborated(mem):
+def test_a_single_mention_is_not_dressed_up_as_repeated(mem):
+    """2026-10-02 contract: no UNCONFIRMED nag on every line (a first-hand
+    statement is good evidence), but a fact said once must never carry a
+    repeat count either."""
     block = mem.context_block()
     for line in block.splitlines():
         if "Lumen Health" in line:
-            assert line.startswith("- UNCONFIRMED (seen once):"), line
-            assert "mentions" not in line
+            assert "UNCONFIRMED" not in line, line
+            assert "said " not in line and "mentions" not in line, line
 
 
-def test_corroborated_facts_come_first_and_keep_their_count(mem):
+def test_repeated_facts_come_first_and_keep_their_count(mem):
     lines = [l for l in mem.context_block().splitlines() if l.startswith("- ")]
-    assert lines[0] == "- Alex is allergic to peanuts  (x2 mentions)"
-    assert all("UNCONFIRMED" in l for l in lines[1:])
+    assert lines[0].startswith("- Alex is allergic to peanuts  [")
+    assert "said 2x" in lines[0]
+    assert all("said " not in l for l in lines[1:])
 
 
 def test_the_budget_covers_both_tiers(mem):
@@ -64,12 +68,8 @@ def test_the_budget_covers_both_tiers(mem):
     assert len(lines) == 2
 
 
-def test_the_header_says_corroborated_only_when_that_is_true(mem):
-    assert mem.context_block().startswith("[MEMORY: profile of the user]")
-    corr_only = MA.Memory(_FakeGraph(dict(mem.g.nodes), {}), {})
-    corr_only.conflicts = lambda: []
-    assert corr_only.context_block().startswith(
-        "[MEMORY: corroborated profile of the user]")
+def test_the_header_says_what_the_lines_are(mem):
+    assert mem.context_block().startswith("[MEMORY: what the user has told you]")
 
 
 def test_an_empty_store_says_so_and_still_carries_the_rules(mem):
@@ -91,10 +91,13 @@ def test_provisional_profile_is_ordered_and_bounded(mem):
     assert mem.provisional_profile(top=0) == []
 
 
-def test_the_rules_no_longer_claim_every_line_is_corroborated(mem):
-    """The old text asserted one tier for a block that renders two."""
-    assert "The facts above are corroborated" not in mem.context_block()
-    assert "CORROBORATED" in MA._RULES and "UNCONFIRMED" in MA._RULES
+def test_the_rules_keep_the_do_not_invent_instruction_and_drop_the_nag(mem):
+    """2026-10-02: the old rules told the agent to ask the user to confirm
+    every single-mention fact -- nearly every fact, so it nagged. What must
+    survive any rewrite is the instruction not to invent."""
+    assert "UNKNOWN" in MA._RULES and "don't know" in MA._RULES
+    assert "confirm" not in MA._RULES
+    assert "(no longer true)" in MA._RULES
 
 
 # ---- 2026-10-02: the context block quotes what was actually said ----------
@@ -104,16 +107,28 @@ def test_a_fact_renders_with_its_verbatim_quote(monkeypatch):
     monkeypatch.delenv("RG_CONTEXT_QUOTES", raising=False)
     f = {"attribute": "work_at", "value": "acme",
          "text": "Alex Reyes works at Acme",
-         "said": "I work at Acme as a backend engineer."}
+         "said": "I work at Acme as a backend engineer.",
+         "mentions": 1, "receipts": [{"date": "2026-10-02"}]}
     assert MA._render_fact(f) == ('Alex Reyes works at Acme  '
-                                  '[said: "I work at Acme as a backend engineer."]')
+                                  '["I work at Acme as a backend engineer." · 2026-10-02]')
+
+
+def test_a_superseded_fact_says_so(monkeypatch):
+    """review 2026-09-05 A4: a fact the user had replaced rendered as current."""
+    import memory_api as MA
+    monkeypatch.delenv("RG_CONTEXT_QUOTES", raising=False)
+    f = {"attribute": "a", "value": "v", "text": "Alex works at Acme",
+         "current": False, "mentions": 2, "said": "I work at Acme.",
+         "receipts": [{"date": "2026-09-01"}]}
+    assert MA._render_fact(f) == ('(no longer true) Alex works at Acme  '
+                                  '["I work at Acme." · said 2x · 2026-09-01]')
 
 
 def test_the_quote_can_be_switched_off(monkeypatch):
     import memory_api as MA
     monkeypatch.setenv("RG_CONTEXT_QUOTES", "0")
     f = {"attribute": "a", "value": "v", "text": "T", "said": "S"}
-    assert MA._render_fact(f) == "T"
+    assert MA._render_fact(f) == "T"   # no quote, and no date/count to show
 
 
 def test_a_fact_without_a_source_renders_as_before(monkeypatch):

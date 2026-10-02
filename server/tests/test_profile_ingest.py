@@ -147,7 +147,7 @@ def test_the_context_block_quotes_the_users_own_sentence(pm):
                         "content": "Neither my wife nor I like horror movies."}],
                       conversation_id="q1", owner_name="Ada Byron")
     block = pm.profile_context()["block"]
-    assert '[said: "Neither my wife nor I like horror movies."]' in block
+    assert '"Neither my wife nor I like horror movies."' in block
     out = pm.profile_recall("Do I like horror movies?")
     said = [f.get("said") for f in out.get("ranked") or out.get("unconfirmed") or []]
     assert "Neither my wife nor I like horror movies." in said
