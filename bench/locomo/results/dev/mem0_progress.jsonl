@@ -1,0 +1,12 @@
+{"conv": 0, "speaker": "Caroline", "session": 1, "messages": 18, "model_calls": 2, "seconds": 20.834181547164917}
+{"conv": 0, "speaker": "Caroline", "session": 2, "messages": 17, "model_calls": 2, "seconds": 26.582021951675415}
+{"conv": 0, "speaker": "Caroline", "session": 3, "messages": 23, "model_calls": 2, "seconds": 32.39214539527893}
+{"conv": 0, "speaker": "Melanie", "session": 1, "messages": 18, "model_calls": 2, "seconds": 15.628933191299438}
+{"conv": 0, "speaker": "Melanie", "session": 2, "messages": 17, "model_calls": 2, "seconds": 29.929473161697388}
+{"conv": 0, "speaker": "Melanie", "session": 3, "messages": 23, "model_calls": 2, "seconds": 46.80018949508667}
+{"conv": 1, "speaker": "Jon", "session": 1, "messages": 28, "model_calls": 2, "seconds": 48.41597366333008}
+{"conv": 1, "speaker": "Jon", "session": 2, "messages": 16, "model_calls": 2, "seconds": 28.90950894355774}
+{"conv": 1, "speaker": "Jon", "session": 3, "messages": 14, "model_calls": 2, "seconds": 26.002568244934082}
+{"conv": 1, "speaker": "Gina", "session": 1, "messages": 28, "model_calls": 2, "seconds": 36.41707372665405}
+{"conv": 1, "speaker": "Gina", "session": 2, "messages": 16, "model_calls": 2, "seconds": 27.74032950401306}
+{"conv": 1, "speaker": "Gina", "session": 3, "messages": 14, "model_calls": 2, "seconds": 29.121726274490356}

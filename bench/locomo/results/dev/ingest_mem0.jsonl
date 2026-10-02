@@ -1,0 +1,4 @@
+{"speaker": "Caroline", "messages": 58, "model_calls": 6, "seconds": 79.80834889411926, "conv": 0, "system": "mem0"}
+{"speaker": "Melanie", "messages": 58, "model_calls": 6, "seconds": 92.3585958480835, "conv": 0, "system": "mem0"}
+{"speaker": "Jon", "messages": 58, "model_calls": 6, "seconds": 103.3280508518219, "conv": 1, "system": "mem0"}
+{"speaker": "Gina", "messages": 58, "model_calls": 6, "seconds": 93.27912950515747, "conv": 1, "system": "mem0"}

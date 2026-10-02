@@ -179,12 +179,28 @@ class Mem0:
         if base:
             create = client.chat.completions.create
 
-            def nothink(*a, **k):   # qwen3 thinking off; no Mem0 prompt text is changed
+            def nothink(*a, **k):
+                # qwen3 thinking off, no Mem0 prompt text changed. "/no_think" goes at the
+                # START of the system message (at the end of the user message the model
+                # ignores it). response_format=json_object is dropped: llama_cpp turns it
+                # into a JSON grammar that forbids the empty <think></think> block the model
+                # writes first, and the model then answers "{}" for every session. The empty
+                # think block is stripped from the reply before Mem0 parses it.
                 ms = [dict(x) for x in k.get("messages", [])]
-                if ms:
-                    ms[-1]["content"] = str(ms[-1]["content"]) + " /no_think"
+                if ms and ms[0].get("role") == "system":
+                    ms[0]["content"] = "/no_think\n" + str(ms[0]["content"])
+                elif ms:
+                    ms[0]["content"] = "/no_think\n" + str(ms[0]["content"])
                 k["messages"] = ms
-                return create(*a, **k)
+                k.pop("response_format", None)
+                resp = create(*a, **k)
+                try:
+                    import re as _re
+                    msg = resp.choices[0].message
+                    msg.content = _re.sub(r"<think>.*?</think>", "", msg.content or "", flags=_re.S).strip()
+                except Exception:   # noqa: BLE001
+                    pass
+                return resp
             client.chat.completions.create = nothink
         else:
             chat = client.chat
