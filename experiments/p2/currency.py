@@ -657,6 +657,39 @@ def _different(fam, a, b):
     return a != b
 
 
+# 2026-10-02: things said in passing. Research into what users want: "the
+# LLM treating a casual comment made three weeks ago ("I'm eating keto
+# today") as an unshakeable, permanent constraint". A statement tied to the
+# moment, or a mood, is kept and searchable, but it never replaces a lasting
+# fact and it drops out of the session summary after a few days.
+_PASSING_TIME = re.compile(
+    r"\b(today|tonight|this (?:morning|afternoon|evening|week|weekend)|"
+    r"right now|at the moment|for now|atm|for the day)\b", re.I)
+_MOODS = frozenset("""tired exhausted stressed hungry thirsty sick ill bored
+busy anxious sad angry frustrated sleepy hungover annoyed grumpy overwhelmed
+cranky knackered cold hot excited nervous upset""".split())
+_INTENSIFIERS = re.compile(r"^(?:so|really|very|a bit|a little|pretty|kind of|"
+                           r"kinda|super|quite|feeling|absolutely|totally)\s+")
+
+
+def passing(text=None, said=None, attr=None, value=None):
+    """Is this fact tied to the moment it was said?"""
+    if _PASSING_TIME.search(said or text or ""):
+        return True
+    a = (attr or "").lower().split(":")[-1]
+    if a in ("is", "feel", "get") and value:
+        v = value.lower().strip()
+        while True:
+            v2 = _INTENSIFIERS.sub("", v)
+            if v2 == v:
+                break
+            v = v2
+        words = re.findall(r"[a-z]+", v)
+        if words and words[0] in _MOODS and len(words) <= 3:
+            return True
+    return False
+
+
 def mark_state_changes(g, order=None):
     """Mark facts a LATER statement in the same state family replaced.
     Returns [(old_node_id, new_node_id)].
@@ -677,6 +710,10 @@ def mark_state_changes(g, order=None):
         for nid, nd in st.items():
             said = f"{nd.get('text') or ''} {nd.get('source') or ''}"
             additive = bool(_ADDITIVE.search(said.lower()))
+            # "I'm in Sydney this week" does not move anyone to Sydney
+            if passing(nd.get("text"), nd.get("source"), nd.get("attr"),
+                       nd.get("value")):
+                continue
             for fam, key in _families(nd.get("attr"), nd.get("value")):
                 members.setdefault(fam, []).append(
                     (nid, nd, set(key), _latest(nd, order), additive))

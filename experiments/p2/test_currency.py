@@ -430,3 +430,22 @@ def test_a_role_and_an_employer_from_one_sentence_change_independently():
     g = _G({"a": _n("a", "work_as", "as a nurse at St Vincent's", "c1"),
             "b": _n("b", "is", "a ward manager at St Vincent's now", "c2")})
     assert C.mark_state_changes(g, order=ORDER) == [("a", "b")]
+
+
+@pytest.mark.parametrize("text,said,attr,value,want", [
+    ("Dana Cole is eating keto today", "I'm eating keto today.", "eat", "keto today", True),
+    ("Dana Cole is so tired", "I'm so tired.", "is", "so tired", True),
+    ("Dana Cole is in Sydney this week", "I'm in Sydney this week.", "is", "in sydney this week", True),
+    ("Dana Cole is vegetarian", "I'm vegetarian.", "is", "vegetarian", False),
+    ("Dana Cole is busy with the billing service migration", "I'm busy with the billing service migration.", "is", "busy with the billing service migration", False),
+    ("Dana Cole works at Acme", "I currently work at Acme.", "work_at", "at acme", False),
+])
+def test_a_remark_tied_to_its_moment(text, said, attr, value, want):
+    assert C.passing(text, said, attr, value) is want
+
+
+def test_a_passing_remark_never_replaces_a_lasting_state():
+    g = _G({"a": _n("a", "live_in", "in fitzroy", "c1"),
+            "b": _n("b", "live_in", "in sydney this week", "c2",
+                    source="I live in Sydney this week.")})
+    assert C.mark_state_changes(g, order=ORDER) == []

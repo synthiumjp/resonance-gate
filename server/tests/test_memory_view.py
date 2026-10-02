@@ -98,3 +98,28 @@ def test_a_life_event_replaces_the_state_it_ends(pm, tmp_path):
     gone = md.split("## No longer true")[1].split("##")[0]
     assert "divorced last year" in about and "34" in about
     assert "married" in gone and "33" in gone
+
+
+def test_a_remark_tied_to_its_moment_leaves_the_summary(pm, tmp_path):
+    """Research into what users want (2026-10-02): "I'm eating keto today",
+    said three weeks ago, is not a permanent constraint."""
+    import datetime
+    old = (datetime.date.today() - datetime.timedelta(days=20)).isoformat()
+    pm.profile_ingest([U("I live in Fitzroy."), U("I'm eating keto today."),
+                       U("I'm so tired.")], conversation_id="a",
+                      owner_name="Dana Cole", date=old)
+    pm.profile_ingest([U("I'm in Sydney this week for work.")],
+                      conversation_id="b", owner_name="Dana Cole",
+                      date=datetime.date.today().isoformat())
+    block = pm.profile_context(None)["block"]
+    assert "Fitzroy" in block
+    assert "keto" not in block and "tired" not in block
+    assert "(said in passing) Dana Cole is in Sydney this week" in block
+    # still findable, and labelled
+    hit = [f for f in pm.profile_recall("What diet am I on?")["ranked"]
+           if "keto" in (f.get("text") or "")]
+    assert hit and hit[0]["passing"] is True
+    # and it never replaced where they live
+    md = (tmp_path / "MEMORY.md").read_text()
+    assert "Fitzroy" in md.split("## About you")[1].split("##")[0]
+    assert "keto" in md.split("## Said in passing")[1]

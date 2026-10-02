@@ -114,4 +114,27 @@ def test_the_summary_can_be_turned_off(home, monkeypatch):
     H.session_end({"transcript_path": _transcript(home / "t.jsonl"),
                    "session_id": "abc"}, owner="Dana Cole", sync=True)
     monkeypatch.setenv("SOURCEDRECALL_BRIEFING", "off")
+    out = H.session_start({"source": "startup"}, owner="Dana Cole")
+    assert "hookSpecificOutput" not in out      # nothing for Claude
+    assert "systemMessage" in out               # the user still sees what was saved
+    monkeypatch.setenv("SOURCEDRECALL_NOTICE", "off")
     assert H.session_start({"source": "startup"}, owner="Dana Cole") is None
+
+
+def test_the_user_is_told_what_was_saved_once(home):
+    """Research into what users want (2026-10-02): visible notices, not
+    silent background harvesting."""
+    H.session_end({"transcript_path": _transcript(home / "t.jsonl"),
+                   "session_id": "abc"}, owner="Dana Cole", sync=True)
+    first = H.session_start({"source": "startup"}, owner="Dana Cole")
+    msg = first["systemMessage"]
+    assert msg.startswith("sourcedrecall saved ") and "I live in Fitzroy" in msg
+    assert "MEMORY.md" in msg and "forget" in msg
+    again = H.session_start({"source": "startup"}, owner="Dana Cole")
+    assert "systemMessage" not in again         # already reported
+
+
+def test_a_long_list_is_cut_short():
+    new = [{"said": f"I like thing {i}."} for i in range(5)]
+    msg = H.saved_notice(new)
+    assert "and 2 more" in msg and "thing 3" not in msg

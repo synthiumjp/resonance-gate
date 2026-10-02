@@ -165,7 +165,10 @@ def session_start(event, owner=None, max_facts=15):
     # users want, 2026-10-02: "I prefer claude's opt in implementation").
     # SOURCEDRECALL_BRIEFING=off: no summary at session start; the tools still
     # work, and sessions are still stored.
-    if os.environ.get("SOURCEDRECALL_BRIEFING", "on").lower() in ("off", "0", "false", "no"):
+    off = ("off", "0", "false", "no")
+    briefing = os.environ.get("SOURCEDRECALL_BRIEFING", "on").lower() not in off
+    notice = os.environ.get("SOURCEDRECALL_NOTICE", "on").lower() not in off
+    if not (briefing or notice):
         return None
     # The briefing needs no retrieval model; skip the NLI conflict model so a
     # session starts in well under a second.
@@ -174,11 +177,37 @@ def session_start(event, owner=None, max_facts=15):
     st = pm.profile_status()
     if not (st.get("asserted") or st.get("provisional")):
         return None
-    from sourcedrecall.paths import current_scope
-    block = pm.profile_context(None, max_facts,
-                               scope=current_scope(event.get("cwd")))["block"]
-    return {"hookSpecificOutput": {"hookEventName": "SessionStart",
-                                   "additionalContext": block[:9500]}}
+    out = {}
+    if briefing:
+        from sourcedrecall.paths import current_scope
+        block = pm.profile_context(None, max_facts,
+                                   scope=current_scope(event.get("cwd")))["block"]
+        out["hookSpecificOutput"] = {"hookEventName": "SessionStart",
+                                     "additionalContext": block[:9500]}
+    if notice:
+        msg = saved_notice(pm.profile_news(), pm.memory_file())
+        if msg:
+            out["systemMessage"] = msg
+    return out or None
+
+
+def saved_notice(new, memory_file=None, show=3):
+    """The line shown to the USER (not to Claude) when a session starts:
+    what was stored since they last looked, in their own words."""
+    if not new:
+        return None
+    def words(f):
+        w = " ".join((f.get("said") or f.get("text") or "").split())
+        return f'"{w[:77] + "..." if len(w) > 80 else w}"'
+    n = len(new)
+    head = f"sourcedrecall saved {n} new thing{'s' if n != 1 else ''}: "
+    body = ", ".join(words(f) for f in new[:show])
+    if n > show:
+        body += f" and {n - show} more"
+    tail = ". Ask Claude to forget any of them"
+    if memory_file:
+        tail += f", or see {memory_file}"
+    return head + body + tail + "."
 
 
 def main(argv=None):

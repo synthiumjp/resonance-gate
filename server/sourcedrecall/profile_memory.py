@@ -644,6 +644,38 @@ def _all_facts(mem):
     return out
 
 
+def memory_file():
+    """Where MEMORY.md is written."""
+    return os.path.join(_data_dir(), "MEMORY.md")
+
+
+def profile_news(mark=True):
+    """Facts stored since the last call, newest first, for the "saved"
+    notice at session start (research into what users want, 2026-10-02:
+    visible notices, not silent background harvesting). The ids already
+    reported are kept in <data dir>/seen.json; mark=False only looks."""
+    mem = _ensure_loaded()
+    with _lock:
+        facts = [f for f in _all_facts(mem)
+                 if f["_tier"] != "hearsay" and f.get("current") is not False]
+        path = os.path.join(_data_dir(), "seen.json")
+        try:
+            with open(path, encoding="utf-8") as fh:
+                seen = set(json.load(fh).get("ids", []))
+        except (OSError, ValueError):
+            seen = set()
+        new = [f for f in facts if f["id"] not in seen]
+        if mark and new:
+            tmp = path + ".tmp"
+            with open(tmp, "w", encoding="utf-8") as fh:
+                json.dump({"ids": sorted(seen | {f["id"] for f in facts})}, fh)
+            os.replace(tmp, path)
+
+    def when(f):
+        return (f.get("receipts") or [{}])[0].get("date") or ""
+    return sorted(new, key=when, reverse=True)
+
+
 def _md_line(f):
     quote = (f.get("said") or "").strip()
     date = (f.get("receipts") or [{}])[0].get("date", "")
@@ -676,6 +708,8 @@ def export_markdown(path=None):
         nd = nodes.get(f["id"])
         return mem.project_of(nd) if nd is not None else None
     live = [f for f in facts if f["_tier"] != "hearsay" and f.get("current") is not False]
+    passing = [f for f in live if f.get("passing")]
+    live = [f for f in live if not f.get("passing")]
     by_project = {}
     for f in live:
         pr = _project(f)
@@ -697,6 +731,8 @@ def export_markdown(path=None):
     for proj in sorted(by_project):
         groups.append((f"Project: {os.path.basename(proj) or proj} ({proj})",
                        by_project[proj]))
+    groups.append(("Said in passing (left out of the summary after a few days)",
+                   passing))
     groups.append(("Said by the assistant, never confirmed by you", heard))
     for title, group in groups:
         if not group:
@@ -706,7 +742,7 @@ def export_markdown(path=None):
         lines.append("")
     if not facts:
         lines += ["Nothing stored yet.", ""]
-    path = path or os.path.join(_data_dir(), "MEMORY.md")
+    path = path or memory_file()
     tmp = path + ".tmp"
     with open(tmp, "w", encoding="utf-8") as fh:
         fh.write("\n".join(lines))
