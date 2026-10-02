@@ -182,6 +182,9 @@ def test_the_subject_rerank_promotes_a_subject_position_answer(monkeypatch, mem)
 
 
 def test_the_rerank_can_be_switched_off(monkeypatch, mem):
+    # isolates this mechanism from the 2026-10-02 answerability check,
+    # whose stub texts here do not supply the asked attribute
+    monkeypatch.setenv("RG_ANSWERABILITY", "0")
     nodes = {"x": _node("x", "work_on", "billing service",
                         "Alex works on the billing service"),
              "y": _node("y", "is", "written in go",
@@ -230,6 +233,9 @@ def test_a_high_scoring_but_ungrounded_hit_abstains(monkeypatch, mem):
 def test_dense_grounding_alone_is_enough(monkeypatch, mem):
     """Paraphrase: "What is my role at work?" shares no content word with "is
     a backend engineer there", and lexical-only grounding rejected it."""
+    # isolates this mechanism from the 2026-10-02 answerability check,
+    # whose stub texts here do not supply the asked attribute
+    monkeypatch.setenv("RG_ANSWERABILITY", "0")
     _stub(monkeypatch, mem, [("a", -1.0)])
     monkeypatch.setattr(MA, "_grounded", lambda *a, **k: False)
     monkeypatch.setattr(MA, "_dense_grounded", lambda *a, **k: True)
@@ -249,6 +255,9 @@ def test_a_grounded_hit_is_returned(monkeypatch, mem):
 
 
 def test_grounding_can_be_switched_off(monkeypatch, mem):
+    # isolates this mechanism from the 2026-10-02 answerability check,
+    # whose stub texts here do not supply the asked attribute
+    monkeypatch.setenv("RG_ANSWERABILITY", "0")
     _stub(monkeypatch, mem, [("a", 5.0)])
     monkeypatch.setenv("RG_GROUNDING", "0")
     assert mem.recall_v3("What is my favourite film?")["abstain"] is False
@@ -405,3 +414,38 @@ def test_the_margin_can_be_switched_off(monkeypatch, mem):
     monkeypatch.setenv("RG_RECALL_MARGIN", "-1")
     _stub(monkeypatch, mem, [("a", 5.0), ("b", -7.0), ("c", -8.0)])
     assert len(mem.recall_v3("q")["ranked"]) == 3
+
+
+# ---- 2026-10-02: answerability -- a fact about the entity is not an answer
+
+def test_a_known_entity_with_an_unknown_attribute_is_refused(monkeypatch, mem):
+    monkeypatch.delenv("RG_ANSWERABILITY", raising=False)
+    monkeypatch.setitem(mem.g.nodes, "a", {**mem.g.nodes["a"],
+                                          "text": "Alex's partner Sam works from home"})
+    _stub(monkeypatch, mem, [("a", 5.0)])
+    out = mem.recall_v3("What is my partner's job?")
+    assert out["abstain"] is True and out["gate"] == "attribute"
+    assert [f["text"] for f in out["known_about"]] == ["Alex's partner Sam works from home"]
+
+
+def test_a_fact_that_supplies_the_attribute_answers(monkeypatch, mem):
+    monkeypatch.delenv("RG_ANSWERABILITY", raising=False)
+    monkeypatch.setitem(mem.g.nodes, "a", {**mem.g.nodes["a"],
+                                          "text": "Alex's partner Lee is a chef"})
+    _stub(monkeypatch, mem, [("a", 5.0)])
+    assert mem.recall_v3("What is my partner's job?")["abstain"] is False
+
+
+def test_questions_without_a_checkable_attribute_are_left_alone(monkeypatch, mem):
+    import answerability as AN
+    for q in ("Do I own any pets?", "What do I eat?", "Who is my manager?",
+              "What is my car like?"):
+        assert AN.read_question(q) is None, q
+
+
+def test_the_entity_must_be_the_one_asked_about():
+    """'scooter is blue' must not answer 'What colour is my car?'"""
+    import answerability as AN
+    qr = AN.read_question("What colour is my car?")
+    assert not AN.answers({"text": "Alex's scooter is blue"}, qr)
+    assert AN.answers({"text": "Alex's car is blue"}, qr)

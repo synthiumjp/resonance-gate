@@ -26,6 +26,7 @@ a missing fact is a bad answer, an invented one is a broken promise.
     python tools/dogfood.py --show-store    # dump what was stored
 """
 import argparse
+import re
 import json
 import os
 import shutil
@@ -498,6 +499,30 @@ def main():
             if not out.get("abstain") and got:
                 partial_answered.append((q, got[0][:58]))
 
+        # CONTEXT-DEPENDENCE DIAGNOSTIC (2026-10-02; JP, "Repetition Without
+        # Exclusivity": if an apparent effect survives removal of the
+        # relevant context, it is not that effect). A refusal on "What is my
+        # partner's job?" only counts as attribute-aware if the SAME memory
+        # answers once the attribute is removed ("What do I know about my
+        # partner?"). Otherwise it is refusing the entity, not the attribute.
+        def _ablated(q, ent):
+            e = ent.lower()
+            own = "my " if re.search(rf"\bmy\s+{re.escape(e)}", q.lower()) else ""
+            return f"What do I know about {own}{ent}?"
+        attr_decides = []
+        for q, ent, attr in PARTIAL_KNOWLEDGE:
+            refused = pmem.profile_recall(q).get("abstain")
+            abl = pmem.profile_recall(_ablated(q, ent))
+            if refused and not abl.get("abstain") and facts_of(abl):
+                attr_decides.append(q)
+
+        # HELD-OUT (written before the answerability rule; read, never tuned)
+        ho_ok = sum(1 for q, needle in HELDOUT_ANSWERABLE.items()
+                    if any(needle.lower() in g.lower()
+                           for g in facts_of(pmem.profile_recall(q))))
+        ho_partial = sum(1 for q, ent, attr in HELDOUT_PARTIAL
+                         if pmem.profile_recall(q).get("abstain"))
+
         # ---- PURITY
         impure = []
         for frag, who in MUST_NOT_ASSERT:
@@ -548,7 +573,10 @@ def main():
         print(f"  ABSTENTION  {abst}/{len(UNSEEN) + len(UNSEEN_NAMED)} honest on never-mentioned topics "
               f"({len(UNSEEN_NAMED)} name the owner)")
         print(f"  PARTIAL     {len(PARTIAL_KNOWLEDGE) - len(partial_answered)}/{len(PARTIAL_KNOWLEDGE)} "
-              f"abstain on a known topic's UNKNOWN attribute   (known limit, not gated)")
+              f"abstain on a known topic's UNKNOWN attribute   "
+              f"{len(attr_decides)}/{len(PARTIAL_KNOWLEDGE)} still answer with the attribute removed")
+        print(f"  HELD-OUT    {ho_ok}/{len(HELDOUT_ANSWERABLE)} answerable found   "
+              f"{ho_partial}/{len(HELDOUT_PARTIAL)} unknown-attribute refused   (never tuned on)")
         if gates:
             # e280: a refusal is an empty result set decided by a named gate.
             # Which gate does the work is the read-path refusal matrix.

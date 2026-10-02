@@ -269,6 +269,7 @@ GATES = (
     "score-floor",       # best raw cross-encoder score under FLOOR_V3 (off by default)
     "grounding",         # no retrieved record shares a content word, and none is dense-close
     "no-renderable",     # candidates existed but none resolved to a stored node
+    "attribute",         # the entity is known, but no fact supplies what was asked
 )
 GATE_COUNTS = {g: 0 for g in GATES}
 
@@ -646,6 +647,25 @@ class Memory:
                 unconfirmed.append(f)
         if not facts:
             return self._abstain(query, idx, gate="no-renderable")
+        # 2026-10-02: ANSWERABILITY, separate from relevance (answerability.py).
+        # A fact about the right entity is not an answer about the asked
+        # attribute: "What is my partner's job?" must not come back as
+        # "partner Sam works from home". Answering facts go first; if none
+        # answers, refuse and say what IS known about the entity.
+        if os.environ.get("RG_ANSWERABILITY") != "0":
+            import answerability as _AN
+            qr = _AN.read_question(query)
+            if qr:
+                ok = [f for f in facts if _AN.answers(f, qr)]
+                if not ok:
+                    known = [f for f in facts
+                             if qr[0] and _AN._mentions(
+                                 f"{f.get('text') or ''} {f.get('said') or ''}",
+                                 qr[0])]
+                    return self._abstain(query, idx, gate="attribute",
+                                         known_about=known, asked=qr)
+                facts = ok + [f for f in facts if f not in ok]
+                unconfirmed = [f for f in facts if f in unconfirmed]
         return {"found": True, "abstain": False, "query": query,
                 "asserted": [f for f in facts if f not in unconfirmed],
                 "ranked": facts, "wired": self._wired_v3(kept),
@@ -723,7 +743,8 @@ class Memory:
             out.append(self._fact(nd))
         return out
 
-    def _abstain(self, query, idx=None, gate=None):
+    def _abstain(self, query, idx=None, gate=None, known_about=None,
+                 asked=None):
         """e277: HEARSAY-ONLY IS NOT ABSTENTION.
 
         e280: `gate` names the predicate that refused (see GATES). The
@@ -750,9 +771,17 @@ class Memory:
                              "user, never asserted by the user")}
         if gate is not None:
             GATE_COUNTS[gate] = GATE_COUNTS.get(gate, 0) + 1
-        return {"found": False, "abstain": True, "query": query,
-                "gate": gate,
-                "answer": "no stored fact matches -- never seen"}
+        out = {"found": False, "abstain": True, "query": query,
+               "gate": gate,
+               "answer": "no stored fact matches -- never seen"}
+        if gate == "attribute":
+            ent, att = asked or (None, None)
+            out["answer"] = (f"nothing stored says {att}"
+                             + (f" for {ent}" if ent else ""))
+            # what IS known, so an agent can say "I know Sam works from home,
+            # but not their salary" instead of only "I don't know"
+            out["known_about"] = list(known_about or [])
+        return out
 
     def _index_v3(self):
         """Cache one IndexV3 per memory state. Invalidated by node count --
@@ -956,6 +985,11 @@ class Memory:
         else:
             r = self._recall_for_context(query)
             head = "[MEMORY: what the user has told you about this]"
+            if not r["found"] and r.get("known_about"):
+                lines = [f"- {_render_fact(f)}" for f in r["known_about"][:max_facts]]
+                return ("[MEMORY] Nothing stored answers this question ("
+                        + r["answer"] + "). Related things the user has told "
+                        "you:\n" + "\n".join(lines) + "\n" + _RULES)
             if not r["found"]:
                 return ("[MEMORY] Nothing stored matches this topic. The user's "
                         "details on this are UNKNOWN: say so rather than "

@@ -27,6 +27,9 @@ LOG="$DATA/install.log"
 LOCK="$DATA/install.lock"
 OWNER="${SOURCEDRECALL_OWNER:-${CLAUDE_PLUGIN_OPTION_OWNER:-}}"
 export SOURCEDRECALL_OWNER="$OWNER"
+# Before anything redirects into it: `install` on a fresh machine failed
+# here because the log's directory did not exist yet.
+mkdir -p "$DATA" || { echo "sourcedrecall: cannot create $DATA" >&2; exit 1; }
 
 installed() {
   [ -x "$VENV/bin/sourcedrecall" ] && [ -f "$STAMP" ] && [ "$(cat "$STAMP")" = "$REF" ]
