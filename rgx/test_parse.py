@@ -1221,3 +1221,36 @@ def test_a_negated_life_event_keeps_its_tense(checked, turn, want):
 def test_a_life_event_under_whether_or_a_supposition_is_not_stored(checked, turn):
     assert not any(p.endswith(("retired", "quit", "retires", "retires at 60"))
                    for p in texts(checked, turn))
+
+
+# ---- false-memory bench, dev cases (2026-10-02) ---------------------------
+
+@pytest.mark.parametrize("turn,want", [
+    ("They promoted me to senior analyst on Friday!",
+     "Martin Mark was promoted to senior analyst on Friday"),
+    ("They laid me off last month.", "Martin Mark was laid off last month"),
+])
+def test_an_unnamed_employer_acting_on_the_user(ex, turn, want):
+    assert want in texts(ex, turn)
+
+
+@pytest.mark.parametrize("turn", ["They promoted my sister.",
+                                  "They gave me a raise."])
+def test_they_acting_on_someone_else_or_another_verb_is_left_alone(ex, turn):
+    assert not any(p.startswith("Martin Mark was") for p in texts(ex, turn))
+
+
+def test_a_name_introduced_with_a_relation_is_kept_later():
+    from rgx import Extractor
+    e = Extractor(owner_name="Dana Cole")
+    e.reset_world()
+    e.extract_turn("My dog Biscuit needs a walk twice a day.", role="user")
+    out = [r.text for r in e.extract_turn("Biscuit died on Tuesday.", role="user")]
+    assert "Biscuit died on Tuesday" in out
+    e.reset_world()
+    assert e.extract_turn("Biscuit died on Tuesday.", role="user") == []
+
+
+def test_or_meaning_otherwise_still_asserts_the_first_clause(ex):
+    out = texts(ex, "My dog Biscuit needs a walk twice a day or she goes feral.")
+    assert any("needs a walk twice a day" in p for p in out), out

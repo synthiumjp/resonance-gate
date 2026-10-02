@@ -7,13 +7,15 @@ only when it opens the conversation or answers a question put to the user
 that mentions nobody else ("What do you do?"). After "What does your sister
 do?", "How's the family?" or a draft about someone else it is skipped.
 
-Two shapes only, both checked on the parse:
+Three shapes only, all checked on the parse:
   * an -ing verb with a noun argument: "Loving the new job", "Training for
     a marathon". "Looking good", "Getting there", "Working on it" have no
     noun argument (or only a pronoun) and are left alone;
-  * an adjective from a closed list of states: "Vegetarian now", "Pregnant!".
-The fragment is parsed as "I'm <fragment>"; the record keeps the original
-sentence as its source.
+  * an adjective from a closed list of states: "Vegetarian now", "Pregnant!";
+  * a past-tense verb with a noun argument: "Sold the Corolla on Saturday",
+    "Cancelled the gym membership". "Sell the Corolla" is an imperative.
+The fragment is parsed as "I'm <fragment>" ("I <fragment>" for the past
+tense); the record keeps the original sentence as its source.
 """
 import os
 import re
@@ -55,58 +57,102 @@ _DENIAL = re.compile(r"^\W*(no\b|nope|not\b|nah|just kidding|kidding|jk\b|"
                      r"joking|lol\b|haha)", re.I)
 
 
+_IRREGULAR_PAST = frozenset("""sold bought got made took left quit lost found
+sent met went gave began broke ran wrote drove had paid built caught chose
+fell flew forgot grew heard kept led lent rode sat slept spent stood swam
+taught told threw won wore""".split())
+
+
 def _candidate(sentence):
+    """-> "ing", "adj", "past" or None, from the first word (after an
+    adverb such as "still" or "finally")."""
     m = _FIRST_WORD.match(sentence)
     if not m:
-        return False
+        return None
     w = m.group(1).lower()
-    return w.endswith("ing") or w in STATE_ADJ
+    if w.endswith("ing"):
+        return "ing"
+    if w in STATE_ADJ:
+        return "adj"
+    if w.endswith("ed") or w in _IRREGULAR_PAST:
+        return "past"
+    return None
 
 
-def rewrite(text, nlp, prev=None):
-    """-> (text to parse, {rewritten sentence: original}) -- unchanged text
-    and an empty map when the turn does not open with an accepted
-    fragment."""
-    if os.environ.get("RG_FRAGMENTS") == "0":
-        return text, {}
-    first = re.split(r"(?<=[.!?])\s+", text.strip(), maxsplit=1)
-    head = first[0]
-    rest = first[1] if len(first) > 1 else ""
-    if not _candidate(head) or not _about_user(prev):
-        return text, {}
-    # "Married? No." is a question; "Pregnant. Just kidding." takes it back;
-    # "Reading: War and Peace" is a heading; "Sending you the file" is about
-    # this conversation, not the user's life.
-    if (head.rstrip().endswith("?") or ":" in head or _DENIAL.match(rest)
+def _accept(head, nlp):
+    """-> the sentence rewritten with "I'm"/"I", or None."""
+    shape = _candidate(head)
+    if not shape:
+        return None
+    # "Married? No." is a question; "Reading: War and Peace" is a heading;
+    # "Sending you the file" is about this conversation, not the user's life.
+    if (head.rstrip().endswith("?") or ":" in head
             or re.search(r"\byou(r)?\b", head, re.I)):
-        return text, {}
-    # A fragment has no finite verb and no subject of its own. "Pregnant
+        return None
+    # A fragment has no subject and no finite verb of its own -- "Pregnant
     # women should avoid sushi", "Married with Children is my favourite
-    # show", "Stealing cars is wrong" all do -- they are sentences.
+    # show", "Stealing cars is wrong" are sentences. A past-tense fragment
+    # ("Sold the Corolla on Saturday") is finite itself: its root is the one
+    # finite verb allowed. An imperative ("Sell the Corolla") is VB, not VBD.
     orig = nlp(head).sentences[0].words
+    oroot = next((w for w in orig if w.deprel == "root"), None)
+    if shape == "past" and (oroot is None or oroot.xpos != "VBD"):
+        return None
     if any(w.deprel.startswith(("nsubj", "csubj", "expl"))
-           or (w.upos in ("VERB", "AUX") and "VerbForm=Fin" in (w.feats or ""))
+           or (w.upos in ("VERB", "AUX") and "VerbForm=Fin" in (w.feats or "")
+               and not (shape == "past" and w is oroot))
            for w in orig):
-        return text, {}
-    new = "I'm " + head[0].lower() + head[1:]
+        return None
+    new = ("I " if shape == "past" else "I'm ") + head[0].lower() + head[1:]
     # Judged on the rewritten sentence: without a subject Stanza often tags
     # the -ing word as a noun ("Nursing at St Vincent's" -> NN root).
     words = nlp(new).sentences[0].words
     root = next((w for w in words if w.deprel == "root"), None)
     if root is None:
-        return text, {}
+        return None
     subj = [w for w in words if w.head == root.id and w.deprel.startswith("nsubj")]
     if len(subj) != 1 or subj[0].text != "I":
-        return text, {}
+        return None
     # "Nursing at St Vincent's, my sister." -- the nurse is the sister
     if any(w.deprel in ("appos", "dislocated", "vocative", "parataxis", "list")
            for w in words):
-        return text, {}
-    if root.xpos == "VBG":
+        return None
+    if root.xpos in ("VBG", "VBD") and (root.xpos == "VBD") == (shape == "past"):
         ok = any(w.head == root.id and w.deprel in _ARG_DEPS
                  and w.upos in ("NOUN", "PROPN") for w in words)
     else:
         ok = root.text.lower() in STATE_ADJ
-    if not ok:
+    return new if ok else None
+
+
+# the user as SUBJECT; "My sister is a nurse." is about the sister, so the
+# fragment after it ("Working nights at the Alfred.") is hers
+_FIRST_PERSON = re.compile(r"^\W*(i|i'm|i’m|i've|i’ve|i'd|we|we're|we’re|we've)\b",
+                           re.I)
+
+
+def rewrite(text, nlp, prev=None):
+    """-> (text to parse, {rewritten sentence: original}) -- unchanged text
+    and an empty map when no sentence is an accepted fragment.
+
+    The first sentence of the turn may be a fragment; a later one only when
+    the sentence before it was about the user too ("I handed in my notice at
+    the cafe. Starting as a paralegal at a law firm on Monday.")."""
+    if os.environ.get("RG_FRAGMENTS") == "0" or not _about_user(prev):
         return text, {}
-    return (new + (" " + rest if rest else "")), {new: head}
+    sents = re.split(r"(?<=[.!?])\s+", text.strip())
+    out, orig, about_user = [], {}, True
+    for i, sent in enumerate(sents):
+        nxt = sents[i + 1] if i + 1 < len(sents) else ""
+        new = None
+        if about_user and not _DENIAL.match(nxt):
+            new = _accept(sent, nlp)
+        if new:
+            orig[new] = sent
+            out.append(new)
+        else:
+            out.append(sent)
+        about_user = bool(new) or bool(_FIRST_PERSON.match(sent))
+    if not orig:
+        return text, {}
+    return " ".join(out), orig

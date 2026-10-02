@@ -396,17 +396,40 @@ CESSATION_PREDS = frozenset((
     "abandon", "discontinue", "unsubscribe", "delete", "retire"))
 
 _CESSATION_PHRASES = ("no longer", "not any more", "not anymore",
-                      "used to", "no more")
+                      "used to", "no more",
+                      # 2026-10-02 (false-memory bench): an ending that is an
+                      # event, not a verb in CESSATION_PREDS
+                      " died", "passed away", "split up", "broke up",
+                      "broken up")
+# the cessation's own words, never what it ends ("Biscuit died" ends what
+# mentions Biscuit, not what mentions "died")
+_CESSATION_WORDS = frozenset("""died dies passed away split broke broken
+sold sell sells quit quits left leave leaves stopped stop stops ended end
+cancelled canceled cancel dropped drop resigned retired""".split())
 
 _NOISE = frozenset("""
 a an the my your his her their its this that these those of at in on for to
 and or but not no longer any more anymore now last month year week job
+monday tuesday wednesday thursday friday saturday sunday weekend yesterday
+today tonight morning afternoon evening ago recently finally just again over
+january february march april may june july august september october november
+december
 """.split())
+
+
+def _stem(t):
+    """Plural to singular, enough to match "the Italian class" against
+    "evening classes in Italian"."""
+    if len(t) > 4 and t.endswith("es") and t[-3] in "sxz" or t.endswith(("ches", "shes")):
+        return t[:-2]
+    if len(t) > 3 and t.endswith("s") and not t.endswith("ss"):
+        return t[:-1]
+    return t
 
 
 def _content(text):
     import re
-    return {t for t in re.findall(r"[a-z0-9]+", (text or "").lower())
+    return {_stem(t) for t in re.findall(r"[a-z0-9]+", (text or "").lower())
             if t not in _NOISE and len(t) > 2}
 
 
@@ -450,7 +473,12 @@ def mark_ceased(g, owner=None, order=None):
                        or any(p in val for p in _CESSATION_PHRASES)
                        or any(p in text for p in _CESSATION_PHRASES))
             if is_cess:
-                toks = _content(nd.get("value")) or _content(nd.get("text"))
+                toks = _content(nd.get("value")) - _CESSATION_WORDS
+                if not toks:
+                    # "Biscuit died on Tuesday": the value is a time, so
+                    # what ended is named by the rest of the record
+                    toks = (_content(nd.get("text")) - _CESSATION_WORDS
+                            - _content(owner))
                 if toks:
                     cess.append((nid, nd, toks, _latest(nd, order)))
     if not cess:
@@ -560,6 +588,7 @@ def _place_tokens(value):
 
 
 _RES_PREDS = {"live_in", "reside_in", "move_to", "relocate_to", "settle_in"}
+_HOME_SLOTS = {"place", "house", "flat", "apartment", "home", "unit"}
 _EMP_PREDS = {"work_at", "work_for", "join", "start_at", "employ_by"}
 _JOB_PREDS = {"get", "start", "land", "take", "accept", "work_as"}
 
@@ -574,7 +603,9 @@ def _families(attr, value):
     v = (value or "").lower()
     out = []
     neg = bool(re.match(r"^(not|no longer)\b", v.strip()))
-    if a in _RES_PREDS:
+    # 2026-10-02 (false-memory bench): "Our place is in Northcote" -- the
+    # home is the subject and the place its complement
+    if a in _RES_PREDS or (a in _HOME_SLOTS and v.startswith("in ")):
         t = _place_tokens(v)
         if t:
             out.append(("residence", frozenset(t)))
@@ -588,19 +619,28 @@ def _families(attr, value):
             t = _place_tokens(m.group(1))
             if t:
                 out.append(("employer", frozenset(t)))
-    head = _head_phrase(re.sub(r"^as\s+", "", v) if a == "work_as" else v)
+    # "started eating fish again" states a diet the way "eats fish" does
+    m = re.match(r"^(?:eating|to eat)\s+(.*)$", v)
+    if a in ("start", "begin", "go_back") and m:
+        a, v = "eat", m.group(1)
+    head = _head_phrase(re.sub(r"^(?:as|to)\s+", "", v)
+                        if a in ("work_as", "start_as", "promote_to", "hire_as")
+                        else v)
     hw = re.findall(r"[a-z]+", head)
-    if a in ("is", "become", "work_as", "train_as", "qualify_as") and hw \
-            and hw[-1] in _ROLES and not neg:
+    if a in ("is", "become", "work_as", "train_as", "qualify_as", "start_as",
+             "promote_to", "hire_as") and hw and hw[-1] in _ROLES and not neg:
         # the role noun plus the modifier just before it: 'ward manager',
-        # 'team lead', but 'senior nurse' == 'nurse'
+        # 'team lead', but 'senior nurse' == 'nurse' -- except after a
+        # promotion, where the level is the change
         role = hw[-1]
-        if len(hw) >= 2 and hw[-2] not in ("a", "an", "the", "senior",
-                                           "junior", "head", "new", "full",
-                                           "time", "part"):
+        level = ("senior", "junior", "head", "lead", "principal", "chief")
+        if len(hw) >= 2 and (hw[-2] not in ("a", "an", "the", "senior",
+                                            "junior", "head", "new", "full",
+                                            "time", "part")
+                             or (a == "promote_to" and hw[-2] in level)):
             role = f"{hw[-2]} {role}"
         out.append(("role", frozenset([role])))
-    if a in ("is", "become", "go", "turn") and hw and hw[-1] in _DIETS:
+    if a in ("is", "become", "go", "turn", "eat") and hw and hw[-1] in _DIETS:
         out.append(("diet", frozenset([("not " if neg else "") + hw[-1]])))
     if a == "eat" and re.search(r"\b(meat|chicken|beef|fish|pork)\b", v) \
             and not neg:

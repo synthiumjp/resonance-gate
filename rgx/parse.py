@@ -95,6 +95,9 @@ ARG_DEPS = ("obj", "iobj", "obl", "obl:agent", "xcomp", "ccomp", "advmod",
 LIFE_EVENTS = {"retire", "divorce", "marry", "remarry", "engage", "separate",
                "graduate", "resign", "quit", "emigrate", "relocate", "fire",
                "hire", "promote", "widow", "propose"}
+# "They promoted me": an unnamed employer acting on the owner
+AGENTLESS_EMPLOY = {"promote", "hire", "fire", "sack", "lay", "transfer",
+                    "appoint", "demote", "rehire"}
 LIFE_PHRASAL = {("break", "up"), ("split", "up"), ("lay", "off"),
                 ("pass", "away"), ("move", "out")}
 SEPARATE = ("conj", "parataxis", "cc")
@@ -641,16 +644,15 @@ def _irrealis_frame(s, head):
                 and a.xpos == "MD" or (a.text or "").lower() in ("will", "'ll", "shall")
                 for a in s.children(p, ("aux",))):
             return True
+    # only an explicit "either": "My dog needs a walk or she goes feral"
+    # asserts its first clause ("or" = otherwise)
     def _disj(w):
         return any((c.lemma or c.text).lower() == "either"
-                   for c in s.children(w, ("cc:preconj",))) or any(
-            (c.lemma or c.text).lower() == "or" for c in s.children(w, ("cc",)))
+                   for c in s.children(w, ("cc:preconj",)))
     if _disj(head):
         return True
-    for c in s.children(head, ("conj",)):
-        if c.upos in ("VERB", "AUX", "ADJ") and _disj(c):
-            return True
-    return False
+    p = s.w.get(head.head) if head.deprel == "conj" else None
+    return p is not None and _disj(p)
 
 
 def _antiveridical(s, head):
@@ -1033,6 +1035,25 @@ def _collect_world(s, head, subj, is_self, sp, out):
                 out.setdefault(sib.lemma.lower(), _np_text(s, sib))
 
 
+def _collect_names(s, allow, out):
+    """2026-10-02 (false-memory bench): a name the owner introduced with a
+    relation -- "My dog Biscuit", "my girlfriend Elise" -- joins their world,
+    so a later "Biscuit died on Tuesday" is kept. Stanza tags a sentence-
+    initial "Biscuit" as a common noun, so the name is otherwise invisible."""
+    for w in s.w.values():
+        if w.upos not in ("NOUN", "PROPN") or not w.text[:1].isupper():
+            continue
+        # "My dog Biscuit": the name heads, the relation is a compound
+        if (_poss(s, w, allow) is not None
+                and any(c.upos == "NOUN" for c in s.children(w, ("compound",)))):
+            out.setdefault(w.lemma.lower(), w.text)
+        # "my girlfriend Elise": the name is an apposition of the relation
+        p = s.w.get(w.head)
+        if (w.deprel in ("appos", "flat") and p is not None
+                and _poss(s, p, allow) is not None):
+            out.setdefault(w.lemma.lower(), w.text)
+
+
 def _world_subject(s, subj, world, role):
     """True when this clause's subject is an entity the owner established."""
     if role != "user" or not world:
@@ -1272,6 +1293,8 @@ def extract_keyed(text, nlp, owner=None, role="user",
         hedge = second and _hedge_sentence(s, sent)
         sent_poss = {}
         _collect_poss(s, allow, sent_poss)
+        if role == "user" and os.environ.get("RG_WORLD") != "0":
+            _collect_names(s, allow, world)
         for head in sent.words:
             s._swap = {}
             if head.deprel not in CLAUSE_DEPS:
@@ -1552,7 +1575,27 @@ def extract_keyed(text, nlp, owner=None, role="user",
                 args = [c for c in s.children(head)
                         if c.deprel in ARG_DEPS and c.id != head.id
                         and c.id not in negdrop and c.id not in fdrop]
-                if sp is None and not is_self:
+                owner_obj = (role == "user" and subj.upos == "PRON"
+                             and subj.text.lower() == "they"
+                             and (head.lemma or "").lower() in AGENTLESS_EMPLOY
+                             and next((c for c in s.children(head, ("obj",))
+                                       if c.text.lower() in allow), None))
+                if sp is None and not is_self and owner_obj and not neg:
+                    # 2026-10-02 (false-memory bench): "They promoted me to
+                    # senior analyst" is "I was promoted to senior analyst";
+                    # "they" is the employer, unnamed. Dropped before.
+                    rest = sorted((c for c in args if c.id != owner_obj.id),
+                                  key=lambda c: c.id)
+                    tail = " ".join(s.text(c, owner=o, second=second)
+                                    for c in rest)
+                    tail = re.sub(r"\s+", " ", tail).strip(" ,.;:!")
+                    be = "was" if "Tense=Past" in (head.feats or "") else "is"
+                    prt = " ".join(c.text for c in
+                                   s.children(head, ("compound:prt",)))
+                    body = f"{o} {be} {head.text} {prt} {tail}"
+                    records.append((body, "event",
+                                    _pred_key(s, head, rest), tail))
+                elif sp is None and not is_self:
                     if tpo or named_tpo or world_subj:
                         # E (e240) / RULE 3 (e243), verbal predicate.
                         full_drop = {c.id for c in s.children(head, SEPARATE)}

@@ -79,3 +79,29 @@ def test_extract_passes_the_assistant_turn_along(ex):
 ])
 def test_a_sentence_or_a_retraction_is_not_a_fragment_fact(ex, turn):
     assert not any(r.text.startswith("Dana Cole is") for r in run(ex, turn))
+
+
+def test_a_later_fragment_continues_a_statement_about_the_user(ex):
+    recs = run(ex, "I handed in my notice at the cafe. Starting as a paralegal "
+                   "at a law firm on Monday.")
+    assert any(r.text.startswith("Dana Cole is starting as a paralegal") for r in recs)
+    assert any(r.source == "Starting as a paralegal at a law firm on Monday."
+               for r in recs)
+
+
+def test_a_later_fragment_after_someone_else_is_theirs(ex):
+    recs = run(ex, "My sister is a nurse. Working nights at the Alfred.")
+    assert not any("Dana Cole is working" in r.text for r in recs)
+
+
+@pytest.mark.parametrize("turn,want", [
+    ("Sold the Corolla on Saturday.", "Dana Cole sold the Corolla on Saturday"),
+    ("Cancelled the gym membership.", "Dana Cole cancelled the gym membership"),
+])
+def test_a_past_tense_fragment_is_about_the_speaker(ex, turn, want):
+    assert want in [r.text for r in run(ex, turn)]
+
+
+@pytest.mark.parametrize("turn", ["Sell the Corolla.", "Put the keys away."])
+def test_an_imperative_is_not_a_fragment_fact(ex, turn):
+    assert run(ex, turn) == []

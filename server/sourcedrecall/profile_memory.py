@@ -339,6 +339,18 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
 
         # ---- (b) rgx extraction, cache-append, skip-if-already-cached ----
         ex = _get_extractor(owner)
+        # 2026-10-02: the entities and names the user has linked to
+        # themselves ("my dog Biscuit", "the billing service") survive
+        # between sessions; each session-end ingest is a new process.
+        world_path = os.path.join(_data_dir(), "world.json")
+        try:
+            with open(world_path, encoding="utf-8") as fh:
+                saved = json.load(fh)
+            if isinstance(saved, dict):
+                for k, v in saved.items():
+                    ex._world.setdefault(k, v)
+        except (OSError, ValueError):
+            pass
         cache_path = _cache_path()
         cached_hashes = set()
         if os.path.exists(cache_path):
@@ -378,6 +390,10 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
             with open(cache_path, "a", encoding="utf-8") as fh:
                 for line in new_lines:
                     fh.write(line + "\n")
+            tmp = world_path + ".tmp"
+            with open(tmp, "w", encoding="utf-8") as fh:
+                json.dump(ex._world, fh)
+            os.replace(tmp, world_path)
 
         # ---- (c) reload ----
         _reload_locked()

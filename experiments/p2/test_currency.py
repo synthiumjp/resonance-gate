@@ -449,3 +449,30 @@ def test_a_passing_remark_never_replaces_a_lasting_state():
             "b": _n("b", "live_in", "in sydney this week", "c2",
                     source="I live in Sydney this week.")})
     assert C.mark_state_changes(g, order=ORDER) == []
+
+
+@pytest.mark.parametrize("old,new", [
+    (("place", "in northcote"), ("relocate_to", "to coburg last week")),
+    (("eat", "completely vegan"), ("start", "eating fish again")),
+    (("is", "a barista at seven seeds"), ("start_as", "as a paralegal at a law firm")),
+    (("is", "a junior analyst at the bank"), ("promote_to", "to senior analyst on friday")),
+])
+def test_bench_dev_changes_of_state(old, new):
+    assert C.mark_state_changes(_pair(*old, *new), order=ORDER) == [("a", "b")]
+
+
+@pytest.mark.parametrize("old_text,cess_attr,cess_value,cess_text", [
+    ("Dana Cole drives a green Corolla", "sell", "the corolla on saturday",
+     "Dana Cole sold the Corolla on Saturday"),
+    ("Dana Cole's dog Biscuit needs a walk", "biscuit_die_on", "on tuesday",
+     "Biscuit died on Tuesday"),
+    ("Dana Cole's girlfriend Elise and Dana Cole are planning a trip",
+     "elise_split_over", "over the weekend",
+     "Elise and Dana Cole split up over the weekend"),
+    ("Dana Cole is taking evening classes in Italian", "drop",
+     "the italian class", "Dana Cole dropped the Italian class"),
+])
+def test_an_ending_names_what_it_ends(old_text, cess_attr, cess_value, cess_text):
+    g = _G({"a": _n("a", "x", "", "c1", text=old_text),
+            "b": _n("b", cess_attr, cess_value, "c2", text=cess_text)})
+    assert ("a", "b") in C.mark_ceased(g, order=ORDER)
