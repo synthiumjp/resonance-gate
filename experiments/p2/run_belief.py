@@ -95,29 +95,7 @@ def _numeric_slot(triple, span):
     return (ak, f"{sv[1]}={sv[0]:g}")
 
 
-def _is_prose(text):
-    """False if the turn is dominated by pasted code/terminal/telemetry rather
-    than first-person prose. Real user data (entry 60) is full of pasted vm_stat/
-    logs/code that the extractors misread as personal facts; those turns carry no
-    life-fact and are skipped. Conversational prose (LongMemEval, personal chat)
-    passes untouched."""
-    if "```" in text:
-        return False
-    lines = [l for l in text.splitlines() if l.strip()]
-    if not lines:
-        return True
-    codey = 0
-    for ln in lines:
-        s = ln.strip()
-        nonalnum = sum(1 for c in s if not c.isalnum() and not c.isspace())
-        digits = sum(1 for c in s if c.isdigit())
-        L = max(1, len(s))
-        # symbol-heavy, digit-heavy, or a "label: number" telemetry/config line
-        # ("Swapins:  1245194", "pageins: 342...") -- command output, not prose.
-        if (nonalnum / L > 0.30 or digits / L > 0.22
-                or re.match(r"^[\w./+-]+\s*[:=]\s*[\d,]", s)):
-            codey += 1
-    return codey / len(lines) < 0.40
+from prose import _is_prose  # noqa: E402,F401  (moved 2026-10-02; re-exported)
 
 
 def evidence_from_span(text, sc, span_id=0, use_llm=True):

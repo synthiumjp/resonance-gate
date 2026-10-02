@@ -31,22 +31,8 @@ from belief import BeliefMemory
 from schema import Scope
 from run_belief import evidence_from_span, changes
 
-# redaction for stdout (the export's own identity fields are read separately)
-_REDACT = [
-    (re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b"), "[EMAIL]"),
-    (re.compile(r"(?<!\d)(\+?\d[\d\-\.\s()]{7,}\d)(?!\d)"), "[PHONE]"),
-]
-_EXTRA_REDACT = []          # filled with the account's own name tokens
-
-
-def redact(s):
-    s = str(s)
-    for rx, rep in _REDACT:
-        s = rx.sub(rep, s)
-    for tok in _EXTRA_REDACT:
-        if tok:
-            s = re.sub(rf"\b{re.escape(tok)}\b", "[NAME]", s, flags=re.I)
-    return s
+# redaction for stdout -- moved to redact.py (2026-10-02); re-exported here
+from redact import _REDACT, _EXTRA_REDACT, redact  # noqa: E402,F401
 
 
 def load_stream(path):

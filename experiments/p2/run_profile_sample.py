@@ -24,7 +24,7 @@ if _HERE not in sys.path:
     sys.path.insert(0, _HERE)
 
 from belief import BeliefMemory
-from run_belief import _is_prose
+from prose import _is_prose
 import run_crosssession as RC
 from run_crosssession import load_stream, redact
 from llm_profile import extract_profile_facts

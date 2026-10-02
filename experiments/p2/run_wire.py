@@ -33,9 +33,9 @@ for p in (_HERE, _ROOT):
     if p not in sys.path:
         sys.path.insert(0, p)
 
-import run_crosssession as RC
-from run_crosssession import redact
-from run_belief import _is_prose
+import redact as RC
+from redact import redact
+from prose import _is_prose
 from llm_profile import canon_attr
 import run_profile_full as PF
 from wire import WireGraph, ResonanceIndex, correct_facts, role_hash_guard

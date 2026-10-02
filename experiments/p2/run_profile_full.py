@@ -29,9 +29,9 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 if _HERE not in sys.path:
     sys.path.insert(0, _HERE)
 
-import run_crosssession as RC
-from run_crosssession import redact
-from run_belief import _is_prose
+import redact as RC
+from redact import redact
+from prose import _is_prose
 from llm_profile import extract_profile_facts, canon_attr
 
 _STOP = {"the", "a", "an", "my", "of", "and", "in", "at", "to", "for", "with",
