@@ -230,16 +230,8 @@ def profile_ingest(turns: list[dict], conversation_id: str = None,
 
 
 def _default_memory_dir():
-    """2026-10-02, from the new-user install test: RG_MEMORY_DIR was required
-    and documented only in a docstring, so the first profile_* call failed.
-    The LIBRARY still refuses to guess (profile_memory._data_dir raises, so a
-    forgetful test can never touch a real user's data); the SERVER, which is
-    what a person actually runs, now defaults it beside SOURCEDRECALL_STATE."""
-    if not os.environ.get("RG_MEMORY_DIR"):
-        d = os.path.join(STATE_DIR, "conversations")
-        os.makedirs(d, exist_ok=True)
-        os.environ["RG_MEMORY_DIR"] = d
-    return os.environ["RG_MEMORY_DIR"]
+    from sourcedrecall.paths import default_memory_dir
+    return default_memory_dir()
 
 
 def _prewarm():

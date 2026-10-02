@@ -24,6 +24,7 @@ dependencies = [
 [project.scripts]
 sourcedrecall = "sourcedrecall.mcp_server:main"
 sourcedrecall-setup = "sourcedrecall.setup_models:main"
+sourcedrecall-hook = "sourcedrecall.claude_hooks:main"
 
 [build-system]
 requires = ["hatchling"]

@@ -1,25 +1,22 @@
 # sourcedrecall
 
-A small, local memory for AI agents. It listens to your conversations, keeps
-what **you** said -- in your own words, with when you said it -- and gives
-your agent a short, honest briefing: what it knows, what has changed, and
-that anything else is unknown.
+A local memory server for AI agents, over MCP. It reads your conversations,
+stores the facts you state about yourself with the sentence and date they
+came from, and gives your agent a short summary of what it knows. If you ask
+about something you never mentioned, it says it doesn't know. If you later
+say something that replaces an earlier fact, the earlier one is marked as no
+longer true.
 
-- **Local.** Runs on your machine over MCP (Claude Code, Claude Desktop, any
-  MCP client). Nothing leaves it.
-- **Nothing is generated.** Facts are read out of your sentences by a
-  deterministic grammar parser, never written by a language model, so the
-  memory cannot invent something you did not say. Every fact keeps the
-  sentence it came from.
-- **Honest.** Ask about something you never mentioned and it says so. Change
-  your mind and the old fact is marked *no longer true*.
+Facts are extracted by a deterministic grammar parser, not a language model,
+so the store only contains things you actually said. Everything runs on your
+machine.
 
 ## Quick start
 
 ```bash
 git clone <this repo> rg && cd rg
 python3 -m venv .venv && . .venv/bin/activate
-# CPU torch first: otherwise pip pulls ~4 GB of CUDA wheels this never uses
+# CPU torch first, otherwise pip installs ~4 GB of CUDA packages that aren't used
 pip install torch --index-url https://download.pytorch.org/whl/cpu
 pip install -e ./server
 ```
@@ -31,11 +28,10 @@ Then download the models, once:
 sourcedrecall-setup
 ```
 
-That fetches the English parser (Stanza, ~320 MB) and four small
-non-generative models (~900 MB, cached under `~/.cache/huggingface`) and
-reports where each went; about 3 minutes. Everything together, venv
-included, is about 2.6 GB. It is the only step that touches the network: the
-server itself runs fully offline.
+This downloads the English parser (Stanza, ~320 MB) and four small models
+(~900 MB, in `~/.cache/huggingface`), and takes about 3 minutes. The install
+is about 2.6 GB in total. This is the only step that uses the network; the
+server runs offline.
 
 Add it to your MCP client, e.g. `.mcp.json` for Claude Code or
 `claude_desktop_config.json` for Claude Desktop:
@@ -51,24 +47,23 @@ Add it to your MCP client, e.g. `.mcp.json` for Claude Code or
 }
 ```
 
-`SOURCEDRECALL_OWNER` is whose memory this is; facts are written about that
-person. Memory lives in `~/.sourcedrecall/conversations` (set
+`SOURCEDRECALL_OWNER` is the person the memory is about. Memory lives in `~/.sourcedrecall/conversations` (set
 `RG_MEMORY_DIR` to move it).
 
 ## The tools you will use
 
 | tool | what it does |
 |---|---|
-| `profile_ingest(turns, owner_name)` | store one conversation: `turns` is `[{"role": "user"\|"assistant", "content": "..."}]`. Only what the **user** asserts becomes a fact; questions, hypotheticals, hedges and other people's opinions do not. |
-| `profile_context(query=None)` | the briefing to put in your agent's prompt -- everything, or just what bears on `query` |
-| `profile_recall(query)` | look one thing up; returns the answering facts with their quotes and dates, or an honest "never seen" |
-| `profile_correct(action, attribute, value)` | `deny` a fact that is wrong, `confirm` one that is right |
+| `profile_ingest(turns, owner_name, date=None)` | store one conversation. `turns` is `[{"role": "user"\|"assistant", "content": "..."}]`. Only statements the user makes become facts; questions, hypotheticals, hedges and other people's opinions don't. |
+| `profile_context(query=None)` | the summary to put in your agent's prompt: everything, or only what relates to `query` |
+| `profile_recall(query)` | look something up. Returns the matching facts with quotes and dates, or "never seen". |
+| `profile_correct(action, attribute, value)` | `deny` a wrong fact, `confirm` a right one |
 
-Your agent has to call `profile_ingest` to remember a conversation -- ask it
-to at the end of a chat, or wire it into a hook.
+The agent has to call `profile_ingest` for a conversation to be stored. In
+Claude Code the hooks below do this automatically.
 
-What the agent receives -- real output, after two conversations a week
-apart (`profile_context("where do I live")`, then the start of
+Example output after two conversations a week apart
+(`profile_context("where do I live")`, then the start of
 `profile_context()`):
 
 ```
@@ -84,14 +79,42 @@ apart (`profile_context("where do I live")`, then the start of
 ...
 ```
 
-The summary is the parser's rewrite; the quote is what was said. If they
-ever disagree, the quote is the truth -- that is why it is there.
+Each line has the parser's summary and the original sentence. If the two
+disagree, go by the sentence.
 
-## What is (and is not) inside
+## Automatic capture in Claude Code
 
-**No generative model is in the request path** -- nothing in this server can
-write a sentence, so nothing in it can invent a fact. Three small
-non-generative models score text that is already stored:
+Two hooks store each session when it ends and load the summary when the next
+one starts. Add to `~/.claude/settings.json` (or a project's
+`.claude/settings.json`):
+
+```json
+{
+  "hooks": {
+    "SessionStart": [{"matcher": "startup|resume|clear",
+      "hooks": [{"type": "command", "timeout": 30,
+        "command": "/absolute/path/to/rg/.venv/bin/sourcedrecall-hook session-start --owner 'Your Name'"}]}],
+    "SessionEnd": [{"hooks": [{"type": "command", "timeout": 10,
+        "command": "/absolute/path/to/rg/.venv/bin/sourcedrecall-hook session-end --owner 'Your Name'"}]}]
+  }
+}
+```
+
+`session-end` reads the session transcript and stores what you typed and the
+assistant's replies (not tool calls, tool output or anything injected by the
+harness). It hands the work to a background process and returns at once; a
+log goes to `$TMPDIR/sourcedrecall-hook.log`. Resuming a session and ending
+it again only adds the new turns. `session-start` adds nothing while the
+memory is empty.
+
+Coding sessions will add whatever you say about yourself in them, as well as
+some statements about the work. Use `profile_correct` to remove anything you
+don't want kept.
+
+## Models
+
+There is no generative model in the server. Three small models score text
+that is already stored:
 
 | model | used by | what it does |
 |---|---|---|
@@ -103,7 +126,7 @@ non-generative models score text that is already stored:
 `RG_NLI=0` drops the NLI model; `RG_PREWARM=0` stops the server loading them
 in the background at startup.
 
-Built on the **Resonance Gate** research substrate, a pre-registered study:
+Built on the Resonance Gate research substrate, a pre-registered study:
 [OSF 95e2q](https://osf.io/95e2q/).
 
 ---
@@ -152,10 +175,10 @@ Returns:
 }
 ```
 
-If nothing resolves, the response is an honest empty:
+If nothing matches, the response is empty:
 `{"resolved": false, "facts": [], "conflict": false}` — never a fabricated
 guess. If contradictory facts are stored under synonymous relation keys
-(e.g. "lives in" vs "resides in"), `conflict: true` and **both** facts are
+(e.g. "lives in" vs "resides in"), `conflict: true` and both facts are
 returned, plus an advisory `resolution_hint`. The server does not choose
 between them.
 
@@ -164,7 +187,7 @@ between them.
 Explicitly correct a fact. Writes the new triple and supersedes prior
 active records for the subject under the same or a synonymous relation
 (tombstoned via the supersedes-chain; the audit trail is retained, not
-erased). This is the **only** path that resolves a conflict by picking a
+erased). This is the only path that resolves a conflict by picking a
 side — because the caller explicitly asked it to. A passive collision
 surfaced by `recall` is never resolved this way on its own.
 
@@ -196,7 +219,7 @@ signals a conflict; high `u` signals "not resolved".
 
 ### Memory browser for triples (read-only)
 
-A read-only page at **http://127.0.0.1:7071** lists every stored record —
+A read-only page at http://127.0.0.1:7071 lists every stored record —
 subject, relation, object, source, confidence — with active conflicts
 highlighted. Port is `SOURCEDRECALL_BROWSER_PORT` (`0` disables it); it binds
 loopback only. Writes never happen from the browser — they only ever go
@@ -205,29 +228,22 @@ triple store; conversation memory is read with `profile_context`.)
 
 ## How `profile_ingest` reads a conversation
 
-`profile_ingest(turns, conversation_id=None, title=None, owner_name=None, date=None)` is
-the one write path in the `profile_*` bridge (see `sourcedrecall/profile_memory.py`)
-that turns raw conversation into new facts. The extractor is **rgx** — a
-grammar-rule parser over a dependency parse — never a language model:
+`profile_ingest(turns, conversation_id=None, title=None, owner_name=None, date=None)`
+turns a conversation into facts. The extractor, rgx, is a set of grammar
+rules over a dependency parse.
 
-- **Never invents content.** A fact is either grounded in the turn's own
-  words or it is not emitted. There is no sampling, no prompt, no paraphrase.
-- **Tags hearsay.** An assistant clause that reports a claim *about* the
-  user ("I remember you mentioning...") is extracted and receipted, but
-  filed under its own `hearsay` tier — never asserted or volunteered as the
-  user's own fact (see `profile_recall`'s `"hearsay"` key).
-- **Every fact carries receipts.** Session, turn index, role, and (once
-  wired) conversation id + date — the same provenance contract every other
-  fact in this store carries; ingestion doesn't relax it.
-- **Keeps your exact words.** Every fact carries the sentence it was read
-  from, and `profile_context` quotes it.
-- **Tracks change.** A later move or new job marks the old residence or
-  employer *no longer true* ("I also joined..." is a second job, not a
-  change). Pass `date` (ISO) when importing older chats: which statement is
-  newer decides what is current.
-- Re-ingesting a conversation is a safe no-op for turns already seen
-  (`skipped_cached` counts them, `model_calls` is always `0` — there is no
-  model call anywhere in this path, cached or fresh).
+- A fact is only stored if it is stated in the turn's own words. Nothing is
+  sampled or paraphrased.
+- When the assistant reports something about the user ("I remember you
+  mentioning..."), it is kept separately under `hearsay` and never presented
+  as the user's own statement.
+- Each fact records its conversation, date and the sentence it came from.
+- A later move or new job marks the old address or employer as no longer
+  true. "I also joined..." is treated as a second job, not a change. Pass
+  `date` (ISO) when importing older conversations so they are ordered
+  correctly.
+- Ingesting the same conversation again only adds turns that are new.
+  `model_calls` in the response is always 0.
 
 ## Persistence
 
@@ -237,9 +253,9 @@ Conversation memory lives in `~/.sourcedrecall/conversations`
 `state.json`) in `SOURCEDRECALL_STATE` (default `~/.sourcedrecall`). A
 restart recovers both from disk.
 
-Everything is local: no network calls, no API keys, no telemetry. The
-embedding model is used from the local Hugging Face cache only — the
-server sets `HF_HUB_OFFLINE=1` and `TRANSFORMERS_OFFLINE=1` by default.
+The server makes no network calls and needs no API keys. It sets
+`HF_HUB_OFFLINE=1` and `TRANSFORMERS_OFFLINE=1`, so models are read from the
+local cache that `sourcedrecall-setup` filled.
 
 ### Example calls (explicit triples)
 
@@ -266,7 +282,7 @@ server sets `HF_HUB_OFFLINE=1` and `TRANSFORMERS_OFFLINE=1` by default.
  "conflict": false}
 ```
 
-**3. `recall` — an honest miss**
+**3. `recall` — a miss**
 
 ```json
 // call
@@ -328,23 +344,22 @@ resolves cleanly to Boston with `conflict: false`.
 ## Limitations
 
 Conversation memory:
-- **English only**, and the parser misses some casual fragments: "Still
-  nursing at St Vincent's though" (no subject) produces no fact.
-- **Change tracking covers where you live and where you work.** Other
-  changes are caught only when you say something ended ("I quit", "I sold
-  the car", "no longer"). Two statements in the *same* conversation are not
+- English only. The parser misses some casual fragments: "Still nursing at
+  St Vincent's though" has no subject and produces no fact.
+- Change tracking covers where you live and where you work. Other changes
+  are picked up only when you say something ended ("I quit", "I sold the
+  car", "no longer"). Two statements in the same conversation are not
   ordered against each other.
-- **Your agent has to call `profile_ingest`.** Nothing captures
-  conversations automatically yet.
-- **The first question in the first seconds after start can take ~4 s**
-  while models load; after that, queries take tens of milliseconds.
+- Outside Claude Code, the agent has to call `profile_ingest` itself.
+- A question asked in the first few seconds after the server starts can
+  take about 4 s while models load. After that, queries take tens of
+  milliseconds.
 
 Explicit triples:
-- **Fixed relation-synonym table.** Exactly two classes today:
-  `works at` / `is employed by`, and `lives in` / `resides in`. Relations
-  outside these classes are treated as distinct keys.
-- **Near-duplicate subject surface forms are not detected** ("Maria" vs
-  "Maria's"); see `docs/COLLISION_FIX.md`.
-- **Collision detection is validated on synthetic pairs only.**
-- **Not a standalone wheel yet.** Install editable from the checkout (see
-  Quick start); the substrate is read from the repo at runtime.
+- Fixed relation-synonym table with two classes: `works at` /
+  `is employed by` and `lives in` / `resides in`. Other relations are
+  treated as distinct keys.
+- Near-duplicate subject forms are not detected ("Maria" vs "Maria's"); see
+  `docs/COLLISION_FIX.md`.
+- Collision detection is validated on synthetic pairs only.
+- Not a standalone wheel yet. Install editable from the checkout.
