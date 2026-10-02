@@ -187,8 +187,10 @@ text, so any model can use it.
 
 Any MCP client (Claude Desktop, Cursor, Windsurf, Cline, Continue, Zed,
 Goose, VS Code agent mode, Gemini CLI, Codex CLI) runs the same server: point
-it at the `sourcedrecall` command with `SOURCEDRECALL_OWNER` set, as in the
-manual install above. Each client documents where its MCP config lives.
+it at the `sourcedrecall` command with `SOURCEDRECALL_OWNER` set. The config
+for each, and how to capture Gemini CLI sessions
+(`sourcedrecall-import gemini <session file>`), is in
+[docs/CLIENTS.md](../docs/CLIENTS.md).
 
 Without MCP, use the command line from any script or harness:
 
