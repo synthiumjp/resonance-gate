@@ -72,3 +72,35 @@ def test_answer_type(q, sent, ok):
     assert t
     assert AT.has_type(sent, t[0], t[1], AT.question_verbs(q, t[0]),
                        possess=AT.is_presence(q)) is ok
+
+
+# ---- semantic grounding and entity matching (dev paraphrase set, 2026-10-03)
+
+@needs_wn
+@pytest.mark.parametrize("q,text,ok", [
+    ("Do I have any siblings?", "My sister Priya is flying in from Perth next week", True),
+    ("What health conditions do I have?", "Got diagnosed with type 2 diabetes last year", True),
+    ("What animal shares my home?", "Mochi, my ginger tabby, knocked the plant off", True),
+    ("What did I purchase recently?", "Bought a Dyson vacuum on sale", True),
+    ("Do I have any pets?", "We got a puppy called Bruno", True),
+    ("Do I have any children?", "I have a dog and a cat at home.", False),
+    ("What city was I born in?", "My friend Dev lives in Leiden.", False),
+    ("What is my blood type?", "I'm vegetarian and I can't stand cilantro.", False),
+    ("When is my birthday?", "Alex Reyes was promoted to senior engineer last month", False),
+    ("What is my favourite film?", "Alex Reyes drives a Skoda now", False),
+])
+def test_semantic_grounding(q, text, ok):
+    assert AT.semantic_grounded(q, text) is ok
+
+
+@pytest.mark.parametrize("text,ent", [
+    ("Mum's turning seventy next month", "mother"),
+    ("My brother Callum is a plumber in Geelong", "sibling"),
+])
+def test_kin_words_mention_the_entity(text, ent):
+    assert A._mentions(text, ent)
+
+
+def test_home_is_the_user():
+    assert A.read_question("Which suburb is home?") == (None, "suburb")
+    assert A.read_question("How old is my mother going to be?") == ("mother", "old")

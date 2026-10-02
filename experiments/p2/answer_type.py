@@ -132,7 +132,7 @@ def _is_a(word, typ):
     tsyn = set(wn.synsets(typ, pos=wn.NOUN))
     if not tsyn:
         return False
-    for syn in wn.synsets(word, pos=wn.NOUN)[:4]:
+    for syn in wn.synsets(word, pos=wn.NOUN)[:8]:
         if syn in tsyn:
             return True
         for path in syn.hypernym_paths():
@@ -199,3 +199,112 @@ def is_presence(q):
 CHECKABLE = frozenset("""food beverage drink sport instrument animal pet city
 country language car fruit vegetable dish meal herb spice flower tree bird
 fish child colour color music genre""".split())
+
+
+# ---- semantic grounding (2026-10-03) ---------------------------------------
+# The dev paraphrase set (bench/false_memory/cases_dev_paraphrase.jsonl) found
+# 30 of 64 questions refused while the answering fact WAS stored: "Do I have
+# any siblings?" / "my sister Priya", "What health conditions do I have?" /
+# "type 2 diabetes", "Which country did I visit?" / "Peru". A WordNet
+# relation between a question word and a fact word -- same meaning, or the
+# fact's word is a kind (or an instance) of the question's -- grounds the
+# question, with the same guard as answer types: the user's own action verb
+# in the question ("born", "attend") must be in the fact too.
+_LIGHT = frozenset("""do does did done doing have has had having get got go
+goes went gone going make made take took be is am are was were been being
+thing things stuff kind sort type way time times lot lots one ones bit
+something anything everything nothing what which who whom whose where when
+why how my mine me myself i you your our we us the a an any some much many
+more most less few""".split())
+
+
+def _syn(word, pos=None):
+    wn = _wn()
+    if wn is None:
+        return []
+    try:
+        return wn.synsets(word, pos=pos)[:6]
+    except Exception:
+        return []
+
+
+def related(q, s):
+    """Is fact word s the same as, a kind of, or an instance of question
+    word q (or derivationally the same: study / student)?"""
+    if q == s or _singular(q) == _singular(s):
+        return True
+    q = _ALIAS.get(_singular(q), q)
+    qs = set(_syn(q)) | set(_syn(_singular(q)))
+    if not qs:
+        return False
+    qn = _singular(q)
+    for syn in _syn(s) + _syn(_singular(s)):
+        if syn in qs:
+            return True
+        for path in syn.hypernym_paths():
+            if qs & set(path):
+                return True
+            # WordNet files a sister under "female_sibling", apart from
+            # "sibling": a broader term NAMED with the question word counts
+            if any(qn in l.name().lower().split("_") for x in path[:-1]
+                   for l in x.lemmas()):
+                return True
+        for inst in syn.instance_hypernyms():
+            for path in inst.hypernym_paths():
+                if qs & set(path):
+                    return True
+    # derivation: "studying" / "student", "married" / "marriage"
+    qlem = {l.name().lower() for x in qs for l in x.lemmas()}
+    for syn in _syn(s):
+        for l in syn.lemmas():
+            for d in l.derivationally_related_forms():
+                if d.name().lower() in qlem:
+                    return True
+    return False
+
+
+def _main_verb(query):
+    """The user's own action: the first word after "do/did/was ... I", if it
+    is a verb that is not a light one ("born", "attend", "purchase")."""
+    m = re.search(r"\b(?:do|did|does|was|were|am|have|had|can|would|will)\s+i\s+"
+                  r"([a-z]+)", (query or "").lower())
+    if not m:
+        return None
+    w = m.group(1)
+    if w in _LIGHT or w in _GENERIC_V:
+        return None
+    wn = _wn()
+    if wn is None or not wn.synsets(w, pos=wn.VERB):
+        return None
+    return w
+
+
+def _verb_related(v, w):
+    wn = _wn()
+    if _verb_lemma(v) == _verb_lemma(w):
+        return True
+    a = set(wn.synsets(v, pos=wn.VERB)[:3])
+    b = set(wn.synsets(w, pos=wn.VERB)[:3])
+    return bool(a & b)
+
+
+def semantic_grounded(query, text):
+    if not query or not text or _wn() is None:
+        return False
+    swords = [w for w in re.findall(r"[a-z]+", text.lower())
+              if w not in _LIGHT and w not in _STOP and len(w) > 2]
+    if not swords:
+        return False
+    verb = _main_verb(query)
+    if verb:
+        if not any(_verb_related(verb, w) for w in swords):
+            return False
+    qwords = [w for w in re.findall(r"[a-z]+", query.lower())
+              if w not in _LIGHT and w not in _GENERIC_V and len(w) > 2
+              and w != verb]
+    nouns = [w for w in qwords if _wn().synsets(w, pos=_wn().NOUN)
+             or _wn().synsets(_singular(w), pos=_wn().NOUN)]
+    if not nouns:
+        # "What did I purchase recently?" -- the verb is the whole question
+        return bool(verb)
+    return any(related(q, s) for q in nouns for s in swords)

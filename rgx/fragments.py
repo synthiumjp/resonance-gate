@@ -90,6 +90,32 @@ def _candidate(sentence):
     return None
 
 
+_PERSONS = frozenset("""sister brother mum mom dad mother father wife husband
+partner boyfriend girlfriend friend boss manager colleague son daughter kid
+kids child children neighbour neighbor flatmate roommate cousin aunt uncle
+grandma grandpa nan""".split())
+
+
+def _tail_ids(words, root):
+    """Ids under a comma-spliced tail of the root: a parataxis / list /
+    discourse child, or a conjunct with its own subject."""
+    if root is None:
+        return set()
+    kids = {}
+    for w in words:
+        kids.setdefault(w.head, []).append(w)
+    starts = [w for w in kids.get(root.id, [])
+              if w.deprel in ("parataxis", "list", "discourse")
+              or (w.deprel == "conj" and any(c.deprel.startswith("nsubj")
+                                            for c in kids.get(w.id, [])))]
+    out, stack = set(), list(starts)
+    while stack:
+        w = stack.pop()
+        out.add(w.id)
+        stack.extend(kids.get(w.id, []))
+    return out
+
+
 def _has_noun_arg(root, words):
     """A noun argument on the root or on a verb coordinated with it
     ("rehearsing hard and working on business plans")."""
@@ -116,19 +142,26 @@ def _accept(head, nlp):
     # finite verb allowed. An imperative ("Sell the Corolla") is VB, not VBD.
     orig = nlp(head).sentences[0].words
     oroot = next((w for w in orig if w.deprel == "root"), None)
+    # a comma-spliced tail is its own clause ("Picked up a Mazda 3 on
+    # Saturday, it's got a few scratches") -- judge the fragment without it
+    tail = _tail_ids(orig, oroot)
+    orig = [w for w in orig if w.id not in tail]
     if shape == "past" and (oroot is None or oroot.xpos != "VBD"):
         return None
     if shape == "been":
-        # judged as the -ing shape on "I've been <...>"
+        # "Been rehearsing hard", "Been promoted to team lead", "Been vegan
+        # since January", judged on "I've been <...>"
         new = "I've " + head[0].lower() + head[1:]
         words = nlp(new).sentences[0].words
         root = next((w for w in words if w.deprel == "root"), None)
-        if (root is None or root.xpos != "VBG"
-                or not any(w.head == root.id and w.deprel.startswith("nsubj")
-                           and w.text == "I" for w in words)
-                or not _has_noun_arg(root, words)):
+        if root is None or not any(w.head == root.id and w.deprel.startswith("nsubj")
+                                   and w.text == "I" for w in words):
             return None
-        return new
+        if root.xpos in ("VBG", "VBN") and _has_noun_arg(root, words):
+            return new
+        if root.text.lower() in STATE_ADJ:
+            return new
+        return None
     if any(w.deprel.startswith(("nsubj", "csubj", "expl"))
            or (w.upos in ("VERB", "AUX") and "VerbForm=Fin" in (w.feats or "")
                and not (shape == "past" and w is oroot))
@@ -144,10 +177,13 @@ def _accept(head, nlp):
     subj = [w for w in words if w.head == root.id and w.deprel.startswith("nsubj")]
     if len(subj) != 1 or subj[0].text != "I":
         return None
-    # "Nursing at St Vincent's, my sister." -- the nurse is the sister
-    if any(w.deprel in ("appos", "dislocated", "vocative", "parataxis", "list")
-           for w in words):
-        return None
+    # "Nursing at St Vincent's, my sister." -- the nurse is the sister; an
+    # appended PERSON (a name, or "my <person>") disqualifies, an appended
+    # remark ("200-day streak now", "send help") does not
+    for w in words:
+        if w.deprel in ("appos", "dislocated", "vocative") and (
+                w.upos == "PROPN" or w.text.lower() in _PERSONS):
+            return None
     if root.xpos in ("VBG", "VBD") and (root.xpos == "VBD") == (shape == "past"):
         ok = _has_noun_arg(root, words)
     else:

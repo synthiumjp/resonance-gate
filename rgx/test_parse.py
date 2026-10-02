@@ -1318,3 +1318,9 @@ def test_review3_negation_rendering(ex, turn, want, bad):
 @pytest.mark.parametrize("turn", ["Maybe cooking makes me happy.", "Cooking makes me."])
 def test_review3_weak_third_party_clauses_are_dropped(ex, turn):
     assert texts(ex, turn) == []
+
+
+def test_british_spelling_is_not_malformed(checked):
+    """_BAD_MORPH's \\w+ises dropped "practises", "organises" (2026-10-03)."""
+    assert any("practises cello" in p
+               for p in texts(checked, "I practise cello every evening before dinner."))

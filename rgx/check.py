@@ -44,8 +44,11 @@ STOP = set("the a an is are was were be been being of to in on at for and or "
 # name is them") failed the grounding check and was silently DROPPED, not
 # just reworded.
 
-_BAD_MORPH = re.compile(r"\b\w+ises\b|\bhas \w+ing\b|\bises\b|\b(?:is|has) "
-                        r"(?:is|has|was)\b", re.I)
+# 2026-10-02: `\w+ises` also matched British spellings -- "practises",
+# "organises", "exercises" -- and dropped every such fact. The malformed
+# forms are the doubled auxiliaries.
+_BAD_MORPH = re.compile(r"\b(?:ises|hases|wases|doeses)\b|\bhas \w+ing\b|"
+                        r"\b(?:is|has) (?:is|has|was)\b", re.I)
 _FIRST_RESIDUE = re.compile(r"\b(?:I|my|me|mine|myself|we|us|our)\b")
 _GOLD_TEMPLATE_VAL = re.compile(r"\bI\s+(?:like|dislike)\s*:?\s*(.+)$", re.I)
 _GOLD_TEMPLATE = re.compile(r"\b[A-Z][\w ]{2,20}\s+I\s+(?:like|dislike)\b")

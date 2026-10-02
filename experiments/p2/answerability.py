@@ -96,7 +96,8 @@ _PATTERNS = [
     # what is my job title / what is my favourite database / my salary
     re.compile(r"^what(?:'s| is| was)\s+my\s+(?P<att>[\w ]+?)\??$"),
 ]
-_TRIM = re.compile(r"\s+(?:at work|now|these days|currently|again)$")
+_TRIM = re.compile(r"\s+(?:at work|now|these days|currently|again|going to be|"
+                   r"going to|going|gonna be|gonna|turning|this year|next year)$")
 
 
 def read_question(q):
@@ -110,7 +111,10 @@ def read_question(q):
             continue
         att = _TRIM.sub("", m.group("att").strip())
         ent = m.groupdict().get("ent")
-        ent = _TRIM.sub("", ent.strip()) if ent else None
+        if ent:
+            ent = ent.strip()
+            for _ in range(3):
+                ent = _TRIM.sub("", ent)
         if ent:
             # "the billing service in" -> "the billing service"
             ent = re.sub(r"\s+(in|at|on|to|for|from|of|with|by)$", "", ent)
@@ -120,8 +124,9 @@ def read_question(q):
             # "i born in", "i buy" -> the owner
             if re.match(r"^(i|me|myself)\b", ent):
                 ent = None
-        if ent in ("i", "me", ""):
-            ent = None
+        if ent in ("i", "me", "", "home", "my home", "my place", "my house",
+                   "my flat"):
+            ent = None           # "Which suburb is home?" is about the user
         if i == 5:                       # "what is my X": X may be "favourite Y"
             # "what is my daughter called" -> (daughter, name)
             m = re.match(r"^(.+?)\s+(?:called|named)$", att)
@@ -152,6 +157,16 @@ _GENERIC_HEADS = {"project", "service", "app", "application", "team",
                   "repo", "codebase", "platform", "thing"}
 
 
+# 2026-10-03 (dev paraphrase set): "my mother" is "Mum", "my sibling" is "my
+# brother Callum"
+_KIN = {"mother": "mum mom mam mummy mommy ma", "father": "dad daddy pa papa",
+        "grandmother": "nan nana gran granny grandma", "grandfather":
+        "grandpa granddad grandad pop", "partner": "husband wife boyfriend "
+        "girlfriend fiance fiancee spouse", "spouse": "husband wife",
+        "sibling": "brother sister", "child": "son daughter kid",
+        "children": "son daughter kids", "kid": "son daughter child"}
+
+
 def _mentions(text, ent):
     """Every content word of the entity: "the billing service" is not
     mentioned by "the pricing service" (tools/scale_test.py, 2026-10-02 --
@@ -163,7 +178,20 @@ def _mentions(text, ent):
     specific = [w for w in words if w not in _GENERIC_HEADS]
     words = specific or words
     tl = text.lower()
-    return all(re.search(rf"\b{re.escape(w)}s?\b", tl) for w in words) if words else True
+
+    def present(w):
+        if re.search(rf"\b{re.escape(w)}s?\b", tl):
+            return True
+        alts = _KIN.get(w) or _KIN.get(w.rstrip("s"))
+        if alts and any(re.search(rf"\b{a}s?\b", tl) for a in alts.split()):
+            return True
+        try:
+            import answer_type as _AT
+            return any(_AT.related(w, t) for t in re.findall(r"[a-z]+", tl)
+                       if len(t) > 2)
+        except Exception:
+            return False
+    return all(present(w) for w in words) if words else True
 
 
 def answers(fact, q_read, owner=None):

@@ -128,3 +128,16 @@ def test_been_fragment(ex):
     out = [r.text for r in run(ex, "Been rehearsing hard and working on business plans.")]
     assert "Dana Cole has been working on business plans" in out
     assert run(ex, "Been there.") == [] and run(ex, "Been thinking about it.") == []
+
+
+# dev paraphrase set (2026-10-03): a comma tail is its own clause
+@pytest.mark.parametrize("turn,want", [
+    ("Picked up a second-hand Mazda 3 on Saturday, it's got a few scratches but runs great.",
+     "Dana Cole picked up a second hand Mazda 3 on Saturday"),
+    ("Rewatched Alien last night, best sci-fi ever made imo.",
+     "Dana Cole rewatched Alien last night"),
+    ("Been vegan since January, honestly the cheese was the hardest bit.",
+     "Dana Cole has been vegan since January"),
+])
+def test_dev_paraphrase_fragments(ex, turn, want):
+    assert want in [r.text for r in run(ex, turn)]

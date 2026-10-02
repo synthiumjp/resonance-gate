@@ -494,6 +494,22 @@ def _type_grounded(query, hits):
                             qt[0], qt[1], verbs, possess=pres) for h in hits)
 
 
+def _semantic_grounded(query, hits):
+    """2026-10-03: a WordNet relation between a question word and a
+    record's words grounds a question about the user (answer_type.
+    semantic_grounded): "Do I have any siblings?" / "my sister Priya"."""
+    if os.environ.get("RG_SEMANTIC") == "0":
+        return False
+    if _ABOUT_OTHER.search((query or "").strip()):
+        return False
+    try:
+        import answer_type as _AT
+    except Exception:
+        return False
+    return any(_AT.semantic_grounded(
+        query, h.get("source") or h.get("value") or h.get("text")) for h in hits)
+
+
 def _grounded(query, hits, owner=None):
     """True when any candidate shares a content word with the question.
 
@@ -896,7 +912,8 @@ class Memory:
                     or _dense_grounded(idx, _strip_owner(
                         query, own, _entity_names(top3)), among=top3)
                     or _family_grounded(query, [h for h, _ in scored[:10]])
-                    or _type_grounded(query, [h for h, _ in scored[:40]])):
+                    or _type_grounded(query, [h for h, _ in scored[:40]])
+                    or _semantic_grounded(query, [h for h, _ in scored[:5]])):
                 return self._abstain(query, idx, gate="grounding")
         kept = list(scored)
         # 2026-10-02: scoping -- another project's facts are not this one's.
@@ -993,10 +1010,12 @@ class Memory:
             except Exception:
                 qt = None
             if qt and qt[0] in _AT.CHECKABLE:
-                vb = _AT.question_verbs(query, qt[0])
+                # no verb requirement HERE: this step can only refuse, and
+                # "What car do I drive?" is answered by "picked up a Mazda 3"
+                # (the verb guard stays on the grounding side, which admits)
                 typed = [f for f in facts if _AT.has_type(
                     f.get("said") or f.get("value") or f.get("text"),
-                    qt[0], qt[1], vb, possess=_AT.is_presence(query))]
+                    qt[0], qt[1], (), possess=_AT.is_presence(query))]
                 if not typed:
                     return self._abstain(query, idx, gate="attribute",
                                          known_about=[], asked=(None, qt[0]))
@@ -1182,7 +1201,7 @@ class Memory:
         hits = [(h, sc) for h, sc in hits
                 if (_grounded(query, [h], owner=own)
                     and _shares_content(query, h["value"], own))
-                or _type_grounded(query, [h])]
+                or _type_grounded(query, [h]) or _semantic_grounded(query, [h])]
         if not hits:
             return []
         try:
