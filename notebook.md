@@ -14338,3 +14338,55 @@ Suites 645 (+9). Variants scheduled for 21:00 tonight via a systemd user
 timer (`systemctl --user list-timers`), started earlier than the previous
 23:00 because the first arm pays full price against a cold cache -- and if it
 overruns, resuming is now nearly free, which is the whole point.
+
+## Entry 283 — 2026-10-02 (CORRECTION to e279 part 2: "the extraction gap is FORM" is not established. An independent re-derivation found the headline mixed in distractors, and score 1 is not "same fact, other words".)
+
+After three weeks away, a sonnet auditor re-derived e279 part 2 from the raw
+judge records (read-only). Re-verified by hand today.
+
+**What was wrong.**
+
+1. **The 118-vs-24 comparison mixed in interference points.** HaluMem plants
+   distractor gold points (`memory_source == "interference"`) that a system
+   should NOT extract; for those, score >= 1 is a FAILURE. Split:
+
+   | population | score >= 1 rgx-only / llm-only | score == 2 rgx-only / llm-only |
+   |---|---|---|
+   | real targets (453) | **74 / 15**, p=1.5e-10 | 49 / 65, p=0.16 |
+   | interference (122) | 44 / 9 (this is the 0.56 interference accuracy) | 5 / 0 |
+
+   "The parser reaches 94 more gold points" was wrong: on real targets it is
+   59 more. 44 of the 118 were the parser echoing distractors -- over-emission,
+   which e279 itself flagged one paragraph later and failed to subtract.
+
+2. **Score 1 is not "said it in other words".** The integrity rubric: 2 =
+   "fully covered or implied"; 1 = "partially covered or mentioned ... key
+   information is missing, inaccurate, or slightly incorrect". A 15-point
+   sample of rgx4=1 / llm3=0 targets read by the auditor: ~6 are the same fact
+   missing a detail (form-like: "dislikes rap music" vs gold "Music I dislike:
+   Rap music" scored 1), ~4 only touch the topic (assistant-side sentences
+   sharing words, one with a wrong entity -- coffee for tea), ~5 in between.
+   **So part of the partial credit is form and part is topic proximity.**
+
+3. **The ceiling I quoted in conversation was wrong both ways.** "Recall 0.20
+   -> ~0.81 if every partial became full" matches no run; the arithmetic upper
+   bound on rgx4 is (93+331)/462 = 0.918, F1 0.79 with target accuracy fixed
+   at 0.690. But that bound assumes every partial is convertible, which (2)
+   says is false. The auditor's estimate, from a 15-point sample and therefore
+   NOT a measurement: form work could plausibly put recall in 0.4-0.6.
+
+**What survives.** QA parity under identical code (62.2 vs 59.8, 22/18,
+p=0.64), recomputed exactly. Full-credit extraction indistinguishable from
+the LLM extractor (p=0.16 on real targets). The parser earns more partial
+credit on real targets (74 vs 15). Pairing details: 578 shared points; the
+unmatched 9 + 24 are all update-routed points (routing depends on each run);
+3 None scores silently dropped; denominators differ slightly by run.
+
+**Method lesson, mine, and it is §5l/§4 again.** I computed a split I
+already knew mattered (interference accuracy was the next paragraph) and
+reported the unsplit number as the headline, then extrapolated a ceiling in
+conversation without computing it. The fb rows still answer the right
+question -- does sentence-level emission convert partials to fulls on REAL
+targets, at what interference cost -- but their readout must split by
+`memory_source` from the start, and the "how much is form" number needs a
+labelled sample of 60+ score-1 points, not my inference.
