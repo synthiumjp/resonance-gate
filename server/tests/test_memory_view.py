@@ -123,3 +123,31 @@ def test_a_remark_tied_to_its_moment_leaves_the_summary(pm, tmp_path):
     md = (tmp_path / "MEMORY.md").read_text()
     assert "Fitzroy" in md.split("## About you")[1].split("##")[0]
     assert "keto" in md.split("## Said in passing")[1]
+
+
+@pytest.mark.parametrize("first,then,q,want,old", [
+    ("Our place is in Northcote, two minutes from the creek trail.",
+     "We finally relocated to Coburg last week.", "Where do I live?",
+     "Coburg", "Northcote"),
+    ("I'm a junior analyst at the bank.",
+     "They promoted me to senior analyst on Friday!", "What is my job title?",
+     "senior analyst", "junior analyst"),
+])
+def test_a_change_of_state_answers_with_the_new_value(pm, first, then, q, want, old):
+    """False-memory bench, dev cases (2026-10-02): the change was stored and
+    linked, then the question was refused -- "relocated" shares no word
+    with "live"."""
+    pm.profile_ingest([U(first)], conversation_id="a", owner_name="Jordan Pike",
+                      date="2026-03-02")
+    pm.profile_ingest([U(then)], conversation_id="b", owner_name="Jordan Pike",
+                      date="2026-03-09")
+    r = pm.profile_recall(q)
+    assert r["found"] and want in r["ranked"][0]["text"]
+    stale = [f for f in r["ranked"] if old in f["text"]]
+    assert all(f["current"] is False for f in stale)
+
+
+def test_a_question_about_someone_else_is_not_grounded_by_the_users_job(pm):
+    pm.profile_ingest([U("I'm a barista at Seven Seeds.")], conversation_id="a",
+                      owner_name="Jordan Pike", date="2026-03-02")
+    assert not pm.profile_recall("What does my brother do for work?")["found"]

@@ -400,6 +400,51 @@ def _dense_grounded(index, query, threshold=None):
         return True
 
 
+# 2026-10-02 (false-memory bench): "Where do I live?" refused while the
+# store held "relocated to Coburg" -- no shared word, and the paraphrase is
+# too far for the dense check. The state families (currency.py) already know
+# that relocating is about where someone lives, so a question that asks
+# about a family is grounded by a fact in it.
+_QUESTION_FAMILIES = [
+    (re.compile(r"\bwhere\b.*\b(live|living|based|stay|staying)\b|"
+                r"\b(address|home ?town|which city|what city|suburb)\b", re.I),
+     ("residence",)),
+    (re.compile(r"\b(work|job|occupation|profession|career|employer|"
+                r"for a living|job title|role)\b", re.I),
+     ("role", "employer")),
+    (re.compile(r"\b(diet|vegan|vegetarian|pescatarian|eat meat)\b", re.I),
+     ("diet",)),
+    (re.compile(r"\b(married|single|relationship|partner|dating|engaged|"
+                r"divorced)\b", re.I), ("relationship status",)),
+    (re.compile(r"\b(how old|my age)\b", re.I), ("age",)),
+    (re.compile(r"\b(car|drive)\b", re.I), ("car",)),
+    (re.compile(r"\b(kids|children)\b", re.I), ("number of children",)),
+]
+
+
+# a question about someone else: "my brother", a name, he/she/they
+_ABOUT_OTHER = re.compile(
+    r"\bmy\s+(?!(?:job|work|role|title|diet|car|address|age|home|place|"
+    r"house|flat|apartment|kids|children|employer|career|occupation|"
+    r"profession|relationship|current|new|old|favou?rite|own)\b)[a-z]+|"
+    r"\b(he|she|they|his|her|their|him|them)\b|(?<!^)\b(?!I\b)[A-Z][a-z]+", )
+
+
+def _family_grounded(query, hits):
+    if _ABOUT_OTHER.search((query or "").strip()):
+        return False
+    asked = {f for rx, fams in _QUESTION_FAMILIES if rx.search(query or "")
+             for f in fams}
+    if not asked:
+        return False
+    import currency
+    for h in hits:
+        fams = {f for f, _ in currency._families(h.get("attr"), h.get("value"))}
+        if fams & asked:
+            return True
+    return False
+
+
 def _grounded(query, hits, owner=None):
     """True when any candidate shares a content word with the question.
 
@@ -655,7 +700,8 @@ class Memory:
             top3 = [h for h, _ in scored[:3]]
             if not (_grounded(query, top3, owner=own)
                     or _dense_grounded(idx, _strip_owner(
-                        query, own, _entity_names(top3)))):
+                        query, own, _entity_names(top3)))
+                    or _family_grounded(query, [h for h, _ in scored[:10]])):
                 return self._abstain(query, idx, gate="grounding")
         kept = list(scored)
         # 2026-10-02: scoping -- another project's facts are not this one's.
