@@ -30,12 +30,13 @@ def main():
     a = ap.parse_args()
     cls = {"sourcedrecall": adapters.SourcedRecallAdapter, "mem0": adapters.Mem0Adapter,
            "rag": adapters.RagAdapter}[a.system]
-    out = a.out or os.path.join(HERE, "results", f"raw_{a.system}.jsonl")
+    results = os.environ.get("FM_RESULTS") or os.path.join(HERE, "results")
+    out = a.out or os.path.join(results, f"raw_{a.system}.jsonl")
     os.makedirs(os.path.dirname(out), exist_ok=True)
     done = set()
     if os.path.exists(out):
         done = {json.loads(l)["id"] for l in open(out)}
-    cases = [json.loads(l) for l in open(os.path.join(HERE, "cases.jsonl"))]
+    cases = [json.loads(l) for l in open(os.environ.get("FM_CASES") or os.path.join(HERE, "cases.jsonl"))]
     want = set(a.ids.split(",")) if a.ids else None
     for c in cases:
         if want and c["id"] not in want:

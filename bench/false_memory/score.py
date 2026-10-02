@@ -33,6 +33,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import judge  # noqa: E402
 
+RESULTS = os.environ.get("FM_RESULTS") or os.path.join(HERE, "results")
+CASES = os.environ.get("FM_CASES") or os.path.join(HERE, "cases.jsonl")
+OVERRIDES = os.environ.get("FM_OVERRIDES") or os.path.join(HERE, "audit_overrides.json")
 SEED = 20261002
 REPS = 10000
 SYSTEMS = ["sourcedrecall", "mem0", "rag"]
@@ -131,7 +134,7 @@ def _k(line):
 
 def apply_overrides(rows, system):
     """Manual audit of judge errors, see audit_overrides.json."""
-    ov = [o for o in json.load(open(os.path.join(HERE, "audit_overrides.json")))["overrides"]
+    ov = [o for o in json.load(open(OVERRIDES))["overrides"]
           if o["system"] == system]
     out = []
     for r in rows:
@@ -165,13 +168,13 @@ def pct(x):
 
 
 def main():
-    cases = load(os.path.join(HERE, "cases.jsonl"))
+    cases = load(CASES)
     result = {"seed": SEED, "bootstrap_reps": REPS, "judge_model": judge.MODEL,
               "systems": {}}
     print("bootstrap seed", SEED, "reps", REPS)
     details = []
     for s in SYSTEMS:
-        raw = {r["id"]: r for r in load(os.path.join(HERE, "results", f"raw_{s}.jsonl"))}
+        raw = {r["id"]: r for r in load(os.path.join(RESULTS, f"raw_{s}.jsonl"))}
         if not raw:
             continue
         views = ["lines"] + (["context"] if s == "sourcedrecall" else [])
@@ -187,8 +190,8 @@ def main():
             print(s, v, "scored", flush=True)
     result["n_scenarios"] = len(cases)
     result["n_heldout"] = sum(c["split"] == "heldout" for c in cases)
-    json.dump(result, open(os.path.join(HERE, "results", "results.json"), "w"), indent=1)
-    with open(os.path.join(HERE, "results", "probe_details.jsonl"), "w") as f:
+    json.dump(result, open(os.path.join(RESULTS, "results.json"), "w"), indent=1)
+    with open(os.path.join(RESULTS, "probe_details.jsonl"), "w") as f:
         for d in details:
             f.write(json.dumps(d, ensure_ascii=False) + "\n")
     write_md(result)
@@ -233,7 +236,7 @@ def write_md(res):
                  f'{c["seconds"]} | {c["seconds_per_message"]} |')
     L += ["", f'Cells: rate [95% CI] (k/n). Cluster bootstrap over scenarios, seed {res["seed"]}, '
               f'{res["bootstrap_reps"]} resamples. Judge: {res["judge_model"]}, temperature 0.']
-    open(os.path.join(HERE, "results", "results.md"), "w").write("\n".join(L) + "\n")
+    open(os.path.join(RESULTS, "results.md"), "w").write("\n".join(L) + "\n")
     print("\n".join(L))
 
 

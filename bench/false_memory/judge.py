@@ -13,7 +13,8 @@ import time
 import urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-LOG = os.path.join(HERE, "results", "judge_log.jsonl")
+RESULTS = os.environ.get("FM_RESULTS") or os.path.join(HERE, "results")
+LOG = os.path.join(RESULTS, "judge_log.jsonl")
 OLLAMA = os.environ.get("OLLAMA_HOST_URL", "http://127.0.0.1:11434")
 MODEL = os.environ.get("FM_JUDGE_MODEL", "qwen3:14b")
 OPTIONS = {"temperature": 0, "num_ctx": 1536, "num_predict": 4, "seed": 0}

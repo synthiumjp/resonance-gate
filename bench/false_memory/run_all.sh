@@ -8,12 +8,16 @@
 #   OURS_PY   python with stanza + the sourcedrecall dependencies
 #   MEM0_PY   venv with mem0ai ollama sentence-transformers  (also runs the RAG baseline)
 #   FM_SCRATCH  scratch dir for per-scenario stores
+#   FM_CASES / FM_RESULTS / FM_OVERRIDES  alternative cases file, results dir, audit overrides
+#     (defaults: cases.jsonl, results/, audit_overrides.json), e.g. the blind v2 set:
+#     FM_CASES=cases_v2.jsonl FM_RESULTS=results_v2 FM_OVERRIDES=audit_overrides_v2.json bash run_all.sh rag ours mem0 score
 set -euo pipefail
 cd "$(dirname "$0")"
 OURS_PY=${OURS_PY:-$HOME/rg_private/halumem/official/.venv/bin/python}
 MEM0_PY=${MEM0_PY:-python3}
 export FM_SCRATCH=${FM_SCRATCH:-/tmp/fm_scratch}
-mkdir -p "$FM_SCRATCH" results
+export FM_RESULTS=${FM_RESULTS:-}
+mkdir -p "$FM_SCRATCH" "${FM_RESULTS:-results}"
 export MEM0_TELEMETRY=False   # HF is offline for rag/ours (set per step); Mem0 may fetch fastembed's BM25 model once
 CAP=(systemd-run --user --scope -p MemoryMax=6G -p MemorySwapMax=0)   # memory cap for heavy steps
 steps=("$@"); [ ${#steps[@]} -eq 0 ] && steps=(cases rag ours mem0 validate score)

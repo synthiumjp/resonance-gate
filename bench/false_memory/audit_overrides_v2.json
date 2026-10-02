@@ -1,0 +1,26 @@
+{
+ "_note": "Manual adjudication for cases_v2, same mechanism as audit_overrides.json. Read: every flagged line (all systems) and every unflagged line of Mem0 and sourcedrecall, classes a-e. Only clear judge false positives were overridden; no false negatives found. Borderline kept as judged: sourcedrecall a04 (future 'will get a motorbike' without the condition), mem0 e02.",
+ "overrides": [
+  {
+   "system": "sourcedrecall",
+   "id": "b01",
+   "fm": false,
+   "reason": "records handing in notice; does not state the user currently works at the council",
+   "line": "Jordan Pike is done Handed in Jordan Pike's notice at the council today [they said: \"Handed in my notice at the council today, I'm done.\"]"
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "d06",
+   "fm": false,
+   "reason": "'works as a paramedic' does not state the employer",
+   "line": "Jordan Pike works as a paramedic [they said: \"I work as a paramedic, nights mostly, so my sleep schedule is a mess.\"]"
+  },
+  {
+   "system": "mem0",
+   "id": "d05",
+   "fm": false,
+   "reason": "vineyard in France, no surname stated",
+   "line": "User's uncle Raoul owns a vineyard located in the south of France, and the user visited him when they were young"
+  }
+ ]
+}

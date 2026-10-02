@@ -8,14 +8,14 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 system = sys.argv[1]
 cls = sys.argv[2] if len(sys.argv) > 2 else "acde"
 cases = {}
-for ln in open(os.path.join(HERE, "cases.jsonl")):
+for ln in open(os.environ.get("FM_CASES") or os.path.join(HERE, "cases.jsonl")):
     c = json.loads(ln)
     cases[c["id"]] = c
 raw = {}
-for ln in open(os.path.join(HERE, "results", f"raw_{system}.jsonl")):
+for ln in open(os.path.join(os.environ.get("FM_RESULTS") or os.path.join(HERE, "results"), f"raw_{system}.jsonl")):
     r = json.loads(ln)
     raw[r["id"]] = r
-for ln in open(os.path.join(HERE, "results", "probe_details.jsonl")):
+for ln in open(os.path.join(os.environ.get("FM_RESULTS") or os.path.join(HERE, "results"), "probe_details.jsonl")):
     d = json.loads(ln)
     if d["system"] == system and d["view"] == "lines" and d["class"] in cls and not d.get("fm"):
         c = cases[d["id"]]
