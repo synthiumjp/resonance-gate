@@ -69,8 +69,11 @@ import qtype_gate as QG   # noqa: E402  (entry 179)
 from llms import llm_request        # noqa: E402  (harness-local)
 from prompts import PROMPT_MEMZERO  # noqa: E402
 
-DEFAULT_DATA_PATH = os.path.expanduser("~/rg_private/halumem/HaluMem-Medium.jsonl")
-DEFAULT_CACHE_DIR = os.path.expanduser("~/rg_private/halumem")
+# RG_PRIVATE overrides the private data root (2026-10-02: on the Mac it is
+# ~/jpwork/rg_private).
+_PRIVATE = os.path.expanduser(os.environ.get("RG_PRIVATE", "~/rg_private"))
+DEFAULT_DATA_PATH = os.path.join(_PRIVATE, "halumem", "HaluMem-Medium.jsonl")
+DEFAULT_CACHE_DIR = os.path.join(_PRIVATE, "halumem")
 
 _TIMELINE = os.environ.get("RG_TIMELINE", "0") == "1"
 
