@@ -230,6 +230,36 @@ PARTIAL_KNOWLEDGE = [
     ("What is Sam's salary?", "Sam", "salary"),
 ]
 
+# HELD-OUT (2026-10-02). Written and committed BEFORE the attribute-level
+# answerability rule existed, and not used to design or tune it: the rule is
+# built on ANSWERABLE / PARTIAL_KNOWLEDGE above and checked here once. Same
+# corpus. A broken rule shows up as refusals in HELDOUT_ANSWERABLE or
+# answers in HELDOUT_PARTIAL.
+HELDOUT_ANSWERABLE = {
+    "What colour is my bike?":                  "red",
+    "What colour is my scooter?":               "blue",
+    "How often do I work from home?":           "three days",
+    "How long was my old commute?":             "90 minutes",
+    "Who suggested I learn Rust?":              "Priya",
+    "What did I switch to instead of coffee?":  "tea",
+    "What was I promoted to?":                  "senior engineer",
+    "Where is the main database replicated?":   "three regions",
+    "What editor do I use?":                    "editor is",
+    "What pets do I have?":                     "dog",
+    "What languages do I like?":                "likes",
+    "Which database do I use?":                 "Postgres",
+}
+HELDOUT_PARTIAL = [
+    ("What colour is my dog?",         "dog",     "colour"),
+    ("What is my cat's name?",         "cat",     "name"),
+    ("What year did I buy my car?",    "car",     "year"),
+    ("How much does Sam earn?",        "Sam",     "earn"),
+    ("What is Priya's last name?",     "Priya",   "last name"),
+    ("How fast is my scooter?",        "scooter", "fast"),
+    ("Where is Acme based?",           "Acme",    "based"),
+    ("How old is my dog?",             "dog",     "old"),
+]
+
 # e281: NEVER-MENTIONED topics whose question NAMES THE OWNER. Every rendered
 # fact begins with the owner's name, so a question carrying it shared a
 # "content word" with every record and grounding let it through: "What is
