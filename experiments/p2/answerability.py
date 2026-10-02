@@ -114,6 +114,9 @@ def read_question(q):
         if ent:
             # "the billing service in" -> "the billing service"
             ent = re.sub(r"\s+(in|at|on|to|for|from|of|with|by)$", "", ent)
+            # "the atlas project written" -> "the atlas project"
+            ent = re.sub(r"\s+(written|made|built|based|located|run|hosted)$",
+                         "", ent)
             # "i born in", "i buy" -> the owner
             if re.match(r"^(i|me|myself)\b", ent):
                 ent = None
@@ -142,6 +145,11 @@ def _kind(att):
 
 
 _ENT_STOP = {"the", "and", "our", "your", "his", "her", "their", "its"}
+# generic heads: "the Atlas project" is mentioned by "Atlas is written in
+# Go"; "the billing service" still needs "billing" (review 2026-10-02)
+_GENERIC_HEADS = {"project", "service", "app", "application", "team",
+                  "company", "system", "tool", "product", "website", "site",
+                  "repo", "codebase", "platform", "thing"}
 
 
 def _mentions(text, ent):
@@ -152,6 +160,8 @@ def _mentions(text, ent):
         return True
     words = [w for w in re.findall(r"[a-z]+", ent)
              if len(w) > 2 and w not in _ENT_STOP]
+    specific = [w for w in words if w not in _GENERIC_HEADS]
+    words = specific or words
     tl = text.lower()
     return all(re.search(rf"\b{re.escape(w)}s?\b", tl) for w in words) if words else True
 
@@ -183,11 +193,16 @@ def answers(fact, q_read, owner=None):
         # the entity ("Priya Sharma", "my cat Tom").
         if re.search(r"\b(called|named|name is)\b", tl):
             return True
+        # Review 2026-10-02: "My wife is Priya", "my dentist is Dr Lee" -- a
+        # copula and a title may stand between the entity and the name.
         own = {w.lower() for w in re.findall(r"[A-Za-z]+", owner or "")}
         for w in [w for w in re.findall(r"[a-z]+", ent or "") if len(w) > 2]:
-            for m in re.finditer(rf"\b{re.escape(w)}s?\b\s+([A-Z][a-z]+)", text,
-                                 re.I):
-                if m.group(1).lower() not in own and m.group(1)[0].isupper():
+            for m in re.finditer(
+                    rf"\b{re.escape(w)}(?:'s|s)?\b(?:\s+(?:is|was|'s))?"
+                    rf"(?:\s+(?:Dr|Mr|Mrs|Ms|Miss|Prof)\.?)?\s+([A-Za-z]+)",
+                    text, re.I):
+                nm = m.group(1)
+                if nm[0].isupper() and nm.lower() not in own:
                     return True
         return False
     if kind == "number":

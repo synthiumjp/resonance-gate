@@ -479,6 +479,40 @@ def test_an_ending_names_what_it_ends(old_text, cess_attr, cess_value, cess_text
 
 
 def test_a_job_described_by_what_you_do_for_an_organisation():
-    fams = dict(C._families("do", "freight scheduling for a shipping firm"))
+    """Grounds a question about work, never replaces an employer: "I do the
+    garden for the council" is not a new job (review 2026-10-02)."""
+    fams = dict(C._families("do", "freight scheduling for a shipping firm",
+                            weak=True))
     assert "employer" in fams
-    assert C._families("do", "the dishes for the family") == []
+    assert C._families("do", "freight scheduling for a shipping firm") == []
+    assert C._families("do", "the dishes for the family", weak=True) == []
+
+
+
+# ---- review 2026-10-02 (round 2): true facts wrongly ended ----------------
+
+@pytest.mark.parametrize("old,new", [
+    (("live_in", "in leeds"), ("flat", "in a terrible state")),
+    (("live_in", "in leeds"), ("house", "in need of a new roof")),
+    (("live_in", "in leeds"), ("house", "in good shape")),
+    (("is", "vegetarian"), ("start", "eating fish fingers for lunch")),
+    (("is", "vegetarian"), ("start", "eating meat-free burgers")),
+    (("is", "vegetarian"), ("eat", "fish and chips once a year on holiday")),
+    (("work_at", "at acme"), ("do", "freelance design for a charity")),
+    (("is", "a nurse"), ("start_as", "as an intern in a lab for a week")),
+    (("is", "a nurse"), ("hire_as", "as a tutor for my kid")),
+])
+def test_review2_not_a_change_of_state(old, new):
+    assert C.mark_state_changes(_pair(*old, *new), order=ORDER) == []
+
+
+@pytest.mark.parametrize("old_text,cess_text", [
+    ("Dana Cole lives in Leeds", "Dana Cole's friend died in Leeds last year"),
+    ("Dana Cole works at St Mary's", "Dana Cole's nan passed away at St Mary's"),
+    ("Dana Cole's dad has cancer", "Dana Cole's dog died of cancer"),
+    ("Dana Cole has a dog named Rex and a cat named Tom", "Tom died last year"),
+])
+def test_a_death_ends_only_what_names_who_died(old_text, cess_text):
+    g = _G({"a": _n("a", "x", "", "c1", text=old_text),
+            "b": _n("b", "die", "", "c2", text=cess_text)})
+    assert C.mark_ceased(g, order=ORDER) == []

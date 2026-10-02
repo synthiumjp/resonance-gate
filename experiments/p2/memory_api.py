@@ -448,13 +448,17 @@ _ABOUT_OTHER = re.compile(
 def _family_grounded(query, hits):
     if _ABOUT_OTHER.search((query or "").strip()):
         return False
+    # "What job should I get?" asks for advice, not for a stored fact
+    if re.search(r"\b(should|could|would|might)\b", query or "", re.I):
+        return False
     asked = {f for rx, fams in _QUESTION_FAMILIES if rx.search(query or "")
              for f in fams}
     if not asked:
         return False
     import currency
     for h in hits:
-        fams = {f for f, _ in currency._families(h.get("attr"), h.get("value"))}
+        fams = {f for f, _ in currency._families(h.get("attr"), h.get("value"),
+                                                 weak=True)}
         if fams & asked:
             return True
     return False

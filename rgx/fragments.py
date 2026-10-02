@@ -50,7 +50,16 @@ def _about_user(prev):
     if _THIRD.search(prev) or any(_NAME.search(x) for x in sents[-2:]):
         return False
     qs = [q for q in sents if q.endswith("?")]
-    return bool(qs) and bool(re.search(r"\byou\b", qs[-1], re.I))
+    if not qs:
+        return False
+    q = qs[-1]
+    # Review 2026-10-02: "What would you like me to include in the speech?",
+    # "Can you summarise this?" -- the reply is material for a task, not
+    # news about the user
+    if (re.search(r"\b(me|I|I'll|I'd|my)\b", q)
+            or re.match(r"^\W*(can|could|would|will) you\b", q, re.I)):
+        return False
+    return bool(re.search(r"\byou\b", q, re.I))
 
 
 _DENIAL = re.compile(r"^\W*(no\b|nope|not\b|nah|just kidding|kidding|jk\b|"
@@ -131,6 +140,25 @@ _FIRST_PERSON = re.compile(r"^\W*(i|i'm|i’m|i've|i’ve|i'd|we|we're|we’re|w
                            re.I)
 
 
+_OTHER_IN_SENT = re.compile(
+    r"\babout\b|\b(met|saw|visited|called|read|watched)\b|"
+    r"\bmy\s+(?:" + "|".join(sorted(
+        "dog cat pet puppy kitten wife husband partner boyfriend girlfriend "
+        "mum mom dad mother father son daughter sister brother friend boss "
+        "manager colleague kid kids child children baby neighbour neighbor "
+        "flatmate roommate".split())) + r")\b")
+
+
+def _mentions_other(sent):
+    """"I'm writing a story about Anna.", "I met Sam today.", "I love my
+    dog." -- the fragment after it may be theirs (review 2026-10-02)."""
+    if _OTHER_IN_SENT.search(sent):
+        return True
+    words = re.findall(r"[A-Za-z']+", sent)
+    return any(w[:1].isupper() and w not in ("I", "I'm", "I've", "I'd")
+               for w in words[1:])
+
+
 def rewrite(text, nlp, prev=None):
     """-> (text to parse, {rewritten sentence: original}) -- unchanged text
     and an empty map when no sentence is an accepted fragment.
@@ -152,7 +180,8 @@ def rewrite(text, nlp, prev=None):
             out.append(new)
         else:
             out.append(sent)
-        about_user = bool(new) or bool(_FIRST_PERSON.match(sent))
+        about_user = bool(new) or (bool(_FIRST_PERSON.match(sent))
+                                   and not _mentions_other(sent))
     if not orig:
         return text, {}
     return " ".join(out), orig

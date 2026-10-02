@@ -644,11 +644,26 @@ def _irrealis_frame(s, head):
                 and a.xpos == "MD" or (a.text or "").lower() in ("will", "'ll", "shall")
                 for a in s.children(p, ("aux",))):
             return True
-    # only an explicit "either": "My dog needs a walk or she goes feral"
-    # asserts its first clause ("or" = otherwise)
+    # An explicit "either", or "or" between predicates of ONE subject ("I'm
+    # vegan or vegetarian", "I got the job or I didn't"). "My dog needs a
+    # walk or she goes feral" asserts its first clause: the "or" joins a
+    # clause with a different subject, and means "otherwise".
+    def _subj_text(w):
+        sb = next(iter(s.children(w, ("nsubj", "nsubj:pass"))), None)
+        return sb.text.lower() if sb is not None else None
+
     def _disj(w):
-        return any((c.lemma or c.text).lower() == "either"
-                   for c in s.children(w, ("cc:preconj",)))
+        if any((c.lemma or c.text).lower() == "either"
+               for c in s.children(w, ("cc:preconj",))):
+            return True
+        for c in s.children(w, ("conj",)):
+            if not any((x.lemma or x.text).lower() == "or"
+                       for x in s.children(c, ("cc",))):
+                continue
+            cs = _subj_text(c)
+            if cs is None or cs == _subj_text(w):
+                return True
+        return False
     if _disj(head):
         return True
     p = s.w.get(head.head) if head.deprel == "conj" else None
@@ -1051,6 +1066,11 @@ def _collect_names(s, allow, out):
         p = s.w.get(w.head)
         if (w.deprel in ("appos", "flat") and p is not None
                 and _poss(s, p, allow) is not None):
+            out.setdefault(w.lemma.lower(), w.text)
+        # "We adopted a beagle called Waffles"
+        if (w.deprel in ("xcomp", "obj") and p is not None
+                and (p.lemma or "").lower() in ("call", "name")
+                and p.deprel == "acl"):
             out.setdefault(w.lemma.lower(), w.text)
 
 
@@ -1575,8 +1595,22 @@ def extract_keyed(text, nlp, owner=None, role="user",
                 args = [c for c in s.children(head)
                         if c.deprel in ARG_DEPS and c.id != head.id
                         and c.id not in negdrop and c.id not in fdrop]
+                # review 2026-10-02: "They might fire me" is not "was
+                # fired" -- no modal, no hedge, no dream or game
+                hedged = (any(a.xpos == "MD" or (a.lemma or "").lower() in
+                              ("will", "would", "could", "might", "may",
+                               "should", "can", "must")
+                              for a in s.children(head, ("aux",)))
+                          or any((c.lemma or "").lower() in
+                                 ("maybe", "probably", "perhaps", "possibly",
+                                  "hopefully")
+                                 for c in s.children(head, ("advmod",)))
+                          or any((w.lemma or "").lower() in
+                                 ("dream", "hypothetical", "game", "story",
+                                  "novel", "discord", "server")
+                                 for w in s.subtree(head)))
                 owner_obj = (role == "user" and subj.upos == "PRON"
-                             and subj.text.lower() == "they"
+                             and subj.text.lower() == "they" and not hedged
                              and (head.lemma or "").lower() in AGENTLESS_EMPLOY
                              and next((c for c in s.children(head, ("obj",))
                                        if c.text.lower() in allow), None))

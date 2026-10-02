@@ -105,3 +105,20 @@ def test_a_past_tense_fragment_is_about_the_speaker(ex, turn, want):
 @pytest.mark.parametrize("turn", ["Sell the Corolla.", "Put the keys away."])
 def test_an_imperative_is_not_a_fragment_fact(ex, turn):
     assert run(ex, turn) == []
+
+
+# review 2026-10-02 (round 2)
+@pytest.mark.parametrize("turn", [
+    "I'm writing a story about Anna. Married in 1990, divorced in 2000.",
+    "I met Sam today. Moved to Paris in May.",
+    "I love my dog. Chewed the sofa again.",
+])
+def test_a_fragment_after_a_sentence_about_someone_else_is_theirs(ex, turn):
+    recs = run(ex, turn)
+    assert len(recs) <= 1
+
+
+@pytest.mark.parametrize("prev", ["What would you like me to include in the speech?",
+                                  "Can you summarise this?"])
+def test_a_fragment_answering_a_task_is_material_not_news(ex, prev):
+    assert run(ex, "Worked at Ford for 30 years. Married in 1965.", prev=prev) == []

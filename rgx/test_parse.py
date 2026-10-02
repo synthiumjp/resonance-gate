@@ -1254,3 +1254,29 @@ def test_a_name_introduced_with_a_relation_is_kept_later():
 def test_or_meaning_otherwise_still_asserts_the_first_clause(ex):
     out = texts(ex, "My dog Biscuit needs a walk twice a day or she goes feral.")
     assert any("needs a walk twice a day" in p for p in out), out
+
+
+# ---- review 2026-10-02 (round 2) ------------------------------------------
+
+@pytest.mark.parametrize("turn", ["They might fire me.", "They'll probably hire me.",
+                                  "Maybe they promoted me.", "They hired me in my dream."])
+def test_a_hedged_they_is_not_an_event(ex, turn):
+    assert not any(p.startswith("Martin Mark was") or " is fire" in p
+                   or " is hire" in p for p in texts(ex, turn))
+
+
+@pytest.mark.parametrize("turn,bad", [
+    ("I'm vegan or vegetarian, can't remember.", "is vegan"),
+    ("I'm single or divorced.", "is single"),
+    ("I got the job or I didn't, I don't remember.", "got the job"),
+])
+def test_or_between_predicates_of_one_subject_asserts_neither(ex, turn, bad):
+    assert not any(bad in p for p in texts(ex, turn))
+
+
+def test_a_name_introduced_with_called_joins_the_world():
+    from rgx import Extractor
+    e = Extractor(owner_name="Dana Cole")
+    e.reset_world()
+    e.extract_turn("We adopted a beagle called Waffles.", role="user")
+    assert "waffles" in e._world

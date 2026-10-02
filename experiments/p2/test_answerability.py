@@ -35,3 +35,12 @@ def test_what_is_my_x_called_asks_for_a_name():
     assert q == ("daughter", "name")
     assert A.answers({"text": "Jordan Pike's daughter Maya just turned six"}, q,
                      owner="Jordan Pike")
+
+
+@pytest.mark.parametrize("q,text", [
+    ("What is my wife's name?", "Dana Cole's wife is Priya"),
+    ("What is my dentist called?", "Dana Cole's dentist is Dr Lee"),
+    ("What language is the Atlas project written in?", "Atlas is written in Go"),
+])
+def test_review2_answers_restored(q, text):
+    assert A.answers({"text": text}, A.read_question(q), owner="Dana Cole")

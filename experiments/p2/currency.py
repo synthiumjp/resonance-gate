@@ -396,11 +396,12 @@ CESSATION_PREDS = frozenset((
     "abandon", "discontinue", "unsubscribe", "delete", "retire"))
 
 _CESSATION_PHRASES = ("no longer", "not any more", "not anymore",
-                      "used to", "no more",
-                      # 2026-10-02 (false-memory bench): an ending that is an
-                      # event, not a verb in CESSATION_PREDS
-                      " died", "passed away", "split up", "broke up",
-                      "broken up")
+                      "used to", "no more")
+# 2026-10-02 (false-memory bench): an ending that is an event about a
+# PERSON or animal. Review 2026-10-02: it ends only facts that name the same
+# one -- "My friend died in Leeds" ended "I live in Leeds" when the place was
+# what got matched.
+_EVENT_END = (" died", "passed away", "split up", "broke up", "broken up")
 # the cessation's own words, never what it ends ("Biscuit died" ends what
 # mentions Biscuit, not what mentions "died")
 _CESSATION_WORDS = frozenset("""died dies passed away split broke broken
@@ -425,6 +426,45 @@ def _stem(t):
     if len(t) > 3 and t.endswith("s") and not t.endswith("ss"):
         return t[:-1]
     return t
+
+
+def _infer_owner(g):
+    """The name most records start with ("Dana Cole ..."), when the caller
+    did not pass one."""
+    import re
+    from collections import Counter
+    c = Counter()
+    n = 0
+    for st in (g.nodes, g.provisional):
+        for nd in st.values():
+            m = re.match(r"([A-Z][a-z]+ [A-Z][a-z]+)(?:'s)?\b", nd.get("text") or "")
+            n += 1
+            if m:
+                c[m.group(1)] += 1
+    if c:
+        name, k = c.most_common(1)[0]
+        if k >= max(1, 0.3 * n):
+            return name
+    return None
+
+
+def _names(text, owner=None):
+    """Capitalised words that are not the first word or the owner's name,
+    lower-cased."""
+    import re
+    own = {w.lower() for w in re.findall(r"[A-Za-z]+", owner or "")}
+    words = re.findall(r"[A-Za-z][a-z']+", text or "")
+    out = set()
+    for i, w in enumerate(words):
+        b = w.rstrip("'s").rstrip("'")
+        if i and b[:1].isupper() and b.lower() not in own \
+                and b.lower() not in _NOISE:
+            out.add(b.lower())
+    first = words[0].rstrip("'s").rstrip("'") if words else ""
+    if first[:1].isupper() and first.lower() not in own and first.lower() not in (
+            "the", "my", "a", "an", "i", "we", "our"):
+        out.add(first.lower())
+    return out
 
 
 def _content(text):
@@ -461,6 +501,8 @@ def mark_ceased(g, owner=None, order=None):
         "bike is red";
       * a node is never ended by itself, and never by another cessation.
     """
+    if owner is None:
+        owner = _infer_owner(g)
     stores = [g.nodes, g.provisional]
     ceased = []
     cess = []
@@ -469,30 +511,42 @@ def mark_ceased(g, owner=None, order=None):
             attr = (nd.get("attr") or "").lower()
             val = (nd.get("value") or "").lower()
             text = (nd.get("text") or "").lower()
+            if any(p in f" {text}" for p in _EVENT_END):
+                # who died is named BEFORE the verb; "at St Mary's" is where
+                raw = nd.get("text") or ""
+                cut = min(raw.lower().find(p.strip()) for p in _EVENT_END
+                          if p.strip() in raw.lower())
+                names = _names(raw[:cut], owner)
+                if names:
+                    cess.append((nid, nd, names, _latest(nd, order), True))
+                continue
             is_cess = (attr.split("_")[0] in CESSATION_PREDS
                        or any(p in val for p in _CESSATION_PHRASES)
                        or any(p in text for p in _CESSATION_PHRASES))
             if is_cess:
                 toks = _content(nd.get("value")) - _CESSATION_WORDS
-                if not toks:
-                    # "Biscuit died on Tuesday": the value is a time, so
-                    # what ended is named by the rest of the record
-                    toks = (_content(nd.get("text")) - _CESSATION_WORDS
-                            - _content(owner))
                 if toks:
-                    cess.append((nid, nd, toks, _latest(nd, order)))
+                    cess.append((nid, nd, toks, _latest(nd, order), False))
     if not cess:
         return ceased
     for st in stores:
         for nid, nd in st.items():
             ndate = _latest(nd, order)
             hay = f"{nd.get('text') or ''} {nd.get('value') or ''}".lower()
-            for cid, cnd, toks, cdate in cess:
+            for cid, cnd, toks, cdate, by_name in cess:
                 if cid == nid:
+                    continue
+                # "a dog named Rex and a cat named Tom": Tom's death does
+                # not end Rex
+                if by_name and _names(nd.get("text"), owner) - toks:
                     continue
                 if cdate == "" or ndate == "" or ndate >= cdate:
                     continue
-                if not toks.issubset(_content(hay)):
+                if by_name:
+                    import re as _re
+                    if not toks.issubset(set(_re.findall(r"[a-z]+", hay))):
+                        continue
+                elif not toks.issubset(_content(hay)):
                     continue
                 nd["current"] = False
                 nd["superseded_by"] = cid
@@ -589,11 +643,14 @@ def _place_tokens(value):
 
 _RES_PREDS = {"live_in", "reside_in", "move_to", "relocate_to", "settle_in"}
 _HOME_SLOTS = {"place", "house", "flat", "apartment", "home", "unit"}
+_NOT_A_PLACE = frozenset("""a an the need good bad great nice terrible decent
+fine poor perfect excellent awful total complete such process state shape
+order disrepair desperate dire much some""".split())
 _EMP_PREDS = {"work_at", "work_for", "join", "start_at", "employ_by"}
 _JOB_PREDS = {"get", "start", "land", "take", "accept", "work_as"}
 
 
-def _families(attr, value):
+def _families(attr, value, weak=False):
     """-> [(family, value key)] for the single-valued states this fact
     states. A fact can state two ("I work as a nurse at St Vincent's" is a
     role AND an employer). The key is what two facts must share to be the
@@ -605,8 +662,16 @@ def _families(attr, value):
     neg = bool(re.match(r"^(not|no longer)\b", v.strip()))
     # 2026-10-02 (false-memory bench): "Our place is in Northcote" -- the
     # home is the subject and the place its complement
-    if a in _RES_PREDS or (a in _HOME_SLOTS and v.startswith("in ")):
-        t = _place_tokens(v)
+    home = None
+    if a in _HOME_SLOTS:
+        # Review 2026-10-02: "My flat is in a terrible state", "in need of a
+        # new roof", "in good shape" are not addresses. The word after "in"
+        # must start a place name, and only that phrase is the place.
+        m = re.match(r"^in\s+([a-z]+(?:\s+[a-z]+)?)", v)
+        if m and m.group(1).split()[0] not in _NOT_A_PLACE:
+            home = m.group(1)
+    if a in _RES_PREDS or home:
+        t = _place_tokens(home or v)
         if t:
             out.append(("residence", frozenset(t)))
     if a in _EMP_PREDS:
@@ -619,7 +684,10 @@ def _families(attr, value):
                   r"business|startup|bank|hospital|school|council|charity|"
                   r"studio|consultancy|corporation|organi[sz]ation|clinic|"
                   r"university|newspaper|nonprofit|ngo))\b", v)
-    if a in ("do", "handle", "run", "manage", "work") and m and not neg:
+    # Review 2026-10-02: "I do the garden for the council", "I run a book
+    # club for a school" are not jobs, so this only GROUNDS a question about
+    # work (weak=True); it never replaces an employer.
+    if weak and a in ("do", "handle", "run", "manage", "work") and m and not neg:
         t = _place_tokens(m.group(1))
         if t:
             out.append(("employer", frozenset(t)))
@@ -633,12 +701,21 @@ def _families(attr, value):
     m = re.match(r"^(?:eating|to eat)\s+(.*)$", v)
     if a in ("start", "begin", "go_back") and m:
         a, v = "eat", m.group(1)
+    weak_meat = bool(re.search(r"\b(free|fingers?|pies?|substitutes?|"
+                               r"alternatives?|once|occasionally|rarely|for "
+                               r"charity|on holiday|and chips)\b|-free", v))
     head = _head_phrase(re.sub(r"^(?:as|to)\s+", "", v)
                         if a in ("work_as", "start_as", "promote_to", "hire_as")
                         else v)
     hw = re.findall(r"[a-z]+", head)
+    # "started as an intern in a lab for a week", "hired me as a tutor for
+    # my kid": a role with a "for" phrase is a stint, not a change of job --
+    # it grounds a question but does not replace the role
+    stint = (a in ("start_as", "hire_as") and re.search(r"\bfor\b", v)
+             and not weak)
     if a in ("is", "become", "work_as", "train_as", "qualify_as", "start_as",
-             "promote_to", "hire_as") and hw and hw[-1] in _ROLES and not neg:
+             "promote_to", "hire_as") and hw and hw[-1] in _ROLES and not neg \
+            and not stint:
         # the role noun plus the modifier just before it: 'ward manager',
         # 'team lead', but 'senior nurse' == 'nurse' -- except after a
         # promotion, where the level is the change
@@ -652,8 +729,8 @@ def _families(attr, value):
         out.append(("role", frozenset([role])))
     if a in ("is", "become", "go", "turn", "eat") and hw and hw[-1] in _DIETS:
         out.append(("diet", frozenset([("not " if neg else "") + hw[-1]])))
-    if a == "eat" and re.search(r"\b(meat|chicken|beef|fish|pork)\b", v) \
-            and not neg:
+    if a == "eat" and re.search(r"\b(meat|chicken|beef|fish|pork|seafood)\b", v) \
+            and not neg and not weak_meat:
         out.append(("diet", frozenset(["eats meat"])))
     if a in ("is", "become", "get") and hw and hw[-1] in _STATUS:
         out.append(("relationship status",
