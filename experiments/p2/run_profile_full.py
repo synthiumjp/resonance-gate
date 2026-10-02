@@ -290,6 +290,7 @@ def _cluster(entries, trace=False):
                              # by later merges, so it stays the winning
                              # label's own proposition text.
                              "text": d.get("text"),
+                             "source": d.get("source"),
                              # entry 246: hearsay-mention count for this
                              # (first) variant; see the merge branch above.
                              "n_hearsay": d.get("n_hearsay", 0)})

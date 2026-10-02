@@ -1065,3 +1065,29 @@ def test_a_short_verb_is_grounded_after_the_person_shift(ex):
     whole record was silently dropped."""
     out = texts(ex, "I go to the gym on Tuesdays.")
     assert any("goes to the gym" in p for p in out), out
+
+
+# ---- 2026-10-02: every record carries its source sentence, verbatim ------
+
+def test_a_record_carries_its_own_sentence_verbatim():
+    from rgx import Extractor
+    ex = Extractor(owner_name="Martin Mark")
+    turn = "I work at Acme as a backend engineer. My partner Sam is a chef."
+    recs = ex.extract_turn(turn, role="user")
+    assert recs
+    for r in recs:
+        assert r.source in ("I work at Acme as a backend engineer.",
+                            "My partner Sam is a chef."), r.source
+        # the source is the sentence the record was read FROM
+        if "Acme" in r.text:
+            assert r.source.startswith("I work at Acme")
+        if "chef" in r.text:
+            assert r.source.startswith("My partner Sam")
+
+
+def test_the_source_survives_into_the_cache_fact():
+    from rgx import Extractor
+    from rgx.facts import to_fact
+    ex = Extractor(owner_name="Martin Mark")
+    f = [to_fact(r) for r in ex.extract_turn("I live in Leeds.", role="user")]
+    assert any(x and x.get("source") == "I live in Leeds." for x in f)

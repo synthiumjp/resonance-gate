@@ -95,3 +95,37 @@ def test_the_rules_no_longer_claim_every_line_is_corroborated(mem):
     """The old text asserted one tier for a block that renders two."""
     assert "The facts above are corroborated" not in mem.context_block()
     assert "CORROBORATED" in MA._RULES and "UNCONFIRMED" in MA._RULES
+
+
+# ---- 2026-10-02: the context block quotes what was actually said ----------
+
+def test_a_fact_renders_with_its_verbatim_quote(monkeypatch):
+    import memory_api as MA
+    monkeypatch.delenv("RG_CONTEXT_QUOTES", raising=False)
+    f = {"attribute": "work_at", "value": "acme",
+         "text": "Alex Reyes works at Acme",
+         "said": "I work at Acme as a backend engineer."}
+    assert MA._render_fact(f) == ('Alex Reyes works at Acme  '
+                                  '[said: "I work at Acme as a backend engineer."]')
+
+
+def test_the_quote_can_be_switched_off(monkeypatch):
+    import memory_api as MA
+    monkeypatch.setenv("RG_CONTEXT_QUOTES", "0")
+    f = {"attribute": "a", "value": "v", "text": "T", "said": "S"}
+    assert MA._render_fact(f) == "T"
+
+
+def test_a_fact_without_a_source_renders_as_before(monkeypatch):
+    import memory_api as MA
+    monkeypatch.delenv("RG_CONTEXT_QUOTES", raising=False)
+    assert MA._render_fact({"attribute": "a", "value": "v", "text": "T"}) == "T"
+    assert MA._render_fact({"attribute": "a", "value": "v"}) == "a: v"
+
+
+def test_a_long_quote_is_truncated_not_dropped(monkeypatch):
+    import memory_api as MA
+    monkeypatch.delenv("RG_CONTEXT_QUOTES", raising=False)
+    out = MA._render_fact({"attribute": "a", "value": "v", "text": "T",
+                           "said": "x" * 500})
+    assert out.endswith('..."]') and len(out) < 230

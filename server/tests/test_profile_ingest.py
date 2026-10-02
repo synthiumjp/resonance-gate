@@ -137,3 +137,17 @@ def test_empty_turns_is_a_safe_no_op(pm):
     res = pm.profile_ingest([])
     assert res == {"conversation_id": None, "turns": 0, "facts": 0,
                     "hearsay": 0, "skipped_cached": 0, "model_calls": 0}
+
+
+def test_the_context_block_quotes_the_users_own_sentence(pm):
+    """2026-10-02: the proposition is a rewrite; the quote is what was said.
+    Every inversion class fixed since e240 lived in the rewrite, so the block
+    an agent receives must carry the original sentence beside it."""
+    pm.profile_ingest([{"role": "user",
+                        "content": "Neither my wife nor I like horror movies."}],
+                      conversation_id="q1", owner_name="Ada Byron")
+    block = pm.profile_context()["block"]
+    assert '[said: "Neither my wife nor I like horror movies."]' in block
+    out = pm.profile_recall("Do I like horror movies?")
+    said = [f.get("said") for f in out.get("ranked") or out.get("unconfirmed") or []]
+    assert "Neither my wife nor I like horror movies." in said

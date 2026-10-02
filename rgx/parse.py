@@ -1107,7 +1107,8 @@ def _slug(text):
 
 
 def extract_keyed(text, nlp, owner=None, role="user",
-                   owner_pronoun=None, owner_pronoun_obj=None, world=None):
+                   owner_pronoun=None, owner_pronoun_obj=None, world=None,
+                   with_source=False):
     """-> [(proposition, kind, predicate_key, value, evidential)].
     `predicate_key` is the attribute name a slot store files the record
     under and `value` the complement it stores there; `extract` drops all
@@ -1569,7 +1570,15 @@ def extract_keyed(text, nlp, owner=None, role="user",
                     if owner_pronoun:
                         value = _pronominalize(value, o, owner_pronoun,
                                                 owner_pronoun_obj)
-                    out.append((body, kind, pred, value, evidential))
+                    if with_source:
+                        # 2026-10-02: the sentence this record was read
+                        # from, VERBATIM. The proposition is a rewrite and
+                        # every inversion class since e240 lived in the
+                        # rewrite; the source sentence cannot be inverted.
+                        out.append((body, kind, pred, value, evidential,
+                                    sent.text))
+                    else:
+                        out.append((body, kind, pred, value, evidential))
         # e267_CARRY_UPDATE: only AFTER the whole sentence is walked, so a
         # pronoun never resolves to a noun from its own sentence.
         poss_carry.update(sent_poss)

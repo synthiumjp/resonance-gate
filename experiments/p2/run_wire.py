@@ -80,7 +80,7 @@ def _load_assistant_stream(path):
     return stream
 
 
-def _keep_text(slot, new_text):
+def _keep_text(slot, new_text, new_source=None):
     """Choose the proposition text for a (key, value) slot.
 
     e266: rgx emits both a short "atom" and a fuller record off the same
@@ -101,15 +101,21 @@ def _keep_text(slot, new_text):
     banked artifact, and the product path has no banked artifacts to protect.
     """
     import os as _os
+    # 2026-10-02: the verbatim source sentence is kept WITH the text it
+    # belongs to, so a slot's quote is always the sentence its proposition
+    # was read from.
     if _os.environ.get("RG_TEXT_LONGEST") == "0":
-        slot.setdefault("text", new_text)
+        if "text" not in slot:
+            slot["text"] = new_text
+            slot["source"] = new_source
         return
     cur = slot.get("text")
     if new_text and (not cur or len(new_text) > len(cur)):
         slot["text"] = new_text
+        slot["source"] = new_source
 
 
-def build_facts(path, min_mentions=2):
+def build_facts(path, min_mentions=2, sources=None):
     """Corroborated facts with receipts, rebuilt from the cache exactly as
     run_profile_full readout (canon + hygiene + clustering). Returns
     (facts, provisional, hearsay, n_convs, titles, n_uncached) -- provisional
@@ -189,7 +195,7 @@ def build_facts(path, min_mentions=2):
             # rgx cache facts carry the full proposition in "text"; LLM cache
             # facts don't (entry 244). e266: keep the LONGEST, not the first --
             # see _keep_text.
-            _keep_text(slots[key][v], fct.get("text"))
+            _keep_text(slots[key][v], fct.get("text"), fct.get("source"))
 
     # ASSISTANT HEARSAY PASS (entry 246 completion): `prose` above is human-
     # turns-only by design (load_stream_and_titles), so an assistant clause
@@ -231,13 +237,18 @@ def build_facts(path, min_mentions=2):
             key = f"{subj}:{a}" if subj else a
             slots[key][v]["n_hearsay"] = slots[key][v].get("n_hearsay", 0) + 1
             slots[key][v]["recs"].append((date, uuid))
-            _keep_text(slots[key][v], fct.get("text"))
+            _keep_text(slots[key][v], fct.get("text"), fct.get("source"))
 
     facts, prov, hearsay = [], [], []
     for attr, entries in slots.items():
         for cl in PF._cluster(entries):
             row = (cl["n"], attr, cl["label"], cl["recs"], cl["toks"],
                   cl.get("text"), cl.get("n_hearsay", 0))
+            # 2026-10-02: the verbatim source sentence, by node id, returned
+            # through an OPTIONAL out-parameter so the row tuple -- unpacked
+            # by position in several places -- keeps its shape.
+            if sources is not None and cl.get("source"):
+                sources[f"{attr}={cl['label']}"] = cl["source"]
             # cl["toks"]: the cluster's merged-variant token union, so queries
             # match any receipted variant, not just the winning label
             if cl["n"] == 0 and cl.get("n_hearsay", 0) > 0:

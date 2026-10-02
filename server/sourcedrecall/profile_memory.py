@@ -123,10 +123,13 @@ def _build():
     (Memory.load discards it) so profile_status can surface it."""
     from run_wire import build_facts  # local: needs the sys.path bridge above
     from wire import WireGraph
+    sources = {}
     facts, prov, hearsay, n_convs, titles, n_uncached = build_facts(
-        _conversations_path(), min_mentions=2)
+        _conversations_path(), min_mentions=2, sources=sources)
     g = WireGraph.from_facts(facts, n_convs=n_convs, provisional=prov,
                               hearsay=hearsay)
+    from memory_api import _attach_sources
+    _attach_sources(g, sources)
     import currency as _CU          # e273: read the user's own cessations
     if os.environ.get("RG_CESSATION") != "0":
         _CU.mark_ceased(g, order={c: i for i, c in enumerate(titles or {})})

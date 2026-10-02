@@ -264,6 +264,38 @@ GATES = (
 GATE_COUNTS = {g: 0 for g in GATES}
 
 
+def _attach_sources(g, sources):
+    """2026-10-02: hang each node's VERBATIM source sentence on it, by node
+    id, after the graph is built (build_facts returns them through an
+    optional out-parameter so its row tuples keep their shape). A node with
+    no recorded source -- an LLM-cache fact, an owner seed, a cache written
+    before this change -- simply has none, and renders as before."""
+    for store in (g.nodes, g.provisional, getattr(g, "hearsay", {}) or {}):
+        for nid, nd in store.items():
+            if nid in sources:
+                nd["source"] = sources[nid]
+
+
+def _render_fact(f, max_quote=200):
+    """One context-block line body: the proposition, then the sentence it was
+    read from, verbatim.
+
+    2026-10-02. The proposition is a REWRITE of the user's words (third
+    person, owner's name substituted, clause extracted) and every inversion
+    class fixed since e240 lived in that rewrite -- a negation lost in
+    rendering, a pronoun bound to the wrong antecedent, "neither ... nor" left
+    in the noun phrase. The quote is what was actually said, so a reader
+    holding both can never be told the opposite. RG_CONTEXT_QUOTES=0 renders
+    the proposition alone."""
+    prop = f.get("text") or f"{f['attribute']}: {f['value']}"
+    said = (f.get("said") or "").strip()
+    if not said or os.environ.get("RG_CONTEXT_QUOTES") == "0":
+        return prop
+    if len(said) > max_quote:
+        said = said[:max_quote - 3].rstrip() + "..."
+    return f'{prop}  [said: "{said}"]'
+
+
 def gate_report():
     """{gate: refusals so far in this process}. Reset with gate_reset()."""
     return dict(GATE_COUNTS)
@@ -373,10 +405,12 @@ class Memory:
         wiring -- so graph, report and recall stay consistent. The graph-level
         apply_corrections below remains for runtime (in-session) deny/confirm."""
         from run_wire import build_facts
+        sources = {}
         facts, prov, hearsay, n_convs, titles, _ = build_facts(
-            conversations_path, min_mentions)
+            conversations_path, min_mentions, sources=sources)
         g = WireGraph.from_facts(facts, n_convs=n_convs, provisional=prov,
                                  hearsay=hearsay)
+        _attach_sources(g, sources)
         _mark_ceased(g, titles)
         return cls(g, titles)
 
@@ -819,6 +853,8 @@ class Memory:
                 # facts and any node built without it -- callers fall back
                 # to the attribute/value atom exactly as before.
                 "text": nd.get("text"),
+                # 2026-10-02: the sentence the fact was read from, verbatim.
+                "said": nd.get("source"),
                 "mentions": nd["n_mentions"], "status": status,
                 # W1: set at write time by currency.mark_current. Exposed so
                 # every consumer sees one verdict instead of re-deriving it.
@@ -853,11 +889,11 @@ class Memory:
         lines = []
         if query is None:
             for f in self.profile(top=max_facts):
-                prop = f.get("text") or f"{f['attribute']}: {f['value']}"
+                prop = _render_fact(f)
                 lines.append(f"- {prop}  (x{f['mentions']} mentions)")
             n_corr = len(lines)
             for f in self.provisional_profile(top=max_facts - len(lines)):
-                prop = f.get("text") or f"{f['attribute']}: {f['value']}"
+                prop = _render_fact(f)
                 lines.append(f"- UNCONFIRMED (seen once): {prop}")
             head = ("[MEMORY: profile of the user]" if len(lines) > n_corr
                     else "[MEMORY: corroborated profile of the user]")
@@ -876,22 +912,22 @@ class Memory:
                 # v3 path: rank order is the evidence order, so it is kept.
                 # The tier still shows on every line.
                 for f in r["ranked"][:max_facts]:
-                    prop = f.get("text") or f"{f['attribute']}: {f['value']}"
+                    prop = _render_fact(f)
                     if f.get("status") == "unconfirmed-single-mention":
                         lines.append(f"- UNCONFIRMED (seen once): {prop}")
                     else:
                         lines.append(f"- {prop}  (x{f['mentions']} mentions)")
             else:
                 for f in r["asserted"][:max_facts]:
-                    prop = f.get("text") or f"{f['attribute']}: {f['value']}"
+                    prop = _render_fact(f)
                     lines.append(f"- {prop}  (x{f['mentions']} mentions)")
                 for w in r["wired"][:max_facts - len(lines)]:
                     f = w["fact"]
-                    prop = f.get("text") or f"{f['attribute']}: {f['value']}"
+                    prop = _render_fact(f)
                     lines.append(f"- (linked) {prop}  "
                                  f"(x{f['mentions']}, co-occurs with the above)")
                 for f in r["unconfirmed"][:max(0, max_facts - len(lines))]:
-                    prop = f.get("text") or f"{f['attribute']}: {f['value']}"
+                    prop = _render_fact(f)
                     lines.append(f"- UNCONFIRMED (seen once): {prop}")
         block = head + "\n" + "\n".join(lines)
         cf = [c for c in self.conflicts()

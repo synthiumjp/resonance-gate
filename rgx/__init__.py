@@ -55,6 +55,7 @@ class Record:
     predicate: Optional[str] = None  # attribute key: head lemma (+case) / slot
     value: Optional[str] = None      # what sits under that key
     evidential: Optional[str] = None  # "report" (e242): hearsay, not assertion
+    source: Optional[str] = None      # the sentence it was read from, verbatim
 
     def __str__(self):
         return self.text
@@ -104,11 +105,11 @@ class Extractor:
         from . import check as C
         from . import parse as G
         out = []
-        for prop, kind, pred, val, evi in G.extract_keyed(
+        for prop, kind, pred, val, evi, src in G.extract_keyed(
                 text, self._parser(), self.owner_name, role=role,
                 owner_pronoun=self.owner_pronoun,
                 owner_pronoun_obj=self.owner_pronoun_obj,
-                world=self._world):
+                world=self._world, with_source=True):
             if self.check:
                 ok, _why = C.prefilter(prop, text, self.owner_name,
                                        value=val, kind=kind)
@@ -116,7 +117,7 @@ class Extractor:
                     continue
             out.append(Record(text=prop, kind=kind, session=session,
                               turn=turn, role=role, predicate=pred, value=val,
-                              evidential=evi,
+                              evidential=evi, source=src,
                               quality=C.quality(prop, text, self.owner_name)))
         return out
 
