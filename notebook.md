@@ -14675,3 +14675,50 @@ Remarks said in passing (today, tonight, moods) are labelled, leave the
 summary after 3 days and never replace a lasting state. The user sees what
 was saved at session start (systemMessage). The rules say memory is not
 permission.
+
+## Entry 288 — 2026-10-02 (second adversarial review; the first blind comparison.)
+
+### Review round 2 (sonnet, ~270 probes) -> 0.3.6
+
+The 0.3.4/0.3.5 changes cost right answers and ended TRUE facts -- a class
+the first review did not look for. "My wife is Priya" stopped answering
+"What is my wife's name?" (my name rule, written to stop the owner's own
+name counting as an answer, needed the name straight after the entity).
+"My flat is in a terrible state" replaced where the user lives; "My friend
+died in Leeds" ended "I live in Leeds" (an ending matched on the PLACE);
+"I do the garden for the council" replaced the user's employer; "They might
+fire me" became "is fire". All fixed with tests; endings by death or
+separation now need the NAME of who died, so an unnamed "my sister passed
+away" ends nothing -- a deliberate loss of recall for precision.
+Lesson: each fix for a false positive needs its own review for the false
+negatives it creates; a rule written from one failing case is
+over-specified to it (the name rule) or under-specified (the home slot).
+
+### Blind bench (cases_v2, 48 scenarios, committed 72c71ee before any run)
+
+Written by an agent that did not read our code; I have not read the cases
+or outputs. Audited false-memory rate, classes a-e:
+
+| | sourcedrecall 0.3.5 | 0.3.6 | Mem0 2.2.1 | RAG |
+|---|---|---|---|---|
+| false memory | 8% (3/37) | 8% (3/37) | 43% (16/37) | 30% (11/37) |
+| stale | 3/12 | 3/12 | 12/12 | 11/12 |
+| assistant-injected | 0/7 | 0/7 | 4/7 | 0/7 |
+| controls | 13/15 | 13/15 | 15/15 | 15/15 |
+| side recall | 5/11 | 5/11 | 11/11 | 11/11 |
+
+This is the first number from data nobody tuned on: the false-memory
+advantage holds (CIs do not overlap Mem0's). The cost is the same as on v1:
+recall. 0.3.6 = 0.3.5 here -- the review fixes neither helped nor hurt on
+unseen cases. From the auditor's description only ("a conditional kept as
+a plan"), probing my own sentences found "In case I get the bonus" asserted
+the bonus; fixed, row added.
+
+### What is next
+
+Recall is now the gap that matters: when the parser does not produce a
+fact, sourcedrecall returns nothing, and RAG returns the sentence. The §5g
+direction (store the verbatim sentence; the parser supplies LABELS, not the
+only path to recall) is the candidate. It must keep RAG's stale failure out:
+a raw sentence carries no currency, so it can only be offered where no
+parsed fact of the same family exists.
