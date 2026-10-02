@@ -506,7 +506,24 @@ def _negated_matrix(s, head):
     parent = s.w.get(head.head)
     if parent is None:
         return False
-    if (parent.lemma or parent.text or "").lower() in FACTIVE_VERBS:
+    lem = (parent.lemma or parent.text or "").lower()
+    if lem in FACTIVE_VERBS:
+        return False
+    # Review 2026-10-02: two negated matrices PRESUPPOSE their complement and
+    # were cancelling it, so the store kept nothing at all:
+    #   incredulity  "I can't believe I got the job"    -- the job was got
+    #   past ignorance "I never knew I had a brother"   -- the brother exists
+    # Present-tense "I don't know that I'm a good cook" stays a hedge: it is
+    # the PAST tense of "know" that presupposes (you can only fail to have
+    # known something that was true).
+    if lem == "believe" and any(
+            (a.lemma or a.text or "").lower() in ("can", "could")
+            for a in s.children(parent, ("aux",))):
+        return False
+    if lem == "know" and (
+            "Tense=Past" in (parent.feats or "")
+            or any("Tense=Past" in (a.feats or "")
+                   for a in s.children(parent, ("aux",)))):
         return False
     neg, _ = _negated(s, parent)
     return neg

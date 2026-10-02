@@ -243,6 +243,77 @@ CASES = [
          control_role="user", control_asserts="is a vegetarian",
          assert_instead="is a vegetarian"),
 
+    # ---- NEGATION THAT DOES NOT CANCEL (review 2026-10-02) ------------------
+    # e278's `_negated_matrix` cancelled the complement under ANY negated
+    # matrix that was not on a short factive list, and the review found true
+    # facts it now loses: "I can't believe I got the job" stored NOTHING.
+    # Added before the fix. Two failed (can't believe, never knew: nothing
+    # stored at all). The rest PASS on the matrix record, which carries the
+    # complement ("did not know Alex Reyes had a brother") and which the
+    # product read path retrieves -- verified 2026-10-02 -- so they guard
+    # against total loss, not against losing the bare duplicate.
+    dict(capability="negation", operator="incredulity (can't believe) -- presupposes",
+         role="user",
+         irrealis="I can't believe I got the job.",
+         must_not=None,
+         control="I got the job.",
+         control_role="user", control_asserts="got the job",
+         assert_instead="got the job"),
+
+    dict(capability="negation", operator="past ignorance (didn't know) -- presupposes",
+         role="user",
+         irrealis="I didn't know I had a brother.",
+         must_not=None,
+         control="I had a brother.",
+         control_role="user", control_asserts="had a brother",
+         assert_instead="had a brother"),
+
+    dict(capability="negation", operator="past ignorance (never knew) -- presupposes",
+         role="user",
+         irrealis="I never knew I had a brother.",
+         must_not=None,
+         control="I had a brother.",
+         control_role="user", control_asserts="had a brother",
+         assert_instead="had a brother"),
+
+    dict(capability="negation", operator="negated telling scopes over the telling",
+         role="user",
+         irrealis="I haven't told my parents I moved to Berlin.",
+         must_not=None,
+         control="I moved to Berlin.",
+         control_role="user", control_asserts="moved to Berlin",
+         assert_instead="moved to Berlin"),
+
+    # present-tense "don't know that" IS a hedge, unlike "didn't know"
+    dict(capability="negation", operator="present hedge (don't know that)",
+         role="user",
+         irrealis="I don't know that I'm a good cook.",
+         must_not="is a good cook", unless_contains="know",
+         control="I'm a good cook.",
+         control_role="user", control_asserts="is a good cook"),
+
+    # ---- THIRD-PARTY REPORTS KEEP THE ATTRIBUTED FORM ------------------------
+    # "The doctor told me I have diabetes" no longer stores the bare fact, but
+    # the attributed record survives and answers "Do I have diabetes?" at
+    # rank 1 (verified through the product read path, 2026-10-02). These rows
+    # lock that in: the fact must stay in the store, WITH its source.
+    dict(capability="factivity", operator="third-party news told to the owner",
+         role="user",
+         irrealis="The doctor told me I have diabetes.",
+         must_not=None,
+         control="I have diabetes.",
+         control_role="user", control_asserts="has diabetes",
+         assert_instead="has diabetes"),
+
+    # the owner as a CO-subject is the owner's own attitude, not a third party's
+    dict(capability="factivity", operator="owner-inclusive plural attitude",
+         role="user",
+         irrealis="My wife and I think we should move to Berlin.",
+         must_not=None,
+         control="We should move to Berlin.",
+         control_role="user", control_asserts="should move to Berlin",
+         assert_instead="should move to Berlin"),
+
     # a modal inside an ASSISTANT report frame must survive into the record
     dict(capability="modal", operator="modal under a report frame (assistant)",
          role="assistant",
