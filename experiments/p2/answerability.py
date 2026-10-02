@@ -137,12 +137,19 @@ def _kind(att):
     return None
 
 
+_ENT_STOP = {"the", "and", "our", "your", "his", "her", "their", "its"}
+
+
 def _mentions(text, ent):
+    """Every content word of the entity: "the billing service" is not
+    mentioned by "the pricing service" (tools/scale_test.py, 2026-10-02 --
+    any one word let filler about other services answer)."""
     if not ent:
         return True
-    words = [w for w in re.findall(r"[a-z]+", ent) if len(w) > 2]
+    words = [w for w in re.findall(r"[a-z]+", ent)
+             if len(w) > 2 and w not in _ENT_STOP]
     tl = text.lower()
-    return any(re.search(rf"\b{re.escape(w)}s?\b", tl) for w in words) if words else True
+    return all(re.search(rf"\b{re.escape(w)}s?\b", tl) for w in words) if words else True
 
 
 def answers(fact, q_read, owner=None):

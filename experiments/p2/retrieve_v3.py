@@ -40,7 +40,13 @@ class IndexV3:
         self.facts = (list(facts) if facts is not None
                       else list(mem.g.nodes.values())
                       + list(mem.g.provisional.values()))
-        self.docs = [RV._stems(d["attr"]) | RV._stems(d["value"]) for d in self.facts]
+        # 2026-10-02 (tools/scale_test.py): the record's own words are
+        # indexed too. A world fact's key is the subject's head lemma
+        # ("service_write_in"), so "billing" was never indexed and "What
+        # language is the billing service in?" lost the fact to filler once
+        # the store had a few hundred "service" facts.
+        self.docs = [RV._stems(d["attr"]) | RV._stems(d["value"])
+                     | RV._stems(d.get("text") or "") for d in self.facts]
         n = len(self.facts)
         from collections import Counter
         df = Counter()

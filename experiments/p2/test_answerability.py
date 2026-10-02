@@ -22,3 +22,9 @@ def test_a_last_name_must_follow_the_person(text, ok):
 def test_a_pet_name(text, ok):
     q = A.read_question("What is my cat's name?")
     assert A.answers({"text": text}, q, owner="Alex Reyes") is ok
+
+
+def test_an_entity_is_mentioned_only_by_all_its_words():
+    q = A.read_question("What language is the billing service in?")
+    assert A.answers({"text": "the billing service is written in Go"}, q)
+    assert not A.answers({"text": "Quin moved the pricing service to Java"}, q)

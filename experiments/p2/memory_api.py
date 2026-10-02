@@ -424,8 +424,8 @@ _QUESTION_FAMILIES = [
     (re.compile(r"\bwhere\b.*\b(live|living|based|stay|staying)\b|"
                 r"\b(address|home ?town|which city|what city|suburb)\b", re.I),
      ("residence",)),
-    (re.compile(r"\b(work|job|occupation|profession|career|employer|"
-                r"for a living|job title|role)\b", re.I),
+    (re.compile(r"\b(work|job|occupation|profession|career|employer|employs?|"
+                r"employed|for a living|job title|role)\b", re.I),
      ("role", "employer")),
     (re.compile(r"\b(diet|vegan|vegetarian|pescatarian|eat meat)\b", re.I),
      ("diet",)),
@@ -674,8 +674,17 @@ class Memory:
         # first version of this reordered the top-8 and changed nothing --
         # the answer was at rank 9.
         rerank = os.environ.get("RG_SUBJECT_RERANK") != "0"
-        pool = max(top_n * 4, 24) if rerank else top_n
-        scored = _RV3.retrieve_facts_v3(idx, query, k=120, dense_k=20,
+        # 2026-10-02: every candidate is scored by the cross-encoder anyway,
+        # so keeping all of them costs nothing; the margin and top_n below
+        # still bound what is returned. With 32, an answer the cross-encoder
+        # under-scores (rank 34, "written in Go" for "what language") was
+        # gone before answerability could put it first.
+        pool = 120 if rerank else top_n
+        # the dense pool grows with the store (capped for the reranker's
+        # cost): at 488 facts "switched to tea" was 34th by similarity to
+        # "What is my beverage of choice?" and never reached the reranker
+        dense_k = min(60, max(20, len(getattr(idx, "facts", [])) // 8))
+        scored = _RV3.retrieve_facts_v3(idx, query, k=120, dense_k=dense_k,
                                         top_n=pool, with_scores=True)
         # e272 CORRECTION TO e258: the floor is an ABSTENTION decision, not a
         # per-record filter. The separation it rests on was measured on the
@@ -745,6 +754,23 @@ class Memory:
         # trusting it. Measured over the whole pool BEFORE truncation, so a
         # superseded fact that answers strongly (demoted by STALE_PENALTY)
         # still sets the bar instead of letting weak neighbours fill the list.
+        # 2026-10-02 (tools/scale_test.py): a question about a named entity
+        # ("What language is the billing service in?") puts the facts that
+        # ANSWER it first, before the margin. The cross-encoder scored "the
+        # billing service is written in Go" 6 points under filler about other
+        # services -- it does not know Go is a language -- and the margin cut
+        # it before answerability ever saw it.
+        if os.environ.get("RG_ANSWERABILITY") != "0":
+            import answerability as _AN
+            _qr = _AN.read_question(query)
+            if _qr and _qr[0]:
+                _own = getattr(idx, "owner", None)
+                _ans = [p for p in kept if _AN.answers(
+                    {"text": p[0].get("text"), "said": p[0].get("source")},
+                    _qr, owner=_own)]
+                if _ans:
+                    _a = {id(p) for p in _ans}
+                    kept = _ans + [p for p in kept if id(p) not in _a]
         _margin = float(os.environ.get("RG_RECALL_MARGIN", RECALL_MARGIN))
         if _margin >= 0 and len(kept) > 1:
             _best = max(sc for _, sc in kept)
