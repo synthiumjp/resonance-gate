@@ -14538,3 +14538,67 @@ user 0. Below that: add users, not runs.
    building) and **`adversary.py`** (a LOCAL adversarial reviewer,
    qwen3.6:27b via ollama; four real defects on its first run) -- both
    portable, both consistent with the no-paid-inference rule.
+
+## Entry 286 — 2026-10-02 (product work since e285: from "a memory" to something a person could install and leave on. Plugin, answerability, scoping, an editable memory file, state families, and four parser drops found one sentence at a time.)
+
+JP: "we want a lightweight, local memory system that people can use and is
+actually useful"; "keep progressing make this a real usable useful
+product". Item 2 of the plan (hooks on JP's own Claude Code) is excluded.
+Everything below is measured on dogfood (TUNED ON -- e285 lesson 3) plus
+the held-out probes committed in 0099100 before the rule they test.
+
+### What shipped (tags pushed: sourcedrecall-v0.2.0, v0.3.0, v0.3.1, v0.3.2)
+
+- **Claude Code plugin** (`plugins/sourcedrecall`, marketplace in the repo).
+  The launcher clones the tag, builds a venv (CPU torch on Linux), installs
+  the server and runs `sourcedrecall-setup` (models, ~59 s); runtime is
+  fully offline. Installed fresh from the v0.2.0 and v0.3.1 tags; the first
+  attempt failed because the log's directory did not exist -- only a fresh
+  install from the tag would have shown it. Options: owner, briefing.
+- **Answerability** (`experiments/p2/answerability.py`, b1ee84a): a fact
+  about the entity is not an answer about the attribute. Held-out
+  unknown-attribute 8/8 refused; the 3 held-out answerable misses are the
+  same 3 with the rule off, so it costs no answers on that set.
+- **A memory you can read and edit** (beef30f): MEMORY.md rewritten on
+  every change, 6-char fact ids, forget/confirm by id, `sourcedrecall-memory`.
+  Reading the first rendered file found three junk-fact classes in minutes
+  (stranded prepositions, "can't believe" as negation, report frames in
+  assistant turns) -- reading the output beats any aggregate metric for
+  this class.
+- **Scoping** (437168a): a project is its git root; facts about the user
+  are global; world facts and work statements are scoped to the project
+  they were said in. Cross-project leakage is the most common complaint
+  in the user research.
+- **State families** (currency.py): residence, employer, role, diet,
+  relationship status, age, car, number of children. A later conversation
+  with a different value supersedes; "also" blocks it.
+- **0.3.1**: "I maintain the checkout service. It is written in Rust." kept
+  only the first sentence. A direct object was the single antecedent but
+  the possessive render is copular-only, so the passive follow-up fell
+  through. It now renders the entity, as e269 does for obliques.
+- **0.3.2**: "I got divorced last year", "I'm engaged!", "I retired",
+  "I'm 34" all produced nothing. Four independent drops: (1) a verb with
+  nothing after it is dropped (now: a closed list of life-event verbs may
+  stand alone; "I agree/see/know" still drop); (2) obl:unmarked/obl:tmod
+  were not arguments, so "last year" was cut from EVERY record; (3) the
+  check's 3-letter content rule removed "34"; (4) the prose filter read
+  "I'm 34." as telemetry (2 digits in 7 chars). Plus "I quit" -> "quits".
+
+Dogfood after 0.3.2: rank-1 24/26 (from 22), held-out answerable 10/12
+(from 9), purity 21/21, abstention 12/12, unknown-attribute 8/8. These are
+counts on small sets; read as "nothing regressed", not as effect sizes.
+
+### For the benchmark side
+
+(2) changes HaluMem extraction: time phrases now appear in records that
+used to lose them. The Mac rows launched 13:24 today (qa-rgx4-x-mac,
+fb1, fb2, tl) run the parser from BEFORE this change. Any later HaluMem row
+must be compared against a baseline built from the same parser commit.
+
+### Still open
+
+Subjectless fragments ("Still nursing at St Vincent's though") -- the
+implied subject is the speaker only if the previous assistant turn asked
+about them, so this needs the prior turn, not a looser rule. Coordinated
+owner subjects render awkwardly ("Dana Cole's wife and Dana Cole
+separated"). "Priya suggested it" is not linked to its antecedent.
