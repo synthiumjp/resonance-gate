@@ -263,11 +263,26 @@ def _prewarm():
                 pass
     if os.environ.get("RG_PREWARM") != "0":
         import threading
+        # Not a daemon: a daemon thread cut off mid-load at shutdown aborts
+        # the process ("terminate called without an active exception");
+        # waiting a few seconds for the load to finish is the clean exit.
         threading.Thread(target=run, name="sourcedrecall-prewarm",
-                         daemon=True).start()
+                         daemon=False).start()
+
+
+def _quiet_logs():
+    """Model loading logs every step at INFO to stderr, which an MCP client
+    shows as server output. Warnings and errors still come through."""
+    import logging
+    os.environ.setdefault("TRANSFORMERS_VERBOSITY", "error")
+    os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
+    for name in ("sentence_transformers", "transformers", "stanza",
+                 "huggingface_hub"):
+        logging.getLogger(name).setLevel(logging.WARNING)
 
 
 def main():
+    _quiet_logs()
     _default_memory_dir()
     _prewarm()
     if BROWSER_PORT:

@@ -1,0 +1,111 @@
+#!/usr/bin/env bash
+# Launcher for the sourcedrecall Claude Code plugin.
+#
+#   sourcedrecall-run mcp                  start the MCP server
+#   sourcedrecall-run hook session-start   SessionStart hook
+#   sourcedrecall-run hook session-end     SessionEnd hook
+#   sourcedrecall-run install              install or update now (foreground)
+#
+# Claude Code installs only Node dependencies for plugins, so this script
+# installs the Python side itself, into the plugin's data directory
+# (${CLAUDE_PLUGIN_DATA}, which survives plugin updates): a shallow clone of
+# the source at a pinned tag, a venv, CPU-only torch on Linux, the server
+# package, and the models (sourcedrecall-setup). The first session starts the
+# install in the background and memory is available from the next session.
+# An install is redone when the plugin version changes.
+set -u
+
+REPO_URL="https://github.com/synthiumjp/resonance-gate.git"
+ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
+DATA="${CLAUDE_PLUGIN_DATA:-$HOME/.sourcedrecall/plugin}"
+VERSION="$(sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' "$ROOT/.claude-plugin/plugin.json" | head -1)"
+REF="${SOURCEDRECALL_REF:-sourcedrecall-v$VERSION}"
+SRC="$DATA/src"
+VENV="$DATA/venv"
+STAMP="$DATA/installed"
+LOG="$DATA/install.log"
+LOCK="$DATA/install.lock"
+OWNER="${SOURCEDRECALL_OWNER:-${CLAUDE_PLUGIN_OPTION_OWNER:-}}"
+export SOURCEDRECALL_OWNER="$OWNER"
+
+installed() {
+  [ -x "$VENV/bin/sourcedrecall" ] && [ -f "$STAMP" ] && [ "$(cat "$STAMP")" = "$REF" ]
+}
+
+do_install() {
+  mkdir -p "$DATA"
+  echo "== sourcedrecall install $REF $(date)"
+  command -v git >/dev/null || { echo "git is required"; return 1; }
+  local py=""
+  for c in python3.13 python3.12 python3.11 python3.10 python3; do
+    if command -v "$c" >/dev/null &&
+       "$c" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 10) else 1)'; then
+      py="$(command -v "$c")"; break
+    fi
+  done
+  [ -n "$py" ] || { echo "Python 3.10 or newer is required"; return 1; }
+  if [ -d "$SRC/.git" ]; then
+    git -C "$SRC" fetch --depth 1 origin "refs/tags/$REF:refs/tags/$REF" 2>/dev/null ||
+      git -C "$SRC" fetch --depth 1 origin "$REF" || return 1
+    git -C "$SRC" checkout -q "$REF" 2>/dev/null || git -C "$SRC" checkout -q FETCH_HEAD || return 1
+  else
+    git clone -q --depth 1 --branch "$REF" "$REPO_URL" "$SRC" || return 1
+  fi
+  [ -x "$VENV/bin/python" ] || "$py" -m venv "$VENV" || return 1
+  "$VENV/bin/pip" install -q --upgrade pip || return 1
+  if [ "$(uname -s)" = "Linux" ]; then
+    # the default Linux wheel pulls ~4 GB of CUDA libraries that are never used
+    "$VENV/bin/pip" install -q torch --index-url https://download.pytorch.org/whl/cpu || return 1
+  fi
+  "$VENV/bin/pip" install -q -e "$SRC/server" || return 1
+  "$VENV/bin/sourcedrecall-setup" || return 1
+  echo "$REF" > "$STAMP"
+  echo "== done $(date)"
+}
+
+start_background_install() {
+  mkdir -p "$DATA"
+  # a lock left by an install that died (reboot, kill) expires after an hour
+  if [ -d "$LOCK" ] && [ -n "$(find "$LOCK" -maxdepth 0 -mmin +60 2>/dev/null)" ]; then
+    rmdir "$LOCK" 2>/dev/null
+  fi
+  mkdir "$LOCK" 2>/dev/null || return 1      # already installing
+  nohup bash -c '"$0" install; rmdir "$1" 2>/dev/null' "$0" "$LOCK" \
+    </dev/null >/dev/null 2>&1 &
+  return 0
+}
+
+case "${1:-}" in
+  install)
+    do_install >>"$LOG" 2>&1
+    rc=$?
+    [ $rc -eq 0 ] || echo "sourcedrecall: install failed, see $LOG" >&2
+    exit $rc
+    ;;
+  mcp)
+    if ! installed; then
+      echo "sourcedrecall: not installed yet. The first session starts the install" \
+           "(about 5 minutes); restart Claude Code when $LOG ends with '== done'." >&2
+      exit 1
+    fi
+    exec "$VENV/bin/sourcedrecall"
+    ;;
+  hook)
+    event="${2:-}"
+    if ! installed; then
+      if [ "$event" = "session-start" ] && start_background_install; then
+        printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"[sourcedrecall] Installing local memory (first run, about 5 minutes). Memory will be available from the next session."}}'
+      fi
+      exit 0
+    fi
+    if [ -z "$OWNER" ]; then
+      echo "sourcedrecall: set your name with /plugin configure sourcedrecall" >&2
+      exit 0
+    fi
+    exec "$VENV/bin/sourcedrecall-hook" "$event" --owner "$OWNER"
+    ;;
+  *)
+    echo "usage: sourcedrecall-run install | mcp | hook session-start|session-end" >&2
+    exit 2
+    ;;
+esac

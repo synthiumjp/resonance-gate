@@ -1,0 +1,21 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear",
+        "hooks": [
+          { "type": "command", "timeout": 30,
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/bin/sourcedrecall-run\" hook session-start" }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          { "type": "command", "timeout": 10,
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/bin/sourcedrecall-run\" hook session-end" }
+        ]
+      }
+    ]
+  }
+}

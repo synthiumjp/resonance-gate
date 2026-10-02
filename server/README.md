@@ -11,7 +11,23 @@ Facts are extracted by a deterministic grammar parser, not a language model,
 so the store only contains things you actually said. Everything runs on your
 machine.
 
-## Quick start
+## Install in Claude Code (plugin)
+
+```
+/plugin marketplace add synthiumjp/resonance-gate#product-p2
+/plugin install sourcedrecall@resonance-gate
+```
+
+Claude Code asks for your name (the person the memory is about). The first
+session installs the Python side in the background (about 3 to 5 minutes,
+~2.6 GB including models; needs Python 3.10+ and git) and memory is
+available from the next session. After that, each session is stored when it
+ends and the next one starts with the summary. Change the name later with
+`/plugin configure sourcedrecall@resonance-gate`.
+
+The install log is `~/.claude/plugins/data/<plugin id>/install.log`.
+
+## Install manually (any MCP client)
 
 ```bash
 git clone <this repo> rg && cd rg
@@ -363,3 +379,8 @@ Explicit triples:
   `docs/COLLISION_FIX.md`.
 - Collision detection is validated on synthetic pairs only.
 - Not a standalone wheel yet. Install editable from the checkout.
+
+## License
+
+Apache-2.0. See `LICENSE` and `NOTICE` in the repository root. If you use or
+adapt this work, please cite it (`CITATION.cff`).

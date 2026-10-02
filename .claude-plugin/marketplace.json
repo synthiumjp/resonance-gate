@@ -1,0 +1,14 @@
+{
+  "name": "resonance-gate",
+  "description": "Plugins from the Resonance Gate project: sourcedrecall, a local memory for Claude Code.",
+  "owner": {
+    "name": "Jon-Paul Cacioli"
+  },
+  "plugins": [
+    {
+      "name": "sourcedrecall",
+      "source": "./plugins/sourcedrecall",
+      "description": "Local memory for Claude Code: what you tell it, in your own words, with dates. No language model writes the memory."
+    }
+  ]
+}

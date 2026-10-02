@@ -1,0 +1,36 @@
+{
+  "name": "sourcedrecall",
+  "version": "0.2.0",
+  "description": "Local memory for Claude Code. Stores the facts you state about yourself, with your exact words and dates, and gives Claude a short summary at the start of each session. No language model is used to write the memory; everything stays on your machine.",
+  "author": {
+    "name": "Jon-Paul Cacioli"
+  },
+  "homepage": "https://github.com/synthiumjp/resonance-gate/tree/product-p2/server",
+  "repository": "https://github.com/synthiumjp/resonance-gate",
+  "keywords": [
+    "memory",
+    "mcp",
+    "local",
+    "privacy"
+  ],
+  "userConfig": {
+    "owner": {
+      "type": "string",
+      "title": "Your name",
+      "description": "The person this memory is about. Facts are written about this name.",
+      "required": true
+    }
+  },
+  "mcpServers": {
+    "sourcedrecall": {
+      "command": "${CLAUDE_PLUGIN_ROOT}/bin/sourcedrecall-run",
+      "args": [
+        "mcp"
+      ],
+      "env": {
+        "SOURCEDRECALL_OWNER": "${user_config.owner}"
+      }
+    }
+  },
+  "license": "Apache-2.0"
+}
