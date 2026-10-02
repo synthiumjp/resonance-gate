@@ -151,3 +151,26 @@ def test_the_context_block_quotes_the_users_own_sentence(pm):
     out = pm.profile_recall("Do I like horror movies?")
     said = [f.get("said") for f in out.get("ranked") or out.get("unconfirmed") or []]
     assert "Neither my wife nor I like horror movies." in said
+
+
+def test_one_sentence_is_one_mention_however_many_records_it_yields(pm):
+    """2026-10-02: rgx emits a short and a full record off a modified clause,
+    both under one (key, value). They were counted as two mentions, so a
+    single sentence came out CORROBORATED ("said more than once")."""
+    pm.profile_ingest([{"role": "user",
+                        "content": "I might be interested in learning Swift."}],
+                      conversation_id="m1", owner_name="Ada Byron")
+    out = pm.profile_recall("Am I interested in learning Swift?")
+    facts = (out.get("ranked") or []) + (out.get("unconfirmed") or [])
+    swift = [f for f in facts if "Swift" in (f.get("text") or "")]
+    assert swift and all(f["mentions"] == 1 for f in swift), swift
+    assert all(f["status"] == "unconfirmed-single-mention" for f in swift)
+
+
+def test_two_turns_are_two_mentions(pm):
+    pm.profile_ingest([{"role": "user", "content": "I live in Leeds."},
+                       {"role": "user", "content": "Like I said, I live in Leeds."}],
+                      conversation_id="m2", owner_name="Ada Byron")
+    out = pm.profile_recall("Where do I live?")
+    leeds = [f for f in (out.get("ranked") or []) if "Leeds" in (f.get("text") or "")]
+    assert leeds and leeds[0]["mentions"] == 2, leeds

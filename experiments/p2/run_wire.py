@@ -187,15 +187,29 @@ def build_facts(path, min_mentions=2, sources=None):
             # toward "n" (corroboration), or the store treats the assistant's
             # invention as if the user had said it themselves. Receipted
             # regardless, so it stays auditable.
+            # 2026-10-02: a mention is a TURN, not a record. rgx emits a
+            # short and a full record off any clause with a modifier, both
+            # under the same (key, value), so ONE sentence counted twice and
+            # came out "corroborated (x2 mentions)" -- the signal the context
+            # block's rules tell an agent to trust as "said more than once".
+            _sl = slots[key][v]
+            # a TURN: its conversation plus its text hash. `step` is the
+            # CONVERSATION index in this stream, not the turn's, so (uuid,
+            # step) would have merged two different turns of one chat.
+            _tid = (uuid, h)
             if fct.get("evidential") == "report":
-                slots[key][v]["n_hearsay"] = slots[key][v].get("n_hearsay", 0) + 1
-            else:
-                slots[key][v]["n"] += 1
-            slots[key][v]["recs"].append((date, uuid))
+                if _tid not in _sl.setdefault("hturns", set()):
+                    _sl["hturns"].add(_tid)
+                    _sl["n_hearsay"] = _sl.get("n_hearsay", 0) + 1
+                    _sl["recs"].append((date, uuid))
+            elif _tid not in _sl.setdefault("turns", set()):
+                _sl["turns"].add(_tid)
+                _sl["n"] += 1
+                _sl["recs"].append((date, uuid))
             # rgx cache facts carry the full proposition in "text"; LLM cache
             # facts don't (entry 244). e266: keep the LONGEST, not the first --
             # see _keep_text.
-            _keep_text(slots[key][v], fct.get("text"), fct.get("source"))
+            _keep_text(_sl, fct.get("text"), fct.get("source"))
 
     # ASSISTANT HEARSAY PASS (entry 246 completion): `prose` above is human-
     # turns-only by design (load_stream_and_titles), so an assistant clause
@@ -235,13 +249,31 @@ def build_facts(path, min_mentions=2, sources=None):
                 continue
             subj = fct.get("subject")
             key = f"{subj}:{a}" if subj else a
-            slots[key][v]["n_hearsay"] = slots[key][v].get("n_hearsay", 0) + 1
-            slots[key][v]["recs"].append((date, uuid))
-            _keep_text(slots[key][v], fct.get("text"), fct.get("source"))
+            _sl = slots[key][v]
+            if (uuid, h) not in _sl.setdefault("hturns", set()):
+                _sl["hturns"].add((uuid, h))
+                _sl["n_hearsay"] = _sl.get("n_hearsay", 0) + 1
+                _sl["recs"].append((date, uuid))
+            _keep_text(_sl, fct.get("text"), fct.get("source"))
 
     facts, prov, hearsay = [], [], []
     for attr, entries in slots.items():
-        for cl in PF._cluster(entries):
+        clusters, vmap = PF._cluster(entries, trace=True)
+        # 2026-10-02: the same rule one level up. Two VARIANT values read off
+        # one turn ("interested" / "interested in learning swift") merge into
+        # one cluster, and _cluster sums their counts. A cluster's mentions
+        # are the DISTINCT turns behind all of its variants.
+        _turns = defaultdict(set)
+        _hturns = defaultdict(set)
+        for _v, _ci in vmap.items():
+            _turns[_ci] |= entries[_v].get("turns", set())
+            _hturns[_ci] |= entries[_v].get("hturns", set())
+        for _ci, cl in enumerate(clusters):
+            if _turns[_ci]:
+                cl["n"] = len(_turns[_ci])
+            if _hturns[_ci]:
+                cl["n_hearsay"] = len(_hturns[_ci])
+        for cl in clusters:
             row = (cl["n"], attr, cl["label"], cl["recs"], cl["toks"],
                   cl.get("text"), cl.get("n_hearsay", 0))
             # 2026-10-02: the verbatim source sentence, by node id, returned
