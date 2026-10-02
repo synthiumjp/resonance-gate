@@ -335,3 +335,31 @@ def test_short_plurals_share_a_stem():
     for a, b in (("dogs", "dog"), ("cars", "car"), ("jobs", "job"), ("gyms", "gym")):
         assert MA._stem(a) == MA._stem(b) == b
     assert MA._stem("bus") == "bus" and MA._stem("gas") == "gas"
+
+
+# ---- review 2026-10-02: `wired` seeds from rank 1 or not at all ------------
+
+class _WalkGraph:
+    def __init__(self, nodes):
+        self.nodes = nodes
+        self.provisional = {}
+        self.seeds = []
+
+    def neighbourhood(self, seeds, **kw):
+        self.seeds.append(dict(seeds))
+        return []
+
+
+def test_wired_seeds_from_rank_one_only():
+    g = _WalkGraph({"b": {"id": "b", "current": True}})
+    m = MA.Memory(g, {})
+    m._wired_v3([({"id": "p"}, 9.0), ({"id": "b"}, 1.0)])   # rank 1 provisional
+    assert g.seeds == [], "a lower-ranked corroborated hit was used as the seed"
+    m._wired_v3([({"id": "b"}, 9.0)])
+    assert g.seeds == [{"b": 1.0}]
+
+
+def test_a_ceased_fact_never_seeds_wired():
+    g = _WalkGraph({"b": {"id": "b", "current": False}})
+    MA.Memory(g, {})._wired_v3([({"id": "b"}, 9.0)])
+    assert g.seeds == []

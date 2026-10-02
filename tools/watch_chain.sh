@@ -22,9 +22,14 @@ VERSIONS="${2:-}"
 STALL=$((40 * 60))
 seen=0
 jmiss=0
+START=""
 
 while true; do
   [ -f "$CHAIN" ] || { sleep 30; continue; }
+  # a FIXED reference time. The first version compared each log to the chain
+  # log's mtime, which every `say` refreshes -- so a traceback written before
+  # the latest chain line was never seen (review 2026-10-02).
+  [ -n "$START" ] || START=$(( $(stat -c %Y "$CHAIN") - 120 ))
   n=$(wc -l < "$CHAIN")
   if [ "$n" -gt "$seen" ]; then sed -n "$((seen + 1)),${n}p" "$CHAIN"; seen=$n; fi
 
@@ -49,15 +54,15 @@ PY
   fi
 
   if grep -q "FAILED" "$CHAIN"; then
-    echo "ANOMALY: a compose arm failed"
+    echo "ANOMALY: an arm reported FAILED (compose or judge)"
     tail -5 "$Q"/compose_*.log 2>/dev/null | cut -c1-200
     exit 2
   fi
 
   for f in "$Q"/compose_*.log "$Q"/judge_*.log; do
     [ -f "$f" ] || continue
-    # only logs this chain has touched since it started
-    [ "$f" -nt "$CHAIN" ] || continue
+    # only logs written since this chain started
+    [ "$(stat -c %Y "$f")" -ge "$START" ] || continue
     if grep -q "Traceback" "$f"; then
       echo "ANOMALY: Traceback in $(basename "$f")"
       grep -A6 Traceback "$f" | tail -8 | cut -c1-200

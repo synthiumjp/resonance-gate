@@ -175,6 +175,23 @@ def _fb_owner(cache):
     return "the user"
 
 
+# Review 2026-10-02: `_shift` rewrites the pronoun and leaves the clitic, so
+# "I'm happy" became "Martin Mark'm happy" -- a garbled record handed to the
+# judge as an extraction, which would bias the fb rows against themselves.
+_FB_CONTRACT = (
+    (r"\bI'm\b", "I am"), (r"\bI've\b", "I have"), (r"\bI'd\b", "I would"),
+    (r"\bI'll\b", "I will"), (r"\byou're\b", "you are"),
+    (r"\byou've\b", "you have"), (r"\byou'd\b", "you would"),
+    (r"\byou'll\b", "you will"), (r"\bwe're\b", "we are"),
+    (r"\bwe've\b", "we have"))
+
+
+def _fb_expand(sent):
+    for pat, rep in _FB_CONTRACT:
+        sent = re.sub(pat, rep, sent, flags=re.I)
+    return sent
+
+
 def _sentence_fallback(text, facts, is_user, owner, user_toks, level):
     _root = os.path.dirname(os.path.dirname(os.path.dirname(
         os.path.abspath(__file__))))
@@ -196,7 +213,7 @@ def _sentence_fallback(text, facts, is_user, owner, user_toks, level):
         if is_user:
             if re.search(r"\b(you|your)\b", sent, re.I):
                 continue                # addressed to the assistant
-            shifted = _shift(sent, owner, second=False)
+            shifted = _shift(_fb_expand(sent), owner, second=False)
         else:
             if level < 2:
                 continue
@@ -206,7 +223,7 @@ def _sentence_fallback(text, facts, is_user, owner, user_toks, level):
                 continue
             if not user_toks or len(st & user_toks) / len(st) < 0.5:
                 continue                # not grounded in the user's words
-            shifted = _shift(sent, owner, second=True)
+            shifted = _shift(_fb_expand(sent), owner, second=True)
         shifted = shifted.strip().rstrip(".!")
         v = re.sub(r"\s+", " ", shifted.lower())
         out.append({"attribute": "statement", "value": v, "text": shifted,

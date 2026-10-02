@@ -77,12 +77,49 @@ _CACHE_FH = None
 _CACHE_FH_PID = None
 
 
+# The configuration every banked verdict was produced under (2026-09-09):
+# the GGUF tools/run_judged.sh serves, under OPENAI_MODEL=qwen3:14b, with the
+# in-text /no_think prefix, temperature 0, 4096 max tokens.
+_DEFAULT_JUDGE_ID = ("sha256-a8cc1361f3145dc01f6d77c6c82c9116b9ffe3c97b34716fe2"
+                     "0418455876c40e")
+
+
 def _cache_key(kind, prompt):
+    """Review 2026-10-02: the key held only OPENAI_MODEL, which comes from
+    .env ("qwen3:14b") whatever GGUF is actually serving on :8090 --
+    llama_cpp.server ignores the client's model name. Swapping in a second
+    judge would have replayed the first judge's verdicts, which makes a
+    two-judge agreement check meaningless. Anything that changes the verdict
+    is now part of the key, but ONLY when it deviates from the configuration
+    the banked shards were produced under, so those stay valid."""
     h = hashlib.sha1()
     h.update((MODEL or '').encode())
     h.update(b'\x00' + kind.encode() + b'\x00')
     h.update((prompt or '').encode())
+    extra = []
+    jid = os.getenv('RG_JUDGE_ID')
+    if jid and jid != _DEFAULT_JUDGE_ID:
+        extra.append('judge=' + jid)
+    if _NO_THINK:
+        extra.append('native-nothink')
+    elif not _PREFIX_NO_THINK:
+        extra.append('thinking')
+    if common_params.get('temperature', 0.0) != 0.0:
+        extra.append(f"temperature={common_params['temperature']}")
+    if common_params.get('max_tokens', 4096) != 4096:
+        extra.append(f"max_tokens={common_params['max_tokens']}")
+    if extra:
+        h.update(b'\x00' + '|'.join(extra).encode())
     return h.hexdigest()
+
+
+def _cacheable(value):
+    """Review 2026-10-02: an empty string (the `or ''` fallback) or a
+    non-dict JSON body was cached like a verdict and replayed forever, so a
+    retry could never repair it. Only a non-empty answer is a verdict."""
+    if isinstance(value, str):
+        return bool(value.strip())
+    return isinstance(value, dict) and bool(value)
 
 
 def _cache_load():
@@ -111,7 +148,7 @@ def _cache_get(key):
 
 def _cache_put(key, value):
     global _CACHE_FH, _CACHE_FH_PID
-    if not _CACHE_ON:
+    if not _CACHE_ON or not _cacheable(value):
         return
     _CACHE[key] = value
     try:

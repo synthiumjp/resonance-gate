@@ -584,9 +584,15 @@ class Memory:
         # old path filled it. "Wired" answers: what is receipted as
         # co-occurring with THE answer -- the paths carry the edge receipts.
         walk = getattr(self.g, "neighbourhood", None)
-        top = next((h.get("id") for h, _ in kept
-                    if h.get("id") in self.g.nodes), None)
-        if top is None or walk is None:
+        # Review 2026-10-02: this took the first CORROBORATED hit anywhere in
+        # the pool, and most of a real store is provisional -- so the seed was
+        # usually a lower-ranked hit, sometimes a ceased one, and "wired to
+        # THE answer" was false. Seed from rank 1 or not at all: a provisional
+        # rank-1 is never wired (tier invariant), and a superseded fact's
+        # neighbourhood is not the current answer's.
+        top = kept[0][0].get("id") if kept else None
+        node = self.g.nodes.get(top) if top is not None else None
+        if node is None or walk is None or node.get("current") is False:
             return []
         seeds = {top: 1.0}
         return [{"fact": self._fact(d["node"]),

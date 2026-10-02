@@ -46,7 +46,7 @@ class _FakeCompletions:
 
 
 def _load(cache_dir, monkeypatch, content='```json\n{"score": 2}\n```',
-          model="test-judge", cache="1"):
+          model="test-judge", cache="1", prefix="0", judge_id=None):
     """Import llms fresh under a given cache dir, with a stubbed client.
 
     `model` and `cache` are parameters rather than fixed values because the
@@ -59,8 +59,14 @@ def _load(cache_dir, monkeypatch, content='```json\n{"score": 2}\n```',
                  ("RETRY_TIMES", "1"), ("WAIT_TIME_LOWER", "1"),
                  ("WAIT_TIME_UPPER", "2"), ("RG_JUDGE_CACHE_DIR", str(cache_dir)),
                  ("RG_JUDGE_CACHE", cache), ("RG_NO_THINK", "0"),
-                 ("RG_PREFIX_NO_THINK", "0")):
+                 ("RG_PREFIX_NO_THINK", prefix)):
         monkeypatch.setenv(k, v)
+    if judge_id is None:
+        monkeypatch.delenv("RG_JUDGE_ID", raising=False)
+    else:
+        monkeypatch.setenv("RG_JUDGE_ID", judge_id)
+    for k in ("OPENAI_TEMPERATURE", "OPENAI_MAX_TOKENS"):
+        monkeypatch.delenv(k, raising=False)
     if _OFFICIAL not in sys.path:
         sys.path.insert(0, _OFFICIAL)
     sys.modules.pop("llms", None)
@@ -157,3 +163,50 @@ def test_the_shard_is_one_json_object_per_line(tmp_path, monkeypatch):
     shard = next(iter(tmp_path.glob("*.jsonl")))
     rows = [json.loads(l) for l in open(shard) if l.strip()]
     assert len(rows) == 2 and all(set(r) == {"k", "v"} for r in rows)
+
+
+# ---- review 2026-10-02: the key must separate JUDGES, not just model names --
+
+def test_the_banked_configuration_keeps_its_original_key(tmp_path, monkeypatch):
+    """1,702 verdicts were banked under sha1(MODEL, kind, prompt) with the
+    default judge and /no_think. Separating judges must not orphan them."""
+    import hashlib
+    mod, _ = _load(tmp_path, monkeypatch, prefix="1",
+                   judge_id=None)
+    legacy = hashlib.sha1(b"test-judge\x00json\x00p").hexdigest()
+    assert mod._cache_key("json", "p") == legacy
+    mod2, _ = _load(tmp_path, monkeypatch, prefix="1",
+                    judge_id=mod._DEFAULT_JUDGE_ID)
+    assert mod2._cache_key("json", "p") == legacy
+
+
+def test_a_different_judge_on_the_same_port_never_hits(tmp_path, monkeypatch):
+    """llama_cpp.server ignores the client's model name, so OPENAI_MODEL alone
+    could not tell two GGUFs apart; RG_JUDGE_ID (set by run_judged.sh) can."""
+    mod, _ = _load(tmp_path, monkeypatch, prefix="1")
+    mod.llm_request_for_json("score this memory")
+    mod2, fake2 = _load(tmp_path, monkeypatch, prefix="1",
+                        judge_id="sha256-some-other-gguf")
+    mod2.llm_request_for_json("score this memory")
+    assert fake2.calls == 1, "a second judge replayed the first judge's verdict"
+
+
+def test_thinking_mode_is_a_different_judge(tmp_path, monkeypatch):
+    mod, _ = _load(tmp_path, monkeypatch, prefix="1")
+    mod2, _ = _load(tmp_path, monkeypatch, prefix="0")
+    assert mod._cache_key("json", "p") != mod2._cache_key("json", "p")
+
+
+def test_an_empty_answer_is_not_cached(tmp_path, monkeypatch):
+    """The `or ''` fallback used to be cached and replayed forever."""
+    mod, fake = _load(tmp_path, monkeypatch, content="")
+    mod.llm_request("a question")
+    mod.llm_request("a question")
+    assert fake.calls == 2
+
+
+def test_an_empty_json_object_is_not_cached(tmp_path, monkeypatch):
+    mod, fake = _load(tmp_path, monkeypatch, content='```json\n{}\n```')
+    mod.llm_request_for_json("a question")
+    mod.llm_request_for_json("a question")
+    assert fake.calls == 2

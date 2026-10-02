@@ -22,14 +22,28 @@ EVAL=~/rg_private/halumem/official/HaluMem/eval
 V=~/rg_private/halumem/official/.venv/bin/python
 JUDGE_PY=~/rg/.venv/bin/python
 MODEL=/usr/share/ollama/.ollama/models/blobs/sha256-a8cc1361f3145dc01f6d77c6c82c9116b9ffe3c97b34716fe20418455876c40e
+# The judge's identity travels WITH the GGUF that serves it. The verdict
+# cache keys on both (llms.py), so changing MODEL above changes the key and a
+# second judge can never replay the first one's verdicts.
+export OPENAI_MODEL=qwen3:14b
+export RG_JUDGE_ID="$(basename "$MODEL")"
+RG=/home/jp/rg
 LOG="$Q/chain_$(date +%Y%m%d_%H%M)_$MODE.log"
 mkdir -p "$Q"
 
 say() { echo "[chain] $*" | tee -a "$LOG"; }
 
 start_judge() {
-  if curl -s -m 90 127.0.0.1:8090/v1/models >/dev/null 2>&1; then
-    say "judge already up"; return 0
+  local served
+  served=$(curl -s -m 90 127.0.0.1:8090/v1/models 2>/dev/null)
+  if [ -n "$served" ]; then
+    # review 2026-10-02: "something answers on :8090" is not "our judge is up"
+    if echo "$served" | grep -q "$RG_JUDGE_ID"; then
+      say "judge already up ($RG_JUDGE_ID)"; return 0
+    fi
+    say "A DIFFERENT MODEL is serving :8090 -- refusing to judge with it"
+    say "served: $(echo "$served" | head -c 200)"
+    return 1
   fi
   say "starting judge $(date +%H:%M)"
   nohup "$JUDGE_PY" -m llama_cpp.server --model "$MODEL" \
@@ -54,12 +68,23 @@ run() {
   local rc=$?
   say "$ver compose rc=$rc"
   [ $rc -ne 0 ] && { say "$ver compose FAILED -- not judging"; return 1; }
+  # review 2026-10-02: evaluation.py skips any user with a checkpoint in
+  # tmp2/ and re-aggregates it, so judging a re-composed version would have
+  # reported the OLD verdicts as fresh. The per-verdict cache (llms.py) makes
+  # a clean slate cheap: everything unchanged replays from the cache.
+  rm -rf "$EVAL/results/rgp2-$ver/tmp2" "$EVAL/results/rgp2-$ver/rgp2_eval_stat_result.json"
   say "$ver judge $(date +%H:%M)"
   ( cd "$EVAL" || exit 1
     RG_PREFIX_NO_THINK=1 PYTHONUNBUFFERED=1 \
       "$V" evaluation.py --frame rgp2 --version "$ver" --user_num 1 \
       > "$Q/judge_$ver.log" 2>&1 )
-  say "$ver judge rc=$? $(date +%H:%M)"
+  local jrc=$?
+  say "$ver judge rc=$jrc $(date +%H:%M)"
+  # review 2026-10-02: a dead judge records None scores and still exits 0.
+  if ! python3 "$RG/tools/check_judged.py" "$ver" >> "$LOG" 2>&1 || [ $jrc -ne 0 ]; then
+    say "$ver judge FAILED -- see check_judged output above"
+    return 1
+  fi
 }
 
 start_judge || exit 1
