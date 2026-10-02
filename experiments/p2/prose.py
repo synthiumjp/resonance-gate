@@ -11,6 +11,10 @@ existing import keeps working.
 import re
 
 
+_FIRST_PERSON = re.compile(r"^(?:i|i'm|i’m|i am|i've|i’ve|my|we|we're|we’re)\s+\w",
+                           re.I)
+
+
 def _is_prose(text):
     """False if the turn is dominated by pasted code/terminal/telemetry rather
     than first-person prose. Real user data (entry 60) is full of pasted vm_stat/
@@ -28,6 +32,11 @@ def _is_prose(text):
         nonalnum = sum(1 for c in s if not c.isalnum() and not c.isspace())
         digits = sum(1 for c in s if c.isdigit())
         L = max(1, len(s))
+        # 2026-10-02: "I'm 34." is 2 digits in 7 characters and read as
+        # telemetry, so the user's age never reached the parser. A line that
+        # opens like a first-person sentence is prose whatever its digits.
+        if _FIRST_PERSON.match(s):
+            continue
         # symbol-heavy, digit-heavy, or a "label: number" telemetry/config line
         # ("Swapins:  1245194", "pageins: 342...") -- command output, not prose.
         if (nonalnum / L > 0.30 or digits / L > 0.22

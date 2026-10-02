@@ -399,6 +399,11 @@ def _pair(a1, v1, a2, v2):
     (("drive", "a Volvo"), ("drive", "a Skoda now")),
     (("drive", "a Volvo"), ("buy", "a Tesla")),
     (("have", "two kids"), ("have", "three kids now")),
+    (("is", "married"), ("divorce", "last year")),
+    (("is", "single"), ("engage", "")),
+    (("is", "married"), ("separate", "")),
+    (("is", "a nurse"), ("retire", "last year")),
+    (("is", "33"), ("is", "34")),
 ])
 def test_a_later_value_replaces_a_single_valued_state(old, new):
     g = _pair(*old, *new)
@@ -412,6 +417,8 @@ def test_a_later_value_replaces_a_single_valued_state(old, new):
     (("is", "vegetarian"), ("is", "a morning person")),
     (("drive", "a Volvo"), ("buy", "a new kettle")),
     (("like", "jazz"), ("like", "techno")),                            # multi-valued
+    (("is", "a nurse"), ("dad_retire", "")),                           # someone else
+    (("is", "divorced"), ("divorce", "")),                             # same value
 ])
 def test_things_that_are_not_a_change_of_the_same_state(old, new):
     assert C.mark_state_changes(_pair(*old, *new), order=ORDER) == []

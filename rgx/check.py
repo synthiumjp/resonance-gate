@@ -65,7 +65,8 @@ def _content(s):
     out = []
     for w in re.findall(r"[a-z0-9']+", str(s).lower()):
         w = w.rstrip("'").removesuffix("'s")
-        if w and w not in STOP and len(w) > 2:
+        # a number is content at any length: "I'm 34" is the whole fact
+        if w and w not in STOP and (len(w) > 2 or w.isdigit()):
             out.append(w)
     return out
 

@@ -523,6 +523,9 @@ _DIETS = frozenset("vegetarian vegan pescatarian carnivore omnivore keto paleo".
 _STATUS = {"single": "single", "married": "married", "engaged": "engaged",
            "divorced": "divorced", "separated": "separated",
            "widowed": "widowed", "dating": "dating"}
+_EVENT_STATUS = {"divorce": "divorced", "engage": "engaged",
+                 "separate": "separated", "remarry": "married",
+                 "widow": "widowed"}
 _CAR_BRANDS = frozenset("""
 volvo skoda tesla toyota honda mazda subaru nissan ford holden hyundai kia
 volkswagen vw audi bmw mercedes porsche jeep lexus mitsubishi suzuki renault
@@ -607,6 +610,14 @@ def _families(attr, value):
                     frozenset([("not " if neg else "") + _STATUS[hw[-1]]])))
     if a.startswith("marry") and not neg:
         out.append(("relationship status", frozenset(["married"])))
+    # 2026-10-02: the parser now keeps life events with nothing after the
+    # verb ("I got divorced last year", "I'm engaged!"). The predicate is the
+    # verb itself, so a possessed subject ("dad_retire") never matches.
+    verb = a.split("_")[0]
+    if verb in _EVENT_STATUS and not neg:
+        out.append(("relationship status", frozenset([_EVENT_STATUS[verb]])))
+    if verb == "retire" and not neg:
+        out.append(("role", frozenset(["retired"])))
     if a in ("is", "turn"):
         m = re.fullmatch(r"(\d{1,3})(?:\s+years?\s+old)?", head)
         if m and 0 < int(m.group(1)) < 120:

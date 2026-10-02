@@ -392,14 +392,14 @@ resolves cleanly to Boston with `conflict: false`.
 Conversation memory:
 - English only. The parser misses some casual fragments: "Still nursing at
   St Vincent's though" has no subject and produces no fact.
-- Change tracking covers where you live and where you work. Other changes
-  are picked up only when you say something ended ("I quit", "I sold the
-  car", "no longer"). Two statements in the same conversation are not
-  ordered against each other.
+- Change tracking covers where you live, where you work, your job, diet,
+  relationship status, age, car and number of children. Other changes are
+  picked up only when you say something ended ("I quit", "I sold the car",
+  "no longer"). Two statements in the same conversation are not ordered
+  against each other.
 - Outside Claude Code, the agent has to call `profile_ingest` itself.
-- A pronoun that refers back to something in an earlier sentence is often
-  not resolved ("I maintain the checkout service. It is written in Rust."
-  stores only the first sentence).
+- A pronoun is resolved only when one thing in the same message could be
+  meant. "I have a dog and a cat. It barks." stores nothing about barking.
 - A question asked in the first few seconds after the server starts can
   take about 4 s while models load. After that, queries take tens of
   milliseconds.

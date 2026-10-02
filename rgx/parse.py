@@ -84,8 +84,22 @@ REPORT_CHAIN = ("ccomp", "xcomp", "advcl", "csubj")
 # the same defect the spaCy version had with comma splices.
 ARG_DEPS = ("obj", "iobj", "obl", "obl:agent", "xcomp", "ccomp", "advmod",
             "nmod", "case", "compound", "amod", "det", "nummod", "fixed",
-            "flat", "advcl", "acl", "nmod:poss", "expl")
+            "flat", "advcl", "acl", "nmod:poss", "expl",
+            # 2026-10-02: Stanza labels a bare time phrase obl:unmarked ("I
+            # retired LAST YEAR"). Left out, the time was lost from every
+            # record, and a verb with only a time after it was dropped.
+            "obl:unmarked", "obl:tmod", "obl:npmod")
+# 2026-10-02: a verb with nothing after it is dropped ("I agree", "I see" are
+# talk, not facts), but these are life events that are complete on their
+# own: "I retired", "I got divorced", "I'm engaged!", "We broke up".
+LIFE_EVENTS = {"retire", "divorce", "marry", "remarry", "engage", "separate",
+               "graduate", "resign", "quit", "emigrate", "relocate", "fire",
+               "hire", "promote", "widow", "propose"}
+LIFE_PHRASAL = {("break", "up"), ("split", "up"), ("lay", "off"),
+                ("pass", "away"), ("move", "out")}
 SEPARATE = ("conj", "parataxis", "cc")
+SAME_PAST = {"quit", "put", "cut", "set", "hit", "let", "shut", "split",
+             "hurt", "bet", "upset"}
 IRREG = {"have": "has", "do": "does", "be": "is", "go": "goes"}
 ALREADY_3SG = {"is", "was", "has", "does", "did", "had", "were", "will",
                "would", "can", "could", "should", "may", "might", "must"}
@@ -109,6 +123,11 @@ def _third(word, lemma, feats=None):
     # UD marks the tense; read it rather than guessing from the spelling.
     if lemma == "be" and w == "were":
         return "was"          # the subject is singular now; past or not
+    # 2026-10-02: "I quit" is past as often as present and the spelling is
+    # the same; Stanza guessed present and the record read "Dana Cole
+    # quits", a habit. Kept as typed, the record is right on either reading.
+    if w in SAME_PAST and lemma and w == lemma.lower():
+        return word
     if feats:
         # e238: the OLD guard was `endswith("ed") or endswith("s")`, a
         # spelling test that misfired on ordinary present-tense verbs that
@@ -1042,6 +1061,14 @@ PERIPHERY_MARK_LEMMAS = {"because", "since", "although", "though", "while",
                           "whereas", "so", "unless", "despite", "due"}
 
 
+def _life_event(s, head):
+    lem = (head.lemma or "").lower()
+    if lem in LIFE_EVENTS:
+        return True
+    return any((lem, c.text.lower()) in LIFE_PHRASAL
+               for c in s.children(head, ("compound:prt",)))
+
+
 def _periphery(s, head):
     """-> set of ids of `head`'s children that make up the clause's
     PERIPHERY (e243). These carry real content -- dropping them would lose
@@ -1479,9 +1506,11 @@ def extract_keyed(text, nlp, owner=None, role="user",
                         tail_core = f"{tail_core} {ftxt}".strip()
                     tail_full = re.sub(r"\s+", " ", tail_full).strip(" ,.;:")
                     tail_core = re.sub(r"\s+", " ", tail_core).strip(" ,.;:")
-                    if not tail_full or len(tail_full.split()) > 24:
+                    if not tail_full and not _life_event(s, head):
                         continue
-                    if not tail_core or len(tail_core.split()) > 24:
+                    if len(tail_full.split()) > 24:
+                        continue
+                    if (not tail_core and tail_full) or len(tail_core.split()) > 24:
                         tail_core, peri = tail_full, set()  # core guard
 
                     if obj_ctrl:

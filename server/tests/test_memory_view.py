@@ -83,3 +83,18 @@ def test_the_hooks_never_store_the_memory_summary_itself(tmp_path):
     t.write_text("\n".join(json.dumps(r) for r in rows))
     turns, _ = H.read_transcript(str(t))
     assert turns == [{"role": "user", "content": "I play the drums."}]
+
+
+def test_a_life_event_replaces_the_state_it_ends(pm, tmp_path):
+    """2026-10-02: "I got divorced" used to produce nothing, so "married"
+    stayed current forever."""
+    pm.profile_ingest([U("I'm married."), U("I'm 33.")], conversation_id="a",
+                      owner_name="Dana Cole", date="2026-01-10")
+    pm.profile_ingest([U("I got divorced last year."), U("I'm 34.")],
+                      conversation_id="b", owner_name="Dana Cole",
+                      date="2026-09-20")
+    md = (tmp_path / "MEMORY.md").read_text()
+    about = md.split("## About you")[1].split("##")[0]
+    gone = md.split("## No longer true")[1].split("##")[0]
+    assert "divorced last year" in about and "34" in about
+    assert "married" in gone and "33" in gone

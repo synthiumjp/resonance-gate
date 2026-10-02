@@ -1138,3 +1138,36 @@ def test_a_phrasal_verb_keeps_its_particle():
                        ("I gave up smoking last year.", "gave up smoking")):
         ex.reset_world()
         assert any(want in r.text for r in ex.extract_turn(turn, role="user")), turn
+
+
+# ---- life events and short statements (2026-10-02) -----------------------
+# A verb with nothing after it was always dropped, because "I agree" and "I
+# see" are talk. That also dropped "I retired", "I got divorced last year"
+# ("last year" was not counted as an argument) and "I'm engaged!".
+
+@pytest.mark.parametrize("turn,want", [
+    ("I got divorced last year.", "Martin Mark got divorced last year"),
+    ("I'm engaged!", "Martin Mark is engaged"),
+    ("I retired last year.", "Martin Mark retired last year"),
+    ("I got laid off.", "Martin Mark got laid off"),
+    ("My dad retired.", "Martin Mark's dad retired"),
+    ("I cut my hair last week.", "Martin Mark cut Martin Mark's hair last week"),
+    ("I moved to Brisbane last year.", "Martin Mark moved to Brisbane last year"),
+])
+def test_a_life_event_needs_nothing_after_the_verb(checked, turn, want):
+    assert want in texts(checked, turn)
+
+
+@pytest.mark.parametrize("turn", ["I agree.", "I see.", "I know.",
+                                  "Thanks, that worked."])
+def test_talk_with_nothing_after_the_verb_is_still_dropped(checked, turn):
+    assert texts(checked, turn) == []
+
+
+def test_a_number_is_content_at_any_length(checked):
+    assert "Martin Mark is 34" in texts(checked, "I'm 34.")
+
+
+def test_quit_keeps_the_form_that_was_typed(checked):
+    """Stanza read "I quit" as present and the record said "quits", a habit."""
+    assert "Martin Mark quit" in texts(checked, "I quit.")
