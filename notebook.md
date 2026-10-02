@@ -14477,3 +14477,64 @@ question", which is exactly the PARTIAL_KNOWLEDGE gap, 1/6), it should be a
 local model screened with JP's protocol on a labelled set of our own
 decisions -- not the hosted API, which would break the product's local
 guarantee and the no-paid-inference rule.
+
+## Entry 285 — 2026-10-02 (lessons carried over from JP's structural-break project, and the measurement floor this notebook has never stated.)
+
+JP pointed at `E:\sbrt-cold` -- the archive of the ADIA Structural Break
+Real-Time competition (Aug-Oct 2026, with Chris): time series, not memory,
+but ~2,300 ledger entries of the same research process, run on THIS machine
+in the same weeks. Read: its memory notes, PROTOCOL, PAPER-METACOG.
+
+### Our two lost runs probably were not ours to prevent
+
+That project's machine note says the 15 GB WSL box "permanently runs a
+llama_cpp server (/home/jp/rg/.venv on port 8090, ~8.4 GB RSS) that is NOT
+ours to kill" -- our judge. It logs global OOMs that killed WSL and every
+process on it (31 Aug x2, 17 Sep, 29 Sep x2) and its rule became: every
+heavy Linux job under `systemd-run --user -p MemoryMax=... -p
+MemorySwapMax=0`, total caps <= 10 GB. Our 07 Sep reboot and the 09 Sep run
+that died after 21:01 fit that picture; I cannot prove the exact cause from
+either side's logs. The competition ended 1 Oct, so the box is ours again.
+Launch the judged runs capped anyway.
+
+### The floor, computed for the first time (user 0, paired, from e279's rows)
+
+| comparison | n | paired SE | resolves at 95% |
+|---|---|---|---|
+| QA correct | 164 | 0.0386 | **|delta| > 7.6 pt** |
+| full-credit extraction recall, real targets | 453 | 0.0235 | **|delta| > 4.6 pt** |
+
+(Bootstrap SE matches the analytic one -- their sqrt(n) sanity rule.) So
+**every single-user QA delta this notebook has reported below ~7.6 points is
+UNVERIFIABLE, not a result** -- including e279's "+6pt", and in the other
+direction, "parity" is the only thing a 2.4-point difference can be. The fb
+rows can only show a full-credit recall change bigger than ~4.6 points on
+user 0. Below that: add users, not runs.
+
+### Lessons that transfer, in their words
+
+1. **State the instrument's resolution before the verdict**; label verdicts
+   REFUTED (measured, effect absent) / UNVERIFIABLE (below resolution) /
+   UNTESTED. Five retractions there, one cause; e279 -> e283 here.
+2. **Stratify before the headline.** Their metacognition paper (§2): a
+   confidence head scored 0.65 AUROC pooled and at or below chance within
+   the hard stratum -- it had learned difficulty, not correctness. e279
+   pooled interference with real targets the same way. **This is also the
+   test any Jev-style "does this record answer the question" gate must pass:
+   measure it WITHIN the hard stratum (topic present, attribute absent --
+   PARTIAL_KNOWLEDGE), not pooled with easy unrelated questions.**
+3. **One surface you tune on anti-predicts.** Their tuned holdout ranked
+   submissions in the WRONG ORDER; an untouched set predicted the board to
+   0.4 pt. We tune and report on HaluMem user 0 only. Held-out users are
+   the untouched set: develop on u0, confirm on u1-u3, never select there.
+4. **Ship rule**: a NEW mechanism, predicted above the floor BEFORE
+   measuring, and NOT the winner of a search. Tuned sub-floor increments
+   failed to transfer three times there.
+5. **Lineage audit after any rebuild**: list every mechanism the ledger
+   records as ADOPTED; classify each against the code as PRESENT (file:line),
+   CORRECTLY ABSENT (cite the refuting entry) or LOST. This is §5m's
+   pathology with a procedure attached -- six instances here.
+6. **`priorart.py`** (search the repo's own docstrings + ledger before
+   building) and **`adversary.py`** (a LOCAL adversarial reviewer,
+   qwen3.6:27b via ollama; four real defects on its first run) -- both
+   portable, both consistent with the no-paid-inference rule.
