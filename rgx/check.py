@@ -128,6 +128,10 @@ def _deictic_empty(value):
     return not [t for t in toks if t not in _VALUE_FILLER]
 
 
+_STRANDED = re.compile(r"\b(on|in|at|to|with|for|about|from|of|by|into|"
+                       r"onto|after|over|under|through)\s*[.!?]?$", re.I)
+
+
 def prefilter(prop, turn, owner=None, min_grounded=0.85, min_content=1,
               value=None, kind=None):
     """-> (keep: bool, reason: str). No model call.
@@ -148,6 +152,12 @@ def prefilter(prop, turn, owner=None, min_grounded=0.85, min_content=1,
     if (value is not None and kind != "relationship"
             and _deictic_empty(value)):
         return False, "deictic-empty value (unresolved referent)"
+    # 2026-10-02 (seen in the first rendered MEMORY.md): a relative clause
+    # whose object was extracted leaves the verb with a stranded preposition
+    # -- "The ward I work on has 30 beds" also yielded "<owner> works on".
+    # A record ending in a bare preposition says nothing.
+    if _STRANDED.search(text):
+        return False, "stranded preposition (object was extracted)"
 
     # "user" is a subject token too -- gold writes the name point as "User's
     # name is X", and counting "user" as content made it ungrounded.

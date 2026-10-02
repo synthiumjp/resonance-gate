@@ -37,6 +37,7 @@ _NOT_SPEECH = re.compile(
     r"^\s*(<command-name>|<command-message>|<command-args>|<local-command-"
     r"|<bash-input>|<bash-stdout>|<bash-stderr>|Caveat:)", re.S)
 _INJECTED = re.compile(r"<system-reminder>.*?</system-reminder>", re.S)
+_OWN_SUMMARY = re.compile(r"\[MEMORY[^\]]*\].*?(?:\[MEMORY RULES\][^\n]*|\Z)", re.S)
 
 
 def _text_items(content):
@@ -73,6 +74,11 @@ def read_transcript(path):
                     continue                      # tool output, not the human
                 text = "\n".join(_text_items(content))
                 text = _INJECTED.sub("", text).strip()
+                # our own summary, if it is ever recorded as user text, must
+                # not be stored again -- a memory that re-reads what it
+                # recalled grows copies of its own output (a Mem0 audit,
+                # issue #4573, found 668 copies of one hallucination)
+                text = _OWN_SUMMARY.sub("", text).strip()
                 if not text or _NOT_SPEECH.match(text):
                     continue
                 role = "user"

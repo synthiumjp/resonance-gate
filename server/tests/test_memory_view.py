@@ -1,0 +1,85 @@
+"""A memory the user can read and edit (2026-10-02): MEMORY.md, fact ids,
+forget and confirm by id, and the feedback-loop guard on the hooks."""
+import json
+
+import pytest
+
+pytest.importorskip("stanza", reason="ingest needs the rgx parser (stanza)")
+
+
+@pytest.fixture
+def pm(tmp_path, monkeypatch):
+    monkeypatch.setenv("RG_MEMORY_DIR", str(tmp_path))
+    monkeypatch.setenv("RG_NLI", "0")
+    monkeypatch.delenv("SOURCEDRECALL_OWNER", raising=False)
+    import sourcedrecall.profile_memory as mod
+
+    def reset():
+        mod._state.update({"mem": None, "audit_pass": None,
+                           "needs_reload": False, "uncached_turns": None,
+                           "transcripts": None})
+        mod._ingest_state.update({"extractor": None, "owner": None})
+    reset()
+    yield mod
+    reset()
+
+
+U = lambda c: {"role": "user", "content": c}
+
+
+def _seed(pm):
+    pm.profile_ingest([U("I live in Fitzroy."), U("I'm allergic to penicillin."),
+                       {"role": "assistant",
+                        "content": "I remember you mentioning you play the cello."}],
+                      conversation_id="a", owner_name="Dana Cole",
+                      date="2026-09-01")
+    pm.profile_ingest([U("Big news, I moved to Brunswick last weekend."),
+                       U("The billing service is written in Go.")],
+                      conversation_id="b", owner_name="Dana Cole",
+                      date="2026-09-20")
+
+
+def test_every_write_rewrites_a_readable_memory_file(pm, tmp_path):
+    _seed(pm)
+    md = (tmp_path / "MEMORY.md").read_text()
+    assert md.startswith("# Memory: Dana Cole")
+    about = md.split("## About you")[1].split("##")[0]
+    assert "allergic to penicillin" in about and '"I\'m allergic to penicillin."' in about
+    gone = md.split("## No longer true")[1].split("##")[0]
+    assert "Fitzroy" in gone
+    heard = md.split("## Said by the assistant, never confirmed by you")[1]
+    assert "cello" in heard
+
+
+def test_a_fact_can_be_forgotten_by_its_id(pm, tmp_path):
+    _seed(pm)
+    hit = pm.profile_recall("Am I allergic to anything?")["ranked"][0]
+    assert hit["id"] and len(hit["id"]) == 6
+    out = pm.profile_forget(hit["id"])
+    assert out["forgotten"] is True
+    after = pm.profile_recall("Am I allergic to anything?")
+    assert not any("penicillin" in (f.get("text") or "")
+                   for f in after.get("ranked") or [])
+    assert "penicillin" not in (tmp_path / "MEMORY.md").read_text()
+
+
+def test_an_unknown_id_is_an_error_not_a_silent_success(pm):
+    _seed(pm)
+    assert pm.profile_forget("zzzzzz")["forgotten"] is False
+
+
+def test_the_hooks_never_store_the_memory_summary_itself(tmp_path):
+    """If the injected summary is ever recorded as user text, re-ingesting it
+    would store the memory's own output as new facts."""
+    from sourcedrecall import claude_hooks as H
+    t = tmp_path / "t.jsonl"
+    rows = [
+        {"type": "user", "message": {"role": "user", "content":
+         "[MEMORY: what the user has told you]\n- Dana Cole lives in Fitzroy  "
+         "[\"I live in Fitzroy.\" · 2026-09-01]\n[MEMORY RULES] Each line is "
+         "something the user told you."}},
+        {"type": "user", "message": {"role": "user", "content": "I play the drums."}},
+    ]
+    t.write_text("\n".join(json.dumps(r) for r in rows))
+    turns, _ = H.read_transcript(str(t))
+    assert turns == [{"role": "user", "content": "I play the drums."}]

@@ -274,6 +274,14 @@ GATES = (
 GATE_COUNTS = {g: 0 for g in GATES}
 
 
+def fact_id(nd):
+    """A short, stable id for a stored fact (2026-10-02), so a person or an
+    agent can say 'forget a3f9c1' instead of reconstructing attribute and
+    value. Derived from the node id, so it survives reloads."""
+    import hashlib
+    return hashlib.sha1(str(nd.get("id", "")).encode()).hexdigest()[:6]
+
+
 def _attach_sources(g, sources):
     """2026-10-02: hang each node's VERBATIM source sentence on it, by node
     id, after the graph is built (build_facts returns them through an
@@ -931,7 +939,7 @@ class Memory:
             status = "unconfirmed-single-mention"
         else:
             status = "corroborated"
-        return {"attribute": nd["attr"], "value": nd["value"],
+        return {"id": fact_id(nd), "attribute": nd["attr"], "value": nd["value"],
                 # entry 244: the deterministic (rgx) extractor's full
                 # proposition, when the node carries one; None for LLM-cache
                 # facts and any node built without it -- callers fall back

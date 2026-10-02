@@ -270,6 +270,28 @@ def _prewarm():
                          daemon=False).start()
 
 
+@mcp.tool()
+def profile_forget(fact_id: str) -> dict:
+    """Remove one remembered fact, by the `id` shown in profile_recall results
+    and in MEMORY.md. Use when the user says something stored is wrong or
+    should not be kept."""
+    return pmem.profile_forget(fact_id)
+
+
+@mcp.tool()
+def profile_confirm(fact_id: str) -> dict:
+    """Mark one remembered fact as confirmed by the user, by its `id`."""
+    return pmem.profile_confirm(fact_id)
+
+
+@mcp.tool()
+def profile_export() -> dict:
+    """Write the whole memory to MEMORY.md and return its path and contents,
+    so the user can read everything that is stored."""
+    path = pmem.export_markdown()
+    return {"path": path, "markdown": open(path, encoding="utf-8").read()}
+
+
 def _quiet_logs():
     """Model loading logs every step at INFO to stderr, which an MCP client
     shows as server output. Warnings and errors still come through."""

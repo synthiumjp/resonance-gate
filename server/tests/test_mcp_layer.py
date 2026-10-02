@@ -15,7 +15,7 @@ def test_all_tools_registered_and_callable(tmp_path, monkeypatch):
         "remember", "recall", "update", "forget",
         "profile_dynamics", "profile_quarantine", "profile_conflicts",
         "profile_recall", "profile_context", "profile_correct",
-        "profile_status", "profile_rehydrate", "profile_ingest"}
+        "profile_status", "profile_rehydrate", "profile_ingest", "profile_forget", "profile_confirm", "profile_export"}
 
     # each tool advertises a description (shown to the calling model)
     assert all(t.description for t in tools)

@@ -35,6 +35,7 @@ Design commitments, in order of how much they cost to keep:
   NO MODEL AT EXTRACTION TIME. A model may CHECK or REPAIR later; it does not
       write the memory.
 """
+import re
 from dataclasses import dataclass, field
 from typing import Iterable, List, Optional, Sequence
 
@@ -128,6 +129,15 @@ class Extractor:
                 ok, _why = C.prefilter(prop, text, self.owner_name,
                                        value=val, kind=kind)
                 if not ok:
+                    continue
+                # 2026-10-02: an assistant's report FRAME is not a fact --
+                # "I remember you mentioning you play the cello" yielded both
+                # "<owner> plays the cello" (the claim, kept as hearsay) and
+                # "<owner> mentioning <owner> plays the cello" (the frame).
+                if (role == "assistant" and self.owner_name
+                        and re.match(rf"^{re.escape(self.owner_name)}\s+"
+                                     r"(mentioning|saying|telling|noting|"
+                                     r"suggesting|asking)\b", prop)):
                     continue
             out.append(Record(text=prop, kind=kind, session=session,
                               turn=turn, role=role, predicate=pred, value=val,

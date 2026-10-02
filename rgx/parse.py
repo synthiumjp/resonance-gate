@@ -1535,6 +1535,13 @@ def extract_keyed(text, nlp, owner=None, role="user",
                                 for t in s.subtree(subj, stop={sp.id}))
                             else "event")
                     pred = _pred_key(s, head, args, slot=slot_txt)
+                    # 2026-10-02: a phrasal verb keeps its particle -- "I grew
+                    # up in Leeds" rendered "grew in Leeds", "I gave up
+                    # smoking" lost the "up" that carries the meaning.
+                    prt = [c for c in s.children(head, ("compound:prt",))
+                           if c.text.lower() not in verb.lower().split()]
+                    if prt:
+                        verb = f"{verb} {' '.join(c.text for c in prt)}"
                     npfx = "not " if neg else ""
                     value = npfx + tail_core             # (a): core, e243
                     if peri and tail_core != tail_full:

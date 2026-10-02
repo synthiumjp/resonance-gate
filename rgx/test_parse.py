@@ -1091,3 +1091,30 @@ def test_the_source_survives_into_the_cache_fact():
     ex = Extractor(owner_name="Martin Mark")
     f = [to_fact(r) for r in ex.extract_turn("I live in Leeds.", role="user")]
     assert any(x and x.get("source") == "I live in Leeds." for x in f)
+
+
+# ---- 2026-10-02: three defects found by reading the first MEMORY.md --------
+
+def test_a_stranded_preposition_is_not_a_fact():
+    from rgx import Extractor
+    ex = Extractor(owner_name="Dana Cole")
+    out = [r.text for r in ex.extract_turn("The ward I work on has 30 beds.", role="user")]
+    assert "Dana Cole works on" not in out
+    assert any("30 beds" in t for t in out)
+
+
+def test_an_assistant_report_frame_is_not_stored_beside_its_claim():
+    from rgx import Extractor
+    ex = Extractor(owner_name="Dana Cole")
+    out = [r.text for r in ex.extract_turn(
+        "I remember you mentioning you play the cello.", role="assistant")]
+    assert out == ["Dana Cole plays the cello"]
+
+
+def test_a_phrasal_verb_keeps_its_particle():
+    from rgx import Extractor
+    ex = Extractor(owner_name="Dana Cole")
+    for turn, want in (("I grew up in Leeds.", "grew up in Leeds"),
+                       ("I gave up smoking last year.", "gave up smoking")):
+        ex.reset_world()
+        assert any(want in r.text for r in ex.extract_turn(turn, role="user")), turn
