@@ -43,6 +43,19 @@ __all__ = ["Record", "Extractor", "extract"]
 __version__ = "0.1.0"
 
 
+# Review 2026-10-02: "I got fired. Not really, it's a joke." -- the next
+# sentence takes the previous one back.
+_RETRACT = re.compile(r"^\W*(not really|just kidding|only kidding|kidding|jk\b|"
+                      r"joking|i'?m joking|lol,? no|haha,? no|not true)", re.I)
+
+
+def _retracted(text, sentence):
+    i = text.find(sentence)
+    if i < 0:
+        return False
+    return bool(_RETRACT.match(text[i + len(sentence):].lstrip()))
+
+
 @dataclass(frozen=True)
 class Record:
     """One extracted memory, with its provenance."""
@@ -146,6 +159,8 @@ class Extractor:
                                      r"(mentioning|saying|telling|noting|"
                                      r"suggesting|asking)\b", prop)):
                     continue
+            if src and _retracted(text, src):
+                continue
             out.append(Record(text=prop, kind=kind, session=session,
                               turn=turn, role=role, predicate=pred, value=val,
                               evidential=evi, source=orig.get(src, src),

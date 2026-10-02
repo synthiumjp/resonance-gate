@@ -1182,3 +1182,42 @@ def test_quit_keeps_the_form_that_was_typed(checked):
 def test_an_adverb_stays_on_its_side_of_the_auxiliary(ex, turn, want):
     """2026-10-02: "I'm still nursing" rendered "<owner> still is nursing"."""
     assert want in texts(ex, turn)
+
+
+# ---- review 2026-10-02: pronoun carry, retractions, irrealis life events --
+
+@pytest.mark.parametrize("turn,bad", [
+    ("I took the train. It is raining.", "train is raining"),
+    ("I visited my father. It was raining.", "father was raining"),
+    ("I called the plumber. It is leaking.", "plumber is leaking"),
+    ("I met the CEO. It is rumoured to be sold.", "CEO is rumoured"),
+    ("I quit my job. It was the right call.", "job was the right call"),
+])
+def test_weather_evaluative_and_personal_it_carry_nothing(ex, turn, bad):
+    assert not any(bad in p for p in texts(ex, turn))
+
+
+def test_a_real_antecedent_still_carries(ex):
+    assert "the tests failed" in texts(ex, "I ran the tests. It failed.")
+
+
+@pytest.mark.parametrize("turn", ["I got fired. Not really, it's a joke.",
+                                  "I got fired. Just kidding!"])
+def test_a_statement_taken_back_is_not_stored(checked, turn):
+    assert texts(checked, turn) == []
+
+
+@pytest.mark.parametrize("turn,want", [
+    ("I never got divorced.", "Martin Mark never got divorced"),
+    ("I never retired.", "Martin Mark did not retire"),
+])
+def test_a_negated_life_event_keeps_its_tense(checked, turn, want):
+    assert want in texts(checked, turn)
+
+
+@pytest.mark.parametrize("turn", ["He asked me whether I retired.",
+                                  "Whether I quit or not.", "Imagine I retire.",
+                                  "Let's say I retire at 60."])
+def test_a_life_event_under_whether_or_a_supposition_is_not_stored(checked, turn):
+    assert not any(p.endswith(("retired", "quit", "retires", "retires at 60"))
+                   for p in texts(checked, turn))

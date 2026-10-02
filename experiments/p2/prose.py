@@ -34,8 +34,10 @@ def _is_prose(text):
         L = max(1, len(s))
         # 2026-10-02: "I'm 34." is 2 digits in 7 characters and read as
         # telemetry, so the user's age never reached the parser. A line that
-        # opens like a first-person sentence is prose whatever its digits.
-        if _FIRST_PERSON.match(s):
+        # opens like a first-person sentence is prose if it has at most three
+        # digits. Review 2026-10-02: "My PIN is 4821 5512 9930 1123" opens
+        # like a sentence too, and a PIN must not reach the memory.
+        if _FIRST_PERSON.match(s) and digits <= 3:
             continue
         # symbol-heavy, digit-heavy, or a "label: number" telemetry/config line
         # ("Swapins:  1245194", "pageins: 342...") -- command output, not prose.

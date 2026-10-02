@@ -438,7 +438,7 @@ def _fronted(s, head, subj):
 # "whenever"/"when" are deliberately absent: they are HABITUAL, not
 # hypothetical. "Whenever I travel I get anxious" asserts a real pattern, and
 # suppressing it would lose a fact rather than prevent a fabrication.
-CONDITIONAL_MARKS = frozenset(("if", "unless"))
+CONDITIONAL_MARKS = frozenset(("if", "unless", "whether"))
 
 # e270: "Supposing/Provided/Assuming I moved to Berlin" carries NO `mark` at
 # all -- Stanza reads the word as a VERB heading the advcl, with the
@@ -599,6 +599,58 @@ def _preconj_negation(s, subj):
             if (cc.lemma or cc.text).lower() == "nor":
                 swap[cc.id] = "and"
     return True, swap
+
+
+# Review 2026-10-02: once life events could stand alone ("I retired"), every
+# frame that used to drop them for having nothing after the verb had to
+# refuse them for the right reason. "I dreamed I got divorced", "I hope I
+# get promoted", "I joked that I quit" -- the owner's OWN non-veridical
+# attitude: unlike "I think X" (a hedged assertion, kept), the speaker is
+# not committing to X. The matrix record ("<owner> hopes ...") is kept.
+NONVERIDICAL_OWN = frozenset((
+    "dream", "hope", "fear", "wish", "worry", "wonder", "fantasize",
+    "fantasise", "joke", "kid", "afraid", "scared", "worried", "hopeful",
+    "pretend", "imagine"))
+# "Suppose I quit", "Let's say I retire at 60": an imperative supposition
+FUTURE_TEMPORAL = frozenset(("when", "once", "after", "before", "until"))
+
+
+def _irrealis_frame(s, head):
+    """True when the clause is (1) under the owner's own non-veridical
+    attitude or an imperative supposition, at any depth of complements;
+    (2) a temporal clause whose main clause is future ("When I retire I will
+    travel"); or (3) one side of an either/or between clauses."""
+    w = head
+    while w.deprel in ("ccomp", "xcomp"):
+        p = s.w.get(w.head)
+        if p is None:
+            break
+        lem = (p.lemma or "").lower()
+        if lem in NONVERIDICAL_OWN:
+            return True
+        if (lem in CONDITIONAL_PREDICATES or lem == "say") and not any(
+                s.children(p, ("nsubj", "nsubj:pass"))):
+            return True
+        w = p
+    if head.deprel in ("advcl",):
+        marks = {(c.lemma or c.text).lower()
+                 for c in s.children(head, ("mark", "advmod"))}
+        p = s.w.get(head.head)
+        if marks & FUTURE_TEMPORAL and p is not None and any(
+                (a.lemma or "").lower() in ("will", "shall", "be")
+                and a.xpos == "MD" or (a.text or "").lower() in ("will", "'ll", "shall")
+                for a in s.children(p, ("aux",))):
+            return True
+    def _disj(w):
+        return any((c.lemma or c.text).lower() == "either"
+                   for c in s.children(w, ("cc:preconj",))) or any(
+            (c.lemma or c.text).lower() == "or" for c in s.children(w, ("cc",)))
+    if _disj(head):
+        return True
+    for c in s.children(head, ("conj",)):
+        if c.upos in ("VERB", "AUX", "ADJ") and _disj(c):
+            return True
+    return False
 
 
 def _antiveridical(s, head):
@@ -990,6 +1042,51 @@ def _world_subject(s, subj, world, role):
     return bool(subj.lemma) and subj.lemma.lower() in world
 
 
+# Review 2026-10-02: "I took the train. It is raining." stored "the train is
+# raining"; "I quit my job. It was the right call." stored "<owner>'s job was
+# the right call"; "I called the plumber. It is leaking." stored "the plumber
+# is leaking". Weather and evaluative "it" point at no noun, and "it" never
+# points at a person.
+WEATHER_IT = frozenset("""rain snow pour drizzle hail storm thunder freeze
+raining snowing pouring sunny cloudy windy rainy foggy humid cold hot warm
+chilly freezing dark late early rumour rumor""".split())
+# After an ACTION on an object ("I quit my job. It was the right call."),
+# an evaluation is about the action. After "My commute is long. It is
+# exhausting." it is about the commute -- so these block only an object.
+EVAL_IT = frozenset("""call decision choice idea mistake move thing time day week experience relief
+shame pity nightmare blast disaster success failure struggle journey ride
+hard tough easy difficult great fun awful terrible amazing weird crazy nice
+good bad sad scary stressful worth long short quick rough brutal fine okay ok
+painful emotional exhausting intense surreal wild lovely horrible perfect
+right wrong worse better best interesting boring annoying frustrating
+schedule quiet busy""".split())
+PERSON_NOUNS = frozenset("""mother father mom mum dad parent parents brother
+sister son daughter wife husband partner boyfriend girlfriend fiance fiancee
+friend boss manager colleague coworker teacher doctor dentist nurse plumber
+electrician lawyer ceo cto cfo founder landlord landlady neighbour neighbor
+client customer therapist coach mentor uncle aunt cousin grandma grandpa
+grandmother grandfather baby kid child person guy woman man girl boy
+recruiter engineer developer designer accountant mechanic vet surgeon physio
+tutor student roommate flatmate housemate niece nephew stepdad stepmom
+stepmum lead director founder owner""".split())
+
+
+def _ambient_it(s, head, subj, cop, eval_too=False):
+    if subj.text.lower() not in ("it", "this", "that"):
+        return False
+    words = {(head.lemma or "").lower(), (head.text or "").lower()}
+    if cop is not None:
+        words |= {(c.lemma or "").lower()
+                  for c in s.children(head, ("amod", "compound"))}
+    return bool(words & WEATHER_IT) or (eval_too and bool(words & EVAL_IT))
+
+
+def _is_person(lemma):
+    l = (lemma or "").lower()
+    return l in PERSON_NOUNS or (l.endswith(("ist", "ian"))
+                                 and not l.endswith("list"))
+
+
 def _poss_antecedent(carry, subj):
     """-> the carried antecedent for this pronoun subject, or None.
 
@@ -1213,6 +1310,8 @@ def extract_keyed(text, nlp, owner=None, role="user",
                 continue
             if _antiveridical(s, head):
                 continue
+            if _irrealis_frame(s, head):
+                continue
             if _negated_matrix(s, head):
                 continue
             if _third_party_matrix(s, head, allow, role):
@@ -1230,7 +1329,17 @@ def extract_keyed(text, nlp, owner=None, role="user",
             carried = None
             world_carried = None
             if sp is None:
-                anc = _poss_antecedent(poss_carry, subj)
+                anc = (None if _ambient_it(s, head, subj, cop)
+                       else _poss_antecedent(poss_carry, subj))
+                if anc is not None and (
+                        (subj.text.lower() == "it" and _is_person(anc.lemma))
+                        or (anc.deprel in ("obj", "iobj")
+                            and _ambient_it(s, head, subj, cop, eval_too=True))):
+                    anc = None
+                    poss_blocked = True
+                else:
+                    # world entities are always objects/obliques of an action
+                    poss_blocked = _ambient_it(s, head, subj, cop, eval_too=True)
                 if anc is not None:
                     carried = anc.text
                     # 2026-10-02: a DIRECT OBJECT the owner linked to themselves
@@ -1246,7 +1355,7 @@ def extract_keyed(text, nlp, owner=None, role="user",
                         world_carried = re.sub(r"^(?:a|an)\s+", "the ",
                                                turn_world[lem], flags=re.I)
                         carried = None
-                elif not poss_carry:
+                elif not poss_carry and not poss_blocked:
                     # e269: no owner-possessed candidate, but the owner may
                     # have established exactly one world entity this turn.
                     # Renders as the entity itself ("The billing service is
@@ -1257,7 +1366,9 @@ def extract_keyed(text, nlp, owner=None, role="user",
                             and len(turn_world) == 1
                             and os.environ.get("RG_WORLD") != "0"
                             and role == "user"):
-                        world_carried = next(iter(turn_world.values()))
+                        lem, np = next(iter(turn_world.items()))
+                        if not (subj.text.lower() == "it" and _is_person(lem)):
+                            world_carried = np
             is_self = subj.text.lower() in allow
             fdrop, ftail, fhedge = _fronted(s, head, subj)
             # e243, RULE 3: a NAMED third party as subject, with the owner
@@ -1543,7 +1654,23 @@ def extract_keyed(text, nlp, owner=None, role="user",
                         # Forcing singular turned "friends ... have played"
                         # into "... has played".
                         agree = is_self
-                        if aux:
+                        if aux and neg and (aux[0].lemma or "").lower() == "get":
+                            # "I never got divorced" read "got not divorced";
+                            # "did not get" is not in the turn and failed the
+                            # grounding check, so keep the user's own words
+                            if any((c.lemma or "").lower() == "never"
+                                   for c in s.children(head, ("advmod",))):
+                                verb = f"never {aux[0].text}"
+                            else:
+                                d = ("did" if "Tense=Past" in (aux[0].feats or "")
+                                     else "does" if agree else "do")
+                                verb = f"{d} not get"
+                            verb += " " + " ".join(
+                                _expand_clitic(a.text, a.lemma)
+                                if a.text.startswith("'") else a.text
+                                for a in aux[1:] if a is not aux[0])
+                            verb = verb.strip() + " " + head.text
+                        elif aux:
                             verb = (_third(aux[0].text, aux[0].lemma, aux[0].feats)
                                     if agree else aux[0].text)
                             verb = _expand_clitic(verb, aux[0].lemma)
@@ -1559,8 +1686,12 @@ def extract_keyed(text, nlp, owner=None, role="user",
                             verb = (_third(head.text, head.lemma, head.feats)
                                     if agree else head.text)
                             if neg:
-                                verb = (f"does not {head.lemma}" if agree
-                                        else f"do not {head.lemma}")
+                                # "I never retired" read "does not retire"
+                                if "Tense=Past" in (head.feats or ""):
+                                    verb = f"did not {head.lemma}"
+                                else:
+                                    verb = (f"does not {head.lemma}" if agree
+                                            else f"do not {head.lemma}")
                     slot_txt = (s.text(subj, stop={sp.id}, owner=o, second=second)
                                 if sp is not None else None)
                     lead = o if sp is None else f"{o}'s {slot_txt}"

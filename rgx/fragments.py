@@ -3,8 +3,9 @@
 People drop the subject in chat: "Still nursing at St Vincent's though",
 "Vegetarian now, for about a year". The parser needs a subject, so these
 produced nothing. A fragment that opens a user turn is about the speaker
-unless the assistant has just asked about someone else ("What does your
-sister do?" -- "Nursing at St Vincent's"), so the rule is skipped then.
+only when it opens the conversation or answers a question put to the user
+that mentions nobody else ("What do you do?"). After "What does your sister
+do?", "How's the family?" or a draft about someone else it is skipped.
 
 Two shapes only, both checked on the parse:
   * an -ing verb with a noun argument: "Loving the new job", "Training for
@@ -26,23 +27,32 @@ _FIRST_WORD = re.compile(r"^\W*(?:still|now|currently|just|recently|mostly|"
                          r"finally|also|actually)?\s*([A-Za-z-]+)", re.I)
 
 
-def _third_party_question(prev):
-    """Was the assistant's last question about someone other than the user?
-    A question with "you" in it is about the user; one naming a person,
-    "your <someone>", or he/she/they is not; anything else ("Any news?")
-    is taken as open."""
+_THIRD = re.compile(r"\byour\s+(?!own\b)\w+|\b(he|she|they|him|her|them|his|"
+                    r"their|the (?:family|kids?|baby|dog|cat|team|boss|"
+                    r"landlord|doctors?|new hire|character|story|draft))\b",
+                    re.I)
+_NAME = re.compile(r"(?<!^)(?<![.!?]\s)\b[A-Z][a-z]+")
+
+
+def _about_user(prev):
+    """Is a fragment answering `prev` about the user?
+
+    Review 2026-10-02: a fragment answers whatever was just raised, and
+    "How's the family?", "What's the dog up to?", "Tell me about your wife."
+    or a draft bio for someone else all raise someone else. So the rule
+    fires only at the start of a conversation, or right after a question
+    put to the user ("What do you do?") that mentions nobody else."""
     if not prev:
+        return True
+    sents = re.split(r"(?<=[.!?])\s+", prev.strip())
+    if _THIRD.search(prev) or any(_NAME.search(x) for x in sents[-2:]):
         return False
-    qs = [q for q in re.split(r"(?<=[.!?])\s+", prev.strip()) if q.endswith("?")]
-    if not qs:
-        return False
-    q = qs[-1]
-    if re.search(r"\byou\b", q, re.I):
-        return False
-    # "How is Sam?", "What does your sister do?", "Is she still there?"
-    return bool(re.search(r"\byour\s+\w+|\b(he|she|they|him|her|them|his|"
-                          r"their)\b", q, re.I)
-                or re.search(r"(?<!^)(?<![.!?]\s)\b[A-Z][a-z]+", q))
+    qs = [q for q in sents if q.endswith("?")]
+    return bool(qs) and bool(re.search(r"\byou\b", qs[-1], re.I))
+
+
+_DENIAL = re.compile(r"^\W*(no\b|nope|not\b|nah|just kidding|kidding|jk\b|"
+                     r"joking|lol\b|haha)", re.I)
 
 
 def _candidate(sentence):
@@ -61,7 +71,22 @@ def rewrite(text, nlp, prev=None):
         return text, {}
     first = re.split(r"(?<=[.!?])\s+", text.strip(), maxsplit=1)
     head = first[0]
-    if not _candidate(head) or _third_party_question(prev):
+    rest = first[1] if len(first) > 1 else ""
+    if not _candidate(head) or not _about_user(prev):
+        return text, {}
+    # "Married? No." is a question; "Pregnant. Just kidding." takes it back;
+    # "Reading: War and Peace" is a heading; "Sending you the file" is about
+    # this conversation, not the user's life.
+    if (head.rstrip().endswith("?") or ":" in head or _DENIAL.match(rest)
+            or re.search(r"\byou(r)?\b", head, re.I)):
+        return text, {}
+    # A fragment has no finite verb and no subject of its own. "Pregnant
+    # women should avoid sushi", "Married with Children is my favourite
+    # show", "Stealing cars is wrong" all do -- they are sentences.
+    orig = nlp(head).sentences[0].words
+    if any(w.deprel.startswith(("nsubj", "csubj", "expl"))
+           or (w.upos in ("VERB", "AUX") and "VerbForm=Fin" in (w.feats or ""))
+           for w in orig):
         return text, {}
     new = "I'm " + head[0].lower() + head[1:]
     # Judged on the rewritten sentence: without a subject Stanza often tags
@@ -73,6 +98,10 @@ def rewrite(text, nlp, prev=None):
     subj = [w for w in words if w.head == root.id and w.deprel.startswith("nsubj")]
     if len(subj) != 1 or subj[0].text != "I":
         return text, {}
+    # "Nursing at St Vincent's, my sister." -- the nurse is the sister
+    if any(w.deprel in ("appos", "dislocated", "vocative", "parataxis", "list")
+           for w in words):
+        return text, {}
     if root.xpos == "VBG":
         ok = any(w.head == root.id and w.deprel in _ARG_DEPS
                  and w.upos in ("NOUN", "PROPN") for w in words)
@@ -80,5 +109,4 @@ def rewrite(text, nlp, prev=None):
         ok = root.text.lower() in STATE_ADJ
     if not ok:
         return text, {}
-    rest = first[1] if len(first) > 1 else ""
     return (new + (" " + rest if rest else "")), {new: head}
