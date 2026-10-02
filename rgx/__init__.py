@@ -116,9 +116,16 @@ class Extractor:
                     "processors='tokenize,pos,lemma,depparse')\")") from e
         return self._nlp
 
-    def extract_turn(self, text, role="user", session=0, turn=0):
+    def extract_turn(self, text, role="user", session=0, turn=0, prev=None):
+        """`prev`: the assistant message just before this turn, if any. It
+        decides whether a subjectless fragment opening the turn is about the
+        user (see rgx.fragments)."""
         from . import check as C
         from . import parse as G
+        from . import fragments as F
+        orig = {}
+        if role == "user":
+            text, orig = F.rewrite(text, self._parser(), prev=prev)
         out = []
         for prop, kind, pred, val, evi, src in G.extract_keyed(
                 text, self._parser(), self.owner_name, role=role,
@@ -141,7 +148,7 @@ class Extractor:
                     continue
             out.append(Record(text=prop, kind=kind, session=session,
                               turn=turn, role=role, predicate=pred, value=val,
-                              evidential=evi, source=src,
+                              evidential=evi, source=orig.get(src, src),
                               quality=C.quality(prop, text, self.owner_name)))
         return out
 
@@ -152,12 +159,15 @@ class Extractor:
     def extract(self, dialogue, session=0):
         """dialogue: [{"role": ..., "content": ...}] for ONE session."""
         out = []
+        prev = None
         for i, t in enumerate(dialogue):
             content = str(t.get("content", "")).strip()
             if not content:
                 continue
-            out.extend(self.extract_turn(content, t.get("role", "user"),
-                                         session, i))
+            role = t.get("role", "user")
+            out.extend(self.extract_turn(content, role, session, i,
+                                         prev=prev if role == "user" else None))
+            prev = content if role == "assistant" else None
         return out
 
 

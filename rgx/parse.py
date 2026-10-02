@@ -1565,8 +1565,26 @@ def extract_keyed(text, nlp, owner=None, role="user",
                                 if sp is not None else None)
                     lead = o if sp is None else f"{o}'s {slot_txt}"
                     if preverb:
-                        lead = f"{lead} " + " ".join(
-                            s.text(c, owner=o, second=second) for c in preverb)
+                        # 2026-10-02: "I'm still nursing" rendered "<owner>
+                        # still is nursing". An adverb that sat AFTER the
+                        # first auxiliary goes back there, just before the
+                        # verb ("is still nursing", "does not really like");
+                        # one before it stays in front ("really does not").
+                        auxs = s.children(head, ("aux", "aux:pass"))
+                        a0 = min((a.id for a in auxs), default=None)
+                        inner = ([c for c in preverb if c.id > a0]
+                                 if a0 is not None and not obj_ctrl else [])
+                        outer = [c for c in preverb if c not in inner]
+                        if inner and " " in verb:
+                            vparts = verb.rsplit(" ", 1)
+                            verb = f"{vparts[0]} " + " ".join(
+                                s.text(c, owner=o, second=second)
+                                for c in inner) + f" {vparts[1]}"
+                        else:
+                            outer = preverb
+                        if outer:
+                            lead = f"{lead} " + " ".join(
+                                s.text(c, owner=o, second=second) for c in outer)
                         lead = re.sub(r"\s+", " ", lead).strip()
                     # E (e240): the owner-possession chain can pass through a
                     # named third party -- "my FRIEND THOMAS's support" -- in

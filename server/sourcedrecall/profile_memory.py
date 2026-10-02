@@ -350,17 +350,20 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
 
         n_turns = n_facts = n_hearsay = n_skipped = 0
         new_lines = []
+        prev = None     # the assistant message before a user turn (rgx.fragments)
         for ti, t in enumerate(turns):
             role = t.get("role", "user")
             text = str(t.get("content", "")).strip()[:1800]
             if not text:
                 continue
+            before, prev = prev, (text if role == "assistant" else None)
             n_turns += 1
             h = _rgx_facts.turn_hash(text)
             if h in cached_hashes:
                 n_skipped += 1
                 continue
-            recs = ex.extract_turn(text, role=role, session=0, turn=ti)
+            recs = ex.extract_turn(text, role=role, session=0, turn=ti,
+                                   prev=before if role == "user" else None)
             facts = [f for f in (_rgx_facts.to_fact(r) for r in recs)
                      if f is not None]
             for f in facts:

@@ -390,8 +390,11 @@ resolves cleanly to Boston with `conflict: false`.
 ## Limitations
 
 Conversation memory:
-- English only. The parser misses some casual fragments: "Still nursing at
-  St Vincent's though" has no subject and produces no fact.
+- English only. A fragment with no subject is read as being about you only
+  when it opens your message and has a familiar shape ("Still nursing at St
+  Vincent's though", "Vegetarian now"); others, such as "Married, two kids",
+  are only partly read. After a question about someone else ("What does
+  your sister do?") a fragment is not stored.
 - Change tracking covers where you live, where you work, your job, diet,
   relationship status, age, car and number of children. Other changes are
   picked up only when you say something ended ("I quit", "I sold the car",

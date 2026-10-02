@@ -1171,3 +1171,14 @@ def test_a_number_is_content_at_any_length(checked):
 def test_quit_keeps_the_form_that_was_typed(checked):
     """Stanza read "I quit" as present and the record said "quits", a habit."""
     assert "Martin Mark quit" in texts(checked, "I quit.")
+
+
+@pytest.mark.parametrize("turn,want", [
+    ("I'm still nursing at St Vincent's.", "Martin Mark is still nursing at St Vincent's"),
+    ("I don't really like jazz.", "Martin Mark does not really like jazz"),
+    ("I really don't like jazz.", "Martin Mark really does not like jazz"),
+    ("I have recently started running.", "Martin Mark has recently started running"),
+])
+def test_an_adverb_stays_on_its_side_of_the_auxiliary(ex, turn, want):
+    """2026-10-02: "I'm still nursing" rendered "<owner> still is nursing"."""
+    assert want in texts(ex, turn)
