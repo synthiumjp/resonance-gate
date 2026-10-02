@@ -19,7 +19,8 @@ What it adds:
 - an MCP server with `profile_recall`, `profile_context`, `profile_correct`
   and related tools
 - a SessionEnd hook that stores the session
-- a SessionStart hook that adds the memory summary
+- a SessionStart hook that adds the memory summary (the `briefing` option
+  turns it off; the tools still work)
 
 Memory is kept in `~/.sourcedrecall/conversations` and is not removed when
 the plugin is uninstalled. Full documentation: `server/README.md` in the

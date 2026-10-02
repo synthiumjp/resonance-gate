@@ -108,3 +108,10 @@ def test_session_start_briefs_the_agent_once_there_is_memory(home):
 
 def test_session_end_without_a_transcript_does_nothing(home):
     assert H.session_end({}, owner="Dana Cole")["stored"] is False
+
+
+def test_the_summary_can_be_turned_off(home, monkeypatch):
+    H.session_end({"transcript_path": _transcript(home / "t.jsonl"),
+                   "session_id": "abc"}, owner="Dana Cole", sync=True)
+    monkeypatch.setenv("SOURCEDRECALL_BRIEFING", "off")
+    assert H.session_start({"source": "startup"}, owner="Dana Cole") is None

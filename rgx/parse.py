@@ -1206,6 +1206,19 @@ def extract_keyed(text, nlp, owner=None, role="user",
                 anc = _poss_antecedent(poss_carry, subj)
                 if anc is not None:
                     carried = anc.text
+                    # 2026-10-02: a DIRECT OBJECT the owner linked to themselves
+                    # ("I maintain the checkout service. It is written in
+                    # Rust.") is the one candidate, but the possessive render
+                    # below exists only for copular clauses, so a verbal or
+                    # passive follow-up was dropped. Render the entity itself,
+                    # as e269 does for "I work on the billing service".
+                    lem = (anc.lemma or "").lower()
+                    if (cop is None and anc.deprel in ("obj", "iobj")
+                            and lem in turn_world and role == "user"
+                            and os.environ.get("RG_WORLD") != "0"):
+                        world_carried = re.sub(r"^(?:a|an)\s+", "the ",
+                                               turn_world[lem], flags=re.I)
+                        carried = None
                 elif not poss_carry:
                     # e269: no owner-possessed candidate, but the owner may
                     # have established exactly one world entity this turn.

@@ -946,6 +946,26 @@ def test_an_owner_possessed_antecedent_still_renders_as_possessed(ex):
     assert any("Martin Mark's car is very reliable" in p for p in out), out
 
 
+def test_a_direct_object_carries_to_a_verbal_follow_up(ex):
+    """2026-10-02: "I maintain the checkout service" makes the service a
+    direct object, which took the possessive path, and that path renders
+    copular clauses only. "It is written in Rust" was dropped."""
+    out = texts(ex, "I maintain the checkout service. It is written in Rust.")
+    assert any(p == "the checkout service is written in Rust" for p in out), out
+    out = texts(ex, "I bought a new car. It was made in Japan.")
+    assert any(p == "the new car was made in Japan" for p in out), out
+
+
+def test_a_carried_object_keeps_its_negation(ex):
+    out = texts(ex, "I maintain the checkout service. It is not written in Rust.")
+    assert not any(p.endswith("is written in Rust") for p in out), out
+
+
+def test_two_objects_still_decline_a_verbal_follow_up(ex):
+    out = texts(ex, "I have a dog and a cat. It barks at night.")
+    assert not any("barks" in p for p in out), out
+
+
 def test_the_world_can_be_switched_off(ex, monkeypatch):
     monkeypatch.setenv("RG_WORLD", "0")
     out = texts(ex, "I work on the billing service. It is written in Go.")

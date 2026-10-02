@@ -1,6 +1,6 @@
 {
   "name": "sourcedrecall",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Local memory for Claude Code. Stores the facts you state about yourself, with your exact words and dates, and gives Claude a short summary at the start of each session. No language model is used to write the memory; everything stays on your machine.",
   "author": {
     "name": "Jon-Paul Cacioli"
@@ -19,6 +19,12 @@
       "title": "Your name",
       "description": "The person this memory is about. Facts are written about this name.",
       "required": true
+    },
+    "briefing": {
+      "type": "boolean",
+      "title": "Summary at session start",
+      "description": "Give Claude a short summary of what it knows about you at the start of each session. Turn off to use memory only when you or Claude ask for it.",
+      "default": true
     }
   },
   "mcpServers": {

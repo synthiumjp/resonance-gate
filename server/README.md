@@ -22,7 +22,8 @@ Claude Code asks for your name (the person the memory is about). The first
 session installs the Python side in the background (about 3 to 5 minutes,
 ~2.6 GB including models; needs Python 3.10+ and git) and memory is
 available from the next session. After that, each session is stored when it
-ends and the next one starts with the summary. Change the name later with
+ends and the next one starts with the summary. Change the name later, or
+turn the summary off and keep only the tools, with
 `/plugin configure sourcedrecall@resonance-gate`.
 
 The install log is `~/.claude/plugins/data/<plugin id>/install.log`.
@@ -149,6 +150,8 @@ harness). It hands the work to a background process and returns at once; a
 log goes to `$TMPDIR/sourcedrecall-hook.log`. Resuming a session and ending
 it again only adds the new turns. `session-start` adds nothing while the
 memory is empty.
+With `SOURCEDRECALL_BRIEFING=off` it adds nothing at all, and sessions are
+still stored.
 
 Coding sessions will add whatever you say about yourself in them, as well as
 some statements about the work. Use `profile_correct` to remove anything you

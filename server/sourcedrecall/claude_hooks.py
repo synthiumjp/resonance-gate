@@ -161,6 +161,12 @@ def session_end(event, owner=None, sync=False):
 def session_start(event, owner=None, max_facts=15):
     """-> the JSON Claude Code adds to the session's context, or None when
     there is nothing to say (an empty memory adds no noise)."""
+    # Some people want memory only when they ask for it (research into what
+    # users want, 2026-10-02: "I prefer claude's opt in implementation").
+    # SOURCEDRECALL_BRIEFING=off: no summary at session start; the tools still
+    # work, and sessions are still stored.
+    if os.environ.get("SOURCEDRECALL_BRIEFING", "on").lower() in ("off", "0", "false", "no"):
+        return None
     # The briefing needs no retrieval model; skip the NLI conflict model so a
     # session starts in well under a second.
     os.environ.setdefault("RG_NLI", "0")
