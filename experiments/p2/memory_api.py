@@ -579,6 +579,8 @@ def _unparsed_sentences(conversations_path, g):
             continue
         for sent in _SENT_SPLIT.split(text.strip()):
             n = _norm_sent(sent)
+            if "[secret removed]" in sent:
+                continue
             if (not n or n in used or sent.strip().endswith("?")
                     or len(n.split()) < 4 or _denied_sentence(sent, denied)):
                 continue

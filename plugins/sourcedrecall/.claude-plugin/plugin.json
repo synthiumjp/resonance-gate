@@ -1,6 +1,6 @@
 {
   "name": "sourcedrecall",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "Local memory for Claude Code. Stores the facts you state about yourself, with your exact words and dates, and gives Claude a short summary at the start of each session. No language model is used to write the memory; everything stays on your machine.",
   "author": {
     "name": "Jon-Paul Cacioli"

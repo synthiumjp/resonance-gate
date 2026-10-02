@@ -116,6 +116,10 @@ Agents can do the same with the `profile_forget`, `profile_confirm` and
 `profile_export` tools. Editing `MEMORY.md` by hand does not change the
 memory; it is regenerated.
 
+Passwords, PINs, API keys, tokens, card numbers and similar are replaced by
+`[secret removed]` before anything is written, including the stored
+transcript.
+
 Things said in passing ("I'm eating keto today", "I'm so tired") are kept
 in their own section. They are labelled in answers, drop out of the session
 summary after three days, and never replace a lasting fact: "I'm in Sydney

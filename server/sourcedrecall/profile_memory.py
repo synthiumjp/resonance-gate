@@ -273,6 +273,12 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
           always 0, since nothing here is a model call.
     """
     turns = turns or []
+    # 2026-10-02: credentials never enter the memory -- not the stored
+    # transcript, not a fact, not a quoted sentence (sourcedrecall.secrets).
+    from sourcedrecall.secrets import scrub, MARK
+    turns = [dict(t, content=scrub(t.get("content")))
+             if isinstance(t, dict) and isinstance(t.get("content"), str) else t
+             for t in turns]
     if not turns:
         # Safe no-op: nothing to append, nothing to extract, no reload
         # forced, no extractor loaded. conversation_id is echoed back
@@ -379,7 +385,8 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
             recs = ex.extract_turn(text, role=role, session=0, turn=ti,
                                    prev=before if role == "user" else None)
             facts = [f for f in (_rgx_facts.to_fact(r) for r in recs)
-                     if f is not None]
+                     if f is not None and MARK not in str(f.get("value"))
+                     and MARK not in str(f.get("text"))]
             for f in facts:
                 if f.get("evidential") == "report":
                     n_hearsay += 1

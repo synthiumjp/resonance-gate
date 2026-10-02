@@ -62,6 +62,10 @@ def test_the_reader_keeps_only_human_speech_and_visible_replies(tmp_path):
 def home(tmp_path, monkeypatch):
     monkeypatch.setenv("SOURCEDRECALL_STATE", str(tmp_path / "state"))
     monkeypatch.delenv("RG_MEMORY_DIR", raising=False)
+    # session_start does os.environ.setdefault("RG_NLI", "0") -- right for a
+    # hook process, a leak in a shared test run (it switched off the conflict
+    # model for experiments/p2/test_memory_api.py run after it)
+    monkeypatch.setenv("RG_NLI", "0")
     import sourcedrecall.profile_memory as pm
 
     def reset():
