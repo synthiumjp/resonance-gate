@@ -20,8 +20,8 @@ import json
 import os
 import sys
 
-RESULTS = os.path.expanduser(
-    "~/rg_private/halumem/official/HaluMem/eval/results")
+RESULTS = os.path.expanduser(os.environ.get(
+    "RG_RESULTS", "~/rg_private/halumem/official/HaluMem/eval/results"))
 
 # record list -> the field that is None when the judge failed on that record
 STAGES = {

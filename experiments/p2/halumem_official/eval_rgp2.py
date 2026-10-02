@@ -38,7 +38,9 @@ import sys
 import time
 
 # our system lives outside this repo -- import it directly, no packaging
-_P2 = "/home/jp/rg/experiments/p2"
+# 2026-10-02: derived from this file's REAL location (it is reached through
+# a symlink from HaluMem/eval/), so the same code runs on WSL and the Mac.
+_P2 = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 if _P2 not in sys.path:
     sys.path.insert(0, _P2)
 # 2026-09-06: this file is reached through a SYMLINK from HaluMem/eval/, and

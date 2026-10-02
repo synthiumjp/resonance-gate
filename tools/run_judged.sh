@@ -17,17 +17,24 @@
 # the records it changed.
 set -u
 MODE="${1:-variants}"
-Q=~/rg_private/halumem/qa_rerun2
-EVAL=~/rg_private/halumem/official/HaluMem/eval
-V=~/rg_private/halumem/official/.venv/bin/python
-JUDGE_PY=~/rg/.venv/bin/python
-MODEL=/usr/share/ollama/.ollama/models/blobs/sha256-a8cc1361f3145dc01f6d77c6c82c9116b9ffe3c97b34716fe20418455876c40e
+# Every location is overridable, so the same script runs on WSL (defaults)
+# and the Mac Studio (tools/run_judged_mac.env sets the Mac values).
+Q=${RG_Q:-~/rg_private/halumem/qa_rerun2}
+EVAL=${RG_EVAL:-~/rg_private/halumem/official/HaluMem/eval}
+V=${RG_PY:-~/rg_private/halumem/official/.venv/bin/python}
+JUDGE_PY=${RG_JUDGE_PY:-~/rg/.venv/bin/python}
+MODEL=${RG_MODEL:-/usr/share/ollama/.ollama/models/blobs/sha256-a8cc1361f3145dc01f6d77c6c82c9116b9ffe3c97b34716fe20418455876c40e}
+RG=${RG_HOME:-/home/jp/rg}
 # The judge's identity travels WITH the GGUF that serves it. The verdict
 # cache keys on both (llms.py), so changing MODEL above changes the key and a
-# second judge can never replay the first one's verdicts.
+# second judge can never replay the first one's verdicts. RG_JUDGE_SUFFIX
+# names the BACKEND: Metal and ROCm are not guaranteed to give identical
+# verdicts at temperature 0, so a Mac verdict is never replayed on WSL or
+# vice versa.
 export OPENAI_MODEL=qwen3:14b
-export RG_JUDGE_ID="$(basename "$MODEL")"
-RG=/home/jp/rg
+export RG_JUDGE_ID="sha256-$(basename "$MODEL" | grep -oE '[0-9a-f]{64}' || basename "$MODEL")${RG_JUDGE_SUFFIX:-}"
+QA_RGX=${RG_QA_RGX:-~/rg_private/halumem/qa_rgx}
+QA_LLM=${RG_QA_LLM:-~/rg_private/halumem/qa_llm}
 LOG="$Q/chain_$(date +%Y%m%d_%H%M)_$MODE.log"
 mkdir -p "$Q"
 
@@ -38,7 +45,7 @@ start_judge() {
   served=$(curl -s -m 90 127.0.0.1:8090/v1/models 2>/dev/null)
   if [ -n "$served" ]; then
     # review 2026-10-02: "something answers on :8090" is not "our judge is up"
-    if echo "$served" | grep -q "$RG_JUDGE_ID"; then
+    if echo "$served" | grep -q "$(basename "$MODEL")"; then
       say "judge already up ($RG_JUDGE_ID)"; return 0
     fi
     say "A DIFFERENT MODEL is serving :8090 -- refusing to judge with it"
@@ -90,14 +97,21 @@ run() {
 start_judge || exit 1
 case "$MODE" in
   judge)    say "judge only; leaving it up"; exit 0 ;;
-  baseline) run qa-rgx4 ~/rg_private/halumem/qa_rgx "RG_INGEST_ALL_TURNS=1"
-            run qa-llm3 ~/rg_private/halumem/qa_llm "" ;;
+  baseline) run qa-rgx4 "$QA_RGX" "RG_INGEST_ALL_TURNS=1"
+            run qa-llm3 "$QA_LLM" "" ;;
   variants) # extraction-only: RG_SKIP_QA means no answers are generated or
             # judged, so these rows have NO question_answering block -- never
             # compare their QA fields to a baseline row's.
-            run qa-rgx4-fb1 ~/rg_private/halumem/qa_rgx "RG_INGEST_ALL_TURNS=1 RG_SKIP_QA=1 RG_SENTENCE_FALLBACK=1"
-            run qa-rgx4-fb2 ~/rg_private/halumem/qa_rgx "RG_INGEST_ALL_TURNS=1 RG_SKIP_QA=1 RG_SENTENCE_FALLBACK=2"
-            run qa-rgx4-tl  ~/rg_private/halumem/qa_rgx "RG_INGEST_ALL_TURNS=1 RG_SKIP_QA=1 RG_TEXT_LONGEST=1" ;;
+            run qa-rgx4-fb1 "$QA_RGX" "RG_INGEST_ALL_TURNS=1 RG_SKIP_QA=1 RG_SENTENCE_FALLBACK=1"
+            run qa-rgx4-fb2 "$QA_RGX" "RG_INGEST_ALL_TURNS=1 RG_SKIP_QA=1 RG_SENTENCE_FALLBACK=2"
+            run qa-rgx4-tl  "$QA_RGX" "RG_INGEST_ALL_TURNS=1 RG_SKIP_QA=1 RG_TEXT_LONGEST=1" ;;
+  extraction) # the SAME-JUDGE comparison set: the baseline and the three
+            # variants, all extraction-only, all judged by one backend. Run
+            # this whenever the judge host changes (2026-10-02: the Mac).
+            run "qa-rgx4-x${RG_TAG:-}"   "$QA_RGX" "RG_INGEST_ALL_TURNS=1 RG_SKIP_QA=1"
+            run "qa-rgx4-fb1${RG_TAG:-}" "$QA_RGX" "RG_INGEST_ALL_TURNS=1 RG_SKIP_QA=1 RG_SENTENCE_FALLBACK=1"
+            run "qa-rgx4-fb2${RG_TAG:-}" "$QA_RGX" "RG_INGEST_ALL_TURNS=1 RG_SKIP_QA=1 RG_SENTENCE_FALLBACK=2"
+            run "qa-rgx4-tl${RG_TAG:-}"  "$QA_RGX" "RG_INGEST_ALL_TURNS=1 RG_SKIP_QA=1 RG_TEXT_LONGEST=1" ;;
   *)        say "unknown mode $MODE"; exit 2 ;;
 esac
 say "COMPLETE $(date +%H:%M)"
