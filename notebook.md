@@ -14602,3 +14602,76 @@ implied subject is the speaker only if the previous assistant turn asked
 about them, so this needs the prior turn, not a looser rule. Coordinated
 owner subjects render awkwardly ("Dana Cole's wife and Dana Cole
 separated"). "Priya suggested it" is not linked to its antecedent.
+
+## Entry 287 — 2026-10-02 (an adversarial review of the day's parser work, a three-system false-memory bench, and what breaks as the memory grows.)
+
+### Adversarial review (sonnet, ~510 probes) -> 0.3.3
+
+The day's parser changes (pronoun carry after an object, life events that
+stand alone, fragments) created false facts the dogfood never saw: "I
+dreamed I got divorced", "I hope I get promoted", "Suppose I quit" (life
+events had been protected only by "nothing after the verb"); "I took the
+train. It is raining." -> "the train is raining"; "Married? No." -> "is
+married"; "How's the family?" -> "Vegetarian now." about the user; and my
+0.3.2 prose-filter exemption let "My PIN is 4821 5512 ..." through. Nine
+refusal rows went in first (all failing, controls passing), then the fixes.
+Lesson, again (ledger 5q): a review per day of parser work, not per release.
+
+### False-memory bench (bench/false_memory; built by a sonnet agent)
+
+72 synthetic scenarios, classes a negation/hedge, b stale, c invention,
+d attribute absent, e assistant-injected, f controls; local judge qwen3:14b,
+validated 29/30 on items labelled before any output; every flagged line
+audited. Audited false-memory rate, classes a-e:
+
+| | all (60) | stale (12) | assistant-injected (12) | controls (16) | held-out (19) |
+|---|---|---|---|---|---|
+| sourcedrecall 03e0b24 | 13% | 8 | 0 | 14 | 21% |
+| sourcedrecall 0.3.4+ | 7% | 4 | 0 | 14 | 16% |
+| Mem0 2.2.1 (local, qwen3:14b) | 27% | 12 | 4 | 16 | 26% |
+| verbatim RAG | 20% | 12 | 0 | 16 | 21% |
+
+Between the two sourcedrecall rows I fixed what the DEV cases exposed, so
+that row is not an unbiased estimate; the held-out split moved by one case,
+and I had read its four stale cases. Mem0 2.2.1's add never updates or
+deletes, so every change of state survives in it. Our cost is recall
+(controls 14/16 vs 16/16, side recall 6/11 vs 11/11). The bench needs a
+fresh, unread set before the next claim.
+
+What the stale class taught: the replacing sentence was often parsed fine
+and then not LINKED ("relocated" was a residence predicate but "Our place
+is in Northcote" was not; "Sold the Corolla on Saturday" failed the
+ending match on "saturday"), and once linked, the QUESTION was refused
+("Where do I live?" shares no word with "relocated to Coburg"). Family
+grounding: a question about a state is grounded by a fact in its family,
+only when the question is about the user ("my brother" is not).
+
+### Scale (tools/scale_test.py)
+
+Template filler in front of dogfood, avoiding every never-mentioned topic.
+The VSA note JP pasted asked the right question in the wrong vocabulary
+(capacity vs SNR); for this system it is "does refusal survive N facts".
+It did not: at 395 facts a never-mentioned question was answered, because
+dense grounding took the max similarity over the WHOLE store (ledger 5o's
+scale creep, now measured). Now only returned facts count. Recall lost two
+answers at 488 facts, both candidate-pipeline bugs, not model limits: the
+BM25 index never saw "billing" (a world fact's key is the head lemma), and
+the 32-wide slice cut an answer the cross-encoder under-scored. After:
+
+| facts | rank-1 | in pool | never-mentioned refused | unknown attribute refused | p95 |
+|---|---|---|---|---|---|
+| 39 | 24/26 | 26/26 | 12/12 | 8/8 | 80 ms |
+| 488 | 24/26 | 26/26 | 12/12 | 8/8 | 216 ms |
+| 1,526 | 24/26 | 25/26 | 12/12 | 8/8 | 355 ms |
+
+The one loss at 1,526 is paraphrase only ("beverage of choice" -> tea),
+34th+ by bi-encoder similarity; not fixable by pool size alone.
+HELDOUT_PARTIAL is no longer untouched for the name kind (fixed after it
+leaked at 159 facts).
+
+### Product (from JP's research into what users want)
+
+Remarks said in passing (today, tonight, moods) are labelled, leave the
+summary after 3 days and never replace a lasting state. The user sees what
+was saved at session start (systemMessage). The rules say memory is not
+permission.
