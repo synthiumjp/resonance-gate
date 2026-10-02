@@ -813,14 +813,41 @@ def profile_forget(fact_id):
                 "applied": "live"}
     out = profile_correct("deny", f["attribute"], f["value"], exact=True,
                           said=f.get("said"))
-    if f["_tier"] == "hearsay":
-        # live deny covers the asserted and single-mention tiers; the
-        # hearsay tier is rebuilt from the corrections file
-        with _lock:
-            _reload_locked()
-        _export_quietly()
+    # 2026-10-03: forgetting removes what the fact left behind. A rebuild
+    # (from the cache; nothing is re-parsed) recomputes "no longer true"
+    # without it -- forgetting "moved to Brunswick" makes "lives in Fitzroy"
+    # current again -- and covers the hearsay tier; the names the sentence
+    # introduced ("my dog Biscuit") leave the parser's saved world.
+    _forget_names(f.get("said"))
+    with _lock:
+        _reload_locked()
+    _export_quietly()
     return {"forgotten": True, "fact": {k: f[k] for k in ("id", "text", "said")},
             "applied": out.get("applied")}
+
+
+def _forget_names(sentence):
+    if not sentence:
+        return
+    path = os.path.join(_data_dir(), "world.json")
+    try:
+        with open(path, encoding="utf-8") as fh:
+            world = json.load(fh)
+    except (OSError, ValueError):
+        return
+    import re as _re
+    words = {w.lower() for w in _re.findall(r"[A-Za-z]+", sentence)}
+    kept = {k: v for k, v in world.items()
+            if not (k in words and str(v)[:1].isupper())}
+    if len(kept) != len(world):
+        tmp = path + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as fh:
+            json.dump(kept, fh)
+        os.replace(tmp, path)
+        ex = _ingest_state.get("extractor")
+        if ex is not None:
+            for k in set(world) - set(kept):
+                ex._world.pop(k, None)
 
 
 def profile_confirm(fact_id):

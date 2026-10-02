@@ -244,3 +244,30 @@ def test_nothing_is_offered_from_another_project(pm, tmp_path):
     other.mkdir()
     r = pm.profile_recall("What language is the billing service in?", scope=str(other))
     assert "billing" not in str(r.get("related"))
+
+
+# ---- forgetting removes what the fact left behind (2026-10-03) -------------
+
+def test_forgetting_the_new_value_restores_the_old_one(pm):
+    pm.profile_ingest([U("I live in Fitzroy.")], conversation_id="a",
+                      owner_name="Jordan Pike", date="2026-03-02")
+    pm.profile_ingest([U("I moved to Brunswick last week.")], conversation_id="b",
+                      owner_name="Jordan Pike", date="2026-03-09")
+    new = next(f for f in pm.profile_recall("Where do I live?")["ranked"]
+               if "Brunswick" in f["text"])
+    pm.profile_forget(new["id"])
+    r = pm.profile_recall("Where do I live?")
+    fitz = [f for f in r["ranked"] if "Fitzroy" in f["text"]]
+    assert fitz and fitz[0]["current"] is True
+    assert "Brunswick" not in str(r)
+
+
+def test_forgetting_a_fact_drops_the_names_it_introduced(pm, tmp_path):
+    pm.profile_ingest([U("My dog Biscuit needs a walk twice a day.")],
+                      conversation_id="a", owner_name="Jordan Pike", date="2026-03-02")
+    world = json.load(open(tmp_path / "world.json"))
+    assert "biscuit" in world
+    hit = pm.profile_recall("Do I have a dog?")["ranked"][0]
+    pm.profile_forget(hit["id"])
+    world = json.load(open(tmp_path / "world.json"))
+    assert "biscuit" not in world
