@@ -6,7 +6,7 @@ Three systems, 72 synthetic scenarios, local models only, no network calls at ru
 
 | system | what it is |
 |---|---|
-| `sourcedrecall` | this repo's `server/sourcedrecall/profile_memory.py`: a deterministic parser (`rgx`, stanza dependency parse) writes facts with the user's own quote and date; no model call at ingest. **Committed numbers are from RG commit `03e0b24`** (not from later `product-p2` commits). |
+| `sourcedrecall` | this repo's `server/sourcedrecall/profile_memory.py`: a deterministic parser (`rgx`, stanza dependency parse) writes facts with the user's own quote and date; no model call at ingest. `results/` holds the run at RG commit `36aea17` (sourcedrecall 0.3.4); the first run, at `03e0b24`, is kept in `results/raw_sourcedrecall_03e0b24.jsonl` (see Results by version). |
 | `mem0` | Mem0 open source, `mem0ai==2.2.1`, fully local (below). |
 | `rag` | Control with no extraction: every user message stored verbatim, top-3 by `BAAI/bge-small-en-v1.5` cosine. |
 
@@ -65,11 +65,35 @@ Steps are resumable; delete `results/raw_*.jsonl` for a clean run. Needs Ollama 
 * Judge: Ollama 0.15.2, `qwen3:14b` (id `bdbd181c33f2`), temperature 0, seed 0, `num_predict 4`.
 * Hardware: CPU only. The Ollama service on this machine has no working GPU backend (WSL, no ROCm/Vulkan build), so all LLM calls ran on a Ryzen 5 7600.
 
+## Results by version (sourcedrecall only; Mem0 and RAG were run once)
+
+Audited false-memory rate on classes a-e, control recall (f), and true-fact
+side recall on a/b/e:
+
+| sourcedrecall | all: false memory | all: stale (b) | all: control | all: side recall | held-out: false memory | held-out: control |
+|---|---|---|---|---|---|---|
+| `03e0b24` | 13% (8/60) | 67% (8/12) | 14/16 | 1/11 | 21% (4/19) | 5/7 |
+| `36aea17` (0.3.4) | 7% (4/60) | 33% (4/12) | 14/16 | 6/11 | 16% (3/19) | 5/7 |
+| Mem0 2.2.1 | 27% (16/60) | 100% (12/12) | 16/16 | 11/11 | 26% (5/19) | 7/7 |
+| RAG | 20% (12/60) | 100% (12/12) | 16/16 | 11/11 | 21% (4/19) | 7/7 |
+
+Between the two runs, sourcedrecall was changed using this benchmark's dev
+cases: parsing of subjectless and past-tense fragments ("Sold the Corolla on
+Saturday"), "They promoted me to ...", names introduced with a relation ("my
+dog Biscuit"), more state families (home, diet, role), endings matched past
+time words and plurals, and questions about a state answered by a fact in
+that state's family. So the dev numbers for `36aea17` are not an unbiased
+estimate. The held-out split is the better guide, and it moved little (one
+stale case). The four held-out stale cases were read before those changes,
+so they are not blind for `36aea17` either. A fresh set of cases is needed
+to measure the change properly.
+
 ## Reading the results (what the numbers do and do not say)
 
 * Class a (denials, hedges, questions, conditionals, reported opinions): no system returned an asserting line, including sourcedrecall at `03e0b24`. This class does not separate the systems on this set.
-* Class b (stale) dominates every system's false-memory rate. None of the systems marked an old value as replaced in this set: Mem0 2.2.1 never deletes, RAG returns both messages, and sourcedrecall did not parse the replacing sentences ("relocated to Coburg", "dropped the Italian class", "split up"), so its old fact stayed unmarked. Its 4 "passes" in class b are cases where it extracted nothing at all (empty return), not cases where it resolved the conflict; its true-fact side recall of 1/11 shows this.
+* Class b (stale) dominates every system's false-memory rate. At `03e0b24` none of the systems marked an old value as replaced in this set: Mem0 2.2.1 never deletes, RAG returns both messages, and sourcedrecall did not parse the replacing sentences ("relocated to Coburg", "dropped the Italian class", "split up"), so its old fact stayed unmarked. Its 4 "passes" in class b are cases where it extracted nothing at all (empty return), not cases where it resolved the conflict; its true-fact side recall of 1/11 shows this.
 * Class e: Mem0 stored assistant statements about the user as user facts in 4 of 12 scenarios (vegan, shellfish allergy, Seattle, and the borderline Go case); RAG cannot, because it stores user messages only (a property of the control, not a skill).
+* At `36aea17` sourcedrecall marks 8 of the 12 changes and returns the new value first; the 4 it misses need knowledge it does not have (that Anytime Fitness is a gym) or are held-out cases it does not parse.
 * sourcedrecall's price is recall: control recall 14/16 (it returned nothing for the marine-biology control f06 and for one of the three f12 probes), and it dropped the freight-job fact in a05.
 * Cost: sourcedrecall 0 model calls and about 0.12 s per message; Mem0 about 1.6 model calls and 24 s per message on CPU (168 calls for 108 messages).
 

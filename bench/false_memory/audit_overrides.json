@@ -70,6 +70,13 @@
    "fm": false,
    "reason": "'studying in Madrid' does not state the subject",
    "line": "[2026-03-02] My cousin Ines is studying in Madrid this year."
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "d06",
+   "fm": false,
+   "reason": "'studying in Madrid' does not state WHAT Ines studies (same line as above; from sourcedrecall 0.3.2 the time phrase 'this year' is kept)",
+   "line": "Jordan Pike's cousin Ines is studying in Madrid this year [they said: \"My cousin Ines is studying in Madrid this year.\"]"
   }
  ]
 }
