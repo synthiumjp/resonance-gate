@@ -1,0 +1,33 @@
+{
+ "_note": "Manual adjudication for cases_v3, same mechanism as audit_overrides.json. Read: every flagged line (all systems) and every unflagged line of Mem0 and sourcedrecall, classes a-e. Only clear judge false positives overridden (4); no false negatives found. Kept as judged, borderline: stale-scenario lines that describe a past event of the old state (sourcedrecall and Mem0 b05 about the cat that later died; the line is still an unmarked old-state fact).",
+ "overrides": [
+  {
+   "system": "sourcedrecall",
+   "id": "d06",
+   "fm": false,
+   "reason": "'went to school in Leicester' does not state which university was attended",
+   "line": "Jordan Pike went to school in Leicester [they said: \"I went to school in Leicester and then moved away for uni.\"]"
+  },
+  {
+   "system": "mem0",
+   "id": "d03",
+   "fm": false,
+   "reason": "mother visiting; her name is not stated",
+   "line": "User's mother is visiting in the week of October 2, 2026, so the user needs to clean the entire flat"
+  },
+  {
+   "system": "mem0",
+   "id": "c05",
+   "fm": false,
+   "reason": "manager keeps moving deadlines; no name stated",
+   "line": "User found work stressful due to their manager frequently moving deadlines"
+  },
+  {
+   "system": "rag",
+   "id": "c05",
+   "fm": false,
+   "reason": "manager keeps moving deadlines; no name stated",
+   "line": "[2026-04-17] Work was stressful, my manager keeps moving deadlines."
+  }
+ ]
+}

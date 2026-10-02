@@ -118,6 +118,43 @@ borderline sourcedrecall line was left as the judge scored it (not
 flagged): a conditional rendered as a plan ("will get a motorbike"). Run
 with `FM_CASES=cases_v2.jsonl FM_RESULTS=results_v2 FM_OVERRIDES=audit_overrides_v2.json`.
 
+## Blind set v3 (cases_v3.jsonl)
+
+48 more scenarios, all marked held-out, written by an agent that did not read
+sourcedrecall's code, the earlier blind set or any output, and committed
+(`42dce13`) before any system ran on them. Mix: f 18, b 8, d 6, c 6, a 5, e 5.
+The control questions lean on paraphrase: the question uses different words
+from what the user said ("Which food do I dislike?" against a sentence about
+not being able to stand something), with casual wording, typos, facts in the
+middle of a paragraph and several facts in one message. The c questions share
+topic words with what was said but ask for something never mentioned.
+
+sourcedrecall was run at RG commit `42dce13` (its models run through the
+same checkout; the 0.4.0 ONNX change was committed after the run). Audited,
+count [95% CI] (k/n), results in `results_v3/`:
+
+| | sourcedrecall | Mem0 2.2.1 | RAG |
+|---|---|---|---|
+| false memory, a-e | 4/30 [3-27] | 9/30 [13-47] | 8/30 [13-43] |
+| a negation/hedge/question | 0/5 | 0/5 | 0/5 |
+| b stale | 4/8 [12-88] | 8/8 | 8/8 |
+| c invention | 0/6 | 0/6 | 0/6 |
+| d attribute absent | 0/6 | 0/6 | 0/6 |
+| e assistant-injected | 0/5 | 1/5 [0-60] | 0/5 |
+| control recall (f) | 8/23 [14-55] | 23/23 | 23/23 |
+| explicit abstention, c+d | 10/12 [58-100] | 0/12 | 0/12 |
+| true-fact side recall, a/b/e | 3/8 [12-75] | 8/8 | 8/8 |
+
+Control recall is the number to read for sourcedrecall: with paraphrased
+questions it returned the stated fact for 8 of 23 probes. Judge audit: every
+flagged line for all systems and every unflagged sourcedrecall and Mem0 line
+was read; 4 false positives were overridden (`audit_overrides_v3.json`), no
+false negatives found. Run with
+`FM_CASES=cases_v3.jsonl FM_RESULTS=results_v3 FM_OVERRIDES=audit_overrides_v3.json`.
+Mem0 took about 15 minutes per scenario for part of this run (a busy CPU, no
+prefix cache hit) and Ollama was restarted twice by something else on the
+machine, so the Mem0 step was resumed after clearing its failed rows.
+
 ## Reading the results (what the numbers do and do not say)
 
 * Class a (denials, hedges, questions, conditionals, reported opinions): no system returned an asserting line, including sourcedrecall at `03e0b24`. This class does not separate the systems on this set.
