@@ -3,6 +3,8 @@ name = "sourcedrecall"
 version = "0.1.0"
 description = "sourcedrecall — LLM-free MCP memory server over the Resonance Gate VSA substrate: explicit structured facts, honest no-match, surfaced conflicts"
 requires-python = ">=3.10"
+license = "Apache-2.0"
+authors = [{ name = "Jon-Paul Cacioli" }]
 # The rg substrate itself is numpy-only and is loaded from the repo checkout
 # at runtime (RG_ROOT); these are the server + registry-encoder deps. There is
 # NO generative model dependency — sentence-transformers is the registry's

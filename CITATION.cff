@@ -1,0 +1,26 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Resonance Gate / sourcedrecall: a local, non-generative memory for AI agents"
+authors:
+  - family-names: Cacioli
+    given-names: Jon-Paul
+    orcid: "https://orcid.org/0009-0000-7054-2014"
+repository-code: "https://github.com/synthiumjp/resonance-gate"
+license: Apache-2.0
+date-released: "2026-07-19"
+keywords:
+  - agent memory
+  - vector-symbolic architecture
+  - abstention
+  - mcp
+preferred-citation:
+  type: article
+  title: "The Resonance Gate: endogenous confidence from retrieval geometry in a vector-symbolic memory"
+  authors:
+    - family-names: Cacioli
+      given-names: Jon-Paul
+      orcid: "https://orcid.org/0009-0000-7054-2014"
+  doi: "10.5281/zenodo.21446859"
+  year: 2026
+  publisher:
+    name: Zenodo
