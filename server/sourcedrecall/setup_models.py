@@ -32,11 +32,17 @@ HF_MODELS = [
 
 
 def _du(path):
+    """Bytes actually on disk. Skips symlinks: the HF cache links every
+    snapshot file to a blob, and following both reported 2.8 GB for an
+    0.9 GB cache (second new-user test)."""
     total = 0
     for root, _dirs, files in os.walk(path):
         for f in files:
+            fp = os.path.join(root, f)
+            if os.path.islink(fp):
+                continue
             try:
-                total += os.path.getsize(os.path.join(root, f))
+                total += os.path.getsize(fp)
             except OSError:
                 pass
     return total
@@ -51,16 +57,17 @@ def main(argv=None):
     print("sourcedrecall setup: downloading the models the server uses.\n"
           "This is the only step that touches the network.\n")
 
-    print(f"[1/{1 + len(HF_MODELS)}] English parser (Stanza: {STANZA_PROCESSORS})")
+    print(f"[1/{1 + len(HF_MODELS)}] English parser (Stanza: {STANZA_PROCESSORS})"
+          " -- ~320 MB, the slowest step", flush=True)
     import stanza
-    stanza.download("en", processors=STANZA_PROCESSORS, verbose=False)
+    stanza.download("en", processors=STANZA_PROCESSORS)
     from stanza.resources.common import DEFAULT_MODEL_DIR
     sdir = os.environ.get("STANZA_RESOURCES_DIR", DEFAULT_MODEL_DIR)
     print(f"      -> {sdir} ({_mb(_du(sdir))})")
 
     from huggingface_hub import constants as hfc
     for i, (what, name, kind) in enumerate(HF_MODELS, start=2):
-        print(f"[{i}/{1 + len(HF_MODELS)}] {what}: {name}")
+        print(f"[{i}/{1 + len(HF_MODELS)}] {what}: {name}", flush=True)
         if kind == "bi":
             from sentence_transformers import SentenceTransformer
             SentenceTransformer(name, device="cpu")
@@ -70,7 +77,12 @@ def main(argv=None):
         else:
             from transformers import pipeline
             pipeline("text-classification", model=name, device=-1)
-    print(f"      -> {hfc.HF_HUB_CACHE} ({_mb(_du(hfc.HF_HUB_CACHE))} in that cache)")
+    # Size of THESE models only -- a shared HF cache can hold gigabytes of
+    # other people's models, and reporting the whole cache misleads.
+    ours = sum(_du(os.path.join(hfc.HF_HUB_CACHE,
+                                "models--" + name.replace("/", "--")))
+               for _w, name, _k in HF_MODELS)
+    print(f"      -> {hfc.HF_HUB_CACHE} ({_mb(ours)} for these {len(HF_MODELS)} models)")
 
     print(f"\nDone in {time.time() - t0:.0f} s. The server will now run fully "
           "offline.")

@@ -123,6 +123,13 @@ def _build():
     (Memory.load discards it) so profile_status can surface it."""
     from run_wire import build_facts  # local: needs the sys.path bridge above
     from wire import WireGraph
+    # 2026-10-02 (second new-user test): on a fresh install the very first
+    # profile_recall raised "No such file or directory: conversations.json".
+    # Nothing stored is a STATE, not an error -- an empty memory answers
+    # "never seen" like any other miss.
+    if not os.path.exists(_conversations_path()):
+        g = WireGraph.from_facts([], n_convs=0, provisional=[], hearsay=[])
+        return Memory(g, {}, owner=os.environ.get("SOURCEDRECALL_OWNER")), 0
     sources = {}
     facts, prov, hearsay, n_convs, titles, n_uncached = build_facts(
         _conversations_path(), min_mentions=2, sources=sources)

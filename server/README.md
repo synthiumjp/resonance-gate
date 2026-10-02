@@ -32,8 +32,9 @@ sourcedrecall-setup
 ```
 
 That fetches the English parser (Stanza, ~320 MB) and four small
-non-generative models (~600 MB, cached under `~/.cache/huggingface`) and
-reports where each went. It is the only step that touches the network: the
+non-generative models (~900 MB, cached under `~/.cache/huggingface`) and
+reports where each went; about 3 minutes. Everything together, venv
+included, is about 2.6 GB. It is the only step that touches the network: the
 server itself runs fully offline.
 
 Add it to your MCP client, e.g. `.mcp.json` for Claude Code or
@@ -66,15 +67,25 @@ person. Memory lives in `~/.sourcedrecall/conversations` (set
 Your agent has to call `profile_ingest` to remember a conversation -- ask it
 to at the end of a chat, or wire it into a hook.
 
-What the agent receives from `profile_context`:
+What the agent receives -- real output, after two conversations a week
+apart (`profile_context("where do I live")`, then the start of
+`profile_context()`):
 
 ```
-[MEMORY: what the user has told you]
-- Dana Cole works as a nurse at St Vincent's  ["I work as a nurse at St Vincent's and I live in Fitzroy." · 2026-10-02]
-- Dana Cole is allergic to penicillin  ["I'm allergic to penicillin, which matters at work." · 2026-10-02]
-- (no longer true) Dana Cole drinks coffee  ["I drink a lot of coffee." · 2026-09-01]
+[MEMORY: what the user has told you about this]
+- Dana Cole moved to Brunswick  ["Big news, I moved to Brunswick last weekend." · 2026-10-02]
+- (no longer true) Dana Cole lives in Fitzroy  ["I work as a nurse at St Vincent's and I live in Fitzroy." · 2026-09-25]
 [MEMORY RULES] Each line is something the user told you: a short summary, then their exact words in quotes, and when. Lines marked (no longer true) were replaced by something they said later. Anything about the user not listed here is UNKNOWN: say you don't know rather than guessing.
+
+[MEMORY: what the user has told you]
+- Dana Cole works as a nurse at St Vincent's  ["I work as a nurse at St Vincent's and I live in Fitzroy." · 2026-09-25]
+- Dana Cole is allergic to penicillin which matters at work  ["I'm allergic to penicillin, which matters at work." · 2026-09-25]
+- Dana Cole's partner Lee is a chef  ["My partner Lee is a chef." · 2026-09-25]
+...
 ```
+
+The summary is the parser's rewrite; the quote is what was said. If they
+ever disagree, the quote is the truth -- that is why it is there.
 
 ## What is (and is not) inside
 
@@ -183,19 +194,18 @@ Every fact in `recall` carries the gate's opinion: `b` = belief, `d` =
 disbelief/ambiguity, `u` = uncertainty/ignorance — they sum to 1. High `d`
 signals a conflict; high `u` signals "not resolved".
 
-## Memory browser (read-only)
+### Memory browser for triples (read-only)
 
 A read-only page at **http://127.0.0.1:7071** lists every stored record —
 subject, relation, object, source, confidence — with active conflicts
 highlighted. Port is `SOURCEDRECALL_BROWSER_PORT` (`0` disables it); it binds
 loopback only. Writes never happen from the browser — they only ever go
-through the four MCP tools above, so provenance stays clean. This is a
-trust feature: you can *see* what the memory holds, in human-readable
-triples, unlike embedding-only competitors.
+through the four triple tools, so provenance stays clean. (It shows the
+triple store; conversation memory is read with `profile_context`.)
 
-## `profile_ingest` (deterministic extraction, no LLM)
+## How `profile_ingest` reads a conversation
 
-`profile_ingest(turns, conversation_id=None, title=None, owner_name=None)` is
+`profile_ingest(turns, conversation_id=None, title=None, owner_name=None, date=None)` is
 the one write path in the `profile_*` bridge (see `sourcedrecall/profile_memory.py`)
 that turns raw conversation into new facts. The extractor is **rgx** — a
 grammar-rule parser over a dependency parse — never a language model:
@@ -209,136 +219,29 @@ grammar-rule parser over a dependency parse — never a language model:
 - **Every fact carries receipts.** Session, turn index, role, and (once
   wired) conversation id + date — the same provenance contract every other
   fact in this store carries; ingestion doesn't relax it.
+- **Keeps your exact words.** Every fact carries the sentence it was read
+  from, and `profile_context` quotes it.
+- **Tracks change.** A later move or new job marks the old residence or
+  employer *no longer true* ("I also joined..." is a second job, not a
+  change). Pass `date` (ISO) when importing older chats: which statement is
+  newer decides what is current.
 - Re-ingesting a conversation is a safe no-op for turns already seen
   (`skipped_cached` counts them, `model_calls` is always `0` — there is no
   model call anywhere in this path, cached or fresh).
 
 ## Persistence
 
-State is a local snapshot (`arrays.npz` + `state.json`) written after every
-mutation, in `SOURCEDRECALL_STATE` (default `~/.sourcedrecall`). A restart fully
-recovers memory from disk.
+Conversation memory lives in `~/.sourcedrecall/conversations`
+(`conversations.json` plus an extraction cache; override with
+`RG_MEMORY_DIR`). The triple store is a snapshot (`arrays.npz` +
+`state.json`) in `SOURCEDRECALL_STATE` (default `~/.sourcedrecall`). A
+restart recovers both from disk.
 
 Everything is local: no network calls, no API keys, no telemetry. The
 embedding model is used from the local Hugging Face cache only — the
 server sets `HF_HUB_OFFLINE=1` and `TRANSFORMERS_OFFLINE=1` by default.
 
-## Install / run (older notes)
-
-The **Quick start** at the top supersedes this section; it is kept for the
-running-from-a-research-venv details.
-
-The server is Python (`mcp`, `numpy`, `sentence-transformers`, `torch` —
-see `pyproject.toml`). The `rg` substrate itself is a set of numpy-only
-flat modules (`substrate/`, `gate/`, `encoder/`) loaded from the repo
-checkout at runtime via `RG_ROOT` (default: the repo containing this
-server). `mouth/` — the repo's language-model conversation layer — is
-deliberately never imported by this server.
-
-### (a) From the repo venv — simplest, works today
-
-```bash
-/ABS/PATH/TO/rg/.venv/bin/python -m sourcedrecall.mcp_server
-```
-
-with environment:
-
-```
-PYTHONPATH=/ABS/PATH/TO/rg/server
-RG_ROOT=/ABS/PATH/TO/rg
-```
-
-### (b) uvx / pipx — distribution option
-
-```bash
-uvx --from /ABS/PATH/TO/rg/server sourcedrecall
-```
-
-or
-
-```bash
-pipx install /ABS/PATH/TO/rg/server
-sourcedrecall
-```
-
-Either way, `RG_ROOT=/ABS/PATH/TO/rg` is **required** — even in an isolated
-uvx/pipx environment, the server still reads the numpy-only substrate from
-the repo on disk (v1 does not bundle it into the wheel).
-
-Note: every model must be present locally before first use -- the server
-runs fully offline (`HF_HUB_OFFLINE=1`). `sourcedrecall-setup` installs them
-all.
-
-Substitute your actual absolute path for `/ABS/PATH/TO/rg` everywhere
-above and below.
-
-## MCP client config
-
-### Claude Code
-
-```bash
-claude mcp add sourcedrecall /ABS/PATH/TO/rg/.venv/bin/python \
-  -e PYTHONPATH=/ABS/PATH/TO/rg/server \
-  -e RG_ROOT=/ABS/PATH/TO/rg \
-  -- -m sourcedrecall.mcp_server
-```
-
-or as JSON (`.mcp.json` / `claude mcp add-json`):
-
-```json
-{
-  "mcpServers": {
-    "sourcedrecall": {
-      "command": "/ABS/PATH/TO/rg/.venv/bin/python",
-      "args": ["-m", "sourcedrecall.mcp_server"],
-      "env": {
-        "PYTHONPATH": "/ABS/PATH/TO/rg/server",
-        "RG_ROOT": "/ABS/PATH/TO/rg"
-      }
-    }
-  }
-}
-```
-
-### Claude Desktop (`claude_desktop_config.json`)
-
-```json
-{
-  "mcpServers": {
-    "sourcedrecall": {
-      "command": "/ABS/PATH/TO/rg/.venv/bin/python",
-      "args": ["-m", "sourcedrecall.mcp_server"],
-      "env": {
-        "PYTHONPATH": "/ABS/PATH/TO/rg/server",
-        "RG_ROOT": "/ABS/PATH/TO/rg"
-      }
-    }
-  }
-}
-```
-
-### Cursor (`~/.cursor/mcp.json` or project `.cursor/mcp.json`)
-
-```json
-{
-  "mcpServers": {
-    "sourcedrecall": {
-      "command": "/ABS/PATH/TO/rg/.venv/bin/python",
-      "args": ["-m", "sourcedrecall.mcp_server"],
-      "env": {
-        "PYTHONPATH": "/ABS/PATH/TO/rg/server",
-        "RG_ROOT": "/ABS/PATH/TO/rg"
-      }
-    }
-  }
-}
-```
-
-The uvx distribution option (b) works the same way in any of the above:
-`"command": "uvx", "args": ["--from", "/ABS/PATH/TO/rg/server", "sourcedrecall"]`,
-with `"env": {"RG_ROOT": "/ABS/PATH/TO/rg"}`.
-
-## Quickstart: example calls
+### Example calls (explicit triples)
 
 **1. `remember` a fact**
 
@@ -422,23 +325,26 @@ resolves cleanly to Boston with `conflict: false`.
 {"forgotten": ["r4", "r5"]}
 ```
 
-## Limitations / deferred
+## Limitations
 
-- **No fact extraction from text.** You pass structured triples; the
-  server does not read prose and infer facts. Extraction is a possible
-  opt-in v2, not present here.
+Conversation memory:
+- **English only**, and the parser misses some casual fragments: "Still
+  nursing at St Vincent's though" (no subject) produces no fact.
+- **Change tracking covers where you live and where you work.** Other
+  changes are caught only when you say something ended ("I quit", "I sold
+  the car", "no longer"). Two statements in the *same* conversation are not
+  ordered against each other.
+- **Your agent has to call `profile_ingest`.** Nothing captures
+  conversations automatically yet.
+- **The first question in the first seconds after start can take ~4 s**
+  while models load; after that, queries take tens of milliseconds.
+
+Explicit triples:
 - **Fixed relation-synonym table.** Exactly two classes today:
   `works at` / `is employed by`, and `lives in` / `resides in`. Relations
-  outside these classes are treated as distinct keys, even if they mean
-  the same thing in English.
-- **Near-duplicate subject surface forms are not detected.** "Maria" vs
-  "Maria's" is not caught by the collision detector — that axis is
-  deferred to write-time canonicalization. See `docs/COLLISION_FIX.md` in
-  the repo root.
-- **Collision detection is validated on synthetic pairs only** — real-world
-  validation is pending. The server never claims it "never contradicts
-  itself"; the disciplined claim is that it detects and surfaces
-  contradictory writes under synonymous keys.
-- **No standalone wheel bundling the substrate yet.** v1 reads
-  `substrate/`, `gate/`, `encoder/` from the repo checkout via `RG_ROOT`
-  at runtime; a self-contained package is a future packaging item.
+  outside these classes are treated as distinct keys.
+- **Near-duplicate subject surface forms are not detected** ("Maria" vs
+  "Maria's"); see `docs/COLLISION_FIX.md`.
+- **Collision detection is validated on synthetic pairs only.**
+- **Not a standalone wheel yet.** Install editable from the checkout (see
+  Quick start); the substrate is read from the repo at runtime.

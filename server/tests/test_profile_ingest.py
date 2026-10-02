@@ -211,3 +211,12 @@ def test_a_bad_date_is_refused_not_misfiled(pm):
     with _pt.raises(ValueError):
         pm.profile_ingest([{"role": "user", "content": "I live in Leeds."}],
                           owner_name="Dana Cole", date="last tuesday")
+
+
+def test_a_fresh_install_answers_never_seen_not_a_file_error(pm):
+    """Second new-user test: the first profile_recall on an empty memory
+    raised FileNotFoundError for conversations.json."""
+    out = pm.profile_recall("Where do I live?")
+    assert out["found"] is False and out["abstain"] is True
+    assert "Nothing is stored" in pm.profile_context()["block"]
+    assert pm.profile_status()["asserted"] == 0
