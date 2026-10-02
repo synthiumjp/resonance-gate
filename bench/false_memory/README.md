@@ -88,6 +88,29 @@ stale case). The four held-out stale cases were read before those changes,
 so they are not blind for `36aea17` either. A fresh set of cases is needed
 to measure the change properly.
 
+## Blind set (cases_v2.jsonl)
+
+48 further scenarios, written by an agent that did not read sourcedrecall's
+code, committed (72c71ee) before any system ran on them; the sourcedrecall
+developer has not read them or the outputs. Classes as above (b 12, f 12,
+a 6, c 6, d 6, e 6). Audited, rate [95% CI] (k/n):
+
+| | sourcedrecall 0.3.5 | sourcedrecall 0.3.6 | Mem0 2.2.1 | RAG |
+|---|---|---|---|---|
+| false memory, a-e | 8% [0-18] (3/37) | 8% [0-18] (3/37) | 43% [27-59] (16/37) | 30% [16-45] (11/37) |
+| stale (b) | 3/12 | 3/12 | 12/12 | 11/12 |
+| assistant-injected (e) | 0/7 | 0/7 | 4/7 | 0/7 |
+| control recall (f) | 13/15 | 13/15 | 15/15 | 15/15 |
+| true-fact side recall, a/b/e | 5/11 | 5/11 | 11/11 | 11/11 |
+
+Results are in `results_v2/` (0.3.5, all three systems) and
+`results_v2_036/` (0.3.6; Mem0 and RAG copied from `results_v2/`). Judge
+audit: every flagged line and every unflagged Mem0 and sourcedrecall line
+read; 3 false positives overridden (`audit_overrides_v2.json`). One
+borderline sourcedrecall line was left as the judge scored it (not
+flagged): a conditional rendered as a plan ("will get a motorbike"). Run
+with `FM_CASES=cases_v2.jsonl FM_RESULTS=results_v2 FM_OVERRIDES=audit_overrides_v2.json`.
+
 ## Reading the results (what the numbers do and do not say)
 
 * Class a (denials, hedges, questions, conditionals, reported opinions): no system returned an asserting line, including sourcedrecall at `03e0b24`. This class does not separate the systems on this set.
