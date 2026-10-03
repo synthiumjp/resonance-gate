@@ -79,6 +79,12 @@ Tests (the 1.14 Stanza models live in their own directory, because
     STANZA_RESOURCES_DIR=~/jpwork/stanza_resources_114 \
       ../sdr-venv/bin/python -m pytest -q rgx experiments/p2 tools server
 
+Bench runs write result directories into `~/jpwork/sdr`. Copy them back to
+WSL and commit them there, then delete them on the Mac before the next `git
+pull` -- an untracked copy of a committed file makes the pull abort, and a
+script chained after it then runs on the OLD code (happened three times on
+2026-10-03/04). Check `git log -1` on the Mac before trusting a run.
+
 The venv also has `openai` and `tenacity`, which only the HaluMem judge-cache
 tests need. `~/jpwork/sdr_retest.sh` pulls, reinstalls and runs the suite.
 
