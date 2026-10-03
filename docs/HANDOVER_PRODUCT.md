@@ -100,10 +100,12 @@ and real-conversation text before pushing (the repo is public).
 
 ## Open items, in order
 
-1. LoCoMo is the largest gap (33% vs RAG 57%). Diagnose on dev convs 0-1
-   with the block view; the likely causes are over-refusal on questions
-   that name a speaker in the third person, and summaries in place of the
-   user's words.
+1. LoCoMo is the largest gap. Dev convs 0-1 with the block view: 41.6% ->
+   51.1% with whole-message quotes (540ac82), RAG 62.2%. Context doubled
+   (415 -> 775 tokens); lean variants under test (notebook e293). Then:
+   retrieval over whole messages as well as facts (the remaining misses are
+   mostly retrieval), and the "(may have changed since)" noise in long chats.
+   The test-set number (33.4%) is from the old harness view and 3c6b0a7.
 2. Changes of state are the main weakness (blind v4: 33/44 stale facts
    returned as current; the new state is missing in 16/44, most likely never
    extracted). Work on a fresh readable dev set, not on v4 (notebook e291).

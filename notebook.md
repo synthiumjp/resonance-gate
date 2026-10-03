@@ -14852,3 +14852,27 @@ and how to run everything).
 - Direction both benches point at: a reader does best with the user's own
   dated words. The parser's value is in the labels and gates, not in the
   rewritten summary.
+
+## Entry 293 — 2026-10-04 (LoCoMo: the reader needs the whole message)
+
+- LoCoMo dev (convs 0-1, all 233 questions; the harness now passes the
+  block's lines): sourcedrecall 41.6%, RAG 62.2%. Single-hop 39.5 vs 71.1%.
+  Reading the misses: the answer was in the rest of the user's message ("a
+  gift from my grandma in Sweden ... it stands for love, faith and
+  strength"), or in the reply to the other speaker's question ("How long
+  have you been married?"), or the right fact was not retrieved. Half our
+  lines said "(may have changed since)" -- in long chats nearly every
+  message has "new", "now" or "since". And an internal conflict prompt ("I
+  have 5 values for your is") leaked into the block: "is" in the question
+  matched the attribute "is" by substring. Fixed.
+- 540ac82: each line quotes the user's whole message (cut around the
+  sentence when long) and the question it answered; facts from one message
+  share a line; forgotten sentences are removed from a message before it
+  is quoted. LoCoMo dev 41.6 -> 51.1% (RAG 62.2%), single-hop 50.9%,
+  temporal ties RAG at 57.1%. Context tokens 415 -> 775 (RAG 385). Fresh
+  change-of-state set (answer view): old state 17 -> 19/64, new 40 -> 40/64,
+  controls 14 -> 14/16.
+- Token cost is the open problem with it: per line the quote is ~214 chars,
+  the summary ~56, the reply snippet ~110 (on 31% of lines). Variants under
+  test: the reply cut to its question sentences; no summary when the
+  message is quoted; quotes capped at 300 chars.
