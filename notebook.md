@@ -14752,3 +14752,20 @@ and how to run everything).
 - WSL was OOM-killed twice (09:58, 18:46): a 6-9 GB Python test/bench
   process next to Ollama's 9 GB qwen3:14b, with user systemd down so the
   bench's MemoryMax cap was off. Heavy work moves to the Mac.
+
+## Entry 290 — 2026-10-03 (first full suite on the Mac; Stanza pinned; 0.4.5.)
+
+- The first full-suite run in a fresh venv (the Mac) failed 20 tests. 14 were
+  the HaluMem judge-cache tests (missing openai/tenacity, research harness
+  only) and 3 the sentinel tests (they read the real /home disk, which has no
+  space on macOS; now they stat tmp_path).
+- The other 3 were real: a fresh install got Stanza 1.15, and the rgx rules
+  are tuned on 1.14. 1.15 tags "due" in "due to" as ADJ (the owner-pronoun
+  tests lost "my active lifestyle") and misparses "Rewatched Alien last
+  night, ..." (the fragment record is lost). Any new user would have had the
+  1.15 behaviour. Pinned stanza==1.14.0; the suite is 1019 passed, 3 skipped.
+- Released 0.4.5 (the read-only memory browser, `sourcedrecall-memory view`).
+- The false-memory judge can now call an OpenAI-compatible server
+  (FM_JUDGE_OPENAI), so blind v4 can be judged by the Mac's llama_cpp
+  qwen3-14b instead of ollama. Its agreement with the ollama judge is being
+  checked on the 30 hand-labelled items and the 198 v1 calls before use.

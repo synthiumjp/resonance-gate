@@ -1,8 +1,9 @@
 # Handover: sourcedrecall (product track)
 
 Last updated 2026-10-03. Branch `product-p2`, repo github.com/synthiumjp/resonance-gate.
-Latest release tag: `sourcedrecall-v0.4.4`. Committed after it, not yet run
-through the full suite: the read-only memory browser (515c2fa).
+Latest release tag: `sourcedrecall-v0.4.5` (the read-only memory browser,
+`sourcedrecall-memory view`; Stanza pinned to 1.14.0). Full suite on the Mac:
+1019 passed, 3 skipped.
 
 ## What it is
 
@@ -11,6 +12,10 @@ turns what the user says into facts, each kept with the user's exact words and
 the date. No language model is called when storing. Retrieval is BM25 +
 bge-small embeddings + a MiniLM cross-encoder, all run with ONNX Runtime from
 fp16-stored weights (identical results to PyTorch). Stanza still needs torch.
+Stanza is pinned to 1.14.0 in `server/pyproject.toml`: the rgx rules are tuned
+on it, and 1.15 parses some sentences differently (3 parser tests fail on it,
+e.g. it tags "due" in "due to" as ADJ). Test any Stanza upgrade with the full
+suite before moving the pin.
 
 Delivery: a Claude Code plugin (`plugins/sourcedrecall`), an MCP server for any
 MCP client (`docs/CLIENTS.md`), and a command line for everything else
@@ -57,9 +62,15 @@ ran without its MemoryMax cap. Run heavy work on the Mac Studio (512 GB):
     ~/jpwork/sdr_setup.sh re-runs the clone/venv/models setup
     ~/jpwork/rg           an rsync copy used by the HaluMem tools -- leave it
 
-Tests:
+Tests (the 1.14 Stanza models live in their own directory, because
+`~/stanza_resources` is used by other work in that account):
 
-    cd ~/jpwork/sdr && ../sdr-venv/bin/python -m pytest -q rgx experiments/p2 tools server
+    cd ~/jpwork/sdr && git pull
+    STANZA_RESOURCES_DIR=~/jpwork/stanza_resources_114 \
+      ../sdr-venv/bin/python -m pytest -q rgx experiments/p2 tools server
+
+The venv also has `openai` and `tenacity`, which only the HaluMem judge-cache
+tests need. `~/jpwork/sdr_retest.sh` pulls, reinstalls and runs the suite.
 
 The Mac is shared with Chris: never touch processes you did not start, do not
 pull models into his Ollama app. Our llama_cpp server (qwen3-14b GGUF) runs on
@@ -79,15 +90,18 @@ and real-conversation text before pushing (the repo is public).
 
 ## Open items, in order
 
-1. Run the full suite on the Mac for 515c2fa (browser) and release 0.4.5.
-2. LoCoMo: finish reader+judge on the Mac (`bench/locomo/run_test.sh answer`
-   pointed at the Mac's own 127.0.0.1:8090), then `run_test.sh score`.
-3. Blind v4 (changes of state): run RAG + sourcedrecall (+ Mem0 later); the
-   judge needs an OpenAI-compatible endpoint on the Mac or Ollama.
-4. Stale facts remain the main false-memory source (blind v3 stale 6/8).
-5. Parser distillation to drop torch (~0.8 GB), only if it matches Stanza on
+1. LoCoMo: reader+judge answers running on the Mac since 18:56 on 2026-10-03
+   (`~/jpwork/sdr/bench/locomo`, log `~/jpwork/locomo_answer.log`, about 4 h).
+   Then `score.py`, copy `results/test` back, commit.
+2. Blind v4 (changes of state): run RAG + sourcedrecall (+ Mem0 later) on
+   the Mac. The judge can now use the llama_cpp server
+   (`FM_JUDGE_OPENAI=http://127.0.0.1:8090/v1 FM_JUDGE_MODEL=qwen3-14b-a8cc1361.gguf`);
+   check its agreement with the ollama judge first (`~/jpwork/fmjudge`).
+   RAG needs sentence-transformers: `~/jpwork/rg/.venv-judge` has it.
+3. Stale facts remain the main false-memory source (blind v3 stale 6/8).
+4. Parser distillation to drop torch (~0.8 GB), only if it matches Stanza on
    every test.
-6. Codex CLI importer (format undocumented; stub).
+5. Codex CLI importer (format undocumented; stub).
 
 ## Rules carried from JP
 
