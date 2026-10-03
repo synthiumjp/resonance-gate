@@ -178,6 +178,14 @@ def main():
         if not raw:
             continue
         views = ["lines"] + (["context"] if s == "sourcedrecall" else [])
+        # the answer view (answer.py): the reader's answer, judged as one line
+        ans = {r["id"]: r["answers"] for r in
+               load(os.path.join(RESULTS, f"answers_{s}.jsonl"))}
+        for cid, al in ans.items():
+            for pr, a in zip((raw.get(cid) or {}).get("probes") or [], al):
+                pr.setdefault("views", {})["answer"] = [a] if a else []
+        if ans:
+            views.append("answer")
         result["systems"][s] = {"ingest_cost": ingest_cost(raw), "views": {},
                                 "views_audited": {}}
         for v in views:
