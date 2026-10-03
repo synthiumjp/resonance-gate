@@ -48,9 +48,16 @@ Product harnesses: `tools/dogfood.py --v3` (24/26 rank-1, 12/12 never-mentioned
 refused, 8/8 unknown-attribute refused), `tools/scale_test.py` (refusals hold
 at 1,526 facts), `tools/refusal_report.py` (all cells pass).
 
-LoCoMo (`bench/locomo`): retrievals done for all three systems on test
-conversations 2-9 (sourcedrecall pinned at 3c6b0a7); reader+judge answers
-partial (RAG 702/1307, others not started). Conversations 0-1 are dev.
+LoCoMo (`bench/locomo`), test conversations 2-9, 1307 questions, reader and
+judge qwen3-14b: sourcedrecall 33.4%, Mem0 64.6%, RAG 56.6% (sourcedrecall
+pinned at 3c6b0a7, confirmed facts only). The reader said "don't know" 207
+times with our context (RAG 44). Conversations 0-1 are dev
+(`results/dev_full`, `~/jpwork/locomo_dev.sh`).
+
+The false-memory bench has an answer view (`answer.py`): a local reader
+answers from each system's returned memory and the answer is judged. Blind
+v4 answers, new block (7538dcf): old state given 13/44, new state 28/44
+(RAG 7/44, 36/44); controls 16/16. Notebook e292.
 
 ## How to run things -- ON THE MAC, not WSL
 
@@ -93,9 +100,10 @@ and real-conversation text before pushing (the repo is public).
 
 ## Open items, in order
 
-1. LoCoMo: reader+judge answers running on the Mac since 18:56 on 2026-10-03
-   (`~/jpwork/sdr/bench/locomo`, log `~/jpwork/locomo_answer.log`, about 4 h).
-   Then `score.py`, copy `results/test` back, commit.
+1. LoCoMo is the largest gap (33% vs RAG 57%). Diagnose on dev convs 0-1
+   with the block view; the likely causes are over-refusal on questions
+   that name a speaker in the third person, and summaries in place of the
+   user's words.
 2. Changes of state are the main weakness (blind v4: 33/44 stale facts
    returned as current; the new state is missing in 16/44, most likely never
    extracted). Work on a fresh readable dev set, not on v4 (notebook e291).

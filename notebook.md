@@ -14805,3 +14805,50 @@ and how to run everything).
 - Next: the main gap is extraction of the NEW state, not labelling. Work it
   on a new readable dev set written from scratch (not from v4), measured on
   v4 only at the end, with item-level change reported.
+
+## Entry 292 — 2026-10-03 (what the user sees is the answer; LoCoMo is bad)
+
+- Changes of state, round two. f94ea98 (a wider recall margin for facts said
+  after the top answer; three fragment shapes; acquisition counts as
+  possession) moved the tuned dev set a lot (new state 33 -> 40/50) and the
+  blind set very little (new state 28 -> 30/44, stale 33 -> 33/44 after
+  audit). A fresh dev set written by an agent (cases_dev_stale2: 64 changes,
+  16 controls), measured once before reading it, agreed with the blind set:
+  new state 41 -> 43/64, stale 29 -> 26/64. Tuned dev numbers do not predict.
+- The audit with the store dumped (adapter.dump) split the 33 blind stale
+  probes: 20 return the new state too (the old line just is not marked as
+  ended), 10 never stored the new state (5 subjectless fragments), 4 stored
+  but did not return it.
+- Requiring evidence that a later statement is about the same thing before
+  marking an earlier one (shared word, family or answer type) was tried and
+  dropped: controls wrongly marked 4 -> 3/16, but stale lines 27 -> 36/64.
+- An ANSWER view for the false-memory bench (answer.py): a local reader
+  (qwen3-14b) answers each probe from what the system returned, and the
+  answer is judged. Per line, RAG looked worse than us on changes; per
+  answer it is far better (dev: RAG 1/50 stale answers, us 13/50), because
+  its lines are the user's dated messages. Reading the dev answers found a
+  harness flaw (the reader was not given the block header, so "Jordan Pike"
+  read as a third party) and three product faults: the block never said
+  the named person is the user; with the newest line first the reader still
+  answered from the older one; "(said in passing)" landed on "We got
+  married on Saturday" because "this morning" was in the other clause.
+- New block (7538dcf): each line is the date, the user's words, then the
+  summary; lines run oldest first; the header names the user; life events
+  are never passing. Answer view:
+
+      set                      old state given    new state given   controls
+      dev (tuned)              20 -> 7/50         26 -> 37/50
+      dev2 (fresh)             25 -> 17/64        33 -> 40/64       15 -> 14/16
+      v4 blind (unaudited)     17 -> 13/44        25 -> 28/44       16 -> 16/16
+      RAG on v4                7/44               36/44             16/16
+
+  On v4 item by item: 4 stale answers fixed, none broken; new state +4 -1.
+- LoCoMo test (convs 2-9, 1307 questions, reader+judge qwen3-14b, retrieval
+  pinned at 3c6b0a7): sourcedrecall 33.4%, Mem0 64.6%, RAG 56.6%. The reader
+  said "don't know" 207 times with our context (RAG 44). The 30-question
+  dev run had already shown 43% vs 77% and I did not act on it. The harness
+  passed only confirmed facts (nothing when a gate refused); it now passes
+  the block's lines (LOCOMO_SR_VIEW=block). Diagnosis on dev convs 0-1 next.
+- Direction both benches point at: a reader does best with the user's own
+  dated words. The parser's value is in the labels and gates, not in the
+  rewritten summary.
