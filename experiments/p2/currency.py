@@ -628,6 +628,7 @@ _CAR_BRANDS = frozenset("""
 volvo skoda tesla toyota honda mazda subaru nissan ford holden hyundai kia
 volkswagen vw audi bmw mercedes porsche jeep lexus mitsubishi suzuki renault
 peugeot citroen fiat mini jaguar landrover rivian polestar byd mg
+corolla camry yaris prius rav4 tiguan impreza i30 cerato
 """.split())
 _NUM_WORDS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6,
               "seven": 7, "eight": 8, "nine": 9, "ten": 10}

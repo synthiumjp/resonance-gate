@@ -24,6 +24,8 @@ CASES = os.path.join(_ROOT, "bench", "false_memory", "cases_dev_stale.jsonl")
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--misses", action="store_true")
+    ap.add_argument("--facts", action="store_true",
+                    help="with --misses: also list every stored fact")
     a = ap.parse_args()
     sys.path.insert(0, os.path.join(_ROOT, "server"))
     os.environ.setdefault("RG_NLI", "0")
@@ -57,22 +59,29 @@ def main():
             new_ok += got_new
             stale_n += bool(old_current)
             if not got_new or old_current:
+                stored = []
+                if a.facts:
+                    mem = pm._ensure_loaded()
+                    stored = [f"{f.get('_tier')}{'' if f.get('current') is not False else ' GONE'}: {f.get('text')}"
+                              for f in pm._all_facts(mem)]
                 said = [f"[{cv.get('date')}] " + " / ".join(
                     t["content"] for t in cv["turns"] if t["role"] == "user")
                     for cv in c["conversations"]]
                 report.append((c["id"], p["q"], terms, got_new,
                                [f.get("text") for f in old_current][:2],
-                               [f.get("text") for f in fs][:3], said))
+                               [f.get("text") for f in fs][:3], said, stored))
         shutil.rmtree(d, ignore_errors=True)
     print(f"new state returned {new_ok}/{tot}   old line still current {stale_n}/{tot}")
     if a.misses:
-        for cid, q, terms, ok, old, got, said in report:
+        for cid, q, terms, ok, old, got, said, stored in report:
             print(f"\n{cid} Q: {q}  expect {terms}  new={'yes' if ok else 'NO'}")
             if old:
                 print(f"   STALE: {old}")
             print(f"   got: {got}")
             for s in said:
                 print(f"   said {s[:200]}")
+            for s in stored:
+                print(f"   stored {s[:200]}")
 
 
 if __name__ == "__main__":

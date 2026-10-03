@@ -263,6 +263,12 @@ DENSE_GROUND = 0.62
 # 2026-10-02: recall returns facts within this many raw cross-encoder points
 # of the best one (pilot value, see recall_v3). Negative disables the cut.
 RECALL_MARGIN = 4.0
+# 2026-10-03 (stale dev set): a fact said AFTER the top answer may be its
+# update ("has no pets" -> "adopted a kitten called Pickle"); the re-ranker
+# scores the update lower because it shares fewer words with the question,
+# and RECALL_MARGIN cut it in 9 of 17 misses. Later facts get this wider
+# margin instead. Chosen on the dev set; check on held-out data.
+NEWER_MARGIN = 6.0
 
 # ---------------------------------------------------------------------------
 # THE GATES (e280). A refusal is an EMPTY RESULT SET, not a model being
@@ -1071,8 +1077,17 @@ class Memory:
         _margin = float(os.environ.get("RG_RECALL_MARGIN", RECALL_MARGIN))
         if _margin >= 0 and len(kept) > 1:
             _best = max(sc for _, sc in kept)
+            _newer = float(os.environ.get("RG_NEWER_MARGIN", NEWER_MARGIN))
+
+            def _last(p):
+                nd = nodes.get(p[0].get("id")) or prov.get(p[0].get("id")) or {}
+                return max((str(d)[:10] for d in (nd.get("convs") or {}).values()
+                            if d), default="")
+            _top_last = _last(kept[0])
             kept = kept[:1] + [p for p in kept[1:]
-                               if p[1] >= _best - _margin or id(p) in _protect]
+                               if p[1] >= _best - _margin or id(p) in _protect
+                               or (_top_last and p[1] >= _best - _newer
+                                   and _last(p) > _top_last)]
         # A superseded fact that answers is shown WITH what replaced it: "you
         # lived in Fitzroy (no longer true); you moved to Brunswick". Without
         # this the replacement could be cut and the stale fact stand alone.

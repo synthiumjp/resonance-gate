@@ -1663,9 +1663,16 @@ def extract_keyed(text, nlp, owner=None, role="user",
                                  ("dream", "hypothetical", "game", "story",
                                   "novel", "discord", "server")
                                  for w in s.subtree(head)))
+                # 2026-10-03 (stale dev set): "They made me a senior
+                # designer" -- "make" with the owner as object and a noun
+                # complement is the same unnamed employer
+                made_x = ((head.lemma or "").lower() == "make"
+                          and any(c.upos == "NOUN"
+                                  for c in s.children(head, ("xcomp",))))
                 owner_obj = (role == "user" and subj.upos == "PRON"
                              and subj.text.lower() == "they" and not hedged
-                             and (head.lemma or "").lower() in AGENTLESS_EMPLOY
+                             and ((head.lemma or "").lower() in AGENTLESS_EMPLOY
+                                  or made_x)
                              and next((c for c in s.children(head, ("obj",))
                                        if c.text.lower() in allow), None))
                 if sp is None and not is_self and owner_obj and not neg:

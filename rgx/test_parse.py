@@ -1229,6 +1229,9 @@ def test_a_life_event_under_whether_or_a_supposition_is_not_stored(checked, turn
     ("They promoted me to senior analyst on Friday!",
      "Martin Mark was promoted to senior analyst on Friday"),
     ("They laid me off last month.", "Martin Mark was laid off last month"),
+    # 2026-10-03 (stale dev set)
+    ("They made me a senior designer today, with a pay bump.",
+     "Martin Mark was made a senior designer today with a pay bump"),
 ])
 def test_an_unnamed_employer_acting_on_the_user(ex, turn, want):
     assert want in texts(ex, turn)
@@ -1331,3 +1334,9 @@ def test_reported_speech_through_a_chain_stays_reported(checked):
     is too stubborn"; the attitude verb's subject sits one verb up."""
     out = texts(checked, "My dad keeps telling me I'm too stubborn for my own good.")
     assert not any(p.startswith("Martin Mark is too stubborn") for p in out), out
+
+
+@pytest.mark.parametrize("turn", ["They made me a sandwich.", "They made me laugh.",
+                                  "They made my sister a manager."])
+def test_made_me_is_an_employer_only_with_a_role(ex, turn):
+    assert not any("was made" in p for p in texts(ex, turn))

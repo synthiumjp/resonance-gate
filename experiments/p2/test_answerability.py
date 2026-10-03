@@ -63,6 +63,11 @@ needs_wn = pytest.mark.skipif(AT._wn() is None, reason="WordNet not installed")
     ("Do I have any children?", "I have a dog and a cat at home.", False),
     ("Do I have any children?", "Send me recipes for the kids.", False),
     ("Do I own any pets?", "I have a dog and a cat at home.", True),
+    # 2026-10-03 (stale dev set): getting a thing makes it the user's
+    ("Do I have any pets?", "We adopted a kitten called Pickle.", True),
+    ("Do I own a car?", "We bought a used Corolla on Saturday.", True),
+    ("Do I have any pets?", "Should we adopt a kitten?", False),
+    ("Do I own a car?", "I play golf on Sundays.", False),
     ("What instrument do I play?", "I play the cello badly.", True),
     ("What sport do I play?", "I play the cello badly.", False),
     ("What language is the billing service in?", "It is written in Go.", True),

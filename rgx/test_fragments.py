@@ -96,6 +96,11 @@ def test_a_later_fragment_after_someone_else_is_theirs(ex):
 
 @pytest.mark.parametrize("turn,want", [
     ("Sold the Corolla on Saturday.", "Dana Cole sold the Corolla on Saturday"),
+    # 2026-10-03 (stale dev set): a number object; a get-passive
+    ("Turned 30 yesterday.", "Dana Cole turned 30 yesterday"),
+    ("Got hooked on flat whites since the new job.", "Dana Cole got hooked on flat whites"),
+    ("Got promoted to team lead.", "Dana Cole got promoted to team lead"),
+    ("Got married in June.", "Dana Cole got married in June"),
     ("Cancelled the gym membership.", "Dana Cole cancelled the gym membership"),
 ])
 def test_a_past_tense_fragment_is_about_the_speaker(ex, turn, want):

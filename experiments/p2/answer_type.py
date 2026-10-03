@@ -151,8 +151,12 @@ because since after before during my your our his her its""".split())
 _ALIAS = {"pet": "animal", "drink": "beverage", "color": "colour"}
 
 
+# 2026-10-03 (stale dev set): getting a thing makes it the user's -- "We
+# adopted a kitten", "bought a used Corolla", "Picked up a rescue greyhound"
 _POSSESS = re.compile(r"\b(my|our|i have|i've|i've got|i own|we have|we've|"
-                      r"i got|we got)\b", re.I)
+                      r"i got|we got)\b|(?:\b(?:i|we)\s+(?:just\s+|finally\s+)?|^\W*)"
+                      r"(?:adopted|bought|picked up|rescued|purchased|leased|"
+                      r"inherited|took in)\b", re.I)
 
 
 def has_type(sentence, typ, pol=None, verbs=(), possess=False):

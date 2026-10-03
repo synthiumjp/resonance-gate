@@ -118,11 +118,27 @@ def _tail_ids(words, root):
 
 def _has_noun_arg(root, words):
     """A noun argument on the root or on a verb coordinated with it
-    ("rehearsing hard and working on business plans")."""
+    ("rehearsing hard and working on business plans"). A number object
+    counts too: "Turned 30 yesterday" (2026-10-03, stale dev set)."""
     heads = {root.id} | {w.id for w in words
                          if w.head == root.id and w.deprel == "conj"}
     return any(w.head in heads and w.deprel in _ARG_DEPS
-               and w.upos in ("NOUN", "PROPN") for w in words)
+               and (w.upos in ("NOUN", "PROPN")
+                    or (w.upos == "NUM" and w.deprel == "obj"))
+               for w in words)
+
+
+# 2026-10-03 (stale dev set): "Got hooked on flat whites", "Got promoted
+# to lead" -- a get-passive. Its root is the participle, not a VBD.
+_GET_PASSIVE_EVENTS = {"marry", "engage", "promote", "fire", "hire",
+                       "divorce", "sack", "lay", "accept", "diagnose"}
+
+
+def _get_passive(words, root):
+    return (root is not None and root.xpos == "VBN"
+            and any(w.head == root.id and w.deprel == "aux:pass"
+                    and (w.lemma or "").lower() == "get" and w.id == 1
+                    for w in words))
 
 
 def _accept(head, nlp):
@@ -146,7 +162,8 @@ def _accept(head, nlp):
     # Saturday, it's got a few scratches") -- judge the fragment without it
     tail = _tail_ids(orig, oroot)
     orig = [w for w in orig if w.id not in tail]
-    if shape == "past" and (oroot is None or oroot.xpos != "VBD"):
+    getpass = shape == "past" and _get_passive(orig, oroot)
+    if shape == "past" and not getpass and (oroot is None or oroot.xpos != "VBD"):
         return None
     if shape == "been":
         # "Been rehearsing hard", "Been promoted to team lead", "Been vegan
@@ -164,7 +181,8 @@ def _accept(head, nlp):
         return None
     if any(w.deprel.startswith(("nsubj", "csubj", "expl"))
            or (w.upos in ("VERB", "AUX") and "VerbForm=Fin" in (w.feats or "")
-               and not (shape == "past" and w is oroot))
+               and not (shape == "past" and w is oroot)
+               and not (getpass and w.id == 1))
            for w in orig):
         return None
     new = ("I " if shape == "past" else "I'm ") + head[0].lower() + head[1:]
@@ -184,7 +202,13 @@ def _accept(head, nlp):
         if w.deprel in ("appos", "dislocated", "vocative") and (
                 w.upos == "PROPN" or w.text.lower() in _PERSONS):
             return None
-    if root.xpos in ("VBG", "VBD") and (root.xpos == "VBD") == (shape == "past"):
+    if getpass:
+        ok = (root.xpos == "VBN" and any(
+                  w.head == root.id and w.deprel == "aux:pass"
+                  and (w.lemma or "").lower() == "get" for w in words)
+              and (_has_noun_arg(root, words)
+                   or (root.lemma or "").lower() in _GET_PASSIVE_EVENTS))
+    elif root.xpos in ("VBG", "VBD") and (root.xpos == "VBD") == (shape == "past"):
         ok = _has_noun_arg(root, words)
     else:
         ok = root.text.lower() in STATE_ADJ
