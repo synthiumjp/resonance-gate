@@ -18,6 +18,11 @@ LOG = os.path.join(RESULTS, "judge_log.jsonl")
 OLLAMA = os.environ.get("OLLAMA_HOST_URL", "http://127.0.0.1:11434")
 MODEL = os.environ.get("FM_JUDGE_MODEL", "qwen3:14b")
 OPTIONS = {"temperature": 0, "num_ctx": 1536, "num_predict": 4, "seed": 0}
+# An OpenAI-compatible server instead of ollama (2026-10-03, for the Mac's
+# llama_cpp server): FM_JUDGE_OPENAI=http://127.0.0.1:8090/v1 and
+# FM_JUDGE_MODEL=<its model name>. The model name is in the cache key, so its
+# verdicts never mix with ollama's.
+OPENAI = os.environ.get("FM_JUDGE_OPENAI")
 
 RUBRIC = """/no_think
 You audit an AI memory system. You are given a PROPOSITION about a user and ONE MEMORY LINE that the system returned. The user may appear as "I", "the user" or by name ("{owner}").
@@ -33,6 +38,25 @@ MEMORY LINE: {line}
 Reply with exactly one word: YES or NO."""
 
 _cache = None
+
+
+def _call(prompt):
+    msgs = [{"role": "user", "content": prompt}]
+    if OPENAI:
+        body = {"model": MODEL, "messages": msgs, "temperature": 0,
+                "max_tokens": 16, "seed": 0}   # room for an empty <think></think>
+        url = OPENAI.rstrip("/") + "/chat/completions"
+    else:
+        body = {"model": MODEL, "stream": False, "think": False,
+                "options": OPTIONS, "messages": msgs}
+        url = OLLAMA + "/api/chat"
+    req = urllib.request.Request(url, json.dumps(body).encode(),
+                                 {"Content-Type": "application/json"})
+    out = json.loads(urllib.request.urlopen(req, timeout=600).read())
+    if OPENAI:
+        raw = out["choices"][0]["message"]["content"] or ""
+        return re.sub(r"<think>.*?</think>", "", raw, flags=re.S).strip()
+    return out["message"]["content"].strip()
 
 
 def _key(prop, line, owner):
@@ -66,13 +90,8 @@ def ask(prop, line, owner="Jordan Pike", context="", log_path=None):
               "verdict": cache[k], "cached": True}, log_path)
         return cache[k] == "YES"
     prompt = RUBRIC.format(owner=owner, prop=prop, line=line)
-    body = {"model": MODEL, "stream": False, "think": False, "options": OPTIONS,
-            "messages": [{"role": "user", "content": prompt}]}
     t0 = time.time()
-    req = urllib.request.Request(OLLAMA + "/api/chat", json.dumps(body).encode(),
-                                 {"Content-Type": "application/json"})
-    out = json.loads(urllib.request.urlopen(req, timeout=600).read())
-    raw = out["message"]["content"].strip()
+    raw = _call(prompt)
     m = re.match(r"\W*(YES|NO)\b", raw, re.I)
     verdict = m.group(1).upper() if m else "UNPARSEABLE"
     cache[k] = verdict
