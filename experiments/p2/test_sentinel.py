@@ -383,14 +383,14 @@ def _write_meminfo(tmp_path, mem_avail_kb, swap_total_kb=0, swap_free_kb=0):
 
 def test_ram_crunch_flagged(tmp_path):
     meminfo = _write_meminfo(tmp_path, mem_avail_kb=500_000)  # 0.48 GiB
-    r = S.check_host(meminfo_path=meminfo, disk_path="/home")
+    r = S.check_host(meminfo_path=meminfo, disk_path=str(tmp_path))
     assert not r.ok
     assert r.anomaly == "RAM crunch"
 
 
 def test_ram_healthy_not_flagged(tmp_path):
     meminfo = _write_meminfo(tmp_path, mem_avail_kb=12_000_000)  # ~11.4 GiB
-    r = S.check_host(meminfo_path=meminfo, disk_path="/home")
+    r = S.check_host(meminfo_path=meminfo, disk_path=str(tmp_path))
     assert r.ok
 
 
@@ -399,7 +399,7 @@ def test_swap_crunch_flagged(tmp_path):
         tmp_path, mem_avail_kb=12_000_000,
         swap_total_kb=4_000_000, swap_free_kb=100_000,  # 97.5% used
     )
-    r = S.check_host(meminfo_path=meminfo, disk_path="/home")
+    r = S.check_host(meminfo_path=meminfo, disk_path=str(tmp_path))
     assert not r.ok
     assert r.anomaly == "swap crunch"
 
@@ -412,7 +412,7 @@ def test_disk_crunch_flagged(tmp_path, monkeypatch):
         f_frsize = 1024  # 100 * 1024 bytes ~ tiny, way under 5 GiB
 
     monkeypatch.setattr(os, "statvfs", lambda path: FakeStatvfs())
-    r = S.check_host(meminfo_path=meminfo, disk_path="/home")
+    r = S.check_host(meminfo_path=meminfo, disk_path=str(tmp_path))
     assert not r.ok
     assert r.anomaly == "disk crunch"
 
@@ -484,7 +484,7 @@ def test_run_checks_survives_broken_checkpoint(tmp_path):
     bad_path.write_text("{not json")
 
     paths = S.SentinelPaths(halumem_dir=str(halumem), official_dir=str(official),
-                             dev_dir=str(tmp_path / "dev"))
+                             dev_dir=str(tmp_path / "dev"), disk_path=str(tmp_path))
     results = S.run_checks(paths)
     names = {r.name for r in results}
     assert "official_eval" in names
@@ -507,7 +507,7 @@ def test_run_checks_healthy_path(tmp_path):
 
     paths = S.SentinelPaths(halumem_dir=str(halumem), official_dir=str(official),
                              dev_dir=str(dev_dir), meminfo_path=meminfo,
-                             disk_path="/home")
+                             disk_path=str(tmp_path))
     results = S.run_checks(paths)
     assert all(r.ok for r in results), [r.line() for r in results]
 
@@ -527,7 +527,7 @@ def test_print_report_and_exit_code(tmp_path, capsys, monkeypatch):
                                                     "llama_cpp.server": False,
                                                     "dev_set.py": False})
     paths = S.SentinelPaths(halumem_dir=str(halumem), official_dir=str(official),
-                             dev_dir=str(dev_dir))
+                             dev_dir=str(dev_dir), disk_path=str(tmp_path))
     code = S.cmd_report(paths)
     captured = capsys.readouterr()
     assert "sentinel report" in captured.out
