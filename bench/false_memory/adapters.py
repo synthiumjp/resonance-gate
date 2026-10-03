@@ -190,6 +190,15 @@ class SourcedRecallAdapter:
             calls += res["model_calls"]
         return {"messages": n, "model_calls": calls, "seconds": time.time() - t0}
 
+    def dump(self):
+        """Every stored fact (2026-10-03), so an audit can tell a fact that
+        was never stored from one stored but not returned."""
+        mem = self.pm._ensure_loaded()
+        return [{"text": f.get("text"), "said": f.get("said"),
+                 "tier": f.get("_tier"), "current": f.get("current"),
+                 "date": (f.get("receipts") or [{}])[0].get("date")}
+                for f in self.pm._all_facts(mem)]
+
     @staticmethod
     def _fact_line(f):
         tag = "" if f.get("current", True) else "(no longer true) "
