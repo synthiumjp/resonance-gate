@@ -108,9 +108,14 @@ confirmed. Each line has your exact words, the date and a short id.
 
 ```bash
 sourcedrecall-memory show            # print it
+sourcedrecall-memory view            # browse it at http://127.0.0.1:7071
 sourcedrecall-memory forget a3f9c1   # remove a fact
 sourcedrecall-memory confirm a3f9c1  # mark a fact as confirmed
 ```
+
+The browser (also served by the MCP server while it runs) shows the same
+sections as `MEMORY.md`, and a search box that shows what recall returns for
+a question. It listens on 127.0.0.1 only and is read-only.
 
 Agents can do the same with the `profile_forget`, `profile_confirm` and
 `profile_export` tools. Editing `MEMORY.md` by hand does not change the

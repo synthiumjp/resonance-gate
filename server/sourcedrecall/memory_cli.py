@@ -8,6 +8,7 @@ agent or model -- no MCP client needed.
     sourcedrecall-memory context [question]   the text to put in any model's prompt
     sourcedrecall-memory recall <question>    what is stored about a question
     sourcedrecall-memory ingest [file]        store a conversation
+    sourcedrecall-memory view [--port N]      browse it at http://127.0.0.1:7071
 
 `ingest` reads JSON Lines from the file or stdin, one message per line:
     {"role": "user", "content": "I moved to Brunswick last week."}
@@ -57,13 +58,15 @@ def main(argv=None):
     ap = argparse.ArgumentParser(prog="sourcedrecall-memory",
                                  description="Use the memory from a terminal.")
     ap.add_argument("command", choices=["show", "path", "forget", "confirm",
-                                        "context", "recall", "ingest"])
+                                        "context", "recall", "ingest", "view"])
     ap.add_argument("arg", nargs="*", help="a fact id, a question, or a file")
     ap.add_argument("--owner", default=os.environ.get("SOURCEDRECALL_OWNER"))
     ap.add_argument("--id", dest="conv_id")
     ap.add_argument("--date")
     ap.add_argument("--scope")
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--port", type=int, default=int(os.environ.get(
+        "SOURCEDRECALL_BROWSER_PORT", "7071") or 7071))
     a = ap.parse_args(argv)
     if a.command in ("show", "path", "forget", "confirm"):
         os.environ.setdefault("RG_NLI", "0")   # no model needed to list facts
@@ -79,6 +82,16 @@ def main(argv=None):
     if a.command == "show":
         path = pm.export_markdown()
         print(open(path, encoding="utf-8").read())
+        return 0
+    if a.command == "view":
+        import http.server
+        from sourcedrecall.browser import make_handler
+        httpd = http.server.HTTPServer(("127.0.0.1", a.port), make_handler(None))
+        print(f"memory at http://127.0.0.1:{a.port}  (Ctrl-C to stop)", flush=True)
+        try:
+            httpd.serve_forever()
+        except KeyboardInterrupt:
+            pass
         return 0
     if a.command == "context":
         out = pm.profile_context(arg or None, scope=a.scope)

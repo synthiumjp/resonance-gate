@@ -1,6 +1,13 @@
-"""Read-only local memory browser. A single static page served on
-127.0.0.1 that lists every stored record as a human-readable triple with its
-provenance, confidence (b,d,u) and any active conflict. This is a trust
+"""Read-only local memory browser, served on 127.0.0.1.
+
+  /          what the memory holds about you, grouped as in MEMORY.md, each
+             fact with your exact words, the date and its id; a search box
+             shows what recall returns for a question (2026-10-03)
+  /triples   the explicit triples written with `remember`, with provenance,
+             confidence (b,d,u) and any active conflict
+
+Read-only by design: forget a fact with `sourcedrecall-memory forget <id>`
+or by asking the assistant. This is a trust
 feature: you can SEE exactly what the memory holds. Read-only by design —
 writes go through the MCP tools so provenance stays clean.
 
@@ -14,12 +21,8 @@ import json
 import threading
 
 FOOTER = (
-    "sourcedrecall stores explicit structured facts you write. It does NOT "
-    "extract facts from conversation (no language model inside — nothing to "
-    "hallucinate). It detects contradictory writes under synonymous keys "
-    "(validated on synthetic pairs; real-world validation pending), returns "
-    "an honest ‘no match’ when nothing is stored, and surfaces "
-    "conflicts rather than silently picking.")
+    "Explicit triples written with the remember tool. Contradictory writes "
+    "under synonymous keys are flagged rather than silently resolved.")
 
 PAGE = """<!doctype html><html><head><meta charset="utf-8">
 <title>sourcedrecall — stored records</title>
@@ -72,6 +75,75 @@ def _render(records):
                        footer=html.escape(FOOTER))
 
 
+MEM_PAGE = """<!doctype html><html><head><meta charset="utf-8">
+<title>sourcedrecall memory</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+ :root{{--bg:#fff;--fg:#1d1f23;--mute:#6b7280;--line:#e5e7eb;--acc:#2f5fd0;--old:#9a6700}}
+ @media (prefers-color-scheme: dark){{:root{{--bg:#0f1115;--fg:#e6e6e6;--mute:#8b93a1;--line:#23272f;--acc:#9db4ff;--old:#e3b341}}}}
+ body{{font:15px/1.5 system-ui,sans-serif;margin:0;background:var(--bg);color:var(--fg)}}
+ header,main,footer{{max-width:880px;margin:0 auto;padding:16px}}
+ h1{{font-size:20px;margin:0}} h2{{font-size:15px;margin:28px 0 8px;color:var(--mute);font-weight:600}}
+ .sub,.meta,footer{{color:var(--mute);font-size:13px}}
+ form{{margin-top:12px;display:flex;gap:8px}} input{{flex:1;padding:8px 10px;font:inherit;
+  border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg)}}
+ button{{padding:8px 14px;font:inherit;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg)}}
+ ul{{list-style:none;padding:0;margin:0}} li{{padding:8px 0;border-bottom:1px solid var(--line)}}
+ .said{{color:var(--mute)}} .tag{{color:var(--old);font-size:13px}} code{{color:var(--mute);font-size:12px}}
+ .result{{border:1px solid var(--line);border-radius:8px;padding:8px 14px;margin-top:12px}}
+ a{{color:var(--acc)}}
+</style></head><body>
+<header><h1>{title}</h1>
+<div class="sub">{n} facts · read-only · <a href="/">refresh</a> · <a href="/triples">explicit triples</a></div>
+<form method="get" action="/"><input name="q" value="{q}" placeholder="Ask what it remembers, e.g. Where do I live?">
+<button>Recall</button></form>{result}</header>
+<main>{body}</main>
+<footer>Each line is a short summary, then your exact words and the date. To remove one:
+<code>sourcedrecall-memory forget &lt;id&gt;</code>, or ask your assistant to forget it.</footer>
+</body></html>"""
+
+
+def _fact_li(f, tag=""):
+    e = html.escape
+    text = e(f.get("text") or f"{f.get('attribute')}: {f.get('value')}")
+    said = (f.get("said") or "").strip()
+    date = ((f.get("receipts") or [{}])[0].get("date") or "")
+    bits = []
+    if said:
+        bits.append(f'<span class="said">"{e(said[:240])}"</span>')
+    if date:
+        bits.append(e(str(date)[:10]))
+    if (f.get("mentions") or 0) > 1:
+        bits.append(f"said {f['mentions']}x")
+    labels = [t for t, on in (("no longer true", f.get("current") is False),
+                              ("said in passing", f.get("passing")),
+                              ("may have changed since", f.get("changed_later")),
+                              ("possibly related", f.get("related"))) if on]
+    lab = "".join(f'<span class="tag">({t})</span> ' for t in labels) or tag
+    return (f"<li>{lab}{text}<div class='meta'>{' · '.join(bits)} · "
+            f"<code>{e(str(f.get('id') or ''))}</code></div></li>")
+
+
+def _render_memory(owner, groups, q="", rec=None):
+    e = html.escape
+    n = sum(len(g) for _, g in groups)
+    body = "".join(f"<h2>{e(t)}</h2><ul>{''.join(_fact_li(f) for f in g)}</ul>"
+                   for t, g in groups) or "<p class='sub'>Nothing stored yet.</p>"
+    result = ""
+    if q:
+        if rec and rec.get("found"):
+            items = "".join(_fact_li(f) for f in rec.get("ranked") or [])
+            result = f"<div class='result'><ul>{items}</ul></div>"
+        elif rec and rec.get("related"):
+            items = "".join(_fact_li(f) for f in rec["related"])
+            result = ("<div class='result'><div class='sub'>Nothing stored is known "
+                      f"to answer this. Closest things said:</div><ul>{items}</ul></div>")
+        else:
+            result = "<div class='result sub'>Nothing stored about this.</div>"
+    title = f"Memory: {e(owner)}" if owner else "Memory"
+    return MEM_PAGE.format(title=title, n=n, q=e(q), result=result, body=body)
+
+
 def make_handler(service):
     class Handler(http.server.BaseHTTPRequestHandler):
         def _send(self, body, ctype="text/html; charset=utf-8"):
@@ -83,11 +155,19 @@ def make_handler(service):
             self.wfile.write(data)
 
         def do_GET(self):
-            if self.path.startswith("/api/records"):
+            from urllib.parse import urlparse, parse_qs
+            u = urlparse(self.path)
+            if u.path.startswith("/api/records") and service is not None:
                 self._send(json.dumps(service.all_records()),
                            "application/json")
-            elif self.path == "/" or self.path.startswith("/?"):
+            elif u.path == "/triples" and service is not None:
                 self._send(_render(service.all_records()))
+            elif u.path == "/":
+                from sourcedrecall import profile_memory as pm
+                q = (parse_qs(u.query).get("q") or [""])[0].strip()[:300]
+                owner, groups = pm.memory_groups()
+                rec = pm.profile_recall(q) if q else None
+                self._send(_render_memory(owner, groups, q, rec))
             else:
                 self.send_error(404)
 

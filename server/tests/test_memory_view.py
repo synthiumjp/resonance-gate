@@ -271,3 +271,19 @@ def test_forgetting_a_fact_drops_the_names_it_introduced(pm, tmp_path):
     pm.profile_forget(hit["id"])
     world = json.load(open(tmp_path / "world.json"))
     assert "biscuit" not in world
+
+
+def test_the_browser_shows_the_memory_and_a_recall(pm):
+    from sourcedrecall.browser import _render_memory
+    pm.profile_ingest([U("I live in Fitzroy.")], conversation_id="a",
+                      owner_name="Jordan Pike", date="2026-03-02")
+    pm.profile_ingest([U("I moved to Brunswick last week.")], conversation_id="b",
+                      owner_name="Jordan Pike", date="2026-03-09")
+    owner, groups = pm.memory_groups()
+    page = _render_memory(owner, groups, "Where do I live?",
+                          pm.profile_recall("Where do I live?"))
+    assert "Memory: Jordan Pike" in page and "About you" in page
+    assert "(no longer true)" in page and "Brunswick" in page
+    assert "<script" not in page.lower()
+    evil = _render_memory(owner, groups, "<script>alert(1)</script>", None)
+    assert "<script>alert" not in evil
