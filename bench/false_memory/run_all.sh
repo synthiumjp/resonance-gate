@@ -27,11 +27,11 @@ for s in "${steps[@]}"; do
   echo "=== $s $(date +%T)"
   case $s in
     cases)    python3 build_cases.py ;;
-    rag)      HF_HUB_OFFLINE=1 "${CAP[@]}" "$MEM0_PY" -u run_system.py rag ;;
-    ours)     HF_HUB_OFFLINE=1 "${CAP[@]}" "$OURS_PY" -u run_system.py sourcedrecall ;;
+    rag)      HF_HUB_OFFLINE=1 ${CAP[@]+"${CAP[@]}"} "$MEM0_PY" -u run_system.py rag ;;
+    ours)     HF_HUB_OFFLINE=1 ${CAP[@]+"${CAP[@]}"} "$OURS_PY" -u run_system.py sourcedrecall ;;
     mem0)     ollama create qwen3-14b-fm -f Modelfile.mem0
               ollama pull nomic-embed-text
-              "${CAP[@]}" "$MEM0_PY" -u run_system.py mem0 ;;
+              ${CAP[@]+"${CAP[@]}"} "$MEM0_PY" -u run_system.py mem0 ;;
     validate) python3 judge_validate.py ;;
     score)    python3 score.py ;;
   esac
