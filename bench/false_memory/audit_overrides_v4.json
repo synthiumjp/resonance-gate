@@ -1,5 +1,5 @@
 {
- "_note": "Audited by an agent on 2026-10-03. Read: every sourcedrecall class-b flagged line (lines view) with its context-view rendering, the scenario conversations and propositions, and every RAG class-b flagged line. Only clear judge errors overridden (5 total: sourcedrecall 2, rag 3); borderline cases left as judged. rag s02 and rag s43 remove one bad line each, the probe stays false memory through another line.",
+ "_note": "Audited by an agent on 2026-10-03. Read: every sourcedrecall class-b flagged line (lines view) with its context-view rendering, the scenario conversations and propositions, and every RAG class-b flagged line. Only clear judge errors overridden (6 total: sourcedrecall 3, rag 3); borderline cases left as judged. rag s02 and rag s43 remove one bad line each, the probe stays false memory through another line.",
  "overrides": [
   {
    "system": "sourcedrecall",
@@ -35,6 +35,13 @@
    "fm": false,
    "reason": "line refers to a new landlord, does not assert the old one is current",
    "line": "[2026-07-16] How do I ask my new landlord about subletting? Mr Okafor never minded but the letting agency does."
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "s09",
+   "fm": false,
+   "reason": "line states using the tram, does not assert owning the Corolla",
+   "line": "Jordan Pike is using the tram [they said: \"Sold the Corolla on Saturday, I'm going car-free and using the tram.\"]"
   }
  ]
 }

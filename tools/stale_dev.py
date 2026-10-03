@@ -24,14 +24,17 @@ CASES = os.path.join(_ROOT, "bench", "false_memory", "cases_dev_stale.jsonl")
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--misses", action="store_true")
+    ap.add_argument("--cases", default=CASES,
+                    help="cases file (default cases_dev_stale.jsonl)")
     ap.add_argument("--facts", action="store_true",
                     help="with --misses: also list every stored fact")
     a = ap.parse_args()
     sys.path.insert(0, os.path.join(_ROOT, "server"))
     os.environ.setdefault("RG_NLI", "0")
     import sourcedrecall.profile_memory as pm
-    cases = [json.loads(l) for l in open(CASES)]
+    cases = [json.loads(l) for l in open(a.cases)]
     tot = new_ok = stale_n = 0
+    ctl = ctl_ok = ctl_marked = 0
     report = []
     for c in cases:
         d = tempfile.mkdtemp(prefix="rg-stale-")
@@ -55,6 +58,20 @@ def main():
                            and not f.get("changed_later")
                            and str((f.get("receipts") or [{}])[0].get("date") or "")[:10]
                            < str(last)[:10]]
+            if c.get("class") == "f":
+                # a control: nothing changed, the state must come back and
+                # must not be marked as changed or ended
+                marked = any(f.get("changed_later") or f.get("current") is False
+                             for f in fs if any(t in f"{f.get('text')} {f.get('said') or ''}".lower()
+                                                for t in terms))
+                ctl += 1
+                ctl_ok += got_new
+                ctl_marked += marked
+                if a.misses and (not got_new or marked):
+                    print(f"\nCONTROL {c['id']} Q: {p['q']}  expect {terms}  "
+                          f"found={'yes' if got_new else 'NO'} marked={'YES' if marked else 'no'}")
+                    print(f"   got: {[f.get('text') for f in fs][:3]}")
+                continue
             tot += 1
             new_ok += got_new
             stale_n += bool(old_current)
@@ -71,7 +88,9 @@ def main():
                                [f.get("text") for f in old_current][:2],
                                [f.get("text") for f in fs][:3], said, stored))
         shutil.rmtree(d, ignore_errors=True)
-    print(f"new state returned {new_ok}/{tot}   old line still current {stale_n}/{tot}")
+    print(f"new state returned {new_ok}/{tot}   old line still current {stale_n}/{tot}"
+          + (f"   controls found {ctl_ok}/{ctl}, wrongly marked changed {ctl_marked}/{ctl}"
+             if ctl else ""))
     if a.misses:
         for cid, q, terms, ok, old, got, said, stored in report:
             print(f"\n{cid} Q: {q}  expect {terms}  new={'yes' if ok else 'NO'}")
