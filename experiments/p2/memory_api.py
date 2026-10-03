@@ -418,6 +418,14 @@ def _render_fact(f, max_quote=200):
     pronoun bound to the wrong antecedent, "neither ... nor" left in the noun
     phrase. The quote is what was actually said, so a reader holding both can
     never be told the opposite. RG_CONTEXT_QUOTES=0 omits the quote."""
+    if f.get("verbatim") and f.get("message"):
+        # a message no fact was made of: the date, the label, their words
+        recs = f.get("receipts") or []
+        date = str(recs[0]["date"]) if recs and recs[0].get("date") else ""
+        asked = ""
+        if f.get("asked"):
+            asked = f'(in reply to "{_window(f["asked"], "", 160)}") '
+        return (f"[{date}] " if date else "") + f'(their words) {asked}"{_window(f["message"], "", max_quote * 2)}"'
     prop = f.get("text") or f"{f['attribute']}: {f['value']}"
     if f.get("current") is False:
         prop = "(no longer true) " + prop
@@ -1785,12 +1793,35 @@ class Memory:
                 # v3 path: rank order is the evidence order, so it is kept.
                 # The tier still shows on every line.
                 ranked = self._with_messages(r["ranked"][:max_facts])
+                # 2026-10-04 (LoCoMo dev): the user's own messages that match
+                # the question best, for answers the parser never made a
+                # fact of; they take the slots of the lowest-ranked facts
+                extra = []
+                mf = getattr(self, "messages_for", None)
+                if mf is not None:
+                    shown = {(f.get("message") or f.get("said") or "").strip().lower()
+                             for f in ranked}
+                    for m in mf(query):
+                        if m.get("score", 0.0) < VERBATIM_FLOOR:
+                            continue
+                        key = m["text"].strip().lower()
+                        if key in shown or any(key in x or x in key for x in shown if x):
+                            continue
+                        asked = m.get("asked")
+                        extra.append({"text": "", "said": m["text"], "message": m["text"],
+                                      "asked": asked if asked and asked.rstrip().endswith("?")
+                                      else None,
+                                      "receipts": [{"date": m.get("date")}],
+                                      "verbatim": True})
+                    if extra:
+                        ranked = ranked[:max(1, max_facts - len(extra))]
+                both = ranked + extra
                 if os.environ.get("RG_BLOCK_ORDER", "chrono") == "chrono":
                     # 2026-10-03 (answer view): oldest first, so the latest
                     # statement is the last thing the reader sees; with the
                     # newest first a reader still took the older line
-                    ranked = sorted(ranked, key=_f_date)
-                for f in ranked:
+                    both = sorted(both, key=_f_date)
+                for f in both:
                     lines.append(f"- {_render_fact(f)}")
             else:
                 for f in r["asserted"][:max_facts]:

@@ -391,3 +391,26 @@ def test_a_conflict_shows_only_when_the_question_names_its_attribute(monkeypatch
     b = m.context_block("What is my favourite colour?")
     assert "values for your is" not in b and "MEMORY CONFLICTS" not in b
     assert "Which employer is current?" in m.context_block("Who is my employer?")
+
+
+def test_retrieved_messages_join_the_block_within_its_budget(monkeypatch):
+    """2026-10-04 (LoCoMo dev): the user's own messages that match best are
+    added for answers no fact holds -- above the verbatim floor, not when
+    already shown through a fact, and in place of the lowest-ranked facts."""
+    m = Memory(WireGraph.from_facts([], n_convs=1))
+    m.conflicts = lambda: []
+    facts = [{"text": f"Sam Lee fact {i}", "said": f"Fact {i}.",
+              "receipts": [{"date": f"2026-01-0{i + 1}"}]} for i in range(4)]
+    monkeypatch.setattr(m, "_recall_for_context", lambda q: {"found": True, "ranked": facts})
+    m.messages_for = lambda q: [
+        {"text": "Fact 0.", "date": "2026-01-01", "score": 2.0},          # shown already
+        {"text": "The grandma is from Sweden, it was her necklace.",
+         "date": "2026-02-01", "score": 1.0, "asked": "Where is she from?"},
+        {"text": "Something unrelated entirely here.", "date": "2026-02-02", "score": -9.0}]
+    lines = [l for l in m.context_block("Where is my grandma from?", max_facts=4).splitlines()
+             if l.startswith("- ")]
+    assert len(lines) == 4
+    sweden = [l for l in lines if "Sweden" in l]
+    assert sweden and "(their words)" in sweden[0] and 'in reply to "Where is she from?"' in sweden[0]
+    assert not any("unrelated" in l for l in lines)
+    assert sum("Fact 0." in l for l in lines) == 1

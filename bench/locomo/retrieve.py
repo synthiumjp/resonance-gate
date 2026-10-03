@@ -126,8 +126,10 @@ class Ours:
             # (profile_context), labels and candidates included. The test run
             # committed in 147101c used LOCOMO_SR_VIEW=recall (confirmed
             # facts only, nothing when a gate refused).
-            blk = self.pm.profile_context(q)["block"]
-            lines = [l[2:] for l in blk.splitlines() if l.startswith("- ")][:C.TOP_K]
+            # the block holds at most TOP_K lines itself; slicing its lines
+            # would drop the NEWEST, since the block runs oldest first
+            blk = self.pm.profile_context(q, max_facts=C.TOP_K)["block"]
+            lines = [l[2:] for l in blk.splitlines() if l.startswith("- ")]
             return {f"Memories of {self.owner}": lines}
         r = self.pm.profile_recall(q)
         lines = []

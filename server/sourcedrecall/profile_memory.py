@@ -514,12 +514,68 @@ def _message_of(conversation_id, said):
     return None, None
 
 
+def _denied_lists():
+    denied, denied_said = [], []
+    try:
+        for line in open(_corrections_path()):
+            c = json.loads(line)
+            if c.get("action") == "deny":
+                if c.get("said"):
+                    denied_said.append(c["said"])
+                if c.get("value"):
+                    denied.append(str(c["value"]))
+    except (OSError, ValueError):
+        pass
+    return denied, denied_said
+
+
+def _messages_for(query, k=3):
+    """2026-10-04: the user's own messages that best match the question,
+    ranked by the same models as facts (retrieve_v3) -- for answers the
+    parser never made a fact of. -> [{"text", "date", "asked", "score"}].
+    The index is rebuilt when the transcripts change."""
+    import retrieve_v3 as _RV3
+    from memory_api import _SENT_SPLIT, _denied_sentence
+    with _lock:
+        try:
+            tr = _ensure_transcripts_locked()
+        except (OSError, ValueError):
+            return []
+        cached = _state.get("msg_index")
+        if cached is None or cached[0] is not tr:
+            denied, denied_said = _denied_lists()
+            docs = []
+            for conv in tr.values():
+                turns = conv["turns"]
+                for i, t in enumerate(turns):
+                    if t["role"] != "human" or "[MEMORY" in t["text"]:
+                        continue
+                    sents = [x for x in _SENT_SPLIT.split(t["text"].strip())
+                             if not _denied_sentence(x, denied, denied_said)]
+                    text = " ".join(sents).strip()
+                    if len(text.split()) < 3:
+                        continue
+                    prev = (turns[i - 1]["text"] if i and turns[i - 1]["role"]
+                            == "assistant" else None)
+                    docs.append({"attr": "", "value": text, "text": text,
+                                 "date": conv["date"], "asked": prev})
+            cached = (tr, _RV3.IndexV3(None, facts=docs) if docs else None)
+            _state["msg_index"] = cached
+    if cached[1] is None:
+        return []
+    hits = _RV3.retrieve_facts_v3(cached[1], query, k=60, dense_k=30,
+                                  top_n=k, with_scores=True)
+    return [dict(h, score=sc) for h, sc in hits]
+
+
 def profile_context(query=None, max_facts=15, scope=None):
     mem = _ensure_loaded()
     with _lock:
         _set_scope(mem, scope)
         if os.environ.get("RG_MESSAGE_QUOTES") != "0":
             mem.message_of = _message_of
+        if os.environ.get("RG_MESSAGE_RECALL", "1") != "0":
+            mem.messages_for = _messages_for
         block = mem.context_block(query, max_facts)
     return {"block": block}
 

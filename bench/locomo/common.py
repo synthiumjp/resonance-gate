@@ -15,7 +15,7 @@ RESULTS = os.environ.get("LOCOMO_RESULTS", os.path.join(HERE, "results"))
 # Test run: llama_cpp.server on the Mac Studio, through an ssh tunnel.
 LLM_BASE = os.environ.get("LOCOMO_LLM_BASE", "http://127.0.0.1:11434")
 LLM_MODEL = os.environ.get("LOCOMO_LLM_MODEL", "qwen3:14b")
-TOP_K = 10
+TOP_K = int(os.environ.get("LOCOMO_TOP_K", "10"))
 CATS = {1: "multi-hop", 2: "temporal", 3: "open-domain", 4: "single-hop"}
 
 
