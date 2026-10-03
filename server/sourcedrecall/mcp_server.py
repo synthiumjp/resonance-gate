@@ -130,13 +130,14 @@ def profile_recall(query: str, scope: str = None) -> dict:
 
 
 @mcp.tool()
-def profile_context(query: str = None, max_facts: int = 15,
+def profile_context(query: str = None, max_facts: int = None,
                     scope: str = None) -> dict:
     """The verbatim, receipted text block for prompt injection — every line is
     a stored fact with its mention count, and the block carries the standing
     instruction that anything about the user NOT listed is unknown and must
     not be invented. With no query, the top of the corroborated profile;
-    with a query, that recall's neighbourhood. Returns {"block": <str>}."""
+    with a query, that recall's neighbourhood (8 lines by default, 15 for
+    the profile). Returns {"block": <str>}."""
     return pmem.profile_context(query, max_facts, scope)
 
 

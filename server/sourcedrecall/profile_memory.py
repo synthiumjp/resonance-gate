@@ -568,7 +568,12 @@ def _messages_for(query, k=3):
     return [dict(h, score=sc) for h, sc in hits]
 
 
-def profile_context(query=None, max_facts=15, scope=None):
+def profile_context(query=None, max_facts=None, scope=None):
+    # 2026-10-04 (LoCoMo dev): 5 lines per speaker answered as well as 10
+    # (58.8% at 568 tokens vs 58.4% at 899), so a question gets 8 lines by
+    # default; the profile summary keeps 15
+    if max_facts is None:
+        max_facts = 8 if query else 15
     mem = _ensure_loaded()
     with _lock:
         _set_scope(mem, scope)

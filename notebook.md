@@ -14876,3 +14876,29 @@ and how to run everything).
   the summary ~56, the reply snippet ~110 (on 31% of lines). Variants under
   test: the reply cut to its question sentences; no summary when the
   message is quoted; quotes capped at 300 chars.
+
+## Entry 294 — 2026-10-04 (message retrieval; at the answer level RAG is as good as us or better)
+
+- 56c72e6: the block also carries the user's own best-matching messages
+  (indexed with the fact models, above the verbatim floor, at most three,
+  in place of the lowest-ranked facts, only when facts were found).
+  LoCoMo dev (233 questions): 51.1 -> 58.4% (RAG 62.2%); temporal 66.7%
+  vs RAG 57.1%. With 5 lines per speaker instead of 10: 58.8% at 568
+  tokens (899 at 10), so a question block now defaults to 8 lines.
+- Blind answer view at HEAD (unaudited), vs the previous release:
+  v3 false memory 4/30 -> 2/30 (all from stale; negation, invention,
+  absent attribute, assistant-injected 0/22 both), controls 20 -> 19/23;
+  v4 old state given 13 -> 10/44, new state 28 -> 34/44, controls 16/16.
+- The finding that matters: at the answer level, plain RAG over the user's
+  dated messages is at least as good on everything we measure -- v3 0/30
+  false memory, 23/23 controls, 12/12 abstention on never-mentioned
+  topics; v4 7/44 and 36/44; LoCoMo dev 62.2%. Our false-memory advantage
+  was real per line and disappears once a capable reader (a 14B local
+  model) reads the lines. The reader resolves dated messages better than
+  it resolves our rewrites.
+- What sourcedrecall still has that a RAG store does not: a memory the
+  user can read and edit (MEMORY.md, browser, forget by id with the words
+  removed everywhere), secrets scrubbed before storage, project scoping,
+  labels for changes of state, no model calls at all. The direction the
+  numbers point at: retrieve the user's messages first, and use the parser
+  for labels, forgetting and scoping rather than as the evidence.

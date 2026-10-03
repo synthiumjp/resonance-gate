@@ -1,9 +1,9 @@
 # Handover: sourcedrecall (product track)
 
-Last updated 2026-10-03. Branch `product-p2`, repo github.com/synthiumjp/resonance-gate.
-Latest release tag: `sourcedrecall-v0.4.5` (the read-only memory browser,
-`sourcedrecall-memory view`; Stanza pinned to 1.14.0). Full suite on the Mac:
-1019 passed, 3 skipped.
+Last updated 2026-10-04. Branch `product-p2`, repo github.com/synthiumjp/resonance-gate.
+Latest release tag: `sourcedrecall-v0.4.6` (dated quotes of the user's whole
+messages, message retrieval, the installer finds Homebrew Python, breed/make
+answers). Full suite on the Mac: 1047 passed, 3 skipped.
 
 ## What it is
 
@@ -106,12 +106,11 @@ and real-conversation text before pushing (the repo is public).
 
 ## Open items, in order
 
-1. LoCoMo is the largest gap. Dev convs 0-1 with the block view: 41.6% ->
-   51.1% with whole-message quotes (540ac82), RAG 62.2%. Context doubled
-   (415 -> 775 tokens); lean variants under test (notebook e293). Then:
-   retrieval over whole messages as well as facts (the remaining misses are
-   mostly retrieval), and the "(may have changed since)" noise in long chats.
-   The test-set number (33.4%) is from the old harness view and 3c6b0a7.
+1. Decide the architecture (notebook e294): at the answer level plain RAG
+   over dated messages matches or beats us on every bench (LoCoMo dev 62.2
+   vs 58.8%; v3 0/30 vs 2/30; v4 7/44 vs 10/44). Prototype: messages first,
+   parser for labels, forgetting and scoping. The LoCoMo test number
+   (33.4%) is from the old harness view and 3c6b0a7; rerun at the end.
 2. Changes of state are the main weakness (blind v4: 33/44 stale facts
    returned as current; the new state is missing in 16/44, most likely never
    extracted). Work on a fresh readable dev set, not on v4 (notebook e291).
