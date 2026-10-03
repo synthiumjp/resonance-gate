@@ -56,6 +56,7 @@ for k, words in {
     "reason": "why reason",
     "language": "language languages",
     "preference": "favourite favorite",
+    "kind": "breed kind type sort species variety make model brand",
 }.items():
     for w in words.split():
         _KIND.setdefault(w, k)
@@ -194,6 +195,39 @@ def _mentions(text, ent):
     return all(present(w) for w in words) if words else True
 
 
+def _names_a_kind(tl, ent):
+    ent_words = re.findall(r"[a-z]+", (ent or "").lower())
+    if not ent_words:
+        return False
+    import answer_type as _AT
+    head = _AT._singular(ent_words[-1])
+    closed = _AT._closed(head)
+    for w in set(re.findall(r"[a-z]+", tl)) - set(ent_words) - _AT._STOP:
+        if len(w) < 3 or _AT._singular(w) == head:
+            continue
+        if w in closed or _below(w, head, 2):
+            return True
+    return False
+
+
+def _below(word, head, depth):
+    """Is `word` at least `depth` hypernym steps under `head` in WordNet?
+    One step is a life stage or a plain sub-kind ("puppy", "sedan"), not
+    what "breed" or "make" asks for; breeds sit deeper ("beagle -> hound ->
+    hunting dog -> dog")."""
+    import answer_type as _AT
+    wn = _AT._wn()
+    if wn is None:
+        return False
+    tsyn = set(wn.synsets(head, pos=wn.NOUN))
+    for syn in wn.synsets(word, pos=wn.NOUN)[:8]:
+        for path in syn.hypernym_paths():
+            hit = [i for i, x in enumerate(path) if x in tsyn]
+            if hit and len(path) - 1 - hit[-1] >= depth:
+                return True
+    return False
+
+
 def answers(fact, q_read, owner=None):
     """Does this fact (a recall dict with text/said/attribute/value) supply
     what the question asks?"""
@@ -245,6 +279,12 @@ def answers(fact, q_read, owner=None):
         return bool(toks & _LANGUAGES)
     if kind == "preference":
         return bool(_PREFERENCE.search(tl))
+    if kind == "kind" and _names_a_kind(tl, ent):
+        # 2026-10-03 (fresh install on the Mac): "What breed is my dog?" was
+        # refused against "My dog Biscuit is a beagle" -- "breed" is never
+        # said. A word naming a kind of the entity answers it (WordNet: a
+        # beagle is a dog; a closed list for car makes).
+        return True
     # no known kind: the attribute word itself must appear
     words = [w for w in re.findall(r"[a-z]+", att) if len(w) > 2]
     return bool(words) and all(re.search(rf"\b{re.escape(w)}", tl) for w in words)

@@ -104,3 +104,19 @@ def test_kin_words_mention_the_entity(text, ent):
 def test_home_is_the_user():
     assert A.read_question("Which suburb is home?") == (None, "suburb")
     assert A.read_question("How old is my mother going to be?") == ("mother", "old")
+
+
+@pytest.mark.parametrize("q,text,ok", [
+    # 2026-10-03 (fresh install on the Mac): a kind of the entity answers
+    # "breed"/"make" though the word is never said
+    ("What breed is my dog?", "Sam Reed's dog Biscuit is a beagle", True),
+    ("What breed is my dog?", "Sam Reed's dog is a golden retriever", True),
+    ("What breed is my dog?", "Sam Reed's dog is a puppy", False),   # one step: not a breed
+    ("What breed is my dog?", "Sam Reed's dog Biscuit loves the beach", False),
+    ("What make is my car?", "Sam Reed's car is a Toyota", True),
+    ("What make is my car?", "Sam Reed's car is a sedan", False),
+])
+def test_a_kind_answers_breed_or_make(q, text, ok):
+    r = A.read_question(q)
+    assert r and r[1] in ("breed", "make"), r
+    assert A.answers({"text": text}, r, owner="Sam Reed") is ok

@@ -287,3 +287,19 @@ def test_the_browser_shows_the_memory_and_a_recall(pm):
     assert "<script" not in page.lower()
     evil = _render_memory(owner, groups, "<script>alert(1)</script>", None)
     assert "<script>alert" not in evil
+
+
+# ---- a new user's first questions (2026-10-03, fresh install on the Mac) ----
+
+def test_a_new_users_first_questions(pm):
+    pm.profile_ingest([U("I moved to Brunswick last week. My physical health "
+                         "remains stable due to my active lifestyle."),
+                       U("My dog Biscuit is a beagle.")],
+                      conversation_id="a", owner_name="Sam Reed", date="2026-10-03")
+    r = pm.profile_recall("Where do I live?")
+    assert r["found"]
+    texts = [f["text"] for f in r["ranked"]]
+    assert "Brunswick" in texts[0], texts
+    r = pm.profile_recall("What breed is my dog?")
+    assert r["found"], r.get("answer")
+    assert "beagle" in r["ranked"][0]["text"]
