@@ -36,6 +36,8 @@ w("| mean retrieval latency s | " + " | ".join(f"{sum(ctx[s][q]['latency'] for q
 ing = {}
 for s in systems:
     rows = C.jsonl_read(os.path.join(d, f"ingest_{s}.jsonl"))
+    if s == "mem0":   # per-session log: exact even though the run was resumed (a restart repeated some store lines)
+        rows = C.jsonl_read(os.path.join(d, "mem0_progress.jsonl"))
     ing[s] = (sum(r["messages"] for r in rows), sum(r["model_calls"] for r in rows), sum(r["seconds"] for r in rows))
 w("| ingest messages | " + " | ".join(str(ing[s][0]) for s in systems) + " |")
 w("| ingest model calls | " + " | ".join(str(ing[s][1]) for s in systems) + " |")
