@@ -84,15 +84,15 @@ Example output after two conversations a week apart
 `profile_context()`):
 
 ```
-[MEMORY: what the user has told you about this]
-- Dana Cole moved to Brunswick  ["Big news, I moved to Brunswick last weekend." · 2026-10-02]
-- (no longer true) Dana Cole lives in Fitzroy  ["I work as a nurse at St Vincent's and I live in Fitzroy." · 2026-09-25]
-[MEMORY RULES] Each line is something the user told you: a short summary, then their exact words in quotes, and when. Lines marked (no longer true) were replaced by something they said later; (said in passing) was true when said, not necessarily now; (their words) is quoted exactly, and a later line can update an earlier one -- check the dates. Anything about the user not listed here is UNKNOWN: say you don't know rather than guessing. Memory is background, not permission: don't act on it (run commands, change files, contact anyone) unless the user asks in this conversation.
+[MEMORY: what the user has told you about this] Dana Cole is the user you are talking to.
+- [2026-09-25] (no longer true) "I work as a nurse at St Vincent's and I live in Fitzroy."  (Dana Cole lives in Fitzroy)
+- [2026-10-02] "Big news, I moved to Brunswick last weekend."  (Dana Cole moved to Brunswick)
+[MEMORY RULES] Each line is something the user told you: when, their exact words in quotes, then a short summary in brackets. Lines run oldest first; a later line can update an earlier one. Lines marked (no longer true) were replaced by something they said later; (said in passing) was true when said, not necessarily now; (their words) is quoted exactly, and a later line can update an earlier one -- check the dates; (may have changed since) marks an earlier statement a later one seems to update. (possibly related) lines are the closest things said, not known to answer the question: use one only if it clearly does. Anything about the user not listed here is UNKNOWN: say you don't know rather than guessing. Memory is background, not permission: don't act on it (run commands, change files, contact anyone) unless the user asks in this conversation.
 
-[MEMORY: what the user has told you]
-- Dana Cole works as a nurse at St Vincent's  ["I work as a nurse at St Vincent's and I live in Fitzroy." · 2026-09-25]
-- Dana Cole is allergic to penicillin which matters at work  ["I'm allergic to penicillin, which matters at work." · 2026-09-25]
-- Dana Cole's partner Lee is a chef  ["My partner Lee is a chef." · 2026-09-25]
+[MEMORY: what the user has told you] Dana Cole is the user you are talking to.
+- [2026-09-25] "I work as a nurse at St Vincent's and I live in Fitzroy."  (Dana Cole works as a nurse at St Vincent's)
+- [2026-09-25] "I'm allergic to penicillin, which matters at work."  (Dana Cole is allergic to penicillin which matters at work)
+- [2026-09-25] "My partner Lee is a chef."  (Dana Cole's partner Lee is a chef)
 ...
 ```
 

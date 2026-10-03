@@ -50,8 +50,10 @@ from wire import WireGraph
 # a nurse?" about something the user just said. A first-hand statement is good
 # evidence; what an agent actually needs is the user's words, how recent they
 # are, and whether they have since been replaced.
-_RULES = ("[MEMORY RULES] Each line is something the user told you: a short "
-          "summary, then their exact words in quotes, and when. Lines marked "
+_RULES = ("[MEMORY RULES] Each line is something the user told you: when, "
+          "their exact words in quotes, then a short summary in brackets. "
+          "Lines run oldest first; a later line can update an earlier one. "
+          "Lines marked "
           "(no longer true) were replaced by something they said later; "
           "(said in passing) was true when said, not necessarily now; "
           "(their words) is quoted exactly, and a later line can update an "
@@ -421,8 +423,23 @@ def _render_fact(f, max_quote=200):
     if (f.get("mentions") or 0) > 1:
         ev.append(f"said {f['mentions']}x")
     recs = f.get("receipts") or []
-    if recs and recs[0].get("date"):
-        ev.append(str(recs[0]["date"]))
+    date = str(recs[0]["date"]) if recs and recs[0].get("date") else ""
+    # 2026-10-03 (answer view): the date, then the user's own words, then
+    # the summary. A reader answering from the block gave the old state as
+    # current in 25/64 fresh changes of state with the summary first, 17/64
+    # with this layout (cases_dev_stale2). RG_LINE_LAYOUT=summary restores
+    # the old layout; "date" leads with the date only.
+    layout = os.environ.get("RG_LINE_LAYOUT", "quote")
+    if layout == "quote" and said and os.environ.get("RG_CONTEXT_QUOTES") != "0":
+        lead = f"[{date}] " if date else ""
+        label = prop[:len(prop) - len(f.get("text") or "")] if f.get("text") else ""
+        count = f" · said {f['mentions']}x" if (f.get("mentions") or 0) > 1 else ""
+        return f'{lead}{label}"{said}"{count}  ({f.get("text") or prop})'
+    if layout in ("date", "quote") and date:
+        ev = [e for e in ev if e != date]
+        return f"[{date}] {prop}" + (f"  [{' · '.join(ev)}]" if ev else "")
+    if date:
+        ev.append(date)
     return f"{prop}  [{' · '.join(ev)}]" if ev else prop
 
 
@@ -1685,6 +1702,8 @@ class Memory:
             for f in keep:
                 lines.append(f"- {_render_fact(f)}")
             head = "[MEMORY: what the user has told you]"
+            if self.owner:
+                head += f" {self.owner} is the user you are talking to."
             if not lines:
                 return ("[MEMORY] Nothing is stored about the user yet. Treat "
                         "every detail about them as UNKNOWN: say so rather "
@@ -1692,6 +1711,10 @@ class Memory:
         else:
             r = self._recall_for_context(query)
             head = "[MEMORY: what the user has told you about this]"
+            if self.owner:
+                # 2026-10-03 (answer view): a reader took "Jordan Pike" for a
+                # third party ("it mentions that Jordan Pike rents ...")
+                head += f" {self.owner} is the user you are talking to."
             if not r["found"] and r.get("known_about"):
                 lines = [f"- {_render_fact(f)}" for f in r["known_about"][:max_facts]]
                 return ("[MEMORY] Nothing stored answers this question ("
@@ -1710,7 +1733,13 @@ class Memory:
             if r.get("ranked"):
                 # v3 path: rank order is the evidence order, so it is kept.
                 # The tier still shows on every line.
-                for f in r["ranked"][:max_facts]:
+                ranked = r["ranked"][:max_facts]
+                if os.environ.get("RG_BLOCK_ORDER", "chrono") == "chrono":
+                    # 2026-10-03 (answer view): oldest first, so the latest
+                    # statement is the last thing the reader sees; with the
+                    # newest first a reader still took the older line
+                    ranked = sorted(ranked, key=_f_date)
+                for f in ranked:
                     lines.append(f"- {_render_fact(f)}")
             else:
                 for f in r["asserted"][:max_facts]:

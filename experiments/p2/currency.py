@@ -824,9 +824,21 @@ _INTENSIFIERS = re.compile(r"^(?:so|really|very|a bit|a little|pretty|kind of|"
                            r"kinda|super|quite|feeling|absolutely|totally)\s+")
 
 
+# 2026-10-03 (answer view, dev set): a life event is permanent even when it
+# happened "today"
+_LIFE_EVENT = re.compile(r"\b(?:got |get |getting )?(?:married|engaged|divorced|"
+                         r"promoted|graduated|retired|hired|fired|adopted|"
+                         r"born|died|passed away|moved|enrolled|pregnant|"
+                         r"broke up|split up|laid off)\b", re.I)
+
+
 def passing(text=None, said=None, attr=None, value=None):
-    """Is this fact tied to the moment it was said?"""
-    if _PASSING_TIME.search(said or text or ""):
+    """Is this fact tied to the moment it was said? The fact's own clause
+    decides when there is one: in "We got married on Saturday, and my husband
+    burned the toast this morning" the marriage is not of this morning."""
+    if _LIFE_EVENT.search(text or said or ""):
+        return False
+    if _PASSING_TIME.search(text or said or ""):
         return True
     a = (attr or "").lower().split(":")[-1]
     if a in ("is", "feel", "get") and value:

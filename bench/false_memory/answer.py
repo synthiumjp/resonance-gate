@@ -76,6 +76,11 @@ def main(systems):
                 lines = (p.get("views") or {}).get("context") if s == "sourcedrecall" \
                     else p.get("lines")
                 mem = "\n".join(f"- {l}" for l in (lines or [])) or "(nothing)"
+                if p.get("block"):
+                    # the exact block an agent receives (header and rules)
+                    prompts.append(PROMPT.format(today=today, q=p["q"],
+                                                 memory=p["block"], rules=""))
+                    continue
                 prompts.append(PROMPT.format(today=today, q=p["q"], memory=mem,
                                              rules=rules if s == "sourcedrecall" else ""))
             key = hashlib.sha1(json.dumps([MODEL, prompts]).encode()).hexdigest()

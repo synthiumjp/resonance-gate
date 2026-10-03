@@ -114,7 +114,8 @@ def test_a_remark_tied_to_its_moment_leaves_the_summary(pm, tmp_path):
     block = pm.profile_context(None)["block"]
     assert "Fitzroy" in block
     assert "keto" not in block and "tired" not in block
-    assert "(said in passing) Dana Cole is in Sydney this week" in block
+    sydney = next(l for l in block.splitlines() if "Sydney" in l)
+    assert "(said in passing)" in sydney and "Dana Cole is in Sydney this week" in sydney
     # still findable, and labelled
     hit = [f for f in pm.profile_recall("What diet am I on?")["ranked"]
            if "keto" in (f.get("text") or "")]

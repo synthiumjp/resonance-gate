@@ -217,4 +217,5 @@ class SourcedRecallAdapter:
                      for f in r["related"][:TOP_K]]
         blk = self.pm.profile_context(q)["block"]
         ctx = [ln[2:] for ln in blk.splitlines() if ln.startswith("- ")]
-        return {"lines": lines, "views": {"context": ctx}}
+        # the whole block, as an agent receives it (answer.py reads it)
+        return {"lines": lines, "views": {"context": ctx}, "block": blk}

@@ -57,7 +57,7 @@ def test_a_single_mention_is_not_dressed_up_as_repeated(mem):
 
 def test_repeated_facts_come_first_and_keep_their_count(mem):
     lines = [l for l in mem.context_block().splitlines() if l.startswith("- ")]
-    assert lines[0].startswith("- Alex is allergic to peanuts  [")
+    assert "Alex is allergic to peanuts" in lines[0]
     assert "said 2x" in lines[0]
     assert all("said " not in l for l in lines[1:])
 
@@ -109,6 +109,10 @@ def test_a_fact_renders_with_its_verbatim_quote(monkeypatch):
          "text": "Alex Reyes works at Acme",
          "said": "I work at Acme as a backend engineer.",
          "mentions": 1, "receipts": [{"date": "2026-10-02"}]}
+    # 2026-10-03: the date and the user's words lead, the summary follows
+    assert MA._render_fact(f) == ('[2026-10-02] "I work at Acme as a backend '
+                                  'engineer."  (Alex Reyes works at Acme)')
+    monkeypatch.setenv("RG_LINE_LAYOUT", "summary")
     assert MA._render_fact(f) == ('Alex Reyes works at Acme  '
                                   '["I work at Acme as a backend engineer." · 2026-10-02]')
 
@@ -120,8 +124,8 @@ def test_a_superseded_fact_says_so(monkeypatch):
     f = {"attribute": "a", "value": "v", "text": "Alex works at Acme",
          "current": False, "mentions": 2, "said": "I work at Acme.",
          "receipts": [{"date": "2026-09-01"}]}
-    assert MA._render_fact(f) == ('(no longer true) Alex works at Acme  '
-                                  '["I work at Acme." · said 2x · 2026-09-01]')
+    assert MA._render_fact(f) == ('[2026-09-01] (no longer true) "I work at Acme."'
+                                  ' · said 2x  (Alex works at Acme)')
 
 
 def test_the_quote_can_be_switched_off(monkeypatch):
@@ -143,4 +147,4 @@ def test_a_long_quote_is_truncated_not_dropped(monkeypatch):
     monkeypatch.delenv("RG_CONTEXT_QUOTES", raising=False)
     out = MA._render_fact({"attribute": "a", "value": "v", "text": "T",
                            "said": "x" * 500})
-    assert out.endswith('..."]') and len(out) < 230
+    assert '..."' in out and out.endswith("(T)") and len(out) < 230

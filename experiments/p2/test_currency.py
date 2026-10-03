@@ -526,3 +526,17 @@ def test_a_place_in_the_old_fact_is_not_a_second_person():
             "b": _n("b", "elise_split_over", "", "c2",
                     text="Elise and Jordan Pike split up over the weekend")})
     assert ("a", "b") in C.mark_ceased(g, order=ORDER)
+
+
+@pytest.mark.parametrize("text,said,want", [
+    # 2026-10-03 (answer view, dev set): the fact's own clause decides, and
+    # a life event is never a passing remark
+    ("Jordan Pike got married on Saturday",
+     "We got married on Saturday, and my husband Tomas burned the toast this morning.", False),
+    ("Jordan Pike's husband Tomas burned the toast this morning",
+     "We got married on Saturday, and my husband Tomas burned the toast this morning.", True),
+    ("Jordan Pike got engaged today", "Got engaged today!!", False),
+    ("Jordan Pike is in Sydney this week for work", "I'm in Sydney this week for work.", True),
+])
+def test_passing_is_judged_on_the_facts_own_clause(text, said, want):
+    assert C.passing(text, said) is want
