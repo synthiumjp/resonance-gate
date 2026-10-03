@@ -14769,3 +14769,39 @@ and how to run everything).
   (FM_JUDGE_OPENAI), so blind v4 can be judged by the Mac's llama_cpp
   qwen3-14b instead of ollama. Its agreement with the ollama judge is being
   checked on the 30 hand-labelled items and the 198 v1 calls before use.
+
+## Entry 291 — 2026-10-03 (blind v4: changes of state. The dev set flattered us.)
+
+- New-user install from the 0.4.5 tag on the Mac found two product bugs:
+  the installer searched only PATH for Python (a non-login shell or an app
+  started from the macOS desktop sees only Apple's 3.9), and "What breed is
+  my dog?" was refused against "My dog Biscuit is a beagle" (the attribute
+  gate wanted the word "breed"). Both fixed. A trim of unrelated extras in
+  tiny stores was tried and dropped (it cost dogfood a rank-1 answer and
+  stale dev 33/21 -> 30/24).
+- The false-memory judge now also runs on the Mac's llama_cpp qwen3-14b
+  (FM_JUDGE_OPENAI). Validated before use: 29/30 on the hand-labelled items
+  (the same single miss as ollama) and 197/198 agreement with the ollama
+  judge's verdicts on all v1 calls.
+- Blind v4 (60 scenarios, 44 stale probes, 16 controls), sourcedrecall 0.4.5
+  vs RAG, after the agent audit (5 judge errors overridden):
+
+      stale fact returned as current   33/44   (RAG 39/44)
+      new state returned               28/44   (RAG 44/44)
+      controls answered                16/16   (RAG 16/16)
+
+  The dev stale set said 21/50 old lines still current. On blind data it is
+  33/44. The dev numbers were tuned on and do not transfer.
+- Audit categories (counts only): 18 old lines with no label at all, 9 that
+  the context view marked "(may have changed since)" (the judge still counts
+  them, and the lines-view adapter does not render that label), 6 from the
+  "possibly related" candidates, 0 "(no longer true)". Of the 16 probes where
+  the new state was missing, 15 returned lines without it -- most likely the
+  new-state sentence was never extracted (inferred, the raw files do not hold
+  the store). Work changes: 10/10 flagged; diet: 0/3.
+- Protocol slip: the audit agent's report quoted a short fragment of one v4
+  case (s19) and named three case topics (an editor, a commute, a language).
+  Treat s19 as seen; any later v4 claim should say so.
+- Next: the main gap is extraction of the NEW state, not labelling. Work it
+  on a new readable dev set written from scratch (not from v4), measured on
+  v4 only at the end, with item-level change reported.

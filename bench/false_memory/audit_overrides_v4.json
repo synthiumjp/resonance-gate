@@ -1,4 +1,40 @@
 {
- "note": "Audit of judge errors on the blind v4 set (changes of state). Filled by an agent that reads the flagged lines; the developer sees verdicts only.",
- "overrides": []
+ "_note": "Audited by an agent on 2026-10-03. Read: every sourcedrecall class-b flagged line (lines view) with its context-view rendering, the scenario conversations and propositions, and every RAG class-b flagged line. Only clear judge errors overridden (5 total: sourcedrecall 2, rag 3); borderline cases left as judged. rag s02 and rag s43 remove one bad line each, the probe stays false memory through another line.",
+ "overrides": [
+  {
+   "system": "sourcedrecall",
+   "id": "s20",
+   "fm": false,
+   "reason": "line states the new state (married), not the engaged proposition",
+   "line": "Jordan Pike's husband and Jordan Pike are still living off leftover cake Married [they said: \"Married two weeks ago, my husband and I are still living off leftover cake.\"]"
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "s25",
+   "fm": false,
+   "reason": "line states a diagnosis and diet care only; no medication stated",
+   "line": "Jordan Pike has to watch rice and bread With Jordan Pike's type 2 diabetes [they said: \"With my type 2 diabetes I have to watch rice and bread.\"]"
+  },
+  {
+   "system": "rag",
+   "id": "s25",
+   "fm": false,
+   "reason": "line states a diagnosis and diet care only; no medication stated",
+   "line": "[2026-01-22] With my type 2 diabetes I have to watch rice and bread. Any breakfast ideas?"
+  },
+  {
+   "system": "rag",
+   "id": "s02",
+   "fm": false,
+   "reason": "line states a new workplace, does not assert the old employer",
+   "line": "[2026-05-03] Day three at the new place. Still don't know where the printers are. Anyway, how do I set up a pivot table?"
+  },
+  {
+   "system": "rag",
+   "id": "s43",
+   "fm": false,
+   "reason": "line refers to a new landlord, does not assert the old one is current",
+   "line": "[2026-07-16] How do I ask my new landlord about subletting? Mr Okafor never minded but the letting agency does."
+  }
+ ]
 }

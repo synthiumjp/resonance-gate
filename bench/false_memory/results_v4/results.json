@@ -1,0 +1,481 @@
+{
+ "seed": 20261002,
+ "bootstrap_reps": 10000,
+ "judge_model": "qwen3-14b-a8cc1361.gguf",
+ "systems": {
+  "sourcedrecall": {
+   "ingest_cost": {
+    "messages": 132,
+    "model_calls": 0,
+    "seconds": 17.1,
+    "calls_per_message": 0.0,
+    "seconds_per_message": 0.13,
+    "scenarios_with_error": 0
+   },
+   "views": {
+    "lines": {
+     "all": {
+      "false_memory_all": {
+       "rate": 0.7954545454545454,
+       "lo": 0.6818181818181818,
+       "hi": 0.9090909090909091,
+       "n": 44,
+       "k": 35
+      },
+      "false_memory_a": null,
+      "false_memory_b": {
+       "rate": 0.7954545454545454,
+       "lo": 0.6818181818181818,
+       "hi": 0.9090909090909091,
+       "n": 44,
+       "k": 35
+      },
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": null,
+      "control_recall": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 16,
+       "k": 16
+      },
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": {
+       "rate": 0.6363636363636364,
+       "lo": 0.5,
+       "hi": 0.7727272727272727,
+       "n": 44,
+       "k": 28
+      }
+     },
+     "heldout": {
+      "false_memory_all": {
+       "rate": 0.7954545454545454,
+       "lo": 0.6818181818181818,
+       "hi": 0.9090909090909091,
+       "n": 44,
+       "k": 35
+      },
+      "false_memory_a": null,
+      "false_memory_b": {
+       "rate": 0.7954545454545454,
+       "lo": 0.6818181818181818,
+       "hi": 0.9090909090909091,
+       "n": 44,
+       "k": 35
+      },
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": null,
+      "control_recall": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 16,
+       "k": 16
+      },
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": {
+       "rate": 0.6363636363636364,
+       "lo": 0.5,
+       "hi": 0.7727272727272727,
+       "n": 44,
+       "k": 28
+      }
+     }
+    },
+    "context": {
+     "all": {
+      "false_memory_all": {
+       "rate": 0.7954545454545454,
+       "lo": 0.6818181818181818,
+       "hi": 0.9090909090909091,
+       "n": 44,
+       "k": 35
+      },
+      "false_memory_a": null,
+      "false_memory_b": {
+       "rate": 0.7954545454545454,
+       "lo": 0.6818181818181818,
+       "hi": 0.9090909090909091,
+       "n": 44,
+       "k": 35
+      },
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": null,
+      "control_recall": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 16,
+       "k": 16
+      },
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": {
+       "rate": 0.6363636363636364,
+       "lo": 0.5,
+       "hi": 0.7727272727272727,
+       "n": 44,
+       "k": 28
+      }
+     },
+     "heldout": {
+      "false_memory_all": {
+       "rate": 0.7954545454545454,
+       "lo": 0.6818181818181818,
+       "hi": 0.9090909090909091,
+       "n": 44,
+       "k": 35
+      },
+      "false_memory_a": null,
+      "false_memory_b": {
+       "rate": 0.7954545454545454,
+       "lo": 0.6818181818181818,
+       "hi": 0.9090909090909091,
+       "n": 44,
+       "k": 35
+      },
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": null,
+      "control_recall": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 16,
+       "k": 16
+      },
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": {
+       "rate": 0.6363636363636364,
+       "lo": 0.5,
+       "hi": 0.7727272727272727,
+       "n": 44,
+       "k": 28
+      }
+     }
+    }
+   },
+   "views_audited": {
+    "lines": {
+     "all": {
+      "false_memory_all": {
+       "rate": 0.75,
+       "lo": 0.6136363636363636,
+       "hi": 0.8636363636363636,
+       "n": 44,
+       "k": 33
+      },
+      "false_memory_a": null,
+      "false_memory_b": {
+       "rate": 0.75,
+       "lo": 0.6136363636363636,
+       "hi": 0.8636363636363636,
+       "n": 44,
+       "k": 33
+      },
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": null,
+      "control_recall": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 16,
+       "k": 16
+      },
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": {
+       "rate": 0.6363636363636364,
+       "lo": 0.5,
+       "hi": 0.7727272727272727,
+       "n": 44,
+       "k": 28
+      }
+     },
+     "heldout": {
+      "false_memory_all": {
+       "rate": 0.75,
+       "lo": 0.6136363636363636,
+       "hi": 0.8636363636363636,
+       "n": 44,
+       "k": 33
+      },
+      "false_memory_a": null,
+      "false_memory_b": {
+       "rate": 0.75,
+       "lo": 0.6136363636363636,
+       "hi": 0.8636363636363636,
+       "n": 44,
+       "k": 33
+      },
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": null,
+      "control_recall": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 16,
+       "k": 16
+      },
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": {
+       "rate": 0.6363636363636364,
+       "lo": 0.5,
+       "hi": 0.7727272727272727,
+       "n": 44,
+       "k": 28
+      }
+     }
+    },
+    "context": {
+     "all": {
+      "false_memory_all": {
+       "rate": 0.7727272727272727,
+       "lo": 0.6363636363636364,
+       "hi": 0.8863636363636364,
+       "n": 44,
+       "k": 34
+      },
+      "false_memory_a": null,
+      "false_memory_b": {
+       "rate": 0.7727272727272727,
+       "lo": 0.6363636363636364,
+       "hi": 0.8863636363636364,
+       "n": 44,
+       "k": 34
+      },
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": null,
+      "control_recall": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 16,
+       "k": 16
+      },
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": {
+       "rate": 0.6363636363636364,
+       "lo": 0.5,
+       "hi": 0.7727272727272727,
+       "n": 44,
+       "k": 28
+      }
+     },
+     "heldout": {
+      "false_memory_all": {
+       "rate": 0.7727272727272727,
+       "lo": 0.6363636363636364,
+       "hi": 0.8863636363636364,
+       "n": 44,
+       "k": 34
+      },
+      "false_memory_a": null,
+      "false_memory_b": {
+       "rate": 0.7727272727272727,
+       "lo": 0.6363636363636364,
+       "hi": 0.8863636363636364,
+       "n": 44,
+       "k": 34
+      },
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": null,
+      "control_recall": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 16,
+       "k": 16
+      },
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": {
+       "rate": 0.6363636363636364,
+       "lo": 0.5,
+       "hi": 0.7727272727272727,
+       "n": 44,
+       "k": 28
+      }
+     }
+    }
+   }
+  },
+  "rag": {
+   "ingest_cost": {
+    "messages": 132,
+    "model_calls": 104,
+    "seconds": 0.9,
+    "calls_per_message": 0.788,
+    "seconds_per_message": 0.007,
+    "scenarios_with_error": 0
+   },
+   "views": {
+    "lines": {
+     "all": {
+      "false_memory_all": {
+       "rate": 0.9090909090909091,
+       "lo": 0.8181818181818182,
+       "hi": 0.9772727272727273,
+       "n": 44,
+       "k": 40
+      },
+      "false_memory_a": null,
+      "false_memory_b": {
+       "rate": 0.9090909090909091,
+       "lo": 0.8181818181818182,
+       "hi": 0.9772727272727273,
+       "n": 44,
+       "k": 40
+      },
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": null,
+      "control_recall": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 16,
+       "k": 16
+      },
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 44,
+       "k": 44
+      }
+     },
+     "heldout": {
+      "false_memory_all": {
+       "rate": 0.9090909090909091,
+       "lo": 0.8181818181818182,
+       "hi": 0.9772727272727273,
+       "n": 44,
+       "k": 40
+      },
+      "false_memory_a": null,
+      "false_memory_b": {
+       "rate": 0.9090909090909091,
+       "lo": 0.8181818181818182,
+       "hi": 0.9772727272727273,
+       "n": 44,
+       "k": 40
+      },
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": null,
+      "control_recall": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 16,
+       "k": 16
+      },
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 44,
+       "k": 44
+      }
+     }
+    }
+   },
+   "views_audited": {
+    "lines": {
+     "all": {
+      "false_memory_all": {
+       "rate": 0.8863636363636364,
+       "lo": 0.7954545454545454,
+       "hi": 0.9772727272727273,
+       "n": 44,
+       "k": 39
+      },
+      "false_memory_a": null,
+      "false_memory_b": {
+       "rate": 0.8863636363636364,
+       "lo": 0.7954545454545454,
+       "hi": 0.9772727272727273,
+       "n": 44,
+       "k": 39
+      },
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": null,
+      "control_recall": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 16,
+       "k": 16
+      },
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 44,
+       "k": 44
+      }
+     },
+     "heldout": {
+      "false_memory_all": {
+       "rate": 0.8863636363636364,
+       "lo": 0.7954545454545454,
+       "hi": 0.9772727272727273,
+       "n": 44,
+       "k": 39
+      },
+      "false_memory_a": null,
+      "false_memory_b": {
+       "rate": 0.8863636363636364,
+       "lo": 0.7954545454545454,
+       "hi": 0.9772727272727273,
+       "n": 44,
+       "k": 39
+      },
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": null,
+      "control_recall": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 16,
+       "k": 16
+      },
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 44,
+       "k": 44
+      }
+     }
+    }
+   }
+  }
+ },
+ "n_scenarios": 60,
+ "n_heldout": 60
+}

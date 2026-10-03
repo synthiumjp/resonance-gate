@@ -32,7 +32,7 @@ flagged line audited):
 | v1 (72, read, tuned on) false memory | 4/60 | 16/60 | 12/60 |
 | v2 blind (48) false memory | 3/37 | 16/37 | 11/37 |
 | v3 blind (48) false memory / paraphrase controls | 6/30, 19/23 | 9/30, 23/23 | 8/30, 23/23 |
-| v4 blind (60, changes of state) | not run yet | | |
+| v4 blind (60, changes of state) stale-as-current / new state returned | 33/44, 28/44 | not run | 39/44, 44/44 |
 
 Blind sets (`cases_v2/v3/v4.jsonl`) are numbers-only for the developer: never
 read their case text or outputs. An agent audits new judge flags and reports
@@ -40,6 +40,9 @@ only verdicts. Dev sets you may read and tune on:
 `cases_dev_paraphrase.jsonl` (`tools/paraphrase_dev.py`, 51/64 with
 candidates) and `cases_dev_stale.jsonl` (`tools/stale_dev.py`, old line still
 current 21/50, new state found 33/50).
+
+Mac dev worktree for patches under test: `~/jpwork/sdr-dev` (run with
+`PYTHONPATH=$PWD/server`), so benches in `~/jpwork/sdr` keep the committed code.
 
 Product harnesses: `tools/dogfood.py --v3` (24/26 rank-1, 12/12 never-mentioned
 refused, 8/8 unknown-attribute refused), `tools/scale_test.py` (refusals hold
@@ -93,12 +96,16 @@ and real-conversation text before pushing (the repo is public).
 1. LoCoMo: reader+judge answers running on the Mac since 18:56 on 2026-10-03
    (`~/jpwork/sdr/bench/locomo`, log `~/jpwork/locomo_answer.log`, about 4 h).
    Then `score.py`, copy `results/test` back, commit.
-2. Blind v4 (changes of state): run RAG + sourcedrecall (+ Mem0 later) on
-   the Mac. The judge can now use the llama_cpp server
-   (`FM_JUDGE_OPENAI=http://127.0.0.1:8090/v1 FM_JUDGE_MODEL=qwen3-14b-a8cc1361.gguf`);
-   check its agreement with the ollama judge first (`~/jpwork/fmjudge`).
-   RAG needs sentence-transformers: `~/jpwork/rg/.venv-judge` has it.
-3. Stale facts remain the main false-memory source (blind v3 stale 6/8).
+2. Changes of state are the main weakness (blind v4: 33/44 stale facts
+   returned as current; the new state is missing in 16/44, most likely never
+   extracted). Work on a fresh readable dev set, not on v4 (notebook e291).
+   v4 was judged on the Mac (`~/jpwork/fm_v4.sh`): the llama_cpp judge
+   (`FM_JUDGE_OPENAI=http://127.0.0.1:8090/v1
+   FM_JUDGE_MODEL=qwen3-14b-a8cc1361.gguf`) agrees with the ollama judge
+   197/198 on v1 calls and 29/30 on the hand-labelled items. RAG runs from
+   `~/jpwork/rg/.venv-judge` (has sentence-transformers). Mem0 on v4 not run
+   (it needs ollama; the Mac's ollama is Chris's).
+3. Release 0.4.6 with the installer and breed fixes once LoCoMo is done.
 4. Parser distillation to drop torch (~0.8 GB), only if it matches Stanza on
    every test.
 5. Codex CLI importer (format undocumented; stub).
