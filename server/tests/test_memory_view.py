@@ -304,3 +304,34 @@ def test_a_new_users_first_questions(pm):
     r = pm.profile_recall("What breed is my dog?")
     assert r["found"], r.get("answer")
     assert "beagle" in r["ranked"][0]["text"]
+
+
+# ---- whole messages in the block (2026-10-04, LoCoMo dev) ------------------
+
+A = lambda c: {"role": "assistant", "content": c}
+
+
+def test_the_block_quotes_the_whole_message(pm):
+    pm.profile_ingest([U("I work at Acme. The office is in Carlton so I cycle there.")],
+                      conversation_id="a", owner_name="Dana Cole", date="2026-03-02")
+    block = pm.profile_context("Where do I work?")["block"]
+    acme = next(l for l in block.splitlines() if "Acme" in l)
+    assert "The office is in Carlton" in acme
+
+
+def test_the_block_shows_the_question_a_message_answered(pm):
+    pm.profile_ingest([A("Where do you work these days?"), U("I work at Acme now.")],
+                      conversation_id="a", owner_name="Dana Cole", date="2026-03-02")
+    block = pm.profile_context("Where do I work?")["block"]
+    acme = next(l for l in block.splitlines() if "Acme" in l)
+    assert 'in reply to "Where do you work these days?"' in acme
+
+
+def test_a_forgotten_sentence_is_not_quoted_inside_a_message(pm):
+    pm.profile_ingest([U("I work at Acme. I'm allergic to penicillin.")],
+                      conversation_id="a", owner_name="Dana Cole", date="2026-03-02")
+    hit = pm.profile_recall("Am I allergic to anything?")["ranked"][0]
+    assert "penicillin" in hit["text"]
+    pm.profile_forget(hit["id"])
+    block = pm.profile_context("Where do I work?")["block"]
+    assert "Acme" in block and "penicillin" not in block

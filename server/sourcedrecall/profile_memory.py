@@ -469,10 +469,57 @@ def _recall(mem, query):
         return mem.recall(query)
 
 
+def _message_of(conversation_id, said):
+    """-> (the user's whole message that contains `said`, the turn just
+    before it) from conversations.json, or (None, None).
+
+    2026-10-04 (LoCoMo dev): the answer was often in the rest of the message
+    ("...a gift from my grandma in Sweden. It stands for love, faith and
+    strength.") or in a reply to the other side's question ("How long have
+    you been married?"). Sentences the user asked to forget are taken out of
+    the message before it is quoted."""
+    if not conversation_id or not said:
+        return None, None
+    import re as _re
+    from memory_api import _SENT_SPLIT, _denied_sentence
+    with _lock:
+        try:
+            conv = _ensure_transcripts_locked().get(conversation_id)
+        except (OSError, ValueError):
+            return None, None
+    if not conv:
+        return None, None
+    norm = lambda t: _re.sub(r"\W+", " ", t or "").strip().lower()  # noqa: E731
+    key = norm(said)
+    turns = conv["turns"]
+    for i, t in enumerate(turns):
+        if t["role"] != "human" or not key or key not in norm(t["text"]):
+            continue
+        denied, denied_said = [], []
+        try:
+            for line in open(_corrections_path()):
+                c = json.loads(line)
+                if c.get("action") == "deny":
+                    if c.get("said"):
+                        denied_said.append(c["said"])
+                    if c.get("value"):
+                        denied.append(str(c["value"]))
+        except (OSError, ValueError):
+            pass
+        sents = [x for x in _SENT_SPLIT.split(t["text"].strip())
+                 if not _denied_sentence(x, denied, denied_said)]
+        prev = (turns[i - 1]["text"] if i and turns[i - 1]["role"] == "assistant"
+                else None)
+        return " ".join(sents) or None, prev
+    return None, None
+
+
 def profile_context(query=None, max_facts=15, scope=None):
     mem = _ensure_loaded()
     with _lock:
         _set_scope(mem, scope)
+        if os.environ.get("RG_MESSAGE_QUOTES") != "0":
+            mem.message_of = _message_of
         block = mem.context_block(query, max_facts)
     return {"block": block}
 

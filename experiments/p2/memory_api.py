@@ -53,6 +53,7 @@ from wire import WireGraph
 _RULES = ("[MEMORY RULES] Each line is something the user told you: when, "
           "their exact words in quotes, then a short summary in brackets. "
           "Lines run oldest first; a later line can update an earlier one. "
+          "(in reply to \"...\") is the question they were answering. "
           "Lines marked "
           "(no longer true) were replaced by something they said later; "
           "(said in passing) was true when said, not necessarily now; "
@@ -393,6 +394,18 @@ def _mark_later_changes(facts, owner=None):
     return [out[k] for k in order]
 
 
+def _window(text, around, limit):
+    """`text` cut to about `limit` characters, keeping `around` in view."""
+    text = (text or "").strip()
+    if len(text) <= limit:
+        return text
+    i = text.lower().find((around or "").strip().lower()[:40]) if around else 0
+    i = max(0, i)
+    start = max(0, min(i - limit // 4, len(text) - limit))
+    out = text[start:start + limit].strip()
+    return ("..." if start else "") + out + ("..." if start + limit < len(text) else "")
+
+
 def _render_fact(f, max_quote=200):
     """One context-block line body: summary, then the evidence in brackets.
 
@@ -416,9 +429,13 @@ def _render_fact(f, max_quote=200):
         prop = "(possibly related) " + prop
     ev = []
     said = (f.get("said") or "").strip()
+    if f.get("message"):
+        # 2026-10-04: the whole message the sentence came from, cut to a
+        # window around that sentence when it is long
+        said = _window(f["message"], said, max_quote * 2)
+    elif said and len(said) > max_quote:
+        said = said[:max_quote - 3].rstrip() + "..."
     if said and os.environ.get("RG_CONTEXT_QUOTES") != "0":
-        if len(said) > max_quote:
-            said = said[:max_quote - 3].rstrip() + "..."
         ev.append(f'"{said}"')
     if (f.get("mentions") or 0) > 1:
         ev.append(f"said {f['mentions']}x")
@@ -434,7 +451,13 @@ def _render_fact(f, max_quote=200):
         lead = f"[{date}] " if date else ""
         label = prop[:len(prop) - len(f.get("text") or "")] if f.get("text") else ""
         count = f" · said {f['mentions']}x" if (f.get("mentions") or 0) > 1 else ""
-        return f'{lead}{label}"{said}"{count}  ({f.get("text") or prop})'
+        asked = ""
+        if f.get("asked"):
+            asked = f'(in reply to "{_window(f["asked"], "", 160)}") '
+        summary = f.get("text") or prop
+        if f.get("also"):
+            summary += "; " + "; ".join(f["also"])
+        return f'{lead}{label}{asked}"{said}"{count}  ({summary})'
     if layout in ("date", "quote") and date:
         ev = [e for e in ev if e != date]
         return f"[{date}] {prop}" + (f"  [{' · '.join(ev)}]" if ev else "")
@@ -1672,6 +1695,34 @@ class Memory:
 
     # ---------------- injection ----------------
 
+    def _with_messages(self, facts):
+        """2026-10-04: each fact with the user's whole message and the turn
+        it answered (profile_memory sets `message_of`); facts from the same
+        message share one line, the others' summaries added to it."""
+        mo = getattr(self, "message_of", None)
+        if mo is None:
+            return facts
+        out, by_msg = [], {}
+        for f in facts:
+            f = dict(f)
+            for rc in f.get("receipts") or []:
+                msg, prev = mo(rc.get("conversation_id"), f.get("said"))
+                if msg:
+                    f["message"] = msg
+                    if prev and prev.rstrip().endswith("?"):
+                        f["asked"] = prev
+                    break
+            key = (f.get("message") or "").strip().lower()
+            if key and key in by_msg:
+                first = by_msg[key]
+                if f.get("text") and f["text"] != first.get("text"):
+                    first.setdefault("also", []).append(f["text"])
+                continue
+            if key:
+                by_msg[key] = f
+            out.append(f)
+        return out
+
     def context_block(self, query=None, max_facts=15):
         """Verbatim receipted block for prompt injection. If `query` is given,
         the block is the recall neighbourhood; else the top-of-profile. Empty
@@ -1721,7 +1772,7 @@ class Memory:
                         + r["answer"] + "). Related things the user has told "
                         "you:\n" + "\n".join(lines) + "\n" + _RULES)
             if not r["found"] and r.get("related"):
-                lines = [f"- {_render_fact(f)}" for f in r["related"]]
+                lines = [f"- {_render_fact(f)}" for f in self._with_messages(r["related"])]
                 return ("[MEMORY] Nothing stored is confirmed to answer this. "
                         "The closest things the user has said are below; use "
                         "one only if it clearly answers, otherwise say you "
@@ -1733,7 +1784,7 @@ class Memory:
             if r.get("ranked"):
                 # v3 path: rank order is the evidence order, so it is kept.
                 # The tier still shows on every line.
-                ranked = r["ranked"][:max_facts]
+                ranked = self._with_messages(r["ranked"][:max_facts])
                 if os.environ.get("RG_BLOCK_ORDER", "chrono") == "chrono":
                     # 2026-10-03 (answer view): oldest first, so the latest
                     # statement is the last thing the reader sees; with the
@@ -1750,9 +1801,13 @@ class Memory:
                 for f in r["unconfirmed"][:max(0, max_facts - len(lines))]:
                     lines.append(f"- {_render_fact(f)}")
         block = head + "\n" + "\n".join(lines)
+        # 2026-10-04 (LoCoMo dev): a substring test let "is" in any question
+        # match the attribute "is" and print "I have 5 values for your is"
+        # into the block. A question word must BE a word of the attribute.
+        qw = {w for w in re.findall(r"[a-z]+", str(query or "").lower())
+              if len(w) > 3 and w not in _RERANK_STOP and w not in _Q_FUNCTION}
         cf = [c for c in self.conflicts()
-              if query is None or any(t in c["attribute"]
-                                      for t in str(query).lower().split())]
+              if query is None or qw & set(re.split(r"[_\W]+", c["attribute"].lower()))]
         if cf:
             block += ("\n[MEMORY CONFLICTS -- unresolved; if one becomes "
                       "relevant, ASK the user instead of picking:]")

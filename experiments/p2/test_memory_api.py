@@ -377,3 +377,17 @@ def test_proposition_rendering():
     assert P.owner_name(facts) == "jo blogs"
     out = P.render_all(facts, owner=P.owner_name(facts), with_tier=True)
     assert out[0].endswith("(confirmed x3)") and out[1].endswith("(mentioned once)")
+
+
+def test_a_conflict_shows_only_when_the_question_names_its_attribute(monkeypatch):
+    """2026-10-04 (LoCoMo dev): "is" in any question matched the attribute
+    "is" by substring and printed "I have 5 values for your is"."""
+    m = Memory(WireGraph.from_facts([], n_convs=1))
+    monkeypatch.setattr(m, "conflicts", lambda: [
+        {"attribute": "is", "ask": "I have 5 values for your is"},
+        {"attribute": "employer", "ask": "Which employer is current?"}])
+    monkeypatch.setattr(m, "_recall_for_context", lambda q: {
+        "found": True, "ranked": [{"text": "T", "said": "S", "receipts": [{"date": "2026-01-01"}]}]})
+    b = m.context_block("What is my favourite colour?")
+    assert "values for your is" not in b and "MEMORY CONFLICTS" not in b
+    assert "Which employer is current?" in m.context_block("Who is my employer?")
