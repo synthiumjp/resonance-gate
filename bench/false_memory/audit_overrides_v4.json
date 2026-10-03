@@ -1,0 +1,4 @@
+{
+ "note": "Audit of judge errors on the blind v4 set (changes of state). Filled by an agent that reads the flagged lines; the developer sees verdicts only.",
+ "overrides": []
+}
