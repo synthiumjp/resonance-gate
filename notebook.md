@@ -14722,3 +14722,33 @@ direction (store the verbatim sentence; the parser supplies LABELS, not the
 only path to recall) is the candidate. It must keep RAG's stale failure out:
 a raw sentence carries no currency, so it can only be offered where no
 parsed fact of the same family exists.
+
+## Entry 289 — 2026-10-03 (recall, change of state, any-model use, and two OOM crashes on WSL.)
+
+Releases v0.4.1 to v0.4.4 (see docs/HANDOVER_PRODUCT.md for the current state
+and how to run everything).
+
+- Labelled candidates (0.4.1): when nothing is confirmed, at most three
+  closest records come back as "possibly related", found=False. Blind v3
+  paraphrase controls 9 -> 19/23; false memory 5 -> 6/30 (Mem0 9, RAG 8).
+  Reading the new v1 flags found two real bugs (reported speech through
+  "keeps telling"; a place mistaken for a second person when a breakup
+  should end a fact).
+- Any model (0.4.2/0.4.3): the memory calls no model; added a CLI (ingest,
+  recall, context), docs/CLIENTS.md for ten MCP clients (checked against
+  vendor docs), a Gemini CLI importer (format from the source; Codex is
+  undocumented, stub). Forgetting now rebuilds currency and drops names.
+- Labels screened against audited lines (JP's validity protocol): "no
+  longer true" never wrong; "possibly related" safe (4% false memory) but
+  weakly predictive (46% carry the answer vs 56% for confirmed facts).
+  Stale CONFIRMED facts are the main false-memory source.
+- Change of state (0.4.4), dev set of 50: "no longer" kept in the value
+  (it was merged into the old fact as a repeat); family and type matches
+  survive the margin; "(may have changed since)" when a later statement
+  signals a change or flips no/yes. Dev old-current 39 -> 21/50. Blind v3
+  stale unchanged at 6/8 (n=8).
+- A crash in the new marking was silently turned into "never seen" by the
+  fallback retriever; found by the scale test. Both fallbacks now print.
+- WSL was OOM-killed twice (09:58, 18:46): a 6-9 GB Python test/bench
+  process next to Ollama's 9 GB qwen3:14b, with user systemd down so the
+  bench's MemoryMax cap was off. Heavy work moves to the Mac.
