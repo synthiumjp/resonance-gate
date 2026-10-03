@@ -751,6 +751,14 @@ def _families(attr, value, weak=False):
     if a in ("is", "become", "get") and hw and hw[-1] in _STATUS:
         out.append(("relationship status",
                     frozenset([("not " if neg else "") + _STATUS[hw[-1]]])))
+    # 2026-10-03 (stale dev set): "my girlfriend Mara" after "I'm single" is
+    # a change of status; the possessed partner word names it
+    if not neg:
+        if re.match(r"^(?:wife|husband)(?:_|$)", a):
+            out.append(("relationship status", frozenset(["married"])))
+        elif re.match(r"^(?:girlfriend|boyfriend|partner|fiance|fiancee)(?:_|$)", a):
+            out.append(("relationship status",
+                        frozenset(["engaged" if a.startswith("fianc") else "partnered"])))
     if a.startswith("marry") and not neg:
         out.append(("relationship status", frozenset(["married"])))
     # 2026-10-02: the parser now keeps life events with nothing after the

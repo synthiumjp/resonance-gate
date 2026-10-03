@@ -461,6 +461,11 @@ def _recall(mem, query):
     except Exception:
         # No models available, or v3 unusable in this environment. The
         # token-overlap path is a real, tested retriever; degrade to it.
+        # 2026-10-03: but SAY so -- a bug in recall_v3 was silently turned
+        # into "never seen" by this fallback.
+        import traceback
+        print("sourcedrecall: recall_v3 failed, using the fallback retriever:\n"
+              + traceback.format_exc(), file=sys.stderr, flush=True)
         return mem.recall(query)
 
 

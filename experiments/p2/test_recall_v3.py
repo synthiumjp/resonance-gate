@@ -477,3 +477,22 @@ def test_dense_grounding_counts_only_the_facts_returned():
         assert not M._dense_grounded(idx, "q", threshold=0.9, among=[idx.facts[1]])
     finally:
         M._RV3._models = orig
+
+
+def test_marking_later_changes_never_loses_or_crashes():
+    """2026-10-03: the first version replaced items with copies and then
+    looked the originals up -- ValueError, silently turned into "never
+    seen" by the fallback retriever."""
+    import memory_api as MA
+    mk = lambda i, t, d: {"id": i, "text": t, "said": t, "current": True,
+                          "receipts": [{"date": d}]}
+    facts = [mk("a", "Alex Reyes has no pets", "2026-01-01"),
+             mk("b", "Alex Reyes adopted a kitten", "2026-03-01"),
+             mk("c", "Alex Reyes moved to Coburg now", "2026-04-01"),
+             mk("d", "Alex Reyes lives in Fitzroy", "2026-02-01")]
+    out = MA._mark_later_changes(facts, "Alex Reyes")
+    assert sorted(f["id"] for f in out) == ["a", "b", "c", "d"]
+    marked = {f["id"]: f.get("changed_later") for f in out}
+    assert marked["a"] and marked["d"]
+    ids = [f["id"] for f in out]
+    assert ids.index(marked["a"]) < ids.index("a")

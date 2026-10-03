@@ -1876,6 +1876,19 @@ def extract_keyed(text, nlp, owner=None, role="user",
                     if prt:
                         verb = f"{verb} {' '.join(c.text for c in prt)}"
                     npfx = "not " if neg else ""
+                    # 2026-10-03 (stale dev set): "I no longer work at Acme"
+                    # had the value "at Acme" and was merged into "works at
+                    # Acme Logistics" as a repeat -- the ending vanished and
+                    # the old job looked as recent as the new one. An
+                    # ending marker belongs to the value.
+                    if not neg and (any(
+                            (c.lemma or "").lower() == "long"
+                            and any((g.lemma or "").lower() == "no"
+                                    for g in s.children(c, ("advmod",)))
+                            for c in s.children(head, ("advmod",)))
+                            or any((c.text or "").lower() in ("anymore",)
+                                   for c in s.children(head, ("advmod",)))):
+                        npfx = "no longer "
                     value = npfx + tail_core             # (a): core, e243
                     if peri and tail_core != tail_full:
                         records.append((f"{lead} {verb} {tail_core}",

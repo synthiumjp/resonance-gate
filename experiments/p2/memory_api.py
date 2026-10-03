@@ -55,7 +55,8 @@ _RULES = ("[MEMORY RULES] Each line is something the user told you: a short "
           "(no longer true) were replaced by something they said later; "
           "(said in passing) was true when said, not necessarily now; "
           "(their words) is quoted exactly, and a later line can update an "
-          "earlier one -- check the dates. (possibly related) lines are the "
+          "earlier one -- check the dates; (may have changed since) marks an "
+          "earlier statement a later one seems to update. (possibly related) lines are the "
           "closest things said, not known to answer the question: use one "
           "only if it clearly does. "
           "Anything about the user not listed here is UNKNOWN: say you don't "
@@ -318,6 +319,72 @@ def _attach_sources(g, sources):
                 nd["source"] = sources[nid]
 
 
+# 2026-10-03 (stale dev set): most changes of state are not in a closed
+# family ("Switched to oat milk", "Transferred to the search team", "Dr Ahn
+# took me off the blood pressure tablets"). When two of the user's own
+# statements come back for the SAME question and the later one signals a
+# change -- or flips no/yes ("I have no pets" ... "We adopted a kitten") --
+# the earlier one is marked "may have changed" and the later one goes first.
+# A hedge for the agent, not a deletion; the families still decide "no
+# longer true".
+_CHANGE = re.compile(
+    r"\b(now|anymore|any more|no longer|switched|switch(?:ed)? to|replaced|"
+    r"moved|new|since|quit|stopped|started|start(?:ing)? on|transferred|"
+    r"back to|cutover|migrat\w+|graduated|finally|sold|gave up|recovered|"
+    r"took me off|signed me off|got rid|left|joined|adopted|engaged|married|"
+    r"divorced|broke up|split up|enrolled|retired|promoted|made me|report to|"
+    r"instead|these days|no more|from now on)\b", re.I)
+_NEGATED = re.compile(r"\b(not|no|never|don't|doesn't|didn't|isn't|aren't|"
+                      r"haven't|hasn't|none|nothing)\b", re.I)
+
+
+def _f_date(f):
+    return str((f.get("receipts") or [{}])[0].get("date") or "")[:10]
+
+
+def _mark_later_changes(facts, owner=None):
+    if os.environ.get("RG_LATER_CHANGES") == "0" or len(facts) < 2:
+        return facts
+    own = (owner or "").lower()
+
+    def users(f):
+        # every returned record was said by the user; skip only the ones
+        # ABOUT someone else ("Jordan Pike's sister lives in Perth")
+        t = (f.get("text") or "")
+        return not re.search(rf"^{re.escape(own)}'s\s+(?:sister|brother|mum|mom|"
+                             r"dad|mother|father|wife|husband|partner|"
+                             r"boyfriend|girlfriend|friend|boss|manager|"
+                             r"colleague|son|daughter|kid|child|neighbour|"
+                             r"neighbor|cousin|aunt|uncle)\b", t.lower()) \
+            if own else True
+    out = [dict(f) for f in facts]
+    for jn, new in enumerate(out):
+        if not users(new) or new.get("current") is False:
+            continue
+        nwords = f"{new.get('said') or ''} {new.get('text') or ''}"
+        changes = bool(_CHANGE.search(new.get("said") or new.get("text") or ""))
+        for old in out:
+            if old is new or not users(old) or old.get("current") is False \
+                    or old.get("changed_later"):
+                continue
+            if not (_f_date(old) and _f_date(new) and _f_date(old) < _f_date(new)):
+                continue
+            owords = f"{old.get('said') or ''} {old.get('text') or ''}"
+            flip = bool(_NEGATED.search(owords)) != bool(_NEGATED.search(nwords))
+            if changes or flip:
+                old["changed_later"] = new.get("id")
+    # the later statement before the earlier one it updates
+    order = list(range(len(out)))
+    pos = {id(f): k for k, f in enumerate(out)}
+    for f in out:
+        if f.get("changed_later"):
+            newer = next((g for g in out if g.get("id") == f["changed_later"]), None)
+            if newer is not None and pos[id(newer)] > pos[id(f)]:
+                a, b = order.index(pos[id(f)]), order.index(pos[id(newer)])
+                order.insert(a, order.pop(b))
+    return [out[k] for k in order]
+
+
 def _render_fact(f, max_quote=200):
     """One context-block line body: summary, then the evidence in brackets.
 
@@ -335,6 +402,8 @@ def _render_fact(f, max_quote=200):
         prop = "(no longer true) " + prop
     elif f.get("passing"):
         prop = "(said in passing) " + prop
+    elif f.get("changed_later"):
+        prop = "(may have changed since) " + prop
     if f.get("related"):
         prop = "(possibly related) " + prop
     ev = []
@@ -963,11 +1032,47 @@ class Memory:
                 if _ans:
                     _a = {id(p) for p in _ans}
                     kept = _ans + [p for p in kept if id(p) not in _a]
+        # 2026-10-03 (stale dev set): a question about a STATE ("Where do I
+        # work?") keeps every current fact of that state's family past the
+        # margin -- "joined Northwind Freight" scored far under "no longer
+        # works at Acme" and was cut. (Moving them first cost dogfood rank-1
+        # 24 -> 20/26, so the order is left alone.)
+        _protect = set()
+        if os.environ.get("RG_FAMILY_FIRST") != "0" and not _ABOUT_OTHER.search(query or ""):
+            asked = {f for rx, fams in _QUESTION_FAMILIES if rx.search(query or "")
+                     for f in fams}
+            if asked:
+                import currency as _CUR
+                def _cur_fam(p):
+                    nd = nodes.get(p[0].get("id")) or prov.get(p[0].get("id")) or {}
+                    if nd.get("current") is False:
+                        return False
+                    return bool({f for f, _ in _CUR._families(
+                        p[0].get("attr"), p[0].get("value"))} & asked)
+                fam = [p for p in kept if _cur_fam(p)]
+                if fam:
+                    # kept in the re-ranker's order (rank-1 is its call);
+                    # only exempt from the margin cut
+                    _protect = {id(p) for p in fam}
+        # the same for records of the TYPE a question asks for ("Do I have
+        # any pets?" / "adopted a kitten" was cut before the type check ran)
+        if os.environ.get("RG_ANSWER_TYPE") != "0" and not _ABOUT_OTHER.search(query or ""):
+            try:
+                import answer_type as _AT
+                _qt = _AT.question_type(query)
+            except Exception:
+                _qt = None
+            if _qt and _qt[0] in _AT.CHECKABLE:
+                for p in kept[:40]:
+                    if _AT.has_type(p[0].get("source") or p[0].get("value")
+                                    or p[0].get("text"), _qt[0], _qt[1], (),
+                                    possess=_AT.is_presence(query)):
+                        _protect.add(id(p))
         _margin = float(os.environ.get("RG_RECALL_MARGIN", RECALL_MARGIN))
         if _margin >= 0 and len(kept) > 1:
             _best = max(sc for _, sc in kept)
             kept = kept[:1] + [p for p in kept[1:]
-                               if p[1] >= _best - _margin]
+                               if p[1] >= _best - _margin or id(p) in _protect]
         # A superseded fact that answers is shown WITH what replaced it: "you
         # lived in Fitzroy (no longer true); you moved to Brunswick". Without
         # this the replacement could be cut and the stale fact stand alone.
@@ -1039,6 +1144,7 @@ class Memory:
                                          known_about=known, asked=qr)
                 facts = ok + [f for f in facts if f not in ok]
                 unconfirmed = [f for f in facts if f in unconfirmed]
+        facts = _mark_later_changes(facts, getattr(idx, "owner", None))
         # 2026-10-02: what the user said LATER, in words the parser could not
         # structure ("Two months without any coffee now" after "four coffees
         # a day"). Appended after the facts, dated, never in place of them.
@@ -1222,7 +1328,7 @@ class Memory:
             f["related"] = True
             f["status"] = "possibly-related"
             out.append(f)
-        return out
+        return _mark_later_changes(out, self.owner)
 
     def _quote_fact(self, h, sc):
         return {"id": h["id"], "attribute": "said", "value": h["value"],
@@ -1620,6 +1726,9 @@ class Memory:
         try:
             return self.recall_v3(query)
         except Exception:
+            import traceback
+            print("sourcedrecall: recall_v3 failed, using the fallback retriever:\n"
+                  + traceback.format_exc(), file=sys.stderr, flush=True)
             return self.recall(query)
 
     def provisional_profile(self, top=40):
