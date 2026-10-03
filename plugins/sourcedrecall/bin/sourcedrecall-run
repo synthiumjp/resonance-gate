@@ -42,14 +42,26 @@ do_install() {
   mkdir -p "$DATA"
   echo "== sourcedrecall install $REF $(date)"
   command -v git >/dev/null || { echo "git is required"; return 1; }
-  local py=""
+  local py="" c v
+  # PATH first, then where Homebrew and python.org put Python: an app started
+  # from the macOS desktop (or a non-login shell) often has only Apple's 3.9
+  # on PATH even when a newer Python is installed.
   for c in python3.13 python3.12 python3.11 python3.10 python3; do
-    if command -v "$c" >/dev/null &&
-       "$c" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 10) else 1)'; then
-      py="$(command -v "$c")"; break
+    c="$(command -v "$c")" || continue
+    if "$c" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 10) else 1)'; then
+      py="$c"; break
     fi
   done
-  [ -n "$py" ] || { echo "Python 3.10 or newer is required"; return 1; }
+  if [ -z "$py" ]; then
+    for v in 3.13 3.12 3.11 3.10; do
+      for c in "/opt/homebrew/bin/python$v" "/usr/local/bin/python$v" \
+               "/Library/Frameworks/Python.framework/Versions/$v/bin/python$v"; do
+        [ -x "$c" ] && { py="$c"; break 2; }
+      done
+    done
+  fi
+  [ -n "$py" ] || { echo "Python 3.10 or newer is required (on macOS: brew install python@3.12)"; return 1; }
+  echo "using $py"
   if [ -d "$SRC/.git" ]; then
     git -C "$SRC" fetch --depth 1 origin "refs/tags/$REF:refs/tags/$REF" 2>/dev/null ||
       git -C "$SRC" fetch --depth 1 origin "$REF" || return 1
