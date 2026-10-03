@@ -121,6 +121,14 @@ class Ours:
                    "seconds": time.time() - t0}, (owner,)
 
     def query(self, q, names):
+        if os.environ.get("LOCOMO_SR_VIEW", "block") == "block":
+            # 2026-10-03: the lines of the block an agent receives
+            # (profile_context), labels and candidates included. The test run
+            # committed in 147101c used LOCOMO_SR_VIEW=recall (confirmed
+            # facts only, nothing when a gate refused).
+            blk = self.pm.profile_context(q)["block"]
+            lines = [l[2:] for l in blk.splitlines() if l.startswith("- ")][:C.TOP_K]
+            return {f"Memories of {self.owner}": lines}
         r = self.pm.profile_recall(q)
         lines = []
         if r.get("found") and not r.get("abstain"):
