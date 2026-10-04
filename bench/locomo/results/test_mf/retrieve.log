@@ -1,0 +1,34 @@
+conv 2: 152 questions to retrieve
+  ingested {'speaker': 'John', 'messages': 663, 'model_calls': 0, 'seconds': 127.12528395652771}
+  ingested {'speaker': 'Maria', 'messages': 663, 'model_calls': 0, 'seconds': 128.8923408985138}
+conv 3: 199 questions to retrieve
+  ingested {'speaker': 'Joanna', 'messages': 629, 'model_calls': 0, 'seconds': 106.16436100006104}
+  ingested {'speaker': 'Nate', 'messages': 629, 'model_calls': 0, 'seconds': 105.20556807518005}
+conv 4: 178 questions to retrieve
+  ingested {'speaker': 'Tim', 'messages': 680, 'model_calls': 0, 'seconds': 118.47713208198547}
+  ingested {'speaker': 'John', 'messages': 680, 'model_calls': 0, 'seconds': 120.7064859867096}
+conv 5: 123 questions to retrieve
+  ingested {'speaker': 'Audrey', 'messages': 675, 'model_calls': 0, 'seconds': 112.60111904144287}
+  ingested {'speaker': 'Andrew', 'messages': 675, 'model_calls': 0, 'seconds': 111.7453830242157}
+conv 6: 150 questions to retrieve
+  ingested {'speaker': 'James', 'messages': 689, 'model_calls': 0, 'seconds': 112.57335901260376}
+WARNING: cross-role turn-hash collision -- hash cd1d02267279 was extracted as role='user', now seen again as role='assistant'; text: 'Take care, bye!'
+WARNING: cross-role turn-hash collision -- hash cd1d02267279 was extracted as role='user', now seen again as role='assistant'; text: 'Take care, bye!'
+  ingested {'speaker': 'John', 'messages': 689, 'model_calls': 0, 'seconds': 115.84626483917236}
+WARNING: cross-role turn-hash collision -- hash cd1d02267279 was extracted as role='user', now seen again as role='assistant'; text: 'Take care, bye!'
+conv 7: 191 questions to retrieve
+  ingested {'speaker': 'Deborah', 'messages': 681, 'model_calls': 0, 'seconds': 101.96783709526062}
+WARNING: cross-role turn-hash collision -- hash 87966062f395 was extracted as role='user', now seen again as role='assistant'; text: 'Have a great day!'
+WARNING: cross-role turn-hash collision -- hash 4cf24554ad7d was extracted as role='user', now seen again as role='assistant'; text: 'See you!'
+WARNING: cross-role turn-hash collision -- hash 44981fc6bac7 was extracted as role='user', now seen again as role='assistant'; text: 'Take care!'
+WARNING: cross-role turn-hash collision -- hash 4cf24554ad7d was extracted as role='user', now seen again as role='assistant'; text: 'See you!'
+  ingested {'speaker': 'Jolene', 'messages': 681, 'model_calls': 0, 'seconds': 107.4998209476471}
+WARNING: cross-role turn-hash collision -- hash 44981fc6bac7 was extracted as role='user', now seen again as role='assistant'; text: 'Take care!'
+WARNING: cross-role turn-hash collision -- hash 4cf24554ad7d was extracted as role='user', now seen again as role='assistant'; text: 'See you!'
+WARNING: cross-role turn-hash collision -- hash 87966062f395 was extracted as role='user', now seen again as role='assistant'; text: 'Have a great day!'
+conv 8: 156 questions to retrieve
+  ingested {'speaker': 'Evan', 'messages': 509, 'model_calls': 0, 'seconds': 91.43993091583252}
+  ingested {'speaker': 'Sam', 'messages': 509, 'model_calls': 0, 'seconds': 94.8967432975769}
+conv 9: 158 questions to retrieve
+  ingested {'speaker': 'Calvin', 'messages': 568, 'model_calls': 0, 'seconds': 123.87521600723267}
+  ingested {'speaker': 'Dave', 'messages': 568, 'model_calls': 0, 'seconds': 114.79714107513428}
