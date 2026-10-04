@@ -1,4 +1,4 @@
 {
- "_note": "Audit of judge errors on the multi-project coding set; filled by an agent.",
+ "_note": "Audit of judge errors on the multi-project coding set (held out), answer view, by an agent, 2026-10-05, results_proj2_blind. No judge errors (sourcedrecall 0 flags; rag 3 genuine). Class-f misses: sourcedrecall 5 (4 genuine, 1 scoring), rag 6 (4 genuine, 2 scoring), all f1.",
  "overrides": []
 }
