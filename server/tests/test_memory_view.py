@@ -335,3 +335,40 @@ def test_a_forgotten_sentence_is_not_quoted_inside_a_message(pm):
     pm.profile_forget(hit["id"])
     block = pm.profile_context("Where do I work?")["block"]
     assert "Acme" in block and "penicillin" not in block
+
+
+# ---- messages-first evidence (2026-10-04, RG_EVIDENCE=messages) -----------
+
+def test_messages_first_quotes_the_user_with_the_parsers_notes(pm, monkeypatch):
+    monkeypatch.setenv("RG_EVIDENCE", "messages")
+    pm.profile_ingest([U("I live in Fitzroy, above a bakery.")], conversation_id="a",
+                      owner_name="Dana Cole", date="2026-01-05")
+    pm.profile_ingest([U("Big news, I moved to Brunswick last weekend.")],
+                      conversation_id="b", owner_name="Dana Cole", date="2026-03-01")
+    block = pm.profile_context("Where do I live?")["block"]
+    lines = [l for l in block.splitlines() if l.startswith("- ")]
+    assert lines and "Fitzroy" in lines[0] and "Brunswick" in lines[-1]   # oldest first
+    assert '"I live in Fitzroy, above a bakery."' in lines[0]
+    assert "(no longer true:" in lines[0]
+    assert "no longer true" not in lines[-1]
+
+
+def test_messages_first_says_when_nothing_matches(pm, monkeypatch):
+    monkeypatch.setenv("RG_EVIDENCE", "messages")
+    pm.profile_ingest([U("I live in Fitzroy, above a bakery.")], conversation_id="a",
+                      owner_name="Dana Cole", date="2026-01-05")
+    block = pm.profile_context("What is my blood type?")["block"]
+    assert "Nothing stored matches" in block or "Fitzroy" not in block
+
+
+def test_messages_first_keeps_other_projects_out(pm, monkeypatch, tmp_path):
+    monkeypatch.setenv("RG_EVIDENCE", "messages")
+    a, b = tmp_path / "proj_a", tmp_path / "proj_b"
+    a.mkdir(); b.mkdir()
+    pm.profile_ingest([U("The billing service is written in Go and deployed with Helm.")],
+                      conversation_id="a", owner_name="Dana Cole", date="2026-01-05",
+                      scope=str(a))
+    block = pm.profile_context("What language is the billing service in?", scope=str(b))["block"]
+    assert "Go and deployed" not in block
+    block = pm.profile_context("What language is the billing service in?", scope=str(a))["block"]
+    assert "Go and deployed" in block

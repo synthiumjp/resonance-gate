@@ -545,7 +545,7 @@ def _messages_for(query, k=3):
         if cached is None or cached[0] is not tr:
             denied, denied_said = _denied_lists()
             docs = []
-            for conv in tr.values():
+            for cid, conv in tr.items():
                 turns = conv["turns"]
                 for i, t in enumerate(turns):
                     if t["role"] != "human" or "[MEMORY" in t["text"]:
@@ -558,7 +558,8 @@ def _messages_for(query, k=3):
                     prev = (turns[i - 1]["text"] if i and turns[i - 1]["role"]
                             == "assistant" else None)
                     docs.append({"attr": "", "value": text, "text": text,
-                                 "date": conv["date"], "asked": prev})
+                                 "date": conv["date"], "asked": prev,
+                                 "conv": cid})
             cached = (tr, _RV3.IndexV3(None, facts=docs) if docs else None)
             _state["msg_index"] = cached
     if cached[1] is None:
