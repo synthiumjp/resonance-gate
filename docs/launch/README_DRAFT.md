@@ -55,6 +55,15 @@ For coding assistants, each test scenario was stored after a background of
 | a fact from another project offered as true of this one | 0/13 | 2/13 |
 | a preference said in another project, found when asked here | 4/8 | 4/8 |
 
+About these numbers: every answer was read and judged by a local model
+(Qwen3-14B), the same for every system, so the comparison inside each table
+is fair, but the scores are not comparable with published LoCoMo results,
+which use GPT-4-class models and other protocols. The judge agreed with hand
+labels on 29 of 30 checks. The false-memory and coding sets are synthetic and
+small (44-100 scenarios each); the held-out ones were written before any
+system was run. Mem0 used the same local model for its own calls. To rerun
+everything with another model, see `bench/REPRODUCE.md`.
+
 Where it is weaker: questions that need several facts from different
 conversations put together (LoCoMo multi-hop, 48.5% against 61.9%). Mem0 makes a model call for
 every exchange and merges facts as it goes; sourcedrecall does not.

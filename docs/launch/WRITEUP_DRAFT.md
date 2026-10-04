@@ -126,6 +126,11 @@ questions answered; plain retrieval 0/30 and 23/23; Mem0 2/30 and 23/23.
   where Mem0's model calls pay off: 61.9% against our 48.5%.
 - English only. The parser's rules are English.
 - The install is about 1.6 GB, mostly PyTorch for the parser.
+- We did not run GPT-4-class readers or judges (no paid API was used).
+  With a stronger reader every system would likely score higher; we expect
+  the order to hold, since our misses were mostly the reader stopping at
+  the first item of a list, but that is untested. Anyone with an API key
+  can rerun it from bench/REPRODUCE.md.
 - All judging is by a local 14B model. Its agreement with hand labels is
   29/30 on our items, but LoCoMo scores from other papers used other
   judges and readers and are not comparable to these.
