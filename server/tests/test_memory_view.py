@@ -224,7 +224,8 @@ def test_hypotheticals_and_other_people_are_not_quoted(pm, said, q):
 
 # ---- candidates when nothing is confirmed (2026-10-03) ---------------------
 
-def test_an_unconfirmed_question_gets_labelled_candidates(pm):
+def test_an_unconfirmed_question_gets_labelled_candidates(pm, monkeypatch):
+    monkeypatch.setenv("RG_EVIDENCE", "facts")   # candidates are the fact block's
     pm.profile_ingest([U("I'm in my second year of a law degree at Monash.")],
                       conversation_id="a", owner_name="Jordan Pike", date="2026-03-02")
     r = pm.profile_recall("Which university do I attend?")
@@ -353,10 +354,18 @@ def test_messages_first_quotes_the_user_with_the_parsers_notes(pm, monkeypatch):
     assert "no longer true" not in lines[-1]
 
 
-def test_messages_first_says_when_nothing_matches(pm, monkeypatch):
+def test_messages_first_says_when_nothing_is_stored(pm, monkeypatch):
+    """With messages first, the closest messages are shown and the reader
+    decides (blind v3: 12/12 never-mentioned questions refused); an empty
+    store says so, and RG_MSG_GATE=1 restores the parser's gate."""
     monkeypatch.setenv("RG_EVIDENCE", "messages")
+    pm.profile_ingest([A("Hello! How can I help today?")], conversation_id="z",
+                      owner_name="Dana Cole", date="2026-01-01")
+    assert "Nothing stored matches" in pm.profile_context("What is my blood type?")["block"]
     pm.profile_ingest([U("I live in Fitzroy, above a bakery.")], conversation_id="a",
                       owner_name="Dana Cole", date="2026-01-05")
+    monkeypatch.setenv("RG_MSG_GATE", "1")
+    pm._state["msg_index"] = None
     block = pm.profile_context("What is my blood type?")["block"]
     assert "Nothing stored matches" in block or "Fitzroy" not in block
 
@@ -372,3 +381,14 @@ def test_messages_first_keeps_other_projects_out(pm, monkeypatch, tmp_path):
     assert "Go and deployed" not in block
     block = pm.profile_context("What language is the billing service in?", scope=str(a))["block"]
     assert "Go and deployed" in block
+
+
+def test_forgetting_the_sentence_drops_its_link(pm, tmp_path):
+    pm.profile_ingest([U("My hometown is Ballarat.")], conversation_id="a",
+                      owner_name="Dana Cole", date="2026-03-02")
+    import json, os
+    w = json.load(open(os.path.join(str(tmp_path), "world.json")))
+    assert w.get("=hometown") == "Ballarat"
+    pm._forget_names("My hometown is Ballarat.")
+    w = json.load(open(os.path.join(str(tmp_path), "world.json")))
+    assert "=hometown" not in w

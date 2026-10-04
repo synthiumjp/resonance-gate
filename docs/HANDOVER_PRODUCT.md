@@ -1,9 +1,9 @@
 # Handover: sourcedrecall (product track)
 
 Last updated 2026-10-04. Branch `product-p2`, repo github.com/synthiumjp/resonance-gate.
-Latest release tag: `sourcedrecall-v0.4.6` (dated quotes of the user's whole
-messages, message retrieval, the installer finds Homebrew Python, breed/make
-answers). Full suite on the Mac: 1047 passed, 3 skipped.
+Latest release tag: `sourcedrecall-v0.5.0`: messages-first evidence (the user's
+own dated messages, chosen and labelled by the parser). Full suite on the
+Mac: 1054 passed, 3 skipped.
 
 ## What it is
 
@@ -106,12 +106,12 @@ and real-conversation text before pushing (the repo is public).
 
 ## Open items, in order
 
-1. Messages-first evidence (RG_EVIDENCE=messages, notebook e295-e296) beats
-   0.4.6 and RAG on the blind change-of-state set with a 14B and a 4B
-   reader, ties RAG on blind v3, and beats RAG on LoCoMo dev (63.9 vs
-   62.2%). LoCoMo test (convs 2-9) running on the Mac
-   (`~/jpwork/confirm.sh`, results/test_mf). If it holds: make it the
-   default, update the tests that pin the fact-block format, release 0.5.0.
+1. Numbers to beat (notebook e297): LoCoMo test 61.7% (Mem0 64.6, RAG
+   56.6); blind v4 old state 2/44, new 42/44 (14B reader); blind v3 0/30
+   false memory, 23/23 controls. The gap to Mem0 is multi-hop (41.8 vs
+   61.9%). Next ideas: more parser links (relations other than apposition),
+   grouping a list's items in the notes, and an audit of the answer-view
+   flags on v3/v4 by an agent (unaudited so far).
 2. Changes of state are the main weakness (blind v4: 33/44 stale facts
    returned as current; the new state is missing in 16/44, most likely never
    extracted). Work on a fresh readable dev set, not on v4 (notebook e291).

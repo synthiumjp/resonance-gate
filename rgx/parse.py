@@ -1066,6 +1066,21 @@ def _collect_world(s, head, subj, is_self, sp, out):
                 out.setdefault(sib.lemma.lower(), _np_text(s, sib))
 
 
+def _link(s, rel, name, out):
+    """2026-10-04 (LoCoMo dev, multi-hop): "my home country, Sweden" links
+    the phrase "home country" to "Sweden", stored in the world map under
+    "=home country". A later "since I moved from my home country" can then
+    be read with the name (memory_api adds the note)."""
+    mods = sorted([c for c in s.children(rel, ("compound", "amod"))
+                   if c.id < rel.id], key=lambda c: c.id)
+    phrase = " ".join([c.text for c in mods] + [rel.text]).lower()
+    full = sorted([name] + [c for c in s.children(name, ("flat", "compound"))],
+                  key=lambda c: c.id)
+    value = " ".join(c.text for c in full)
+    if phrase and value[:1].isupper():
+        out["=" + phrase] = value
+
+
 def _collect_names(s, allow, out):
     """2026-10-02 (false-memory bench): a name the owner introduced with a
     relation -- "My dog Biscuit", "my girlfriend Elise" -- joins their world,
@@ -1083,6 +1098,16 @@ def _collect_names(s, allow, out):
         if (w.deprel in ("appos", "flat") and p is not None
                 and _poss(s, p, allow) is not None):
             out.setdefault(w.lemma.lower(), w.text)
+            if w.deprel == "appos" and p.upos == "NOUN":
+                _link(s, p, w, out)
+        # "My hometown is Ballarat": the name is the predicate of a copula
+        # whose subject is the owner's relation
+        if (w.upos == "PROPN" and w.deprel == "root"
+                and any(c.deprel == "cop" for c in s.children(w))):
+            subj = next(iter(s.children(w, ("nsubj",))), None)
+            if (subj is not None and subj.upos == "NOUN"
+                    and _poss(s, subj, allow) is not None):
+                _link(s, subj, w, out)
         # "We adopted a beagle called Waffles"
         if (w.deprel in ("xcomp", "obj") and p is not None
                 and (p.lemma or "").lower() in ("call", "name")

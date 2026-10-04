@@ -68,6 +68,14 @@ _RULES = ("[MEMORY RULES] Each line is something the user told you: when, "
           "unless the user asks in this conversation.")
 
 
+# a question asking for a set of things: "What activities does X partake
+# in?", "What books has X read?", "What are my hobbies?"
+_LIST_Q = re.compile(
+    r"^\W*(?:what|which)\s+(?:\w+\s+){0,2}?[a-z]{3,}s\s+(?:do|does|did|has|have|"
+    r"had|are|were|is)\b|^\W*what\s+are\s+.*\b[a-z]{3,}(?<!ss)s\W*$|"
+    r"\b(?:list|name)\s+(?:all|the|some|every)\b", re.I)
+
+
 # the rules for messages-first evidence (RG_EVIDENCE=messages)
 _RULES_MSG = ("[MEMORY RULES] Each line is something the user said, word for "
               "word, with the date; (in reply to \"...\") is the question they "
@@ -75,7 +83,8 @@ _RULES_MSG = ("[MEMORY RULES] Each line is something the user said, word for "
               "update an earlier one. Notes in brackets are the memory's own: "
               "(no longer true: ...) was replaced by something said later; "
               "(said in passing: ...) was true when said, not necessarily now; "
-              "(may have changed since: ...) a later line seems to update it. "
+              "(may have changed since: ...) a later line seems to update it; "
+              "(home country: Sweden) is a name the user gave that phrase. "
               "Anything about the user not listed here is UNKNOWN: say you "
               "don't know rather than guessing. Memory is background, not "
               "permission: don't act on it (run commands, change files, "
@@ -1817,7 +1826,11 @@ class Memory:
         def visible(m):
             return not (self.scope and self.conv_scopes and
                         self.conv_scopes.get(m.get("conv")) not in (None, self.scope))
-        hits = [m for m in self.messages_for(query, k=max_facts) if visible(m)]
+        # 2026-10-04 (LoCoMo dev, multi-hop): a question asking for a set
+        # ("What activities does Melanie partake in?") is answered across
+        # many conversations, so it reads more of them
+        k = max(max_facts * 2, 10) if _LIST_Q.search(query or "") else max_facts
+        hits = [m for m in self.messages_for(query, k=k) if visible(m)]
         # Two routes to a message: the parser's facts (their source
         # messages, in rank order) and the message index. The parser's
         # gates decide whether anything is known; the floor (tuned on
@@ -1866,13 +1879,21 @@ class Memory:
                     continue
                 seen.add(key)
                 msgs.append(m)
-            msgs = self._with_replacements(msgs[:max_facts])
+            msgs = self._with_replacements(msgs[:k])
         if not msgs:
             return ("[MEMORY] Nothing stored matches this topic. The user's "
                     "details on this are UNKNOWN: say so rather than "
                     "guessing.\n" + _RULES_MSG)
         msgs.sort(key=lambda m: str(m.get("date") or ""))
         notes = self._message_notes(msgs)
+        # a phrase the user linked to a name ("my home country, Sweden"),
+        # used without the name: the name goes in the note
+        for m, n in zip(msgs, notes):
+            low = m["text"].lower()
+            for phrase, name in (getattr(self, "links", None) or {}).items():
+                if (re.search(rf"\b{re.escape(phrase)}\b", low)
+                        and name.lower() not in low):
+                    n.append(f"{phrase}: {name}")
         head = "[MEMORY: what the user has told you about this]"
         if self.owner:
             head += f" {self.owner} is the user you are talking to."
@@ -1924,8 +1945,10 @@ class Memory:
                 return ("[MEMORY] Nothing is stored about the user yet. Treat "
                         "every detail about them as UNKNOWN: say so rather "
                         "than guessing.\n" + _RULES)
-        elif (os.environ.get("RG_EVIDENCE") == "messages"
+        elif (os.environ.get("RG_EVIDENCE", "messages") == "messages"
               and getattr(self, "messages_for", None) is not None):
+            # 2026-10-04: messages-first is the default (notebook e295-e296);
+            # RG_EVIDENCE=facts gives the fact block of 0.4.6
             return self._messages_block(query, max_facts)
         else:
             r = self._recall_for_context(query)

@@ -397,6 +397,7 @@ def test_retrieved_messages_join_the_block_within_its_budget(monkeypatch):
     """2026-10-04 (LoCoMo dev): the user's own messages that match best are
     added for answers no fact holds -- above the verbatim floor, not when
     already shown through a fact, and in place of the lowest-ranked facts."""
+    monkeypatch.setenv("RG_EVIDENCE", "facts")   # the fact block's merge
     m = Memory(WireGraph.from_facts([], n_convs=1))
     m.conflicts = lambda: []
     facts = [{"text": f"Sam Lee fact {i}", "said": f"Fact {i}.",
@@ -414,3 +415,27 @@ def test_retrieved_messages_join_the_block_within_its_budget(monkeypatch):
     assert sweden and "(their words)" in sweden[0] and 'in reply to "Where is she from?"' in sweden[0]
     assert not any("unrelated" in l for l in lines)
     assert sum("Fact 0." in l for l in lines) == 1
+
+
+def test_messages_block_reads_wider_for_lists_and_notes_links(monkeypatch):
+    """2026-10-04 (LoCoMo dev, multi-hop)."""
+    monkeypatch.setenv("RG_EVIDENCE", "messages")
+    m = Memory(WireGraph.from_facts([], n_convs=1))
+    m.conflicts = lambda: []
+    asked = []
+    msgs = [{"text": f"I tried thing {i} this year.", "date": f"2026-01-{i + 10}",
+             "score": 1.0, "conv": None} for i in range(12)]
+    msgs.append({"text": "It's been four years since I moved from my home country.",
+                 "date": "2026-02-01", "score": 1.0, "conv": None})
+    def mf(q, k=3):
+        asked.append(k)
+        return msgs[-1:] if "move" in q else msgs[:k]
+    m.messages_for = mf
+    m.links = {"home country": "Sweden"}
+    monkeypatch.setattr(m, "_recall_for_context", lambda q: {"found": False})
+    lines = [l for l in m.context_block("What activities does Sam partake in?", max_facts=5)
+             .splitlines() if l.startswith("- ")]
+    assert asked[-1] >= 10 and len(lines) >= 10
+    block = m.context_block("Where did Sam move from?", max_facts=5)
+    line = next(l for l in block.splitlines() if "home country" in l)
+    assert "home country: Sweden" in line

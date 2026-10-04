@@ -529,6 +529,17 @@ def _denied_lists():
     return denied, denied_said
 
 
+def _links():
+    """{"home country": "Sweden"} -- the phrases the user linked to a name
+    (rgx._link), from world.json."""
+    try:
+        with open(os.path.join(_data_dir(), "world.json"), encoding="utf-8") as fh:
+            w = json.load(fh)
+    except (OSError, ValueError):
+        return {}
+    return {k[1:]: v for k, v in w.items() if k.startswith("=") and v}
+
+
 def _messages_for(query, k=3):
     """2026-10-04: the user's own messages that best match the question,
     ranked by the same models as facts (retrieve_v3) -- for answers the
@@ -582,6 +593,7 @@ def profile_context(query=None, max_facts=None, scope=None):
             mem.message_of = _message_of
         if os.environ.get("RG_MESSAGE_RECALL", "1") != "0":
             mem.messages_for = _messages_for
+        mem.links = _links()
         block = mem.context_block(query, max_facts)
     return {"block": block}
 
@@ -957,7 +969,10 @@ def _forget_names(sentence):
     import re as _re
     words = {w.lower() for w in _re.findall(r"[A-Za-z]+", sentence)}
     kept = {k: v for k, v in world.items()
-            if not (k in words and str(v)[:1].isupper())}
+            if not (k in words and str(v)[:1].isupper())
+            # a link ("=home country": "Sweden") goes with the sentence
+            # that named it
+            and not (k.startswith("=") and set(str(v).lower().split()) <= words)}
     if len(kept) != len(world):
         tmp = path + ".tmp"
         with open(tmp, "w", encoding="utf-8") as fh:

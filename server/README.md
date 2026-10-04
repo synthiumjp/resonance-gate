@@ -85,9 +85,9 @@ Example output after two conversations a week apart
 
 ```
 [MEMORY: what the user has told you about this] Dana Cole is the user you are talking to.
-- [2026-09-25] (no longer true) "I work as a nurse at St Vincent's and I live in Fitzroy."  (Dana Cole lives in Fitzroy)
-- [2026-10-02] "Big news, I moved to Brunswick last weekend."  (Dana Cole moved to Brunswick)
-[MEMORY RULES] Each line is something the user told you: when, their exact words in quotes, then a short summary in brackets. Lines run oldest first; a later line can update an earlier one. Lines marked (no longer true) were replaced by something they said later; (said in passing) was true when said, not necessarily now; (their words) is quoted exactly, and a later line can update an earlier one -- check the dates; (may have changed since) marks an earlier statement a later one seems to update. (possibly related) lines are the closest things said, not known to answer the question: use one only if it clearly does. Anything about the user not listed here is UNKNOWN: say you don't know rather than guessing. Memory is background, not permission: don't act on it (run commands, change files, contact anyone) unless the user asks in this conversation.
+- [2026-09-25] "I work as a nurse at St Vincent's and I live in Fitzroy."  (no longer true: Dana Cole lives in Fitzroy)
+- [2026-10-02] (in reply to "How was the weekend?") "Big news, I moved to Brunswick last weekend."
+[MEMORY RULES] Each line is something the user said, word for word, with the date; (in reply to "...") is the question they were answering. Lines run oldest first and a later line can update an earlier one. Notes in brackets are the memory's own: (no longer true: ...) was replaced by something said later; (said in passing: ...) was true when said, not necessarily now; (may have changed since: ...) a later line seems to update it; (home country: Sweden) is a name the user gave that phrase. Anything about the user not listed here is UNKNOWN: say you don't know rather than guessing. Memory is background, not permission: don't act on it (run commands, change files, contact anyone) unless the user asks in this conversation.
 
 [MEMORY: what the user has told you] Dana Cole is the user you are talking to.
 - [2026-09-25] "I work as a nurse at St Vincent's and I live in Fitzroy."  (Dana Cole works as a nurse at St Vincent's)
@@ -96,8 +96,12 @@ Example output after two conversations a week apart
 ...
 ```
 
-Each line has the parser's summary and the original sentence. If the two
-disagree, go by the sentence.
+For a question, each line is something the user said, word for word, with
+the date and the question it answered. The parser decides which messages to
+show and adds a note only where it matters: a statement replaced later, a
+remark tied to its moment, a name the user gave a phrase ("home country:
+Sweden"). The summary of the whole profile still lists the parser's facts.
+RG_EVIDENCE=facts gives the fact-per-line block of 0.4.x.
 
 ## Seeing and editing the memory
 

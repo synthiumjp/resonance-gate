@@ -190,7 +190,9 @@ def test_a_move_makes_the_old_address_no_longer_true(pm):
     assert "Brunswick" in ranked[0]["text"] and ranked[0]["current"] is True
     fitz = [f for f in ranked if "Fitzroy" in f["text"]]
     assert fitz and fitz[0]["current"] is False
-    assert "(no longer true)" in pm.profile_context("where do I live")["block"]
+    block = pm.profile_context("where do I live")["block"]
+    fitz_line = next(l for l in block.splitlines() if "Fitzroy" in l)
+    assert "no longer true" in fitz_line
 
 
 def test_an_older_conversation_imported_later_stays_older(pm):

@@ -14962,3 +14962,22 @@ and how to run everything).
 
 - LoCoMo test (convs 2-9) running for 01a88f5 (gate on; LoCoMo questions
   are nearly always about something said, so the gate rarely acts there).
+
+## Entry 297 — 2026-10-04 (0.5.0: messages first; LoCoMo test 61.7%)
+
+- LoCoMo test (convs 2-9, 1307 questions, run once) with messages-first at
+  01a88f5: sourcedrecall 61.7%, Mem0 2.2.1 64.6%, RAG 56.6%. The fact view
+  at 3c6b0a7 had scored 33.4%. Temporal 55.8% (Mem0 37.2, RAG 49.6),
+  single-hop 73.5% (77.9, 66.9), multi-hop 41.8% (61.9, 39.3). No model
+  calls at ingest (Mem0 941, about six hours).
+- Multi-hop misses on dev were lists gathered across conversations ("What
+  activities does Melanie partake in?" -- two of four) and links between
+  statements ("moved from my home country" + "my home country, Sweden").
+  Two deterministic fixes: a list question reads at least 10 messages; the
+  parser keeps phrases the user linked to a name (apposition or copula,
+  stored as "=home country" in world.json, removed with the sentence on
+  forget) and the block notes the name where a message uses the phrase.
+  LoCoMo dev 63.9 -> 66.1% (RAG 62.2%), multi-hop 37.2 -> 41.9% (+4 -2),
+  temporal 69.8 -> 74.6%; this run also has the gate off.
+- 0.5.0 makes messages-first the default (RG_EVIDENCE=facts for the 0.4.x
+  block). Mac: suite 1054 passed; dogfood, refusals, scale test unchanged.

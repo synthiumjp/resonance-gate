@@ -1340,3 +1340,15 @@ def test_reported_speech_through_a_chain_stays_reported(checked):
                                   "They made my sister a manager."])
 def test_made_me_is_an_employer_only_with_a_role(ex, turn):
     assert not any("was made" in p for p in texts(ex, turn))
+
+
+@pytest.mark.parametrize("turn,phrase,name", [
+    # 2026-10-04 (LoCoMo dev, multi-hop): a phrase the owner linked to a name
+    ("This necklace is a gift from my grandma in my home country, Sweden.",
+     "home country", "Sweden"),
+    ("My hometown is Ballarat.", "hometown", "Ballarat"),
+])
+def test_a_phrase_linked_to_a_name_is_kept(ex, turn, phrase, name):
+    ex.reset_world()
+    ex.extract_turn(turn, role="user")
+    assert ex._world.get("=" + phrase) == name
