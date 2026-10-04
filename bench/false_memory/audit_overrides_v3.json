@@ -1,5 +1,5 @@
 {
- "_note": "Manual adjudication for cases_v3, same mechanism as audit_overrides.json. Read: every flagged line (all systems) and every unflagged line of Mem0 and sourcedrecall, classes a-e. Only clear judge false positives overridden (4); no false negatives found. Kept as judged, borderline: stale-scenario lines that describe a past event of the old state (sourcedrecall and Mem0 b05 about the cat that later died; the line is still an unmarked old-state fact).",
+ "_note": "Manual adjudication for cases_v3, same mechanism as audit_overrides.json. Read: every flagged line (all systems) and every unflagged line of Mem0 and sourcedrecall, classes a-e. Only clear judge false positives overridden (4); no false negatives found. Kept as judged, borderline: stale-scenario lines that describe a past event of the old state (sourcedrecall and Mem0 b05 about the cat that later died; the line is still an unmarked old-state fact). Answer view audited 2026-10-04: no overrides added; total stays 4.",
  "overrides": [
   {
    "system": "sourcedrecall",

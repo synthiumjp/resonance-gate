@@ -14981,3 +14981,21 @@ and how to run everything).
   temporal 69.8 -> 74.6%; this run also has the gate off.
 - 0.5.0 makes messages-first the default (RG_EVIDENCE=facts for the 0.4.x
   block). Mac: suite 1054 passed; dogfood, refusals, scale test unchanged.
+
+## Entry 298 — 2026-10-04 (a margin on messages: dropped; answer-view audit)
+
+- A fresh install showed every question in a three-message store returning
+  all three messages ("What is my sister called?" included). Tried: drop
+  index hits more than 5 below the best, only the best parser candidate
+  when nothing is confirmed, and only one message when nothing scores well.
+  Worse everywhere: paraphrase 61 -> 57/64; v1 false memory 2 -> 4/60 (14B)
+  and 1 -> 3/60 (4B); LoCoMo dev 66.1 -> 64.8%. The messages it drops are
+  often the newer statements -- the same trap as RECALL_MARGIN in e290.
+  Reverted; in tiny stores the extra lines cost a few tokens and the reader
+  handles them.
+- Answer-view audit of the blind sets by an agent (counts only): v4 14B
+  sourcedrecall 2/2 flags genuine, RAG 7/7 genuine; v4 4B sourcedrecall 1 of
+  3 flags a judge error (now 2/44), and 3 "missing new state" answers gave
+  it in other words; v3 sourcedrecall and RAG 0 flags, Mem0 2 genuine.
+  RAG's 4B answers on v4 being audited for parity.
+- Launch drafts in docs/launch/ (README_DRAFT.md, WRITEUP_DRAFT.md).

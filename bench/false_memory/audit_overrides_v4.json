@@ -1,5 +1,5 @@
 {
- "_note": "Audited by an agent on 2026-10-03. Read: every sourcedrecall class-b flagged line (lines view) with its context-view rendering, the scenario conversations and propositions, and every RAG class-b flagged line. Only clear judge errors overridden (6 total: sourcedrecall 3, rag 3); borderline cases left as judged. rag s02 and rag s43 remove one bad line each, the probe stays false memory through another line.",
+ "_note": "Audited by an agent on 2026-10-03. Read: every sourcedrecall class-b flagged line (lines view) with its context-view rendering, the scenario conversations and propositions, and every RAG class-b flagged line. Only clear judge errors overridden (6 total: sourcedrecall 3, rag 3); borderline cases left as judged. rag s02 and rag s43 remove one bad line each, the probe stays false memory through another line. Answer view audited 2026-10-04: 1 override added (sourcedrecall 1); total now 7 (sourcedrecall 4, rag 3).",
  "overrides": [
   {
    "system": "sourcedrecall",
@@ -42,6 +42,13 @@
    "fm": false,
    "reason": "line states using the tram, does not assert owning the Corolla",
    "line": "Jordan Pike is using the tram [they said: \"Sold the Corolla on Saturday, I'm going car-free and using the tram.\"]"
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "s35",
+   "fm": false,
+   "reason": "answer gives the later state",
+   "line": "The user has a daughter who is two and a half, and now there is a baby, making the total number of children two."
   }
  ]
 }
