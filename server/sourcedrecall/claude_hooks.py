@@ -212,12 +212,32 @@ def saved_notice(new, memory_file=None, show=3):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="sourcedrecall-hook")
-    ap.add_argument("event", choices=["session-end", "session-start", "_worker"])
+    ap.add_argument("event", choices=["session-end", "session-start", "_worker",
+                                      "_pending"])
     ap.add_argument("job", nargs="?")
     ap.add_argument("--owner", default=os.environ.get("SOURCEDRECALL_OWNER"))
     ap.add_argument("--sync", action="store_true",
                     help="session-end: ingest in this process (for testing)")
     a = ap.parse_args(argv)
+    if a.event == "_pending":
+        # sessions that ended before the install finished (or before a name
+        # was set): their hook events, one per line, stored now
+        try:
+            lines = [l for l in open(a.job, encoding="utf-8") if l.strip()]
+        except OSError:
+            return 0
+        for line in lines:
+            try:
+                ev = json.loads(line)
+            except ValueError:
+                continue
+            path, sid = ev.get("transcript_path"), ev.get("session_id")
+            if not path or not sid or not os.path.exists(path):
+                continue
+            out = ingest_session(path, sid, a.owner, ev.get("cwd"))
+            print(json.dumps({"session": sid, "queued": True, **out}), flush=True)
+        os.unlink(a.job)
+        return 0
     if a.event == "_worker":
         job = json.load(open(a.job))
         try:

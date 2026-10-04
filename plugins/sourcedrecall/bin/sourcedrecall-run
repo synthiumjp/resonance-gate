@@ -112,13 +112,26 @@ case "${1:-}" in
     event="${2:-}"
     if ! installed; then
       if [ "$event" = "session-start" ] && start_background_install; then
-        printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"[sourcedrecall] Installing local memory (first run, about 5 minutes). Memory will be available from the next session."}}'
+        printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"[sourcedrecall] Installing local memory (first run, about 5 minutes). This session will be remembered once the install finishes."}}'
+      fi
+      if [ "$event" = "session-end" ]; then
+        # 2026-10-04: a session that ends before the install has finished is
+        # queued (its transcript stays on disk) and stored afterwards; the
+        # first session used to be lost
+        { tr -d '\n' ; echo; } >> "$DATA/pending.jsonl"
       fi
       exit 0
     fi
     if [ -z "$OWNER" ]; then
       echo "sourcedrecall: set your name with /plugin configure sourcedrecall" >&2
+      [ "$event" = "session-end" ] && { tr -d '\n' ; echo; } >> "$DATA/pending.jsonl"
       exit 0
+    fi
+    if [ "$event" = "session-start" ] && [ -s "$DATA/pending.jsonl" ]; then
+      queued="$DATA/pending-$$.jsonl"
+      mv "$DATA/pending.jsonl" "$queued" 2>/dev/null &&
+        nohup "$VENV/bin/sourcedrecall-hook" _pending "$queued" --owner "$OWNER" \
+          </dev/null >>"$DATA/pending.log" 2>&1 &
     fi
     exec "$VENV/bin/sourcedrecall-hook" "$event" --owner "$OWNER"
     ;;

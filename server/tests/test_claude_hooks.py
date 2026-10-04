@@ -142,3 +142,19 @@ def test_a_long_list_is_cut_short():
     new = [{"said": f"I like thing {i}."} for i in range(5)]
     msg = H.saved_notice(new)
     assert "and 2 more" in msg and "thing 3" not in msg
+
+
+def test_sessions_queued_during_the_install_are_stored_afterwards(home):
+    """2026-10-04: the first session ended before the install finished and
+    was lost; the launcher now queues its hook event and the next session
+    stores it."""
+    t = _transcript(home / "t.jsonl")
+    q = home / "pending.jsonl"
+    q.write_text(json.dumps({"transcript_path": t, "session_id": "first"}) + "\n"
+                 + json.dumps({"transcript_path": str(home / "gone.jsonl"),
+                               "session_id": "missing"}) + "\nnot json\n")
+    assert H.main(["_pending", str(q), "--owner", "Dana Cole"]) == 0
+    assert not q.exists()
+    import sourcedrecall.profile_memory as pm
+    r = pm.profile_recall("Where do I live?")
+    assert "Fitzroy" in r["ranked"][0]["text"]
