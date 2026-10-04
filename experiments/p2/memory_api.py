@@ -1829,15 +1829,32 @@ class Memory:
         via = []
         mo = getattr(self, "message_of", None)
         for f in facts:
+            got = None
             for rc in f.get("receipts") or []:
                 cid = rc.get("conversation_id")
                 msg, prev = mo(cid, f.get("said")) if mo else (None, None)
                 if msg:
-                    via.append({"text": msg, "date": rc.get("date"), "asked": prev,
-                                "conv": cid, "score": None})
+                    got = {"text": msg, "date": rc.get("date"), "asked": prev,
+                           "conv": cid, "score": None}
                     break
-        known = bool(via) or (hits and max(m.get("score", 0.0) for m in hits)
-                              >= VERBATIM_FLOOR)
+            if got is None and (f.get("said") or "").strip():
+                # a quote or candidate whose message cannot be located (the
+                # verbatim fallback keeps sentences, not conversation ids):
+                # its own sentence stands in (paraphrase dev set, 8 refusals)
+                rc = (f.get("receipts") or [{}])[0]
+                got = {"text": f["said"].strip(), "date": rc.get("date"),
+                       "asked": None, "conv": rc.get("conversation_id"), "score": None}
+            if got:
+                via.append(got)
+        # 2026-10-04: any message found is shown and the reader decides.
+        # Gating on the parser (RG_MSG_GATE=1) refused paraphrased questions
+        # that were answered in the messages (paraphrase dev 42 -> 61/64 with
+        # it off, RAG 64) while never-mentioned questions stayed refused
+        # 20/20 by both a 14B and a 4B reader (v1 set).
+        known = bool(via or hits)
+        if os.environ.get("RG_MSG_GATE") == "1":
+            known = bool(via) or (hits and max(m.get("score", 0.0) for m in hits)
+                                  >= VERBATIM_FLOOR)
         msgs, seen = [], set()
         if known:
             # the two routes take turns, so neither fills every slot
