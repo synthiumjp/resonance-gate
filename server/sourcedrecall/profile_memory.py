@@ -410,10 +410,21 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
         _reload_locked()
     _export_quietly()       # MEMORY.md reflects every write
 
+    # ---- (c2) optional model-written notes (notes.py; off by default) ----
+    model_calls = 0
+    from sourcedrecall import notes as _notes
+    if _notes.enabled() and owner and n_turns > n_skipped:
+        try:
+            written = _notes.write_notes(owner, created_at[:10], turns)
+            model_calls = 1
+            _save_notes(conv_id, created_at[:10], written)
+        except Exception as e:      # a model that is down must not lose the session
+            print(f"sourcedrecall: notes not written ({e})", file=sys.stderr)
+
     # ---- (d) receipts ----
     return {"conversation_id": conv_id, "turns": n_turns, "facts": n_facts,
             "hearsay": n_hearsay, "skipped_cached": n_skipped,
-            "model_calls": 0}
+            "model_calls": model_calls}
 
 
 # --------------------------------------------------------------- the tools
@@ -605,6 +616,8 @@ def profile_context(query=None, max_facts=None, scope=None):
             mem.message_of = _message_of
         if os.environ.get("RG_MESSAGE_RECALL", "1") != "0":
             mem.messages_for = _messages_for
+        from sourcedrecall import notes as _notes
+        mem.notes_for = _notes_for if _notes.enabled() else None
         mem.links = _links()
         block = mem.context_block(query, max_facts)
     return {"block": block}
@@ -642,6 +655,7 @@ def profile_correct(action, attribute, value, new_attribute=None, exact=False,
             f.write(json.dumps(correction) + "\n")
         if action == "deny":
             _drop_embeddings()
+            _drop_notes(said or (value if attribute == "said" else None))
 
         if action == "retype":
             _state["needs_reload"] = True
@@ -974,6 +988,75 @@ def profile_forget(fact_id):
     _export_quietly()
     return {"forgotten": True, "fact": {k: f[k] for k in ("id", "text", "said")},
             "applied": out.get("applied")}
+
+
+def _notes_path():
+    return os.path.join(_data_dir(), "notes.jsonl")
+
+
+def _load_notes():
+    try:
+        with open(_notes_path(), encoding="utf-8") as fh:
+            return [json.loads(l) for l in fh if l.strip()]
+    except (OSError, ValueError):
+        return []
+
+
+def _write_notes_file(rows):
+    tmp = _notes_path() + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as fh:
+        for r in rows:
+            fh.write(json.dumps(r, ensure_ascii=False) + "\n")
+    os.replace(tmp, _notes_path())
+    _state["notes_index"] = None
+
+
+def _save_notes(conv_id, date, texts):
+    """A conversation's notes replace its earlier ones (a resumed session is
+    re-sent whole)."""
+    with _lock:
+        rows = [r for r in _load_notes() if r.get("conv") != conv_id]
+        rows += [{"conv": conv_id, "date": date, "text": t} for t in texts]
+        _write_notes_file(rows)
+
+
+def _notes_for(query, k=6):
+    """The model-written notes that match the question best (retrieve_v3)."""
+    import retrieve_v3 as _RV3
+    with _lock:
+        cached = _state.get("notes_index")
+        if cached is None:
+            rows = _load_notes()
+            docs = [{"attr": "", "value": r["text"], "text": r["text"],
+                     "date": r.get("date"), "conv": r.get("conv")} for r in rows]
+            cached = _RV3.IndexV3(None, facts=docs) if docs else False
+            _state["notes_index"] = cached
+    if not cached:
+        return []
+    hits = _RV3.retrieve_facts_v3(cached, query, k=60, dense_k=30, top_n=k,
+                                  with_scores=True)
+    return [dict(h, score=sc) for h, sc in hits]
+
+
+def _drop_notes(said):
+    """Forgetting a sentence drops the notes of every conversation it was in:
+    a note may restate it."""
+    if not said:
+        return
+    key = re.sub(r"\W+", " ", said).strip().lower()
+    if not key:
+        return
+    try:
+        convs = json.load(open(_conversations_path(), encoding="utf-8"))
+    except (OSError, ValueError):
+        return
+    hit = {c.get("uuid") for c in convs
+           if any(key in re.sub(r"\W+", " ", str(m.get("text", ""))).lower()
+                  for m in c.get("chat_messages") or [])}
+    rows = _load_notes()
+    kept = [r for r in rows if r.get("conv") not in hit]
+    if len(kept) != len(rows):
+        _write_notes_file(kept)
 
 
 def _drop_embeddings():

@@ -1927,7 +1927,28 @@ class Memory:
             if n:
                 line += "  (" + "; ".join(n) + ")"
             lines.append(line)
-        return head + "\n" + "\n".join(lines) + "\n" + _RULES_MSG
+        # 2026-10-05: notes written by the user's own model (notes.py, opt-in)
+        nf = getattr(self, "notes_for", None)
+        rules = _RULES_MSG
+        if nf is not None:
+            nk = 12 if listy else 6
+            seen = set()
+            for nt in sorted((x for x in nf(query, k=nk) if visible(x)),
+                             key=lambda x: str(x.get("date") or "")):
+                t = nt["text"].strip()
+                if t.lower() in seen:
+                    continue
+                seen.add(t.lower())
+                lines.append((f"- [{nt.get('date')}] " if nt.get("date") else "- ")
+                             + f"(note written by your model) {t}")
+            if seen:
+                rules = _RULES_MSG.replace(
+                    "Anything about the user not listed here",
+                    "(note written by your model) lines are short notes the "
+                    "user's own model wrote from a conversation on that date; "
+                    "the quoted lines are what the user actually said. "
+                    "Anything about the user not listed here")
+        return head + "\n" + "\n".join(lines) + "\n" + rules
 
     def context_block(self, query=None, max_facts=15):
         """Verbatim receipted block for prompt injection. If `query` is given,

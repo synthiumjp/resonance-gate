@@ -495,3 +495,38 @@ def test_memory_file_lists_standing_instructions_first(pm):
     assert sections[0] == "## What you have asked the assistant to always do"
     first = md.split(sections[0])[1].split("## ")[0]
     assert "never add comments" in first and "Fitzroy" not in first
+
+
+# ---- opt-in notes written by the user's own model (2026-10-05) -------------
+
+def test_model_notes_are_labelled_replaced_and_forgotten(pm, monkeypatch):
+    from sourcedrecall import notes as N
+    monkeypatch.setenv("SOURCEDRECALL_NOTES_URL", "http://127.0.0.1:9/v1")
+    monkeypatch.setenv("SOURCEDRECALL_NOTES_MODEL", "fake")
+    calls = []
+
+    def fake(prompt, timeout=600):
+        calls.append(prompt)
+        return ("- Dana Cole plays the clarinet and the violin.\nSomeone else likes jazz.\n"
+                "Dana Cole is allergic to penicillin.")
+    monkeypatch.setattr(N, "_call", fake)
+    turns = [U("I picked up the violin last year, still playing clarinet too. "
+               "I'm allergic to penicillin.")]
+    out = pm.profile_ingest(turns, conversation_id="a", owner_name="Dana Cole",
+                            date="2026-03-02")
+    assert out["model_calls"] == 1 and len(calls) == 1
+    block = pm.profile_context("What instruments do I play?")["block"]
+    assert "(note written by your model) Dana Cole plays the clarinet and the violin." in block
+    assert "Someone else likes jazz" not in block
+    pm.profile_ingest(turns, conversation_id="a", owner_name="Dana Cole", date="2026-03-02")
+    assert len([r for r in pm._load_notes() if r["conv"] == "a"]) == 2   # replaced, not doubled
+    hit = pm.profile_recall("Am I allergic to anything?")["ranked"][0]
+    pm.profile_forget(hit["id"])
+    assert pm._load_notes() == []                                         # the conversation's notes go
+
+
+def test_notes_are_off_by_default(pm):
+    pm.profile_ingest([U("I play the violin.")], conversation_id="a",
+                      owner_name="Dana Cole", date="2026-03-02")
+    assert pm._load_notes() == []
+    assert "note written by your model" not in pm.profile_context("What do I play?")["block"]
