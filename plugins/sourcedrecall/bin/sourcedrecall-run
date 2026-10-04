@@ -22,6 +22,12 @@ VERSION="$(sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' "$ROOT/.claude-plugin/plu
 REF="${SOURCEDRECALL_REF:-sourcedrecall-v$VERSION}"
 SRC="$DATA/src"
 VENV="$DATA/venv"
+# 2026-10-05: native Windows runs this script in Git Bash; a venv there keeps
+# its programs in Scripts\ with .exe (untested on Windows so far)
+case "$(uname -s)" in
+  MINGW*|MSYS*|CYGWIN*) VBIN="$VENV/Scripts"; EXE=".exe" ;;
+  *) VBIN="$VENV/bin"; EXE="" ;;
+esac
 STAMP="$DATA/installed"
 LOG="$DATA/install.log"
 LOCK="$DATA/install.lock"
@@ -35,7 +41,7 @@ esac
 mkdir -p "$DATA" || { echo "sourcedrecall: cannot create $DATA" >&2; exit 1; }
 
 installed() {
-  [ -x "$VENV/bin/sourcedrecall" ] && [ -f "$STAMP" ] && [ "$(cat "$STAMP")" = "$REF" ]
+  [ -x "$VBIN/sourcedrecall$EXE" ] && [ -f "$STAMP" ] && [ "$(cat "$STAMP")" = "$REF" ]
 }
 
 do_install() {
@@ -46,12 +52,18 @@ do_install() {
   # PATH first, then where Homebrew and python.org put Python: an app started
   # from the macOS desktop (or a non-login shell) often has only Apple's 3.9
   # on PATH even when a newer Python is installed.
-  for c in python3.13 python3.12 python3.11 python3.10 python3; do
+  for c in python3.13 python3.12 python3.11 python3.10 python3 python; do
     c="$(command -v "$c")" || continue
     if "$c" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 10) else 1)'; then
       py="$c"; break
     fi
   done
+  if [ -z "$py" ] && command -v py >/dev/null; then
+    # the Windows Python launcher: ask it where a recent Python lives
+    for v in 3.13 3.12 3.11 3.10; do
+      c="$(py -$v -c 'import sys; print(sys.executable)' 2>/dev/null)" && [ -n "$c" ] && { py="$c"; break; }
+    done
+  fi
   if [ -z "$py" ]; then
     for v in 3.13 3.12 3.11 3.10; do
       for c in "/opt/homebrew/bin/python$v" "/usr/local/bin/python$v" \
@@ -60,7 +72,7 @@ do_install() {
       done
     done
   fi
-  [ -n "$py" ] || { echo "Python 3.10 or newer is required (on macOS: brew install python@3.12)"; return 1; }
+  [ -n "$py" ] || { echo "Python 3.10 or newer is required (macOS: brew install python@3.12; Windows: python.org or winget install Python.Python.3.12)"; return 1; }
   echo "using $py"
   if [ -d "$SRC/.git" ]; then
     git -C "$SRC" fetch --depth 1 origin "refs/tags/$REF:refs/tags/$REF" 2>/dev/null ||
@@ -69,14 +81,14 @@ do_install() {
   else
     git clone -q --depth 1 --branch "$REF" "$REPO_URL" "$SRC" || return 1
   fi
-  [ -x "$VENV/bin/python" ] || "$py" -m venv "$VENV" || return 1
-  "$VENV/bin/pip" install -q --upgrade pip || return 1
+  [ -x "$VBIN/python$EXE" ] || "$py" -m venv "$VENV" || return 1
+  "$VBIN/python$EXE" -m pip install -q --upgrade pip || return 1
   if [ "$(uname -s)" = "Linux" ]; then
     # the default Linux wheel pulls ~4 GB of CUDA libraries that are never used
-    "$VENV/bin/pip" install -q torch --index-url https://download.pytorch.org/whl/cpu || return 1
+    "$VBIN/python$EXE" -m pip install -q torch --index-url https://download.pytorch.org/whl/cpu || return 1
   fi
-  "$VENV/bin/pip" install -q -e "$SRC/server" || return 1
-  "$VENV/bin/sourcedrecall-setup" || return 1
+  "$VBIN/python$EXE" -m pip install -q -e "$SRC/server" || return 1
+  "$VBIN/sourcedrecall-setup$EXE" || return 1
   echo "$REF" > "$STAMP"
   echo "== done $(date)"
 }
@@ -106,7 +118,7 @@ case "${1:-}" in
            "(about 5 minutes); restart Claude Code when $LOG ends with '== done'." >&2
       exit 1
     fi
-    exec "$VENV/bin/sourcedrecall"
+    exec "$VBIN/sourcedrecall$EXE"
     ;;
   hook)
     event="${2:-}"
@@ -130,10 +142,10 @@ case "${1:-}" in
     if [ "$event" = "session-start" ] && [ -s "$DATA/pending.jsonl" ]; then
       queued="$DATA/pending-$$.jsonl"
       mv "$DATA/pending.jsonl" "$queued" 2>/dev/null &&
-        nohup "$VENV/bin/sourcedrecall-hook" _pending "$queued" --owner "$OWNER" \
+        nohup "$VBIN/sourcedrecall-hook$EXE" _pending "$queued" --owner "$OWNER" \
           </dev/null >>"$DATA/pending.log" 2>&1 &
     fi
-    exec "$VENV/bin/sourcedrecall-hook" "$event" --owner "$OWNER"
+    exec "$VBIN/sourcedrecall-hook$EXE" "$event" --owner "$OWNER"
     ;;
   *)
     echo "usage: sourcedrecall-run install | mcp | hook session-start|session-end" >&2

@@ -28,6 +28,11 @@ turn the summary off and keep only the tools, with
 
 The install log is `~/.claude/plugins/data/<plugin id>/install.log`.
 
+Windows: through WSL it works as on Linux. Native Windows (Claude Code runs
+hooks in Git Bash) needs Python 3.10+ from python.org or winget; the
+installer handles the `py` launcher and `Scripts\` folders, but this path
+has not been tested yet.
+
 ## Install manually (any MCP client)
 
 ```bash
