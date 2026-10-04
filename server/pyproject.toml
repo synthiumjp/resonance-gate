@@ -1,6 +1,6 @@
 [project]
 name = "sourcedrecall"
-version = "0.5.0"
+version = "0.5.1"
 description = "Memory for AI agents that never calls a language model to store anything: your own dated messages, chosen and labelled by a grammar parser. MCP server and command line."
 requires-python = ">=3.10"
 license = "Apache-2.0"
