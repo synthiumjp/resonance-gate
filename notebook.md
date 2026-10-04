@@ -14902,3 +14902,34 @@ and how to run everything).
   labels for changes of state, no model calls at all. The direction the
   numbers point at: retrieve the user's messages first, and use the parser
   for labels, forgetting and scoping rather than as the evidence.
+
+## Entry 295 — 2026-10-04 (messages first, parser as gate, router and labeller)
+
+- Small reader (Qwen3-4B Q4_K_M, our own llama_cpp on :8091; the judge
+  stays the 14B). Fresh change-of-state set, answer view:
+
+      system             old state given   new state given   controls
+      RAG                9/64              32/64             8/16
+      0.4.5 block        9/64              40/64             13/16
+      0.4.6 block        13/64             43/64             15/16
+
+  With a weak reader the structured block beats RAG clearly (new state 43
+  vs 32, controls 15 vs 8). The parser's structure is what a small model
+  needs; a 14B reader manages raw messages on its own.
+- Messages-first (RG_EVIDENCE=messages, 01a88f5), three versions, iterated
+  on LoCoMo dev and cases_dev_stale2 (both readable, so tuned):
+    v1, the message index alone, the relevance floor deciding whether
+       anything is known: the floor was tuned on sentences and refused basic
+       questions ("What's my job?") -- 22 probes lost; LoCoMo dev 54.1%.
+    v2, the parser's gates decide whether anything is known; messages come
+       through the parser's facts first, then the index: fresh set old state
+       5/64 (0.4.6 18, RAG 11), new 47/64, controls 14/16; LoCoMo 54.9% --
+       the fact route filled all 5 slots.
+    v3, the two routes take turns: LoCoMo dev 63.9% (RAG 62.2%, 0.4.6
+       58.8%), single-hop 70.2% (RAG 71.1%), temporal 69.8% (RAG 57.1%);
+       fresh set unchanged from v2. 666 tokens (RAG 385).
+  The parser's roles in v3: refuse (its gates), route (its facts lead to
+  messages the index misses), replace (an ended fact pulls in the message
+  that replaced it), label (notes only where status matters).
+- Confirmation running at 01a88f5: blind v3/v4 (14B reader), v4 with the
+  4B reader, LoCoMo test convs 2-9 once.
