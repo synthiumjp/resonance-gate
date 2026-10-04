@@ -877,6 +877,7 @@ def _hedge_sentence(s, sent):
                for c in s.children(root, ("advmod",)))
 
 
+_HABIT_VERBS = frozenset("keep avoid stop stick default prefer".split())
 _STANDING = re.compile(r"\b(from now on|every time|in future|going forward|"
                        r"whenever)\b", re.I)
 
@@ -894,7 +895,11 @@ def _standing_instruction(s, head, role, sent):
         if not any((c.text or "").lower() == "please"
                    for c in s.children(head, ("discourse",))):
             return False
-    elif head.deprel == "root":
+    elif head.deprel == "root" or (
+            # "Keep answers terse, I tend to skim": the imperative opens the
+            # sentence as a clause of what follows
+            head.deprel in ("advcl", "parataxis")
+            and head.id == min(w.id for w in sent.words if w.upos != "PUNCT")):
         lead = [w for w in sent.words if w.id < head.id and w.upos != "PUNCT"]
         lead_text = " ".join(w.text for w in lead)
         if not _STANDING.match(lead_text) and any(
@@ -904,8 +909,22 @@ def _standing_instruction(s, head, role, sent):
     else:
         return False
     marks = {(c.text or "").lower() for c in s.children(head, ("advmod", "aux"))}
-    return bool(marks & {"always", "never", "n't", "not"}) or bool(
-        _STANDING.search(" ".join(w.text for w in sent.words)))
+    if marks & {"always", "never", "n't", "not"}:
+        return True
+    text = " ".join(w.text for w in sent.words)
+    if _STANDING.search(text):
+        return True
+    # 2026-10-05 (cases_dev_prefs): "Keep answers terse, I tend to skim",
+    # "Avoid red/green in charts" -- a habit verb is a standing instruction
+    # without always/never; so is an imperative about the user's own things
+    # ("format my code", "for me"). "Fix the failing test" is neither.
+    if ((head.lemma or "").lower() in _HABIT_VERBS
+            and any(c.upos in ("NOUN", "PROPN", "ADJ")
+                    for c in s.children(head, ("obj", "obl", "xcomp")))):
+        return True     # "Keep answers terse", not "Keep going"
+    return bool(re.search(r"\bfor me\b|\bmy (?:code|commits?|files?|answers?|"
+                          r"repos?|projects?|scripts?|charts?|docs?|prs?|"
+                          r"pull requests?|messages?)\b", text, re.I))
 
 
 def _conj_donor(s, head):

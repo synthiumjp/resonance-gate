@@ -1367,9 +1367,20 @@ def test_a_standing_instruction_is_kept(ex, turn, want):
     assert any(want in t for t in texts(ex, turn)), texts(ex, turn)
 
 
+@pytest.mark.parametrize("turn,want", [
+    # 2026-10-05: a habit verb, or the user's own things, without always/never
+    ("Keep answers terse, I tend to skim.", "asked the assistant: Keep answers terse"),
+    ("Avoid red and green in charts.", "asked the assistant: Avoid red and green in charts"),
+    ("Write my docs in British English.", "asked the assistant: Write Martin Mark's docs in British English"),
+])
+def test_a_standing_instruction_without_always(ex, turn, want):
+    assert any(want in t for t in texts(ex, turn)), texts(ex, turn)
+
+
 @pytest.mark.parametrize("turn", ["Fix the failing test in parser.py.",
                                   "Run the tests again please.",
-                                  "Can you always check the logs first?"])
+                                  "Can you always check the logs first?",
+                                  "Keep going.", "Use the other branch."])
 def test_a_one_off_request_is_not_an_instruction(ex, turn):
     assert not any("asked the assistant" in t for t in texts(ex, turn))
 
