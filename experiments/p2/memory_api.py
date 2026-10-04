@@ -328,7 +328,12 @@ _PERSONAL_KINDS = re.compile(
     r"home|house|apartment|flat|vegetarian|vegan|diet|eats?|drinks?|married|"
     r"single|divorced|engaged|hobb\w*|likes?|loves?|enjoys?|hates?|dislikes?|"
     r"prefers?|favou?rite|plays? the|speaks?|learning|studies|studying|"
-    r"name is|years old|age|asked the assistant)\b")
+    r"name is|years old|age|asked the assistant|"
+    # 2026-10-05 (multi-project coding set): a statement about the user that
+    # says it holds everywhere ("I always use tabs ... in any code you write
+    # for me", "every project"), and how they write (British English)
+    r"always|never|everywhere|every project|any code|all (?:my )?(?:code|projects|repos)|"
+    r"british|american english|spelling|indentation|tabs)\b")
 
 
 def fact_id(nd):
@@ -796,10 +801,11 @@ def _unparsed_sentences(conversations_path, g):
     except OSError:
         pass
     out = {}
+    from prose import prose_only
     for _step, uuid, date, text in stream:
         if not _is_prose(text):
             continue
-        for sent in _SENT_SPLIT.split(text.strip()):
+        for sent in _SENT_SPLIT.split(prose_only(text)):
             n = _norm_sent(sent)
             if "[secret removed]" in sent or not _quotable(sent):
                 continue

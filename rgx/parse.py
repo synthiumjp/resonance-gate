@@ -748,8 +748,26 @@ def _interrogative(s, head, subj, is_question):
                         for a in s.children(head, ARG_DEPS)
                         for t in s.subtree(a))):
             return True
+    # 2026-10-05 (coding background chatter): people leave out the "?" --
+    # "should i add a test in the same commit" stored "<owner> should add a
+    # test in the same commit". Inversion that OPENS the sentence (the aux
+    # first, or a wh-word first) is a question without the mark; declarative
+    # fronting opens with the negative adverb instead ("Never have I...").
+    words = [w for w in sorted(s.w.values(), key=lambda w: w.id)
+             if w.upos != "PUNCT" and w.deprel not in ("discourse", "cc")]
+    first = words[0] if words else None
+    av = s.children(head, ("aux", "aux:pass", "cop"))
+    if (not is_question and first is not None and av
+            and min(a.id for a in av) < subj.id
+            and (first.id == min(a.id for a in av)
+                 or ("PronType=Int" in (first.feats or "")
+                     and first.head == head.id))):
+        return True
+    if (not is_question and first is not None and first.id == head.id
+            and head.id < subj.id
+            and next(iter(s.children(head, ("expl",))), None)):
+        return True
     if is_question:
-        av = s.children(head, ("aux", "aux:pass", "cop"))
         if av and min(a.id for a in av) < subj.id:
             return True
         # e264: in an EXISTENTIAL question the inverted element IS the head

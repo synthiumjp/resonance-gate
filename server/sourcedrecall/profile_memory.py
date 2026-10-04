@@ -47,6 +47,7 @@ process; reload() rebuilds it (also reachable via profile_status(reload=True)).
 import datetime
 import json
 import os
+import re
 import sys
 import threading
 import uuid as _uuidlib
@@ -380,7 +381,10 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
             if h in cached_hashes:
                 n_skipped += 1
                 continue
-            recs = ex.extract_turn(text, role=role, session=0, turn=ti,
+            ptext = _prose_only(text)
+            if not ptext:
+                continue
+            recs = ex.extract_turn(ptext, role=role, session=0, turn=ti,
                                    prev=before if role == "user" else None)
             facts = [f for f in (_rgx_facts.to_fact(r) for r in recs)
                      if f is not None and MARK not in str(f.get("value"))
@@ -510,6 +514,16 @@ def _message_of(conversation_id, said):
                 else None)
         return " ".join(sents) or None, prev
     return None, None
+
+
+# 2026-10-05 (multi-project coding set): a message with a pasted code block
+# reached the parser whole -- "...for the record I always use tabs, never
+# spaces, in any code you write for me." ran into the C++ that followed and
+# nothing was stored. The parser reads the prose only; the stored message
+# keeps the code for quoting.
+def _prose_only(text):
+    from prose import prose_only
+    return prose_only(text)
 
 
 def _denied_lists():

@@ -15082,3 +15082,38 @@ and how to run everything).
   sentence, not the other project's whole message. One-off requests ("Fix
   the failing test") store nothing. Suite 1066; dogfood, refusals unchanged;
   fresh stale set new 43 -> 45/64, stale 26 -> 24/64.
+
+## Entry 304 — 2026-10-05 (coding sessions: background noise, projects, and three defects)
+
+- Coding sets with a background of 120 debugging sessions (FM_DISTRACTORS,
+  two copies of distractors_code.jsonl) in front of every scenario, held
+  out, audited: false memory sourcedrecall 0/51 with a 14B and a 4B reader,
+  RAG 3/51 with both (all genuine); new state 14/14 vs 11/14 (14B).
+- Multi-project sets (one developer, 2-3 projects, the question asked in one
+  of them; sourcedrecall gets real project directories, RAG has none):
+  another project's fact leaked into the answer 0/9 and 0/13 (held out) for
+  sourcedrecall, 3/9 and 2/13 for RAG (4B reader: 4/9, 2/13). Controls 5/8
+  and 6/13 vs 6/8 and 7/13 -- the misses were personal preferences said in
+  another project. score.py compared expected terms case-sensitively
+  (the agent wrote "GitHub Actions"); fixed, all sets rescored.
+- Three defects found reading the readable misses:
+  1. a question typed without "?" became a fact -- "should i add a test in
+     the same commit" stored "<owner> should add a test in the same commit"
+     (and, repeated in the background, corroborated). Inversion that opens
+     the sentence (the aux first, or a wh-word first) is now a question;
+     declarative fronting ("Never have I...") opens with the adverb.
+  2. a message of prose plus a pasted code block was skipped whole when the
+     memory was built (prose filter) and reached the parser with the code
+     glued on; the parser and the filter now see the prose only (stack-trace
+     lines dropped too); the stored message keeps the code for quoting.
+  3. "I always use tabs ... in any code you write for me" stayed in the
+     project it was said in: a statement about the user that says it holds
+     everywhere (always, never, every project, any code) or how they write
+     (British English, indentation) now counts as personal.
+- Tried and dropped: leaving names used to address someone ("Thanks,
+  Melanie!") out of the text messages are found by -- LoCoMo dev 66.1 ->
+  65.2%, +17 -19 items.
+- Also today: sessions that end during the install are queued and stored
+  afterwards; standing instructions lead every session's summary; the
+  triple-store encoder is not downloaded unless the legacy tools are on
+  (install about 1.6 GB).

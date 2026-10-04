@@ -76,7 +76,7 @@ def score_view(cases, raw, view):
                 row["bad"] = bad
             if "expect" in p:
                 blob = " ".join(lines).lower()
-                row["hit"] = any(t in blob for t in p["expect"]["terms"])
+                row["hit"] = any(t.lower() in blob for t in p["expect"]["terms"])
             rows.append(row)
     return rows
 

@@ -452,6 +452,7 @@ def test_project_facts_stay_and_the_persons_preferences_travel(pm, tmp_path):
     assert "tabs everywhere" in tabs and "Rust" not in tabs
 
 
+
 def test_standing_instructions_lead_every_sessions_summary(pm, tmp_path):
     a, b = tmp_path / "proj-a", tmp_path / "proj-b"
     a.mkdir(); b.mkdir()
@@ -462,3 +463,25 @@ def test_standing_instructions_lead_every_sessions_summary(pm, tmp_path):
     lines = [l for l in block.splitlines() if l.startswith("- ")]
     assert lines and "(standing instruction)" in lines[0] and "never add comments" in lines[0]
     assert "Fly.io" not in block
+
+
+def test_code_is_not_parsed_and_an_always_preference_travels(pm, tmp_path):
+    """2026-10-05: a pasted code block ran into the preceding sentence and
+    nothing was stored; "I always use tabs ... in any code you write for me"
+    stayed in the project it was said in."""
+    a, b = tmp_path / "bramble-engine", tmp_path / "pollen-count"
+    a.mkdir(); b.mkdir()
+    msg = ("This is a C++ game engine. Please reformat this header, and for the record "
+           "I always use tabs for indentation, never spaces, in any code you write for me.\n"
+           "```cpp\nstruct Vec2 {\n  float x, y;\n};\n```")
+    pm.profile_ingest([U(msg)], conversation_id="a", owner_name="Walter Hughes",
+                      date="2026-04-01", scope=str(a))
+    block = pm.profile_context("How do I like my code indented?", scope=str(b))["block"]
+    assert "tabs" in block and "struct Vec2" not in block
+
+
+def test_prose_only_drops_code_and_traces():
+    from sourcedrecall import profile_memory as P
+    t = ("Getting this:\nTraceback (most recent call last):\n  File \"app.py\", line 3\n"
+         "KeyError: 'x'\nI moved the config to YAML last week.\n```py\nx = 1\n```")
+    assert P._prose_only(t) == "Getting this:\nI moved the config to YAML last week."

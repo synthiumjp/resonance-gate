@@ -1,0 +1,63 @@
+=== rag 01:08:29
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights: 100%|██████████| 199/199 [00:00<00:00, 20487.64it/s]
+pd01 rag ok 3.87 s
+pd02 rag ok 0.58 s
+pd03 rag ok 0.51 s
+pd04 rag ok 0.5 s
+pd05 rag ok 0.49 s
+pd06 rag ok 0.49 s
+pd07 rag ok 0.5 s
+pd08 rag ok 0.56 s
+pd09 rag ok 0.57 s
+pd10 rag ok 0.59 s
+pd11 rag ok 0.58 s
+pd12 rag ok 0.58 s
+pd13 rag ok 0.5 s
+pd14 rag ok 0.5 s
+pd15 rag ok 0.5 s
+pd16 rag ok 0.5 s
+pd17 rag ok 0.5 s
+pd18 rag ok 0.58 s
+pd19 rag ok 0.58 s
+pd20 rag ok 0.57 s
+pd21 rag ok 0.57 s
+pd22 rag ok 0.56 s
+pd23 rag ok 0.49 s
+pd24 rag ok 0.49 s
+pd25 rag ok 0.5 s
+pd26 rag ok 0.5 s
+pd27 rag ok 0.52 s
+pd28 rag ok 0.57 s
+pd29 rag ok 0.58 s
+pd30 rag ok 0.57 s
+=== ours 01:08:50
+pd01 sourcedrecall ok 85.61 s
+pd02 sourcedrecall ok 84.21 s
+pd03 sourcedrecall ok 84.71 s
+pd04 sourcedrecall ok 85.45 s
+pd05 sourcedrecall ok 84.38 s
+pd06 sourcedrecall ok 87.53 s
+pd07 sourcedrecall ok 83.07 s
+pd08 sourcedrecall ok 82.88 s
+pd09 sourcedrecall ok 84.74 s
+pd10 sourcedrecall ok 82.41 s
+pd11 sourcedrecall ok 81.72 s
+pd12 sourcedrecall ok 81.53 s
+pd13 sourcedrecall ok 83.02 s
+pd14 sourcedrecall ok 85.7 s
+pd15 sourcedrecall ok 86.89 s
+pd16 sourcedrecall ok 84.55 s
+pd17 sourcedrecall ok 84.94 s
+pd18 sourcedrecall ok 85.58 s
+pd19 sourcedrecall ok 86.52 s
+pd20 sourcedrecall ok 85.77 s
+pd21 sourcedrecall ok 87.12 s
+pd22 sourcedrecall ok 84.73 s
+pd23 sourcedrecall ok 84.63 s
+pd24 sourcedrecall ok 85.53 s
+pd25 sourcedrecall ok 86.21 s
+pd26 sourcedrecall ok 82.63 s
+pd27 sourcedrecall ok 86.45 s
+pd28 sourcedrecall ok 83.79 s
+pd29 sourcedrecall ok 90.68 s
+pd30 sourcedrecall ok 86.56 s

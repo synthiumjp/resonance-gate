@@ -15,14 +15,33 @@ _FIRST_PERSON = re.compile(r"^(?:i|i'm|i’m|i am|i've|i’ve|my|we|we're|we’r
                            re.I)
 
 
+_FENCE = re.compile(r"```.*?(?:```|$)", re.S)
+_CODE_LINE = re.compile(r"^\s*(?:Traceback \(most recent|File \"[^\"]+\", line \d|"
+                        r"at [\w.$<>]+\(|[\w.]+(?:Error|Exception):|\$ |>>> |"
+                        r"[{}\[\]();]+\s*$|(?: {4}|\t)\S)")
+
+
+def prose_only(text):
+    """The turn without fenced code blocks and code / stack-trace lines
+    (2026-10-05): a developer's message is often a sentence of prose and a
+    pasted snippet, and the prose can carry a preference ("I always use
+    tabs ... in any code you write for me")."""
+    t = _FENCE.sub("\n", text or "")
+    keep = [ln for ln in t.splitlines() if not _CODE_LINE.match(ln)]
+    return re.sub(r"[ \t]+", " ", "\n".join(keep)).strip()
+
+
 def _is_prose(text):
     """False if the turn is dominated by pasted code/terminal/telemetry rather
     than first-person prose. Real user data (entry 60) is full of pasted vm_stat/
     logs/code that the extractors misread as personal facts; those turns carry no
     life-fact and are skipped. Conversational prose (LongMemEval, personal chat)
-    passes untouched."""
+    passes untouched. 2026-10-05: judged on prose_only(text) -- a message of
+    prose plus a fenced snippet used to be skipped whole."""
     if "```" in text:
-        return False
+        text = prose_only(text)
+        if not text:
+            return False
     lines = [l for l in text.splitlines() if l.strip()]
     if not lines:
         return True
