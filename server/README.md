@@ -148,12 +148,26 @@ this week" does not change where you live.
 ## Projects
 
 Facts about you (health, family, home, job, diet, tastes) are available
-everywhere. Facts about a project, and what you said about your work in it
-("I work on the billing service", "the billing service is written in Go"),
-are only shown in that project. In Claude Code the project is the
-repository you are working in; the tools also take a `scope` argument.
-Conversations stored outside any project are shown everywhere. Set
-`SOURCEDRECALL_SCOPING=0` to turn this off.
+everywhere. So is anything you say holds everywhere ("I always use tabs",
+"in any code you write for me") and how you write ("I write British
+English"). Facts about a project, and what you said about your work in it
+("this repo is a Rust CLI", "we deploy to Fly.io here"), are only shown in
+that project: asking "What language is this project in?" in your SQL
+repository never brings up the Rust one. When something about you was said
+inside another project, only that sentence is shown, not the rest of the
+message. In Claude Code the project is the repository you are working in;
+the tools also take a `scope` argument. Conversations stored outside any
+project are shown everywhere. Set `SOURCEDRECALL_SCOPING=0` to turn this
+off.
+
+## Standing instructions
+
+Things you tell the assistant to always or never do ("never add comments to
+my code", "always run the tests before you suggest a commit", "from now on,
+write commit messages in the imperative") are kept as instructions. They
+lead the summary at the start of every session, in every project, and
+`MEMORY.md` lists them first so they are easy to check and to remove. A
+one-off request ("fix the failing test") is not kept.
 
 ## Automatic capture in Claude Code
 
