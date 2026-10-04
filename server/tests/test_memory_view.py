@@ -434,3 +434,19 @@ def test_a_rebuilt_index_reuses_saved_embeddings(tmp_path, monkeypatch):
     R._EMB_CACHE.clear()
     R._encode_cached(Bi(), ["one"])
     assert calls == [2, 1]
+
+
+# ---- projects and the person (2026-10-04) ----------------------------------
+
+def test_project_facts_stay_and_the_persons_preferences_travel(pm, tmp_path):
+    a, b = tmp_path / "rusty-cli", tmp_path / "sales-analytics"
+    a.mkdir(); b.mkdir()
+    pm.profile_ingest([U("This repo is a Rust CLI, we build it with cargo workspaces."),
+                       U("By the way, I prefer tabs everywhere and please never add comments to my code.")],
+                      conversation_id="a", owner_name="Sam Reed", date="2026-03-01", scope=str(a))
+    pm.profile_ingest([U("This project is all SQL: dbt models on Snowflake.")],
+                      conversation_id="b", owner_name="Sam Reed", date="2026-03-05", scope=str(b))
+    lang = pm.profile_context("What language is this project written in?", scope=str(b))["block"]
+    assert "SQL" in lang and "Rust" not in lang
+    tabs = pm.profile_context("Should I use tabs or spaces?", scope=str(b))["block"]
+    assert "tabs everywhere" in tabs and "Rust" not in tabs

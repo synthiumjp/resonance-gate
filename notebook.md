@@ -15058,3 +15058,27 @@ and how to run everything).
   (~4 s for a 50-message session, run at session end).
 - Coding-assistant sets written (cases_dev_code 40, cases_code_blind 60,
   held out); the first measurement is queued.
+
+## Entry 303 — 2026-10-04 (coding use: projects, the person, and instructions)
+
+- Coding sets (cases_dev_code 40, cases_code_blind 60, written by an agent):
+  both systems near perfect -- false memory 0/34 and 0/51, controls all
+  (4B reader: ours 8/9 controls, RAG 2/51 false memory). Each scenario holds
+  1-4 conversations, so every system's top results hold everything: the
+  sets do not discriminate. A distractor background (distractors_code.jsonl,
+  60 conversations of debugging chatter with no stated preferences) is
+  written to make them realistic.
+- JP: what is true in one session's project (Rust) need not be in another's
+  (SQL). Probed with two projects: project facts stayed in their project,
+  but a preference said in one ("I prefer tabs everywhere and please never
+  add comments to my code") was invisible in the other -- messages-first
+  hid every message from another project. And the same sentence stored a
+  FALSE fact: the "please" clause borrowed "I" -> "<owner> does not add
+  comments to <owner>'s code".
+- Fixed: a "please" conjunct no longer borrows the subject; a standing
+  instruction to the assistant (always / never / don't / from now on, no
+  subject of its own) is stored as "<owner> asked the assistant: ...", and
+  counts as personal; a personal fact from another project shows as its own
+  sentence, not the other project's whole message. One-off requests ("Fix
+  the failing test") store nothing. Suite 1066; dogfood, refusals unchanged;
+  fresh stale set new 43 -> 45/64, stale 26 -> 24/64.

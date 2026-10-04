@@ -328,7 +328,7 @@ _PERSONAL_KINDS = re.compile(
     r"home|house|apartment|flat|vegetarian|vegan|diet|eats?|drinks?|married|"
     r"single|divorced|engaged|hobb\w*|likes?|loves?|enjoys?|hates?|dislikes?|"
     r"prefers?|favou?rite|plays? the|speaks?|learning|studies|studying|"
-    r"name is|years old|age)\b")
+    r"name is|years old|age|asked the assistant)\b")
 
 
 def fact_id(nd):
@@ -1845,6 +1845,12 @@ class Memory:
             got = None
             for rc in f.get("receipts") or []:
                 cid = rc.get("conversation_id")
+                if not visible({"conv": cid}):
+                    # 2026-10-04: a fact about the person said in another
+                    # project ("I prefer tabs", "never add comments to my
+                    # code") shows as its own sentence; the rest of that
+                    # message belongs to the other project
+                    continue
                 msg, prev = mo(cid, f.get("said")) if mo else (None, None)
                 if msg:
                     got = {"text": msg, "date": rc.get("date"), "asked": prev,
@@ -1855,8 +1861,10 @@ class Memory:
                 # verbatim fallback keeps sentences, not conversation ids):
                 # its own sentence stands in (paraphrase dev set, 8 refusals)
                 rc = (f.get("receipts") or [{}])[0]
+                cid = rc.get("conversation_id")
                 got = {"text": f["said"].strip(), "date": rc.get("date"),
-                       "asked": None, "conv": rc.get("conversation_id"), "score": None}
+                       "asked": None, "score": None,
+                       "conv": cid if visible({"conv": cid}) else None}
             if got:
                 via.append(got)
         # 2026-10-04: any message found is shown and the reader decides.

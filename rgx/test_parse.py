@@ -1352,3 +1352,31 @@ def test_a_phrase_linked_to_a_name_is_kept(ex, turn, phrase, name):
     ex.reset_world()
     ex.extract_turn(turn, role="user")
     assert ex._world.get("=" + phrase) == name
+
+
+@pytest.mark.parametrize("turn,want", [
+    # 2026-10-04: a standing instruction to the assistant is the user's own
+    ("Always run the tests before you commit anything.",
+     "Martin Mark asked the assistant: Always run the tests before you commit anything"),
+    ("Don't use semicolons in my JavaScript.",
+     "Martin Mark asked the assistant: Do not use semicolons in Martin Mark's JavaScript"),
+    ("From now on, write commit messages in the imperative.",
+     "Martin Mark asked the assistant: From now on write commit messages in the imperative"),
+])
+def test_a_standing_instruction_is_kept(ex, turn, want):
+    assert any(want in t for t in texts(ex, turn)), texts(ex, turn)
+
+
+@pytest.mark.parametrize("turn", ["Fix the failing test in parser.py.",
+                                  "Run the tests again please.",
+                                  "Can you always check the logs first?"])
+def test_a_one_off_request_is_not_an_instruction(ex, turn):
+    assert not any("asked the assistant" in t for t in texts(ex, turn))
+
+
+def test_please_does_not_borrow_the_users_subject(ex):
+    """"I prefer tabs and please never add comments to my code" stored
+    "<owner> does not add comments to <owner>'s code"."""
+    out = texts(ex, "By the way, I prefer tabs everywhere and please never add comments to my code.")
+    assert not any("does not add comments" in t for t in out), out
+    assert any("asked the assistant: never add comments" in t for t in out), out

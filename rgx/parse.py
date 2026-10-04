@@ -859,6 +859,37 @@ def _hedge_sentence(s, sent):
                for c in s.children(root, ("advmod",)))
 
 
+_STANDING = re.compile(r"\b(from now on|every time|in future|going forward|"
+                       r"whenever)\b", re.I)
+
+
+def _standing_instruction(s, head, role, sent):
+    """An imperative to the assistant that holds beyond this request: its
+    verb has no subject, and it says always / never / don't, or "from now
+    on", "every time". At the start of a sentence, or a conjunct with
+    "please"."""
+    if role != "user" or head.upos != "VERB":
+        return False
+    if s.children(head, ("nsubj", "nsubj:pass", "csubj", "expl")):
+        return False
+    if head.deprel == "conj":
+        if not any((c.text or "").lower() == "please"
+                   for c in s.children(head, ("discourse",))):
+            return False
+    elif head.deprel == "root":
+        lead = [w for w in sent.words if w.id < head.id and w.upos != "PUNCT"]
+        lead_text = " ".join(w.text for w in lead)
+        if not _STANDING.match(lead_text) and any(
+                w.head != head.id or w.deprel not in ("advmod", "aux", "discourse")
+                for w in lead):
+            return False
+    else:
+        return False
+    marks = {(c.text or "").lower() for c in s.children(head, ("advmod", "aux"))}
+    return bool(marks & {"always", "never", "n't", "not"}) or bool(
+        _STANDING.search(" ".join(w.text for w in sent.words)))
+
+
 def _conj_donor(s, head):
     """A (e240): UD basic deps do not propagate a subject to a `conj` head,
     so "I am not only enhancing my well-being but also contributing to the
@@ -869,6 +900,12 @@ def _conj_donor(s, head):
     teacher and a writer" must not produce a second record for "writer".
     """
     if head.upos not in ("VERB", "AUX") and not s.children(head, ("cop",)):
+        return None
+    # 2026-10-04: "I prefer tabs and please never add comments to my code"
+    # -- a conjunct with "please" is addressed to the assistant; it borrowed
+    # "I" and stored "<owner> does not add comments to <owner>'s code"
+    if any((c.text or "").lower() == "please"
+           for c in s.children(head, ("discourse",))):
         return None
     node = head
     seen = set()
@@ -1406,6 +1443,23 @@ def extract_keyed(text, nlp, owner=None, role="user",
                         if mobj is not None:
                             subj = mobj
                             obj_ctrl = True
+            if subj is None and _standing_instruction(s, head, role, sent):
+                # 2026-10-04: "Always run the tests", "Don't use semicolons
+                # in my JavaScript", "please never add comments to my code"
+                # -- a standing instruction to the assistant is the user's
+                # own, wherever they work (a one-off "Fix the failing test"
+                # has no always/never/don't and stores nothing)
+                stop = {c.id for c in s.children(
+                    head, ("conj", "cc", "discourse", "punct", "parataxis"))}
+                span = re.sub(r"\s+", " ", s.text(head, stop=stop, owner=o,
+                                                   second=second)).strip(" ,.;:!")
+                body = f"{o} asked the assistant: {span}"
+                if span and body.lower()[:90] not in seen:
+                    seen.add(body.lower()[:90])
+                    out.append((body, "attr", "instruction", span, None, sent.text)
+                               if with_source else
+                               (body, "attr", "instruction", span, None))
+                continue
             if subj is None:
                 continue
             if _interrogative(s, head, subj, is_q):

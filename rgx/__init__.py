@@ -146,7 +146,11 @@ class Extractor:
                 owner_pronoun_obj=self.owner_pronoun_obj,
                 world=self._world, with_source=True):
             if self.check:
-                ok, _why = C.prefilter(prop, text, self.owner_name,
+                # an instruction record's frame ("<owner> asked the
+                # assistant:") is ours, not the user's words; the
+                # instruction itself is what must be grounded
+                ok, _why = C.prefilter(val if pred == "instruction" else prop,
+                                       text, self.owner_name,
                                        value=val, kind=kind)
                 if not ok:
                     continue
