@@ -112,8 +112,8 @@ and real-conversation text before pushing (the repo is public).
 
 ## Open items, in order
 
-1. Numbers to beat (notebook e297): LoCoMo test 61.7% (Mem0 64.6, RAG
-   56.6); blind v4 old state 2/44, new 42/44 (14B reader); blind v3 0/30
+1. Numbers to beat (notebook e297, e301): LoCoMo test 63.7% for the 0.5.0
+   tag (Mem0 64.6, RAG 56.6; multi-hop 48.5 vs 61.9); blind v4 old state 2/44, new 42/44 (14B reader); blind v3 0/30
    false memory, 23/23 controls. The gap to Mem0 is multi-hop (41.8 vs
    61.9%). Next ideas: more parser links (relations other than apposition),
    grouping a list's items in the notes, and an audit of the answer-view

@@ -15031,3 +15031,12 @@ and how to run everything).
 - Multi-hop stays the known limitation for launch (test 41.8% vs Mem0
   61.9%). What might move it without model calls: retrieving per item for
   list questions, or linking facts across conversations by shared entities.
+
+## Entry 301 — 2026-10-04 (LoCoMo test on the 0.5.0 release: 63.7%)
+
+- LoCoMo test (convs 2-9, 1307 questions, run once on the tag): sourcedrecall
+  0.5.0 63.7%, Mem0 2.2.1 64.6%, RAG 56.6%. Multi-hop 41.8 -> 48.5% against
+  01a88f5 (the wider reading for list questions and the parser's links, plus
+  the gate off), temporal 56.2%, single-hop 74.8%, open-domain 32.5%. 735
+  context tokens (Mem0 722, RAG 356); no model calls at ingest (Mem0 941).
+- Launch drafts and bench/REPRODUCE.md carry these numbers.
