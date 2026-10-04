@@ -548,3 +548,11 @@ def test_model_notes_are_listed_and_can_be_forgotten_by_id(pm, monkeypatch):
     assert out["forgotten"] is True
     assert [r["text"] for r in pm._load_notes()] == ["Dana Cole lives in Fitzroy."]
     assert "plays the violin." not in open(pm.export_markdown()).read().split("## Notes")[1]
+
+
+def test_the_browser_lists_model_notes_escaped(pm):
+    from sourcedrecall.browser import _render_memory
+    pm._save_notes("a", "2026-03-02", ["Dana Cole plays the <b>violin</b>."])
+    owner, groups = pm.memory_groups()
+    page = _render_memory(owner, groups)
+    assert "Notes written by your model" in page and "&lt;b&gt;violin" in page

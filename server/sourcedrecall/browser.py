@@ -128,7 +128,20 @@ def _render_memory(owner, groups, q="", rec=None):
     e = html.escape
     n = sum(len(g) for _, g in groups)
     body = "".join(f"<h2>{e(t)}</h2><ul>{''.join(_fact_li(f) for f in g)}</ul>"
-                   for t, g in groups) or "<p class='sub'>Nothing stored yet.</p>"
+                   for t, g in groups)
+    # 2026-10-05: notes written by the user's own model (opt-in notes mode)
+    try:
+        from sourcedrecall import profile_memory as _pm
+        notes = sorted(_pm._load_notes(), key=lambda r: str(r.get("date") or ""),
+                       reverse=True)
+    except Exception:
+        notes = []
+    if notes:
+        items = "".join(
+            f"<li>{e(r['text'])} <span class='sub'>{e(str(r.get('date') or ''))}"
+            f" · id <code>{e(_pm._note_id(r))}</code></span></li>" for r in notes)
+        body += f"<h2>Notes written by your model</h2><ul>{items}</ul>"
+    body = body or "<p class='sub'>Nothing stored yet.</p>"
     result = ""
     if q:
         if rec and rec.get("found"):
