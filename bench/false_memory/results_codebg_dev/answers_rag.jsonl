@@ -1,0 +1,40 @@
+{"id": "cd01", "key": "19073416d5941101340583754414c6bd22e75223", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd02", "key": "ee5a3a8fb0c2bb762e10faf2fdb5901b9f43a003", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd03", "key": "6ebc3b5a1d67005edef6c35aec867a499ddfcd6f", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd04", "key": "672d59e2f9f1e550a8bcf6712c29d90ce10e2c66", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The audit log is currently not specified to be in MongoDB, as the decision to move it there has not been made. The current database is not explicitly mentioned in the memory."]}
+{"id": "cd05", "key": "c410013f7a28eb215c4994b5a9d448ab37faf801", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["No, you mentioned that you never touch Docker locally and run the Flask app straight from a venv."]}
+{"id": "cd06", "key": "76a83b2ede6345c98c6c33b50bbe07b933084ef4", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The scheduler is written in Python, as indicated by the mention of `scheduler/parse.py`."]}
+{"id": "cd07", "key": "1b84f3c2ad8a417f379996daf6cb3de29fc7bc79", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["It's all hand-clicked in the console, which is a mess."]}
+{"id": "cd08", "key": "0f7ef5d2ba240e3ed882db7f6c7ef0c8e784b22b", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We are currently using GitHub Actions for CI."]}
+{"id": "cd09", "key": "9e9ee7c28a44c2e51fe52b32978ecd15263220bd", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We use pnpm as the package manager."]}
+{"id": "cd10", "key": "e5a57dcdf8685e0a72b8639e7a4c60f6112b90bd", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The pricing API is written in Go."]}
+{"id": "cd11", "key": "eed79f5564cacb36f4382b22eca36f5bd47637fa", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd12", "key": "656eb2ecf6c3e48c52c71034d64cd2996d03515a", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Our max line length is 80 columns."]}
+{"id": "cd13", "key": "f87504cc914e9731097a50bf0f042b3e9c6a402c", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The landing site is hosted on Fly.io."]}
+{"id": "cd14", "key": "6e9a21e21570a1502f983320084d1d9f2afa87e0", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You currently use Neovim."]}
+{"id": "cd15", "key": "d4d703a1c63ae397099a9dc0582ccd4e13868f03", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The invoice export is now due by June 30."]}
+{"id": "cd16", "key": "c5f23847b039f414d15a1d90d956119466b39c5d", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The notes app uses Postgres."]}
+{"id": "cd17", "key": "89f8ee172c32ff9edee6700effa9733938340c0e", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd18", "key": "45a2439e22fa50d4a8b717408ca238ffba2b170c", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd19", "key": "406bd3fcd88a0e79e82d5fb2587851977210ca40", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd20", "key": "dbb8e99555d48f51c984816e82ad59c371c98553", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd21", "key": "edbabab36c6319c38b37c517d587df2e6ec2223c", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd22", "key": "6dc300092302f24a3ee26b71c5c7ce40bf6dc9da", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know when your birthday is."]}
+{"id": "cd23", "key": "54f5131014736f081572b68a9aa6612bfecb969c", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd24", "key": "0c837f5573a60123f96e00967e2bc88c7d684dc7", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd25", "key": "192e942b32747b4d28a865aa495d3de8c3539280", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd26", "key": "cedcfd26594b07dee1107d8d07e11a783fe821db", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd27", "key": "75a5636d630e3676886961d57564d3a6a8b1a297", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd28", "key": "546977bc7710c3cffa5befb352404fa9a01d9f17", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd29", "key": "deee190531fbe7d0f9d45d2c76752735ca8be618", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd30", "key": "88f200cee32658c9b9d71efe53a5bac310287266", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd31", "key": "e4f2e7a2201a329149ebc845c4f1b78cda34ed71", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd32", "key": "f773c555516c90244498b1f495a7a3b3bb007ac5", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd33", "key": "afefbc6cc95432e8300ad6b315be81b455b34f57", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd34", "key": "baefbe64f7f115200c121476e3bcae240519c36b", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd35", "key": "1e3df5080f173f1870b1135925a2ff1d5b3f1771", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We use Poetry for dependency management in all our Python repos."]}
+{"id": "cd36", "key": "f73e730b9e887258cd7d29a536e299b6968c76e5", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You should not add comments in your code. I read the code, and I don't want narration."]}
+{"id": "cd37", "key": "630b6022f3390137fe8d079b6ddc90cabbe04a7c", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Always run the tests with `make test` after you change anything, before telling me it's done."]}
+{"id": "cd38", "key": "9adf913ba31f60d574e377a00b6f057172cd4d75", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We chose SQLite for the field-agent app because the tablets are offline most of the day and we need a local store that syncs later."]}
+{"id": "cd39", "key": "59852f4f800543776df4488c70d54ab57fdf5a3c", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The directory you must never touch is \"conftest\" in a sibling directory."]}
+{"id": "cd40", "key": "ae785a084676e82c6f15c1b3128220617b0ca21c", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["TypeScript files use kebab-case for their filenames."]}

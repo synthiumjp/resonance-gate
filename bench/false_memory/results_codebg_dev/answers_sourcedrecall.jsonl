@@ -1,0 +1,40 @@
+{"id": "cd01", "key": "9c9088d5a1e6b8999df89a0e8fa929060e535158", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd02", "key": "3a6cf72007095408f4203fa12a04637ca165a340", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You did not mention what runtime is used for running your tests."]}
+{"id": "cd03", "key": "44e468bd7804779359334b1fd32ec7b40f81106b", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You should use tabs, as Tobias insists on tabs and wants everything in Allman braces."]}
+{"id": "cd04", "key": "e4a09d07b98f97995b3e827a9b557b84ec06ab00", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The audit log is currently held in a SQL database, as indicated by the reference to \"[secret removed].sql\" in the memory."]}
+{"id": "cd05", "key": "f29819b6d45da2d229f83360dce81f04418e4128", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["No, you mentioned that you never touch Docker locally and instead run the Flask app straight from a venv."]}
+{"id": "cd06", "key": "477aeeeb12ed0e621b0f7600d6fb2835ceaff816", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The scheduler is written in Python."]}
+{"id": "cd07", "key": "da6efff9de00149d915787c545bab26646078b1c", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The staging infrastructure is managed manually through the console, as Terraform is not used for it."]}
+{"id": "cd08", "key": "341f88a6fc793b2ba1730cbbc5474e79aef1331a", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We are now on GitHub Actions."]}
+{"id": "cd09", "key": "2a715b6013cae83f95bd60a8fb94313395669cd5", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We use pnpm, as indicated by the recent switch mentioned on 2026-03-30."]}
+{"id": "cd10", "key": "f19d274b570eaf7d6d05d8aadc748d1dc6bb72db", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The pricing API is written in Go."]}
+{"id": "cd11", "key": "8a9a41872d4577e34ebe473cceb2ae1b261ba947", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are on the search platform team."]}
+{"id": "cd12", "key": "e6545cacf372d1bb8f0d650a571e80d867deb928", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Our max line length is 100 columns."]}
+{"id": "cd13", "key": "fa1cc15b2e5c3097f8aa7074ab9b53942159bad5", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The landing site is hosted on Fly.io."]}
+{"id": "cd14", "key": "51eee2219fe9e2afdfeeb8300b1fff819e399d66", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You use Neovim full time now."]}
+{"id": "cd15", "key": "19e83b463f5b66c59d31027fa8452736ac77ce82", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The invoice export is due by June 30."]}
+{"id": "cd16", "key": "493d933d11fe8b4f6fce3bc93d6922f325464dd5", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The notes app uses Postgres."]}
+{"id": "cd17", "key": "ae24c0ee287d5c8a8a6457db6a20a1d790765d8e", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd18", "key": "11fcf827296a06ba485be047384a381d79417431", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know your salary."]}
+{"id": "cd19", "key": "31214750415955f9a37a5b1be81f67e69af737fa", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd20", "key": "3e16d34cca4d6a86d076759269ba7e2d6bd9f5b1", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd21", "key": "7f6afdf983390fefff9cb132e6c187a7a3705d7f", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd22", "key": "41d127f1503a6a97b6119cc57c035fc3aceda434", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd23", "key": "1cca11f8e04a91176f581edc37c763d011f086e2", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd24", "key": "768760d1749ac9408b71780cc501be3ea201d46f", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd25", "key": "0ba119f926a09f2e8c153826346003e731df1ae7", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd26", "key": "f46e785a217125a0cf7c389ee25dd025ea9f29a1", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd27", "key": "5143063a1ad69a022cf725827d08b5ee0e0addcc", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd28", "key": "8b258a7a3689fc27c24a4323d3206f89b40c9e32", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd29", "key": "6594d246c62d9282f97543cf37cc398a0f0c8869", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd30", "key": "578c06997d1054a0d7ef436846486a2f70860853", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd31", "key": "e5ab44bcbff975e57964ae2832689244acc5ad0b", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd32", "key": "76df163b93cc05d9d7889fdd9180cdcdac8c5787", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd33", "key": "ed27f24bb615040e22cac46573e224c32cf3dca1", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd34", "key": "8c50b171d85e979b6156b80ff6dd63ab8c63561a", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cd35", "key": "bc29add15f4bc985d9780b742c4bc748b3cfb394", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We use Poetry for dependency management in all our Python repos."]}
+{"id": "cd36", "key": "07fb2e49e655211e509e61d01e1d5f095b65c03a", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You should avoid adding comments. I read the code, and I don't want narration."]}
+{"id": "cd37", "key": "880af4732b604ab4a7b4b0357ae8d944e8fa6e9f", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You should always run the tests with `make test` after you change anything."]}
+{"id": "cd38", "key": "fe03c3549c3501b6f9b129d343a732b0f4ff5adc", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We picked SQLite for the field-agent app because the tablets are offline most of the day and we need a local store that syncs later."]}
+{"id": "cd39", "key": "6f4353216c1261b888f81c9f72bbea736128f239", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You must never touch anything under legacy/payroll."]}
+{"id": "cd40", "key": "c113f1d44df1e60730d86b5151981c0de47e46ff", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The naming convention for TypeScript files is kebab-case."]}
