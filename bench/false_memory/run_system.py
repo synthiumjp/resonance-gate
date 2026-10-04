@@ -37,6 +37,20 @@ def main():
     if os.path.exists(out):
         done = {json.loads(l)["id"] for l in open(out)}
     cases = [json.loads(l) for l in open(os.environ.get("FM_CASES") or os.path.join(HERE, "cases.jsonl"))]
+    # 2026-10-04: FM_DISTRACTORS=<jsonl of conversations> stores that
+    # background in front of every scenario, the same for every system, so
+    # the relevant sentence has to be found among months of other sessions
+    # (FM_DISTRACTOR_COPIES repeats it with dates a year earlier each time)
+    dpath = os.environ.get("FM_DISTRACTORS")
+    if dpath:
+        base = [json.loads(l) for l in open(dpath)]
+        copies = int(os.environ.get("FM_DISTRACTOR_COPIES", "1"))
+        bg = []
+        for k in range(copies, 0, -1):
+            for cv in base:
+                y = int(cv["date"][:4]) - (k - 1)
+                bg.append(dict(cv, date=f"{y}{cv['date'][4:]}"))
+        cases = [dict(c, conversations=bg + c["conversations"]) for c in cases]
     want = set(a.ids.split(",")) if a.ids else None
     for c in cases:
         if want and c["id"] not in want:
