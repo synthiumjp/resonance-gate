@@ -934,7 +934,15 @@ def export_markdown(path=None):
         lines += [f"## {title}", ""]
         lines += [_md_line(f) for f in group]
         lines.append("")
-    if not groups:
+    notes = _load_notes()
+    if notes:
+        # 2026-10-05: notes written by the user's own model (opt-in), each
+        # with an id so it can be forgotten like any fact
+        lines += ["## Notes written by your model (from your conversations)", ""]
+        for r in sorted(notes, key=lambda r: str(r.get("date") or ""), reverse=True):
+            lines.append(f"- {r['text']}  [{r.get('date') or ''} · id `{_note_id(r)}`]")
+        lines.append("")
+    if not groups and not notes:
         lines += ["Nothing stored yet.", ""]
     path = path or memory_file()
     tmp = path + ".tmp"
@@ -959,10 +967,28 @@ def _find(fact_id):
     return None
 
 
+def _note_id(r):
+    import hashlib
+    return "n" + hashlib.sha1(f"{r.get('conv')}\x00{r['text']}".encode()).hexdigest()[:5]
+
+
 def profile_forget(fact_id):
     """Remove one fact by its id (as shown in recall results and MEMORY.md).
     A quoted sentence ("their words", ids starting with "u") can be
-    forgotten the same way."""
+    forgotten the same way, and so can a note written by the user's model
+    (ids starting with "n")."""
+    if str(fact_id).startswith("n"):
+        with _lock:
+            rows = _load_notes()
+            kept = [r for r in rows if _note_id(r) != fact_id]
+            if len(kept) != len(rows):
+                gone = [r for r in rows if _note_id(r) == fact_id][0]
+                _write_notes_file(kept)
+                _drop_embeddings()      # its vector must not stay on disk
+        if len(kept) != len(rows):
+            _export_quietly()
+            return {"forgotten": True, "fact": {"id": fact_id, "text": gone["text"],
+                                                "said": None}, "applied": "live"}
     f = _find(fact_id)
     if f is None:
         mem = _ensure_loaded()

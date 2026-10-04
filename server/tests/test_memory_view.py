@@ -530,3 +530,21 @@ def test_notes_are_off_by_default(pm):
                       owner_name="Dana Cole", date="2026-03-02")
     assert pm._load_notes() == []
     assert "note written by your model" not in pm.profile_context("What do I play?")["block"]
+
+
+def test_model_notes_are_listed_and_can_be_forgotten_by_id(pm, monkeypatch):
+    from sourcedrecall import notes as N
+    monkeypatch.setenv("SOURCEDRECALL_NOTES_URL", "http://127.0.0.1:9/v1")
+    monkeypatch.setenv("SOURCEDRECALL_NOTES_MODEL", "fake")
+    monkeypatch.setattr(N, "_call", lambda p, timeout=600:
+                        "Dana Cole plays the violin.\nDana Cole lives in Fitzroy.")
+    pm.profile_ingest([U("I play the violin and I live in Fitzroy.")], conversation_id="a",
+                      owner_name="Dana Cole", date="2026-03-02")
+    md = open(pm.export_markdown()).read()
+    assert "## Notes written by your model" in md
+    import re
+    nid = re.search(r"Dana Cole plays the violin\.\s+\[[^\]]*id `(n[0-9a-f]+)`", md).group(1)
+    out = pm.profile_forget(nid)
+    assert out["forgotten"] is True
+    assert [r["text"] for r in pm._load_notes()] == ["Dana Cole lives in Fitzroy."]
+    assert "plays the violin." not in open(pm.export_markdown()).read().split("## Notes")[1]
