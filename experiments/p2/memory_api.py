@@ -1944,6 +1944,21 @@ class Memory:
                     if not _stale_passing(f)][:max_facts]
             keep += [f for f in self.provisional_profile(top=max_facts * 3)
                      if not _stale_passing(f)][:max_facts - len(keep)]
+            # 2026-10-04: standing instructions to the assistant ("never add
+            # comments to my code", "always run the tests") lead the summary
+            # in every session -- they are rules for the assistant, not facts
+            # that wait for a matching question
+            instr = []
+            for st, prov in ((self.g.nodes, False), (self.g.provisional, True)):
+                for nd in st.values():
+                    if (nd.get("attr") == "instruction" and nd.get("current", True)
+                            and self._visible(nd)):
+                        instr.append(self._fact(nd, provisional=prov))
+            instr.sort(key=_f_date)
+            ids = {f.get("id") for f in instr}
+            keep = [f for f in keep if f.get("id") not in ids]
+            for f in instr:
+                lines.append(f"- (standing instruction) {_render_fact(f)}")
             for f in keep:
                 lines.append(f"- {_render_fact(f)}")
             head = "[MEMORY: what the user has told you]"

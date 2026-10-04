@@ -450,3 +450,15 @@ def test_project_facts_stay_and_the_persons_preferences_travel(pm, tmp_path):
     assert "SQL" in lang and "Rust" not in lang
     tabs = pm.profile_context("Should I use tabs or spaces?", scope=str(b))["block"]
     assert "tabs everywhere" in tabs and "Rust" not in tabs
+
+
+def test_standing_instructions_lead_every_sessions_summary(pm, tmp_path):
+    a, b = tmp_path / "proj-a", tmp_path / "proj-b"
+    a.mkdir(); b.mkdir()
+    pm.profile_ingest([U("I live in Fitzroy."), U("Please never add comments to my code."),
+                       U("This repo deploys to Fly.io.")],
+                      conversation_id="a", owner_name="Sam Reed", date="2026-03-01", scope=str(a))
+    block = pm.profile_context(None, scope=str(b))["block"]
+    lines = [l for l in block.splitlines() if l.startswith("- ")]
+    assert lines and "(standing instruction)" in lines[0] and "never add comments" in lines[0]
+    assert "Fly.io" not in block
