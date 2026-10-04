@@ -39,7 +39,7 @@ with an Ollama-served copy of the same model on earlier calls.
 
 Data: `locomo10.json` from https://github.com/snap-research/locomo. We use
 conversations 0-1 for development and 2-9 as the test set; categories 1-4
-(categories 5, adversarial, are left out as in most published comparisons).
+(category 5, adversarial, is left out, as in most published comparisons).
 
 ```bash
 cd bench/locomo
