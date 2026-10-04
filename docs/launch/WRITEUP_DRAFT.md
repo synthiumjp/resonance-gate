@@ -1,7 +1,7 @@
 # Memory without model calls: what a grammar parser is good for
 
-Draft, 2026-10-04. Numbers marked (unaudited) are pending a check of every
-flagged answer.
+Draft, 2026-10-04. The false-memory answers were audited (every flagged answer
+read; counts in the notebook). The LoCoMo numbers are not audited.
 
 ## The question
 
@@ -87,20 +87,20 @@ LoCoMo, conversations 2-9, 1,307 questions:
 | model calls to store | 0 | 941 | 0 |
 | context tokens per question | 638 | 722 | 356 |
 
-Blind change-of-state set v4 (44 changes, 16 unchanged), reader's answers
-(unaudited):
+Blind change-of-state set v4 (44 changes, 16 unchanged), reader's answers,
+every flagged answer checked by hand (one judge error removed, ours, 4B):
 
 | | sourcedrecall 0.5 | sourcedrecall 0.4.6 | plain retrieval |
 |---|---|---|---|
 | old state given as current, 14B reader | 2/44 | 10/44 | 7/44 |
 | new state given, 14B reader | 42/44 | 34/44 | 36/44 |
-| old state given as current, 4B reader | 3/44 | 11/44 | 5/44 |
+| old state given as current, 4B reader | 2/44 | 11/44 | 5/44 |
 | new state given, 4B reader | 35/44 | 32/44 | 28/44 |
 | unchanged, answered | 16/16 | 16/16 | 16/16 |
 
 Blind set v3 (negations, things never said, attributes never given, claims
 the assistant made about the user, stale facts, paraphrased questions), 14B
-reader (unaudited): sourcedrecall 0/30 false memories and 23/23 paraphrased
+reader: sourcedrecall 0/30 false memories and 23/23 paraphrased
 questions answered; plain retrieval 0/30 and 23/23; Mem0 2/30 and 23/23.
 
 ## What did not work

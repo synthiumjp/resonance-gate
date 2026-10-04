@@ -37,12 +37,14 @@ things that changed, 16 that did not). The reader's answer is judged:
 |---|---|---|
 | answer gives the old state as current (14B reader) | 2/44 | 7/44 |
 | answer gives the new state (14B reader) | 42/44 | 36/44 |
-| answer gives the old state as current (4B reader) | 3/44 | 5/44 |
+| answer gives the old state as current (4B reader) | 2/44 | 5/44 |
 | answer gives the new state (4B reader) | 35/44 | 28/44 |
 | unchanged things answered | 16/16 | 16/16 |
 
-<!-- TODO before launch: audited numbers (answer view), LoCoMo test rerun on
-the release version, link to the write-up. -->
+<!-- TODO before launch: LoCoMo test rerun on the release version. -->
+"New state given" counts answers containing the expected words; a few
+answers give it in other words (ours 3, plain retrieval 2, with the 4B
+reader).
 
 Where it is weaker: questions that need several facts from different
 conversations put together (LoCoMo multi-hop). Mem0 makes a model call for
