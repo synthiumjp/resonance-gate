@@ -15156,3 +15156,24 @@ and how to run everything).
 - Plugin installer handles native Windows (Git Bash): Scripts\ and .exe, the
   py launcher, python -m pip. macOS fresh install unchanged; Windows itself
   untested.
+
+## Entry 308 — 2026-10-05 (an opt-in notes mode; what a GPT-4-class test would cost)
+
+- JP: prototype model-assisted memory as a feature to turn on, and show the
+  benchmarks for both modes. notes.py (dd2b2ac): with
+  SOURCEDRECALL_NOTES_URL/_MODEL set, one call per stored conversation to a
+  model the user runs writes short third-person notes of the lasting facts
+  the user stated; kept with the conversation and date; searched with the
+  messages (6 per question, 12 for a list question) and shown as "(note
+  written by your model)"; replaced when a session is re-sent; dropped with
+  any forgotten sentence's conversations. Off by default; the default path
+  is unchanged (suite 1073).
+- Why notes: Mem0's multi-hop lead comes from short merged memories -- the
+  same tokens cover more items than our whole messages do. One call per
+  conversation, against Mem0's per-exchange calls (941 on LoCoMo test).
+- GPT-4-class cost estimate for one full comparison (LoCoMo test reader +
+  judge for three systems, Mem0 re-ingest, false-memory and coding sets):
+  about $3 with GPT-4o-mini, $30-35 with GPT-4o/4.1; needs JP's approval and
+  key (local-only rule).
+- Running: LoCoMo test at f078bf4 (list breadth 16), the cross-project
+  preference set (cases_dev_prefs), LoCoMo dev in notes mode.
