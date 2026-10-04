@@ -98,6 +98,12 @@ child processes with them.
 
 ## Releasing
 
+PyPI wheel: `python tools/build_wheel.py` (needs `pip install build`) writes
+`server/dist/sourcedrecall-<version>-py3-none-any.whl`; the version is in
+`server/pyproject.toml`. Test it in a fresh venv outside the repo before
+uploading (`~/jpwork/wheeltest.sh` on the Mac). Not uploaded yet.
+
+
 Bump `plugins/sourcedrecall/.claude-plugin/plugin.json` version, commit, tag
 `sourcedrecall-v<version>`, push the branch and the tag. A fresh install from
 the tag: `CLAUDE_PLUGIN_ROOT=plugins/sourcedrecall CLAUDE_PLUGIN_DATA=<scratch>

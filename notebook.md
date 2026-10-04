@@ -14999,3 +14999,20 @@ and how to run everything).
   it in other words; v3 sourcedrecall and RAG 0 flags, Mem0 2 genuine.
   RAG's 4B answers on v4 being audited for parity.
 - Launch drafts in docs/launch/ (README_DRAFT.md, WRITEUP_DRAFT.md).
+
+## Entry 299 — 2026-10-04 (launch prep: a wheel, a lean tool list, and a bug the wheel found)
+
+- PyPI name `sourcedrecall` is free. tools/build_wheel.py builds a
+  self-contained wheel (236 KB): the 20 experiments/p2 modules the server
+  imports, found by walking its imports, plus rgx, copied into
+  sourcedrecall/_core; the bridges prefer a checkout and fall back to _core.
+  Tested on the Mac in a fresh venv from the wheel alone: install 24 s
+  (pip cache warm), setup, CLI and MCP all run outside the repo.
+- The MCP server lists 12 profile_* tools; the four rg-1.1 triple tools need
+  SOURCEDRECALL_LEGACY_TOOLS=1 (a new user saw two recall and two forget).
+- The wheel smoke test found a false label: "It is four years since I left
+  my home country" ended "my grandma lives in my home country, Sweden". The
+  user's own ending (left, quit, sold, stopped) no longer ends a fact about
+  one of their people. Stale dev sets unchanged.
+- Per question: ~0.3 s for one store (fact retrieval and message search
+  about half each, both the re-ranker); LoCoMo's 0.6-0.75 s is two stores.
