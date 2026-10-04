@@ -1835,7 +1835,13 @@ class Memory:
         # 2026-10-04 (LoCoMo dev, multi-hop): a question asking for a set
         # ("What activities does Melanie partake in?") is answered across
         # many conversations, so it reads more of them
-        k = max(max_facts * 2, 10) if _LIST_Q.search(query or "") else max_facts
+        # 2026-10-05 (LoCoMo dev): reading 16 for a list question (or "what
+        # has X ...", everything so far) answered 3 more multi-hop questions
+        # than 10 and lost none; 727 -> 780 tokens on average
+        listy = (_LIST_Q.search(query or "")
+                 or re.match(r"^\W*what\s+(?:has|have)\s", query or "", re.I))
+        k = (max(max_facts * 2, int(os.environ.get("RG_LIST_K", "16"))) if listy
+             else max_facts)
         hits = [m for m in self.messages_for(query, k=k) if visible(m)]
         # Two routes to a message: the parser's facts (their source
         # messages, in rank order) and the message index. The parser's

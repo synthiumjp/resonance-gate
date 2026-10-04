@@ -1,0 +1,6 @@
+conv 0: 152 questions to retrieve
+  ingested {'speaker': 'Caroline', 'messages': 419, 'model_calls': 0, 'seconds': 76.58745813369751}
+  ingested {'speaker': 'Melanie', 'messages': 419, 'model_calls': 0, 'seconds': 77.01503586769104}
+conv 1: 81 questions to retrieve
+  ingested {'speaker': 'Jon', 'messages': 369, 'model_calls': 0, 'seconds': 59.37136888504028}
+  ingested {'speaker': 'Gina', 'messages': 369, 'model_calls': 0, 'seconds': 60.78144288063049}

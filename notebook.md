@@ -15146,3 +15146,13 @@ and how to run everything).
   merging at write time -- which is what Mem0's 941 model calls buy. Kept
   as the known limitation: test 48.5% vs Mem0 61.9%, RAG 39.3%.
 - MEMORY.md lists standing instructions first, under their own heading.
+
+## Entry 307 — 2026-10-05 (breadth for list questions; native Windows paths)
+
+- A list question (or "what has X ...") reads 16 messages instead of 10:
+  LoCoMo dev multi-hop 41.9 -> 48.8% (+3 items, none lost), overall 66.5 ->
+  67.8% (RAG 62.2%); 727 -> 780 tokens on average (only those questions read
+  more). Default now.
+- Plugin installer handles native Windows (Git Bash): Scripts\ and .exe, the
+  py launcher, python -m pip. macOS fresh install unchanged; Windows itself
+  untested.
