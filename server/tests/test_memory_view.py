@@ -485,3 +485,13 @@ def test_prose_only_drops_code_and_traces():
     t = ("Getting this:\nTraceback (most recent call last):\n  File \"app.py\", line 3\n"
          "KeyError: 'x'\nI moved the config to YAML last week.\n```py\nx = 1\n```")
     assert P._prose_only(t) == "Getting this:\nI moved the config to YAML last week."
+
+
+def test_memory_file_lists_standing_instructions_first(pm):
+    pm.profile_ingest([U("I live in Fitzroy."), U("Please never add comments to my code.")],
+                      conversation_id="a", owner_name="Dana Cole", date="2026-03-02")
+    md = open(pm.export_markdown()).read()
+    sections = [l for l in md.splitlines() if l.startswith("## ")]
+    assert sections[0] == "## What you have asked the assistant to always do"
+    first = md.split(sections[0])[1].split("## ")[0]
+    assert "never add comments" in first and "Fitzroy" not in first

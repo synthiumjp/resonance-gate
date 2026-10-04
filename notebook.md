@@ -15127,3 +15127,22 @@ and how to run everything).
   66.1 -> 66.5% (RAG 62.2%).
 - Released as 0.5.2 with the queued first session, standing instructions in
   the summary, and the lighter setup.
+
+## Entry 306 — 2026-10-05 (multi-hop: the deterministic tricks are spent)
+
+- LoCoMo dev multi-hop misses at 0.5.2 (25 of 43): 15 have the evidence in
+  the context and the reader answers with the first item ("Clarinet" with
+  clarinet and violin listed; RAG fails most of these too), 10 do not have
+  it. Tried, each measured item by item on dev, none changed an answer's
+  correctness:
+    - gathering the owner's facts with the question's verb into one line
+      ("plays the clarinet; plays the violin"): fired on 1 question, wrongly
+      (the parser stores "started learning the violin" under "learn");
+    - a closing cue line for list questions: reached the reader on 16
+      questions, changed 6 answers, corrected none;
+    - earlier (e300, e304): a header cue, WordNet-gathered items, leaving
+      names used as address out of the index.
+- What is left for multi-hop: more breadth per question (tokens), or
+  merging at write time -- which is what Mem0's 941 model calls buy. Kept
+  as the known limitation: test 48.5% vs Mem0 61.9%, RAG 39.3%.
+- MEMORY.md lists standing instructions first, under their own heading.

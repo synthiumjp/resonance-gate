@@ -884,11 +884,16 @@ def memory_groups():
         if pr:
             by_project.setdefault(pr, []).append(f)
     unbound = [f for f in live if not _project(f)]
+    # 2026-10-05: standing instructions to the assistant get their own
+    # section, first, where they are easy to see and to remove
+    instr = [f for f in live if f.get("attribute") == "instruction"]
+    unbound = [f for f in unbound if f.get("attribute") != "instruction"]
     about = [f for f in unbound if _owner_subject(f.get("text"), owner)]
     world = [f for f in unbound if not _owner_subject(f.get("text"), owner)]
     gone = [f for f in facts if f["_tier"] != "hearsay" and f.get("current") is False]
     heard = [f for f in facts if f["_tier"] == "hearsay"]
-    groups = [("About you", about), ("No longer true", gone),
+    groups = [("What you have asked the assistant to always do", instr),
+              ("About you", about), ("No longer true", gone),
               ("Other things you mentioned", world)]
     for proj in sorted(by_project):
         groups.append((f"Project: {os.path.basename(proj) or proj} ({proj})",
