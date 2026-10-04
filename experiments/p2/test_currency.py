@@ -540,3 +540,17 @@ def test_a_place_in_the_old_fact_is_not_a_second_person():
 ])
 def test_passing_is_judged_on_the_facts_own_clause(text, said, want):
     assert C.passing(text, said) is want
+
+
+def test_the_users_own_ending_does_not_end_someone_elses_fact():
+    """2026-10-04 (wheel smoke test): "I left my home country" ended "my
+    grandma lives in my home country, Sweden"."""
+    g = _G({"a": _n("a", "grandma_live_in", "in sam reed's home country sweden", "c1",
+                    text="Sam Reed's grandma lives in Sam Reed's home country Sweden"),
+            "b": _n("b", "leave", "sam reed's home country", "c2",
+                    text="Sam Reed left Sam Reed's home country"),
+            "c": _n("c", "live_in", "in sam reed's home country", "c1",
+                    text="Sam Reed lives in Sam Reed's home country")})
+    out = C.mark_ceased(g, owner="Sam Reed", order=ORDER)
+    assert ("a", "b") not in out
+    assert ("c", "b") in out

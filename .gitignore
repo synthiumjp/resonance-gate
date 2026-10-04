@@ -26,3 +26,5 @@ private_chat/
 .venv-train/
 data/
 .aider*
+server/sourcedrecall/_core/
+server/dist/

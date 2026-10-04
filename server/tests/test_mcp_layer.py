@@ -5,17 +5,34 @@ round-trips to the substrate."""
 import asyncio
 
 
-def test_all_tools_registered_and_callable(tmp_path, monkeypatch):
-    monkeypatch.setenv("SOURCEDRECALL_STATE", str(tmp_path / "state"))
-    monkeypatch.setenv("SOURCEDRECALL_BROWSER_PORT", "0")
-    import sourcedrecall.mcp_server as srv
-
-    tools = asyncio.run(srv.mcp.list_tools())
-    assert {t.name for t in tools} == {
-        "remember", "recall", "update", "forget",
-        "profile_dynamics", "profile_quarantine", "profile_conflicts",
+PROFILE_TOOLS = {"profile_dynamics", "profile_quarantine", "profile_conflicts",
         "profile_recall", "profile_context", "profile_correct",
         "profile_status", "profile_rehydrate", "profile_ingest", "profile_forget", "profile_confirm", "profile_export"}
+
+
+def _server(monkeypatch, tmp_path, legacy):
+    import importlib
+    monkeypatch.setenv("SOURCEDRECALL_STATE", str(tmp_path / "state"))
+    monkeypatch.setenv("SOURCEDRECALL_BROWSER_PORT", "0")
+    if legacy:
+        monkeypatch.setenv("SOURCEDRECALL_LEGACY_TOOLS", "1")
+    else:
+        monkeypatch.delenv("SOURCEDRECALL_LEGACY_TOOLS", raising=False)
+    import sourcedrecall.mcp_server as srv
+    return importlib.reload(srv)
+
+
+def test_a_new_user_sees_only_the_profile_tools(tmp_path, monkeypatch):
+    srv = _server(monkeypatch, tmp_path, legacy=False)
+    tools = asyncio.run(srv.mcp.list_tools())
+    assert {t.name for t in tools} == PROFILE_TOOLS
+    assert srv.service is None
+
+
+def test_all_tools_registered_and_callable(tmp_path, monkeypatch):
+    srv = _server(monkeypatch, tmp_path, legacy=True)
+    tools = asyncio.run(srv.mcp.list_tools())
+    assert {t.name for t in tools} == {"remember", "recall", "update", "forget"} | PROFILE_TOOLS
 
     # each tool advertises a description (shown to the calling model)
     assert all(t.description for t in tools)

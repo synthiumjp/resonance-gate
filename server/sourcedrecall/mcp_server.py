@@ -1,5 +1,6 @@
-"""sourcedrecall MCP server (stdio). Exposes four substrate tools over the Resonance
-Gate rg-1.1 VSA substrate, plus nine profile_* tools (dogfood-v1) that bridge
+"""sourcedrecall MCP server (stdio). Exposes the profile_* tools (with
+SOURCEDRECALL_LEGACY_TOOLS=1 also four substrate tools over the Resonance
+Gate rg-1.1 VSA substrate). The profile_* tools (dogfood-v1) that bridge
 the p2 world/profile memory (experiments/p2) in as a read+correct+rehydrate+
 ingest slice — see sourcedrecall/profile_memory.py. NO language model
 anywhere in this server, ingestion included — no mouth, no extractor that
@@ -18,6 +19,7 @@ Env:
                                (default when run as a server: $SOURCEDRECALL_STATE/conversations)
   RG_PREWARM                   0 = do not load models in the background at startup
   SOURCEDRECALL_OWNER          fallback owner_name for profile_ingest (see profile_memory.py)
+  SOURCEDRECALL_LEGACY_TOOLS   1 = also the rg-1.1 triple tools (remember/recall/update/forget)
 """
 
 import os
@@ -25,19 +27,30 @@ import os
 from sourcedrecall import substrate_path  # noqa: F401 — sys.path + offline env
 from mcp.server.fastmcp import FastMCP
 
-from sourcedrecall.service import MemoryService
 from sourcedrecall.browser import start_browser
 from sourcedrecall import profile_memory as pmem
 
 STATE_DIR = os.environ.get("SOURCEDRECALL_STATE",
                            os.path.expanduser("~/.sourcedrecall"))
 BROWSER_PORT = int(os.environ.get("SOURCEDRECALL_BROWSER_PORT", "7071"))
+# 2026-10-04: the four triple tools of the rg-1.1 substrate (remember,
+# recall, update, forget) are off unless asked for. Next to profile_recall
+# and profile_forget they gave a new user two "recall" and two "forget"
+# tools, and they load the older substrate at every start.
+LEGACY_TOOLS = os.environ.get("SOURCEDRECALL_LEGACY_TOOLS") == "1"
 
-service = MemoryService(STATE_DIR)
+service = None
+if LEGACY_TOOLS:
+    from sourcedrecall.service import MemoryService
+    service = MemoryService(STATE_DIR)
 mcp = FastMCP("sourcedrecall")
 
 
-@mcp.tool()
+def _legacy_tool(fn):
+    return mcp.tool()(fn) if LEGACY_TOOLS else fn
+
+
+@_legacy_tool
 def remember(subject: str, relation: str, object: str,
              source: str = "caller-stated") -> dict:
     """Store one explicit structured fact as a (subject, relation, object)
@@ -49,7 +62,7 @@ def remember(subject: str, relation: str, object: str,
     return service.remember(subject, relation, object, source)
 
 
-@mcp.tool()
+@_legacy_tool
 def recall(query: str, top_k: int = 10) -> dict:
     """Recall stored facts about `query` (resolved as a subject/entity).
     Returns {resolved, facts:[{subject,relation,object,source,record_id,
@@ -62,7 +75,7 @@ def recall(query: str, top_k: int = 10) -> dict:
     return service.recall(query, top_k)
 
 
-@mcp.tool()
+@_legacy_tool
 def update(subject: str, relation: str, object: str,
            source: str = "caller-stated") -> dict:
     """Explicitly correct a fact: write (subject, relation, object) and
@@ -74,7 +87,7 @@ def update(subject: str, relation: str, object: str,
     return service.update(subject, relation, object, source)
 
 
-@mcp.tool()
+@_legacy_tool
 def forget(subject: str, relation: str = None, object: str = None) -> dict:
     """Delete stored facts. With subject only: forget everything about the
     subject. With subject+relation: forget facts under that relation (and its

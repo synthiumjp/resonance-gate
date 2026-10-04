@@ -504,6 +504,22 @@ def _latest(nd, order=None):
     return ds[-1] if ds else ""
 
 
+_PERSON_WORDS = ("sister|brother|mum|mom|mother|dad|father|parents?|wife|husband|"
+                 "partner|boyfriend|girlfriend|fiance|fiancee|friend|mate|boss|"
+                 "manager|colleague|coworker|son|daughter|kids?|child|children|"
+                 "baby|neighbou?r|cousin|aunt|uncle|grandma|grandmother|grandpa|"
+                 "grandfather|nan|nana|granny|flatmate|roommate|family")
+
+
+def _about_person(text, owner):
+    """Is this fact about one of the owner's people ("<owner>'s grandma
+    lives in Sweden")?"""
+    if not text or not owner:
+        return False
+    return bool(re.match(rf"^\s*{re.escape(owner)}'s\s+(?:\w+\s+)?(?:{_PERSON_WORDS})\b",
+                         text, re.I))
+
+
 def mark_ceased(g, owner=None, order=None):
     """Mark nodes a later cessation statement has ended. Returns the list of
     (ceased_node_id, cessation_node_id) pairs it set, for the caller to log.
@@ -555,6 +571,12 @@ def mark_ceased(g, owner=None, order=None):
                 # place in the same fact ("...a trip to Japan") is not a
                 # second person (false-memory bench b05)
                 if by_name and _named_others(nd.get("text"), owner) - toks:
+                    continue
+                # 2026-10-04 (wheel smoke test): "I left my home country"
+                # ended "my grandma lives in my home country, Sweden". The
+                # user's own ending (left, quit, sold, stopped) does not end
+                # a fact about another person.
+                if not by_name and _about_person(nd.get("text"), owner):
                     continue
                 if cdate == "" or ndate == "" or ndate >= cdate:
                     continue

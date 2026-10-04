@@ -54,10 +54,8 @@ import uuid as _uuidlib
 # Packaging debt (v1): experiments/p2 is a script directory, not an installed
 # package. Bridge it onto sys.path here, and only here, so the rest of the
 # server never has to know p2 isn't packaged yet.
-_RG_ROOT = os.environ.get(
-    "RG_ROOT",
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-_P2_ROOT = os.path.join(_RG_ROOT, "experiments", "p2")
+from sourcedrecall._bridge import code_roots as _code_roots
+_RG_ROOT, _P2_ROOT = _code_roots()
 for _p in (_RG_ROOT, _P2_ROOT):
     if _p not in sys.path:
         sys.path.insert(0, _p)

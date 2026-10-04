@@ -1,7 +1,7 @@
 [project]
 name = "sourcedrecall"
-version = "0.1.0"
-description = "sourcedrecall — LLM-free MCP memory server over the Resonance Gate VSA substrate: explicit structured facts, honest no-match, surfaced conflicts"
+version = "0.5.0"
+description = "Memory for AI agents that never calls a language model to store anything: your own dated messages, chosen and labelled by a grammar parser. MCP server and command line."
 requires-python = ">=3.10"
 license = "Apache-2.0"
 authors = [{ name = "Jon-Paul Cacioli" }]
@@ -39,6 +39,8 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["sourcedrecall"]
+# the memory code copied in by tools/build_wheel.py (git-ignored)
+artifacts = ["sourcedrecall/_core/**"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

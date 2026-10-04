@@ -32,8 +32,8 @@ HF_MODELS = [
     ("conflict checker (NLI)", "cross-encoder/nli-deberta-v3-xsmall"),
     ("triple-store encoder", "sentence-transformers/all-MiniLM-L6-v2"),
 ]
-_P2 = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(
-    os.path.abspath(__file__)))), "experiments", "p2")
+from sourcedrecall._bridge import code_roots as _code_roots
+_P2 = _code_roots()[1]
 
 
 def _du(path):

@@ -246,7 +246,8 @@ Separately from conversation memory, the server can store facts you hand it
 already structured, as `(subject, relation, object)` triples. These four
 tools do not read conversations and do not share storage with the
 `profile_*` tools (they live in `SOURCEDRECALL_STATE`, default
-`~/.sourcedrecall`).
+`~/.sourcedrecall`). They are off by default; set
+`SOURCEDRECALL_LEGACY_TOOLS=1` in the server's environment to turn them on.
 
 ### The four triple tools
 
