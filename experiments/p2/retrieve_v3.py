@@ -38,6 +38,75 @@ def _models():
     return _bi, _ce
 
 
+# 2026-10-04: embeddings are kept on disk, keyed by the text, so an index
+# rebuilt after every stored conversation embeds only what is new. Without it
+# 20,000 messages took 46 s to index on the Mac, on the first question after
+# each session. RG_MEMORY_DIR/embeddings.bin: fixed-size records (20-byte
+# key, then the float32 vector), appended; a torn last record is ignored.
+# Forgetting deletes the file (profile_memory.profile_forget).
+_EMB_MODEL = "bge-small-en-v1.5"
+_EMB_DIM = 384
+_EMB_CACHE = {}
+
+
+def emb_cache_path():
+    d = os.environ.get("RG_MEMORY_DIR")
+    if not d or os.environ.get("RG_EMB_CACHE") == "0":
+        return None
+    return os.path.join(d, "embeddings.bin")
+
+
+def _emb_key(text):
+    import hashlib
+    return hashlib.sha1(f"{_EMB_MODEL}\x00{text}".encode("utf-8")).digest()
+
+
+def _load_emb(path):
+    import numpy as np
+    rec = 20 + 4 * _EMB_DIM
+    out = {}
+    try:
+        with open(path, "rb") as fh:
+            data = fh.read()
+    except OSError:
+        return out
+    for i in range(len(data) // rec):
+        r = data[i * rec:(i + 1) * rec]
+        out[r[:20]] = np.frombuffer(r[20:], dtype=np.float32)
+    return out
+
+
+def _encode_cached(bi, texts):
+    import numpy as np
+    path = emb_cache_path()
+    if path is None:
+        return bi.encode(texts, batch_size=256, show_progress_bar=False,
+                         normalize_embeddings=True)
+    cache = _EMB_CACHE.get(path)
+    if cache is None or not os.path.exists(path):
+        cache = _EMB_CACHE[path] = _load_emb(path)
+    keys = [_emb_key(t) for t in texts]
+    miss = list(dict.fromkeys(k for k in keys if k not in cache))
+    if miss:
+        first = {}
+        for k, t in zip(keys, texts):
+            first.setdefault(k, t)
+        vecs = np.asarray(bi.encode([first[k] for k in miss], batch_size=256,
+                                    show_progress_bar=False,
+                                    normalize_embeddings=True), dtype=np.float32)
+        try:
+            with open(path, "ab") as fh:
+                for k, v in zip(miss, vecs):
+                    fh.write(k + v.tobytes())
+        except OSError:
+            pass
+        for k, v in zip(miss, vecs):
+            cache[k] = v
+    if not keys:
+        return np.zeros((0, _EMB_DIM), dtype=np.float32)
+    return np.stack([cache[k] for k in keys])
+
+
 class IndexV3:
     """Per-memory-state index: BM25 tables + dense embeddings + persona set."""
 
@@ -62,8 +131,7 @@ class IndexV3:
         self.idf = {x: math.log(1 + (n - c + 0.5) / (c + 0.5)) for x, c in df.items()}
         self.avgdl = sum(len(t) for t in self.docs) / max(n, 1)
         self.texts = [f"{d['attr']}: {d['value']}" for d in self.facts]
-        self.emb = bi.encode(self.texts, batch_size=256, show_progress_bar=False,
-                             normalize_embeddings=True)
+        self.emb = _encode_cached(bi, self.texts)
         # Owner name for proposition rendering (entry 178 defect 5): unprefixed
         # facts belong to the profile owner, so the renderer needs it to say
         # "Martin Mark's ..." rather than "The user's ...".

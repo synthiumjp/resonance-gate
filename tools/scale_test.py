@@ -115,6 +115,25 @@ def run(size, v3=True):
     for i, sess in enumerate(D.SESSIONS):
         pm.profile_ingest(sess, title=f"session {i+1}", owner_name=D.OWNER)
     ingest_s = time.time() - t0
+    # 2026-10-04: the product path -- the block an agent gets. The first one
+    # after the store is built pays any index build; then one more session
+    # is stored and the next block pays the rebuild (embeddings are saved,
+    # so only the new messages are embedded).
+    a = time.time()
+    pm.profile_context("Where do I work?")
+    cold_ctx_s = time.time() - a
+    a = time.time()
+    pm.profile_ingest([{"role": "user", "content": "Back from the long weekend, the garden needs work."}],
+                      conversation_id="scale-extra", owner_name=D.OWNER)
+    one_session_s = time.time() - a
+    a = time.time()
+    pm.profile_context("Where do I work?")
+    after_ingest_ctx_s = time.time() - a
+    ctx_lat = []
+    for q in list(D.ANSWERABLE)[:10]:
+        a = time.time()
+        pm.profile_context(q)
+        ctx_lat.append(time.time() - a)
     st = pm.profile_status()
     pm.profile_recall("warm up")
     lat = []
@@ -156,6 +175,9 @@ def run(size, v3=True):
         "median_ms": round(1000 * statistics.median(lat)),
         "p95_ms": round(1000 * sorted(lat)[int(0.95 * (len(lat) - 1))]),
         "ingest_s": round(ingest_s),
+        "cold_ctx_s": round(cold_ctx_s, 1), "one_session_s": round(one_session_s, 1),
+        "after_ingest_ctx_s": round(after_ingest_ctx_s, 1),
+        "ctx_median_ms": round(1000 * statistics.median(ctx_lat)),
         "leaks": leaks, "misses": misses,
     }
 
@@ -165,7 +187,8 @@ def main():
     ap.add_argument("--sizes", type=int, nargs="+", default=[0, 250, 1000, 2500])
     a = ap.parse_args()
     cols = ["filler", "facts", "rank1", "pool", "abstain", "partial",
-            "ho_found", "ho_refused", "median_ms", "p95_ms", "ingest_s"]
+            "ho_found", "ho_refused", "median_ms", "p95_ms", "ingest_s",
+            "cold_ctx_s", "one_session_s", "after_ingest_ctx_s", "ctx_median_ms"]
     rows = []
     for n in a.sizes:
         row = run(n)

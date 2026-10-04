@@ -626,6 +626,8 @@ def profile_correct(action, attribute, value, new_attribute=None, exact=False,
         path = _corrections_path()
         with open(path, "a") as f:
             f.write(json.dumps(correction) + "\n")
+        if action == "deny":
+            _drop_embeddings()
 
         if action == "retype":
             _state["needs_reload"] = True
@@ -953,6 +955,22 @@ def profile_forget(fact_id):
     _export_quietly()
     return {"forgotten": True, "fact": {k: f[k] for k in ("id", "text", "said")},
             "applied": out.get("applied")}
+
+
+def _drop_embeddings():
+    """Forgetting removes the saved vectors too (retrieve_v3's on-disk cache):
+    an embedding of a forgotten sentence must not stay on disk. They are
+    rebuilt from what remains on the next question; the message index is
+    rebuilt without the forgotten words."""
+    import retrieve_v3 as _RV3
+    p = _RV3.emb_cache_path()
+    if p:
+        _RV3._EMB_CACHE.pop(p, None)
+        try:
+            os.remove(p)
+        except OSError:
+            pass
+    _state["msg_index"] = None
 
 
 def _forget_names(sentence):

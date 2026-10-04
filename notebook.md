@@ -15040,3 +15040,21 @@ and how to run everything).
   the gate off), temporal 56.2%, single-hop 74.8%, open-domain 32.5%. 735
   context tokens (Mem0 722, RAG 356); no model calls at ingest (Mem0 941).
 - Launch drafts and bench/REPRODUCE.md carry these numbers.
+
+## Entry 302 — 2026-10-04 (months of use: embeddings kept on disk)
+
+- The message index (and the fact index) re-embedded every message after
+  each stored conversation: 20,000 messages took 46 s on the Mac, paid on
+  the first question after every session. retrieve_v3 now keeps embeddings
+  in RG_MEMORY_DIR/embeddings.bin keyed by the text: a rebuild of the same
+  20,000 takes 0.6 s, with 50 new ones 0.7 s, in a new process 0.6 s (31 MB
+  on disk, float32 so rankings are unchanged). Forgetting deletes the file
+  (an embedding of a forgotten sentence must not stay on disk).
+- tools/scale_test.py now times the product path (profile_context). At
+  20,000 filler messages (2,750 facts): a question 137 ms median, the first
+  question after storing a session 0.6 s, storing one more session 1.3 s,
+  the very first question on a never-indexed store 9.8 s once; refusals
+  12/12 at every size; rank-1 23-24/26 as before. Ingest ~83 ms a message
+  (~4 s for a 50-message session, run at session end).
+- Coding-assistant sets written (cases_dev_code 40, cases_code_blind 60,
+  held out); the first measurement is queued.

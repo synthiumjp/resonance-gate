@@ -392,3 +392,45 @@ def test_forgetting_the_sentence_drops_its_link(pm, tmp_path):
     pm._forget_names("My hometown is Ballarat.")
     w = json.load(open(os.path.join(str(tmp_path), "world.json")))
     assert "=hometown" not in w
+
+
+# ---- embeddings kept on disk (2026-10-04) -----------------------------------
+
+def test_embeddings_are_saved_and_forgetting_removes_them(pm, tmp_path):
+    import os
+    pm.profile_ingest([U("I work at Acme. I'm allergic to penicillin.")], conversation_id="a",
+                      owner_name="Dana Cole", date="2026-03-02")
+    pm.profile_context("Where do I work?")
+    path = os.path.join(str(tmp_path), "embeddings.bin")
+    assert os.path.exists(path) and os.path.getsize(path) > 0
+    hit = pm.profile_recall("Am I allergic to anything?")["ranked"][0]
+    pm.profile_forget(hit["id"])
+    assert not os.path.exists(path)
+    block = pm.profile_context("Where do I work?")["block"]
+    assert "Acme" in block and "penicillin" not in block
+
+
+def test_a_rebuilt_index_reuses_saved_embeddings(tmp_path, monkeypatch):
+    import sys, os
+    monkeypatch.setenv("RG_MEMORY_DIR", str(tmp_path))
+    import sourcedrecall.profile_memory  # noqa: F401 -- puts the memory code on the path
+    import retrieve_v3 as R
+    calls = []
+
+    class Bi:
+        def encode(self, texts, **kw):
+            import numpy as np
+            calls.append(len(texts))
+            return np.ones((len(texts), R._EMB_DIM), dtype=np.float32)
+    R._EMB_CACHE.clear()
+    a = R._encode_cached(Bi(), ["one", "two"])
+    b = R._encode_cached(Bi(), ["two", "three", "one"])
+    assert calls == [2, 1] and a.shape == (2, R._EMB_DIM) and b.shape == (3, R._EMB_DIM)
+    R._EMB_CACHE.clear()                       # a new process reads the file
+    R._encode_cached(Bi(), ["one", "two", "three"])
+    assert calls == [2, 1]
+    with open(os.path.join(str(tmp_path), "embeddings.bin"), "ab") as fh:
+        fh.write(b"torn")                      # a torn last record is ignored
+    R._EMB_CACHE.clear()
+    R._encode_cached(Bi(), ["one"])
+    assert calls == [2, 1]
