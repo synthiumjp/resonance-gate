@@ -125,7 +125,7 @@ questions answered; plain retrieval 0/30 and 23/23; Mem0 2/30 and 23/23.
 - Multi-hop questions (several facts from different conversations) are
   where Mem0's model calls pay off: 61.9% against our 48.5%.
 - English only. The parser's rules are English.
-- The install is about 1.8 GB, mostly PyTorch for the parser.
+- The install is about 1.6 GB, mostly PyTorch for the parser.
 - All judging is by a local 14B model. Its agreement with hand labels is
   29/30 on our items, but LoCoMo scores from other papers used other
   judges and readers and are not comparable to these.

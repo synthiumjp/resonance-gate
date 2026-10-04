@@ -30,8 +30,11 @@ HF_MODELS = [
     ("retrieval embedder", "BAAI/bge-small-en-v1.5"),
     ("retrieval re-ranker", "cross-encoder/ms-marco-MiniLM-L6-v2"),
     ("conflict checker (NLI)", "cross-encoder/nli-deberta-v3-xsmall"),
-    ("triple-store encoder", "sentence-transformers/all-MiniLM-L6-v2"),
 ]
+# only the rg-1.1 triple tools use it, and they are off by default
+# (SOURCEDRECALL_LEGACY_TOOLS=1, mcp_server.py)
+if os.environ.get("SOURCEDRECALL_LEGACY_TOOLS") == "1":
+    HF_MODELS.append(("triple-store encoder", "sentence-transformers/all-MiniLM-L6-v2"))
 from sourcedrecall._bridge import code_roots as _code_roots
 _P2 = _code_roots()[1]
 

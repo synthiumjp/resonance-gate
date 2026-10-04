@@ -89,7 +89,7 @@ sourcedrecall-memory ingest chat.jsonl
 sourcedrecall-memory context "Where do I live?"
 ```
 
-Needs Python 3.10+. The install is about 1.8 GB (the parser needs PyTorch).
+Needs Python 3.10+. The install is about 1.6 GB (the parser needs PyTorch).
 After setup it runs offline.
 
 ## Privacy
