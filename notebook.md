@@ -14933,3 +14933,32 @@ and how to run everything).
   that replaced it), label (notes only where status matters).
 - Confirmation running at 01a88f5: blind v3/v4 (14B reader), v4 with the
   4B reader, LoCoMo test convs 2-9 once.
+
+## Entry 296 — 2026-10-04 (messages-first confirmed on the blind sets)
+
+- Blind v3/v4 with messages-first at 01a88f5 (parser gate on): v4 old state
+  given 1/44 and new 41/44 (14B reader), 3/44 and 34/44 (4B); v3 false
+  memory 0/30 but controls 14/23 -- the gate refused paraphrases.
+- On the readable paraphrase set the same: 0.4.6 51/64, messages-first
+  42/64, RAG 64/64. The lost ones were all full refusals; 0.4.6 had answered
+  them through the verbatim fallback. With the gate off (any message found
+  is shown, the reader decides): 61/64. On the readable v1 set (classes a-f)
+  never-mentioned questions stayed refused 20/20 with a 14B and a 4B
+  reader; false memory 1-2/60 (RAG 2/60); the one new flag was borderline
+  ("Work has been a lot lately" -> "you might be stressed", judged as the
+  assistant's injected "burnt out").
+- Final configuration (196afb4, gate off), blind, answer view, unaudited:
+
+      set / reader     system            old state  new state  controls  false memory
+      v4 / 14B         messages-first    2/44       42/44      16/16
+                       0.4.6             10/44      34/44      16/16
+                       RAG               7/44       36/44      16/16
+      v4 / 4B          messages-first    3/44       35/44      16/16
+                       0.4.6             11/44      32/44      13/16
+                       RAG               5/44       28/44      14/16
+      v3 / 14B         messages-first                          23/23     0/30
+                       RAG                                     23/23     0/30
+                       Mem0                                    23/23     2/30
+
+- LoCoMo test (convs 2-9) running for 01a88f5 (gate on; LoCoMo questions
+  are nearly always about something said, so the gate rarely acts there).

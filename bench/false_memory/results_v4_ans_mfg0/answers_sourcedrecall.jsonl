@@ -1,0 +1,60 @@
+{"id": "s01", "key": "631a926b5cf1038e5f7cfcea6c62fbc5427a03a6", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You live in Bristol, as you mentioned moving there on Saturday."]}
+{"id": "s02", "key": "e5cebe9dacfe2716855391de21b548a56160ae8d", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You work at Barclays, where you handle accounts payable."]}
+{"id": "s03", "key": "296759556ca897f20b37eec5fc26a0f1fd887928", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["No, you are not in a relationship. You mentioned that you had a breakup and have been eating a lot of toast since then."]}
+{"id": "s04", "key": "b8dff8b176bb17a731bd1bd567f338fed47d7910", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["No, you do not smoke anymore. You quit cigarettes a month ago."]}
+{"id": "s05", "key": "035c625cd4a61046251b34a2b84d2a793dcd344a", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You have been eating meat again since the spring, as you mentioned having chicken last night."]}
+{"id": "s06", "key": "6935b6761cdb3914f4b312f8281a19c4a3d3f826", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Yes, you had a dog named Biscuit, but he passed away in July."]}
+{"id": "s07", "key": "ebf69c38342deabaa1dac2aa0c1ee51a8268a721", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You have two guinea pigs."]}
+{"id": "s08", "key": "e4b85d9c3c5ddf6a9f76c35be2d3dac1a252dcb8", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You drive a pickup truck."]}
+{"id": "s09", "key": "d8a5230a6a334f995785ecf06f2b7753059abbd8", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["No, you do not own a car anymore; you sold your Corolla on Saturday and are now using the tram."]}
+{"id": "s10", "key": "1216b5629ea802d34073fa5d8380528f4ecea01b", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You use an iPhone 15."]}
+{"id": "s11", "key": "4bc21c69aa75d49158171263c7366e66f298a7c8", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You use a new MacBook, as mentioned on 2026-07-15."]}
+{"id": "s12", "key": "fe0c7427f473781123cb73233dedfeed0e171d6f", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Your team's backend stack is Go, as you mentioned finishing the move to Go last month."]}
+{"id": "s13", "key": "f36d5ce2db65fb263c7e9cce422756330b2ef7f9", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You use VS Code now, having switched to it in March."]}
+{"id": "s14", "key": "84c42dd885fb3e2daac4230b5777b890f502233e", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Your job title is a senior analyst."]}
+{"id": "s15", "key": "9af752429cba2fd49a11e5fafdc569030041a1e1", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Your manager is Priya, who took over your team in July."]}
+{"id": "s16", "key": "ffb0e6c0afe8bbc1adce8a0867b4b99c61171a36", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are on the data platform group."]}
+{"id": "s17", "key": "60857127d38ac25488c5b9159c68174e2f662c7d", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["No, you are not currently employed. You mentioned being laid off in August."]}
+{"id": "s18", "key": "d7b62f29f9c7954910a5180f553796a434cfbe74", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are studying coding in a bootcamp."]}
+{"id": "s19", "key": "4f61319c02061d84407165067b51f4c0240ad499", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["No, you handed in your dissertation and graduated."]}
+{"id": "s20", "key": "147b1737a7cefca3e30552f0588a5e69c5c5d67e", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are married, as you mentioned getting married two weeks ago."]}
+{"id": "s21", "key": "aef3b6b315c4e903d8a9ce14509e9f5903c7c3a1", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Since your knee surgery, you've been swimming as recommended by your physio."]}
+{"id": "s22", "key": "b1830f4ed090ee5367bc7f49892be8166a554d78", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You used to need three coffees a day, but as of July 29, 2026, you've gone off caffeine completely and now drink peppermint tea instead."]}
+{"id": "s23", "key": "6eca17cec33a4ec5df30194a20cd9742cd6cb632", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You mentioned being three months sober as of today, which suggests you do not currently drink alcohol."]}
+{"id": "s24", "key": "72ce934d24fbc10b5f5682665e0fea260a5ef34f", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are no longer on citalopram, as you tapered off it in May and have been off it since."]}
+{"id": "s25", "key": "87349b45cd6d2cd928a80011ffef1a4f8438ac80", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["No, you don't take metformin anymore, as your last check came back in remission."]}
+{"id": "s26", "key": "0baca5006cd22b40bac136975c1514ffbd0575f0", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["On weekends, you used to attend a pottery class, but after the studio shut down, you picked up bouldering instead."]}
+{"id": "s27", "key": "85ba9cd8b972ea3258e7549b7dbfb393a7497b3f", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You no longer pay for Spotify; you have moved to YouTube Music, which came with your phone plan."]}
+{"id": "s28", "key": "a3a9214c781609216bf7fb91dc733b9755077189", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["No, you mentioned that you cancelled the gym ages ago."]}
+{"id": "s29", "key": "b21c9845e019473c1dbbad719776d43b2affa277", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are travelling to Cornwall instead of Tokyo, as your leave was denied."]}
+{"id": "s30", "key": "0a561c1cc7b14eb1c5c35b65fcb7bd538ffbc8f0", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are learning Italian for your trip."]}
+{"id": "s31", "key": "5fb9c941406877b869f3598b2ffae8a63aa19718", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You live alone for the first time. It's so quiet and you keep leaving the telly on."]}
+{"id": "s32", "key": "4bc372aefdb3556a84984a080987e2c0f051745b", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You now own the house, as you closed on it last Friday."]}
+{"id": "s33", "key": "5e57110900c1b8e28b6baf9074175f3899ff0a24", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You should call me Jo."]}
+{"id": "s34", "key": "c0fc0adb5b88754301131eccfbc2464c64368898", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You turned 30 yesterday."]}
+{"id": "s35", "key": "52c02d437e95ff200c40b6cad9e11735b310f3d1", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You have two children."]}
+{"id": "s36", "key": "2af9f503feea4d8430eef7c6a36a948b82aadefe", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You no longer work from home; your company now requires five days in the office."]}
+{"id": "s37", "key": "8cda54c00b168375a519fc670485702dbe820c42", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You take the train to work now, as your new job is in Slough and you've mentioned missing the bike."]}
+{"id": "s38", "key": "bebe98fbf7c42b181561e41c249ec83ce6e9ef21", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["No, you are not vegan anymore; you mentioned returning to eating dairy."]}
+{"id": "s39", "key": "4c72dcd48c8227b3052c10ff2c4a48debdac4b95", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Since the baby, you're asleep by ten most nights, whether you like it or not."]}
+{"id": "s40", "key": "0a45143fa722c747b4635f85f71ee8886130c115", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You play the cello."]}
+{"id": "s41", "key": "eebb0f31b94e0dc8b1231d3aba909b364a6b809b", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are in Munich."]}
+{"id": "s42", "key": "e0d5fb16564389d559393c14770251207c78ed61", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You teach at a tutoring startup."]}
+{"id": "s43", "key": "8a42e21e5c9a7a264af7902a30771bc203662b15", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Your landlord is Mr. Okafor, as mentioned in your previous conversation on 2026-02-21."]}
+{"id": "s44", "key": "6d0aeae2104c822992fc33c5d435730e0ff1105f", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["No, your wrist is no longer in a cast. It came off on Thursday."]}
+{"id": "t01", "key": "4a3b43d40b786352a770baf7e31cbdf5d209ca4f", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You should avoid penicillin due to your allergy."]}
+{"id": "t02", "key": "08d74fc9f8350ce89232520d0b706a0229877b96", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Your sibling, Anya, lives in Gdansk."]}
+{"id": "t03", "key": "ddc7aeaf2dce70c80a8a835d2e33635218f97e0d", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The name of your pet is Marmalade."]}
+{"id": "t04", "key": "097716f9de9c34c9b89cc9c10867b10c0f25d1e8", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Based on your statement from 2026-04-11, you prefer Python and use it for almost everything at work."]}
+{"id": "t05", "key": "2a07df606f3402ade5c87f7a81aa9e2f4cce444d", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You play the clarinet in a community band on Thursdays."]}
+{"id": "t06", "key": "b45e34887901f2f63785b781a5a595c0849fa4ba", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Your birthday is on the 3rd of November."]}
+{"id": "t07", "key": "0ee037ec16963b7a8a4a595f76786cb363f7b5a5", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You work nights as a hospital porter."]}
+{"id": "t08", "key": "e63f4657a4d64cca10155f06241d556f333fe7dd", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You can't eat peanuts, as they once put you in the hospital."]}
+{"id": "t09", "key": "7c22f4b21eeeea57ca5b88d9417a84a9e4d33862", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are studying part time for an accounting qualification, with exams in December."]}
+{"id": "t10", "key": "ded747b4034c6f10fcc48d0040f841d66a5edc02", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You drive a green Skoda Octavia, estate, which you bought used."]}
+{"id": "t11", "key": "6abe8ff67986b38bda6b36a4047f683b7df42a65", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You live on the fourth floor."]}
+{"id": "t12", "key": "2fd469de9dd0d5c99eda0093a74ee8c3a472c441", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are preparing for the Dublin marathon in October."]}
+{"id": "t13", "key": "cc9afbd61f1e084b7ffe8a9a3feec487cd2e5157", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You write with your left hand."]}
+{"id": "t14", "key": "d482e30a2ce8868212459fd1e6f576dda93cfb62", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Your spouse, Callum, is a chef."]}
+{"id": "t15", "key": "8ca47602061221e4992f19564689a5d4a238968e", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are studying Welsh."]}
+{"id": "t16", "key": "affa73c0c46d18638d3c002a2e26965dc0d0517d", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You take your coffee black, no sugar, and you're weirdly snobby about it."]}

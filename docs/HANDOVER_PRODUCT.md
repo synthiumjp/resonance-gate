@@ -106,11 +106,12 @@ and real-conversation text before pushing (the repo is public).
 
 ## Open items, in order
 
-1. Decide the architecture (notebook e294): at the answer level plain RAG
-   over dated messages matches or beats us on every bench (LoCoMo dev 62.2
-   vs 58.8%; v3 0/30 vs 2/30; v4 7/44 vs 10/44). Prototype: messages first,
-   parser for labels, forgetting and scoping. The LoCoMo test number
-   (33.4%) is from the old harness view and 3c6b0a7; rerun at the end.
+1. Messages-first evidence (RG_EVIDENCE=messages, notebook e295-e296) beats
+   0.4.6 and RAG on the blind change-of-state set with a 14B and a 4B
+   reader, ties RAG on blind v3, and beats RAG on LoCoMo dev (63.9 vs
+   62.2%). LoCoMo test (convs 2-9) running on the Mac
+   (`~/jpwork/confirm.sh`, results/test_mf). If it holds: make it the
+   default, update the tests that pin the fact-block format, release 0.5.0.
 2. Changes of state are the main weakness (blind v4: 33/44 stale facts
    returned as current; the new state is missing in 16/44, most likely never
    extracted). Work on a fresh readable dev set, not on v4 (notebook e291).
