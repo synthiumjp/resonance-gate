@@ -15117,3 +15117,13 @@ and how to run everything).
   afterwards; standing instructions lead every session's summary; the
   triple-store encoder is not downloaded unless the legacy tools are on
   (install about 1.6 GB).
+
+## Entry 305 — 2026-10-05 (0.5.2: confirmed on the coding, change-of-state and LoCoMo sets)
+
+- At e0198db, against the run before the coding fixes:
+  multi-project controls 5 -> 7/8 (readable), 6 -> 8/13 (held out; RAG
+  6/8, 7/13); another project's facts leaked 0/9 and 0/13 (RAG 3/9, 2/13);
+  blind v4 old state given 2/44, new 41/44 (RAG 7/44, 36/44); LoCoMo dev
+  66.1 -> 66.5% (RAG 62.2%).
+- Released as 0.5.2 with the queued first session, standing instructions in
+  the summary, and the lighter setup.

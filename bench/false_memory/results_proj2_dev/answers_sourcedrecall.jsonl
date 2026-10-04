@@ -1,0 +1,30 @@
+{"id": "pd01", "key": "e4b88c5dac49ba4ce50bf0f601aebab7736cb375", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Based on the provided memory, it is not possible to determine the programming language of the project."]}
+{"id": "pd02", "key": "ac1749478f8fa01dd9c252055d15354e3bd1bf3d", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pd03", "key": "7eea8e473a84c69acfce24f9eec8524852e8baa7", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pd04", "key": "b5105e087c56b38c091ad26a598b082b590593d9", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pd05", "key": "13b29069a23d1d389e3cc11ef5c05c9a4289e27c", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pd06", "key": "465256ff0a0fe8939ba1a3b111041f2517366209", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pd07", "key": "f1b93c4835519edc9e319bd1dd04e4c8aa655d94", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pd08", "key": "2399ed1f2479dfdfc6b3b86dfd24ff7620b97dbc", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pd09", "key": "97e43964f2b73870ec39b70ad35c11904e7e39e2", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pd10", "key": "9201d67dc2bd3854315af359e4b553672ab64e3c", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The repo runs on GitHub Actions."]}
+{"id": "pd11", "key": "dd9678900f943f6ce6defa580cf40da54cd77b43", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Weathervane currently uses Postgres."]}
+{"id": "pd12", "key": "702530e41b8e73e60144b90610dc999b87f0b1b6", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Driftwood-app uses pnpm."]}
+{"id": "pd13", "key": "7e030c50d0a8fe9e39c06629cdca24f3175c68e0", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Lanternfish is hosted on Render now."]}
+{"id": "pd14", "key": "4c283303bf731bd37f71b99639dec8f31fca427b", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The project is using Python 3.12."]}
+{"id": "pd15", "key": "0bc59b18bcd9805c24a1f94a387e056fa0a6e0d0", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pd16", "key": "e19240a77ce01b8fdfb3421a2956be3c4dea23bf", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pd17", "key": "bf6480b33a160ca6de25ca15935637292ddb4b5f", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pd18", "key": "20e8f89930f8cd4812ccf0493d08814f5bf1c097", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pd19", "key": "0c4874dc4e687b55ec2a66c3aca0f6a0da3edf3d", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pd20", "key": "0361afd773cec3a4c4db512990d9e11f0208204e", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pd21", "key": "d0cfc0655e71d49ea2e68f9dc0ed81139caa1f5c", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pd22", "key": "17cc84a7df5eae1d2a3262abf390bfb9d0163e24", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pd23", "key": "3b05939bc7ba67feed0a4ed1ac2237f92bf81266", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You always use tabs for indentation, never spaces."]}
+{"id": "pd24", "key": "f53c8d01759fbea13218ea10dd5ab424fad93f26", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["No, the user has explicitly stated that they find comments in code noisy and prefer the code to speak for itself."]}
+{"id": "pd25", "key": "cde0c4ba89e82488a233a7f186c69622a390f84b", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You want the tests to be run before a commit is suggested."]}
+{"id": "pd26", "key": "f6d809ac522d2890afbd0b4945e127cb320630cb", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The docs should use British English spelling, such as \"colour,\" \"organise,\" and \"cheque,\" in all user-facing text."]}
+{"id": "pd27", "key": "6c8159ec33644ff2af776988a4e135cfe17dca66", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are the team lead on this one, so you approve all the merges."]}
+{"id": "pd28", "key": "5237e12c78e80eb906eaf2021902902fec519043", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Tundra-search is written in Go."]}
+{"id": "pd29", "key": "b04ae53c15b1d69c5b84e978d77ed2775ea966de", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We use MongoDB here."]}
+{"id": "pd30", "key": "0dfe4184fdda66dff5e50c8bbb528de371c20885", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["wren-metrics uses GitLab CI."]}
