@@ -46,14 +46,15 @@ answers give it in other words (ours 3, plain retrieval 2, with the 4B
 reader).
 
 For coding assistants, each test scenario was stored after a background of
-120 ordinary debugging sessions (held-out sets, audited):
+120 ordinary debugging sessions (held-out sets; the last two rows are not
+audited yet):
 
 | | sourcedrecall 0.5 | plain retrieval |
 |---|---|---|
 | answer states an out-of-date or never-confirmed setup | 0/51 | 3/51 |
 | answer gives the new setup after a change ("moved CI to GitHub Actions") | 14/14 | 11/14 |
 | a fact from another project offered as true of this one | 0/13 | 2/13 |
-| a preference said in one project used in another | 8/13 | 7/13 |
+| things that should be found: preferences from other projects, and this project's own facts | 8/13 | 7/13 |
 
 Where it is weaker: questions that need several facts from different
 conversations put together (LoCoMo multi-hop, 48.5% against 61.9%). Mem0 makes a model call for
