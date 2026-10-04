@@ -74,7 +74,8 @@ def main():
             rec["probes"] = []
             for p in c["probes"]:
                 t1 = time.time()
-                r = ad.query(p["q"])
+                r = (ad.query(p["q"], scope=p["scope"]) if p.get("scope")
+                     else ad.query(p["q"]))
                 r["q"] = p["q"]
                 r["query_seconds"] = round(time.time() - t1, 3)
                 rec["probes"].append(r)

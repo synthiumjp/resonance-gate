@@ -67,7 +67,7 @@ class RagAdapter:
         return {"messages": n, "model_calls": len(self.msgs),  # one embed per stored message
                 "seconds": time.time() - t0}
 
-    def query(self, q):
+    def query(self, q, scope=None):   # plain RAG has no projects
         if not self.msgs:
             return {"lines": [], "views": {}}
         sims = self.vecs @ self._enc([q], query=True)[0]
@@ -142,7 +142,7 @@ class Mem0Adapter:
         return {"messages": n, "model_calls": self.calls,
                 "seconds": time.time() - t0}
 
-    def query(self, q):
+    def query(self, q, scope=None):   # Mem0 is not scoped here
         r = self.m.search(q, filters={"user_id": self.user}, top_k=TOP_K)
         items = r["results"] if isinstance(r, dict) else r
         lines = [it["memory"] for it in items]
@@ -185,10 +185,19 @@ class SourcedRecallAdapter:
             res = self.pm.profile_ingest(
                 conv["turns"], conversation_id=f"c{self.n}",
                 title=f"conversation {self.n}", owner_name=scenario["owner"],
-                date=conv["date"])
+                date=conv["date"], scope=self._scope(conv.get("scope")))
             n += res["turns"]
             calls += res["model_calls"]
         return {"messages": n, "model_calls": calls, "seconds": time.time() - t0}
+
+    def _scope(self, name):
+        """2026-10-04: a scenario's project ("rusty-cli") as a real directory
+        in this store's workdir, as Claude Code would pass it."""
+        if not name:
+            return None
+        d = os.path.join(os.environ["RG_MEMORY_DIR"], "projects", name)
+        os.makedirs(d, exist_ok=True)
+        return d
 
     def dump(self):
         """Every stored fact (2026-10-03), so an audit can tell a fact that
@@ -205,8 +214,9 @@ class SourcedRecallAdapter:
         said = f.get("said")
         return f'{tag}{f["text"]}' + (f' [they said: "{said}"]' if said else "")
 
-    def query(self, q):
-        r = self.pm.profile_recall(q)
+    def query(self, q, scope=None):
+        scope = self._scope(scope)
+        r = self.pm.profile_recall(q, scope=scope)
         lines = []
         if r.get("found") and not r.get("abstain"):
             lines = [self._fact_line(f) for f in r.get("ranked", [])[:TOP_K]]
@@ -215,7 +225,7 @@ class SourcedRecallAdapter:
             # is confirmed; they reach the agent, so they are scored
             lines = ["(possibly related, not confirmed) " + self._fact_line(f)
                      for f in r["related"][:TOP_K]]
-        blk = self.pm.profile_context(q)["block"]
+        blk = self.pm.profile_context(q, scope=scope)["block"]
         ctx = [ln[2:] for ln in blk.splitlines() if ln.startswith("- ")]
         # the whole block, as an agent receives it (answer.py reads it)
         return {"lines": lines, "views": {"context": ctx}, "block": blk}
