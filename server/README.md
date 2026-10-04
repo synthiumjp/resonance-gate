@@ -160,6 +160,25 @@ the tools also take a `scope` argument. Conversations stored outside any
 project are shown everywhere. Set `SOURCEDRECALL_SCOPING=0` to turn this
 off.
 
+## Notes written by your own model (optional)
+
+By default nothing in sourcedrecall calls a language model. If you run one
+locally (Ollama, llama.cpp, LM Studio or anything with an OpenAI-compatible
+API), you can let it write short notes once per stored conversation:
+
+```bash
+export SOURCEDRECALL_NOTES_URL=http://127.0.0.1:11434/v1   # Ollama
+export SOURCEDRECALL_NOTES_MODEL=qwen3:14b
+```
+
+Each note is one lasting fact you stated ("Dana plays the clarinet and the
+violin"), kept with the conversation and date it came from, and shown as
+"(note written by your model)" next to your own words. Short notes help
+with questions that need several things from different conversations. It
+costs one model call per conversation and a larger summary per question.
+Forgetting a sentence also removes the notes of the conversations it was in.
+Your conversations go to that model and nowhere else.
+
 ## Standing instructions
 
 Things you tell the assistant to always or never do ("never add comments to
