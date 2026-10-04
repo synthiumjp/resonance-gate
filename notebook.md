@@ -15016,3 +15016,18 @@ and how to run everything).
   one of their people. Stale dev sets unchanged.
 - Per question: ~0.3 s for one store (fact retrieval and message search
   about half each, both the re-ranker); LoCoMo's 0.6-0.75 s is two stores.
+
+## Entry 300 — 2026-10-04 (list cue and gathered items: no effect, dropped)
+
+- Most multi-hop misses on LoCoMo dev had the evidence in the context and
+  the reader stopped at the first item ("Clarinet" with clarinet and violin
+  both there). Tried: a header cue for list questions, and a closing line
+  gathering the items of the asked type across the returned messages
+  (WordNet, first sense only, so "kid" is not a goat). LoCoMo dev: identical
+  answers on all 233 questions. Only 3 contexts got a gathered line --
+  LoCoMo's list questions ask for activities, books, events and artists,
+  which WordNet does not type -- and the header never reaches the LoCoMo
+  reader. Dropped.
+- Multi-hop stays the known limitation for launch (test 41.8% vs Mem0
+  61.9%). What might move it without model calls: retrieving per item for
+  list questions, or linking facts across conversations by shared entities.
