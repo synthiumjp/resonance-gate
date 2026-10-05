@@ -7,7 +7,8 @@ import asyncio
 
 PROFILE_TOOLS = {"profile_dynamics", "profile_quarantine", "profile_conflicts",
         "profile_recall", "profile_context", "profile_correct",
-        "profile_status", "profile_rehydrate", "profile_ingest", "profile_forget", "profile_confirm", "profile_export"}
+        "profile_status", "profile_rehydrate", "profile_ingest", "profile_forget", "profile_confirm", "profile_export",
+        "profile_check"}
 
 
 def _server(monkeypatch, tmp_path, legacy):

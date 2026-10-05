@@ -143,6 +143,22 @@ def profile_recall(query: str, scope: str = None) -> dict:
 
 
 @mcp.tool()
+def profile_check(claim: str, scope: str = None) -> dict:
+    """Did the user say this? Use before relying on something about the user
+    -- a tool argument, a detail you are about to act on ("The user lives in
+    Fitzroy", "The user's API is in Go").
+
+    verdict: "said" (with `since`: "no longer true", "may have changed" when
+    a later message on the topic exists, or "no later change found" -- which
+    is NOT a promise it is still true), "contradicted" (the user said
+    otherwise), "unconfirmed" (only the assistant said it), "unclear" (the
+    topic came up but nothing settles it), or "not_found" (nothing found; a
+    claim in very different words can be missed). `evidence` carries the
+    user's own dated words. Deterministic; no model call."""
+    return pmem.profile_check(claim, scope)
+
+
+@mcp.tool()
 def profile_context(query: str = None, max_facts: int = None,
                     scope: str = None) -> dict:
     """The verbatim, receipted text block for prompt injection — every line is

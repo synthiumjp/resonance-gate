@@ -159,8 +159,30 @@ class IndexV3:
                 self.hearsay = IndexV3(mem, facts=hs)
 
 
+_CB = {"model": None, "docs": {}}
+
+
+def _colbert_scores(question, texts):
+    """MaxSim scores of `texts` for `question`; document vectors cached by
+    text. The model folder is RG_COLBERT_DIR (model.onnx, tokenizer.json,
+    colbert_config.json)."""
+    import colbert_onnx
+    if _CB["model"] is None:
+        _CB["model"] = colbert_onnx.ColBERT(os.environ["RG_COLBERT_DIR"])
+    m, cache = _CB["model"], _CB["docs"]
+    need = [t for t in dict.fromkeys(texts) if t not in cache]
+    if need:
+        if len(cache) > 50000:
+            cache.clear()
+        for t, v in zip(need, m.encode_docs(need)):
+            cache[t] = v
+    q = m.encode_queries([question])[0]
+    return [colbert_onnx.maxsim(q, cache[t]) if hasattr(colbert_onnx, "maxsim")
+            else float((q @ cache[t].T).max(axis=1).sum()) for t in texts]
+
+
 def retrieve_facts_v3(index, question, k=120, dense_k=20, top_n=None,
-                      min_score=None, with_scores=False):
+                      min_score=None, with_scores=False, fuse=None, colbert=None):
     """Retrieve evidence for one question.
 
     `k` is the BM25 CANDIDATE POOL, `top_n` is how many survive the
@@ -211,6 +233,34 @@ def retrieve_facts_v3(index, question, k=120, dense_k=20, top_n=None,
     ces = ce.predict([(question, index.texts[j]) for j in cand],
                      show_progress_bar=False)
     order = np.argsort(-ces)[:top_n]
+    if fuse:
+        # 2026-10-05 (LoCoMo dev, message search; literature scan: the
+        # ms-marco cross-encoder alone ranks chatty answering messages low):
+        # z-scored BM25, dense and cross-encoder, weights (bm25, ce) = fuse;
+        # dense weight 1 - bm25
+        wb, wc = fuse
+        bm = dict((j, sc) for sc, j in scored)
+        def zs(v):
+            v = np.asarray(v, float)
+            sd = v.std()
+            return (v - v.mean()) / sd if sd > 0 else v * 0
+        dn = index.emb[cand] @ qv
+        mix = (wb * zs([bm.get(j, 0.0) for j in cand]) + (1 - wb) * zs(dn)
+               + wc * zs(ces))
+        order = np.argsort(-mix)[:top_n]
+    if colbert:
+        # 2026-10-05: late interaction (answerai-colbert-small-v1 on ONNX
+        # Runtime, colbert_onnx.py) over the same candidates, fused with
+        # BM25 and the cross-encoder: weights (bm25, colbert, ce) = colbert
+        wb, wk, wc = colbert
+        bm = dict((j, sc) for sc, j in scored)
+        ks = _colbert_scores(question, [index.texts[j] for j in cand])
+        def zs(v):
+            v = np.asarray(v, float)
+            sd = v.std()
+            return (v - v.mean()) / sd if sd > 0 else v * 0
+        mix = (wb * zs([bm.get(j, 0.0) for j in cand]) + wk * zs(ks) + wc * zs(ces))
+        order = np.argsort(-mix)[:top_n]
     # entry 249: `min_score` is an ABSOLUTE relevance floor on the
     # cross-encoder logit, not a rank cut. The ranked path above always
     # returns top_n whatever the scores are -- correct for the main fact

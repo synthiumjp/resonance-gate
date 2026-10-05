@@ -58,7 +58,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(prog="sourcedrecall-memory",
                                  description="Use the memory from a terminal.")
     ap.add_argument("command", choices=["show", "path", "forget", "confirm",
-                                        "context", "recall", "ingest", "view"])
+                                        "context", "recall", "check", "ingest", "view"])
     ap.add_argument("arg", nargs="*", help="a fact id, a question, or a file")
     ap.add_argument("--owner", default=os.environ.get("SOURCEDRECALL_OWNER"))
     ap.add_argument("--id", dest="conv_id")
@@ -112,6 +112,21 @@ def main(argv=None):
                 print(_line(f))
         else:
             print("Nothing stored about this.")
+        return 0
+    if a.command == "check":
+        if not arg:
+            ap.error("check needs a claim, e.g. \"The user lives in Fitzroy\"")
+        out = pm.profile_check(arg, scope=a.scope)
+        if a.json:
+            print(json.dumps(out, indent=2, default=str))
+            return 0
+        head = out["verdict"].replace("_", " ")
+        if out.get("since"):
+            head += f" ({out['since']})"
+        print(head)
+        for e in out["evidence"]:
+            quote = e.get("said") or e.get("fact") or ""
+            print(f"- [{e.get('date') or '?'}] {e.get('status')}: \"{quote}\"")
         return 0
     if a.command == "ingest":
         msgs = _read_messages(arg or None)

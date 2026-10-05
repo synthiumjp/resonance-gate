@@ -88,6 +88,7 @@ Add it to your MCP client, e.g. `.mcp.json` for Claude Code or
 | `profile_ingest(turns, owner_name, date=None)` | store one conversation. `turns` is `[{"role": "user"\|"assistant", "content": "..."}]`. Only statements the user makes become facts; questions, hypotheticals, hedges and other people's opinions don't. |
 | `profile_context(query=None)` | the summary to put in your agent's prompt: everything, or only what relates to `query` |
 | `profile_recall(query)` | look something up. Returns the matching facts with quotes and dates, or "never seen". |
+| `profile_check(claim)` | did the user say this? For something an agent is about to rely on ("The user lives in Fitzroy", a tool argument): whether the user said it, said otherwise, or only the assistant did, with the user's dated words; see below |
 | `profile_forget(fact_id)` | remove a fact by the id shown in results and `MEMORY.md` |
 
 The agent has to call `profile_ingest` for a conversation to be stored. In
@@ -116,6 +117,40 @@ show and adds a note only where it matters: a statement replaced later, a
 remark tied to its moment, a name the user gave a phrase ("home country:
 Sweden"). The summary of the whole profile still lists the parser's facts.
 RG_EVIDENCE=facts gives the fact-per-line block of 0.4.x.
+
+## Checking a claim
+
+`profile_check(claim)` (and `sourcedrecall-memory check "The user lives in
+Fitzroy"`) answers whether the user said something, with their own dated
+words as evidence. It is meant for a check before an agent acts on a
+detail -- the evidence half of "is this tool argument grounded in what the
+user actually said?".
+
+```
+$ sourcedrecall-memory check "The user lives in Northcote"
+said (may have changed)
+- [2026-02-01] may have changed: "I live in Northcote, near the creek trail."
+- [2026-06-01] later message: "We finally relocated to Coburg last week. Still unpacking."
+```
+
+The verdict is one of: `said`, `contradicted` (the user said otherwise),
+`unconfirmed` (only the assistant said it), `unclear` (the topic came up but
+nothing settles it), `not_found`. With `said`, `since` says what is known
+about it afterwards: `no longer true`, `may have changed` (a later message
+on the topic is returned too), or `no later change found`.
+
+What the measurements on the benchmark's readable sets support, and what
+they do not (`bench/false_memory/check_eval.py`, 263 true claims written for
+the readable sets, `positives_dev.jsonl`): `said` was right about provenance
+in 322 of 323 cases, and 207 of the 263 true claims came back `said`; claims
+the user denied, hedged or never made came back `said` in 1 of 55. On the
+held-out sets, before the last round of rules (which used the categories of
+their errors, so later figures there would not be held out), it was 5 of 61.
+`no later change found` is not a promise that the claim is still true: in
+86% of cases it was. A change the user implied
+without saying ("Fourth week as a paramedic" after "I'm a pharmacy
+assistant") can be missed. `not_found` means nothing was found, which is not
+proof that it was never said. No model is called.
 
 ## Seeing and editing the memory
 

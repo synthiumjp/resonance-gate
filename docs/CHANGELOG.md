@@ -6,6 +6,10 @@ has the details behind each change.
 
 ## Unreleased
 
+- `profile_check(claim)` and `sourcedrecall-memory check`: did the user say
+  this? The verdict (said, contradicted, unconfirmed, unclear, not found),
+  what is known since (no longer true, may have changed, no later change
+  found) and the user's dated words.
 - No PyTorch: the parser runs Stanza 1.14.0's English models on ONNX
   Runtime and numpy (`stanza_ort`), with the same parses (7,755 texts, every
   field). The install is about 0.9 GB instead of 1.6 GB and takes about a

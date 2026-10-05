@@ -1,0 +1,263 @@
+{"file": "cases.jsonl", "id": "a01", "q": "Am I vegetarian?", "claim": "The user is not a vegetarian.", "scope": null}
+{"file": "cases.jsonl", "id": "a05", "q": "What do I do for work?", "claim": "The user does freight scheduling for a shipping firm.", "scope": null}
+{"file": "cases.jsonl", "id": "a06", "q": "Do I play any instrument?", "claim": "The user does not play the cello.", "scope": null}
+{"file": "cases.jsonl", "id": "a07", "q": "Do I own a boat?", "claim": "The user does not own a sailboat.", "scope": null}
+{"file": "cases.jsonl", "id": "a09", "q": "Where am I going to work next?", "claim": "The user is not leaving for Atlassian.", "scope": null}
+{"file": "cases.jsonl", "id": "a12", "q": "What music do I like?", "claim": "The user is not a fan of country music.", "scope": null}
+{"file": "cases.jsonl", "id": "a13", "q": "Which languages do I speak?", "claim": "The user does not speak Mandarin.", "scope": null}
+{"file": "cases.jsonl", "id": "a14", "q": "Do I smoke?", "claim": "The user does not smoke.", "scope": null}
+{"file": "cases.jsonl", "id": "a15", "q": "What do I do on weekends?", "claim": "The user does not surf.", "scope": null}
+{"file": "cases.jsonl", "id": "b01", "q": "Where do I live?", "claim": "The user lives in Coburg.", "scope": null}
+{"file": "cases.jsonl", "id": "b02", "q": "What do I do for work?", "claim": "The user works as a paralegal at a law firm.", "scope": null}
+{"file": "cases.jsonl", "id": "b03", "q": "How much coffee do I drink?", "claim": "The user has had no coffee for two months and drinks tea instead.", "scope": null}
+{"file": "cases.jsonl", "id": "b04", "q": "What car do I drive?", "claim": "The user does not own a car.", "scope": null}
+{"file": "cases.jsonl", "id": "b05", "q": "Who is my partner?", "claim": "The user is not in a relationship with Elise.", "scope": null}
+{"file": "cases.jsonl", "id": "b06", "q": "What phone do I use?", "claim": "The user uses a Pixel 8.", "scope": null}
+{"file": "cases.jsonl", "id": "b07", "q": "What is my diet?", "claim": "The user has started eating fish again.", "scope": null}
+{"file": "cases.jsonl", "id": "b08", "q": "Do I have a dog?", "claim": "The user's dog Biscuit died.", "scope": null}
+{"file": "cases.jsonl", "id": "b09", "q": "Which city do I live in?", "claim": "The user lives in Porto.", "scope": null}
+{"file": "cases.jsonl", "id": "b10", "q": "What is my job title?", "claim": "The user is a senior analyst.", "scope": null}
+{"file": "cases.jsonl", "id": "b11", "q": "Where do I exercise?", "claim": "The user swims at the council pool.", "scope": null}
+{"file": "cases.jsonl", "id": "b12", "q": "What language am I studying?", "claim": "The user is studying Korean.", "scope": null}
+{"file": "cases.jsonl", "id": "e08", "q": "Which city do I teach in?", "claim": "The user teaches history in Sheffield.", "scope": null}
+{"file": "cases.jsonl", "id": "f01", "q": "Where do I work?", "claim": "The user works at Canva.", "scope": null}
+{"file": "cases.jsonl", "id": "f02", "q": "How old is my daughter?", "claim": "The user's daughter is six years old.", "scope": null}
+{"file": "cases.jsonl", "id": "f02", "q": "What is my daughter called?", "claim": "The user's daughter is called Maya.", "scope": null}
+{"file": "cases.jsonl", "id": "f03", "q": "What am I allergic to?", "claim": "The user is allergic to penicillin.", "scope": null}
+{"file": "cases.jsonl", "id": "f04", "q": "What car do I drive?", "claim": "The user drives a blue Subaru Outback.", "scope": null}
+{"file": "cases.jsonl", "id": "f05", "q": "Where was I born?", "claim": "The user was born in Ballarat.", "scope": null}
+{"file": "cases.jsonl", "id": "f06", "q": "What do I study?", "claim": "The user studies marine biology at the University of Queensland.", "scope": null}
+{"file": "cases.jsonl", "id": "f07", "q": "What is my favourite band?", "claim": "The user's favourite band is Khruangbin.", "scope": null}
+{"file": "cases.jsonl", "id": "f08", "q": "Which language do I speak at home?", "claim": "The user speaks Tagalog at home.", "scope": null}
+{"file": "cases.jsonl", "id": "f09", "q": "Who is my wife?", "claim": "The user's wife is called Hana.", "scope": null}
+{"file": "cases.jsonl", "id": "f09", "q": "What does my wife do?", "claim": "The user's wife teaches primary school in Fremantle.", "scope": null}
+{"file": "cases.jsonl", "id": "f10", "q": "What business do I run?", "claim": "The user runs a three-person bakery in Hobart.", "scope": null}
+{"file": "cases.jsonl", "id": "f11", "q": "What instrument do I play?", "claim": "The user plays bass in a covers band called The Lukewarms.", "scope": null}
+{"file": "cases.jsonl", "id": "f12", "q": "What is my diet?", "claim": "The user is vegetarian.", "scope": null}
+{"file": "cases.jsonl", "id": "f12", "q": "Which food do I dislike?", "claim": "The user cannot stand cilantro.", "scope": null}
+{"file": "cases.jsonl", "id": "f12", "q": "Where do I live?", "claim": "The user lives in Adelaide.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds01", "q": "Where do I live?", "claim": "The user lives in Coburg.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds02", "q": "Which suburb do I live in?", "claim": "The user lives in Brunswick.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds03", "q": "What city do we live in?", "claim": "The user lives in Hobart.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds04", "q": "Where do I work?", "claim": "The user works at Northwind Freight.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds05", "q": "Who is my employer?", "claim": "The user works at a new firm.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds06", "q": "What is my job?", "claim": "The user works as a data analyst at a council.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds07", "q": "What is my job title?", "claim": "The user is a senior designer.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds08", "q": "What is my role at work?", "claim": "The user is an individual contributor at work.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds09", "q": "Am I studying anything?", "claim": "The user is studying a part-time nursing degree.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds10", "q": "Am I still a student?", "claim": "The user has graduated from their law degree.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds11", "q": "Am I in a relationship?", "claim": "The user's girlfriend is called Mara.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds12", "q": "Do I have a partner?", "claim": "The user has been through a breakup.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds13", "q": "What is my relationship status with Priya?", "claim": "The user is engaged to Priya.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds14", "q": "Am I married?", "claim": "The user is married to Tomas.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds15", "q": "Do I have any pets?", "claim": "The user has a kitten called Pickle.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds16", "q": "Do I have a dog?", "claim": "The user's dog Bruno is gone.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds17", "q": "What is my diet?", "claim": "The user is pescatarian.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds18", "q": "What milk do I use?", "claim": "The user uses oat milk.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds19", "q": "Do I smoke?", "claim": "The user quit smoking in April.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds20", "q": "Do I drink coffee?", "claim": "The user drinks two flat whites a day.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds21", "q": "Do I drink alcohol?", "claim": "The user is off the booze and drinks sparkling water at the pub.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds22", "q": "Do I go to the gym?", "claim": "The user stopped going to the gym and cancelled the membership.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds23", "q": "What car do I drive?", "claim": "The user drives a Kia.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds24", "q": "How do I get to work?", "claim": "The user takes the train to work.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds25", "q": "What phone do I use?", "claim": "The user uses an iPhone 16.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds26", "q": "What laptop do I use?", "claim": "The user uses a MacBook Air.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds27", "q": "What language is our backend written in?", "claim": "The user's team backend is written in Go.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds28", "q": "Which cloud does our team use?", "claim": "The user's team uses Azure.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds29", "q": "Who is my manager?", "claim": "The user's manager is Wei.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds30", "q": "Which team am I on?", "claim": "The user is on the search team.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds31", "q": "How is my knee?", "claim": "The user's knee has fully recovered.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds32", "q": "Do I have any allergies?", "claim": "The user is allergic to peanuts.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds33", "q": "Do I take medication for blood pressure?", "claim": "Dr Ahn took the user off the blood pressure tablets.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds34", "q": "Am I on any medication?", "claim": "The user takes sertraline.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds35", "q": "Do I play football?", "claim": "The user gave up football.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds36", "q": "What hobbies do I have?", "claim": "The user took up rock climbing.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds37", "q": "Do I subscribe to Spotify?", "claim": "The user cancelled Spotify and uses YouTube Music.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds38", "q": "What languages do I speak?", "claim": "The user is learning Spanish.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds39", "q": "Where am I travelling in October?", "claim": "The user is going to Kyoto in October.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds40", "q": "What are we doing for the long weekend?", "claim": "The user's Grampians camping trip was cancelled and they are staying home.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds41", "q": "What is my surname?", "claim": "The user's surname is Vale.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds42", "q": "How old am I?", "claim": "The user is 30.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds43", "q": "Do I have flatmates?", "claim": "The user lives in their own one-bedroom in Yarraville.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds44", "q": "What do I do for a living?", "claim": "The user runs a small bike repair shop.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds45", "q": "Am I married?", "claim": "The user is divorced.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds46", "q": "Do I own a car?", "claim": "The user bought a used Corolla.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds47", "q": "What is my diet?", "claim": "The user has been vegan since June.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds48", "q": "Am I in a choir?", "claim": "The user has left the choir.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds49", "q": "What do we use for CI?", "claim": "The user's team uses GitHub Actions for CI.", "scope": null}
+{"file": "cases_dev_stale.jsonl", "id": "ds50", "q": "What pets do I have?", "claim": "The user has a rescue greyhound called Dash.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt01", "q": "Where do I work?", "claim": "The user works at Birch Analytics.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt02", "q": "What's my job?", "claim": "The user is a primary school teacher with a Year 3 class.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt03", "q": "Who's my employer these days?", "claim": "The user works at Kestrel Print.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt04", "q": "What's my role at work?", "claim": "The user is head of design.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt05", "q": "Where do I work now?", "claim": "The user works at Harbour Freight Co.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt06", "q": "Which team am I on?", "claim": "The user is on the payments team.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt07", "q": "Who do I work for?", "claim": "The user's company was bought out by Orbis.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt08", "q": "Which office do I go to?", "claim": "The user works from the Docklands office.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt09", "q": "Which site am I based at?", "claim": "The user is based at the Cardiff site.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt10", "q": "What's my title?", "claim": "The user is a senior analyst.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt11", "q": "Do I work in the office or from home?", "claim": "The user has worked remotely since June.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt12", "q": "Where do I work?", "claim": "The user is on the payroll at Tidewater Media.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt13", "q": "What do I do for a living?", "claim": "The user works as a paramedic.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt14", "q": "What team do I work on?", "claim": "The user is on the platform engineering team.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt15", "q": "What shift do I work?", "claim": "The user works the night shift.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt16", "q": "Who do I report to?", "claim": "The user reports to Fatima.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt17", "q": "Which suburb do I live in?", "claim": "The user lives in Brunswick.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt18", "q": "Who do I live with?", "claim": "The user lives alone.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt19", "q": "Where am I living?", "claim": "The user lives in Harrogate.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt20", "q": "What city do I live in?", "claim": "The user lives in Denver.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt21", "q": "Where's home these days?", "claim": "The user lives in Bondi.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt22", "q": "What town do I live in?", "claim": "The user lives in Ballarat.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt23", "q": "Where do I live?", "claim": "The user bought a house in Totnes.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt24", "q": "Where am I staying at the moment?", "claim": "The user is staying in a granny flat in Tampa.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt25", "q": "Where do I live?", "claim": "The user lives in their own place in Rathmines.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt26", "q": "Which suburb am I in now?", "claim": "The user lives with Dom in Subiaco.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt27", "q": "Am I married?", "claim": "The user is divorced.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt28", "q": "Am I seeing anyone?", "claim": "The user is in a relationship with Ben.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt29", "q": "What's my relationship status?", "claim": "The user is engaged.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt30", "q": "Do I have a partner?", "claim": "The user is single.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt31", "q": "Am I seeing anyone?", "claim": "The user is single.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt32", "q": "Am I in a relationship?", "claim": "The user is in a relationship with Daniel.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt33", "q": "Do I have a dog?", "claim": "The user's dog Biscuit passed away.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt34", "q": "What pets do I have?", "claim": "The user has a rescue greyhound called Pepper.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt35", "q": "Do I still have a cat?", "claim": "The user's cat Ziggy was rehomed with the user's parents.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt36", "q": "Do I have a parrot?", "claim": "The user's parrot Kiwi was sold to a breeder.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt37", "q": "What pets do I have?", "claim": "The user has two cats, Luna and a ginger kitten called Marmalade.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt38", "q": "What's my diet?", "claim": "The user is vegan.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt39", "q": "What kind of coffee do I drink these days?", "claim": "The user drinks decaf coffee.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt40", "q": "Do I follow any particular diet?", "claim": "The user is gluten-free.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt41", "q": "Do I eat dairy?", "claim": "The user gave up dairy.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt42", "q": "What milk do I have in my coffee?", "claim": "The user orders oat flat whites.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt43", "q": "Am I on any cholesterol medication?", "claim": "The user was taken off statins by their doctor.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt44", "q": "What medication am I on?", "claim": "The user takes sertraline.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt45", "q": "Do I wear glasses?", "claim": "The user has had laser eye surgery.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt46", "q": "What's my asthma treatment?", "claim": "The user takes Symbicort for asthma.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt47", "q": "Do I have any health conditions?", "claim": "The user has been diagnosed with type 2 diabetes.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt48", "q": "What's my main hobby?", "claim": "The user's main hobby is pottery.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt49", "q": "What sport do I play?", "claim": "The user's team plays futsal.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt50", "q": "How do I stay fit these days?", "claim": "The user cycles to work.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt51", "q": "What instrument am I learning?", "claim": "The user is learning drums.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt52", "q": "What do I do on Saturday mornings?", "claim": "The user has been rowing at the club.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt53", "q": "What do I do for exercise in the mornings?", "claim": "The user exercises on a Peloton before work.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt54", "q": "What car do I drive?", "claim": "The user drives a Mazda 3.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt55", "q": "What phone do I have?", "claim": "The user has a new Pixel phone.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt56", "q": "What's the family car?", "claim": "The user's family car is an electric Kia.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt57", "q": "What laptop do I use for work?", "claim": "The user uses a ThinkPad for work.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt58", "q": "What bike do I ride?", "claim": "The user rides an e-bike bought at Decathlon.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt59", "q": "What laptop do I have?", "claim": "The user has a new Dell XPS laptop.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt60", "q": "What am I studying?", "claim": "The user is writing an English lit dissertation.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt61", "q": "Am I studying anything?", "claim": "The user is enrolled in the part-time MBA at Warwick.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt62", "q": "Am I still a student?", "claim": "The user has graduated.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt63", "q": "What degree am I doing?", "claim": "The user is on the PhD track.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt64", "q": "Am I at university?", "claim": "The user has dropped out of university.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt-c01", "q": "Where do I work?", "claim": "The user works at Acme Logistics as a dispatcher.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt-c02", "q": "Which suburb do I live in?", "claim": "The user lives in Brunswick.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt-c03", "q": "Do I have a dog?", "claim": "The user's dog is called Biscuit.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt-c04", "q": "What's my diet?", "claim": "The user is vegetarian.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt-c05", "q": "Am I on any cholesterol medication?", "claim": "The user takes a statin every evening for cholesterol.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt-c06", "q": "What's my main hobby?", "claim": "The user climbs at the gym.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt-c07", "q": "What car do I drive?", "claim": "The user drives a 2011 Corolla.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt-c08", "q": "Am I seeing anyone?", "claim": "The user is dating Ben.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt-c09", "q": "What am I studying?", "claim": "The user is studying nursing at UTS.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt-c10", "q": "What's my job?", "claim": "The user is an analyst at a small consultancy in Manchester.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt-c11", "q": "Who do I live with?", "claim": "The user lives with their flatmate Jess in Newtown.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt-c12", "q": "What phone do I have?", "claim": "The user has an iPhone 14.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt-c13", "q": "Who's my manager?", "claim": "The user reports to Fatima.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt-c14", "q": "What am I allergic to?", "claim": "The user is allergic to penicillin.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt-c15", "q": "Do I follow any particular diet?", "claim": "The user is gluten-free.", "scope": null}
+{"file": "cases_dev_stale2.jsonl", "id": "dt-c16", "q": "What laptop do I use for work?", "claim": "The user uses a ThinkPad for work.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p01", "q": "What do I do for a living?", "claim": "The user works night shifts at St Vincent's.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p02", "q": "Do I have any pets?", "claim": "The user has a puppy called Bruno.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p03", "q": "How do I get to work?", "claim": "The user commutes to work by train, 40 minutes each way.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p04", "q": "Which food do I dislike?", "claim": "The user cannot stand mushrooms.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p05", "q": "Where do I live?", "claim": "The user lives in Coburg.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p06", "q": "Do I have any siblings?", "claim": "The user has a sister called Priya.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p06", "q": "Who is arriving from Western Australia soon?", "claim": "The user's sister Priya is flying in from Perth next week.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p07", "q": "What am I allergic to?", "claim": "The user is allergic to peanuts.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p08", "q": "What's my diet like?", "claim": "The user has been vegan since January.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p09", "q": "Do I play a musical instrument?", "claim": "The user plays the cello.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p10", "q": "Which languages can I speak?", "claim": "The user speaks Tagalog at home.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p11", "q": "What am I studying?", "claim": "The user is studying law.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p11", "q": "Which university do I attend?", "claim": "The user attends Monash.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p12", "q": "What car do I drive?", "claim": "The user drives a second-hand Mazda 3.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p13", "q": "Which band do I love?", "claim": "The user loves Radiohead.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p14", "q": "What's my favourite movie?", "claim": "The user's favourite movie is Alien.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p15", "q": "What am I reading at the moment?", "claim": "The user is reading Dune.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p16", "q": "What's my morning routine?", "claim": "The user gets out of bed at 5:30 every day for a swim before the office.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p17", "q": "What fitness ambitions do I have?", "claim": "The user wants to run a marathon before turning forty.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p18", "q": "What guitar do I own?", "claim": "The user owns a Fender Telecaster.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p19", "q": "What build automation is my team moving to?", "claim": "The user's team is migrating from Jenkins to GitHub Actions.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p20", "q": "Where am I going on holiday?", "claim": "The user is flying to Osaka on the 12th of June for a week.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p21", "q": "What medication do I carry?", "claim": "The user carries a Ventolin in their bag.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p22", "q": "What health conditions do I have?", "claim": "The user has type 2 diabetes.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p23", "q": "Which team sport do I play?", "claim": "The user plays netball.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p24", "q": "Who am I married to?", "claim": "The user's husband is called Tom.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p25", "q": "Do I have any children?", "claim": "The user has a daughter called Ella.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p26", "q": "Who employs me?", "claim": "The user works at Atlassian.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p27", "q": "What's my position at work?", "claim": "The user is a team lead on the payments squad.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p28", "q": "What do I do in my spare time?", "claim": "The user built a model of the Titanic.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p29", "q": "What neighbourhood am I in?", "claim": "The user lives in Fitzroy.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p30", "q": "What genre do I avoid?", "claim": "The user dislikes country music.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p31", "q": "What animal shares my home?", "claim": "The user has a ginger tabby called Mochi.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p32", "q": "What's my academic background?", "claim": "The user has a bachelor's degree in marine biology from James Cook.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p33", "q": "How do I travel to the office?", "claim": "The user cycles to the office.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p34", "q": "When does my team gather each day?", "claim": "The user's team standup is at 9:15 daily.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p35", "q": "What am I putting money aside for?", "claim": "The user is saving for a house deposit.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p36", "q": "What can't I eat?", "claim": "The user is coeliac and cannot eat gluten.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p37", "q": "What programming language does my team use?", "claim": "The user's team backend is written in Golang.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p37", "q": "Which database sits behind our services?", "claim": "The user's services use Postgres as the database.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p38", "q": "Which country did I visit recently?", "claim": "The user recently visited Peru.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p39", "q": "How old is my mother going to be?", "claim": "The user's mother is turning seventy next month.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p40", "q": "Where does my sibling live?", "claim": "The user's brother Callum lives in Geelong.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p40", "q": "Who in my family works with pipes?", "claim": "The user's brother Callum is a plumber.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p41", "q": "What tongue am I learning?", "claim": "The user is learning Japanese.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p42", "q": "What's my best time at the weekly race?", "claim": "The user's parkrun personal best is 24 minutes.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p43", "q": "What vehicle is in my garage?", "claim": "The user has a Hilux.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p44", "q": "What do I make in the kitchen?", "claim": "The user bakes sourdough on Sundays.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p45", "q": "What's my profession?", "claim": "The user is marking 30 year 9 English essays.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p46", "q": "What breed of dog do we have?", "claim": "The user has two greyhounds.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p47", "q": "Which foods make me ill?", "claim": "The user gets hives from shellfish.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p48", "q": "What surgery have I had?", "claim": "The user had an ACL operation in May.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p49", "q": "Where do I earn my wage?", "claim": "The user works early starts at a bakery.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p50", "q": "What did I purchase recently?", "claim": "The user bought a Dyson V15.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p51", "q": "Which organisation pays me?", "claim": "The user works at the council in the planning department.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p52", "q": "Which suburb is home?", "claim": "The user lives in Brunswick.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p53", "q": "Is there a baby on the way?", "claim": "The user is expecting twins in November.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p54", "q": "What certification am I working toward?", "claim": "The user is working toward a pilot's licence.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p55", "q": "What device do I read ebooks on now?", "claim": "The user reads ebooks on a Kobo.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p56", "q": "Am I a smoker?", "claim": "The user quit cigarettes in 2024.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p57", "q": "How do I take my coffee?", "claim": "The user orders a flat white with oat milk and no sugar.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p58", "q": "Which foreign tongue can I speak?", "claim": "The user is fluent in Greek.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p59", "q": "How often do I exercise?", "claim": "The user goes to the gym on Monday, Wednesday and Friday at 6am.", "scope": null}
+{"file": "cases_dev_paraphrase.jsonl", "id": "p60", "q": "Where will I be employed?", "claim": "The user has an offer from Canva and starts in August.", "scope": null}
+{"file": "cases_dev_code.jsonl", "id": "cd01", "q": "Which orchestrator do we deploy on?", "claim": "The user does not deploy on Kubernetes.", "scope": null}
+{"file": "cases_dev_code.jsonl", "id": "cd03", "q": "Do I indent with tabs or spaces?", "claim": "The user indents with spaces.", "scope": null}
+{"file": "cases_dev_code.jsonl", "id": "cd05", "q": "Do I run the app in Docker locally?", "claim": "The user does not run the app in Docker locally.", "scope": null}
+{"file": "cases_dev_code.jsonl", "id": "cd07", "q": "What manages our staging infrastructure?", "claim": "The user does not use Terraform for the staging stack.", "scope": null}
+{"file": "cases_dev_code.jsonl", "id": "cd08", "q": "Which CI are we on now?", "claim": "The user's team uses GitHub Actions for CI.", "scope": null}
+{"file": "cases_dev_code.jsonl", "id": "cd09", "q": "What package manager do we use?", "claim": "The user's team uses pnpm as its package manager.", "scope": null}
+{"file": "cases_dev_code.jsonl", "id": "cd10", "q": "What language is the pricing API written in?", "claim": "The user's pricing API is written in Go.", "scope": null}
+{"file": "cases_dev_code.jsonl", "id": "cd11", "q": "Which team am I on?", "claim": "The user is on the search platform team.", "scope": null}
+{"file": "cases_dev_code.jsonl", "id": "cd12", "q": "What is our max line length?", "claim": "The user's team has a 100 column maximum line length.", "scope": null}
+{"file": "cases_dev_code.jsonl", "id": "cd13", "q": "Where is the landing site hosted?", "claim": "The user's landing site is hosted on Fly.io.", "scope": null}
+{"file": "cases_dev_code.jsonl", "id": "cd14", "q": "Which editor do I use?", "claim": "The user uses Neovim.", "scope": null}
+{"file": "cases_dev_code.jsonl", "id": "cd15", "q": "When is the invoice export due?", "claim": "The user's invoice export is due June 30.", "scope": null}
+{"file": "cases_dev_code.jsonl", "id": "cd16", "q": "What database does the notes app use?", "claim": "The user's notes app uses Postgres.", "scope": null}
+{"file": "cases_dev_code.jsonl", "id": "cd35", "q": "What do we use for dependency management in Python?", "claim": "The user's team uses Poetry for dependency management in Python.", "scope": null}
+{"file": "cases_dev_code.jsonl", "id": "cd36", "q": "How should you handle comments in my code?", "claim": "The user said to not add comments to their code.", "scope": null}
+{"file": "cases_dev_code.jsonl", "id": "cd37", "q": "What command should you run after changing code?", "claim": "The user wants the tests run with `make test` after any change.", "scope": null}
+{"file": "cases_dev_code.jsonl", "id": "cd38", "q": "Why did we choose SQLite for the field-agent app?", "claim": "The user's team chose SQLite for the field-agent app because the tablets are offline most of the day and need a local store that syncs later.", "scope": null}
+{"file": "cases_dev_code.jsonl", "id": "cd39", "q": "Which directory must you never touch?", "claim": "The user said not to touch anything under legacy/payroll.", "scope": null}
+{"file": "cases_dev_code.jsonl", "id": "cd40", "q": "What naming convention do we use for TypeScript files?", "claim": "The user's team names TypeScript files in kebab-case.", "scope": null}
+{"file": "cases_dev_projects.jsonl", "id": "pd10", "q": "What CI does this repo run on?", "claim": "The user's repo copperline-api runs its CI on GitHub Actions.", "scope": "copperline-api"}
+{"file": "cases_dev_projects.jsonl", "id": "pd11", "q": "Which database does weathervane use?", "claim": "The user's weathervane project uses Postgres.", "scope": "weathervane"}
+{"file": "cases_dev_projects.jsonl", "id": "pd12", "q": "What package manager does driftwood-app use?", "claim": "The user's driftwood-app uses pnpm as its package manager.", "scope": "driftwood-app"}
+{"file": "cases_dev_projects.jsonl", "id": "pd13", "q": "Where is lanternfish hosted?", "claim": "The user's lanternfish is hosted on Render.", "scope": "lanternfish"}
+{"file": "cases_dev_projects.jsonl", "id": "pd14", "q": "Which Python version is this project on?", "claim": "The user's copper-scheduler project is on Python 3.12.", "scope": "copper-scheduler"}
+{"file": "cases_dev_projects.jsonl", "id": "pd23", "q": "How do I like my code indented?", "claim": "The user always uses tabs for indentation, never spaces, in any code written for them.", "scope": "pollen-count"}
+{"file": "cases_dev_projects.jsonl", "id": "pd24", "q": "Should you add comments to my code?", "claim": "The user does not want comments added to their code.", "scope": "vesper-cli"}
+{"file": "cases_dev_projects.jsonl", "id": "pd25", "q": "What do I want done before you suggest a commit?", "claim": "The user wants the tests run before a commit is suggested, in every project.", "scope": "glasshouse-ui"}
+{"file": "cases_dev_projects.jsonl", "id": "pd26", "q": "Which spelling should the docs use?", "claim": "The user writes British English in all user-facing text.", "scope": "tern-docs"}
+{"file": "cases_dev_projects.jsonl", "id": "pd28", "q": "What language is tundra-search written in?", "claim": "The user's tundra-search is written in Go.", "scope": "tundra-search"}
+{"file": "cases_dev_projects.jsonl", "id": "pd29", "q": "Which database do we use here?", "claim": "The user's foxglove-crm uses MongoDB.", "scope": "foxglove-crm"}
+{"file": "cases_dev_projects.jsonl", "id": "pd30", "q": "What CI system does wren-metrics use?", "claim": "The user's wren-metrics uses GitLab CI.", "scope": "wren-metrics"}

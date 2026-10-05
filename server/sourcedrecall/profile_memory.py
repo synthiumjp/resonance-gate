@@ -610,7 +610,9 @@ def _messages_for(query, k=3):
     if cached[1] is None:
         return []
     hits = _RV3.retrieve_facts_v3(cached[1], query, k=60, dense_k=30,
-                                  top_n=k, with_scores=True)
+                                  top_n=k, with_scores=True,
+                                  fuse=(0.3, 0.3) if os.environ.get("RG_FUSE3") == "1" else None,
+                                  colbert=(0.3, 1.0, 0.3) if os.environ.get("RG_COLBERT_DIR") else None)
     return [dict(h, score=sc) for h, sc in hits]
 
 
@@ -704,6 +706,439 @@ def profile_quarantine():
             "rules": {"deny": len(rules["deny"]), "retype": len(rules["retype"]),
                       "from_corrections": rules["n_corrections"]},
             "source": _SOURCE}
+
+
+_NEG_HEAD = re.compile(r"^\s*(?:not|no longer|never|no)\b\s*", re.I)
+_CLAIM_SUBJ = [
+    (re.compile(r"\bthe user's\b", re.I), "my"),
+    (re.compile(r"^\s*the user\b", re.I), "I"),
+    (re.compile(r"\bthe user\b", re.I), "me"),
+    (re.compile(r"\b(?:currently|presently|still)\s+", re.I), ""),
+]
+
+
+def _claim_text(claim, owner):
+    """'The user currently lives in Northcote.' -> 'I live in Northcote.' The
+    parser reads a claim the way it reads something the user said."""
+    t = " ".join(str(claim or "").split())
+    for rx, rep in _CLAIM_SUBJ:
+        t = rx.sub(rep, t)
+    if owner:
+        t = re.sub(rf"^\s*{re.escape(owner)}'s\b", "my", t)
+        t = re.sub(rf"^\s*{re.escape(owner)}\b", "I", t)
+    # third-person verb after a first-person subject reads badly to the
+    # parser ("I lives"); the common cases
+    t = re.sub(r"^I (is)\b", "I am", t)
+    t = re.sub(r"^I (has)\b", "I have", t)
+    t = re.sub(r"^I (\w+?)(ies)\b", lambda m: f"I {m.group(1)}y", t)
+    t = re.sub(r"^I (\w+?[^s])s\b", r"I \1", t)
+    return t[:1].upper() + t[1:]
+
+
+_NEG_WORDS = re.compile(r"\b(not|never|no|nobody|none|neither|nor|without|"
+                        r"\w+n't|cannot)\b", re.I)
+_HEDGED = re.compile(
+    r"\b(would|could|wish|maybe|perhaps|might|(?:might|would|could|should|must)'ve|"
+    r"thinking (?:about|of)|considering|"
+    r"think about it|no idea|not decided|undecided|dunno|remains to be seen|"
+    r"ought|should|reckons?|keeps? telling|telling me|saying|says|said I|"
+    r"apparently|supposedly|heard|rumou?r\w*|"
+    r"if|unless|in case|someday|some day|at some point|doubt|not sure|wonder\w*|"
+    r"plan(?:ning)? to|going to|want to|hope|hoping|whether|either|or not|thinks? I|"
+    r"people|everyone|they say)\b", re.I)
+# a clause that opens like a question, with or without its "?"
+def _ends_value(clause, words, window=4):
+    """Does an ending word in `clause` govern one of `words`? The value
+    follows the ending word closely ("sold the Corolla", "left Acme") or
+    precedes "anymore" / "no longer" / "any more" closely."""
+    import currency
+    toks = re.findall(r"[a-z0-9'-]+", (clause or "").lower())
+    stems = [currency._stem(t) for t in toks]
+    for m in _ENDED.finditer(clause or ""):
+        k = len(re.findall(r"[a-z0-9'-]+", clause[:m.start()].lower()))
+        kw = m.group(0).lower()
+        if kw in ("anymore", "any more", "no longer"):
+            span = stems[max(0, k - window):k]
+        else:
+            span = stems[k + len(kw.split()):k + len(kw.split()) + window]
+        if set(span) & set(words):
+            return True
+    return False
+
+
+def _is_name(word):
+    """A capitalised word that is not an ordinary English word (WordNet)."""
+    if not word or not word[0].isupper():
+        return False
+    try:
+        from nltk.corpus import wordnet as wn
+        return not wn.synsets(word.lower())
+    except Exception:
+        return False
+
+
+_QUESTION_OPEN = re.compile(r"^\s*(what|how|why|which|who|where|when|whether|is|are|"
+                            r"do|does|did|can|could|should|would|will|am)\b", re.I)
+# an ending or a replacement: "I sold the Corolla" is not evidence that the
+# user drives one now -- it is evidence that they did and no longer do
+_ENDED = re.compile(r"\b(quit|quitting|sold|dropped|left|gave up|giving up|stopped|"
+                    r"ended|cancel+ed|moved (?:away|out)|no more|no longer|anymore|"
+                    r"any more|ex-|former|used to)\b", re.I)
+# ("moved to", "switched to", "instead" name the NEW state: "We relocated to
+# Coburg" supports "lives in Coburg")
+_INSTEAD = re.compile(r"\s*\b(?:instead of|rather than|in place of|replacing)\b.*$", re.I)
+
+
+def _neg_split(value):
+    """-> (negated, value without the negation or an 'instead of X' tail).
+    "Fatima instead of Mark" is a value of Fatima, not of Mark (dev stale2)."""
+    v = str(value or "").strip().lower()
+    neg = bool(_NEG_HEAD.match(v))
+    v = _INSTEAD.sub("", _NEG_HEAD.sub("", v)).strip()
+    return neg, v
+
+
+# how close (bge-small cosine) a later message with a change word must be to
+# the message that supports a claim to count as possibly changing it
+# (profile_check). On the readable sets the replacing messages scored
+# 0.53-0.65 against the original, unrelated ones about 0.47.
+CHECK_LATER_COS = float(os.environ.get("RG_CHECK_LATER_COS", "0.5"))
+
+
+def _families_by_message(mem):
+    """{normalised message text fragment: set of state families} from the
+    stored facts' own sentences."""
+    import currency
+    out = []
+    for st in (mem.g.nodes, mem.g.provisional):
+        for nd in st.values():
+            fams = {fam for fam, _k in currency._families(nd.get("attr"), nd.get("value"))}
+            src = (nd.get("source") or "").strip().lower()
+            if fams and src:
+                out.append((src, fams))
+    return out
+
+
+def _later_changes(claim, said, after, hits=None, cfams=None):
+    """Messages after `after` that may have changed what `said` states: in
+    the message search for the claim, dated later, with a change word ("now",
+    "since", "instead", "without", "cancelled"...), and close in meaning to
+    a supporting message ("Cancelled the gym membership" after "I train at
+    Anytime Fitness" shares no word with it)."""
+    import retrieve_v3 as _RV3
+    from memory_api import _CHANGE
+    hits = hits if hits is not None else _messages_for(claim, k=8)
+    said = [t for t in said if t]
+    cands = [m for m in hits if (m.get("date") or "") > (after or "")
+             and (m.get("text") or "").strip().lower() not in
+             {t.strip().lower() for t in said}
+             and (_CHANGE.search(m.get("text") or "")
+                  or re.search(r"\b(without|cancel+ed|ended|over|ex-)\b",
+                               m.get("text") or "", re.I))]
+    if not cands or not said:
+        return []
+    if cfams:
+        # a later message about a different kind of state does not change
+        # this one: a move is not a change of job
+        known = _families_by_message(_ensure_loaded())
+        keep = []
+        for m in cands:
+            low = (m.get("text") or "").lower()
+            mf = set().union(*[f for src, f in known if src and src in low]) if known else set()
+            if mf and not (mf & cfams):
+                continue
+            keep.append(m)
+        cands = keep
+        if not cands:
+            return []
+    bi, _ = _RV3._models()
+    sv = bi.encode(said, normalize_embeddings=True)
+    out = []
+    for m in cands:
+        mv = bi.encode([m["text"]], normalize_embeddings=True)[0]
+        cos = float(max(sv @ mv))
+        if cos >= CHECK_LATER_COS:
+            out.append(dict(m, cos=round(cos, 3)))
+    return out
+
+
+def profile_check(claim, scope=None):
+    """Did the user say this? (2026-10-05)
+
+    For something an agent is about to rely on -- "The user lives in
+    Fitzroy", a tool argument -- the verdict and the user's own dated words:
+
+      said           the user said it; `since` says what is known about it
+                     after that: "no longer true" (a later statement replaced
+                     it), "may have changed" (a later message on the topic,
+                     returned too), or "no later change found" -- which is
+                     not a promise that it is still true
+      contradicted   the user said otherwise (a negation, or a current
+                     different value of the same thing)
+      unconfirmed    only the assistant said it; the user never confirmed it
+      not_found      nothing the user said was found about this (absence of
+                     evidence: a claim in very different words can be missed)
+      unclear        the user's messages touch the topic but do not settle it
+                     (the closest messages are returned)
+
+    Deterministic: the parser reads the claim as it reads a message, and the
+    claim's facts are compared with the stored ones by attribute and by the
+    kind of state (home, job, partner...), with the same value comparison
+    the "no longer true" marking uses. No model is called."""
+    import currency
+    from memory_api import fact_id
+    mem = _ensure_loaded()
+    owner = (_ingest_state.get("owner") or os.environ.get("SOURCEDRECALL_OWNER")
+             or _discover_owner_name() or "User")
+    text = _claim_text(claim, owner)
+    ex = _get_extractor(owner)
+    recs = ex.extract_turn(text, role="user")
+    cfacts = [f for f in (_rgx_facts.to_fact(r) for r in recs) if f]
+    with _lock:
+        _set_scope(mem, scope)
+        stored = [f for f in _all_facts(mem)]
+        visible = {fact_id(nd) for st in (mem.g.nodes, mem.g.provisional,
+                                         getattr(mem.g, "hearsay", {}) or {})
+                   for nd in st.values() if mem._visible(nd)}
+    stored = [f for f in stored if f["id"] in visible]
+    by_id = {f["id"]: f for f in stored}
+
+    def ev(f, status):
+        r = (f.get("receipts") or [{}])[0]
+        return {"id": f["id"], "status": status, "fact": f.get("text"),
+                "said": f.get("said"), "date": r.get("date")}
+
+    found = {"supported": [], "no_longer_true": [], "contradicted": [],
+             "unconfirmed": []}
+    claim_fams = {fam for cf in cfacts
+                  for fam, _k in currency._families(cf["attribute"], _neg_split(cf["value"])[1])}
+    for cf in cfacts:
+        cattr, _ = currency.canon_state_attr(cf["attribute"])
+        cneg, cval = _neg_split(cf["value"])
+        cfam = {fam: set(k) if not isinstance(k, str) else k
+                for fam, k in currency._families(cf["attribute"], cval)}
+        for sf in stored:
+            sattr, _ = currency.canon_state_attr(sf.get("attribute"))
+            sneg, sval = _neg_split(sf.get("value"))
+            sfam = {fam: set(k) if not isinstance(k, str) else k
+                    for fam, k in currency._families(sf.get("attribute"), sval)}
+            shared = set(cfam) & set(sfam)
+            if sattr != cattr and not shared:
+                continue
+            if shared:
+                same = not any(currency._different(fam, cfam[fam], sfam[fam])
+                               for fam in shared)
+            else:
+                same = currency._same_value(cval, sval)
+            hearsay = sf.get("_tier") == "hearsay"
+            if same and cneg != sneg:
+                if not hearsay and sf.get("current") is not False:
+                    found["contradicted"].append(ev(sf, "contradicts"))
+                continue
+            if same:
+                if hearsay:
+                    found["unconfirmed"].append(ev(sf, "assistant said it"))
+                elif sf.get("current") is False:
+                    e = ev(sf, "no longer true")
+                    new = by_id.get(fact_id_of_node(mem, sf.get("superseded_by")))
+                    if new:
+                        e["replaced_by"] = ev(new, "current")
+                    found["no_longer_true"].append(e)
+                else:
+                    found["supported"].append(ev(sf, "supports"))
+            elif shared and not hearsay and sf.get("current") is not False \
+                    and not cneg and not sneg:
+                found["contradicted"].append(ev(sf, "a different current value"))
+
+    # a supporting fact older than a current different value of the same
+    # single-valued state was replaced even if the marking missed it
+    if found["supported"] and found["contradicted"]:
+        last_sup = max(e["date"] or "" for e in found["supported"])
+        newer = [e for e in found["contradicted"] if (e["date"] or "") > last_sup]
+        if newer:
+            for e in found["supported"]:
+                e["status"] = "may have changed"
+                e["replaced_by"] = newer[-1]
+            found["no_longer_true"] += found["supported"]
+            found["supported"] = []
+
+    # 2026-10-05 (check_eval, dev v1): "Back in Porto since the start of
+    # the month" and "Cancelled the gym membership" replaced earlier facts
+    # without a word in common, so nothing was marked. "supported" needs no
+    # LATER message on the topic: the message search for the claim finds
+    # one, it is shown, and the verdict is "may_have_changed".
+    if found["supported"]:
+        last = max(e["date"] or "" for e in found["supported"])
+        said = [(e.get("said") or "").strip() for e in found["supported"]]
+        later = _later_changes(claim, said, last, cfams=claim_fams)
+        if later:
+            for e in found["supported"]:
+                e["status"] = "may have changed"
+            found["may_have_changed"] = found.pop("supported") + [
+                {"status": "later message", "said": m.get("text"),
+                 "date": m.get("date"), "similarity": m.get("cos")}
+                for m in later[:2]]
+            found["supported"] = []
+
+    if found["supported"]:
+        verdict = "supported"
+    elif found.get("may_have_changed"):
+        verdict = "may_have_changed"
+    elif found["no_longer_true"]:
+        verdict = "no_longer_true"
+    elif found["contradicted"]:
+        verdict = "contradicted"
+    elif found["unconfirmed"]:
+        verdict = "unconfirmed"
+    else:
+        verdict = None
+    evidence = [e for k in ("supported", "may_have_changed", "no_longer_true",
+                            "contradicted", "unconfirmed") for e in found.get(k, [])]
+    # the user's messages that carry the claim's words: the claim was said
+    # in other words than the stored fact, or never became a stored fact
+    # (fragments such as "Fourth week as a paramedic", negations such as
+    # "I don't smoke"). Same project rule as the memory block.
+    cneg_claim = bool(_NEG_WORDS.search(text))
+    cwords = currency._content(" ".join([f["text"] for f in cfacts] or [text]))
+    cwords -= currency._content(owner) | {"user"}
+    vwords = currency._content(" ".join(f["value"] for f in cfacts)) - \
+        currency._content(owner) if cfacts else set()
+    msg_ev = None
+    if cwords and verdict in (None, "contradicted"):
+        conv_scope = getattr(mem, "conv_scopes", {}) or {}
+        for m in _messages_for(claim, k=6):
+            if scope and conv_scope.get(m.get("conv")) not in (None, scope):
+                continue
+            mw = currency._content(m.get("text"))
+            if len(cwords & mw) < max(1, round(0.6 * len(cwords))):
+                continue
+            # names alone (a project, a person) are not the claim
+            names = {w for w in currency._content(" ".join(
+                re.findall(r"\b[A-Z][\w-]+", claim)))} - vwords
+            if not ((cwords & mw) - names):
+                continue
+            # the claim's own values must be there: "I teach history" in
+            # Sheffield is not "teaches in Leeds"
+            if vwords and len(vwords & mw) < max(1, round(0.6 * len(vwords))):
+                continue
+            # negation is read in the clause that carries the claim's words:
+            # "Got my own one-bedroom in Yarraville, no more sharing the
+            # bathroom" does not deny the one-bedroom
+            clauses = [c for c in re.split(r"[.!?;]+|,|\bbut\b", m.get("text") or "")
+                       if c.strip()]
+            best = max(clauses, key=lambda c: len(cwords & currency._content(c)),
+                       default="")
+            # negation is read in the sentence that carries the claim's words
+            # and at the start of the next one ("Not me." after a sentence
+            # about someone else)
+            sents = [x for x in re.split(r"(?<=[.!?])\s+", m.get("text") or "") if x.strip()]
+            si = max(range(len(sents)), key=lambda i: len(cwords & currency._content(sents[i])),
+                     default=0)
+            sent = sents[si] if sents else best
+            nxt = sents[si + 1] if si + 1 < len(sents) else ""
+            mneg = bool(_NEG_WORDS.search(best)) or bool(
+                re.match(r"^\s*(no|not|never|nope)\b", nxt, re.I))
+            # a hedge, question, wish or someone else's report is not the
+            # user saying it ("My dad keeps telling me I'm too stubborn",
+            # "Do you think we should try Bun?", "Maybe we rewrite it in Rust")
+            hedge = _HEDGED.search(best)
+            if hedge and re.search(rf"\b{re.escape(hedge.group(0))}\b", text, re.I):
+                hedge = None        # the claim is about wanting / hoping itself
+            if hedge or "?" in (m.get("text") or "").split(best)[-1][:2] \
+                    or best.strip().endswith("?") or _QUESTION_OPEN.match(best.strip()):
+                continue
+            # the clause is about the user: a first-person word, or no other
+            # named subject ("Sam runs the pipeline" is about Sam). A
+            # capitalised first word is a name only if it is not an ordinary
+            # word ("Fourth week as a paramedic" is about the user).
+            if not re.search(r"\b(i|i'm|i've|i'd|i'll|me|my|mine|we|we're|our|us)\b", best, re.I):
+                first = (re.findall(r"[A-Za-z']+", best) or [""])[0]
+                if first.lower() in ("he", "she", "they") or (
+                        _is_name(first) and first.lower() not in text.lower()):
+                    continue
+            # an ending: evidence the user did, and no longer does -- when
+            # the ending word governs the claim's own value ("I left Acme",
+            # "no Corolla anymore"), not another one in the clause ("I left
+            # Acme and joined Birch" does not end the Birch claim)
+            if _ends_value(best, vwords or cwords) and not _ENDED.search(text):
+                found["no_longer_true"].append({"status": "ended", "said": m.get("text"),
+                                                "date": m.get("date")})
+                verdict = "no_longer_true"
+                evidence = found["no_longer_true"] + evidence
+                msg_ev = None
+                break
+            # a negation in raw message text is too often about something
+            # else in the clause ("no air con", "can't find the kitchen") to
+            # call the claim contradicted; the parser's negated facts do that
+            if mneg != cneg_claim:
+                continue
+            msg_ev = (m, True)
+            break
+    if msg_ev is not None:
+        m, agrees = msg_ev
+        older = [e for e in found["contradicted"] if (e["date"] or "") >= (m.get("date") or "")]
+        if not agrees:
+            if verdict is None:
+                verdict = "contradicted"
+                evidence = [{"status": "says otherwise", "said": m.get("text"),
+                             "date": m.get("date")}]
+        elif verdict is None or (verdict == "contradicted" and not older):
+            # said, and later than anything that differs from it
+            e = {"status": "supports", "said": m.get("text"), "date": m.get("date")}
+            later = _later_changes(claim, [m.get("text") or ""], m.get("date"),
+                                   cfams=claim_fams)
+            verdict = "may_have_changed" if later else "supported"
+            if later:
+                e["status"] = "may have changed"
+            evidence = [e] + [{"status": "later message", "said": x.get("text"),
+                               "date": x.get("date"), "similarity": x.get("cos")}
+                              for x in later[:2]] + [
+                dict(c, status="said earlier") for c in found["contradicted"]][:2]
+    if verdict is None:
+        # nothing stored settles it: do the user's messages touch it at all?
+        words = currency._content(" ".join(f["value"] for f in cfacts) or text)
+        words -= currency._content(owner)
+        hits = _messages_for(claim, k=6) if words else []
+        near = [m for m in hits if words & currency._content(m.get("text"))][:3]
+        verdict = "unclear" if near else "not_found"
+        # the claim's words are in an earlier message and a later message on
+        # the topic follows: "four coffees a day" then "Two months without
+        # any coffee now"
+        conv_scope = getattr(mem, "conv_scopes", {}) or {}
+        if scope:
+            near = [m for m in near if conv_scope.get(m.get("conv")) in (None, scope)]
+            verdict = "unclear" if near else "not_found"
+        evidence = [{"status": "mentions", "said": m.get("text"),
+                     "date": m.get("date"), "score": round(m.get("score", 0), 2)}
+                    for m in near]
+    # 2026-10-05 (check_eval on the readable sets): "supported" as a
+    # statement about NOW was right for only 81% of the claims it was given
+    # to -- changes such as "Fourth week as a paramedic" after "I'm a
+    # pharmacy assistant" carry no change word and no shared fact. So the
+    # verdict says what the evidence can carry: whether the user SAID it,
+    # and separately what is known about it since.
+    said = verdict in ("supported", "may_have_changed", "no_longer_true")
+    since = {"supported": "no later change found",
+             "may_have_changed": "may have changed",
+             "no_longer_true": "no longer true"}.get(verdict)
+    return {"claim": claim, "read_as": [f["text"] for f in cfacts],
+            "verdict": "said" if said else verdict,
+            "since": since, "evidence": evidence[:6]}
+
+
+def fact_id_of_node(mem, node_id):
+    """The public fact id of a store node id (superseded_by holds node ids)."""
+    from memory_api import fact_id
+    if not node_id:
+        return None
+    for st in (mem.g.nodes, mem.g.provisional):
+        nd = st.get(node_id)
+        if nd is not None:
+            return fact_id(nd)
+        for nd in st.values():
+            if nd.get("id") == node_id:
+                return fact_id(nd)
+    return None
 
 
 def profile_conflicts():

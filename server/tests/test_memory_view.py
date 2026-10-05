@@ -599,3 +599,39 @@ def test_a_note_must_be_grounded_in_what_the_user_wrote():
     assert N.grounded("Dana Cole plays the violin and the clarinet.", said, "Dana Cole")
     assert not N.grounded("Dana Cole is vegan.", said, "Dana Cole")
     assert not N.grounded("Dana Cole enjoys cooking Italian food.", said, "Dana Cole")
+
+
+# ---- profile_check: did the user say this? (2026-10-05) --------------------
+
+def _check_store(pm):
+    pm.profile_ingest([U("I work at Canva on the design tools team."),
+                       U("I'm not a vegetarian, I just can't stand lamb."),
+                       U("I wish I could surf, but I'm terrified of the ocean.")],
+                      conversation_id="a", owner_name="Dana Cole", date="2026-01-10")
+    pm.profile_ingest([U("I live in Northcote, near the creek trail.")],
+                      conversation_id="b", owner_name="Dana Cole", date="2026-02-01")
+    pm.profile_ingest([U("We finally relocated to Coburg last week. Still unpacking.")],
+                      conversation_id="c", owner_name="Dana Cole", date="2026-06-01")
+
+
+def test_check_a_claim_the_user_made(pm):
+    _check_store(pm)
+    r = pm.profile_check("The user works at Canva.")
+    assert r["verdict"] == "said" and r["since"] == "no later change found"
+    assert any("Canva" in (e.get("said") or "") for e in r["evidence"])
+
+
+def test_check_an_out_of_date_claim_is_said_but_flagged(pm):
+    _check_store(pm)
+    r = pm.profile_check("The user lives in Northcote.")
+    assert r["verdict"] == "said"
+    assert r["since"] in ("no longer true", "may have changed")
+    assert pm.profile_check("The user lives in Coburg.")["verdict"] == "said"
+
+
+def test_check_what_was_denied_hedged_or_never_said(pm):
+    _check_store(pm)
+    assert pm.profile_check("The user is a vegetarian.")["verdict"] == "contradicted"
+    assert pm.profile_check("The user surfs.")["verdict"] != "said"
+    assert pm.profile_check("The user's blood type is O negative.")["verdict"] in (
+        "not_found", "unclear")
