@@ -258,6 +258,87 @@ Coding sessions will add whatever you say about yourself in them, as well as
 some statements about the work. Use `profile_correct` to remove anything you
 don't want kept.
 
+## Automatic capture in Codex CLI, Gemini CLI and Cursor
+
+Codex CLI and Gemini CLI have the same session-start and session-end hooks as
+Claude Code, with the same fields on stdin, so the commands above work with
+`--agent codex` or `--agent gemini`. Cursor's hooks send different fields, so
+it has its own command, `sourcedrecall-hook cursor`.
+
+| agent | stored automatically | not covered |
+|---|---|---|
+| Codex CLI | what you typed and the assistant's replies, when the session ends; the summary at session start | sessions where the process is killed before it shuts down: import the rollout by hand |
+| Gemini CLI | the same, when you exit or run `/clear` | the same |
+| Cursor agent | each prompt and reply, stored when the agent finishes a turn and when the session ends; the summary at session start | text from before the hooks were installed; cloud agents; no "saved" line at session start |
+
+Codex, in `~/.codex/hooks.json` (or `[hooks]` in `~/.codex/config.toml`).
+Codex asks you to review new hooks once with `/hooks`, and gives `SessionEnd`
+at most 3 seconds, which is enough because the work runs in a background
+process:
+
+```json
+{
+  "hooks": {
+    "SessionStart": [{"matcher": "startup|resume|clear",
+      "hooks": [{"type": "command", "timeout": 30,
+        "command": "/absolute/path/to/sourcedrecall-hook session-start --agent codex --owner 'Your Name'"}]}],
+    "SessionEnd": [{"hooks": [{"type": "command", "timeout": 3,
+        "command": "/absolute/path/to/sourcedrecall-hook session-end --agent codex --owner 'Your Name'"}]}]
+  }
+}
+```
+
+Gemini CLI, in `~/.gemini/settings.json` (or `.gemini/settings.json` in a
+project). Timeouts there are in milliseconds, and Gemini does not wait for
+`SessionEnd`:
+
+```json
+{
+  "hooks": {
+    "SessionStart": [{"hooks": [{"name": "sourcedrecall-start", "type": "command",
+        "timeout": 30000,
+        "command": "/absolute/path/to/sourcedrecall-hook session-start --agent gemini --owner 'Your Name'"}]}],
+    "SessionEnd": [{"hooks": [{"name": "sourcedrecall-end", "type": "command",
+        "timeout": 10000,
+        "command": "/absolute/path/to/sourcedrecall-hook session-end --agent gemini --owner 'Your Name'"}]}]
+  }
+}
+```
+
+Cursor, in `~/.cursor/hooks.json` (or `.cursor/hooks.json` in a project). Use
+the same command for each event; it reads the event name from the input:
+
+```json
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart":       [{"command": "/absolute/path/to/sourcedrecall-hook cursor --owner 'Your Name'"}],
+    "beforeSubmitPrompt": [{"command": "/absolute/path/to/sourcedrecall-hook cursor --owner 'Your Name'"}],
+    "afterAgentResponse": [{"command": "/absolute/path/to/sourcedrecall-hook cursor --owner 'Your Name'"}],
+    "stop":               [{"command": "/absolute/path/to/sourcedrecall-hook cursor --owner 'Your Name'"}],
+    "sessionEnd":         [{"command": "/absolute/path/to/sourcedrecall-hook cursor --owner 'Your Name'"}]
+  }
+}
+```
+
+Cursor does not document its transcript file, so the Cursor hook never reads
+it. It writes each prompt and reply it is handed to
+`~/.sourcedrecall/cursor-spool/` (the same folder as your memory), stores
+them at each stop, and deletes that conversation's file at session end.
+
+Thoughts, tool calls, tool output and anything the tool injected itself
+(Codex's AGENTS.md and environment blocks, for example) are not stored. Each
+hook has been checked against the tool's documentation or source, in the
+way described in [docs/CLIENTS.md](../docs/CLIENTS.md), but they have not
+been run inside the live applications.
+
+To store a Codex or Gemini session by hand:
+
+```bash
+sourcedrecall-import codex  ~/.codex/sessions/2026/10/05/rollout-....jsonl
+sourcedrecall-import gemini ~/.gemini/tmp/<project hash>/chats/session-....jsonl
+```
+
 ## Other agents and models
 
 Nothing in the memory calls a language model, and what it returns is plain
@@ -266,8 +347,7 @@ text, so any model can use it.
 Any MCP client (Claude Desktop, Cursor, Windsurf, Cline, Continue, Zed,
 Goose, VS Code agent mode, Gemini CLI, Codex CLI) runs the same server: point
 it at the `sourcedrecall` command with `SOURCEDRECALL_OWNER` set. The config
-for each, and how to capture Gemini CLI sessions
-(`sourcedrecall-import gemini <session file>`), is in
+for each, and the details of capture for Codex, Gemini and Cursor, are in
 [docs/CLIENTS.md](../docs/CLIENTS.md).
 
 Without MCP, use the command line from any script or harness:

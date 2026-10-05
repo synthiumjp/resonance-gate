@@ -6,6 +6,12 @@ has the details behind each change.
 
 ## Unreleased
 
+- Sessions are stored automatically from Codex CLI and Gemini CLI
+  (`sourcedrecall-hook session-end --agent codex|gemini`, with a matching
+  `session-start`) and from the Cursor agent (`sourcedrecall-hook cursor`).
+  `sourcedrecall-import codex` now reads Codex rollout files. Formats and
+  hook inputs were checked against each tool's source or documentation;
+  they have not been run inside the live applications.
 - `sourcedrecall-import chatgpt` and `sourcedrecall-import claude` store a
   ChatGPT or Claude.ai data export, each conversation with its own date.
 - A conversation's messages are parsed in batches: storing a long

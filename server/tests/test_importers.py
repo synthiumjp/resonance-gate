@@ -1,4 +1,5 @@
 import json
+import sys
 import pytest
 
 from sourcedrecall import importers
@@ -48,10 +49,181 @@ def test_gemini_single_json(tmp_path):
     assert importers.gemini_session_id(p) == "zzz"
 
 
-def test_codex_not_implemented(tmp_path):
-    with pytest.raises(NotImplementedError):
-        list(importers.codex_turns(tmp_path / "rollout.jsonl"))
-    assert importers.main(["codex", str(tmp_path / "rollout.jsonl")]) == 2
+def test_gemini_first_timestamp(tmp_path):
+    p = tmp_path / "s.jsonl"
+    _write_jsonl(p, [
+        {"id": "1", "timestamp": "2026-09-01T10:00:00Z", "type": "user", "content": "hi"},
+        {"id": "2", "timestamp": "2026-09-01T10:00:05Z", "type": "gemini", "content": "yo"},
+    ])
+    assert importers.gemini_first_timestamp(p) == "2026-09-01T10:00:00Z"
+
+
+# ---- Codex CLI rollouts (2026-10-05) ---------------------------------------
+# Fixtures are built from the types in openai/codex (see the importers module
+# docstring), with made-up text.
+
+_UUID = "5973b6c0-94b8-487b-a530-2aeb6098ae0e"
+
+
+def _msg(role, *texts, kind=None, **extra):
+    kind = kind or ("output_text" if role == "assistant" else "input_text")
+    return {"type": "message", "role": role,
+            "content": [{"type": kind, "text": t} for t in texts], **extra}
+
+
+def _line(payload, ts="2026-09-20T09:00:05.000Z", kind="response_item"):
+    return {"timestamp": ts, "type": kind, "payload": payload}
+
+
+def _codex_layout_b(path, extra=()):
+    _write_jsonl(path, [
+        _line({"id": _UUID, "session_id": _UUID, "timestamp": "2026-09-20T09:00:00.000Z",
+               "cwd": "/work/proj", "originator": "codex_cli_rs", "cli_version": "0.160.0",
+               "source": "cli"}, kind="session_meta"),
+        _line(_msg("developer", "<permissions instructions>sandbox</permissions instructions>")),
+        _line(_msg("user", "# AGENTS.md instructions for /work/proj\n\n<INSTRUCTIONS>\n"
+                           "You live in Atlantis.\n</INSTRUCTIONS>")),
+        _line(_msg("user", "<environment_context>\n  <cwd>/work/proj</cwd>\n"
+                           "</environment_context>")),
+        _line(_msg("user", "I live in Fitzroy and I work as a nurse.")),
+        _line({"type": "user_message", "message": "I live in Fitzroy and I work as a nurse."},
+              kind="event_msg"),
+        _line({"type": "reasoning", "summary": [], "encrypted_content": "xx"}),
+        _line(_msg("assistant", "Looking around the repo first.", phase="commentary")),
+        _line({"type": "function_call", "name": "shell", "arguments": "{}", "call_id": "c1"}),
+        _line({"type": "function_call_output", "call_id": "c1",
+               "output": {"content": "I live in Narnia."}}),
+        _line(_msg("user", "<user_shell_command>\n<command>\nls\n</command>\n</user_shell_command>")),
+        _line(_msg("assistant", "Thanks, noted.", phase="final_answer")),
+        _line({"type": "token_count", "info": None}, kind="event_msg"),
+        _line({"message": "summary", "replacement_history": None}, kind="compacted"),
+        *extra,
+    ])
+
+
+def test_codex_layout_b_keeps_only_what_was_said(tmp_path):
+    p = tmp_path / f"rollout-2026-09-20T09-00-00-{_UUID}.jsonl"
+    _codex_layout_b(p)
+    turns = list(importers.codex_turns(p))
+    assert turns == [
+        {"role": "user", "content": "I live in Fitzroy and I work as a nurse."},
+        {"role": "assistant", "content": "Looking around the repo first."},
+        {"role": "assistant", "content": "Thanks, noted."},
+    ]
+    blob = json.dumps(turns)
+    for leaked in ("Atlantis", "Narnia", "sandbox", "environment_context", "AGENTS"):
+        assert leaked not in blob, leaked
+    assert importers.codex_session_id(p) == _UUID
+    assert importers.codex_first_timestamp(p) == "2026-09-20T09:00:05.000Z"
+
+
+def test_codex_session_id_falls_back_to_the_header(tmp_path):
+    p = tmp_path / "copy.jsonl"
+    _codex_layout_b(p)
+    assert importers.codex_session_id(p) == _UUID
+
+
+def test_codex_layout_a_header_then_raw_items(tmp_path):
+    p = tmp_path / f"rollout-2025-05-07T17-24-21-{_UUID}.jsonl"
+    _write_jsonl(p, [
+        {"id": _UUID, "timestamp": "2025-05-07T17:24:21.123Z", "instructions": "be brief"},
+        _msg("user", "<environment_context>\n  <cwd>/x</cwd>\n</environment_context>"),
+        _msg("user", "I keep bees."),
+        {"record_type": "state", "previous_response_id": "resp_1"},
+        {"type": "function_call", "name": "shell", "arguments": "{}", "call_id": "c"},
+        {"type": "function_call_output", "call_id": "c", "output": {"content": "x"}},
+        _msg("assistant", "Lovely."),
+        {"type": "reasoning", "id": "r", "summary": []},
+    ])
+    assert list(importers.codex_turns(p)) == [
+        {"role": "user", "content": "I keep bees."},
+        {"role": "assistant", "content": "Lovely."},
+    ]
+    assert importers.codex_session_id(p) == _UUID
+    assert importers.codex_first_timestamp(p) == "2025-05-07T17:24:21.123Z"
+
+
+def test_codex_skips_every_kind_of_injected_user_text(tmp_path):
+    p = tmp_path / "r.jsonl"
+    injected = [
+        "<user_instructions>\nbe nice\n</user_instructions>",
+        "<turn_aborted>\nstopped\n</turn_aborted>",
+        "<subagent_notification>{}</subagent_notification>",
+        "<skill>\n<name>x</name>\n</skill>",
+        "<codex_internal_context source=\"goal\">g</codex_internal_context>",
+        "<external_foo>bar</external_foo>",
+        "<hook_prompt hook_run_id=\"h1\">run the tests</hook_prompt>",
+        "Warning: The maximum number of unified exec processes you can keep open is 60",
+        "Another language model started to solve this problem and produced a summary "
+        "of its thinking process. You also have access to...",
+    ]
+    _write_jsonl(p, [_line(_msg("user", t)) for t in injected]
+                 + [_line(_msg("user", '<image name=[Image #1] path="/a.png">',
+                               "</image>", "What is in this picture?"))]
+                 + [_line(_msg("user", "My cat is called Biscuit."))])
+    assert list(importers.codex_turns(p)) == [
+        {"role": "user", "content": "What is in this picture?"},
+        {"role": "user", "content": "My cat is called Biscuit."},
+    ]
+
+
+def test_codex_keeps_the_request_after_the_context_marker(tmp_path):
+    p = tmp_path / "r.jsonl"
+    _write_jsonl(p, [_line(_msg("user", "context\n## My request for Codex:\nfix the bug"))])
+    assert [t["content"] for t in importers.codex_turns(p)] == ["fix the bug"]
+
+
+def test_codex_a_rollback_removes_the_last_user_turns(tmp_path):
+    p = tmp_path / "r.jsonl"
+    _write_jsonl(p, [
+        _line(_msg("user", "first")), _line(_msg("assistant", "a1")),
+        _line(_msg("user", "second")), _line(_msg("assistant", "a2")),
+        _line(_msg("user", "third")), _line(_msg("assistant", "a3")),
+        _line({"type": "thread_rolled_back", "num_turns": 2}, kind="event_msg"),
+        _line(_msg("user", "fourth")),
+    ])
+    assert [t["content"] for t in importers.codex_turns(p)] == ["first", "a1", "fourth"]
+
+
+def test_codex_subagent_rollouts_are_not_read(tmp_path):
+    p = tmp_path / "r.jsonl"
+    _write_jsonl(p, [
+        _line({"id": _UUID, "timestamp": "t", "cwd": "/", "originator": "o",
+               "cli_version": "1", "source": {"subagent": {"other": "guardian"}}},
+              kind="session_meta"),
+        _line(_msg("user", "Review this approval request.")),
+    ])
+    assert list(importers.codex_turns(p)) == []
+
+
+def test_codex_compressed_rollout_says_what_to_do(tmp_path, monkeypatch):
+    monkeypatch.setitem(sys.modules, "compression", None)
+    monkeypatch.setitem(sys.modules, "zstandard", None)
+    p = tmp_path / "rollout-x.jsonl.zst"
+    p.write_bytes(b"\x28\xb5\x2f\xfd")
+    with pytest.raises(ValueError, match="zstd"):
+        list(importers.codex_turns(p))
+    assert importers.main(["codex", str(p)]) == 2
+
+
+def test_codex_main_stores_with_a_prefixed_id_and_the_session_date(tmp_path, monkeypatch):
+    p = tmp_path / f"rollout-2026-09-20T09-00-00-{_UUID}.jsonl"
+    _codex_layout_b(p)
+    seen = {}
+
+    class FakePM:
+        @staticmethod
+        def profile_ingest(turns, **kw):
+            seen.update(kw, turns=turns)
+            return {"facts": 1, "turns": len(turns), "conversation_id": kw["conversation_id"]}
+
+    import sourcedrecall
+    monkeypatch.setattr(sourcedrecall, "profile_memory", FakePM, raising=False)
+    monkeypatch.setitem(sys.modules, "sourcedrecall.profile_memory", FakePM)
+    assert importers.main(["codex", str(p), "--owner", "Dana"]) == 0
+    assert seen["conversation_id"] == f"codex:{_UUID}"
+    assert seen["date"] == "2026-09-20T09:00:05.000Z"
+    assert len(seen["turns"]) == 3
 
 
 # ---- ChatGPT and Claude.ai data exports (2026-10-05), made-up data -------
@@ -122,6 +294,7 @@ def test_claude_export(tmp_path):
 
 @pytest.fixture
 def pm(tmp_path, monkeypatch):
+    pytest.importorskip("stanza", reason="ingest needs the rgx parser (stanza)")
     monkeypatch.setenv("RG_MEMORY_DIR", str(tmp_path / "mem"))
     monkeypatch.setenv("RG_NLI", "0")
     monkeypatch.delenv("SOURCEDRECALL_OWNER", raising=False)

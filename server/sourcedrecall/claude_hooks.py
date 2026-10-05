@@ -3,6 +3,13 @@
     sourcedrecall-hook session-end   --owner "Your Name"   (SessionEnd)
     sourcedrecall-hook session-start --owner "Your Name"   (SessionStart)
 
+The same two commands serve Codex CLI and Gemini CLI with --agent codex or
+--agent gemini (2026-10-05): both send session_id, transcript_path and cwd on
+stdin at SessionStart and SessionEnd, and accept the same
+hookSpecificOutput.additionalContext and systemMessage back. Only the
+transcript file differs; importers.py reads those. `cursor` is a third
+command for Cursor, whose payloads differ; see cursor_hooks.py.
+
 session-end reads the finished session's transcript and stores it with
 profile_ingest -- the user's own words become facts, receipted, exactly as
 if the agent had called the tool. session-start prints the memory briefing
@@ -120,34 +127,71 @@ def _cwd_of(transcript_path):
     return None
 
 
-def ingest_session(transcript_path, session_id, owner=None, cwd=None):
-    """The worker: store one session. Safe to repeat -- a resumed session
-    re-sends its whole transcript and only new turns are added."""
-    turns, first_ts = read_transcript(transcript_path)
+#: Agents whose session-end / session-start events carry the same fields as
+#: Claude Code's (session_id, transcript_path, cwd). "name" is how the user
+#: notice refers to the assistant. 2026-10-05: Codex CLI (hooks documented at
+#: https://learn.chatgpt.com/docs/hooks, schemas in openai/codex
+#: codex-rs/hooks/schema/generated) and Gemini CLI (docs/hooks/reference.md in
+#: google-gemini/gemini-cli) both send that payload; only the transcript file
+#: differs, and importers.py reads those.
+AGENTS = {"claude": "Claude", "codex": "Codex", "gemini": "Gemini"}
+
+
+def read_session(agent, path, session_id):
+    """-> (turns, first_timestamp, conversation_id) for a transcript written
+    by `agent`. The conversation id is the one `sourcedrecall-import` would
+    use for the same file, so a session stored by hook and again by hand is
+    not stored twice."""
+    if agent == "claude":
+        turns, first_ts = read_transcript(path)
+        return turns, first_ts, f"claude-code:{session_id}"
+    from sourcedrecall import importers
+    if agent == "codex":
+        turns = list(importers.codex_turns(path))
+        sid = importers.codex_session_id(path) or session_id
+        return turns, importers.codex_first_timestamp(path), f"codex:{sid}"
+    if agent == "gemini":
+        turns = list(importers.gemini_turns(path))
+        sid = importers.gemini_session_id(path) or session_id
+        return turns, importers.gemini_first_timestamp(path), sid
+    raise ValueError("unknown agent " + repr(agent))
+
+
+def ingest_turns(turns, conversation_id, first_ts=None, owner=None, cwd=None):
+    """Store turns the way every hook does. Safe to repeat: only turns not
+    already stored are added."""
     if not any(t["role"] == "user" for t in turns):
         return {"stored": False, "reason": "no user speech in this session"}
     pm = _setup_env(owner)
     title = next(t["content"] for t in turns if t["role"] == "user")
     title = " ".join(title.split())[:60]
     from sourcedrecall.paths import current_scope
-    return pm.profile_ingest(turns, conversation_id=f"claude-code:{session_id}",
+    return pm.profile_ingest(turns, conversation_id=conversation_id,
                              title=title,
                              owner_name=os.environ.get("SOURCEDRECALL_OWNER"),
-                             date=first_ts,
-                             scope=current_scope(cwd or _cwd_of(transcript_path)))
+                             date=first_ts, scope=current_scope(cwd))
 
 
-def session_end(event, owner=None, sync=False):
+def ingest_session(transcript_path, session_id, owner=None, cwd=None,
+                   agent="claude"):
+    """The worker: store one session. Safe to repeat -- a resumed session
+    re-sends its whole transcript and only new turns are added."""
+    turns, first_ts, conv_id = read_session(agent, transcript_path, session_id)
+    return ingest_turns(turns, conv_id, first_ts, owner,
+                        cwd or _cwd_of(transcript_path))
+
+
+def session_end(event, owner=None, sync=False, agent="claude"):
     path, sid = event.get("transcript_path"), event.get("session_id")
     if not path or not sid or not os.path.exists(path):
         return {"stored": False, "reason": "no transcript"}
     cwd = event.get("cwd")
     if sync:
-        return ingest_session(path, sid, owner, cwd)
+        return ingest_session(path, sid, owner, cwd, agent)
     job = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False,
                                       prefix="sourcedrecall-job-")
     json.dump({"transcript_path": path, "session_id": sid, "owner": owner,
-               "cwd": cwd}, job)
+               "cwd": cwd, "agent": agent}, job)
     job.close()
     log = os.path.join(tempfile.gettempdir(), "sourcedrecall-hook.log")
     with open(log, "a") as lf:
@@ -158,16 +202,20 @@ def session_end(event, owner=None, sync=False):
     return {"stored": "pending", "job": job.name, "log": log}
 
 
-def session_start(event, owner=None, max_facts=15):
+def session_start(event, owner=None, max_facts=15, agent="claude",
+                  show_notice=True):
     """-> the JSON Claude Code adds to the session's context, or None when
-    there is nothing to say (an empty memory adds no noise)."""
+    there is nothing to say (an empty memory adds no noise). show_notice=False
+    for a host that has no way to show the user a message: reporting what was
+    saved marks it as reported, so it must not be done unseen."""
     # Some people want memory only when they ask for it (research into what
     # users want, 2026-10-02: "I prefer claude's opt in implementation").
     # SOURCEDRECALL_BRIEFING=off: no summary at session start; the tools still
     # work, and sessions are still stored.
     off = ("off", "0", "false", "no")
     briefing = os.environ.get("SOURCEDRECALL_BRIEFING", "on").lower() not in off
-    notice = os.environ.get("SOURCEDRECALL_NOTICE", "on").lower() not in off
+    notice = show_notice and (
+        os.environ.get("SOURCEDRECALL_NOTICE", "on").lower() not in off)
     if not (briefing or notice):
         return None
     # The briefing needs no retrieval model; skip the NLI conflict model so a
@@ -185,13 +233,13 @@ def session_start(event, owner=None, max_facts=15):
         out["hookSpecificOutput"] = {"hookEventName": "SessionStart",
                                      "additionalContext": block[:9500]}
     if notice:
-        msg = saved_notice(pm.profile_news(), pm.memory_file())
+        msg = saved_notice(pm.profile_news(), pm.memory_file(), agent=agent)
         if msg:
             out["systemMessage"] = msg
     return out or None
 
 
-def saved_notice(new, memory_file=None, show=3):
+def saved_notice(new, memory_file=None, show=3, agent="claude"):
     """The line shown to the USER (not to Claude) when a session starts:
     what was stored since they last looked, in their own words, with the id
     to forget it by. A new standing instruction is always shown in full:
@@ -219,7 +267,7 @@ def saved_notice(new, memory_file=None, show=3):
             body += f" and {n - show} more"
         parts.append(f"sourcedrecall saved {n} new thing"
                      f"{'s' if n != 1 else ''}: {body}.")
-    tail = "Ask Claude to forget any of them by id"
+    tail = f"Ask {AGENTS.get(agent, 'the assistant')} to forget any of them by id"
     if memory_file:
         tail += f", or see {memory_file}"
     return " ".join(parts) + " " + tail + "."
@@ -227,10 +275,13 @@ def saved_notice(new, memory_file=None, show=3):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="sourcedrecall-hook")
-    ap.add_argument("event", choices=["session-end", "session-start", "_worker",
-                                      "_pending"])
+    ap.add_argument("event", choices=["session-end", "session-start", "cursor",
+                                      "_worker", "_pending"])
     ap.add_argument("job", nargs="?")
     ap.add_argument("--owner", default=os.environ.get("SOURCEDRECALL_OWNER"))
+    ap.add_argument("--agent", choices=sorted(AGENTS), default="claude",
+                    help="session-end / session-start: which agent's "
+                         "transcript and wording (default claude)")
     ap.add_argument("--sync", action="store_true",
                     help="session-end: ingest in this process (for testing)")
     a = ap.parse_args(argv)
@@ -256,9 +307,17 @@ def main(argv=None):
     if a.event == "_worker":
         job = json.load(open(a.job))
         try:
-            out = ingest_session(job["transcript_path"], job["session_id"],
-                                 job.get("owner"), job.get("cwd"))
-            print(json.dumps({"session": job["session_id"], **out}), flush=True)
+            if job.get("spool"):
+                from sourcedrecall import cursor_hooks
+                out = cursor_hooks.ingest_spool(
+                    job["spool"], job["conversation_id"], job.get("owner"),
+                    job.get("cwd"), job.get("delete", False))
+            else:
+                out = ingest_session(job["transcript_path"], job["session_id"],
+                                     job.get("owner"), job.get("cwd"),
+                                     job.get("agent", "claude"))
+            print(json.dumps({"session": job.get("session_id")
+                              or job.get("conversation_id"), **out}), flush=True)
         finally:
             os.unlink(a.job)
         return 0
@@ -266,12 +325,18 @@ def main(argv=None):
         event = json.load(sys.stdin)
     except ValueError:
         event = {}
+    if not isinstance(event, dict):
+        event = {}
+    if a.event == "cursor":
+        from sourcedrecall import cursor_hooks
+        print(json.dumps(cursor_hooks.handle(event, a.owner, sync=a.sync)))
+        return 0
     if a.event == "session-end":
-        out = session_end(event, a.owner, sync=a.sync)
+        out = session_end(event, a.owner, sync=a.sync, agent=a.agent)
         if a.sync:
             print(json.dumps(out))
         return 0
-    out = session_start(event, a.owner)
+    out = session_start(event, a.owner, agent=a.agent)
     if out:
         print(json.dumps(out))
     return 0
