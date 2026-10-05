@@ -48,14 +48,19 @@ never said as true. Audited, one rule for every system:
 LoCoMo (conversations 2-9, 1,307 questions), against Mem0, with the same
 local reader and judge (Qwen3-14B):
 
-| | sourcedrecall 0.5 | Mem0 2.2.1 | plain retrieval |
-|---|---|---|---|
-| answered correctly | 64.7% | 64.6% | 56.6% |
-| temporal questions | 56.2% | 37.2% | 49.6% |
-| single-hop | 74.8% | 77.9% | 66.9% |
-| multi-hop | 53.6% | 61.9% | 39.3% |
-| model calls to store the conversations | 0 | 941 | 0 (one embedding per message) |
-| context per question (tokens) | 845 | 722 | 356 |
+| | sourcedrecall | sourcedrecall, notes mode | Mem0 2.2.1 | plain retrieval |
+|---|---|---|---|---|
+| answered correctly | 64.7% | 73.1% | 64.6% | 56.6% |
+| temporal questions | 56.2% | 57.4% | 37.2% | 49.6% |
+| single-hop | 74.8% | 85.4% | 77.9% | 66.9% |
+| multi-hop | 53.6% | 62.3% | 61.9% | 39.3% |
+| model calls to store the conversations | 0 | 468 | 941 | 0 (one embedding per message) |
+| context per question (tokens) | 845 | 1,230 | 722 | 356 |
+
+Notes mode is optional: your own local model (here the same Qwen3-14B)
+writes short notes once per stored conversation, labelled as its notes and
+kept only where they are grounded in your own words. With the context cut
+to 994 tokens it scores 71.1% (multi-hop 61.5%).
 
 About these numbers: the answers were read and judged by local models, the
 same for every system, so the comparison inside each table is fair, but the
@@ -66,10 +71,10 @@ scenarios each). Mem0 used the same local model for its own calls. The other
 tools ran in the configuration they document for local use without a
 language model; with one, they offer more than was measured here.
 
-Where it is weaker: questions that need several facts from different
-conversations put together (LoCoMo multi-hop, 53.6% against Mem0's 61.9%);
-the optional notes mode, where your own local model writes short notes,
-closes most of that gap. Only your own messages are searched, so something
+Where it is weaker: without a model, questions that need several facts
+from different conversations put together (LoCoMo multi-hop, 53.6% against
+Mem0's 61.9%); notes mode closes that gap. Better retrieval alone did not:
+three rankers that found more of the right messages answered no better. Only your own messages are searched, so something
 only the assistant said is not found by itself.
 
 The benchmark code, every system's retrieved context, the reader's answers
