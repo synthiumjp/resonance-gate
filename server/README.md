@@ -145,6 +145,29 @@ in their own section. They are labelled in answers, drop out of the session
 summary after three days, and never replace a lasting fact: "I'm in Sydney
 this week" does not change where you live.
 
+## Bringing your history from ChatGPT or Claude.ai
+
+Both apps let you download your data (ChatGPT: Settings, Data controls,
+Export data; Claude.ai: Settings, Privacy, Export data). The archive holds a
+`conversations.json`. Give the archive, or that file, to the importer:
+
+```bash
+sourcedrecall-import chatgpt ~/Downloads/chatgpt-export.zip
+sourcedrecall-import claude ~/Downloads/claude-export.zip
+```
+
+Each conversation is stored with its own date, so what you said in 2024
+and changed in 2025 comes back in that order. Only the visible messages are
+read: no tool output, attached files, hidden instructions or reasoning
+summaries. Importing the same archive again adds nothing new. Neither
+company documents the export's layout; the importer reads the shape it has
+had since 2023, and a conversation it cannot read is skipped.
+
+A long history takes a while: the parser reads every message (about a
+minute per thousand messages on an M3 Mac). With the Claude Code plugin the command is
+in the plugin's own environment:
+`~/.claude/plugins/data/<plugin id>/venv/bin/sourcedrecall-import`.
+
 ## Projects
 
 Facts about you (health, family, home, job, diet, tastes) are available

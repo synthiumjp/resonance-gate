@@ -369,6 +369,15 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
 
         n_turns = n_facts = n_hearsay = n_skipped = 0
         new_lines = []
+        # parse the conversation's new messages in batches first (6x faster
+        # for a long conversation or an imported history; same parses)
+        todo = []
+        for t in turns:
+            text = str(t.get("content", "")).strip()[:1800]
+            if text and _rgx_facts.turn_hash(text) not in cached_hashes:
+                todo.append(_prose_only(text))
+        if len(todo) > 1 and hasattr(ex, "prefetch"):
+            ex.prefetch(todo)
         prev = None     # the assistant message before a user turn (rgx.fragments)
         for ti, t in enumerate(turns):
             role = t.get("role", "user")

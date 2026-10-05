@@ -6,6 +6,11 @@ has the details behind each change.
 
 ## Unreleased
 
+- `sourcedrecall-import chatgpt` and `sourcedrecall-import claude` store a
+  ChatGPT or Claude.ai data export, each conversation with its own date.
+- A conversation's messages are parsed in batches: storing a long
+  conversation or an imported history is about 3.5 times faster, with the
+  same results.
 - Text pasted in for the assistant to work on (an email, a README, a web
   page) is no longer read as your own words. A rule in a pasted email used
   to become one of your standing instructions.

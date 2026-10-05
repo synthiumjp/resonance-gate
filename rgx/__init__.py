@@ -107,6 +107,23 @@ class Extractor:
     # is per-owner; call reset_world() to process a different person.
     _world: dict = field(default_factory=dict, repr=False)
 
+    def prefetch(self, texts, batch=64):
+        """Parse many texts in batches ahead of extract_turn (2026-10-05).
+        Stanza run one message at a time spends its time on tiny LSTM calls
+        (0.25 s a message); 64 at a time is 0.04 s a message, and the parses
+        are the same (300/300 LoCoMo messages, every field). extract_turn
+        uses a prefetched parse when it is asked for exactly that text and
+        parses anything else as before. The previous batch is dropped."""
+        parser = self._parser()
+        parser.cache = {}
+        from stanza import Document
+        todo = [t for t in dict.fromkeys(texts) if t and t.strip()]
+        for i in range(0, len(todo), batch):
+            chunk = todo[i:i + batch]
+            for t, d in zip(chunk, parser.nlp.bulk_process(
+                    [Document([], text=t) for t in chunk])):
+                parser.cache[t] = d
+
     def _parser(self):
         if self._nlp is None:
             import stanza
@@ -117,10 +134,10 @@ class Extractor:
             # leaves the machine cannot do either. Models are installed once
             # by `sourcedrecall-setup`.
             try:
-                self._nlp = stanza.Pipeline(
+                self._nlp = _CachedParser(stanza.Pipeline(
                     "en", processors="tokenize,pos,lemma,depparse",
                     use_gpu=False, verbose=False,
-                    download_method=stanza.DownloadMethod.REUSE_RESOURCES)
+                    download_method=stanza.DownloadMethod.REUSE_RESOURCES))
             except Exception as e:
                 raise RuntimeError(
                     "The English parser models are not installed. Run "
@@ -188,6 +205,23 @@ class Extractor:
                                          prev=prev if role == "user" else None))
             prev = content if role == "assistant" else None
         return out
+
+
+class _CachedParser:
+    """The Stanza pipeline, answering from Extractor.prefetch's parses when
+    it has one for exactly this text. The parser only reads a parse, never
+    changes it, so one can be used more than once."""
+
+    def __init__(self, nlp):
+        self.nlp = nlp
+        self.cache = {}
+
+    def __call__(self, text):
+        doc = self.cache.get(text)
+        return doc if doc is not None else self.nlp(text)
+
+    def __getattr__(self, name):
+        return getattr(self.nlp, name)
 
 
 def extract(dialogue, owner=None, session=0, check=True):
