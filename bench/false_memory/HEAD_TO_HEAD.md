@@ -44,7 +44,7 @@ passed), with one rule for all, and wrote the overrides to
 errors and 2 missed; ai-memory 2 judge errors and 5 missed; sourcedrecall 1
 judge error (4B reader) and 0 missed; plain retrieval none. The judge most
 often missed bare one- or two-word answers naming the old value, and answers
-listing the old item as part of a current set. Four answers that open with
+listing the old item as part of a current set. Answers that open with
 a present-tense "Yes" and then say the state ended were left as the judge
 ruled for every system; under a stricter rule they would count for
 agentmemory (3), ai-memory (1 or 2), sourcedrecall (1, 4B) and plain
