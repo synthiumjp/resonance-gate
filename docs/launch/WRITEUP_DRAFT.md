@@ -79,13 +79,13 @@ LoCoMo, conversations 2-9, 1,307 questions:
 
 | | sourcedrecall 0.5 | Mem0 2.2.1 | plain retrieval |
 |---|---|---|---|
-| overall | 63.7% | 64.6% | 56.6% |
+| overall | 64.7% | 64.6% | 56.6% |
 | single-hop | 74.8% | 77.9% | 66.9% |
 | temporal | 55.8% | 37.2% | 49.6% |
-| multi-hop | 48.5% | 61.9% | 39.3% |
-| open-domain | 32.5% | 41.0% | 38.6% |
+| multi-hop | 53.6% | 61.9% | 39.3% |
+| open-domain | 34.9% | 41.0% | 38.6% |
 | model calls to store | 0 | 941 | 0 |
-| context tokens per question | 735 | 722 | 356 |
+| context tokens per question | 845 | 722 | 356 |
 
 Blind change-of-state set v4 (44 changes, 16 unchanged), reader's answers,
 every flagged answer checked by hand (one judge error removed, ours, 4B):
@@ -123,7 +123,7 @@ questions answered; plain retrieval 0/30 and 23/23; Mem0 2/30 and 23/23.
 ## Limitations
 
 - Multi-hop questions (several facts from different conversations) are
-  where Mem0's model calls pay off: 61.9% against our 48.5%.
+  where Mem0's model calls pay off: 61.9% against our 53.6%.
 - English only. The parser's rules are English.
 - The install is about 1.6 GB, mostly PyTorch for the parser.
 - We did not run GPT-4-class readers or judges (no paid API was used).

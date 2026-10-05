@@ -23,12 +23,12 @@ was given to the same local reader and the same local judge (Qwen3-14B):
 
 | | sourcedrecall 0.5 | Mem0 2.2.1 | plain retrieval |
 |---|---|---|---|
-| answered correctly | 63.7% | 64.6% | 56.6% |
+| answered correctly | 64.7% | 64.6% | 56.6% |
 | temporal questions | 56.2% | 37.2% | 49.6% |
 | single-hop | 74.8% | 77.9% | 66.9% |
-| multi-hop | 48.5% | 61.9% | 39.3% |
+| multi-hop | 53.6% | 61.9% | 39.3% |
 | model calls to store the conversations | 0 | 941 | 0 (one embedding per message) |
-| context per question (tokens) | 735 | 722 | 356 |
+| context per question (tokens) | 845 | 722 | 356 |
 
 Changes of state, on a test set written before any system was run (44
 things that changed, 16 that did not). The reader's answer is judged:
@@ -65,7 +65,7 @@ system was run. Mem0 used the same local model for its own calls. To rerun
 everything with another model, see `bench/REPRODUCE.md`.
 
 Where it is weaker: questions that need several facts from different
-conversations put together (LoCoMo multi-hop, 48.5% against 61.9%). Mem0 makes a model call for
+conversations put together (LoCoMo multi-hop, 53.6% against 61.9%). Mem0 makes a model call for
 every exchange and merges facts as it goes; sourcedrecall does not.
 
 The benchmark code, every system's retrieved context, the reader's answers
