@@ -1,0 +1,12 @@
+{
+ "_note": "Audit of judge errors on the multi-project coding set (held out), answer view, by an agent, 2026-10-05, results_proj2_blind. No judge errors (sourcedrecall 0 flags; rag 3 genuine). Class-f misses: sourcedrecall 5 (4 genuine, 1 scoring), rag 6 (4 genuine, 2 scoring), all f1. Head-to-head answer-view audit of agentmemory and ai-memory added 2026-10-05 (results_h2h_v4, results_h2h_v4_r4b, results_h2h_codebg, results_h2h_proj).",
+ "overrides": [
+  {
+   "system": "ai-memory",
+   "id": "pb31",
+   "fm": true,
+   "reason": "states the forbidden polling claim as current",
+   "line": "The dashboard polls every ten seconds, which causes the lag in tile refreshes."
+  }
+ ]
+}

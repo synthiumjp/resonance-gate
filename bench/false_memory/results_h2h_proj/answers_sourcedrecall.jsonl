@@ -1,0 +1,45 @@
+{"id": "pb01", "key": "721313f692e178512b4f99badf17793b1dbb98cf", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb02", "key": "bc53edc222dc2ec65f4a0c7e76f88165e3f98fc8", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb03", "key": "7cc228513a2dd82b8931da247d5235bb3c4cf7e5", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb04", "key": "475f7dcd983151a9c4bfe109276cdd102eeec30d", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb05", "key": "4e68f12e254f7f68b4c12e262dc50dbdb83eff7b", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb06", "key": "5f6886d5956d693cbceffe2519373ccbf2b9f32b", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb07", "key": "77f633c7f00cee361f7bb321dc4c66298e02c413", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb08", "key": "722993f4217a85d264321f3f21ad208537c61520", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb09", "key": "d70a786f9537d0cff90eea37530adb5c97abe17d", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb10", "key": "02a65b9088328fa03c0721e9027b157a12ca1da5", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb11", "key": "df00db48bd6875b7ec60563587cff25fe00ac9cc", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb12", "key": "acb881b831d84702b45f3ce9b9b42897f1435a50", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb13", "key": "bbf21c3d1456e834939d6e51b8a4088b47c3115f", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb14", "key": "fd39ad5930ef6096fec37ecabbf0356b53fd6f25", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Ashlar-api's pipeline is now GitLab CI, and the Jenkins server has been retired."]}
+{"id": "pb15", "key": "80559d37bbc3cb2afc7b3be82cf33dc3d9528578", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["kingfisher-svc is now on FastAPI."]}
+{"id": "pb16", "key": "8b1f1d6e8c18f656d899ba737b0383ffed3f63a1", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Carousel-app uses Vite now instead of webpack."]}
+{"id": "pb17", "key": "f02795fac3fa4b8d6f11874b1ba64a5ec8c0fca5", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["saltmarsh-ledger is now on MySQL 8.0, as the upgrade was completed over the weekend."]}
+{"id": "pb18", "key": "79dd0294590e7d9daec5fa082417ca047eaeb77b", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["tamarind-api deploys to Cloud Run."]}
+{"id": "pb19", "key": "a739f98524bc15551a1ae6c799b64fc4504380f8", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Tideway-bff is on Node 20 now."]}
+{"id": "pb20", "key": "90abd7cdd83f867854d97a7b8f1bd6f084ff9bb3", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["granary-batch uses SLF4J with Logback for logging."]}
+{"id": "pb21", "key": "275b88f3b9372e519794f64ff2ecfa78bc635bd9", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We use Biome for linting in willow-forms."]}
+{"id": "pb22", "key": "45b563a85f4229bfa7ba27e7fe5c8415cfd31dfb", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb23", "key": "df98a1e6afb1993d852fe1c61905e02a16200892", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb24", "key": "4c805f3fdafd01a6111385de880a3a9e653afc26", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb25", "key": "fbb2ba2be464a38ead3d37e5198b9fb024d045be", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb26", "key": "6d0d5c335468cacfba21e72c089554a20c1bc854", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb27", "key": "c66ff7d2a2708c32dada1ce9fc81c5f0e07bbdd6", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb28", "key": "5a6d870276bc8643b1387c4d5b6368ec3fe729fa", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb29", "key": "01df2680cdf4a87fae16624af20250a3e144c035", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb30", "key": "213129667795495267ba4d23bef8ddb4bb0337da", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb31", "key": "e52b97d3159305c928347a132de830c2470c9420", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb32", "key": "e95caa3c4e6da764ba9ffb6a09b17f82a5c1020d", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb33", "key": "c33654005fca181526b75a21efa9c8cf8d7a474d", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb34", "key": "d764b3375f2f245f131b61b65546a58985c8a13c", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["A two line explanation of the approach first, always, in every project."]}
+{"id": "pb35", "key": "c0784bcb2740a7ea95371a3a4db58151340d2bb3", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You want single quotes everywhere in your code."]}
+{"id": "pb36", "key": "f55ec0edf09903e902371511ac217ca39c1bb18f", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["One or two sentences."]}
+{"id": "pb37", "key": "048a2a0450d07f6d4f6d099776aea443334143f2", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You always want full type hints on every Python function, including parameters and return types."]}
+{"id": "pb38", "key": "c694f2cd17ca84bce80cddc93f0bf09295389506", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You can use a concise and descriptive style, such as \"Increase batch size threshold from 50 to 50 (inclusive)\" for the change you mentioned earlier."]}
+{"id": "pb39", "key": "f34d4b66ef1460eaea63f788957688b2dcad4ecd", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You want both sides of the change shown before deciding."]}
+{"id": "pb40", "key": "144cfad202acfc4be70b494b8e1cc2e8092496ca", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb41", "key": "0b20414421e32a09a9e87056664827146d396440", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb42", "key": "2c47791e2495504523b1bbcbe0985bceb13bc1ad", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Hazelnut-web is a Rails 7 app."]}
+{"id": "pb43", "key": "4db1e4e25d740d94db41ec1c3495de41b446d150", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Otter-wiki is hosted on Netlify."]}
+{"id": "pb44", "key": "ab264daa12d2fbeea25a3e27756b4d7e8f0fafeb", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Redis is used for the session store in russet-shop."]}
+{"id": "pb45", "key": "9ba666dd9d639ab4c3c86723c902e28f9aaac8cc", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The pebble-compiler is written in OCaml."]}

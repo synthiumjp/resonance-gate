@@ -1,0 +1,45 @@
+{"id": "pb01", "key": "f55f378bdba93dc1eafd142ca9f15a31c4bebab1", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The project is written in Elixir."]}
+{"id": "pb02", "key": "cfb3d4d81ec85e7223e7f582235c893d6f254f78", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We are using Cassandra as the datastore."]}
+{"id": "pb03", "key": "b487f514c18970b89378b185d602ce229817e213", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The deployment details for the thing in question are not provided in the memory."]}
+{"id": "pb04", "key": "06491fd52ef38a18e7d72ca602728451020475a8", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb05", "key": "b9c5e74b78260b867671da40c468a33301dcadeb", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The information provided does not mention how dependencies in kelp-gateway are managed."]}
+{"id": "pb06", "key": "e957de16356daa8cfdeaeca59dd767f1189cb7a2", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We use Keycloak for sign-in here."]}
+{"id": "pb07", "key": "4130897b004924535c64120a6ed6441751a3994b", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The project is built on Django 5."]}
+{"id": "pb08", "key": "2fe155647e8cad4b12588b7994ae4b8622852a2c", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Azure."]}
+{"id": "pb09", "key": "ee8e20d822d826188cd401db5efbef3fe9a1da1d", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The repo uses Prisma as its ORM."]}
+{"id": "pb10", "key": "a048e4da39db4e1d39a4bf6448f2bba1fffedc6a", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["For changes here, every PR needs two approvals plus a security sign-off, so please make the PR description thorough."]}
+{"id": "pb11", "key": "dbecee07ae25cc9aafade79a049f34ab40e94b36", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The infrastructure is managed using Terraform with remote state stored in S3."]}
+{"id": "pb12", "key": "1e6512a7e8b2d9565191af6c127cd947758c90d2", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The message broker mentioned is RabbitMQ."]}
+{"id": "pb13", "key": "605cece114b280e3092e37e89268b1384995a1f0", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb14", "key": "f4a34aef57a0949386114d1fe0783ce5ae26f685", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["ashlar-api is now built using GitLab CI, as the Jenkins server was retired on Friday."]}
+{"id": "pb15", "key": "5414834b4b5079bbaa2ac8ec5c5971a3786c333e", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["kingfisher-svc is now on FastAPI."]}
+{"id": "pb16", "key": "ae03b61702ddd166e4e25d5afd87a555f72067e7", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Carousel-app uses Vite now instead of webpack."]}
+{"id": "pb17", "key": "56fea4afab483d2ad86141e65dd6710f1c2eff90", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["saltmarsh-ledger is now running on MySQL 8.0."]}
+{"id": "pb18", "key": "3e43c0bcc807fe71a91777b499b66577476cadd2", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["tamarind-api deploys to Cloud Run."]}
+{"id": "pb19", "key": "a3655a17ecfac5f8e24ad357c20770bcd67494dd", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["tideway-bff is on Node 20 now."]}
+{"id": "pb20", "key": "1fe4f5a367f61627b28370b97b08b1fce3fb826f", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Granary-batch uses Logback as its logging library."]}
+{"id": "pb21", "key": "7afd1bba980b7d4e8f54d9f1ee2986127aeca5be", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We use Biome for linting in willow-forms."]}
+{"id": "pb22", "key": "82517f78a5f2f80f08a0d4a65e37846d5eafc14f", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb23", "key": "1004c86e7b537c8214179bbd8cc7b4ada72c42d3", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb24", "key": "d856ab08fac0297bc0229bc6124d1184fb692a42", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb25", "key": "765e8c7e3a53fba10249d7d7286ffbd6e1939348", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb26", "key": "fd6bc9e1cd7751b977d6064f9b9c1d257c3c4aad", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb27", "key": "eeed18ae0c07ce572574216de3071274d97036f1", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb28", "key": "8111f4a4dba022788afbbf2e76c665222cebbb94", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb29", "key": "76c17d00cf1fc5016ce55ec20e6c3abe219e6362", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb30", "key": "073a25af576b34315d2644613c1c3383d36558ec", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb31", "key": "709ea590aa35c596c94c86ad274f18875ce1e482", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb32", "key": "adaa91033a6dde9f9597378bd4b909b7cd747b13", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb33", "key": "4464b36903a88fa5be68082e010344f75f80cc9d", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb34", "key": "e5f7f25ba9cc47c5750eca8c2e1eadb03a279aec", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["A two-line explanation of the approach, always, in every project."]}
+{"id": "pb35", "key": "6367e497ebebff0b1a51cee07c6a0fdbe4cb2cde", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You want single quotes everywhere in your code."]}
+{"id": "pb36", "key": "f5a2766b33f9c17766fd9fee7cd335abebbbe135", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Your answers should be concise, typically a couple of sentences unless you ask for more."]}
+{"id": "pb37", "key": "ecd70c0357c6aecb858fa09d567150453df5a3c9", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Full type hints on every Python function you write, including parameters and return types."]}
+{"id": "pb38", "key": "d53188aac2a9574655cd5cb9097bace538d79d6a", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You use the conventional commits style for every repo you touch."]}
+{"id": "pb39", "key": "59902d3b07163334148bb598cd3062a299d32bf2", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You want the change shown in a diff format, and you never want whole files pasted back at you, in any project."]}
+{"id": "pb40", "key": "39c48e91f437a97b8acf68830cbba98291ff5ee0", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Ask me before you add any new dependency."]}
+{"id": "pb41", "key": "bfbb98a3fca5614b2dc36f72d79ef04be5ad5b34", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["No, you do not want emojis in log messages and commits."]}
+{"id": "pb42", "key": "d5b9ec275d9a1bb4583e9b7d767043a8ec34b37b", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["hazelnut-web is a Rails 7 app."]}
+{"id": "pb43", "key": "eba426d4143b6188e32cb75743900b89cdbde0ab", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["otter-wiki is hosted on Netlify."]}
+{"id": "pb44", "key": "75a711cd18113fb07551cdb07ba40fe7ffa44d50", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Russet-shop uses Redis for the session store."]}
+{"id": "pb45", "key": "f7ee82d33e48990943b752dcbf2becde4f0dc722", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Pebble-compiler is written in OCaml."]}

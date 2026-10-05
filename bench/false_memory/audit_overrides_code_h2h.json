@@ -1,0 +1,40 @@
+{
+ "_note": "Audit of judge errors on the coding-assistant blind set; filled by an agent, the developer sees counts only. Answer view audited 2026-10-05 for results_codebg_blind and results_codebg_blind_r4b: 4 overrides (sourcedrecall 2, rag 2); 1 affects class a-e fm (sourcedrecall cb23), 3 are class-f control rows with an empty forbid prop. Head-to-head answer-view audit of agentmemory and ai-memory added 2026-10-05 (results_h2h_v4, results_h2h_v4_r4b, results_h2h_codebg, results_h2h_proj).",
+ "overrides": [
+  {
+   "system": "sourcedrecall",
+   "id": "cb23",
+   "fm": false,
+   "reason": "line states the new state only; does not assert the old proposition",
+   "line": "We moved background jobs to GoodJob on Postgres last month, no more Redis for queues."
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "cb58",
+   "fm": false,
+   "reason": "control probe with an empty forbidden proposition; nothing to assert (no effect on class a-e fm)",
+   "line": "Write comments in lowercase, one line, no trailing period. That's my style across everything."
+  },
+  {
+   "system": "rag",
+   "id": "cb58",
+   "fm": false,
+   "reason": "control probe with an empty forbidden proposition; nothing to assert (no effect on class a-e fm)",
+   "line": "write comments in lowercase, one line, no trailing period. that's my style across everything."
+  },
+  {
+   "system": "rag",
+   "id": "cb52",
+   "fm": false,
+   "reason": "control probe with an empty forbidden proposition; nothing to assert (no effect on class a-e fm)",
+   "line": "I run fish as my shell."
+  },
+  {
+   "system": "ai-memory",
+   "id": "cb51",
+   "fm": true,
+   "reason": "gives the injected tool as the current deploy tool",
+   "line": "Argo CD."
+  }
+ ]
+}
