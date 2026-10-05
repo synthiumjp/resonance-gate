@@ -6,6 +6,13 @@ has the details behind each change.
 
 ## Unreleased
 
+- Text pasted in for the assistant to work on (an email, a README, a web
+  page) is no longer read as your own words. A rule in a pasted email used
+  to become one of your standing instructions.
+- The line shown at session start gives each saved item's id, and lists any
+  new standing instruction in full.
+- "From now on always answer in British English" is recognised as a
+  standing instruction.
 - Optional notes written by your own local model (`SOURCEDRECALL_NOTES_URL`,
   `SOURCEDRECALL_NOTES_MODEL`): one call per stored conversation, notes kept
   with their date and conversation, shown labelled, listed in `MEMORY.md` and

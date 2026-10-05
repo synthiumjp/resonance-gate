@@ -144,6 +144,19 @@ def test_a_long_list_is_cut_short():
     assert "and 2 more" in msg and "thing 3" not in msg
 
 
+def test_a_new_instruction_is_always_shown_with_its_id():
+    """2026-10-05: a standing instruction leads every later session, so the
+    user sees each new one in full, never inside "and N more"."""
+    new = [{"id": f"f{i}", "said": f"I like thing {i}."} for i in range(5)]
+    new.append({"id": "f9", "attribute": "instruction",
+                "said": "Never add comments to my code."})
+    msg = H.saved_notice(new)
+    assert msg.startswith("sourcedrecall saved 1 new instruction")
+    assert '"Never add comments to my code." (f9)' in msg
+    assert '"I like thing 0." (f0)' in msg and "and 2 more" in msg
+    assert "forget any of them by id" in msg
+
+
 def test_sessions_queued_during_the_install_are_stored_afterwards(home):
     """2026-10-04: the first session ended before the install finished and
     was lost; the launcher now queues its hook event and the next session

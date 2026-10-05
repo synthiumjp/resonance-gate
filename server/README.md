@@ -216,9 +216,16 @@ memory is empty.
 When a session starts you see a line listing what was saved since you last
 looked, in your own words, for example:
 
-    sourcedrecall saved 2 new things: "I moved to Brunswick last weekend.",
-    "I'm allergic to penicillin.". Ask Claude to forget any of them, or see
-    ~/.sourcedrecall/conversations/MEMORY.md.
+    sourcedrecall saved 2 new things: "I moved to Brunswick last weekend."
+    (f3a1), "I'm allergic to penicillin." (f7c2). Ask Claude to forget any of
+    them by id, or see ~/.sourcedrecall/conversations/MEMORY.md.
+
+A new standing instruction for the assistant is always listed in full, since
+it is followed in every later session.
+
+Text you paste in for the assistant to work on (an email, a README, a page
+from the web) is stored with your message but not read as your own words, so
+a pasted "Never skip the checksum step" does not become an instruction.
 
 `SOURCEDRECALL_NOTICE=off` turns that line off. `SOURCEDRECALL_BRIEFING=off`
 stops the summary Claude gets at the start of a session; sessions are still

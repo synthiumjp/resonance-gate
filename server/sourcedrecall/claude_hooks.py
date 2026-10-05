@@ -193,21 +193,36 @@ def session_start(event, owner=None, max_facts=15):
 
 def saved_notice(new, memory_file=None, show=3):
     """The line shown to the USER (not to Claude) when a session starts:
-    what was stored since they last looked, in their own words."""
+    what was stored since they last looked, in their own words, with the id
+    to forget it by. A new standing instruction is always shown in full:
+    it leads every later session, and a pasted document could plant one
+    (research into memory complaints, 2026-10-05: memory as an injection
+    surface; silent writes)."""
     if not new:
         return None
     def words(f):
         w = " ".join((f.get("said") or f.get("text") or "").split())
-        return f'"{w[:77] + "..." if len(w) > 80 else w}"'
-    n = len(new)
-    head = f"sourcedrecall saved {n} new thing{'s' if n != 1 else ''}: "
-    body = ", ".join(words(f) for f in new[:show])
-    if n > show:
-        body += f" and {n - show} more"
-    tail = ". Ask Claude to forget any of them"
+        w = f'"{w[:77] + "..." if len(w) > 80 else w}"'
+        return f"{w} ({f['id']})" if f.get("id") else w
+    instr = [f for f in new if f.get("attribute") == "instruction"]
+    rest = [f for f in new if f.get("attribute") != "instruction"]
+    parts = []
+    if instr:
+        parts.append(f"sourcedrecall saved {len(instr)} new instruction"
+                     f"{'s' if len(instr) != 1 else ''} for the assistant, "
+                     "followed in every session: "
+                     + ", ".join(words(f) for f in instr) + ".")
+    if rest:
+        n = len(rest)
+        body = ", ".join(words(f) for f in rest[:show])
+        if n > show:
+            body += f" and {n - show} more"
+        parts.append(f"sourcedrecall saved {n} new thing"
+                     f"{'s' if n != 1 else ''}: {body}.")
+    tail = "Ask Claude to forget any of them by id"
     if memory_file:
         tail += f", or see {memory_file}"
-    return head + body + tail + "."
+    return " ".join(parts) + " " + tail + "."
 
 
 def main(argv=None):

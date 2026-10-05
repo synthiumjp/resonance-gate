@@ -1362,6 +1362,9 @@ def test_a_phrase_linked_to_a_name_is_kept(ex, turn, phrase, name):
      "Martin Mark asked the assistant: Do not use semicolons in Martin Mark's JavaScript"),
     ("From now on, write commit messages in the imperative.",
      "Martin Mark asked the assistant: From now on write commit messages in the imperative"),
+    # 2026-10-05: Stanza tags "answer" a noun here
+    ("From now on always answer in British English.",
+     "asked the assistant: From now on always answer in British English"),
 ])
 def test_a_standing_instruction_is_kept(ex, turn, want):
     assert any(want in t for t in texts(ex, turn)), texts(ex, turn)

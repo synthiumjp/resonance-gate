@@ -887,8 +887,19 @@ def _standing_instruction(s, head, role, sent):
     verb has no subject, and it says always / never / don't, or "from now
     on", "every time". At the start of a sentence, or a conjunct with
     "please"."""
-    if role != "user" or head.upos != "VERB":
+    if role != "user":
         return False
+    if head.upos != "VERB":
+        # 2026-10-05: "From now on always answer in British English" --
+        # Stanza tags "answer" a NOUN. A root noun right after always/never,
+        # with no determiner or modifier of its own, is the imperative verb.
+        if not (head.upos == "NOUN" and head.deprel == "root"
+                and any((c.text or "").lower() in ("always", "never")
+                        and c.id == head.id - 1
+                        for c in s.children(head, ("advmod",)))
+                and not s.children(head, ("det", "nmod:poss", "amod",
+                                          "compound", "nummod"))):
+            return False
     if s.children(head, ("nsubj", "nsubj:pass", "csubj", "expl")):
         return False
     if head.deprel == "conj":
