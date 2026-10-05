@@ -9,7 +9,7 @@
 # Claude Code installs only Node dependencies for plugins, so this script
 # installs the Python side itself, into the plugin's data directory
 # (${CLAUDE_PLUGIN_DATA}, which survives plugin updates): a shallow clone of
-# the source at a pinned tag, a venv, CPU-only torch on Linux, the server
+# the source at a pinned tag, a venv, the server
 # package, and the models (sourcedrecall-setup). The first session starts the
 # install in the background and memory is available from the next session.
 # An install is redone when the plugin version changes.
@@ -111,7 +111,7 @@ case "${1:-}" in
   mcp)
     if ! installed; then
       echo "sourcedrecall: not installed yet. The first session starts the install" \
-           "(about 5 minutes); restart Claude Code when $LOG ends with '== done'." >&2
+           "(a minute or two); restart Claude Code when $LOG ends with '== done'." >&2
       exit 1
     fi
     exec "$VBIN/sourcedrecall$EXE"
@@ -120,7 +120,7 @@ case "${1:-}" in
     event="${2:-}"
     if ! installed; then
       if [ "$event" = "session-start" ] && start_background_install; then
-        printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"[sourcedrecall] Installing local memory (first run, about 5 minutes). This session will be remembered once the install finishes."}}'
+        printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"[sourcedrecall] Installing local memory (first run, a minute or two). This session will be remembered once the install finishes."}}'
       fi
       if [ "$event" = "session-end" ]; then
         # 2026-10-04: a session that ends before the install has finished is

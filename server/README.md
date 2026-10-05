@@ -19,8 +19,8 @@ machine.
 ```
 
 Claude Code asks for your name (the person the memory is about). The first
-session installs the Python side in the background (about 3 to 5 minutes,
-~1.6 GB including models; needs Python 3.10+ and git) and memory is
+session installs the Python side in the background (a minute or two,
+about 0.9 GB including models; needs Python 3.10+ and git) and memory is
 available from the next session. After that, each session is stored when it
 ends and the next one starts with the summary. Change the name later, or
 turn the summary off and keep only the tools, with
@@ -38,8 +38,6 @@ has not been tested yet.
 ```bash
 git clone <this repo> rg && cd rg
 python3 -m venv .venv && . .venv/bin/activate
-# CPU torch first, otherwise pip installs ~4 GB of CUDA packages that aren't used
-pip install torch --index-url https://download.pytorch.org/whl/cpu
 pip install -e ./server
 ```
 
@@ -50,11 +48,21 @@ Then download the models, once:
 sourcedrecall-setup
 ```
 
-This downloads the English parser (Stanza, ~320 MB) and three small models
-(~250 MB, in `~/.cache/sourcedrecall/onnx`), and takes about 3 minutes. The
-install is about 1.6 GB in total, most of it PyTorch, which the parser runs
-on. This is the only step that uses the network; the
+This downloads the English parser's models (~335 MB, into
+`~/.sourcedrecall/parser-models`) and three small models (~250 MB, in
+`~/.cache/sourcedrecall/onnx`), and takes about a minute. The install is
+about 0.9 GB in total. This is the only step that uses the network; the
 server runs offline.
+
+The parser is Stanza 1.14.0's English pipeline. Its models run on ONNX
+Runtime through `stanza_ort` (in this repository), converted once from
+Stanza's own and published at
+[huggingface.co/synthiumjp/sourcedrecall-parser-en](https://huggingface.co/synthiumjp/sourcedrecall-parser-en);
+they give the same parses as Stanza on PyTorch (checked on 7,755 texts,
+every field of every word). To run Stanza itself instead, install
+`pip install -e './server[stanza]'` (on Linux, first `pip install torch
+--index-url https://download.pytorch.org/whl/cpu`) and set
+`RGX_PARSER=stanza`.
 
 Add it to your MCP client, e.g. `.mcp.json` for Claude Code or
 `claude_desktop_config.json` for Claude Desktop:
@@ -372,7 +380,8 @@ There is no generative model in the server. Small models score text that
 is already stored. They run with ONNX Runtime from each model's official
 ONNX export, stored with half-precision weights and computed at full
 precision, so results are the same as the original PyTorch models at half
-the download. The English parser (Stanza) runs on PyTorch.
+the download. The English parser (Stanza's models) runs on ONNX Runtime
+too, through `stanza_ort`.
 
 | model | used by | what it does |
 |---|---|---|
