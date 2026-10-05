@@ -56,6 +56,8 @@ def write_notes(owner, date, turns):
         return []
     raw = _call(PROMPT.format(owner=owner, date=date or "unknown date",
                               conversation="\n".join(lines)[:12000]))
+    said = " ".join(str(t.get("content", "")) for t in turns
+                    if t.get("role", "user") == "user")
     out = []
     for ln in raw.splitlines():
         ln = re.sub(r"^\s*(?:[-*•]|\d+[.)])\s*", "", ln).strip()
@@ -63,5 +65,37 @@ def write_notes(owner, date, turns):
             continue
         if owner.split()[0].lower() not in ln.lower():
             continue          # a note must be about the owner
+        if not grounded(ln, said, owner):
+            continue          # what the other side said is not a note
         out.append(ln)
     return out[:20]
+
+
+_STOP = frozenset("""the a an and or of to in on at for with from by as is are was
+were be been has have had does did do not no their they them his her him she he
+its it this that these those who which what when where why how also very really
+just some any all more most other into about over after before than then there
+here our your my me we you""".split())
+
+
+def _stem(w):
+    for suf in ("ing", "ed", "s"):
+        if w.endswith(suf) and len(w) - len(suf) >= 3:
+            w = w[:-len(suf)]
+            break
+    return w[:5]
+
+
+def _stems(text):
+    return {_stem(w) for w in re.findall(r"[a-z0-9]+", (text or "").lower())
+            if len(w) > 2 and w not in _STOP}
+
+
+def grounded(note, said, owner, share=0.6):
+    """2026-10-05 (blind v3, notes mode): the model wrote notes from claims
+    the ASSISTANT made about the user ("you're vegan, right?"). A note is
+    kept only if most of its content words are in what the user wrote."""
+    words = _stems(note) - _stems(owner)
+    if not words:
+        return False
+    return len(words & _stems(said)) / len(words) >= share

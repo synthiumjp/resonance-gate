@@ -1858,6 +1858,26 @@ class Memory:
                         per[i].append(self._fact(nd, provisional=prov))
         return per
 
+    def _note_ended(self, note):
+        """2026-10-05 (blind v4, notes mode): a note from a conversation whose
+        fact the parser later saw replaced ("lives in Fitzroy", then "moved to
+        Brunswick") said the old state with no label. It is marked when it
+        shares most of its content with such an ended fact."""
+        def stems(t):
+            return {w[:5] for w in re.findall(r"[a-z0-9]+", (t or "").lower())
+                    if len(w) > 2} - {w[:5] for w in (self.owner or "").lower().split()}
+        nw = stems(note.get("text"))
+        if not nw:
+            return False
+        for st in (self.g.nodes, self.g.provisional):
+            for nd in st.values():
+                if (nd.get("current") is False
+                        and note.get("conv") in (nd.get("convs") or {})):
+                    fw = stems(nd.get("text"))
+                    if fw and len(nw & fw) / len(fw) >= 0.6:
+                        return True
+        return False
+
     def _messages_block(self, query, max_facts):
         """2026-10-04: messages-first evidence (RG_EVIDENCE=messages). The
         user's own best-matching messages, dated, oldest first, with the
@@ -1981,8 +2001,9 @@ class Memory:
                 if t.lower() in seen:
                     continue
                 seen.add(t.lower())
+                ended = (" (no longer true)" if self._note_ended(nt) else "")
                 lines.append((f"- [{nt.get('date')}] " if nt.get("date") else "- ")
-                             + f"(note written by your model) {t}")
+                             + f"(note written by your model){ended} {t}")
             if seen:
                 rules = _RULES_MSG.replace(
                     "Anything about the user not listed here",

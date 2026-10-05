@@ -556,3 +556,13 @@ def test_the_browser_lists_model_notes_escaped(pm):
     owner, groups = pm.memory_groups()
     page = _render_memory(owner, groups)
     assert "Notes written by your model" in page and "&lt;b&gt;violin" in page
+
+
+def test_a_note_must_be_grounded_in_what_the_user_wrote():
+    """2026-10-05 (blind v3, notes mode): notes picked up the assistant's
+    claims about the user."""
+    from sourcedrecall import notes as N
+    said = "I picked up the violin last year and I still play clarinet. Thanks for the recipe!"
+    assert N.grounded("Dana Cole plays the violin and the clarinet.", said, "Dana Cole")
+    assert not N.grounded("Dana Cole is vegan.", said, "Dana Cole")
+    assert not N.grounded("Dana Cole enjoys cooking Italian food.", said, "Dana Cole")
