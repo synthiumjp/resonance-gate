@@ -83,10 +83,6 @@ do_install() {
   fi
   [ -x "$VBIN/python$EXE" ] || "$py" -m venv "$VENV" || return 1
   "$VBIN/python$EXE" -m pip install -q --upgrade pip || return 1
-  if [ "$(uname -s)" = "Linux" ]; then
-    # the default Linux wheel pulls ~4 GB of CUDA libraries that are never used
-    "$VBIN/python$EXE" -m pip install -q torch --index-url https://download.pytorch.org/whl/cpu || return 1
-  fi
   "$VBIN/python$EXE" -m pip install -q -e "$SRC/server" || return 1
   "$VBIN/sourcedrecall-setup$EXE" || return 1
   echo "$REF" > "$STAMP"

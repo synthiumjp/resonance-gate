@@ -133,8 +133,18 @@ def main(argv=None):
             print(f"      -> {d} ({_mb(_du(d))})")
             done = True
         except Exception as e:
-            print(f"      -> could not install ({e}); using Stanza with PyTorch")
+            print(f"      -> could not install ({e}); trying Stanza with PyTorch")
     if not done:
+        try:
+            import stanza  # noqa: F401
+        except ImportError:
+            print("\nThe parser models could not be installed, and Stanza with "
+                  "PyTorch (the fallback) is not installed either. Check the "
+                  "network and run sourcedrecall-setup again, or install the "
+                  "fallback: pip install 'sourcedrecall[stanza]' (on Linux, "
+                  "first: pip install torch --index-url "
+                  "https://download.pytorch.org/whl/cpu).")
+            return 1
         print(f"[1/{1 + len(HF_MODELS)}] English parser (Stanza: {STANZA_PROCESSORS})"
               " -- ~320 MB, the slowest step", flush=True)
         import stanza

@@ -136,7 +136,13 @@ class Extractor:
                 self._nlp = _CachedParser(stanza_ort.Pipeline(models),
                                           stanza_ort.Document)
                 return self._nlp
-            import stanza
+            try:
+                import stanza
+            except ImportError as e:
+                raise RuntimeError(
+                    "The English parser is not installed. Run "
+                    "`sourcedrecall-setup` once (it downloads the parser "
+                    "models), or install Stanza: pip install stanza==1.14.0") from e
             # 2026-10-02: REUSE_RESOURCES -- never touch the network at
             # runtime. Stanza's default re-fetches resources.json on every
             # Pipeline() (a network call per server start) and downloads

@@ -17,13 +17,19 @@ authors = [{ name = "Jon-Paul Cacioli" }]
 dependencies = [
     "mcp>=1.0,<2",
     "numpy",
-    "torch",                # the Stanza parser runs on it
-    "stanza==1.14.0",       # pinned: the rgx rules are tuned and tested on this release; 1.15 parses "due to" and some fragments differently
     "onnxruntime>=1.17",    # embedder, re-ranker, conflict checker
     "onnx>=1.15",
     "tokenizers>=0.15",
     "huggingface_hub",
     "nltk>=3.8",
+]
+
+[project.optional-dependencies]
+# 2026-10-05: the parser runs on ONNX Runtime (stanza_ort) with models setup
+# downloads; Stanza with PyTorch is the fallback and the reference.
+stanza = [
+    "torch",
+    "stanza==1.14.0",       # pinned: the rgx rules are tuned and tested on this release; 1.15 parses "due to" and some fragments differently
 ]
 
 [project.scripts]
