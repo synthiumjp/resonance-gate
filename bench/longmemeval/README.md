@@ -40,12 +40,13 @@ figures are in `report.md`. The weakest type is single-session-preference
   message search reads only the stored conversations, so the parser cannot
   change this ranking; on the two questions run both ways the rankings were
   identical. With the parser, ingest took about two minutes per question.
-- Only user messages are indexed, as in the product. agentmemory indexes
-  both sides of each session (its document is the session with roles, cut
-  to 512 characters for its embedding); MemPalace indexes user turns.
-- agentmemory's filter for abstention questions checks values the data does
-  not contain, so its 95.2% is over all 500 questions; the comparison above
-  uses the same 500.
+- Only user messages are indexed, as in the product. Other tools' set-ups
+  differ (agentmemory's benchmark script indexes both sides of each session;
+  see their repositories); the figures quoted for them are as they publish
+  them.
+- agentmemory's 95.2% is over all 500 questions (its per-type counts in
+  benchmark/LONGMEMEVAL.md add up to 500), so the comparison above uses the
+  same 500.
 - The two baselines use the same index (messages of three words or more).
 
 `run.py` writes one line per question (`results.jsonl`: ranked sessions and
