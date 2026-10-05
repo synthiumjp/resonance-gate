@@ -15247,3 +15247,54 @@ and how to run everything).
   a port (dictionary-only changes 3 parses in 500 turns); int8 breaks
   parity. Net install about 1.0 GB. A build agent is on it.
 - JP declined GPT-4o-mini reader/judge again (local only).
+
+## Entry 311 — 2026-10-05/06 (claim check; label screening; multi-hop retrieval closed; notes mode held out; implied changes)
+
+- profile_check (did the user say this?), screened like a trust label:
+  "supported" as "true now" was right 81% on the readable sets, so the
+  verdict is provenance (said / contradicted / unconfirmed / unclear /
+  not_found) plus "since". Readable: said 322/323 right, true claims said
+  207/263, denied/hedged/never-said said 1/55. Held out (before the last
+  rules, which used those errors' categories via an agent, counts only):
+  5/61. An agent was blocked by the permission classifier when it tried to
+  print more held-out text; it stopped, correctly.
+- Label screening (bench/false_memory/screen_labels.py, all 12 sets):
+  "may have changed since" was mostly noise in coding sessions (31 and 35
+  firings at ~6% precision). Fix: the newer fact must be the user's own,
+  the change word in its own clause, related by family, shared word or
+  bge cosine >= 0.5. Coding 31 -> 8 and 35 -> 3 firings; false alarms
+  halved; true flags on v4 8 -> 4. Answer level v4: 2/44 old-as-current
+  (unchanged), new state 41/44 (42), controls 16/16. Adopted.
+- Standing instructions: "Haven't set foot in the Leeds office since..."
+  and "Not freelancing any more" were stored as instructions. An English
+  imperative is base form (VB) with no have/be auxiliary.
+- Multi-hop retrieval, closed. Literature scan (agent): a 2026 LoCoMo
+  study found our exact cross-encoder lowers Hit@1. Recall on dev (top 8,
+  multi-hop evidence of 106): CE 42, three-way z-fusion 46, MiniLM-L12 46,
+  ColBERT (answerai-colbert-small, ported to ONNX by an agent, parity
+  7.6e-6) + BM25 + CE 50, mxbai-rerank-base 53 (3.7 s / 30 candidates,
+  too slow), bge-reranker-v2-m3 56 (too big). Coverage selection and word
+  budgets: worse. Answers on LoCoMo dev against the baseline rerun alone
+  (68.2%, identical to the first run): L12 +15/-17, ColBERT +18/-22,
+  fusion +15/-23. None adopted. Second time recall did not become answers.
+- Reader/judge noise: two identical runs alone on the server gave
+  identical scores. Concurrent jobs on the server are what varies them.
+- Notes mode, LoCoMo TEST with the fixed notes: 73.1% (Mem0 64.6, RAG
+  56.6); multi-hop 62.3 (61.9); temporal 57.4 (37.2); single-hop 85.4
+  (77.9); 1,230 context tokens. At 994 tokens (TOP_K 3): 71.1%, multi-hop
+  61.5. The lead is not the extra context.
+- Implied changes (JP: "context linguistics and heuristics"): of 54
+  out-of-date facts never marked on the readable sets, the parser had the
+  newer fact in 38 and nothing in 16. (1) Soft domain links
+  (currency.mark_domain_changes): change-of-state verbs name a domain
+  (graduate -> study, promote -> work, get engaged -> relationship);
+  generic ones (switch, trade, sell) take the object's WordNet supersense
+  or a shared word; contrast markers ("now", "back to", "has been ... since")
+  link within a domain; news about the user's people never counts. (2)
+  Presupposition triggers in fragments (rgx.fragments._PRESUP): "Fourth week
+  as a paramedic", "Day ten of decaf", "Three months with Daniel now" are
+  read as the presupposed state + "now". Readable sets: 22 of 54 now marked
+  (10 no longer true, 21 may have changed in all), 0 false marks in 136
+  no-change scenarios. Held out v2-v4: +4 linked, 0 false in 92. Coding
+  sets over-fired (8 -> 31 firings); work contrast links now need a role
+  word in both facts -- rerun pending.
