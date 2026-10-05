@@ -22,14 +22,20 @@ import adapters  # noqa: E402
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("system", choices=["sourcedrecall", "mem0", "rag"])
+    ap.add_argument("system", choices=["sourcedrecall", "mem0", "rag",
+                                       "agentmemory", "ai-memory"])
     ap.add_argument("--split", default="all")
     ap.add_argument("--ids", default="")
     ap.add_argument("--out", default="")
     ap.add_argument("--scratch", default=os.environ.get("FM_SCRATCH", tempfile.gettempdir()))
     a = ap.parse_args()
-    cls = {"sourcedrecall": adapters.SourcedRecallAdapter, "mem0": adapters.Mem0Adapter,
-           "rag": adapters.RagAdapter}[a.system]
+    if a.system in ("agentmemory", "ai-memory"):
+        import adapters_h2h   # 2026-10-05: the head-to-head tools
+        cls = {"agentmemory": adapters_h2h.AgentMemoryAdapter,
+               "ai-memory": adapters_h2h.AiMemoryAdapter}[a.system]
+    else:
+        cls = {"sourcedrecall": adapters.SourcedRecallAdapter, "mem0": adapters.Mem0Adapter,
+               "rag": adapters.RagAdapter}[a.system]
     results = os.environ.get("FM_RESULTS") or os.path.join(HERE, "results")
     out = a.out or os.path.join(results, f"raw_{a.system}.jsonl")
     os.makedirs(os.path.dirname(out), exist_ok=True)
@@ -68,6 +74,7 @@ def main():
             rec["rg_commit"] = subprocess.run(
                 ["git", "-C", adapters.REPO, "rev-parse", "--short", "HEAD"],
                 capture_output=True, text=True).stdout.strip()
+        ad = None
         try:
             ad = cls(wd)
             rec["ingest"] = ad.ingest(c)
@@ -83,6 +90,9 @@ def main():
                 rec["stored"] = ad.dump()
         except Exception:
             rec["error"] = traceback.format_exc()
+        finally:
+            if ad is not None and hasattr(ad, "close"):
+                ad.close()      # the head-to-head tools run a server each
         rec["wall"] = round(time.time() - t0, 2)
         with open(out, "a") as f:
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
