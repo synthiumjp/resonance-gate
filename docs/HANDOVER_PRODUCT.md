@@ -2,17 +2,26 @@
 
 Last updated 2026-10-05. Branch `product-p2`, pushed to github.com/synthiumjp/resonance-gate (public, research) and as `main` to github.com/synthiumjp/sourcedrecall (PRIVATE until launch; push both: `git push origin product-p2 && git push sr product-p2:main`, tags to both).
 Latest release tag: `sourcedrecall-v0.5.2` (installs from resonance-gate).
-Since then (unreleased, on the branch): list questions read 16 messages,
-preferences across projects, wider standing instructions, the opt-in notes
-mode, notes in MEMORY.md and the browser, native Windows paths (untested),
-CHANGELOG. Full suite on the Mac: 1081 passed, 3 skipped.
+Since then (unreleased, on the branch; docs/CHANGELOG.md): no PyTorch
+(stanza_ort), list questions read 16 messages, preferences across projects,
+wider standing instructions, opt-in notes mode, pasted-text guard, ChatGPT /
+Claude.ai importers, Codex / Gemini CLI / Cursor capture, parser batching.
+Full suite on the Mac: 1118 passed (Stanza backend), 1120 (stanza_ort).
+Notebook up to e310. JP's goal (2026-10-05): a usable, credible open-source
+system -- every claim reproducible, local models only (GPT-4o-mini declined
+twice).
 
 ## What it is
 
 A local memory for AI agents that never calls a language model to store
 anything (unless the user turns on notes mode, below). It keeps the user's
-messages as written, with dates, and a deterministic parser (Stanza 1.14.0,
-pinned, + the `rgx` rules) reads them for facts. For a question the block an
+messages as written, with dates, and a deterministic parser (Stanza 1.14.0's
+English models + the `rgx` rules) reads them for facts. The models run on
+ONNX Runtime through `stanza_ort` (repo root; tools/stanza_ort: convert,
+parity, MODEL_CARD), identical parses to Stanza on PyTorch on 7,755 texts;
+setup downloads them from huggingface.co/synthiumjp/sourcedrecall-parser-en
+(sha256 in setup_models.py). `RGX_PARSER=stanza` + the `[stanza]` extra uses
+Stanza itself. Install ~0.9 GB, ~1 minute. For a question the block an
 agent gets is the user's own dated messages, oldest first, with the question
 each answered: found through the parser's facts and a search over the
 messages (BM25 + bge-small + MiniLM cross-encoder, ONNX Runtime). The parser
@@ -34,6 +43,21 @@ SOURCEDRECALL_LEGACY_TOOLS=1), a command line (`sourcedrecall-memory`), a
 self-contained wheel (`tools/build_wheel.py`, not uploaded).
 
 ## Where things stand (numbers; same local reader and judge, qwen3-14b, for every system)
+
+LongMemEval-S retrieval (no LLM; bench/longmemeval): session recall_any@5
+98.4% over all 500 (bge-small 96.8, BM25 93.4; agentmemory publishes 95.2,
+MemPalace 96.6). Weakest type: single-session-preference 90.0 (bge 96.7).
+
+Head-to-head with agentmemory 0.9.29 and ai-memory 2.5.2
+(bench/false_memory/HEAD_TO_HEAD.md, audited, one rule): v4 old-as-current
+2 / 5 / 7 (RAG 7) of 44; coding false memories 0 / 2 / 6 (3) of 51;
+projects 0 / 9 / 4 (3) of 32. Tools in ~/jpwork/h2h on the Mac.
+
+Notes mode on the LoCoMo TEST (held out), notes before the grounding fix:
+72.1% (Mem0 64.6%), multi-hop 60.3 (61.9), 468 calls, 1234 context tokens.
+With the fix: dev 69.5% (v1 73.8% -- mostly reader/judge noise, the notes
+are near-identical; ~/jpwork/noise.sh measures it), blind v4 2/44, v3
+0/30. Test with the fix and at Mem0's context size: ~/jpwork/notes3.sh.
 
 LoCoMo test (convs 2-9, 1307 q), default mode at f078bf4: 64.7% (Mem0 2.2.1
 64.6%, RAG 56.6%); multi-hop 53.6 (61.9, 39.3), temporal 56.2 (37.2, 49.6);
@@ -58,8 +82,13 @@ cases_dev_paraphrase, cases_dev_stale, cases_dev_stale2, cases_dev_code,
 cases_dev_projects, cases_dev_prefs. Background noise: distractors_code.jsonl
 (FM_DISTRACTORS, FM_DISTRACTOR_COPIES=2). Rerunning: bench/REPRODUCE.md.
 
-Mac worktrees: ~/jpwork/sdr (committed code, benches), sdr-dev, sdr-wheel
-(patches under test), sdr-notes, sdr-notes2 (notes-mode runs). Before a
+Mac worktrees: ~/jpwork/sdr (committed code, benches), sdr-dev, sdr-wheel,
+sdr-test, sdr-ort, sdr-lab (patches under test), sdr-fuse (LongMemEval ran
+from it), sdr-notes, sdr-notes2 (notes-mode runs), sdr-screen (label
+screening baseline). Other Mac dirs: h2h (agentmemory, ai-memory, standalone
+Node), h2h_audit (blind audit dumps: never read), lme (LongMemEval data),
+stanza_ort (the build and parity corpus), rerank (reranker comparison),
+hfparser (the uploaded model archive). Before a
 checkout or pull, delete result directories that are now committed.
 
 ## How to run things -- ON THE MAC, not WSL
@@ -120,20 +149,28 @@ and real-conversation text before pushing (the repo is public).
 
 ## Open items, in order
 
-1. Notes mode after its fixes (grounding, change marking): blind v3/v4 and
-   LoCoMo dev queued on the Mac (~/jpwork/notes2.sh); the notes-mode LoCoMo
-   test (before the fixes) is running (~/jpwork/notes_blind.sh). Then the
-   test once more with the fixes, and audits.
-2. Launch (JP): the repo goes public, then tag the next release (the
-   installer clones synthiumjp/sourcedrecall); PyPI upload needs JP's
-   account; JP reads docs/launch/WRITEUP_DRAFT.md; a week of real use.
-3. Multi-hop (53.6% vs Mem0 61.9% default; notes mode closes much of it on
-   dev). Deterministic tricks tried and measured (e300, e306): only breadth
-   helped.
-4. Install weight (~1.6 GB, PyTorch for the parser): a lighter parser
-   runtime, only if it matches Stanza on every test.
-5. Native Windows: test the installer on a real Windows machine.
-6. Codex CLI importer (format undocumented; stub).
+1. Label screening (JP's validity protocol; bench/false_memory/
+   screen_labels.py): "said in passing" missed life changes ("made me a
+   senior designer today") and "may have changed since" fired on a friend's
+   news or another clause's change word. Fix in the working tree
+   (currency._LIFE_EVENT, memory_api._mark_later_changes: about the user,
+   change word in the fact's own clause, same family or a shared word);
+   ~/jpwork/screen_run.sh (baseline) then screen_fix.sh run every set; compare,
+   then answer-level on dev + blind before committing.
+2. Multi-hop: the cross-encoder ranks answering chatty messages low (pool
+   81/106 evidence, top-8 42). Tried, no gain: CE+dense fusion (answers
+   unchanged), sentence indexing, chatter stripping, WordNet expansion, a
+   verb route. ~/jpwork/rerank compares other rerankers (MiniLM-L12,
+   mxbai xsmall/base, bge-reranker base/v2-m3) on recall; a winner must be
+   ONNX-exportable, permissive, small, and pass answer-level dev.
+3. Notes mode: the fixed-notes LoCoMo test and the context-matched run
+   (notes3.sh); the reader/judge noise run (noise.sh).
+4. Launch (JP): the repo goes public, then tag; PyPI; a week of real use.
+   The front-page README already carries LongMemEval and the head-to-head.
+5. Native Windows: test on a real machine. Codex / Gemini / Cursor capture:
+   never run inside the real apps.
+6. JP's confidence work: re-screen labels each change; a validity screen of
+   the note-writing model (notes mode) is the natural research piece.
 
 ## Rules carried from JP
 
