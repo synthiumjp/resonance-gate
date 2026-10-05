@@ -76,6 +76,39 @@ _LIST_Q = re.compile(
     r"\b(?:list|name)\s+(?:all|the|some|every)\b", re.I)
 
 
+# 2026-10-05 (cases_dev_prefs): a sentence about the PERSON rather than the
+# project in front of them -- first person, a preference or habit marker,
+# and nothing tying it to the project ("this repo", "here", "we", "our").
+# Said in another project, such a sentence still applies: "I use Podman not
+# Docker, as a general thing", "I'm on macOS with zsh", "Always snake_case
+# for file names for me".
+_PERSON = re.compile(r"\b(?:I|I'm|I've|I'd|my|me)\b|\bfor me\b", re.I)
+_HABIT = re.compile(
+    r"\b(?:always|never|prefer\w*|like|likes|love|hate|tend to|rule|"
+    r"for future reference|as a general|in general|across all|in everything|"
+    r"everywhere|in any|for me|just so you know|by the way|please|keep|avoid|"
+    r"I use|I'm on|I'm in|I live|I work (?:on|from|in) (?:remote|a|my)|"
+    r"colou?r-?blind|blind|deaf|screen reader|dyslexi\w*|left-handed)\b", re.I)
+_PROJECT_DEIXIS = re.compile(
+    r"\b(?:this|that|the)\s+(?:repo|repository|project|codebase|service|app|"
+    r"crate|module|package|one|branch|ticket|bug|job|build|pipeline|test)\b|"
+    r"\bhere\b|\bwe\b|\bour\b|\bus\b", re.I)
+
+
+def _personal_sentences(text):
+    """The sentences of a message that are about the person, joined; "" if
+    none."""
+    out = []
+    for sent in _SENT_SPLIT.split(re.sub(r"```.*?(?:```|$)", " ", text or "", flags=re.S)):
+        sent = sent.strip()
+        if (sent and _PERSON.search(sent) and _HABIT.search(sent)
+                and not _PROJECT_DEIXIS.search(sent) and not sent.endswith("?")
+                or sent.endswith(", ok?") and _PERSON.search(sent)
+                and _HABIT.search(sent) and not _PROJECT_DEIXIS.search(sent)):
+            out.append(sent)
+    return " ".join(out)
+
+
 # the rules for messages-first evidence (RG_EVIDENCE=messages)
 _RULES_MSG = ("[MEMORY RULES] Each line is something the user said, word for "
               "word, with the date; (in reply to \"...\") is the question they "
@@ -1673,7 +1706,9 @@ class Memory:
                 return True
         except Exception:
             pass
-        return bool(_PERSONAL_KINDS.search((nd.get("text") or "").lower()))
+        if _PERSONAL_KINDS.search((nd.get("text") or "").lower()):
+            return True
+        return bool(_personal_sentences(nd.get("source") or ""))
 
     def project_of(self, nd):
         """The project a fact is bound to, or None if it shows everywhere."""
@@ -1842,7 +1877,14 @@ class Memory:
                  or re.match(r"^\W*what\s+(?:has|have)\s", query or "", re.I))
         k = (max(max_facts * 2, int(os.environ.get("RG_LIST_K", "16"))) if listy
              else max_facts)
-        hits = [m for m in self.messages_for(query, k=k) if visible(m)]
+        hits = []
+        for m in self.messages_for(query, k=k):
+            if visible(m):
+                hits.append(m)
+                continue
+            ps = _personal_sentences(m["text"])
+            if ps:
+                hits.append(dict(m, text=ps, conv=None, asked=None))
         # Two routes to a message: the parser's facts (their source
         # messages, in rank order) and the message index. The parser's
         # gates decide whether anything is known; the floor (tuned on

@@ -1,0 +1,36 @@
+{"id": "pp01", "key": "96a772c03a961f998e36545e8701d157bbf8190d", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I always use tabs for indentation, never spaces."]}
+{"id": "pp02", "key": "a26777f8affa57ad932d4103c9578ef54b341f04", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The code I write for you should respect a maximum line length of 100 characters."]}
+{"id": "pp03", "key": "f3a634612b2ebea30ab42cf4982f6b16c0711fdd", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You want to use single quotes in JavaScript strings."]}
+{"id": "pp04", "key": "896a458d8e097589981026811378cb056dd60683", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Yes, based on your rule stated on 2026-05-03, you want trailing commas everywhere in every language that allows them."]}
+{"id": "pp05", "key": "254be22fe84c4976219c298a6bf8239e31e02639", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You expect type hints on every function signature, even in tiny scripts."]}
+{"id": "pp06", "key": "45c750bfab31f211cb314e64b1e69532817a6082", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You should call the file something descriptive, like \"csv_header_parser.py\" or a similar name that reflects its purpose."]}
+{"id": "pp07", "key": "2ba5ff1ce8104f4f9cb728e4bc96c85f71357578", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["No, you have stated that you never want comments in your code."]}
+{"id": "pp08", "key": "62ae1bdb644e391cf58676ee9965d5b68741034b", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["No, I will only fix the bug you ask about and not make changes to other code unless you specifically request it."]}
+{"id": "pp09", "key": "428d05b963cce2fa777b6d050c191820beb11478", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I should explain what I'm about to change before editing your files."]}
+{"id": "pp10", "key": "f9f28d01b10a6c3677bcf176499e42b8adfd45e5", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I ask for clarification to better understand your needs."]}
+{"id": "pp11", "key": "1fa9dee202f321de95ce061fd3e0a1b5eefcc41b", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pp12", "key": "ce6103fe687d62f337ec30bbf6eb6f0a4d48d61f", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Keep answers terse, I tend to skim; skip the preamble and just give the fix."]}
+{"id": "pp13", "key": "35fe97168cf873f9792053665f06e2c91f29682b", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You should always run the tests before suggesting a commit."]}
+{"id": "pp14", "key": "0508f48f2e0e42da8e1c79a262681482afdb1f7b", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I squash before merging, always, so don't suggest merge commits."]}
+{"id": "pp15", "key": "61998bf3d08bbeecd21a0af3f01142bf5d9e5626", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You use conventional commits with feat:/fix:/chore: prefixes."]}
+{"id": "pp16", "key": "d618279db9e667962cff0adbe72b8a50e7906681", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["For future reference, every change should go on a branch first, named by ticket, not on main."]}
+{"id": "pp17", "key": "648cb0013f3d0efa95c46f17f42f9155a5424c3e", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The linter should run before any test run, lint then test, in every pipeline."]}
+{"id": "pp18", "key": "10036e1e4b179a203777861eca6deb487d581f7a", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You should write tests before implementing the function, ensuring that the implementation meets the expected behavior defined by the tests."]}
+{"id": "pp19", "key": "0863dc9858e67917f51b5b2f43979562799781fb", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The user writes British English, so the docs should use spellings like colour, organise, and behaviour."]}
+{"id": "pp20", "key": "b5747e776dcbfc564ffd7db89e6f387bd110d3e9", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Keep commit messages short, my rule is subject line only, under 50 characters."]}
+{"id": "pp21", "key": "83ac63a789a1f3e3a3256071b6c8d3b5b9c1ead3", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Identifiers and comments in your code should be in English, as you mentioned wanting them in English always."]}
+{"id": "pp22", "key": "a4c76df90dc33f37c366400c36ca166b4ae6b2f1", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["No, you may not get emojis in the status message. Please never use emojis in anything you write for me, code, docs or commit messages."]}
+{"id": "pp23", "key": "acfb0c2c334b577b2f9f350bc99c17eb564476d4", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Yes, in lists of three items in prose, you should use the Oxford comma, as you mentioned using it in all prose and docs."]}
+{"id": "pp24", "key": "a6840fdd647718350829fb4588fce0cdf781fd50", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pp25", "key": "06995526f92918c1a84241e944338c52ef3663a8", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You use Neovim."]}
+{"id": "pp26", "key": "98da05eefae449f145e1f0a51b92ed90c5ab56bd", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["pnpm."]}
+{"id": "pp27", "key": "d10221bb4953ad14cb617c30d538da162d20de65", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are using macOS with zsh."]}
+{"id": "pp28", "key": "ac3fbf04a26a18afc970c37ce1e78d60873400f9", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You use uv rather than pip or poetry for Python environments."]}
+{"id": "pp29", "key": "f5735171912cf61db88519813d0bdea540bdb0f9", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The memory does not provide enough information to answer the question."]}
+{"id": "pp30", "key": "96ee5a5fe6c76d4a11d9da4be2ec2b1259847d01", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Podman."]}
+{"id": "pp31", "key": "d5fba8d383d60e7099c5bf6417f3fc8801e8b6da", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You should avoid red and green in the pass/fail chart, as you are colour-blind."]}
+{"id": "pp32", "key": "d9f2667cd2eea434d264655ab59c74c830e22d7b", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The user has asked about the appropriate timezone for timestamps, and they mentioned being in Melbourne, so it's likely that AEST (Australia Eastern Standard Time) is preferred over UTC."]}
+{"id": "pp33", "key": "08fa69f01c5b532ff57805318b18a417c632a1d4", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are the tech lead on this team, and you should be pitched advice with trade-offs and rollout risk, not step by step beginner basics."]}
+{"id": "pp34", "key": "7666ce043cd352b7e4f5d7e64d80fd9702f8ac41", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You mentioned that you're a data scientist new to TypeScript, so I should explain TS concepts when using them."]}
+{"id": "pp35", "key": "49a137abbf5685fa1dc93ef9c64b731a11cd1363", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You requested that I always include proper ARIA roles and labels in any UI I write, as you use a screen reader due to being blind."]}
+{"id": "pp36", "key": "6286fc1882a97a7faea28af73b003fc813c558f5", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You should use Decimal for prices because, as you mentioned in a previous conversation, anything touching money must use decimals in a regulated bank environment to ensure precision and enable audit logging."]}

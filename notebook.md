@@ -15177,3 +15177,24 @@ and how to run everything).
   key (local-only rule).
 - Running: LoCoMo test at f078bf4 (list breadth 16), the cross-project
   preference set (cases_dev_prefs), LoCoMo dev in notes mode.
+
+## Entry 309 — 2026-10-05 (preferences across projects; notes visible; own repository)
+
+- A fresh readable set (cases_dev_prefs, 36 preferences and instructions
+  said in one project, asked in another, with the coding background):
+  sourcedrecall 21/36, RAG 23/36. Misses: stored but kept in the project
+  ("I use Podman not Docker, as a general thing", "I'm on macOS with zsh"),
+  or never stored ("Always snake_case for file names for me", "Keep answers
+  terse, I tend to skim", "...ok?").
+- A message from another project now contributes its sentences about the
+  person -- first person, a preference or habit marker, nothing tying it to
+  the project (this repo, here, we, our) -- and only those sentences; the
+  same test makes a stored fact personal. prefs 21 -> 33/36; multi-project
+  held out controls 8 -> 10/13 (RAG 7/13), leaks still 0/13 (RAG 2/13);
+  readable multi-project unchanged (7/8, 0/9). Unaudited.
+- Standing instructions without always/never (habit verbs with an object,
+  the user's own things, fronted imperatives); notes listed in MEMORY.md and
+  the browser and forgettable by id; docs/CHANGELOG.md.
+- The product has its own repository, github.com/synthiumjp/sourcedrecall,
+  private until launch (main = product-p2); the installer and marketplace
+  point at it; no release is tagged while it is private.
