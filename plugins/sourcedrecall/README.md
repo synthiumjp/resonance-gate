@@ -8,8 +8,8 @@ facts; no language model writes the memory, and nothing leaves your machine.
 Install:
 
 ```
-/plugin marketplace add synthiumjp/resonance-gate#product-p2
-/plugin install sourcedrecall@resonance-gate
+/plugin marketplace add synthiumjp/sourcedrecall
+/plugin install sourcedrecall@sourcedrecall
 ```
 
 The first session sets up a Python environment and downloads the models in

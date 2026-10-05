@@ -14,8 +14,8 @@ machine.
 ## Install in Claude Code (plugin)
 
 ```
-/plugin marketplace add synthiumjp/resonance-gate#product-p2
-/plugin install sourcedrecall@resonance-gate
+/plugin marketplace add synthiumjp/sourcedrecall
+/plugin install sourcedrecall@sourcedrecall
 ```
 
 Claude Code asks for your name (the person the memory is about). The first
@@ -24,7 +24,7 @@ session installs the Python side in the background (about 3 to 5 minutes,
 available from the next session. After that, each session is stored when it
 ends and the next one starts with the summary. Change the name later, or
 turn the summary off and keep only the tools, with
-`/plugin configure sourcedrecall@resonance-gate`.
+`/plugin configure sourcedrecall@sourcedrecall`.
 
 The install log is `~/.claude/plugins/data/<plugin id>/install.log`.
 

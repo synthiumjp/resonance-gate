@@ -1,6 +1,6 @@
 # Handover: sourcedrecall (product track)
 
-Last updated 2026-10-04. Branch `product-p2`, repo github.com/synthiumjp/resonance-gate.
+Last updated 2026-10-05. Branch `product-p2`, pushed to github.com/synthiumjp/resonance-gate (public, research) and as `main` to github.com/synthiumjp/sourcedrecall (PRIVATE until launch; push both: `git push origin product-p2 && git push sr product-p2:main`, tags to both).
 Latest release tag: `sourcedrecall-v0.5.0`: messages-first evidence (the user's
 own dated messages, chosen and labelled by the parser). Full suite on the
 Mac: 1054 passed, 3 skipped.
@@ -97,6 +97,11 @@ WSL) and log to a file; Claude Code sessions here restart often and take their
 child processes with them.
 
 ## Releasing
+
+The installer now clones github.com/synthiumjp/sourcedrecall. Do NOT tag a new
+release until that repo is public -- a plugin install could not clone it.
+Releases up to 0.5.2 install from resonance-gate and keep working.
+
 
 PyPI wheel: `python tools/build_wheel.py` (needs `pip install build`) writes
 `server/dist/sourcedrecall-<version>-py3-none-any.whl`; the version is in

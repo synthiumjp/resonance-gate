@@ -69,7 +69,7 @@ conversations put together (LoCoMo multi-hop, 48.5% against 61.9%). Mem0 makes a
 every exchange and merges facts as it goes; sourcedrecall does not.
 
 The benchmark code, every system's retrieved context, the reader's answers
-and the judge's verdicts are in `bench/`. See [the write-up](WRITEUP_DRAFT.md)
+and the judge's verdicts are in `bench/`. See [the write-up](docs/launch/WRITEUP_DRAFT.md)
 for the method and how to rerun it.
 
 ## What it does
@@ -99,10 +99,11 @@ In Claude Code:
 ```
 
 Any other MCP client (Claude Desktop, Cursor, Windsurf, Zed, VS Code, ...):
-see [CLIENTS.md](../CLIENTS.md). Without MCP, the command line works with any
+see [CLIENTS.md](docs/CLIENTS.md). Without MCP, the command line works with any
 model:
 
 ```bash
+git clone https://github.com/synthiumjp/sourcedrecall && cd sourcedrecall
 pip install -e ./server && sourcedrecall-setup
 sourcedrecall-memory ingest chat.jsonl
 sourcedrecall-memory context "Where do I live?"
@@ -118,4 +119,11 @@ Nothing leaves your machine. The memory is a folder of plain files
 
 ## Licence
 
-<!-- TODO: confirm -->
+Apache 2.0 (see `LICENSE`).
+
+## More
+
+- Full documentation: [`server/README.md`](server/README.md)
+- What changed in each version: [`docs/CHANGELOG.md`](docs/CHANGELOG.md)
+- Rerunning the benchmarks: [`bench/REPRODUCE.md`](bench/REPRODUCE.md)
+- This repository also holds the research the product came from (`experiments/`, `notebook.md`).

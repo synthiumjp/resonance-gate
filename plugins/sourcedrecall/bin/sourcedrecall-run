@@ -15,7 +15,7 @@
 # An install is redone when the plugin version changes.
 set -u
 
-REPO_URL="https://github.com/synthiumjp/resonance-gate.git"
+REPO_URL="https://github.com/synthiumjp/sourcedrecall.git"
 ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
 DATA="${CLAUDE_PLUGIN_DATA:-$HOME/.sourcedrecall/plugin}"
 VERSION="$(sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' "$ROOT/.claude-plugin/plugin.json" | head -1)"
