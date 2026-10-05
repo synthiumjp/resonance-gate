@@ -18,8 +18,35 @@ $ sourcedrecall-memory context "Where do I live?"
 
 ## How it compares
 
-LoCoMo (conversations 2-9, 1,307 questions). Every system's retrieved memory
-was given to the same local reader and the same local judge (Qwen3-14B):
+LongMemEval-S, 500 questions, each with about 50 past chat sessions: is a
+session that holds the answer among the five the memory returns? No
+language model is involved, so this is the number other memory tools
+publish:
+
+| | found in the top 5 |
+|---|---|
+| sourcedrecall | 98.4% |
+| MemPalace (as published) | 96.6% |
+| agentmemory (as published) | 95.2% |
+| plain embeddings (bge-small), same messages | 96.8% |
+| plain keyword search (BM25), same messages | 93.4% |
+
+Changes of state and false memories, on held-out sets written before any
+system was run, against two other memory tools that store without a
+language model. Each system's memory went to the same local reader, and the
+same local judge decided whether the answer states something out of date or
+never said as true. Audited, one rule for every system:
+
+| | sourcedrecall | agentmemory 0.9 | ai-memory 2.5 | plain retrieval |
+|---|---|---|---|---|
+| old state given as current, of 44 changes | 2 | 5 | 7 | 7 |
+| new state given, of 44 | 42 | 38 | 33 | 36 |
+| the same with a small (4B) reader: old state as current | 2 | 6 | 11 | |
+| coding sessions behind 120 others: false memories, of 51 | 0 | 2 | 6 | 3 |
+| several projects: false memories, of 32 | 0 | 9 | 4 | 3 |
+
+LoCoMo (conversations 2-9, 1,307 questions), against Mem0, with the same
+local reader and judge (Qwen3-14B):
 
 | | sourcedrecall 0.5 | Mem0 2.2.1 | plain retrieval |
 |---|---|---|---|
@@ -30,47 +57,26 @@ was given to the same local reader and the same local judge (Qwen3-14B):
 | model calls to store the conversations | 0 | 941 | 0 (one embedding per message) |
 | context per question (tokens) | 845 | 722 | 356 |
 
-Changes of state, on a test set written before any system was run (44
-things that changed, 16 that did not). The reader's answer is judged:
-
-| | sourcedrecall 0.5 | plain retrieval |
-|---|---|---|
-| answer gives the old state as current (14B reader) | 2/44 | 7/44 |
-| answer gives the new state (14B reader) | 42/44 | 36/44 |
-| answer gives the old state as current (4B reader) | 2/44 | 5/44 |
-| answer gives the new state (4B reader) | 35/44 | 28/44 |
-| unchanged things answered | 16/16 | 16/16 |
-
-"New state given" counts answers containing the expected words; a few
-answers give it in other words (ours 3, plain retrieval 2, with the 4B
-reader).
-
-For coding assistants, each test scenario was stored after a background of
-120 ordinary debugging sessions (held-out sets, audited):
-
-| | sourcedrecall 0.5 | plain retrieval |
-|---|---|---|
-| answer states an out-of-date or never-confirmed setup | 0/51 | 3/51 |
-| answer gives the new setup after a change ("moved CI to GitHub Actions") | 14/14 | 11/14 |
-| a fact from another project offered as true of this one | 0/13 | 2/13 |
-| a preference said in another project, found when asked here | 4/8 | 4/8 |
-
-About these numbers: every answer was read and judged by a local model
-(Qwen3-14B), the same for every system, so the comparison inside each table
-is fair, but the scores are not comparable with published LoCoMo results,
-which use GPT-4-class models and other protocols. The judge agreed with hand
-labels on 29 of 30 checks. The false-memory and coding sets are synthetic and
-small (44-100 scenarios each); the held-out ones were written before any
-system was run. Mem0 used the same local model for its own calls. To rerun
-everything with another model, see `bench/REPRODUCE.md`.
+About these numbers: the answers were read and judged by local models, the
+same for every system, so the comparison inside each table is fair, but the
+answer scores are not comparable with published LoCoMo results, which use
+GPT-4-class models and other protocols. The judge agreed with hand labels on
+29 of 30 checks. The false-memory sets are synthetic and small (44-100
+scenarios each). Mem0 used the same local model for its own calls. The other
+tools ran in the configuration they document for local use without a
+language model; with one, they offer more than was measured here.
 
 Where it is weaker: questions that need several facts from different
-conversations put together (LoCoMo multi-hop, 53.6% against 61.9%). Mem0 makes a model call for
-every exchange and merges facts as it goes; sourcedrecall does not.
+conversations put together (LoCoMo multi-hop, 53.6% against Mem0's 61.9%);
+the optional notes mode, where your own local model writes short notes,
+closes most of that gap. Only your own messages are searched, so something
+only the assistant said is not found by itself.
 
 The benchmark code, every system's retrieved context, the reader's answers
-and the judge's verdicts are in `bench/`. See [the write-up](docs/launch/WRITEUP_DRAFT.md)
-for the method and how to rerun it.
+and the judge's verdicts are in `bench/` (the comparison with the other
+tools: `bench/false_memory/HEAD_TO_HEAD.md`; LongMemEval:
+`bench/longmemeval/`). See [the write-up](docs/launch/WRITEUP_DRAFT.md) for
+the method and how to rerun it.
 
 ## What it does
 
@@ -87,7 +93,12 @@ for the method and how to rerun it.
   by its id and the words are removed everywhere, including from quotes.
 - API keys, passwords and card numbers are removed before anything is
   stored.
-- Memory about a project stays with that project.
+- Memory about a project stays with that project. Standing instructions
+  ("never add comments to my code") lead every session.
+- Text you paste in for the assistant (an email, a README) is kept but not
+  read as your own words, so it cannot plant an instruction.
+- Sessions are stored automatically in Claude Code, Codex CLI, Gemini CLI
+  and Cursor; a ChatGPT or Claude.ai data export can be imported.
 
 ## Install
 
