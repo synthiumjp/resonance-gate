@@ -15198,3 +15198,52 @@ and how to run everything).
 - The product has its own repository, github.com/synthiumjp/sourcedrecall,
   private until launch (main = product-p2); the installer and marketplace
   point at it; no release is tagged while it is private.
+
+## Entry 310 — 2026-10-05 (research into wants and competitors; pasted text; importers; head-to-head; multi-hop retrieval)
+
+- Research (two agents, web): people want memory that stays current, that
+  they can see and edit, local, cheap to write, light to install; they
+  distrust silent writes, invented facts, stale facts, memory as an
+  injection surface. Zero-LLM-call memory is now a niche (agentmemory 29k
+  stars, ai-memory 8.8k, Mnemosyne, the Zero-Mem paper). None marks a fact
+  as no longer true; none publishes answer accuracy judged like the others.
+- Pasted text: a pasted email's "Never send drafts to the client directly"
+  was stored as the user's standing instruction (probe). prose_only drops
+  pasted material (an introduction such as "this email", "here's the
+  README", "from a webpage" with a colon or a request; an email-shaped
+  greeting...sign-off block). LoCoMo and the dev false-memory sets: 0
+  messages change. The saved notice gives ids and lists new standing
+  instructions in full. "From now on always answer in British English"
+  (Stanza tags "answer" a noun) is an instruction.
+- Importers: ChatGPT and Claude.ai data exports (made-up fixtures only).
+  Batching the parser (Extractor.prefetch, 64 messages a call): 300/300
+  LoCoMo messages parse identically; a 1,451-message export 286 s -> 81 s,
+  the same 819 facts.
+- Automatic capture for Codex CLI, Gemini CLI (hooks, formats from source)
+  and Cursor (documented prompt/response hook fields; spool). Agent work,
+  reviewed; 1118 passed on the Mac. Not yet run inside the real apps.
+- Head-to-head (bench/false_memory/adapters_h2h.py): agentmemory 0.9.29 and
+  ai-memory 2.5.2 stored through their own Claude Code importers, top 5,
+  same reader and judge. v4 held out, 14B reader, old state as current:
+  sourcedrecall 2/44, agentmemory 5/44, ai-memory 7/44, RAG 7/44; new state
+  42 / 38 / 33 / 36 of 44; 4B reader 2 / 4 / 10, controls 16 / 12 / 14 of
+  16. Unaudited for the two new systems. Coding and project sets running.
+- Multi-hop (LoCoMo dev, evidence ids): only 9/43 questions have all their
+  evidence messages in our block, 20/43 none. Pool recall 81/106 (bigger
+  pool 95/106) but the ms-marco cross-encoder ranks chatty answering
+  messages low. Sentence-level indexing: no gain (single-hop worse).
+  CE+dense reciprocal-rank fusion: evidence at 8 lines 42 -> 47/106, but
+  answers on dev unchanged at 68.2% (16 gained, 16 lost; multi-hop +2 net,
+  single-hop -3). Not adopted. A question-verb route finds 16/106 evidence.
+  Without a model, retrieval tweaks give little here; notes mode is the
+  multi-hop answer.
+- Notes mode, LoCoMo TEST (held out) at 139f7e7 (notes v1, before the
+  grounding fix): 72.1% (Mem0 64.6%, RAG 56.6%); multi-hop 60.3% (61.9%);
+  temporal 55.8% (37.2%); 468 model calls (Mem0 941); 1,234 context tokens
+  (Mem0 722). Queued: the fixed notes, and the same stores at Mem0's
+  context size. Notes v3 blind with the grounding fix: 0/30 (was 2/30).
+- PyTorch-free parser spike (agent): fp32 ONNX exports of charlm, pos,
+  depparse, tokenizer identical on 13,193/13,193 words; lemma seq2seq needs
+  a port (dictionary-only changes 3 parses in 500 turns); int8 breaks
+  parity. Net install about 1.0 GB. A build agent is on it.
+- JP declined GPT-4o-mini reader/judge again (local only).

@@ -1,0 +1,36 @@
+{"id": "pp01", "key": "6ce252734ce1aeb3c116725a3b169ffafce11dcb", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pp02", "key": "0df18836f804e955f50712737989079be602cbf2", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pp03", "key": "de804c60abff8622894bad4caa859299f9fd6fb2", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["In JavaScript, you can use either single quotes or double quotes for strings, but you should be consistent. However, if you're dealing with JSON, you must use double quotes."]}
+{"id": "pp04", "key": "1a9efc990f96431cfd41c1e00cef9a1b63d6a125", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Yes, if your rule is to use trailing commas everywhere in every language that allows them."]}
+{"id": "pp05", "key": "8a62d304a399288b30c391d5ce4b526abb5b9c63", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You should expect type hints on every function signature, even in tiny scripts."]}
+{"id": "pp06", "key": "3f7527d7ca1a22b80449a6aec55f7e85d751ddb9", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You should use the 'name' param from process."]}
+{"id": "pp07", "key": "d258c298479be989a85b4dbda67987d8c158bcd5", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["No, I will not add comments to your code."]}
+{"id": "pp08", "key": "8f2a29327b128890bd0398eb48f3401fa0b6f405", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pp09", "key": "cbb2b8a9520383017e8aeeaef90268c858a9e282", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I should ask for your instructions or confirm the changes you want to make."]}
+{"id": "pp10", "key": "ab715e7fed786190f27711fceffd0063299d71b8", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I ask for clarification to better assist you."]}
+{"id": "pp11", "key": "81027d238e550b0771244d9a79b374ebeecd1998", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pp12", "key": "b15e21495e9951842371214679ef8511d710131f", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["My answers should be concise, typically one or two sentences, and directly address your question based on the provided memory."]}
+{"id": "pp13", "key": "614fd801c3b473e2a1152e5d123e0dfbb1abe9f8", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You should write a clear and descriptive commit message that explains the purpose of your changes."]}
+{"id": "pp14", "key": "c60c3028d69b1e7ac1ec092c435ed7c59546bf1f", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I squash before merging, always, so don't suggest merge commits."]}
+{"id": "pp15", "key": "b270e8e10f47fed78d4bb8c28a3619f56b4650fb", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pp16", "key": "06b6918d71b6a597b05a070cf460cd10f9048ad5", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You should make your changes in a separate branch rather than directly on the main branch. This allows you to test and review your changes before merging them into the main branch."]}
+{"id": "pp17", "key": "5342842598940796e2d520fad8b9a40767af6e78", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You want the linter to run before any test run, lint then test, in every pipeline."]}
+{"id": "pp18", "key": "1f84f157ff19c3c458027f5a04f662e2c81752ba", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You should write the tests first, then implement the function to make the tests pass. This approach ensures that the implementation meets the required behavior from the start."]}
+{"id": "pp19", "key": "c8cb84cdc0a224b00e31da4cf83a6ad5bd4c5bcf", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The docs should use British English spelling, such as \"colour,\" \"organise,\" and \"behaviour.\""]}
+{"id": "pp20", "key": "4e4d771de40cd0899a49b1e21680f764af0f3012", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Commit messages should be concise, typically one or two lines, and clearly describe the change made."]}
+{"id": "pp21", "key": "6c7e435ba2ad310ed611b0246f749e400233ac3f", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Identifiers and comments in your code should be in English."]}
+{"id": "pp22", "key": "3cd72a334fbe88832695db73a6f73a18857720d0", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["No, you asked to never use emojis in anything I write, including status messages."]}
+{"id": "pp23", "key": "c40ecb570daf7cd4d6d061ba9325825c66aed856", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pp24", "key": "aa43dce602105d63aa0655868cc77d73d08d1f3e", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Your commit subjects should use the imperative mood, as in \"Add x\" not \"Added x.\""]}
+{"id": "pp25", "key": "ba833faf91281b47f8e4bb4e8f80bc9e64ddbf66", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You can use any text editor you prefer, such as Visual Studio Code, Sublime Text, or even a simple Notepad."]}
+{"id": "pp26", "key": "610f86c7d1eda8cd3bae4928c1822b246cf96e48", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You should use pnpm for JS dependencies, as it is your preferred package manager."]}
+{"id": "pp27", "key": "29defaab05ef7ecff6738642d57ed65c9699cc0b", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Your commands are for macOS with zsh."]}
+{"id": "pp28", "key": "c3ce139d534346471604bf362701decd446dd397", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You use uv to manage Python environments."]}
+{"id": "pp29", "key": "d7343a3d6c91d74a686fc9875cbed92467132112", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The memory does not provide information on whether log inspection steps should assume a GUI or a terminal."]}
+{"id": "pp30", "key": "82e8a7fafa627971591d7ea16576ea8ed637b7eb", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Podman."]}
+{"id": "pp31", "key": "b9fe39163637c97c5c0ae0f21dd97939c71562d1", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pp32", "key": "c361c6219aef0a07da0088598fb3f77a22e7428c", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Timestamps should be in UTC."]}
+{"id": "pp33", "key": "26af8898af685b6607eca8ce1e4166cd796dc540", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pp34", "key": "3cc59261d7303bc147ba0436dd9e835dec82c598", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are new to TypeScript, so explanations of TS concepts should be provided when necessary. Handle the issue by ensuring `folder` is defined before accessing its properties."]}
+{"id": "pp35", "key": "2e88dd9dd52dca5cc37dbfca7992250ff5f72890", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I must include proper ARIA roles and labels in any UI I write to ensure it is accessible to screen readers and users with visual impairments."]}
+{"id": "pp36", "key": "7b62d7e9a10dc2f651b2ee3255045f2af605ed3b", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You should use the Decimal type for prices because it provides precise decimal arithmetic, which is essential for financial calculations to avoid rounding errors that can occur with floating-point numbers."]}

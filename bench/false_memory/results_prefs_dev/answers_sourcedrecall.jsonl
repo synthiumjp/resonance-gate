@@ -1,0 +1,36 @@
+{"id": "pp01", "key": "96a772c03a961f998e36545e8701d157bbf8190d", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I always use tabs for indentation, never spaces."]}
+{"id": "pp02", "key": "07d46e74c093c30cffa760ddd77bbe2e595c7bf7", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pp03", "key": "5d806485cd782667a34006467389c35fb718266e", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["In JavaScript, you can use either single quotes (`'`) or double quotes (`\"`) for strings, but you must be consistent within a string and ensure proper escaping if needed."]}
+{"id": "pp04", "key": "7d13783d6789d70129c11ff2b3c39cf6a5e3f15d", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Yes, you want trailing commas in multi-line lists and objects."]}
+{"id": "pp05", "key": "46bfc1e08025d1d941785a764a00769a53399615", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pp06", "key": "45c750bfab31f211cb314e64b1e69532817a6082", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You should call the file something descriptive, like \"csv_header_parser.py\" or a similar name that reflects its purpose."]}
+{"id": "pp07", "key": "231b0df225c37680dd2422cd8b4890a47d022dd2", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pp08", "key": "02979090c6ef21236576f68a7d6681c3b5be1ff3", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pp09", "key": "f5f5effe3595672ad0c7089f4a428420a2b2488b", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pp10", "key": "f9f28d01b10a6c3677bcf176499e42b8adfd45e5", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I ask for clarification to better understand your needs."]}
+{"id": "pp11", "key": "1fa9dee202f321de95ce061fd3e0a1b5eefcc41b", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pp12", "key": "bbcd34245c81e9559ee81cf3dce33ea300830b08", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["My answers should be concise, typically one or two sentences, and directly address your question based on the information provided in the memory."]}
+{"id": "pp13", "key": "0de88b72487ce60f1d1d613594d7bd7c93d55e20", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You should always run the tests before suggesting a commit."]}
+{"id": "pp14", "key": "ecb764ccd40e96f1fa5abde9221a793402a1c13c", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I squash before merging, always, so don't suggest merge commits."]}
+{"id": "pp15", "key": "61998bf3d08bbeecd21a0af3f01142bf5d9e5626", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You use conventional commits with feat:/fix:/chore: prefixes."]}
+{"id": "pp16", "key": "42b823e37f109ce7654c14e7685f3596ce6ebff9", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pp17", "key": "03f9c1c3dabc68d53459529b8cc6e4c65fbd8c9c", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Lint should run before tests in a pipeline. This ensures that code quality is checked first, and any issues are addressed before running tests."]}
+{"id": "pp18", "key": "10036e1e4b179a203777861eca6deb487d581f7a", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You should write tests before implementing the function, ensuring that the implementation meets the expected behavior defined by the tests."]}
+{"id": "pp19", "key": "0863dc9858e67917f51b5b2f43979562799781fb", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The user writes British English, so the docs should use spellings like colour, organise, and behaviour."]}
+{"id": "pp20", "key": "55c2c4913d4140d3666c1658db6b36c864e242b4", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Commit messages should be concise and clearly describe the change made."]}
+{"id": "pp21", "key": "938250471d2263849bc81e6a8dd3bff0322e6a27", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Identifiers and comments in your code should be in English, as you mentioned wanting them to be in English always."]}
+{"id": "pp22", "key": "a4c76df90dc33f37c366400c36ca166b4ae6b2f1", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["No, you may not get emojis in the status message. Please never use emojis in anything you write for me, code, docs or commit messages."]}
+{"id": "pp23", "key": "9f60d0b5e9510778ff04c4ae5bcaedd465163f44", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The use of the Oxford comma is a matter of style and depends on the guidelines you are following. Some style guides recommend it for clarity, while others do not."]}
+{"id": "pp24", "key": "a6840fdd647718350829fb4588fce0cdf781fd50", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pp25", "key": "2d4b71b300e40c6d977f2fa13e5eebe7cb96c61e", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You use Neovim."]}
+{"id": "pp26", "key": "98da05eefae449f145e1f0a51b92ed90c5ab56bd", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["pnpm."]}
+{"id": "pp27", "key": "71cebb097c06b4e4b3e68325405aef40d1a031f8", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pp28", "key": "eec2a697fcc642d8012ea7246b4b3204bf5eae4f", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You can use virtualenv to manage Python environments."]}
+{"id": "pp29", "key": "f5735171912cf61db88519813d0bdea540bdb0f9", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The memory does not provide enough information to answer the question."]}
+{"id": "pp30", "key": "5378648be4381290485ffc42e25f2f262b041247", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pp31", "key": "3ae3d450da6e95ead884f4dc13b3d40cddb77ba8", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pp32", "key": "6eca8e534a3e80033fff2dccf3b1a375df82b1bf", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Timestamps should be in UTC."]}
+{"id": "pp33", "key": "08fa69f01c5b532ff57805318b18a417c632a1d4", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are the tech lead on this team, and you should be pitched advice with trade-offs and rollout risk, not step by step beginner basics."]}
+{"id": "pp34", "key": "7666ce043cd352b7e4f5d7e64d80fd9702f8ac41", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You mentioned that you're a data scientist new to TypeScript, so I should explain TS concepts when using them."]}
+{"id": "pp35", "key": "b1090ea0980f732ef3e479a1fbe18cf6c64b5915", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pp36", "key": "f726932bf69211fd799d85fdbee03087099d04cf", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You should use `Decimal` for prices because it provides precise decimal arithmetic, which is essential for financial calculations and avoids the rounding errors that can occur with floating-point numbers."]}

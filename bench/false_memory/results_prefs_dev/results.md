@@ -1,0 +1,72 @@
+## A. Judge verdicts as produced
+
+### All scenarios
+
+| metric | sourcedrecall | sourcedrecall (context block) | sourcedrecall (answer block) | rag | rag (answer block) |
+|---|---|---|---|---|---|
+| FALSE-MEMORY RATE, classes a-e (lower is better) | n/a | n/a | n/a | n/a | n/a |
+| a negation/hedge/question | n/a | n/a | n/a | n/a | n/a |
+| b stale | n/a | n/a | n/a | n/a | n/a |
+| c invention | n/a | n/a | n/a | n/a | n/a |
+| d attribute absent | n/a | n/a | n/a | n/a | n/a |
+| e assistant-injected | n/a | n/a | n/a | n/a | n/a |
+| CONTROL RECALL, class f (higher is better) | 44% [28-61] (16/36) | 50% [33-67] (18/36) | 58% [42-75] (21/36) | 56% [39-72] (20/36) | 64% [47-78] (23/36) |
+| explicit abstention, c+d (returned nothing) | n/a | n/a | n/a | n/a | n/a |
+| no false assertion, c+d | n/a | n/a | n/a | n/a | n/a |
+| true-fact side recall, a/b/e (secondary) | n/a | n/a | n/a | n/a | n/a |
+
+### Held-out split
+
+| metric | sourcedrecall | sourcedrecall (context block) | sourcedrecall (answer block) | rag | rag (answer block) |
+|---|---|---|---|---|---|
+| FALSE-MEMORY RATE, classes a-e (lower is better) | n/a | n/a | n/a | n/a | n/a |
+| a negation/hedge/question | n/a | n/a | n/a | n/a | n/a |
+| b stale | n/a | n/a | n/a | n/a | n/a |
+| c invention | n/a | n/a | n/a | n/a | n/a |
+| d attribute absent | n/a | n/a | n/a | n/a | n/a |
+| e assistant-injected | n/a | n/a | n/a | n/a | n/a |
+| CONTROL RECALL, class f (higher is better) | n/a | n/a | n/a | n/a | n/a |
+| explicit abstention, c+d (returned nothing) | n/a | n/a | n/a | n/a | n/a |
+| no false assertion, c+d | n/a | n/a | n/a | n/a | n/a |
+| true-fact side recall, a/b/e (secondary) | n/a | n/a | n/a | n/a | n/a |
+
+## B. After manual audit of judge errors (audit_overrides.json)
+
+### All scenarios
+
+| metric | sourcedrecall | sourcedrecall (context block) | sourcedrecall (answer block) | rag | rag (answer block) |
+|---|---|---|---|---|---|
+| FALSE-MEMORY RATE, classes a-e (lower is better) | n/a | n/a | n/a | n/a | n/a |
+| a negation/hedge/question | n/a | n/a | n/a | n/a | n/a |
+| b stale | n/a | n/a | n/a | n/a | n/a |
+| c invention | n/a | n/a | n/a | n/a | n/a |
+| d attribute absent | n/a | n/a | n/a | n/a | n/a |
+| e assistant-injected | n/a | n/a | n/a | n/a | n/a |
+| CONTROL RECALL, class f (higher is better) | 44% [28-61] (16/36) | 50% [33-67] (18/36) | 58% [42-75] (21/36) | 56% [39-72] (20/36) | 64% [47-78] (23/36) |
+| explicit abstention, c+d (returned nothing) | n/a | n/a | n/a | n/a | n/a |
+| no false assertion, c+d | n/a | n/a | n/a | n/a | n/a |
+| true-fact side recall, a/b/e (secondary) | n/a | n/a | n/a | n/a | n/a |
+
+### Held-out split
+
+| metric | sourcedrecall | sourcedrecall (context block) | sourcedrecall (answer block) | rag | rag (answer block) |
+|---|---|---|---|---|---|
+| FALSE-MEMORY RATE, classes a-e (lower is better) | n/a | n/a | n/a | n/a | n/a |
+| a negation/hedge/question | n/a | n/a | n/a | n/a | n/a |
+| b stale | n/a | n/a | n/a | n/a | n/a |
+| c invention | n/a | n/a | n/a | n/a | n/a |
+| d attribute absent | n/a | n/a | n/a | n/a | n/a |
+| e assistant-injected | n/a | n/a | n/a | n/a | n/a |
+| CONTROL RECALL, class f (higher is better) | n/a | n/a | n/a | n/a | n/a |
+| explicit abstention, c+d (returned nothing) | n/a | n/a | n/a | n/a | n/a |
+| no false assertion, c+d | n/a | n/a | n/a | n/a | n/a |
+| true-fact side recall, a/b/e (secondary) | n/a | n/a | n/a | n/a | n/a |
+
+## Ingest cost
+
+| system | messages | model calls | calls/message | seconds | seconds/message |
+|---|---|---|---|---|---|
+| sourcedrecall | 27364 | 0 | 0.0 | 3398.3 | 0.124 |
+| rag | 27364 | 13682 | 0.5 | 28.4 | 0.001 |
+
+Cells: rate [95% CI] (k/n). Cluster bootstrap over scenarios, seed 20261002, 10000 resamples. Judge: qwen3-14b-a8cc1361.gguf, temperature 0.
