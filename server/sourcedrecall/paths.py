@@ -51,3 +51,18 @@ def current_scope(explicit=None):
     raw = (explicit or os.environ.get("SOURCEDRECALL_SCOPE")
            or os.environ.get("CLAUDE_PROJECT_DIR"))
     return project_scope(raw) if raw else None
+
+
+def parser_models_dir():
+    """Where setup installs the PyTorch-free parser's models (2026-10-05)."""
+    return os.environ.get("SOURCEDRECALL_PARSER_MODELS",
+                          os.path.join(state_dir(), "parser-models"))
+
+
+def use_installed_parser():
+    """Point rgx at the installed stanza_ort models, if there are any (rgx
+    falls back to Stanza on PyTorch otherwise)."""
+    d = parser_models_dir()
+    if (not os.environ.get("RGX_PARSER_MODELS")
+            and os.path.exists(os.path.join(d, "config.json"))):
+        os.environ["RGX_PARSER_MODELS"] = d

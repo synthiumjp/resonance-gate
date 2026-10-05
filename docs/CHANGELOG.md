@@ -6,6 +6,10 @@ has the details behind each change.
 
 ## Unreleased
 
+- The parser can run without PyTorch: `stanza_ort` runs Stanza 1.14.0's
+  English models on ONNX Runtime and numpy, with the same parses (7,755
+  texts, every field). Setup installs its models when they can be
+  downloaded and falls back to Stanza with PyTorch otherwise.
 - Sessions are stored automatically from Codex CLI and Gemini CLI
   (`sourcedrecall-hook session-end --agent codex|gemini`, with a matching
   `session-start`) and from the Cursor agent (`sourcedrecall-hook cursor`).

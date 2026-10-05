@@ -1,0 +1,21 @@
+# stanza_ort progress (Mac ~/jpwork/stanza_ort)
+
+- [x] read spike + Stanza 1.14.0 sources; findings: xpos plain WordVocab; mwt = CharacterClassifier (force_exact_pieces), lemma seq2seq (edit, copy, pos, greedy), tokenizer config max_seqlen=200 (token >200 chars -> <UNK>)
+- [x] venv (numpy + onnxruntime only), torch not importable
+- [x] convert.py works -> models/ (310 MB)
+- [ ] runtime: tokenizer, mwt, pos, lemma, dep, pipeline
+- [ ] parity.py, speed
+- [x] runtime written (tokenizer.py, seq2seq.py numpy mwt+lemma, tagger.py, pipeline.py, vendored doc.py etc), NOTICE
+- [x] smoke parity (260 texts incl odd/long/code/emoji, single mode): 260/260 identical, every field. ort peak RSS 2.8 GB (incl. long texts); torch ref 6.5 GB.
+- [ ] full parity (7755 texts) single + bulk; speed; profile/optimise; final report
+- [x] batched pos/dep graphs (sequence_lens patched into LSTM nodes at convert time, dynamic batch), batched charlm; small parity still 260/260
+- [x] reference runs done on full corpus (7755 texts): ref_single.pkl (1157 s, 6.7 GB rss), ref_bulk.pkl (175 s, 16.7 GB rss peak on the long texts)
+- [ ] ort full parity running (log_ort_single.txt, log_ort_bulk.txt); then bench.py (ort/ref), rgx integration test (rgx_ort/), venv sizes, final report
+- [x] FULL PARITY: 7755 texts / 246,560 words, single AND bulk(64): 100% identical every field vs Stanza (also tokens, sentence splits, offsets, sentence text, dependencies). Note Stanza single vs Stanza bulk itself differ (1 text's sentence split + sentence index meta); ort bulk == stanza bulk exactly.
+- [ ] bench, rgx integration test, sizes, report
+- [x] speed work: hybrid charlm (numpy GEMM LSTM when >=16 rows, ORT otherwise; npz weights from convert), ORT arena/mem-pattern off, cache caps. bench (loaded Mac, 4 threads): ort one-at-a-time ~85-90 ms/msg, bulk64 ~30-35 ms/msg; torch Stanza: 211-216 / 24-27.
+- [ ] RERUNNING full parity on the final code (ort single/bulk -> log_ort_*.txt); then bench, rgx integration, sizes, report
+- [x] FINAL-CODE full parity (hybrid charlm): single 7755/7755, bulk 7755/7755 (246,560 words), 100% every field.
+- [ ] final bench, rgx integration tests (rgx_ort), sizes, report
+- [x] bench (see report), rgx integration: real rgx test-suite (433 tests) passes with stanza_ort in a numpy+onnxruntime+pytest venv (rgx_ort/), same 433 pass on Stanza (rgx_stanza/).
+- DONE. Deliverables: convert.py, stanza_ort/, models/, NOTICE, parity.py (+canon.py), bench.py, PROGRESS.md

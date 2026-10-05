@@ -35,6 +35,7 @@ Design commitments, in order of how much they cost to keep:
   NO MODEL AT EXTRACTION TIME. A model may CHECK or REPAIR later; it does not
       write the memory.
 """
+import os
 import re
 from dataclasses import dataclass, field
 from typing import Iterable, List, Optional, Sequence
@@ -116,7 +117,7 @@ class Extractor:
         parses anything else as before. The previous batch is dropped."""
         parser = self._parser()
         parser.cache = {}
-        from stanza import Document
+        Document = parser.Document
         todo = [t for t in dict.fromkeys(texts) if t and t.strip()]
         for i in range(0, len(todo), batch):
             chunk = todo[i:i + batch]
@@ -126,6 +127,15 @@ class Extractor:
 
     def _parser(self):
         if self._nlp is None:
+            models = ort_models_dir()
+            if models:
+                # 2026-10-05: stanza_ort, the same Stanza 1.14.0 English
+                # models run on ONNX Runtime without PyTorch (identical
+                # parses on 7,755 texts, every field; tools/stanza_ort)
+                import stanza_ort
+                self._nlp = _CachedParser(stanza_ort.Pipeline(models),
+                                          stanza_ort.Document)
+                return self._nlp
             import stanza
             # 2026-10-02: REUSE_RESOURCES -- never touch the network at
             # runtime. Stanza's default re-fetches resources.json on every
@@ -137,7 +147,8 @@ class Extractor:
                 self._nlp = _CachedParser(stanza.Pipeline(
                     "en", processors="tokenize,pos,lemma,depparse",
                     use_gpu=False, verbose=False,
-                    download_method=stanza.DownloadMethod.REUSE_RESOURCES))
+                    download_method=stanza.DownloadMethod.REUSE_RESOURCES),
+                    stanza.Document)
             except Exception as e:
                 raise RuntimeError(
                     "The English parser models are not installed. Run "
@@ -207,13 +218,31 @@ class Extractor:
         return out
 
 
+def ort_models_dir():
+    """The stanza_ort model folder when it is installed and usable, else
+    None (then Stanza on PyTorch is used). RGX_PARSER=stanza forces Stanza;
+    RGX_PARSER_MODELS names the folder (sourcedrecall sets it to the one
+    its setup installed)."""
+    if os.environ.get("RGX_PARSER", "").lower() == "stanza":
+        return None
+    d = os.environ.get("RGX_PARSER_MODELS")
+    if not d or not os.path.exists(os.path.join(d, "config.json")):
+        return None
+    try:
+        import stanza_ort  # noqa: F401
+    except ImportError:
+        return None
+    return d
+
+
 class _CachedParser:
     """The Stanza pipeline, answering from Extractor.prefetch's parses when
     it has one for exactly this text. The parser only reads a parse, never
     changes it, so one can be used more than once."""
 
-    def __init__(self, nlp):
+    def __init__(self, nlp, document_cls):
         self.nlp = nlp
+        self.Document = document_cls
         self.cache = {}
 
     def __call__(self, text):

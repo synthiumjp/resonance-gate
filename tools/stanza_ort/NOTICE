@@ -1,0 +1,26 @@
+stanza_ort contains code copied or ported from Stanza 1.14.0
+(https://github.com/stanfordnlp/stanza), Copyright 2019-2025 The Board of Trustees of
+The Leland Stanford Junior University, licensed under the Apache License, Version 2.0
+(http://www.apache.org/licenses/LICENSE-2.0).
+
+Files vendored (with small edits to remove torch / networkx / NER / constituency /
+coref imports, and relative imports):
+  stanza_ort/doc.py              from stanza/models/common/doc.py
+  stanza_ort/stanza_object.py    from stanza/models/common/stanza_object.py
+  stanza_ort/_utils.py           from stanza/models/common/utils.py (MISC whitespace helpers)
+  stanza_ort/chuliu_edmonds.py   from stanza/models/common/chuliu_edmonds.py
+  stanza_ort/head_constraints.py from stanza/models/depparse/head_constraints.py
+  stanza_ort/_tokregex.py        regular expressions from stanza/models/tokenization/{utils,data}.py
+
+Files ported (logic re-implemented on numpy / onnxruntime, following the Stanza code):
+  stanza_ort/tokenizer.py   stanza/models/tokenization/{data,utils}.py, pipeline/tokenize_processor.py
+  stanza_ort/seq2seq.py     stanza/models/mwt/{trainer,character_classifier}.py,
+                            stanza/models/common/{seq2seq_model,seq2seq_modules}.py,
+                            stanza/models/lemma/{trainer,edit}.py
+  stanza_ort/tagger.py      stanza/models/pos/{data,trainer}.py, stanza/models/depparse/{data,model}.py,
+                            stanza/models/common/{char_model,pretrain,utils}.py
+  stanza_ort/vocab.py       stanza/models/common/vocab.py
+  stanza_ort/pipeline.py    stanza/pipeline/{core,processor,mwt,pos,lemma,depparse}_processor.py
+
+The model weights are Stanza's English models (converted by convert.py), distributed under the
+terms Stanza's model files carry.

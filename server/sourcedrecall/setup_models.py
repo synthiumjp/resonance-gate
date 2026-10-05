@@ -39,6 +39,62 @@ from sourcedrecall._bridge import code_roots as _code_roots
 _P2 = _code_roots()[1]
 
 
+# 2026-10-05: the PyTorch-free parser. Its models are Stanza 1.14.0's English
+# models converted once by tools/stanza_ort/convert.py and packed as a
+# .tar.gz; where that archive is published is set here at release time.
+# Until then setup downloads Stanza's own models (and PyTorch runs them), or
+# SOURCEDRECALL_PARSER_ARCHIVE names an archive (path or URL) to install.
+PARSER_ARCHIVE = ("https://huggingface.co/synthiumjp/sourcedrecall-parser-en/resolve/main/"
+                  "sourcedrecall-parser-en-stanza1.14.0.tar.gz")
+PARSER_SHA256 = "921281ed755e8a4454cce27df56e18557123920e1df4b02443cade72e0e2f105"
+
+
+def install_parser_archive(src, sha256=None):
+    """Download (if a URL) or copy the parser model archive, check its
+    sha256 when one is given, and unpack it into paths.parser_models_dir()."""
+    import hashlib
+    import shutil
+    import tarfile
+    import tempfile
+    import urllib.request
+    from sourcedrecall.paths import parser_models_dir
+    dest = parser_models_dir()
+    tmp = tempfile.mkdtemp(prefix="sourcedrecall-parser-")
+    try:
+        path = os.path.join(tmp, "models.tar.gz")
+        if src.startswith(("http://", "https://")):
+            urllib.request.urlretrieve(src, path)
+        else:
+            shutil.copyfile(src, path)
+        if sha256:
+            h = hashlib.sha256()
+            with open(path, "rb") as f:
+                for chunk in iter(lambda: f.read(1 << 20), b""):
+                    h.update(chunk)
+            if h.hexdigest() != sha256.lower():
+                raise RuntimeError("parser model archive: sha256 does not match")
+        out = os.path.join(tmp, "out")
+        with tarfile.open(path) as t:
+            for m in t.getmembers():
+                if m.name.startswith(("/", "..")) or ".." in m.name.split("/"):
+                    raise RuntimeError("parser model archive: unsafe path " + m.name)
+            t.extractall(out)
+        # the archive holds config.json at its top or in one folder
+        top = out
+        if not os.path.exists(os.path.join(top, "config.json")):
+            subs = [os.path.join(out, x) for x in os.listdir(out)]
+            top = next((x for x in subs if os.path.exists(os.path.join(x, "config.json"))), None)
+            if top is None:
+                raise RuntimeError("parser model archive: no config.json")
+        if os.path.exists(dest):
+            shutil.rmtree(dest)
+        os.makedirs(os.path.dirname(dest), exist_ok=True)
+        shutil.move(top, dest)
+        return dest
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
 def _du(path):
     """Bytes actually on disk. Skips symlinks: the HF cache links every
     snapshot file to a blob, and following both reported 2.8 GB for an
@@ -65,13 +121,27 @@ def main(argv=None):
     print("sourcedrecall setup: downloading the models the server uses.\n"
           "This is the only step that touches the network.\n")
 
-    print(f"[1/{1 + len(HF_MODELS)}] English parser (Stanza: {STANZA_PROCESSORS})"
-          " -- ~320 MB, the slowest step", flush=True)
-    import stanza
-    stanza.download("en", processors=STANZA_PROCESSORS)
-    from stanza.resources.common import DEFAULT_MODEL_DIR
-    sdir = os.environ.get("STANZA_RESOURCES_DIR", DEFAULT_MODEL_DIR)
-    print(f"      -> {sdir} ({_mb(_du(sdir))})")
+    archive = os.environ.get("SOURCEDRECALL_PARSER_ARCHIVE") or PARSER_ARCHIVE
+    done = False
+    if archive and os.environ.get("RGX_PARSER", "").lower() != "stanza":
+        print(f"[1/{1 + len(HF_MODELS)}] English parser (Stanza's models on ONNX "
+              "Runtime, no PyTorch) -- ~335 MB, the slowest step", flush=True)
+        try:
+            sha = (os.environ.get("SOURCEDRECALL_PARSER_SHA256")
+                   or (PARSER_SHA256 if archive == PARSER_ARCHIVE else None))
+            d = install_parser_archive(archive, sha)
+            print(f"      -> {d} ({_mb(_du(d))})")
+            done = True
+        except Exception as e:
+            print(f"      -> could not install ({e}); using Stanza with PyTorch")
+    if not done:
+        print(f"[1/{1 + len(HF_MODELS)}] English parser (Stanza: {STANZA_PROCESSORS})"
+              " -- ~320 MB, the slowest step", flush=True)
+        import stanza
+        stanza.download("en", processors=STANZA_PROCESSORS)
+        from stanza.resources.common import DEFAULT_MODEL_DIR
+        sdir = os.environ.get("STANZA_RESOURCES_DIR", DEFAULT_MODEL_DIR)
+        print(f"      -> {sdir} ({_mb(_du(sdir))})")
 
     if _P2 not in sys.path:
         sys.path.insert(0, _P2)

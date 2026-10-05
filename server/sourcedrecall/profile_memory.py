@@ -189,6 +189,8 @@ def _get_extractor(owner_name):
     if (_ingest_state["extractor"] is None
             or _ingest_state["owner"] != owner_name):
         from rgx import Extractor
+        from sourcedrecall.paths import use_installed_parser
+        use_installed_parser()
         _ingest_state["extractor"] = Extractor(owner_name=owner_name)
         _ingest_state["owner"] = owner_name
     return _ingest_state["extractor"]

@@ -56,7 +56,10 @@ def main():
     for f in os.listdir(os.path.join(ROOT, "rgx")):
         if f.endswith(".py") and not f.startswith("test_"):
             shutil.copy2(os.path.join(ROOT, "rgx", f), os.path.join(CORE, "rgx", f))
-    print(f"_core: {len(mods)} modules from experiments/p2 + rgx")
+    # 2026-10-05: the PyTorch-free parser runtime (tools/stanza_ort)
+    shutil.copytree(os.path.join(ROOT, "stanza_ort"), os.path.join(CORE, "stanza_ort"),
+                    ignore=shutil.ignore_patterns("__pycache__"))
+    print(f"_core: {len(mods)} modules from experiments/p2 + rgx + stanza_ort")
     try:
         subprocess.run([sys.executable, "-m", "build", "--wheel", "--outdir",
                         os.path.join(ROOT, "server", "dist"),
