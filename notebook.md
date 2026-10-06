@@ -15365,3 +15365,20 @@ and how to run everything).
   become a cue (SODA reuses common first names with empty targets). Fix:
   every training row gets a fresh owner name and date format (prep.py
   names). r4 = names; r5 = names + explicit person.
+
+## Entry 314 — 2026-10-07 early (r4-r6: the NONE habit, and explicit person measured)
+
+- r4 (random owner names) still wrote nothing for Melanie, Gina, Jon. A
+  sweep of 12 names over 4 sessions each: r4 wrote NONE for most names
+  (Melanie, Anna, Sarah, Kofi, Dana, Jon, Tom: 4/4); r2 for one session in
+  48. The name only tipped the margin. Cause: the flipped SODA rows are 24%
+  empty (the one replying in a short chat has little to say): "the replier
+  -> NONE". Dropped those empties (prep.py noflipnone).
+- r5 (names, no empty flips; 1,450 iters): notes for every speaker (457);
+  judged right 76%, other speaker's facts given to the user 16%; dev 68.2%.
+  Twice r2's data did not teach a 0.6B model to keep two speakers apart.
+- r6 = r5 + explicit person on the input (notes.explicit_person): right
+  348 -> 381 (80%), wrong person 75 -> 62 (13%; 14B 3%); dev 68.2% (+17/-17
+  against r5). Explicit person helps but does not close the gap: many of the
+  remaining errors carry no pronoun ("the kids", "the trip").
+- Held-out next for r6: blind false memory v3/v4, then the LoCoMo test.
