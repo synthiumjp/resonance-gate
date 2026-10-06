@@ -150,7 +150,8 @@ their errors, so later figures there would not be held out), it was 5 of 61.
 86% of cases it was. A change the user implied
 without saying ("Fourth week as a paramedic" after "I'm a pharmacy
 assistant") can be missed. `not_found` means nothing was found, which is not
-proof that it was never said. No model is called.
+proof that it was never said. No language model is called; the search
+uses the same small ranking models as the rest of the memory.
 
 ## Seeing and editing the memory
 

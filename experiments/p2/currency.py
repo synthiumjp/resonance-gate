@@ -851,7 +851,23 @@ _INTENSIFIERS = re.compile(r"^(?:so|really|very|a bit|a little|pretty|kind of|"
 _LIFE_EVENT = re.compile(r"\b(?:got |get |getting )?(?:married|engaged|divorced|"
                          r"promoted|graduated|retired|hired|fired|adopted|"
                          r"born|died|passed away|moved|enrolled|pregnant|"
-                         r"broke up|split up|laid off)\b", re.I)
+                         r"broke up|split up|laid off)\b"
+                         # 2026-10-05 (label screening): a change of state
+                         # said "today" is not passing -- "They made me a
+                         # senior designer today", "The MacBook Air arrived
+                         # today", "I joined Birch today"
+                         # 2026-10-06 adversarial review: "I bought a coffee
+                         # today", "I made a cake today", "I joined a Zoom
+                         # meeting today" are passing; the verb is a change
+                         # of state only with a state object
+                         r"|\bmade (?:me|him|her|them)\s+(?:a|an|the)\s+\w+"
+                         r"|\bbought (?:a|an|our|my|the) (?:new )?(?:house|flat|"
+                         r"apartment|home|place|car)\b"
+                         r"|\bjoined (?:the|a|an) (?:\w+ )?(?:team|company|firm|"
+                         r"board|practice|band|club)\b"
+                         r"|\b(?:signed (?:the |a )?lease|started (?:at|as)\b|"
+                         r"new (?:job|role|position|house|home|flat|apartment|"
+                         r"car|partner|boyfriend|girlfriend))", re.I)
 
 
 def passing(text=None, said=None, attr=None, value=None):
@@ -920,3 +936,312 @@ def mark_state_changes(g, order=None):
             nd["ceased"] = True
             changed.append((nid, cid))
     return changed
+
+# 2026-10-05 (implied-change catalogue, readable sets): of 54 out-of-date
+# facts never marked, the parser HAD stored the newer fact in 38 ("Jordan
+# Pike graduated yesterday" after "is a law student", "moved to the
+# payments team", "traded in the Honda for an electric Kia"); nothing linked
+# the two, because they share no state family and no value. A change-of-
+# state verb names its domain (graduate -> study, promote -> work, get
+# engaged -> relationship); a generic one (switch, trade, replace, sell)
+# takes its object's WordNet supersense (tea and coffee are noun.food). A
+# link made this way is softer than a family change: the older fact is
+# marked "may have changed", not "no longer true".
+_DOMAIN_VERBS = {
+    "study": {"graduate", "enrol", "enroll", "drop", "matriculate", "defer"},
+    "work": {"promote", "hire", "fire", "quit", "resign", "retire", "transfer",
+             "join", "start", "make", "lay", "report", "buy"},
+    "relationship": {"engage", "marry", "divorce", "date", "split", "break",
+                     "separate", "propose"},
+    "home": {"move", "relocate", "close", "rent", "kick", "settle"},
+    "diet": {"give", "go", "cut", "quit", "switch"},
+}
+_DOMAIN_WORDS = {
+    "study": {"student", "studying", "study", "studies", "uni", "university",
+              "degree", "masters", "phd", "course", "school", "college", "year"},
+    "work": {"work", "works", "job", "team", "manager", "boss", "report",
+             "reports", "office", "site", "shift", "role", "company", "firm",
+             "employer", "freelance", "freelances", "analyst", "designer",
+             "engineer", "nurse", "assistant", "lead", "contributor", "payroll",
+             "shop", "business", "startup", "clinic", "practice", "manager"},
+    "relationship": {"single", "dating", "girlfriend", "boyfriend", "partner",
+                     "wife", "husband", "married", "engaged", "relationship"},
+    "home": {"live", "lives", "living", "flat", "apartment", "house", "home",
+             "rent", "rents", "flatmate", "flatmates", "parents", "place"},
+    "diet": {"vegan", "vegetarian", "dairy", "gluten", "bread", "cheese", "milk",
+             "coffee", "coffees", "caffeine", "caffeinated", "meat", "sugar",
+             "drink", "drinks", "eat", "eats"},
+}
+_GENERIC_CHANGE = {"switch", "swap", "trade", "replace", "sell", "change",
+                   "upgrade", "migrate", "cancel", "stop", "drop", "give",
+                   "adopt", "get", "buy", "finish"}
+_LEXNAME_SKIP = {"noun.time", "noun.quantity", "noun.Tops", "noun.relation",
+                 "noun.attribute", "noun.cognition", "noun.communication"}
+
+
+def _supersenses(text):
+    try:
+        from nltk.corpus import wordnet as wn
+    except Exception:
+        return set()
+    out = set()
+    for w in re.findall(r"[a-z]+", (text or "").lower()):
+        if len(w) < 3 or w in _NOISE:
+            continue
+        syns = wn.synsets(w, pos=wn.NOUN)
+        if syns and syns[0].lexname() not in _LEXNAME_SKIP:
+            out.add(syns[0].lexname())
+    return out
+
+
+# 2026-10-06: coarse kinds of thing from WordNet's hypernym hierarchy -- a
+# paramedic and a pharmacy assistant are both workers, decaf and coffee both
+# beverages, futsal and cricket both sports. A "vegan" is an eater, not a
+# worker, which keeps diets out of jobs. First sense only ("head" is the body
+# part, not a head of cattle); a drink is not also counted as food.
+_CATEGORY_ROOTS = {
+    "occupation": ("worker.n.01", "professional.n.01", "employee.n.01",
+                   "skilled_worker.n.01", "health_professional.n.01",
+                   "leader.n.01", "student.n.01", "expert.n.01", "creator.n.02"),
+    "device": ("computer.n.01", "telephone.n.01"),
+    "vehicle": ("motor_vehicle.n.01", "bicycle.n.01"),
+    "drink": ("beverage.n.01",),
+    "food": ("food.n.01", "foodstuff.n.02"),
+    "sport": ("sport.n.01", "athletic_game.n.01"),
+    "medication": ("drug.n.01", "medicine.n.02"),
+    "pet": ("domestic_animal.n.01", "feline.n.01", "canine.n.02", "pet.n.01"),
+    "language": ("natural_language.n.01",),
+    "instrument": ("musical_instrument.n.01",),
+}
+_CAT_CACHE = {}
+
+
+def _categories(text):
+    try:
+        from nltk.corpus import wordnet as wn
+    except Exception:
+        return set()
+    if "roots" not in _CAT_CACHE:
+        try:
+            _CAT_CACHE["roots"] = {c: {wn.synset(x) for x in xs}
+                                   for c, xs in _CATEGORY_ROOTS.items()}
+        except Exception:
+            return set()
+    roots = _CAT_CACHE["roots"]
+    out = set()
+    for w in re.findall(r"[a-z]+", (text or "").lower()):
+        if len(w) < 3 or w in _NOISE:
+            continue
+        if w not in _CAT_CACHE:
+            if len(_CAT_CACHE) > 20000:
+                _CAT_CACHE.clear()
+                return _categories(text)
+            syns = wn.synsets(w, pos=wn.NOUN)[:1]
+            found = set()
+            for syn in syns:
+                hyp = set(syn.closure(lambda s: s.hypernyms())) | {syn}
+                found |= {c for c, a in roots.items() if hyp & a}
+            if "drink" in found:
+                found.discard("food")
+            _CAT_CACHE[w] = found
+        out |= _CAT_CACHE[w]
+    return out
+
+
+def _domains(nd):
+    words = set(re.findall(r"[a-z]+", f"{nd.get('value') or ''} {nd.get('text') or ''}".lower()))
+    return {d for d, ws in _DOMAIN_WORDS.items() if words & ws}
+
+
+_CONTRAST = re.compile(r"\b(now|back to|instead|these days|no longer|anymore|any more)\b"
+                       r"|\b(?:has|have)\s+been\b.*\bsince\b", re.I)
+_ROLE = re.compile(r"\b(lead|manager|analyst|designer|engineer|developer|nurse|"
+                   r"doctor|paramedic|teacher|assistant|contributor|director|head of|"
+                   r"intern|freelanc\w*|consultant|editor|student|apprentice|"
+                   r"owner|founder|chef|driver|officer|clerk|associate)\b")
+_WORK_OBJECT = {"team", "site", "office", "group", "department", "branch", "desk",
+                "role", "position", "shift", "track"}
+
+
+# 2026-10-06 adversarial review: "I moved the sofa", "I started a new book",
+# "I made a cake", "I closed the window" were read as changes of home or job.
+# A verb names a change of state only in a particular frame -- its
+# preposition or object (subcategorisation): move TO/INTO/OUT, start AT/AS,
+# MADE ME a..., close ON a house, quit a JOB, break UP.
+_FRAMES = [
+    ("study", r"\b(graduat\w*|enrol\w*|enroll\w*|dropped out|drop out|deferr?\w*)\b"),
+    ("work", r"\b(promot\w*|hired|fired|resign\w*|retir\w*|laid off|"
+             r"transferr?\w* to|reports? to|started (?:at|as)|start (?:at|as)|"
+             r"join\w* (?:the|a|an)? ?(?:\w+ )?(?:team|company|firm|startup|practice|board)|"
+             r"made (?:me|him|her) (?:a|an|the)|(?:was|were|got|be|been) made (?:a|an|the)|"
+             r"\bmake (?:a|an|the) \w+ (?:today|yesterday|this week)|bought out|quit (?:my |the )?(?:job|role)|"
+             r"left (?:my |the )?(?:job|company|firm|role))\b"),
+    ("relationship", r"\b(engaged|married|divorc\w*|dating|broke up|break up|"
+                     r"split up|separated|proposed)\b"),
+    ("home", r"\b(moved (?:to|into|in|out|back|away|from|house)|move (?:to|into|in|out|back)|"
+             r"relocat\w*|closed on|close on|renting (?:a|an|my)|rent (?:a|an) "
+             r"(?:flat|apartment|house|place|room)|kicked (?:me )?out|settl\w* in(?:to)?)\b"),
+    ("diet", r"\b(gave up|give up|giving up|went (?:vegan|vegetarian|gluten|dairy|keto|"
+             r"sober|decaf|teetotal)|cut out|quit (?:smoking|drinking|sugar|caffeine|"
+             r"coffee|meat|dairy|alcohol))\b"),
+]
+_FRAMES = [(d, re.compile(rx, re.I)) for d, rx in _FRAMES]
+
+
+def _verb_domains(attr, value, text):
+    """The domains a change-of-state verb names, read from its frame."""
+    # the frame as said ("Dana moved the sofa to the other wall"); the
+    # predicate name folds in the preposition ("move_to") and would read
+    # "move to" where the sentence has "moved the sofa to"
+    s = text or f"{(attr or '').replace('_', ' ')} {value or ''}"
+    out = {d for d, rx in _FRAMES if rx.search(s)}
+    # "moved to the payments team" is a change of team, not of home
+    if "home" in out and re.search(r"\b(team|site|office|group|department|"
+                                   r"branch|desk)\b", s, re.I):
+        out = (out - {"home"}) | {"work"}
+    return out
+
+
+def _verbs_of(attr):
+    """The predicate's words: 'promote_to' -> {'promote', 'to'};
+    'university_switch' -> {'university', 'switch'}."""
+    return set(re.split(r"[_:\s]+", (attr or "").lower()))
+
+
+def mark_domain_changes(g, owner=None, order=None):
+    """Soft links: an older current fact of the owner's that a newer
+    change in the same domain may have changed gets nd["maybe_changed_by"] =
+    the newer node's key. A change is a change-of-state verb (graduate,
+    promote, switch, trade in), or a contrast marker ("now", "back to",
+    "instead", "has been ... since"). Returns [(old, new)]."""
+    owner = (owner or _infer_owner(g) or "").lower()
+    if not owner:
+        return []
+    def mine(nd):
+        t = (nd.get("text") or "").lower()
+        return t.startswith(owner + " ") or t.startswith(owner + "'s ")
+    def causative(nd):
+        # "The university switched Ahmad Karimi to the PhD track"
+        t = (nd.get("text") or "").lower()
+        return owner in t and not t.startswith(owner)
+    nodes = [(nid, nd) for st in (g.nodes, g.provisional) for nid, nd in st.items()
+             if nd.get("current") is not False]
+    olds = [(nid, nd) for nid, nd in nodes if mine(nd)]
+    out = []
+    for nid, new in nodes:
+        if not (mine(new) or causative(new)):
+            continue
+        # news about the user's people is not a change of the user's state:
+        # "Martin's friend Dev just started at Birch", "George's mum stopped
+        # her statins" (dev stale2 controls)
+        if _about_person(new.get("text"), owner) or re.match(
+                rf"^\s*{re.escape(owner)}'s\s+(?:\w+\s+)?(?:{_PERSON_WORDS}|"
+                r"neighbou?r|best friend|pal|ex)\b", (new.get("text") or "").lower()):
+            continue
+        verbs = _verbs_of(new.get("attr"))
+        text = new.get("text") or ""
+        words = set(re.findall(r"[a-z]+", f"{new.get('value') or ''} {text}".lower()))
+        verb_doms = _verb_domains(new.get("attr"), new.get("value"), text)
+        generic = bool(verbs & _GENERIC_CHANGE)
+        contrast = bool(_CONTRAST.search(text))
+        if not (verb_doms or generic or contrast):
+            continue
+        if passing(new.get("text"), new.get("source"), new.get("attr"), new.get("value")):
+            continue
+        when = _latest(new, order)
+        nsup = _supersenses(new.get("value")) if generic else set()
+        ndoms = _domains(new) | ({"work"} if words & _WORK_OBJECT else set())
+        ncontent = _content(f"{new.get('value') or ''}") - _content(owner)
+        for oid, old in olds:
+            if oid == nid or old.get("maybe_changed_by"):
+                continue
+            owhen = _latest(old, order)
+            # ordinals start at 0, so test for "unknown", not falsiness
+            if owhen in ("", None) or when in ("", None) or owhen >= when:
+                continue
+            odoms = _domains(old)
+            linked = bool(verb_doms & odoms)
+            if not linked and generic:
+                osup = _supersenses(old.get("value"))
+                ocontent = _content(f"{old.get('value') or ''} {old.get('attr') or ''}") - _content(owner)
+                linked = bool((nsup & osup) or (ncontent & ocontent))
+            if not linked and (generic or contrast):
+                # the same kind of thing (WordNet): "I'm a paramedic now"
+                # after "is a pharmacy assistant"; "I'm on decaf now" after
+                # "drinks four coffees a day"
+                nc = _categories(new.get("value"))
+                oc = _categories(old.get("value"))
+                linked = bool(nc & oc)
+            if not linked and contrast and not verb_doms:
+                # a contrast marker only links within a named domain; for
+                # work, both facts must name a ROLE -- coding talk is full of
+                # "now", "the backend", "the team" (label screening, coding
+                # sets: 8 -> 31 firings at 10% precision without this)
+                shared = ndoms & odoms
+                if shared == {"work"}:
+                    otext = f"{old.get('value') or ''} {old.get('text') or ''}".lower()
+                    shared = shared if (_ROLE.search(text.lower()) and _ROLE.search(otext)) else set()
+                linked = bool(shared)
+            if linked and not _same_value(str(old.get("value") or ""), str(new.get("value") or "")):
+                old["maybe_changed_by"] = nid
+                out.append((oid, nid))
+    return out
+
+
+_DECISION_CHANGE = re.compile(r"\b(switch|switched|back|instead|replace|replaced|"
+                              r"move|moved|migrate|drop|dropped|stop|revert|"
+                              r"change|changed)\b", re.I)
+
+
+_DEC_GENERIC = {_stem(w) for w in ("use", "build", "add", "set", "make", "switch",
+                                    "move", "change", "write", "run", "keep", "go",
+                                    "with", "instead", "for", "now", "back", "simple",
+                                    "simplest", "thing", "plain", "small", "new")}
+_DEC_VEC = {}
+
+
+def _decision_vec(text):
+    """bge-small vector of a decision, cached (one encode per decision, not
+    per pair)."""
+    if text not in _DEC_VEC:
+        import retrieve_v3 as _RV3
+        bi, _ = _RV3._models()
+        if len(_DEC_VEC) > 5000:
+            _DEC_VEC.clear()
+        _DEC_VEC[text] = bi.encode([text], normalize_embeddings=True)[0]
+    return _DEC_VEC[text]
+
+
+def mark_decision_changes(g, order=None):
+    """A later decision on the same topic replaces an earlier one: the later
+    one says it changes something (switch back, instead, drop, revert) and
+    shares a word with the earlier one or is close to it in meaning
+    ("switch back to npm" after "switching the build to pnpm")."""
+    decs = [(nid, nd) for st in (g.nodes, g.provisional) for nid, nd in st.items()
+            if (nd.get("attr") or "") == "decision"]
+    out = []
+    for nid, new in decs:
+        when = _latest(new, order)
+        for oid, old in decs:
+            if oid == nid or old.get("current") is False:
+                continue
+            owhen = _latest(old, order)
+            if owhen in ("", None) or when in ("", None) or owhen >= when:
+                continue
+            # the same topic: a shared content word (not a generic verb), or
+            # close in meaning; a later choice about the same thing replaces
+            # the earlier one even without a change word ("plain testing
+            # package plus testify" -> "standard library ... go-cmp")
+            shared = (_content(old.get("value")) & _content(new.get("value"))) - _DEC_GENERIC
+            close = False
+            if not shared:
+                try:
+                    va, vb = _decision_vec(old["value"]), _decision_vec(new["value"])
+                    close = float(va @ vb) >= 0.6
+                except Exception:
+                    close = False
+            if shared or close:
+                old["current"] = False
+                old["superseded_by"] = nid
+                out.append((oid, nid))
+    return out

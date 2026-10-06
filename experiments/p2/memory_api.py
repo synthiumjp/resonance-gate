@@ -412,6 +412,8 @@ def _f_date(f):
     return str((f.get("receipts") or [{}])[0].get("date") or "")[:10]
 
 
+
+
 def _mark_later_changes(facts, owner=None):
     if os.environ.get("RG_LATER_CHANGES") == "0" or len(facts) < 2:
         return facts
@@ -427,20 +429,53 @@ def _mark_later_changes(facts, owner=None):
                              r"colleague|son|daughter|kid|child|neighbour|"
                              r"neighbor|cousin|aunt|uncle)\b", t.lower()) \
             if own else True
+    def about_user(f):
+        # 2026-10-05 (label screening, cases_dev_stale2 controls): "my friend
+        # Dev just started at Birch Analytics" marked "I work at Acme" as
+        # possibly changed. The fact must be the user's own: its subject is
+        # the owner, not a friend or relative.
+        t = (f.get("text") or "").lower()
+        return users(f) and (not own or t.startswith(own + " ")
+                             or t.startswith(own + "'s "))
+
+    def related(a, b):
+        # the same kind of state (job, home, partner...) or a shared word:
+        # "I started yoga" does not update "I work at Acme"
+        import currency
+        fa = {fam for fam, _k in currency._families(a.get("attribute"), a.get("value"))}
+        fb = {fam for fam, _k in currency._families(b.get("attribute"), b.get("value"))}
+        if fa & fb:
+            return True
+        if fa and fb:
+            return False            # two known kinds of state, different
+        drop = currency._content(own)
+        # a shared content word of the facts' VALUES, or the same kind of
+        # thing (WordNet). 2026-10-06 adversarial review: an embedding
+        # fallback at cosine 0.5 linked "I live in Fitzroy" to "I moved the
+        # sofa" and "I drive a Honda Civic" to "I bought a new bike" (11 of 18
+        # unrelated pairs); bge-small cosine does not separate them.
+        if ((currency._content(a.get("value")) - drop)
+                & (currency._content(b.get("value")) - drop)):
+            return True
+        return bool(currency._categories(a.get("value")) & currency._categories(b.get("value")))
+
     out = [dict(f) for f in facts]
     for jn, new in enumerate(out):
-        if not users(new) or new.get("current") is False:
+        if not about_user(new) or new.get("current") is False:
             continue
-        nwords = f"{new.get('said') or ''} {new.get('text') or ''}"
-        changes = bool(_CHANGE.search(new.get("said") or new.get("text") or ""))
+        # the change word must be in the fact's own clause, not elsewhere in
+        # the sentence ("I hired a Mazda 3, and my brother bought a new Kia")
+        nclause = new.get("text") or new.get("said") or ""
+        changes = bool(_CHANGE.search(nclause))
         for old in out:
-            if old is new or not users(old) or old.get("current") is False \
+            if old is new or not about_user(old) or old.get("current") is False \
                     or old.get("changed_later"):
                 continue
             if not (_f_date(old) and _f_date(new) and _f_date(old) < _f_date(new)):
                 continue
-            owords = f"{old.get('said') or ''} {old.get('text') or ''}"
-            flip = bool(_NEGATED.search(owords)) != bool(_NEGATED.search(nwords))
+            if not related(old, new):
+                continue
+            flip = bool(_NEGATED.search(old.get("text") or "")) != bool(_NEGATED.search(nclause))
             if changes or flip:
                 old["changed_later"] = new.get("id")
     # the later statement before the earlier one it updates
@@ -883,6 +918,11 @@ def _mark_ceased(g, titles=None):
     # ONE hook for both loaders (Memory.load and the server's _build) -- the
     # server used to call currency directly, the §5m shape waiting to happen.
     currency.mark_state_changes(g, order=order or None)
+    # 2026-10-06: decisions made with the assistant, replaced by later ones
+    currency.mark_decision_changes(g, order=order or None)
+    # 2026-10-05: soft links by domain (graduated -> was a student)
+    if os.environ.get("RG_DOMAIN_CHANGES", "1") != "0":
+        currency.mark_domain_changes(g, order=order or None)
 
 
 class Memory:
@@ -1760,6 +1800,7 @@ class Memory:
                 # every consumer sees one verdict instead of re-deriving it.
                 "current": nd.get("current", True),
                 "superseded_by": nd.get("superseded_by"),
+                "maybe_changed_by": nd.get("maybe_changed_by"),
                 "supersedes": list(nd.get("supersedes") or []),
                 "receipts": [{"date": d, "conversation":
                               self.titles.get(c, c)[:60],
@@ -1807,11 +1848,14 @@ class Memory:
         for fs in per:
             n = []
             for f in fs:
-                if f.get("current") is False:
+                if f.get("attribute") == "decision":
+                    pre = "no longer true: " if f.get("current") is False else ""
+                    n.append(f"{pre}decided with the assistant: {f.get('value')}")
+                elif f.get("current") is False:
                     n.append(f"no longer true: {f.get('text')}")
                 elif f.get("passing"):
                     n.append(f"said in passing: {f.get('text')}")
-                elif f.get("id") in later:
+                elif f.get("id") in later or f.get("maybe_changed_by"):
                     n.append(f"may have changed since: {f.get('text')}")
             notes.append(n)
         return notes
@@ -1827,7 +1871,7 @@ class Memory:
         extra = []
         for fs in self._facts_in(msgs):
             for f in fs:
-                rid = f.get("superseded_by")
+                rid = f.get("superseded_by") or f.get("maybe_changed_by")
                 nd = nodes.get(rid) or prov.get(rid) if rid else None
                 if not nd or not nd.get("source"):
                     continue
@@ -2002,8 +2046,9 @@ class Memory:
                     continue
                 seen.add(t.lower())
                 ended = (" (no longer true)" if self._note_ended(nt) else "")
+                label = "(note written by your model)"
                 lines.append((f"- [{nt.get('date')}] " if nt.get("date") else "- ")
-                             + f"(note written by your model){ended} {t}")
+                             + f"{label}{ended} {t}")
             if seen:
                 rules = _RULES_MSG.replace(
                     "Anything about the user not listed here",

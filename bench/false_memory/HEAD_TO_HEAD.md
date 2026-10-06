@@ -32,8 +32,14 @@ never-said proposition as currently true. Adapters:
 With the 14B reader every system answered all 16 unchanged things. Most of
 agentmemory's project false memories are another project's fact offered as
 true of this one: its search has no project filter. sourcedrecall's
-project row is the published run at an earlier commit (controls 10/13 at
-the current code, `results_ps_projblind`).
+project rows are the published run at an earlier commit, where it answered
+8 of 13 unchanged facts; a later, unaudited run of a newer commit answered
+10 of 13 (`results_ps_projblind`), which this table does not use.
+
+The systems return different amounts: sourcedrecall its memory block,
+agentmemory and ai-memory their top 5 results (ai-memory's pages cut at
+1,500 characters), plain retrieval its top 3 messages. The table does not
+equalise them.
 
 ## Audit
 

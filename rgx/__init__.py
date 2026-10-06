@@ -171,9 +171,18 @@ class Extractor:
         from . import parse as G
         from . import fragments as F
         orig = {}
-        if role == "user":
-            text, orig = F.rewrite(text, self._parser(), prev=prev)
         out = []
+        if role == "user":
+            # 2026-10-06: a proposal the user accepts is the user's decision
+            from . import decisions as D
+            dec = D.decision(text, prev)
+            if dec and self.owner_name:
+                val, _src = dec
+                out.append(Record(text=f"{self.owner_name} decided with the assistant: {val}",
+                                  kind="attr", session=session, turn=turn, role=role,
+                                  predicate="decision", value=val, evidential=None,
+                                  source=text, quality=1.0))
+            text, orig = F.rewrite(text, self._parser(), prev=prev)
         for prop, kind, pred, val, evi, src in G.extract_keyed(
                 text, self._parser(), self.owner_name, role=role,
                 owner_pronoun=self.owner_pronoun,

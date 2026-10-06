@@ -44,6 +44,12 @@ never said as true. Audited, one rule for every system:
 | the same with a small (4B) reader: old state as current | 2 | 6 | 11 | |
 | coding sessions behind 120 others: false memories, of 51 | 0 | 2 | 6 | 3 |
 | several projects: false memories, of 32 | 0 | 9 | 4 | 3 |
+| several projects: unchanged facts answered, of 13 | 8 | 12 | 5 | 7 |
+
+The last two rows are a trade-off: sourcedrecall keeps a project's facts in
+that project, so it never offers another project's fact as true here, and
+it also answered "I don't know" to 5 real facts that agentmemory, which
+searches every project at once, found (it also offered 9 false ones).
 
 LoCoMo (conversations 2-9, 1,307 questions), against Mem0, with the same
 local reader and judge (Qwen3-14B):
@@ -66,10 +72,27 @@ About these numbers: the answers were read and judged by local models, the
 same for every system, so the comparison inside each table is fair, but the
 answer scores are not comparable with published LoCoMo results, which use
 GPT-4-class models and other protocols. The judge agreed with hand labels on
-29 of 30 checks. The false-memory sets are synthetic and small (44-100
-scenarios each). Mem0 used the same local model for its own calls. The other
-tools ran in the configuration they document for local use without a
-language model; with one, they offer more than was measured here.
+29 of 30 checks; the audits of its verdicts were done by an AI agent with
+one rule for every system. The false-memory sets are synthetic and small
+(44-100 scenarios each).
+
+The systems hand the reader different amounts: sourcedrecall its memory
+block (845 tokens a question on LoCoMo, 1,230 in notes mode), Mem0 its top
+5 memories (722), agentmemory and ai-memory their top 5 results, plain
+retrieval its top 3 messages (356). Mem0 2.2.1 used the same local Qwen3-14B
+for its own calls, with thinking turned off and its JSON response format
+removed (the local server does not support it), and dates written into the
+messages because it does not accept a timestamp; this may cost it on time
+questions. The other tools ran in the configuration they document for local
+use without a language model; with one, they offer more than was measured
+here.
+
+LoCoMo conversations 2-9 were run for each version reported, so they are
+not untouched: notes mode was changed after its first run there (72.1%)
+and scored 73.1% after. Measured at: LoCoMo default f078bf4, notes mode
+49561c4, LongMemEval e8b8c0f, false-memory head-to-head on the published
+runs listed in `bench/false_memory/HEAD_TO_HEAD.md`. The release will be
+measured again in one run.
 
 Where it is weaker: without a model, questions that need several facts
 from different conversations put together (LoCoMo multi-hop, 53.6% against

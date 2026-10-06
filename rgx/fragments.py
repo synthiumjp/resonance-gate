@@ -240,6 +240,85 @@ def _mentions_other(sent):
                for w in words[1:])
 
 
+# 2026-10-05 (implied-change catalogue): presupposition triggers. An
+# ordinal with a time unit ("Fourth week as a paramedic", "First week at
+# Kestrel Print"), a phase ("Day ten of decaf", "Six weeks into drums"), a
+# duration with someone ("Three months with Daniel now", "Anniversary dinner
+# with Ben") presupposes a state that began recently (Karttunen 1974,
+# Levinson 1983 on presupposition triggers). The presupposed state is read
+# as its own sentence, with "now" for the onset the trigger presupposes, and
+# the user's sentence is kept as said.
+_ORD = (r"(?:first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth|"
+        r"\d+(?:st|nd|rd|th))")
+_NUM = (r"(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|"
+        r"a few|several|\d+)")
+_UNIT = r"(?:day|week|month|year|shift|term|semester)"
+_X = r"(?P<x>[^,.;!?]+?)"
+_END = r"(?=\s+(?:was|is|has been|went|so|and|but)\b|[,.;!?]|$)"
+_PRESUP = [
+    (re.compile(rf"^\W*(?:sitting in\s+)?(?:my\s+)?{_ORD}\s+(?:\w+\s+){{0,2}}as\s+{_X}{_END}", re.I),
+     "I am {x} now."),
+    # the place must be an organisation: a name, or a job word ("First day
+    # at the beach" presupposes nothing about work)
+    (re.compile(rf"^\W*(?i:(?:my\s+)?{_ORD}\s+{_UNIT}\s+(?:at|with)\s+(?:the\s+new\s+)?)"
+                r"(?P<x>(?:[A-Z][\w&'-]*\s*){1,4}|(?i:(?:the\s+|my\s+)?(?:new\s+)?"
+                r"(?:job|company|firm|school|office|practice|hospital|clinic)\b))", 0),
+     "I work at {x} now."),
+    (re.compile(rf"^\W*(?:day|week|month)\s+\w+\s+(?:of|on)\s+{_X}{_END}", re.I),
+     "I'm on {x} now."),
+    (re.compile(rf"^\W*{_NUM}\s+(?:days|weeks|months|years)\s+into\s+{_X}{_END}", re.I),
+     "I'm doing {x} now."),
+    (re.compile(rf"^\W*(?i:{_NUM}\s+(?:days|weeks|months|years)\s+(?:with|dating)\s+)"
+                r"(?P<x>[A-Z][a-z]+)\b"), "I'm with {x} now."),
+    (re.compile(r"^\W*(?i:(?:our\s+)?anniversary\s+(?:dinner\s+|trip\s+)?with\s+)"
+                r"(?P<x>[A-Z][a-z]+)\b"), "I'm with {x} now."),
+    (re.compile(rf"^\W*started\s+(?:at|with)\s+{_X}(?=\s+(?:on|last|this|today|yesterday)\b|[,.;!?]|$)",
+                re.I), "I started at {x}."),
+    (re.compile(r"^\W*(?:transferred|moved)\s+to\s+(?P<x>the\s+[^,.;!?]+?\s+"
+                r"(?:team|site|office|group|department|branch))\b", re.I),
+     "I moved to {x}."),
+    (re.compile(rf"^\W*(?P<x>{_NUM}\s+[a-z]+s)\s+now\b", re.I), "I have {x} now."),
+]
+
+
+# 2026-10-06 adversarial review: 19 of 28 negative sentences fired --
+# "First year at Oxford was hard back in 1998", "Five years with Jenny ended
+# in 2010", "Day 3 of the conference", "Third week as a result". A trigger
+# presupposes a CURRENT state only when nothing in the sentence places it in
+# the past or in a story, and the slot is not an idiom or an event.
+_PAST = re.compile(r"\b(back in|ago|last (?:year|month|week|summer|winter|time)|"
+                   r"in (?:19|20)\d\d|ended|finished|cancel+ed|broke up|split up|"
+                   r"used to|when i was|years? before|in the (?:book|film|movie|show|story|game)|"
+                   r"was over|didn'?t last|quit|left|resigned|got fired|laid off|"
+                   r"handed in)\b", re.I)
+_IDIOM = re.compile(r"^(?:a result|a kid|a child|a teen\w*|a baby|a joke|a whole|"
+                    r"a matter|a favour|a favor|usual|always|ever)\b", re.I)
+_EVENT = re.compile(r"\b(conference|holiday|holidays|vacation|trip|festival|"
+                    r"christmas|easter|war|course of|tour|camp|retreat|honeymoon)\b", re.I)
+
+
+def _presupposed(sent):
+    """-> the state a presupposition trigger at the start of `sent` takes
+    for granted, as a first-person sentence, or None."""
+    if _PAST.search(sent):
+        return None
+    for rx, tpl in _PRESUP:
+        m = rx.match(sent)
+        if m:
+            x = " ".join(m.group("x").split())
+            # "Second week at Tesco I quit": the slot stops before "I"
+            x = re.split(r"\s+(?:I|i|we|my)\b", x)[0].strip()
+            if not x or _IDIOM.match(x) or _EVENT.search(x):
+                return None
+            if tpl.startswith("I have"):
+                x = x.lower()
+            if tpl.startswith("I work at") and x.lower() in ("job", "new job"):
+                return "I have a new job now."
+            if 1 <= len(x.split()) <= 6:
+                return tpl.format(x=x)
+    return None
+
+
 def rewrite(text, nlp, prev=None):
     """-> (text to parse, {rewritten sentence: original}) -- unchanged text
     and an empty map when no sentence is an accepted fragment.
@@ -254,14 +333,21 @@ def rewrite(text, nlp, prev=None):
     for i, sent in enumerate(sents):
         nxt = sents[i + 1] if i + 1 < len(sents) else ""
         new = None
+        pre = None
         if about_user and not _DENIAL.match(nxt):
-            new = _accept(sent, nlp)
-        if new:
+            pre = _presupposed(sent)
+            new = None if pre else _accept(sent, nlp)
+        if pre:
+            # the presupposed state, then the sentence as said
+            orig[pre] = sent
+            out.append(pre)
+            out.append(sent)
+        elif new:
             orig[new] = sent
             out.append(new)
         else:
             out.append(sent)
-        about_user = bool(new) or (bool(_FIRST_PERSON.match(sent))
+        about_user = bool(new or pre) or (bool(_FIRST_PERSON.match(sent))
                                    and not _mentions_other(sent))
     if not orig:
         return text, {}

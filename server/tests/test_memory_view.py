@@ -635,3 +635,32 @@ def test_check_what_was_denied_hedged_or_never_said(pm):
     assert pm.profile_check("The user surfs.")["verdict"] != "said"
     assert pm.profile_check("The user's blood type is O negative.")["verdict"] in (
         "not_found", "unclear")
+
+
+def test_an_advice_request_is_routed_but_a_question_about_others_is_not(pm):
+    assert pm._ADVICE_Q.search("Can you recommend some resources for video editing?")
+    assert pm._ADVICE_Q.search("any tips for my photography setup")
+    assert not pm._ADVICE_Q.search("What book did Caroline recommend to Melanie?")
+    assert not pm._ADVICE_Q.search("I'm planning to visit Bandung again, remind me of the restaurant")
+
+
+@pytest.mark.parametrize("old,new,q", [
+    # 2026-10-06 adversarial review: unrelated later news is not a change
+    ("I live in Fitzroy.", "I moved the sofa to the other wall.", "Where do I live?"),
+    ("I drive a Honda Civic.", "I bought a new bike for the weekends.", "What car do I drive?"),
+    ("I am single.", "I got a new job offer today.", "Am I in a relationship?"),
+    ("I'm allergic to penicillin.", "I got a rash from a new detergent.", "What am I allergic to?"),
+])
+def test_unrelated_later_news_does_not_mark_a_change(pm, old, new, q):
+    pm.profile_ingest([U(old)], conversation_id="a", owner_name="Dana Cole", date="2026-01-10")
+    pm.profile_ingest([U(new)], conversation_id="b", owner_name="Dana Cole", date="2026-05-10")
+    lines = [l for l in pm.profile_context(q)["block"].splitlines() if l.startswith("- ")]
+    assert not any("may have changed since" in l for l in lines), lines
+
+
+def test_check_compares_the_value_not_only_the_attribute(pm):
+    pm.profile_ingest([U("I'm allergic to penicillin."), U("I drink tea, never coffee.")],
+                      conversation_id="a", owner_name="Dana Cole", date="2026-01-10")
+    assert pm.profile_check("The user is allergic to peanuts.")["verdict"] != "said"
+    assert pm.profile_check("The user drinks coffee.")["verdict"] != "said"
+    assert pm.profile_check("The user is allergic to penicillin.")["verdict"] == "said"

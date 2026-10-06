@@ -205,6 +205,7 @@ class SourcedRecallAdapter:
         mem = self.pm._ensure_loaded()
         return [{"text": f.get("text"), "said": f.get("said"),
                  "tier": f.get("_tier"), "current": f.get("current"),
+                 "maybe_changed_by": f.get("maybe_changed_by"),
                  "date": (f.get("receipts") or [{}])[0].get("date")}
                 for f in self.pm._all_facts(mem)]
 

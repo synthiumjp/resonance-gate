@@ -1,0 +1,24 @@
+{"id": "dd01", "key": "de9ee466ae0bc64e82bbccd259c586e5c6d55bc5", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We settled on using pnpm for this project."]}
+{"id": "dd02", "key": "cd666ac0aa75fc17d5fea76f3ec3d2355605f8f9", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We are using vitest for the test runner."]}
+{"id": "dd03", "key": "ae7bba5d7d5ba470b44072cd6d824a0eef8dcc21", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We picked PostgreSQL for the invoices."]}
+{"id": "dd04", "key": "7729733c892eda901f17f74c88eb69375d6ce6a9", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We will implement exponential backoff with jitter, capped at 5 attempts, and then move the event to a dead-letter queue."]}
+{"id": "dd05", "key": "69e1897ee4d1c6cd73b67408c3e49dbad6208595", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We haven't specifically agreed on a branch naming convention; you mentioned that people are all over the place with how they refer to branches."]}
+{"id": "dd06", "key": "6f78d066e7f3b03948f4b2fc5fcb1bbb42524146", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We decided that the no-explicit-any lint rule is too noisy, as there are tons of warnings about any."]}
+{"id": "dd07", "key": "3a66de50ad2626289bee8b082ab30f9727acf258", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We are deploying the static site to Cloudflare Pages and the small API as a single Fly."]}
+{"id": "dd08", "key": "19c6a514f5c81060528902d22d10c3c37ebfc4dd", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We chose structlog."]}
+{"id": "dd09", "key": "568190b2e07fc6c626f81215816af9fb6e07cb16", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We decided to cache the response in Redis with a 60-second TTL and invalidate it on product changes."]}
+{"id": "dd10", "key": "8b94be6b6d0a7310899b5bd06bbbcb3fbcc7064d", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We are versioning the API using path versioning."]}
+{"id": "dd11", "key": "c788774a07d4833389a76bf7e0b71916269b0d5b", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The project uses npm."]}
+{"id": "dd12", "key": "396c53d43870151bd27ce146bfdc0ef739fceadd", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We decided not to proceed with partitioning the orders table, as it was considered too risky at this time."]}
+{"id": "dd13", "key": "e36a51d4bcbb259f3a1435c25e0c7a46fdfdf262", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["No, we didn't decide to move to microservices yet. The user mentioned that the API is a monolith and getting unwieldy, but they responded with \"hmm, maybe later\" when asked about splitting it into three microservices."]}
+{"id": "dd14", "key": "db9b23d0a0e1beac3d2bd065f9b6041266c97ce6", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "dd15", "key": "77768f5bbdb7236001a11b295769fb8b76c58a62", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The login flow works, but sessions feel flaky."]}
+{"id": "dd16", "key": "cd90276be04697fec7ccaa8b1f5a756bfe6435e8", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The user asked if the ETL would be rewritten in Rust, but there is no confirmation of a rewrite; they requested profiling first."]}
+{"id": "dd17", "key": "ef94774465db1318ae8345fe7914ee9be52d6b06", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We use Docusaurus for our docs site."]}
+{"id": "dd18", "key": "28bd20c858def4aa3116125df0dbc8bb52d771b8", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The project now uses pnpm as the package manager."]}
+{"id": "dd19", "key": "7fa01a476e2de3dfa759b96bd4e993db04b95a01", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Currently, we are using SQLite for the prototype."]}
+{"id": "dd20", "key": "21abfaa3ab723618306253f1cb1421b804635355", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Right now, you have switched back to using flake8 and black for linting and formatting."]}
+{"id": "dd21", "key": "a9a1574caf14f07f1a4ec128f6431a01f157c433", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We use the standard library with small helper functions and go-cmp for diffs."]}
+{"id": "dd22", "key": "b5685683156e892bbcff7b0457f5d1ac13cda710", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The site is now hosted on Render."]}
+{"id": "dd23", "key": "0b0b1cef9499e544e19980b4f1ec192a76ba9438", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Pino is now in use, writing JSON to stdout."]}
+{"id": "dd24", "key": "270331392f79ac2fe97b46bb8f9b7106c09d3118", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Memcached shared across instances is used now."]}

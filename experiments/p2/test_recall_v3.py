@@ -484,12 +484,14 @@ def test_marking_later_changes_never_loses_or_crashes():
     looked the originals up -- ValueError, silently turned into "never
     seen" by the fallback retriever."""
     import memory_api as MA
-    mk = lambda i, t, d: {"id": i, "text": t, "said": t, "current": True,
-                          "receipts": [{"date": d}]}
-    facts = [mk("a", "Alex Reyes has no pets", "2026-01-01"),
-             mk("b", "Alex Reyes adopted a kitten", "2026-03-01"),
-             mk("c", "Alex Reyes moved to Coburg now", "2026-04-01"),
-             mk("d", "Alex Reyes lives in Fitzroy", "2026-02-01")]
+    mk = lambda i, t, d, a, v: {"id": i, "text": t, "said": t, "current": True,
+                                "attribute": a, "value": v, "receipts": [{"date": d}]}
+    # 2026-10-06: related by state family or WordNet kind (dog -> pet), not
+    # by embedding similarity (the adversarial review's unrelated pairs)
+    facts = [mk("a", "Alex Reyes has no pets", "2026-01-01", "have", "no pets"),
+             mk("b", "Alex Reyes adopted a dog", "2026-03-01", "adopt", "a dog"),
+             mk("c", "Alex Reyes moved to Coburg now", "2026-04-01", "move_to", "to coburg now"),
+             mk("d", "Alex Reyes lives in Fitzroy", "2026-02-01", "live_in", "in fitzroy")]
     out = MA._mark_later_changes(facts, "Alex Reyes")
     assert sorted(f["id"] for f in out) == ["a", "b", "c", "d"]
     marked = {f["id"]: f.get("changed_later") for f in out}

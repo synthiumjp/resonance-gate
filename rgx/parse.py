@@ -761,7 +761,11 @@ def _interrogative(s, head, subj, is_question):
             and min(a.id for a in av) < subj.id
             and (first.id == min(a.id for a in av)
                  or ("PronType=Int" in (first.feats or "")
-                     and first.head == head.id))):
+                     and (first.head == head.id
+                          # "which errors should I retry": the wh-word
+                          # determines an argument of the clause
+                          or (s.w.get(first.head) is not None
+                              and s.w[first.head].head == head.id))))):
         return True
     if (not is_question and first is not None and first.id == head.id
             and head.id < subj.id
@@ -901,6 +905,27 @@ def _standing_instruction(s, head, role, sent):
                                           "compound", "nummod"))):
             return False
     if s.children(head, ("nsubj", "nsubj:pass", "csubj", "expl")):
+        return False
+    # 2026-10-05 (implied-change catalogue): "Haven't set foot in the Leeds
+    # office since they went remote" and "Not freelancing any more" were
+    # stored as standing instructions. An English imperative is the base
+    # form (VB) with no perfect or progressive auxiliary; "don't" is the
+    # only auxiliary it takes.
+    if head.upos == "VERB" and (head.xpos or "") != "VB":
+        return False
+    if any((c.lemma or "").lower() in ("have", "be") for c in s.children(head, ("aux",))):
+        return False
+    # 2026-10-06 adversarial review: "Summarize this paragraph for me" is a
+    # one-off -- its object points at something present (this, that, these,
+    # the following); "Don't forget my sister's birthday is Friday" and
+    # "Always forget my keys" are about a fact or a habit, not how the
+    # assistant should behave ("Don't forget to run the tests" still is)
+    for a in s.children(head, ("obj", "obl", "iobj")):
+        if any((d.lemma or "").lower() in ("this", "that", "these", "those")
+               for d in s.children(a, ("det",))):
+            return False
+    if (head.lemma or "").lower() in ("forget", "remember", "lose", "miss") and \
+            not s.children(head, ("xcomp",)):
         return False
     if head.deprel == "conj":
         if not any((c.text or "").lower() == "please"

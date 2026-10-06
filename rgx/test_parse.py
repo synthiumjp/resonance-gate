@@ -1388,9 +1388,49 @@ def test_a_one_off_request_is_not_an_instruction(ex, turn):
     assert not any("asked the assistant" in t for t in texts(ex, turn))
 
 
+@pytest.mark.parametrize("turn", ["which errors should I retry in general",
+                                  "what kind of index should we add here"])
+def test_a_wh_determiner_question_without_a_mark_is_not_a_fact(ex, turn):
+    assert not any("retry" in t or "index" in t for t in texts(ex, turn)), texts(ex, turn)
+
+
+@pytest.mark.parametrize("turn", [
+    # 2026-10-05: a subjectless perfect or gerund is the user's own state
+    "Haven't set foot in the Leeds office since they went remote in June.",
+    "Not freelancing any more, I've been on the payroll at Tidewater since June.",
+    "Haven't had a slice of bread since I went gluten-free in May."])
+def test_a_subjectless_perfect_is_not_an_instruction(ex, turn):
+    assert not any("asked the assistant" in t for t in texts(ex, turn))
+
+
 def test_please_does_not_borrow_the_users_subject(ex):
     """"I prefer tabs and please never add comments to my code" stored
     "<owner> does not add comments to <owner>'s code"."""
     out = texts(ex, "By the way, I prefer tabs everywhere and please never add comments to my code.")
     assert not any("does not add comments" in t for t in out), out
     assert any("asked the assistant: never add comments" in t for t in out), out
+
+
+# ---- decisions made with the assistant (2026-10-06) ------------------------
+
+@pytest.mark.parametrize("user,assistant,want", [
+    ("yes do it", "I'd suggest switching the build to pnpm for the workspaces.",
+     "decided with the assistant: switching the build to pnpm"),
+    ("ok use pnpm", "We could use pnpm or yarn here.", "decided with the assistant: use pnpm"),
+    ("sounds good", "Shall I add a retry with exponential backoff to the client?",
+     "decided with the assistant: add a retry with exponential backoff"),
+])
+def test_an_accepted_proposal_is_a_decision(ex, user, assistant, want):
+    out = [r.text for r in ex.extract_turn(user, prev=assistant)]
+    assert any(want in t for t in out), out
+
+
+@pytest.mark.parametrize("user,assistant", [
+    ("no, keep npm", "I'd suggest switching to pnpm."),
+    ("sure, but not now", "Want me to set up Renovate?"),
+    ("hmm maybe later", "How about adding Sentry?"),
+    ("thanks!", "I'd suggest pnpm."),
+])
+def test_a_declined_or_deferred_proposal_is_not(ex, user, assistant):
+    out = [r.text for r in ex.extract_turn(user, prev=assistant)]
+    assert not any("decided with the assistant" in t for t in out), out

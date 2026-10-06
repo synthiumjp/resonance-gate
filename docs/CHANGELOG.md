@@ -10,6 +10,26 @@ has the details behind each change.
   this? The verdict (said, contradicted, unconfirmed, unclear, not found),
   what is known since (no longer true, may have changed, no later change
   found) and the user's dated words.
+- Trust labels screened against the benchmark: "said in passing" no longer
+  marks changes of state said "today" ("They made me a senior designer
+  today", "We bought a house today"), and still marks ordinary events ("I
+  bought a coffee today"). "May have changed since" needs the newer
+  statement to be the user's own, its change word in its own clause, and
+  the same kind of state, a shared word in the values, or the same kind of
+  thing in WordNet; on the coding sets it fired a quarter as often.
+- Changes the user implies: a change-of-state verb in its frame ("graduated",
+  "moved to", "started at", "got engaged", "made me a ..."), a contrast
+  ("now", "back to", "has been ... since") or a presupposition trigger
+  ("Fourth week as a paramedic", "Day ten of decaf") marks the older fact
+  "may have changed since".
+- A proposal the user accepts ("I'd suggest pnpm" / "yes do it") is stored as
+  a decision made with the assistant; a declined or deferred one is not, and
+  a later "let's switch back to npm" replaces it.
+- Requests for advice ("Can you recommend...", "any tips for...") are ranked
+  by embeddings, which finds what the user mentioned owning or liking.
+- "Haven't set foot in the office since..." and "Summarize this paragraph
+  for me" are no longer stored as standing instructions; "which errors
+  should I retry", typed without a "?", is no longer stored as a fact.
 - No PyTorch: the parser runs Stanza 1.14.0's English models on ONNX
   Runtime and numpy (`stanza_ort`), with the same parses (7,755 texts, every
   field). The install is about 0.9 GB instead of 1.6 GB and takes about a

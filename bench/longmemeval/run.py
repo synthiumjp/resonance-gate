@@ -109,13 +109,26 @@ def run_question(pm, rv3, e, qi):
                "n_sessions": len(e["haystack_sessions"]), "ingest_s": round(t_ing, 1), "sys": {}}
         q = e["question"]
         t0 = time.time()
-        for name, fuse in (("ours", "0"), ("fuse", "1")):
-            os.environ["RG_FUSE"] = fuse
+        # LME_VARIANTS="ours:;dense:RG_FUSE3=1,RG_FUSE3_W=0.2/0.0" -- each
+        # variant sets environment variables for the message search
+        variants = os.environ.get("LME_VARIANTS", "ours:")
+        for spec in variants.split(";"):
+            name, _, assigns = spec.partition(":")
+            saved = {}
+            for a in filter(None, assigns.split(",")):
+                k, v = a.split("=", 1)
+                saved[k] = os.environ.get(k)
+                os.environ[k] = v
+            pm._state["msg_index"] = pm._state.get("msg_index")
             hits = pm._messages_for(q, k=50)
             s, t, nonm = rank(hits)
             out["sys"][name] = {"sessions": s, "turns": t, "n_hits": len(hits), "unmatched": nonm}
+            for k, v in saved.items():
+                if v is None:
+                    os.environ.pop(k, None)
+                else:
+                    os.environ[k] = v
         out["retrieve_s"] = round(time.time() - t0, 1)
-        os.environ["RG_FUSE"] = "0"
         # baselines over the same index
         idx = pm._state["msg_index"][1]
         facts = idx.facts
@@ -159,6 +172,9 @@ def main():
     if "--spread" in sys.argv:   # smoke: spread over types/positions
         data = data[::max(1, len(data) // (limit or 10))]
     data = data[start:]
+    if os.environ.get("LME_TYPES"):
+        keep = set(os.environ["LME_TYPES"].split(","))
+        data = [e for e in data if e["question_type"] in keep]
     import sourcedrecall.profile_memory as pm
     import retrieve_v3 as rv3
     if os.environ.get("FULL") != "1":

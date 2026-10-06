@@ -1,6 +1,6 @@
 import json, sys, collections
 rows = [json.loads(l) for l in open(sys.argv[1])]
-SYS = ["ours", "bm25", "bge"]
+SYS = list(rows[0]["sys"]) if rows else ["ours", "bm25", "bge"]
 KS = [1, 3, 5, 10]
 def sess_metrics(r, s, k):
     top = set(r["sys"][s]["sessions"][:k]); g = set(r["answer_session_ids"])

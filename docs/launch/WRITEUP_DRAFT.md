@@ -1,3 +1,8 @@
+> Out of date (2026-10-06): an adversarial review found this draft mixes two
+> runs in one table and predates the head-to-head, notes mode and LongMemEval.
+> The front-page README is current; this draft will be rewritten from one
+> run of the release.
+
 # Memory without model calls: what a grammar parser is good for
 
 Draft, 2026-10-04. The false-memory answers were audited (every flagged answer

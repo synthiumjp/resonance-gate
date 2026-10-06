@@ -146,3 +146,25 @@ def test_been_fragment(ex):
 ])
 def test_dev_paraphrase_fragments(ex, turn, want):
     assert want in [r.text for r in run(ex, turn)]
+
+
+
+@pytest.mark.parametrize("turn,want", [
+    # 2026-10-05: presupposition triggers -- the state they take for granted
+    ("Fourth week as a paramedic. What's a healthy snack for a night shift?",
+     "is a paramedic"),
+    ("First week at Kestrel Print was chaos, I still can't find the kettle.",
+     "works at Kestrel Print"),
+    ("Day ten of decaf. Why do I feel so sluggish?", "is on decaf"),
+    ("Three months with Daniel now. How do I meet his parents?", "is with Daniel"),
+])
+def test_a_presupposed_state_is_read(ex, turn, want):
+    out = [r.text for r in ex.extract_turn(turn)]
+    assert any(want in t for t in out), out
+
+
+@pytest.mark.parametrize("turn", ["First day at the beach was fun.",
+                                  "Three weeks with no rain, the garden is dying."])
+def test_no_state_is_presupposed_without_a_trigger(ex, turn):
+    out = [r.text for r in ex.extract_turn(turn)]
+    assert not any("works at" in t or "is with" in t for t in out), out
