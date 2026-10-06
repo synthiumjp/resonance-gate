@@ -85,12 +85,21 @@ def _local(prompt, max_new=300):
     p = og.GeneratorParams(m)
     p.set_search_options(do_sample=False, max_length=len(ids) + max_new)
     g = og.Generator(m, p)
-    g.append_tokens(ids)
-    out = []
+    # 2026-10-06: the prompt goes in 256 tokens at a time. Whole, its
+    # next-token scores for every position (3,000 x 152k) took peak memory
+    # from 1.2 to 3.9 GB; in parts it is 2.0 GB, with the same notes.
+    for i in range(0, len(ids), 256):
+        g.append_tokens(ids[i:i + 256])
+    stream, text, seen = tok.create_stream(), "", []
     while not g.is_done():
         g.generate_next_token()
-        out.append(g.get_next_tokens()[0])
-    return re.sub(r"<think>.*?</think>", "", tok.decode(out), flags=re.S).strip()
+        text += stream.decode(g.get_next_tokens()[0])
+        if text.endswith("\n"):
+            line = text.rstrip("\n").rsplit("\n", 1)[-1].strip()
+            if line and seen.count(line) >= 2:
+                break                 # a small model can repeat a line forever
+            seen.append(line)
+    return re.sub(r"<think>.*?</think>", "", text, flags=re.S).strip()
 
 
 def _call(prompt, timeout=600):
