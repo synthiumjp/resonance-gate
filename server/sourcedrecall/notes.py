@@ -13,6 +13,11 @@ of the conversations it was in.
 
     SOURCEDRECALL_NOTES_URL    e.g. http://127.0.0.1:11434/v1 (Ollama)
     SOURCEDRECALL_NOTES_MODEL  the model name that server knows
+
+Or, with no server, a small model trained for this one job runs in the
+same process on onnxruntime-genai (2026-10-06):
+
+    SOURCEDRECALL_NOTES_DIR    a folder holding its genai_config.json
 """
 import json
 import os
@@ -27,10 +32,48 @@ CONVERSATION:
 {conversation}
 /no_think"""
 
+# The in-process model was trained on this prompt (notes from Qwen3-14B with
+# PROMPT, kept only where grounded() passes), so it needs no instructions.
+LOCAL_PROMPT = ("Write the lasting facts {owner} states about themselves in this conversation "
+                "from {date}, one short sentence per line starting with \"{owner}\", or NONE."
+                "\n\n{conversation}")
+
+
+def _local_dir():
+    d = os.environ.get("SOURCEDRECALL_NOTES_DIR")
+    return d if d and os.path.isfile(os.path.join(d, "genai_config.json")) else None
+
 
 def enabled():
-    return bool(os.environ.get("SOURCEDRECALL_NOTES_URL")
-                and os.environ.get("SOURCEDRECALL_NOTES_MODEL"))
+    return bool(_local_dir() or (os.environ.get("SOURCEDRECALL_NOTES_URL")
+                                 and os.environ.get("SOURCEDRECALL_NOTES_MODEL")))
+
+
+_LOCAL = {}
+
+
+def _local(prompt, max_new=300):
+    import onnxruntime_genai as og
+    d = _local_dir()
+    if d not in _LOCAL:
+        cfg = og.Config(d)
+        cfg.clear_providers()
+        n = int(os.environ.get("SOURCEDRECALL_NOTES_THREADS", "4"))
+        cfg.overlay(json.dumps({"model": {"decoder": {"session_options": {
+            "intra_op_num_threads": n}}}}))
+        m = og.Model(cfg)
+        _LOCAL[d] = (m, og.Tokenizer(m))
+    m, tok = _LOCAL[d]
+    ids = tok.encode("<|im_start|>user\n" + prompt + "<|im_end|>\n<|im_start|>assistant\n")
+    p = og.GeneratorParams(m)
+    p.set_search_options(do_sample=False, max_length=len(ids) + max_new)
+    g = og.Generator(m, p)
+    g.append_tokens(ids)
+    out = []
+    while not g.is_done():
+        g.generate_next_token()
+        out.append(g.get_next_tokens()[0])
+    return re.sub(r"<think>.*?</think>", "", tok.decode(out), flags=re.S).strip()
 
 
 def _call(prompt, timeout=600):
@@ -54,8 +97,10 @@ def write_notes(owner, date, turns):
             lines.append(f"{who}: {txt[:1500]}")
     if not any(l.startswith(owner + ":") for l in lines):
         return []
-    raw = _call(PROMPT.format(owner=owner, date=date or "unknown date",
-                              conversation="\n".join(lines)[:12000]))
+    args = dict(owner=owner, date=date or "unknown date",
+                conversation="\n".join(lines)[:12000])
+    raw = (_local(LOCAL_PROMPT.format(**args)) if _local_dir()
+           else _call(PROMPT.format(**args)))
     said = " ".join(str(t.get("content", "")) for t in turns
                     if t.get("role", "user") == "user")
     out = []

@@ -558,6 +558,23 @@ def test_model_notes_are_labelled_replaced_and_forgotten(pm, monkeypatch):
     assert pm._load_notes() == []                                         # the conversation's notes go
 
 
+def test_notes_from_the_in_process_model_use_its_own_prompt(pm, monkeypatch, tmp_path):
+    from sourcedrecall import notes as N
+    (tmp_path / "genai_config.json").write_text("{}")
+    monkeypatch.setenv("SOURCEDRECALL_NOTES_DIR", str(tmp_path))
+    prompts = []
+
+    def fake(prompt, max_new=300):
+        prompts.append(prompt)
+        return "Dana Cole is allergic to penicillin.\nDana Cole is vegan."
+    monkeypatch.setattr(N, "_local", fake)
+    monkeypatch.setattr(N, "_call", lambda *a, **k: pytest.fail("no server is called"))
+    pm.profile_ingest([U("I'm allergic to penicillin.")], conversation_id="a",
+                      owner_name="Dana Cole", date="2026-03-02")
+    assert prompts and prompts[0].startswith("Write the lasting facts Dana Cole states")
+    assert [r["text"] for r in pm._load_notes()] == ["Dana Cole is allergic to penicillin."]
+
+
 def test_notes_are_off_by_default(pm):
     pm.profile_ingest([U("I play the violin.")], conversation_id="a",
                       owner_name="Dana Cole", date="2026-03-02")
