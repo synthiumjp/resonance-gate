@@ -1,10 +1,10 @@
 # student.sh TAG ROWS ITERS : train Qwen3-0.6B on the first ROWS teacher rows, export int4 ONNX, run LoCoMo dev with in-process notes
 set -u
-TAG=$1; ROWS=$2; ITERS=$3
+TAG=$1; ROWS=$2; ITERS=$3; MODE=${4:-}; TREE=${5:-sdr-distil}
 D=$HOME/jpwork/distil; cd $D
 export HF_HOME=$D/hf HF_HUB_OFFLINE=1
 head -n $ROWS teacher.jsonl > rows_$TAG.jsonl
-venv/bin/python prep.py rows_$TAG.jsonl data_$TAG
+venv/bin/python prep.py rows_$TAG.jsonl data_$TAG $MODE
 venv/bin/python -m mlx_lm lora --model Qwen/Qwen3-0.6B --train --data data_$TAG --fine-tune-type full --mask-prompt \
   --batch-size 4 --iters $ITERS --max-seq-length 4096 --learning-rate 1e-5 --adapter-path ckpt_$TAG \
   --steps-per-report 20 --steps-per-eval 100 --save-every 1000 2>&1 | grep -E "Iter|val|loss" | tail -40
@@ -14,7 +14,7 @@ rm -rf ort_$TAG; $HOME/jpwork/ortgen/venv_build/bin/python -m onnxruntime_genai.
 ls -la ort_$TAG | grep onnx
 while pgrep -f notes_sizes.sh > /dev/null; do sleep 60; done
 export STANZA_RESOURCES_DIR=$HOME/jpwork/stanza_resources_114
-P=$HOME/jpwork/sdr-venv/bin/python; W=$HOME/jpwork/sdr-distil
+P=$HOME/jpwork/sdr-venv/bin/python; W=$HOME/jpwork/$TREE
 cd $W/bench/locomo
 export RG_REPO=$W LOCOMO_DATA=$HOME/jpwork/locomo10.json LOCOMO_TOP_K=5
 export LOCOMO_LLM_BASE=http://127.0.0.1:8090/v1 LOCOMO_LLM_MODEL=qwen3-14b-a8cc1361.gguf

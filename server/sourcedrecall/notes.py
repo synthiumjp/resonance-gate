@@ -113,6 +113,46 @@ def _call(prompt, timeout=600):
     return re.sub(r"<think>.*?</think>", "", text, flags=re.S).strip()
 
 
+# 2026-10-06: person deixis made explicit for the small model. "I" and "my"
+# point at whoever is speaking, "you" and "your" at the listener; a 0.6B model
+# loses track and gives the user the other side's news ("Caroline has kids"
+# from Melanie's "I took the kids", 17% of its notes on LoCoMo dev). Before it
+# reads the conversation, each pronoun is replaced by who it refers to.
+_AGREE = {"am": "is", "'m": " is", "'ve": " has", "have": "has", "'ll": " will",
+          "'d": " would", "was": "was", "were": "was", "are": "is", "'re": " is"}
+
+
+def _deixis(text, me, you):
+    """Rewrite the pronouns of one speaker's line: first person -> `me`,
+    second person -> `you` (names or "Other")."""
+    def subj(name):
+        def f(m):
+            aux = m.group(2) or ""
+            a = _AGREE.get(aux.strip().lower(), aux)
+            return name + ((" " + a.strip()) if aux and not aux.startswith("'") else a)
+        return f
+    t = re.sub(r"\byours\b", you + "'s", text, flags=re.I)
+    t = re.sub(r"\byour\b", you + "'s", t, flags=re.I)
+    t = re.sub(r"\byourself\b", you, t, flags=re.I)
+    t = re.sub(r"\b(I)(?!\w)('m|'ve|'ll|'d|\s+am\b|\s+have\b|\s+was\b)?", subj(me), t)
+    t = re.sub(r"\b(you)(?!\w)('re|'ve|'ll|'d|\s+are\b|\s+have\b|\s+were\b)?", subj(you), t, flags=re.I)
+    t = re.sub(r"\bmy\b", me + "'s", t, flags=re.I)
+    t = re.sub(r"\bmine\b", me + "'s", t, flags=re.I)
+    t = re.sub(r"\b(me|myself)\b", me, t, flags=re.I)
+    return t
+
+
+def explicit_person(lines, owner, other="Other"):
+    """`Name: text` lines -> the same with each pronoun replaced by who it
+    refers to."""
+    out = []
+    for l in lines:
+        who, _, txt = l.partition(": ")
+        me, you = (owner, other) if who == owner else (other, owner)
+        out.append(f"{who}: {_deixis(txt, me, you)}")
+    return out
+
+
 CALLS = {"last": 0}
 
 
@@ -128,6 +168,8 @@ def write_notes(owner, date, turns):
             lines.append(f"{who}: {txt[:1500]}")
     if not any(l.startswith(owner + ":") for l in lines):
         return []
+    if _local_dir():
+        lines = explicit_person(lines, owner)
     # 2026-10-06: a long session (a day of coding) is read in parts of at
     # most 12,000 characters, not cut at the first 12,000.
     parts, cur = [], []

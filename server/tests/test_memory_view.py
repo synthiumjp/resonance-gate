@@ -575,6 +575,18 @@ def test_notes_from_the_in_process_model_use_its_own_prompt(pm, monkeypatch, tmp
     assert [r["text"] for r in pm._load_notes()] == ["Dana Cole is allergic to penicillin."]
 
 
+def test_person_is_made_explicit_for_the_small_model():
+    from sourcedrecall.notes import explicit_person
+    out = explicit_person([
+        "Other: Yesterday I took the kids to the museum - my son loved it!",
+        "Dana: Your kids must love it. I'm going to Iceland with my friends.",
+        "Other: You're so brave. I am proud of you."], "Dana")
+    assert out == [
+        "Other: Yesterday Other took the kids to the museum - Other's son loved it!",
+        "Dana: Other's kids must love it. Dana is going to Iceland with Dana's friends.",
+        "Other: Dana is so brave. Other is proud of Dana."]
+
+
 def test_a_long_session_is_read_in_parts(monkeypatch):
     from sourcedrecall import notes as N
     monkeypatch.setattr(N, "_local_dir", lambda: None)
