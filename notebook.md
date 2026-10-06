@@ -15298,3 +15298,39 @@ and how to run everything).
   no-change scenarios. Held out v2-v4: +4 linked, 0 false in 92. Coding
   sets over-fired (8 -> 31 firings); work contrast links now need a role
   word in both facts -- rerun pending.
+
+## Entry 312 — 2026-10-06 (adversarial review; decisions with the assistant; a smaller notes model)
+
+- Adversarial review (an agent asked to break the rules and check every
+  number): fixes in a20918d, counterexamples in rgx/test_adversarial.py.
+  Decisions with the assistant (rgx/decisions.py): an accepted proposal is
+  the user's decision. Dev 24 scenarios: recalled 4/10 -> 7/10, new choice
+  after a reversal 5/9 -> 8/9, declined or replaced given as current
+  0/14 -> 1/14. Full suite 1169 passed.
+- Notes writer size, LoCoMo dev (233 q; no notes 68.2%, multi-hop 23/43):
+  Qwen3-14B 69.5% (old code), 4B 69.5% (22), 1.7B 70.0% (26), 0.6B 67.8%
+  (20). Parser-written notes 67.4% (19): refuted. 0.6B as it comes is
+  below no notes at all.
+- In-process feasibility (agent, Mac): onnxruntime-genai 0.17.1 runs
+  Qwen3 with wheels for macOS/Linux/Windows, no torch, no server. The
+  community int4 export (kld-block-128) writes broken notes on 3 of 5
+  conversations; a self-built int4 (builder, algo_config=k_quant_mixed)
+  matches llama.cpp Q8. 1.7B int4: 1.44 GB, ~5.5 s per conversation at 4
+  threads. 0.6B: 0.52 GB, but invents facts and repeats lines on both
+  runtimes. Even the 14B copies the prompt's example ("plays the clarinet
+  and the violin") in 8% of outputs; the grounding filter removes it.
+- JP: "Surely a specialised model." Research (agent): narrow extraction
+  distils well into sub-1B models (Qwen3.5-0.8B 94.75 F1 vs 96.75 for an
+  8B on 6.1k examples); LFM2 Extract models are licence-restricted; Gemma
+  custom licence; Granite-4.0-350M Apache-2.0. Plan: distil Qwen3-0.6B.
+- Distillation: Qwen3-14B (MLX 4-bit, batch 16) writes notes with the
+  product prompt over 3,000 LongMemEval-S sessions (MIT; 80% with first
+  person statements, 20% random; random owner names); notes.grounded keeps
+  only lines grounded in the user's lines the teacher saw (about half
+  dropped, mostly not about the user). Student: full fine-tune of
+  Qwen3-0.6B (mlx-lm, mask prompt, lr 1e-5) on a short prompt
+  (notes.LOCAL_PROMPT), fused, int4 ONNX. Smoke test end to end 0.54 GB.
+  Files: ~/jpwork/distil (teacher.py, prep.py, student.sh, tsent.py).
+- Product: notes in-process (SOURCEDRECALL_NOTES_DIR, or installed by
+  `sourcedrecall-setup --notes`; [notes] extra; SOURCEDRECALL_NOTES=off);
+  long sessions read in parts of 12,000 characters instead of cut.
