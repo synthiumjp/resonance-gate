@@ -1,8 +1,8 @@
-locomo_stores_dev_notes2 441 {'SAID': '418 (95%)', 'OTHER': '22 (5%)', 'NO': '1 (0%)'}
-locomo_stores_notes_1p7b 90 {'SAID': '79 (88%)', 'OTHER': '10 (11%)', 'NO': '1 (1%)'}
-locomo_stores_notes_4b 651 {'SAID': '551 (85%)', 'OTHER': '80 (12%)', 'NO': '20 (3%)'}
-locomo_stores_student_r1k 490 {'SAID': '293 (60%)', 'OTHER': '155 (32%)', 'NO': '42 (9%)'}
-locomo_stores_student_r2 469 {'SAID': '360 (77%)', 'OTHER': '81 (17%)', 'NO': '28 (6%)'}
-judge done
+locomo_stores_dev_notes2 441 {'SAID': '409 (93%)', 'ABOUT_OTHER': '18 (4%)', 'WRONG_PERSON': '12 (3%)', 'NO': '2 (0%)'}
+locomo_stores_notes_1p7b 90 {'SAID': '76 (84%)', 'WRONG_PERSON': '14 (16%)'}
+locomo_stores_notes_4b 651 {'SAID': '553 (85%)', 'WRONG_PERSON': '51 (8%)', 'ABOUT_OTHER': '26 (4%)', 'NO': '21 (3%)'}
+locomo_stores_student_r1k 490 {'SAID': '308 (63%)', 'WRONG_PERSON': '138 (28%)', 'NO': '30 (6%)', 'ABOUT_OTHER': '14 (3%)'}
+locomo_stores_student_r2 469 {'SAID': '364 (78%)', 'WRONG_PERSON': '81 (17%)', 'NO': '12 (3%)', 'ABOUT_OTHER': '12 (3%)'}
+judge2 done
 
 [exited with code 0]
