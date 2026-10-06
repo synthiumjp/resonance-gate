@@ -15334,3 +15334,34 @@ and how to run everything).
 - Product: notes in-process (SOURCEDRECALL_NOTES_DIR, or installed by
   `sourcedrecall-setup --notes`; [notes] extra; SOURCEDRECALL_NOTES=off);
   long sessions read in parts of 12,000 characters instead of cut.
+
+## Entry 313 — 2026-10-06 night (the distilled notes model: what the judge shows)
+
+- Held-out LoCoMo test with 1.7B notes: 69.3% (14B notes 73.1, default
+  64.7, Mem0 64.6); multi-hop 62.3 (= 14B); single-hop 79.2 (14B 85.4). Dev
+  had shown 1.7B level with 14B: the 233-question dev set does not rank
+  notes writers.
+- Note judge (bench/locomo/note_judge.py; Qwen3-14B labels every note on
+  dev against its session). The first version's OTHER label counted true
+  notes about the other speaker as errors; split into ABOUT_OTHER and
+  WRONG_PERSON. Other speaker's facts given to the user: 14B 3%, 4B 8%,
+  1.7B 16%, 0.6B r1k 28%, r2 17%. The 1.7B's 16% vs the 14B's 3% matches
+  its single-hop loss on the test.
+- Output filters, refuted: (1) other-side words (<=15% of a note's words
+  only in the other side's lines): judged 77% -> 85% but answers 69.1 ->
+  67.4 (+4/-8), removing true notes; reverted. (2) Person deixis from the
+  parse (a note noun the user only anchors in the second person, "your
+  kids"): catches a third of wrong-person notes at one right note per two
+  wrong. The cases it misses ("I'd love to see the kids") carry no person.
+- JP: "a linguistic fix might be the best strategy." Person deixis on the
+  INPUT (notes.explicit_person): I/my -> the speaker, you/your -> the
+  listener, with agreement (I'm -> Dana is), before the small model reads.
+- r2 (prompt v2: time words kept, other side's news left out; + 1,500 SODA
+  dialogues): judged right 60% -> 78%, time words in notes 6 -> 17, dev
+  69.1%. r3 (+ LME v2 1,304, + the same SODA dialogues from the other
+  speaker's side; 6,000 rows, 1,500 iters): 146 notes, wrong person 12%, dev
+  68.2%. It wrote NONE for Melanie, Jon and Gina: the same Melanie session
+  labelled "Caroline" or "Priya Shah" gets notes. The owner's NAME had
+  become a cue (SODA reuses common first names with empty targets). Fix:
+  every training row gets a fresh owner name and date format (prep.py
+  names). r4 = names; r5 = names + explicit person.
