@@ -49,17 +49,28 @@ PARSER_ARCHIVE = ("https://huggingface.co/synthiumjp/sourcedrecall-parser-en/res
 PARSER_SHA256 = "921281ed755e8a4454cce27df56e18557123920e1df4b02443cade72e0e2f105"
 
 
+# 2026-10-06: the optional in-process notes model (notes.py): Qwen3-0.6B
+# trained to write the user's lasting facts, int4 ONNX for onnxruntime-genai.
+# Set at release time; SOURCEDRECALL_NOTES_ARCHIVE overrides.
+NOTES_ARCHIVE = None
+NOTES_SHA256 = None
+
+
 def install_parser_archive(src, sha256=None):
     """Download (if a URL) or copy the parser model archive, check its
     sha256 when one is given, and unpack it into paths.parser_models_dir()."""
+    from sourcedrecall.paths import parser_models_dir
+    return install_archive(src, sha256, parser_models_dir(), "config.json", "parser")
+
+
+def install_archive(src, sha256, dest, marker, what):
+    """The same for any model archive whose top folder holds `marker`."""
     import hashlib
     import shutil
     import tarfile
     import tempfile
     import urllib.request
-    from sourcedrecall.paths import parser_models_dir
-    dest = parser_models_dir()
-    tmp = tempfile.mkdtemp(prefix="sourcedrecall-parser-")
+    tmp = tempfile.mkdtemp(prefix=f"sourcedrecall-{what}-")
     try:
         path = os.path.join(tmp, "models.tar.gz")
         if src.startswith(("http://", "https://")):
@@ -72,20 +83,20 @@ def install_parser_archive(src, sha256=None):
                 for chunk in iter(lambda: f.read(1 << 20), b""):
                     h.update(chunk)
             if h.hexdigest() != sha256.lower():
-                raise RuntimeError("parser model archive: sha256 does not match")
+                raise RuntimeError(f"{what} model archive: sha256 does not match")
         out = os.path.join(tmp, "out")
         with tarfile.open(path) as t:
             for m in t.getmembers():
                 if m.name.startswith(("/", "..")) or ".." in m.name.split("/"):
-                    raise RuntimeError("parser model archive: unsafe path " + m.name)
+                    raise RuntimeError(f"{what} model archive: unsafe path " + m.name)
             t.extractall(out)
-        # the archive holds config.json at its top or in one folder
+        # the archive holds the marker file at its top or in one folder
         top = out
-        if not os.path.exists(os.path.join(top, "config.json")):
+        if not os.path.exists(os.path.join(top, marker)):
             subs = [os.path.join(out, x) for x in os.listdir(out)]
-            top = next((x for x in subs if os.path.exists(os.path.join(x, "config.json"))), None)
+            top = next((x for x in subs if os.path.exists(os.path.join(x, marker))), None)
             if top is None:
-                raise RuntimeError("parser model archive: no config.json")
+                raise RuntimeError(f"{what} model archive: no {marker}")
         if os.path.exists(dest):
             shutil.rmtree(dest)
         os.makedirs(os.path.dirname(dest), exist_ok=True)
@@ -116,7 +127,33 @@ def _mb(n):
     return f"{n / 1e6:,.0f} MB"
 
 
+def install_notes():
+    """`sourcedrecall-setup --notes`: install the notes model, which turns
+    notes on (about 0.5 GB; needs pip install 'sourcedrecall[notes]')."""
+    try:
+        import onnxruntime_genai  # noqa: F401
+    except ImportError:
+        print("Notes need onnxruntime-genai: pip install 'sourcedrecall[notes]'")
+        return 1
+    src = os.environ.get("SOURCEDRECALL_NOTES_ARCHIVE") or NOTES_ARCHIVE
+    if not src:
+        print("No notes model has been published yet.")
+        return 1
+    from sourcedrecall.paths import notes_models_dir
+    sha = (os.environ.get("SOURCEDRECALL_NOTES_SHA256")
+           or (NOTES_SHA256 if src == NOTES_ARCHIVE else None))
+    print("Notes model (writes short notes of what you said, in this process,"
+          " no server) -- ~0.5 GB", flush=True)
+    d = install_archive(src, sha, notes_models_dir(), "genai_config.json", "notes")
+    print(f"      -> {d} ({_mb(_du(d))})\nNotes are on. To turn them off: "
+          "SOURCEDRECALL_NOTES=off, or delete that folder.")
+    return 0
+
+
 def main(argv=None):
+    argv = sys.argv[1:] if argv is None else argv
+    if "--notes" in argv:
+        return install_notes()
     t0 = time.time()
     print("sourcedrecall setup: downloading the models the server uses.\n"
           "This is the only step that touches the network.\n")

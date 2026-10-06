@@ -32,6 +32,11 @@ stanza = [
     "stanza==1.14.0",       # pinned: the rgx rules are tuned and tested on this release; 1.15 parses "due to" and some fragments differently
 ]
 
+# 2026-10-06: the optional in-process notes model (sourcedrecall-setup --notes)
+notes = [
+    "onnxruntime-genai>=0.17",
+]
+
 [project.scripts]
 sourcedrecall = "sourcedrecall.mcp_server:main"
 sourcedrecall-setup = "sourcedrecall.setup_models:main"

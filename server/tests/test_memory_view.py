@@ -12,6 +12,7 @@ def pm(tmp_path, monkeypatch):
     monkeypatch.setenv("RG_MEMORY_DIR", str(tmp_path))
     monkeypatch.setenv("RG_NLI", "0")
     monkeypatch.delenv("SOURCEDRECALL_OWNER", raising=False)
+    monkeypatch.setenv("SOURCEDRECALL_NOTES_MODELS", str(tmp_path / "no-notes-model"))
     import sourcedrecall.profile_memory as mod
 
     def reset():
@@ -560,8 +561,7 @@ def test_model_notes_are_labelled_replaced_and_forgotten(pm, monkeypatch):
 
 def test_notes_from_the_in_process_model_use_its_own_prompt(pm, monkeypatch, tmp_path):
     from sourcedrecall import notes as N
-    (tmp_path / "genai_config.json").write_text("{}")
-    monkeypatch.setenv("SOURCEDRECALL_NOTES_DIR", str(tmp_path))
+    monkeypatch.setattr(N, "_local_dir", lambda: str(tmp_path))
     prompts = []
 
     def fake(prompt, max_new=300):
@@ -573,6 +573,21 @@ def test_notes_from_the_in_process_model_use_its_own_prompt(pm, monkeypatch, tmp
                       owner_name="Dana Cole", date="2026-03-02")
     assert prompts and prompts[0].startswith("Write the lasting facts Dana Cole states")
     assert [r["text"] for r in pm._load_notes()] == ["Dana Cole is allergic to penicillin."]
+
+
+def test_an_installed_notes_model_is_used_unless_turned_off(monkeypatch, tmp_path):
+    pytest.importorskip("onnxruntime_genai")
+    from sourcedrecall import notes as N
+    (tmp_path / "genai_config.json").write_text("{}")
+    monkeypatch.setenv("SOURCEDRECALL_NOTES_MODELS", str(tmp_path))
+    monkeypatch.delenv("SOURCEDRECALL_NOTES_DIR", raising=False)
+    monkeypatch.delenv("SOURCEDRECALL_NOTES_URL", raising=False)
+    assert N._local_dir() == str(tmp_path) and N.enabled()
+    monkeypatch.setenv("SOURCEDRECALL_NOTES", "off")
+    assert N._local_dir() is None
+    monkeypatch.delenv("SOURCEDRECALL_NOTES")
+    monkeypatch.setenv("SOURCEDRECALL_NOTES_URL", "http://127.0.0.1:9/v1")
+    assert N._local_dir() is None          # the server the user named wins
 
 
 def test_notes_are_off_by_default(pm):

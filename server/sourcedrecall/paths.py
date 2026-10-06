@@ -59,6 +59,13 @@ def parser_models_dir():
                           os.path.join(state_dir(), "parser-models"))
 
 
+def notes_models_dir():
+    """Where `sourcedrecall-setup --notes` installs the in-process notes
+    model (2026-10-06). Installing it is the opt-in."""
+    return os.environ.get("SOURCEDRECALL_NOTES_MODELS",
+                          os.path.join(state_dir(), "notes-model"))
+
+
 def use_installed_parser():
     """Point rgx at the installed stanza_ort models, if there are any (rgx
     falls back to Stanza on PyTorch otherwise)."""

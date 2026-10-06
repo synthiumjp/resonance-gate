@@ -18,6 +18,9 @@ Or, with no server, a small model trained for this one job runs in the
 same process on onnxruntime-genai (2026-10-06):
 
     SOURCEDRECALL_NOTES_DIR    a folder holding its genai_config.json
+
+`sourcedrecall-setup --notes` installs it (paths.notes_models_dir()), and
+an installed model is used; SOURCEDRECALL_NOTES=off turns it off again.
 """
 import json
 import os
@@ -40,8 +43,21 @@ LOCAL_PROMPT = ("Write the lasting facts {owner} states about themselves in this
 
 
 def _local_dir():
+    if os.environ.get("SOURCEDRECALL_NOTES", "").lower() in ("off", "0", "no"):
+        return None
     d = os.environ.get("SOURCEDRECALL_NOTES_DIR")
-    return d if d and os.path.isfile(os.path.join(d, "genai_config.json")) else None
+    if not d:
+        if os.environ.get("SOURCEDRECALL_NOTES_URL"):
+            return None       # a server the user named wins over the installed model
+        from sourcedrecall.paths import notes_models_dir
+        d = notes_models_dir()
+    if not os.path.isfile(os.path.join(d, "genai_config.json")):
+        return None
+    try:
+        import onnxruntime_genai  # noqa: F401
+    except ImportError:
+        return None
+    return d
 
 
 def enabled():
