@@ -1,7 +1,11 @@
 """Note precision on LoCoMo dev: the local 14B reads one session and the notes
 written from it, and labels each note SAID (the person says it about
-themselves or their life), OTHER (the other speaker's), or NO (not said /
-wrong). One call per session per writer. Usage: note_judge.py STORE..."""
+themselves or their life), ABOUT_OTHER (a true fact about the other speaker,
+said to be theirs), WRONG_PERSON (the other speaker's fact given to this
+person), or NO (nobody says it / wrong). One call per session per writer.
+2026-10-06: the first version had one OTHER label, and counted true notes
+about the other speaker -- useful to LoCoMo questions about either person --
+as errors. Usage: note_judge.py STORE..."""
 import json, glob, re, sys, urllib.request, collections
 C = json.load(open("/Users/chrismarmo/jpwork/locomo10.json"))
 URL = "http://127.0.0.1:8090/v1/chat/completions"
@@ -9,7 +13,8 @@ ASK = """Below is a conversation between {owner} and {other}, then numbered note
 
 For each note, answer with one label:
 SAID - {owner} says this (or clearly implies it) about themselves or their own life in the conversation.
-OTHER - it is really about {other} or comes from what {other} said, not {owner}.
+ABOUT_OTHER - it is a true fact about {other}, and the note says it is {other}'s (e.g. "{other} is excited about {owner}'s plans").
+WRONG_PERSON - it gives {owner} something that is really {other}'s (e.g. {other}'s children, trip or job stated as {owner}'s).
 NO - nobody says it, or it is wrong.
 
 CONVERSATION:
@@ -41,7 +46,7 @@ for store in sys.argv[1:]:
             text = "\n".join(f'{t["speaker"]}: {t["text"]}' for t in turns)
             out = call(ASK.format(owner=owner, other=other, conv=text,
                                   notes="\n".join(f"{k + 1}. {n}" for k, n in enumerate(notes))))
-            lab = dict(re.findall(r"(\d+)\s*[:.]\s*(SAID|OTHER|NO)\b", out))
+            lab = dict(re.findall(r"(\d+)\s*[:.]\s*(SAID|ABOUT_OTHER|WRONG_PERSON|NO)\b", out))
             for k, n in enumerate(notes):
                 v = lab.get(str(k + 1), "UNPARSED"); tally[v] += 1
                 rows.append({"owner": owner, "sess": sess, "note": n, "label": v})
