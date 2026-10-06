@@ -65,6 +65,7 @@ def enabled():
                                  and os.environ.get("SOURCEDRECALL_NOTES_MODEL")))
 
 
+MAX_PARTS = int(os.environ.get("SOURCEDRECALL_NOTES_MAX_PARTS", "8"))
 _LOCAL = {}
 
 
@@ -103,8 +104,13 @@ def _call(prompt, timeout=600):
     return re.sub(r"<think>.*?</think>", "", text, flags=re.S).strip()
 
 
+CALLS = {"last": 0}
+
+
 def write_notes(owner, date, turns):
-    """-> the model's notes for one conversation (list of sentences)."""
+    """-> the model's notes for one conversation (list of sentences);
+    CALLS["last"] is how many times the model was run for it."""
+    CALLS["last"] = 0
     lines = []
     for t in turns:
         who = owner if t.get("role", "user") == "user" else "Other"
@@ -113,10 +119,23 @@ def write_notes(owner, date, turns):
             lines.append(f"{who}: {txt[:1500]}")
     if not any(l.startswith(owner + ":") for l in lines):
         return []
-    args = dict(owner=owner, date=date or "unknown date",
-                conversation="\n".join(lines)[:12000])
-    raw = (_local(LOCAL_PROMPT.format(**args)) if _local_dir()
-           else _call(PROMPT.format(**args)))
+    # 2026-10-06: a long session (a day of coding) is read in parts of at
+    # most 12,000 characters, not cut at the first 12,000.
+    parts, cur = [], []
+    for l in lines:
+        if cur and len("\n".join(cur + [l])) > 12000:
+            parts.append(cur)
+            cur = []
+        cur.append(l[:12000])
+    parts.append(cur)
+    parts = [p for p in parts if any(l.startswith(owner + ":") for l in p)][:MAX_PARTS]
+    raw = []
+    for p in parts:
+        args = dict(owner=owner, date=date or "unknown date", conversation="\n".join(p))
+        raw.append(_local(LOCAL_PROMPT.format(**args)) if _local_dir()
+                   else _call(PROMPT.format(**args)))
+    CALLS["last"] = len(parts)
+    raw = "\n".join(raw)
     said = " ".join(str(t.get("content", "")) for t in turns
                     if t.get("role", "user") == "user")
     out = []
@@ -128,8 +147,9 @@ def write_notes(owner, date, turns):
             continue          # a note must be about the owner
         if not grounded(ln, said, owner):
             continue          # what the other side said is not a note
-        out.append(ln)
-    return out[:20]
+        if ln not in out:
+            out.append(ln)
+    return out[:20 * len(parts)]
 
 
 _STOP = frozenset("""the a an and or of to in on at for with from by as is are was

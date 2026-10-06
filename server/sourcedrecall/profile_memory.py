@@ -427,7 +427,7 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
     if _notes.enabled() and owner and n_turns > n_skipped:
         try:
             written = _notes.write_notes(owner, created_at[:10], turns)
-            model_calls = 1
+            model_calls = _notes.CALLS["last"]
             _save_notes(conv_id, created_at[:10], written)
         except Exception as e:      # a model that is down must not lose the session
             print(f"sourcedrecall: notes not written ({e})", file=sys.stderr)

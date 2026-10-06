@@ -575,6 +575,23 @@ def test_notes_from_the_in_process_model_use_its_own_prompt(pm, monkeypatch, tmp
     assert [r["text"] for r in pm._load_notes()] == ["Dana Cole is allergic to penicillin."]
 
 
+def test_a_long_session_is_read_in_parts(monkeypatch):
+    from sourcedrecall import notes as N
+    monkeypatch.setattr(N, "_local_dir", lambda: None)
+    seen = []
+
+    def fake(prompt, timeout=600):
+        seen.append(prompt)
+        return "Dana Cole has a dog called Rex." if "Rex" in prompt else "Dana Cole lives in Leeds."
+    monkeypatch.setattr(N, "_call", fake)
+    turns = [{"role": "user", "content": "I live in Leeds."}]
+    turns += [{"role": "assistant", "content": "x" * 1400}] * 20
+    turns += [{"role": "user", "content": "My dog Rex is ill."}]
+    out = N.write_notes("Dana Cole", "2026-03-02", turns)
+    assert len(seen) == N.CALLS["last"] == 2
+    assert out == ["Dana Cole lives in Leeds.", "Dana Cole has a dog called Rex."]
+
+
 def test_an_installed_notes_model_is_used_unless_turned_off(monkeypatch, tmp_path):
     pytest.importorskip("onnxruntime_genai")
     from sourcedrecall import notes as N
