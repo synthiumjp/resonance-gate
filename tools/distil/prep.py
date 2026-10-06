@@ -29,6 +29,12 @@ rows = [json.loads(l) for l in open(SRC)]
 for r in rows:
     seen = " ".join(l.split(": ", 1)[1] for l in r["conv"].split("\n") if l.startswith(r["owner"] + ": "))
     r["notes"] = [n for n in r["notes"] if grounded(n, seen, r["owner"])]
+# r3/r4 wrote NONE for most LoCoMo speakers (r2 almost never): the flipped
+# SODA rows are 24% empty -- the one replying in a two-person chat often has
+# nothing lasting -- and taught "the replier -> NONE". Keep their notes, not
+# their empties.
+if "noflipnone" in FLAGS:
+    rows = [r for r in rows if not (r.get("src") == "soda_flip" and not r["notes"])]
 random.Random(3).shuffle(rows)
 nval = max(2, len(rows) // 20)
 import os; os.makedirs(OUT, exist_ok=True)
