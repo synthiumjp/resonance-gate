@@ -575,6 +575,15 @@ def test_notes_from_the_in_process_model_use_its_own_prompt(pm, monkeypatch, tmp
     assert [r["text"] for r in pm._load_notes()] == ["Dana Cole is allergic to penicillin."]
 
 
+def test_the_small_model_does_not_take_the_other_sides_news():
+    from sourcedrecall.notes import grounded
+    said = "I went to a pride parade with my friends. My kids are at school."
+    other = "Yesterday I took the kids to the museum and saw the dinosaur exhibit."
+    assert grounded("Dana went to a pride parade.", said, "Dana", other=other)
+    assert not grounded("Dana took the kids to the museum.", said + " took", "Dana", other=other)
+    assert grounded("Dana took the kids to the museum.", said + " took museum", "Dana", other=other)
+
+
 def test_a_long_session_is_read_in_parts(monkeypatch):
     from sourcedrecall import notes as N
     monkeypatch.setattr(N, "_local_dir", lambda: None)

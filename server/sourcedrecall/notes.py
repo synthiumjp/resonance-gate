@@ -147,6 +147,8 @@ def write_notes(owner, date, turns):
     raw = "\n".join(raw)
     said = " ".join(str(t.get("content", "")) for t in turns
                     if t.get("role", "user") == "user")
+    other = (" ".join(str(t.get("content", "")) for t in turns
+                      if t.get("role", "user") != "user") if _local_dir() else None)
     out = []
     for ln in raw.splitlines():
         ln = re.sub(r"^\s*(?:[-*•]|\d+[.)])\s*", "", ln).strip()
@@ -154,7 +156,7 @@ def write_notes(owner, date, turns):
             continue
         if owner.split()[0].lower() not in ln.lower():
             continue          # a note must be about the owner
-        if not grounded(ln, said, owner):
+        if not grounded(ln, said, owner, other=other):
             continue          # what the other side said is not a note
         if ln not in out:
             out.append(ln)
@@ -181,11 +183,24 @@ def _stems(text):
             if len(w) > 2 and w not in _STOP}
 
 
-def grounded(note, said, owner, share=0.6):
+def grounded(note, said, owner, share=0.6, other=None, other_only=0.15):
     """2026-10-05 (blind v3, notes mode): the model wrote notes from claims
     the ASSISTANT made about the user ("you're vegan, right?"). A note is
-    kept only if most of its content words are in what the user wrote."""
+    kept only if most of its content words are in what the user wrote.
+
+    2026-10-06, with `other` (what the other side wrote; used for the small
+    in-process model): a 0.6B model gives the user the other side's news.
+    A note is also dropped when more than 15% of its content words appear
+    only in the other side's lines. LoCoMo dev notes judged by Qwen3-14B:
+    right 360/469 (77%) -> 338/399 (85%); the 14B's own notes would lose 56
+    right ones for 11 wrong, so it is not applied to a model the user runs.
+    Chosen on those dev notes."""
     words = _stems(note) - _stems(owner)
     if not words:
         return False
-    return len(words & _stems(said)) / len(words) >= share
+    mine = _stems(said)
+    if len(words & mine) / len(words) < share:
+        return False
+    if other is not None:
+        return len((words - mine) & _stems(other)) / len(words) <= other_only
+    return True
