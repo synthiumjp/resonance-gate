@@ -1,0 +1,9 @@
+false claims:
+  class a: unclear 3, not_found 2, said (no later change found) 1
+  class b: said (may have changed) 3, unclear 1
+  class c: not_found 3
+  class e: not_found 2, unconfirmed 1
+  all: not_found 7, unclear 4, said (may have changed) 3, said (no later change found) 1, unconfirmed 1
+true claims:
+  class f: said (no later change found) 3, unclear 1
+  all: said (no later change found) 3, unclear 1

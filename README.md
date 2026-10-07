@@ -51,6 +51,15 @@ that project, so it never offers another project's fact as true here, and
 it also answered "I don't know" to 5 real facts that agentmemory, which
 searches every project at once, found (it also offered 9 false ones).
 
+A pre-registered held-out set (v5: 120 scenarios nobody working on the
+system had read, hypotheses fixed beforehand, run once): old state given as
+current in 0 of 25 stated changes and 3 of 25 implied ones (plain retrieval
+4 and 7), decisions recalled 10 of 10, no declined proposal given as
+decided. Two hypotheses missed: the "may have changed since" label marked
+only 2 of 25 implied changes, and "no longer true" did not beat its base
+rate as screened. Results and what was behind the misses:
+`bench/false_memory/results_v5/SUMMARY.md`.
+
 LoCoMo (conversations 2-9, 1,307 questions), against Mem0, with the same
 local reader and judge (Qwen3-14B):
 

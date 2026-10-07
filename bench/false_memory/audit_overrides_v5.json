@@ -1,0 +1,19 @@
+{
+ "_note": "Audited by an agent on 2026-10-08. Read: every answer-view row of classes a-e for sourcedrecall and rag in probe_details.jsonl (152 rows, 16 judged false memory), each with its scenario conversations, forbidden proposition and question. Rule: override only clear judge errors, borderline cases stay as judged. Overrides: 2 total (sourcedrecall 1, rag 1), both class b, same scenario. All other fm=true rows (sourcedrecall 3, rag 11) were confirmed as the answer asserting the earlier state as current; no fm=false row was found that clearly asserts the forbidden claim.",
+ "overrides": [
+  {
+   "system": "sourcedrecall",
+   "id": "v5_B24",
+   "fm": false,
+   "reason": "answer names the newer school, not the earlier one; the judged-forbidden proposition is the earlier state",
+   "line": "The user's daughters attend Willowmere school."
+  },
+  {
+   "system": "rag",
+   "id": "v5_B24",
+   "fm": false,
+   "reason": "answer names the newer school, not the earlier one; the judged-forbidden proposition is the earlier state",
+   "line": "The user's daughters attend Willowmere school."
+  }
+ ]
+}

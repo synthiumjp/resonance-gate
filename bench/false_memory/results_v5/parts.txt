@@ -1,0 +1,22 @@
+rag            part A class b: 25 probes; false memory 4/25; expected term in the answer 19/25
+rag            part B class b: 25 probes; false memory 7/25; expected term in the answer 19/25
+rag            part C class f: 20 probes; expected term in the answer 17/20
+rag            part D class e: 10 probes; false memory 0/10; expected term in the answer 3/6
+rag            part D class f: 10 probes; expected term in the answer 9/10
+rag            part E class a: 6 probes; false memory 0/6
+rag            part E class b: 4 probes; false memory 0/4; expected term in the answer 4/4
+rag            part E class c: 3 probes; false memory 0/3
+rag            part E class e: 3 probes; false memory 0/3
+rag            part E class f: 4 probes; expected term in the answer 4/4
+rag            part F class f: 10 probes; expected term in the answer 8/10
+sourcedrecall  part A class b: 25 probes; false memory 0/25; expected term in the answer 23/25
+sourcedrecall  part B class b: 25 probes; false memory 3/25; expected term in the answer 20/25
+sourcedrecall  part C class f: 20 probes; expected term in the answer 20/20
+sourcedrecall  part D class e: 10 probes; false memory 0/10; expected term in the answer 5/6
+sourcedrecall  part D class f: 10 probes; expected term in the answer 10/10
+sourcedrecall  part E class a: 6 probes; false memory 0/6
+sourcedrecall  part E class b: 4 probes; false memory 0/4; expected term in the answer 4/4
+sourcedrecall  part E class c: 3 probes; false memory 0/3
+sourcedrecall  part E class e: 3 probes; false memory 0/3
+sourcedrecall  part E class f: 4 probes; expected term in the answer 4/4
+sourcedrecall  part F class f: 10 probes; expected term in the answer 2/10

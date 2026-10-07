@@ -1,0 +1,6 @@
+lines 487: about the out-of-date state 27, about the current state 115, in no-change scenarios 183
+unlabelled lines: 466, of which out-of-date 23 (4.9%)
+no longer true: fired 4 | on out-of-date lines 0/27 | on CURRENT lines 0/115 | in no-change scenarios 0/183 | precision 0/4 = 0.0% vs unlabelled 4.9%
+may have changed since: fired 8 | on out-of-date lines 3/27 | on CURRENT lines 1/115 | in no-change scenarios 0/183 | precision 3/8 = 37.5% vs unlabelled 4.9%
+said in passing: fired 9 | on out-of-date lines 1/27 | on CURRENT lines 4/115 | in no-change scenarios 6/183 | precision 1/9 = 11.1% vs unlabelled 4.9%
+model note: never fired

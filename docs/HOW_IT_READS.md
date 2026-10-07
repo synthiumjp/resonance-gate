@@ -13,6 +13,25 @@ and `experiments/p2/`. Measurements come from `bench/` (readable development
 sets unless marked held out; held-out sets were written before any system
 saw them and are read only as counts). Last measured 2026-10-07.
 
+## Held-out test (v5, pre-registered)
+
+The rules below were tested once on a set nobody working on the system had
+read: 120 scenarios written by an agent from a brief without the rules' word
+lists, with hypotheses fixed beforehand (`docs/PREREG_HELDOUT_V5.md`,
+results in `bench/false_memory/results_v5/SUMMARY.md`). Five of seven met,
+two missed:
+- met: old state given as current 0/25 for stated changes and 3/25 for
+  implied ones (plain retrieval 4 and 7); no change label on a current fact
+  (0/20); decisions recalled 10/10, a declined proposal given as decided
+  0/10; the claim check said "said" for 1 of 12 denied, hedged,
+  assistant-only or never-said claims; advice, the right conversation in the
+  top 5 10/10.
+- missed: the labels on implied changes ("may have changed since" on 2 of
+  25 scenarios against at least 12 hypothesised; the answers were right in
+  22 of 25 from the dated quotes), and "no longer true" did not beat its base
+  rate as screened (3 of its 4 lines marked the right fact, phrased as an
+  event the screen could not match).
+
 ## Which words count as the user's own
 
 **Questions are not statements.** A clause whose subject or head is a
@@ -120,7 +139,9 @@ Fitzroy" / "I moved the sofa", cosine above 0.5), and it was removed.
   fix 8 and 3. On the held-out change set v4, answers were unchanged (old
   state given as current 2/44, new state 41/44, unchanged things 16/16).
 - Status: supported; it now catches fewer true changes (4 instead of 8 lines
-  on v4), the cost of not crying wolf.
+  on v4), the cost of not crying wolf. Held out (v5): no false change label
+  in 20 no-change scenarios, but labelled only 2 of 25 implied changes:
+  refuted as a signal of implied change; the answers did not need it.
 
 ## Decisions made with the assistant
 
@@ -145,7 +166,8 @@ it works now", "yes I did", "alright, I read it" after a suggestion) fired
   perfect, move it") or name the choice ("path versioning it is"); an offer
   that follows a proposal ("We could use go-cmp. Want me to rewrite the
   assertions?") is joined to it.
-- Status: supported on development data; not yet held out.
+- Status: supported, held out (v5): accepted decisions recalled 10/10, a
+  declined or deferred proposal given as decided 0/10.
 
 ## Notes written by the small model
 
