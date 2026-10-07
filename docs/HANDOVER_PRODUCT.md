@@ -1,13 +1,13 @@
 # Handover: sourcedrecall (product track)
 
-Last updated 2026-10-06. Branch `product-p2`, pushed to github.com/synthiumjp/resonance-gate (public, research) and as `main` to github.com/synthiumjp/sourcedrecall (PRIVATE until launch; push both: `git push origin product-p2 && git push sr product-p2:main`, tags to both).
+Last updated 2026-10-07. Branch `product-p2`, pushed to github.com/synthiumjp/resonance-gate (public, research) and as `main` to github.com/synthiumjp/sourcedrecall (PRIVATE until launch; push both: `git push origin product-p2 && git push sr product-p2:main`, tags to both).
 Latest release tag: `sourcedrecall-v0.5.2` (installs from resonance-gate).
 Since then (unreleased, on the branch; docs/CHANGELOG.md): no PyTorch
 (stanza_ort), list questions read 16 messages, preferences across projects,
 wider standing instructions, opt-in notes mode, pasted-text guard, ChatGPT /
 Claude.ai importers, Codex / Gemini CLI / Cursor capture, parser batching.
 Full suite on the Mac: 1118 passed (Stanza backend), 1120 (stanza_ort).
-Notebook up to e312. Rules and their evidence: docs/HOW_IT_READS.md. JP's goal (2026-10-05): a usable, credible open-source
+Notebook up to e314. Rules and their evidence: docs/HOW_IT_READS.md. JP's goal (2026-10-05): a usable, credible open-source
 system -- every claim reproducible, local models only (GPT-4o-mini declined
 twice).
 
@@ -147,26 +147,28 @@ the tag: `CLAUDE_PLUGIN_ROOT=plugins/sourcedrecall CLAUDE_PLUGIN_DATA=<scratch>
 plugins/sourcedrecall/bin/sourcedrecall-run install`. Scan the diff for secrets
 and real-conversation text before pushing (the repo is public).
 
-## Open items, in order (2026-10-06)
+## Open items, in order (2026-10-07)
 
-1. A small notes model that needs no server (JP: "we need something we
-   don't have to actually serve"; "surely a specialised model"). Qwen3-0.6B
-   fine-tuned on Qwen3-14B's grounded notes over LongMemEval sessions, int4
-   ONNX (~0.5 GB), run in-process by notes.py on onnxruntime-genai. Work in
-   ~/jpwork/distil on the Mac (notebook e312). Bar on LoCoMo dev: 1.7B 70.0%,
-   multi-hop 26/43; no notes 68.2% (23). Then: blind v3/v4 false memory,
-   the held-out LoCoMo test, publish to HF (synthiumjp/sourcedrecall-notes-en)
-   and set NOTES_ARCHIVE/NOTES_SHA256 in setup_models.py. Default on or off
-   is JP's decision.
-2. The held-out LoCoMo test with 1.7B notes (~/jpwork/test_1p7b.sh).
-3. JP reviews docs/PREREG_HELDOUT_V5.md; an agent builds held-out set v5
-   (numbers only to the developer); one confirmatory run.
-4. One clean re-measurement of every headline number on the release commit.
-5. Launch (JP): a week of real use; Codex / Gemini / Cursor capture in the
-   real apps; native Windows; the repo goes public, then tag and PyPI; the
-   write-up rewrite (WRITEUP_DRAFT is out of date) and a demo.
-6. JP's confidence work: re-screen labels each change; a validity screen of
-   the notes model is the natural research piece.
+1. Release re-measurement running on the Mac (tools/release_measure.sh on
+   1754180, ~/jpwork/release.log, tree ~/jpwork/sdr-release): suite, LoCoMo
+   test default + both built-in notes models (installed from HF), LongMemEval,
+   held-out false memory v3/v4/coding/projects. Then README/CHANGELOG numbers
+   from it, one set, one commit.
+2. Built-in notes models PUBLISHED: huggingface.co/synthiumjp/sourcedrecall-
+   notes-en (small = Qwen3-0.6B r6, standard = Qwen3-1.7B L1; int4 ONNX;
+   sha256 pinned in setup_models.NOTES_MODELS). `sourcedrecall-setup --notes
+   [small|standard]`; notes stay OFF by default (JP's call; recommended).
+   LoCoMo test 68.2 / 70.3 (default 64.7, Mem0 64.6, 14B notes 73.1);
+   multi-hop 55.2 / 59.0 (Mem0 61.9). Training: ~/jpwork/distil, tools/distil,
+   notebook e312-e314. Plugin installer does not offer notes yet.
+3. JP reviews docs/PREREG_HELDOUT_V5.md; an agent builds v5 (numbers only to
+   the developer); one confirmatory run. The LoCoMo test has been reused for
+   five notes runs (disclosed in the README).
+4. Launch (JP): a week of real use; Codex / Gemini / Cursor capture in the
+   real apps; native Windows; repo public, then tag and PyPI; the write-up
+   rewrite (WRITEUP_DRAFT is out of date) and a demo.
+5. JP's confidence work: re-screen labels each change; a validity screen of
+   the notes models (note judge: bench/locomo/note_judge.py).
 
 ## Rules carried from JP
 
