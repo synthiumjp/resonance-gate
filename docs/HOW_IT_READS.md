@@ -241,6 +241,13 @@ evidence.
   67.4% against 68.2% without, multi-hop 19 against 23 of 43. Refuted: the
   model's notes help by merging facts ("plays the clarinet and the violin"),
   not by being short; restating adds tokens without that.
+- **A digest for list questions** (RG_DIGEST, off): the parser's facts
+  whose object is the asked-for kind in WordNet ("What instruments..." ->
+  clarinet, violin) as one extra line. It fired on about a third of the
+  development list questions, often with partial or unrelated facts
+  ("symbols" is too broad a word); answers +0/-1 against the same run without
+  it. Refuted: where the parser had the facts, the messages were already in
+  the context.
 - **"Supported" as "true now"** in the claim check: 81% precise. Refuted;
   the verdict is provenance.
 - **Reading negation off raw message text** to call a claim contradicted:
