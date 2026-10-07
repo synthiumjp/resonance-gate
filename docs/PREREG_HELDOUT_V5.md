@@ -1,6 +1,7 @@
-# Pre-registration: held-out set v5 (draft for review)
+# Pre-registration: held-out set v5
 
-Written before set v5 exists. Its purpose is to test the rules in
+Reviewed and approved by JP on 2026-10-08; this is the version reviewed,
+committed before the set was written. Written before set v5 exists. Its purpose is to test the rules in
 `docs/HOW_IT_READS.md` on conversations no one working on the system has
 read, once, and to publish the result whatever it is.
 
