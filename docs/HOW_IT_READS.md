@@ -11,7 +11,7 @@ The parser is Stanza 1.14.0's English pipeline (Universal Dependencies
 parses), run without PyTorch through `stanza_ort`; the rules are in `rgx/`
 and `experiments/p2/`. Measurements come from `bench/` (readable development
 sets unless marked held out; held-out sets were written before any system
-saw them and are read only as counts). Last measured 2026-10-06.
+saw them and are read only as counts). Last measured 2026-10-07.
 
 ## Which words count as the user's own
 
@@ -146,6 +146,36 @@ it works now", "yes I did", "alright, I read it" after a suggestion) fired
   that follows a proposal ("We could use go-cmp. Want me to rewrite the
   assertions?") is joined to it.
 - Status: supported on development data; not yet held out.
+
+## Notes written by the small model
+
+**Person deixis is resolved before the model reads a conversation.** "I"
+and "my" point at whoever is speaking, "you" and "your" at the listener
+(Bühler's origo; Levinson 1983 on person deixis). A 0.6B model loses track
+of who is speaking and gives the user the other person's news: Melanie's "I
+took the kids to the museum" became "Caroline has kids" in Caroline's notes.
+So each pronoun is replaced by who it refers to, with the verb agreeing:
+"Yesterday I took the kids" from the other side becomes "Yesterday Other
+took the kids", and the user's "your kids must love it" becomes "Other's
+kids must love it". English personal pronouns are a closed class, so this
+is a deterministic rewrite (`notes.explicit_person`).
+- LoCoMo development conversations, notes judged against their session by
+  Qwen3-14B, the same training data with and without the rewrite: notes
+  right 348 -> 381 (76% -> 80%), notes giving the user the other speaker's
+  facts 75 -> 62 (16% -> 13%; Qwen3-14B's own notes 3%).
+- Status: supported, partial. Most remaining errors carry no pronoun ("the
+  kids", "the studio"): the model fuses the conversation's topic onto the
+  user, which is not a deixis error.
+
+Tried and refuted for the same problem (output filters, after the model):
+- Dropping a note that leans on words only the other side used: judged
+  right 77% -> 85%, but answers fell 69.1% -> 67.4% (+4/-8): it removed true
+  notes, including true notes about the other person.
+- Reading person off the parse of the user's sentences (a note noun the
+  user only ever possesses as "your X" or uses under a "you" subject): it
+  caught a third of the wrong-person notes and lost one right note for
+  every two wrong ones. Its misses ("I'd love to see the kids") carry no
+  person at all: once the note is written, the information is gone.
 
 ## Finding the right messages
 
