@@ -36,6 +36,13 @@ export SOURCEDRECALL_OWNER="$OWNER"
 case "${CLAUDE_PLUGIN_OPTION_BRIEFING:-true}" in
   false|0|off|no) export SOURCEDRECALL_BRIEFING=off ;;
 esac
+# 2026-10-07: optional notes model (small | standard); anything else is off,
+# which also keeps an installed model from being used
+NOTES="$(printf '%s' "${SOURCEDRECALL_NOTES_TIER:-${CLAUDE_PLUGIN_OPTION_NOTES:-off}}" | tr '[:upper:]' '[:lower:]')"
+case "$NOTES" in
+  small|standard) ;;
+  *) NOTES=off; export SOURCEDRECALL_NOTES=off ;;
+esac
 # Before anything redirects into it: `install` on a fresh machine failed
 # here because the log's directory did not exist yet.
 mkdir -p "$DATA" || { echo "sourcedrecall: cannot create $DATA" >&2; exit 1; }
@@ -44,9 +51,18 @@ installed() {
   [ -x "$VBIN/sourcedrecall$EXE" ] && [ -f "$STAMP" ] && [ "$(cat "$STAMP")" = "$REF" ]
 }
 
+notes_ready() {
+  [ "$NOTES" = off ] || [ "$(cat "$DATA/notes-installed" 2>/dev/null)" = "$REF $NOTES" ]
+}
+
 do_install() {
   mkdir -p "$DATA"
   echo "== sourcedrecall install $REF $(date)"
+  if installed; then          # only the notes model is missing
+    do_notes || return 1
+    echo "== done $(date)"
+    return 0
+  fi
   command -v git >/dev/null || { echo "git is required"; return 1; }
   local py="" c v
   # PATH first, then where Homebrew and python.org put Python: an app started
@@ -86,7 +102,15 @@ do_install() {
   "$VBIN/python$EXE" -m pip install -q -e "$SRC/server" || return 1
   "$VBIN/sourcedrecall-setup$EXE" || return 1
   echo "$REF" > "$STAMP"
+  do_notes || return 1
   echo "== done $(date)"
+}
+
+do_notes() {
+  notes_ready && return 0
+  "$VBIN/python$EXE" -m pip install -q -e "$SRC/server[notes]" || return 1
+  "$VBIN/sourcedrecall-setup$EXE" --notes "$NOTES" || return 1
+  echo "$REF $NOTES" > "$DATA/notes-installed"
 }
 
 start_background_install() {
@@ -134,6 +158,11 @@ case "${1:-}" in
       echo "sourcedrecall: set your name with /plugin configure sourcedrecall" >&2
       [ "$event" = "session-end" ] && { tr -d '\n' ; echo; } >> "$DATA/pending.jsonl"
       exit 0
+    fi
+    # notes chosen but not installed yet: install them in the background;
+    # memory works meanwhile, without notes
+    if [ "$event" = "session-start" ] && ! notes_ready; then
+      start_background_install
     fi
     if [ "$event" = "session-start" ] && [ -s "$DATA/pending.jsonl" ]; then
       queued="$DATA/pending-$$.jsonl"

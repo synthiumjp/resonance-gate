@@ -25,6 +25,12 @@
       "title": "Summary at session start",
       "description": "Give Claude a short summary of what it knows about you at the start of each session. Turn off to use memory only when you or Claude ask for it.",
       "default": true
+    },
+    "notes": {
+      "type": "string",
+      "title": "Notes (off, small or standard)",
+      "description": "Optional: a small model, run on your machine with no server, writes short notes of what you said once per session (small: 0.5 GB download; standard: 1.4 GB). Off by default: memory then uses no language model at all.",
+      "default": "off"
     }
   },
   "mcpServers": {
