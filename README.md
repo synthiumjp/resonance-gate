@@ -25,7 +25,7 @@ publish:
 
 | | found in the top 5 |
 |---|---|
-| sourcedrecall | 98.4% |
+| sourcedrecall | 98.8% |
 | MemPalace (as published) | 96.6% |
 | agentmemory (as published) | 95.2% |
 | plain embeddings (bge-small), same messages | 96.8% |
@@ -40,11 +40,11 @@ never said as true. Audited, one rule for every system:
 | | sourcedrecall | agentmemory 0.9 | ai-memory 2.5 | plain retrieval |
 |---|---|---|---|---|
 | old state given as current, of 44 changes | 2 | 5 | 7 | 7 |
-| new state given, of 44 | 42 | 38 | 33 | 36 |
-| the same with a small (4B) reader: old state as current | 2 | 6 | 11 | |
+| new state given, of 44 | 41 | 38 | 33 | 36 |
+| the same with a small (4B) reader: old state as current (earlier run) | 2 | 6 | 11 | |
 | coding sessions behind 120 others: false memories, of 51 | 0 | 2 | 6 | 3 |
 | several projects: false memories, of 32 | 0 | 9 | 4 | 3 |
-| several projects: unchanged facts answered, of 13 | 8 | 12 | 5 | 7 |
+| several projects: unchanged facts answered, of 13 | 11 | 12 | 5 | 7 |
 
 The last two rows are a trade-off: sourcedrecall keeps a project's facts in
 that project, so it never offers another project's fact as true here, and
@@ -57,11 +57,11 @@ local reader and judge (Qwen3-14B):
 | | sourcedrecall | with the built-in notes model | with notes by Qwen3-14B | Mem0 2.2.1 | plain retrieval |
 |---|---|---|---|---|---|
 | answered correctly | 64.7% | 68.2% (small) / 70.3% (standard) | 73.1% | 64.6% | 56.6% |
-| temporal questions | 56.2% | 58.9% / 57.4% | 57.4% | 37.2% | 49.6% |
-| single-hop | 74.8% | 79.0% / 81.6% | 85.4% | 77.9% | 66.9% |
-| multi-hop | 53.6% | 55.2% / 59.0% | 62.3% | 61.9% | 39.3% |
+| temporal questions | 53.5% | 58.9% / 57.4% | 57.4% | 37.2% | 49.6% |
+| single-hop | 75.5% | 79.0% / 81.6% | 85.4% | 77.9% | 66.9% |
+| multi-hop | 52.3% | 55.2% / 59.0% | 62.3% | 61.9% | 39.3% |
 | model calls to store the conversations | 0 | 468, in-process | 468, to a local server | 941 | 0 (one embedding per message) |
-| context per question (tokens) | 845 | 1,048 / 1,037 | 1,230 | 722 | 356 |
+| context per question (tokens) | 696 | 1,048 / 1,037 | 1,230 | 722 | 356 |
 
 Notes are optional. A small model writes short notes once per stored
 conversation, labelled as its notes and kept only where they are grounded in
@@ -84,7 +84,7 @@ one rule for every system. The false-memory sets are synthetic and small
 (44-100 scenarios each).
 
 The systems hand the reader different amounts: sourcedrecall its memory
-block (845 tokens a question on LoCoMo, about 1,040 with the built-in notes
+block (696 tokens a question on LoCoMo, about 1,040 with the built-in notes
 model, 1,230 with Qwen3-14B's notes), Mem0 its top
 5 memories (722), agentmemory and ai-memory their top 5 results, plain
 retrieval its top 3 messages (356). Mem0 2.2.1 used the same local Qwen3-14B
@@ -98,14 +98,16 @@ here.
 LoCoMo conversations 2-9 were run for each version reported, so they are
 not untouched: notes mode was changed after its first run there (72.1%)
 and scored 73.1% after, and three more notes models were each run once there
-(Qwen3-1.7B untrained 69.3%, then the two built-in models above). Measured
-at: LoCoMo default f078bf4, Qwen3-14B notes 49561c4, built-in notes models
-e3283d4, LongMemEval e8b8c0f, false-memory head-to-head on the published
-runs listed in `bench/false_memory/HEAD_TO_HEAD.md`. The release will be
-measured again in one run.
+(Qwen3-1.7B untrained 69.3%, then the two built-in models above).
+sourcedrecall's numbers here, with and without the built-in notes models,
+LongMemEval and the held-out false-memory sets, were all measured in one
+run on commit 1754180 (`tools/release_measure.sh`, log in
+`bench/RELEASE_1754180.log`); the test suite passed on it (1,176 tests).
+The Qwen3-14B notes column is from commit 49561c4, and the other tools'
+columns from the runs listed in `bench/false_memory/HEAD_TO_HEAD.md`.
 
 Where it is weaker: without a model, questions that need several facts
-from different conversations put together (LoCoMo multi-hop, 53.6% against
+from different conversations put together (LoCoMo multi-hop, 52.3% against
 Mem0's 61.9%). Notes by Qwen3-14B close that gap (62.3%); the built-in
 models narrow it (55.2% and 59.0%). Better retrieval alone did not:
 three rankers that found more of the right messages answered no better. Only your own messages are searched, so something

@@ -7,7 +7,7 @@ the sessions that hold the evidence. No language model is involved here:
 this measures retrieval only, the number other memory tools publish for
 this benchmark.
 
-Run at commit e8b8c0f (2026-10-05) on a Mac, `longmemeval_s_cleaned.json`
+Run at commit 1754180 (2026-10-07, the release run; first run e8b8c0f, 98.4%) on a Mac, `longmemeval_s_cleaned.json`
 from huggingface.co/datasets/xiaowu0162/longmemeval-cleaned.
 
 ## Result
@@ -17,16 +17,18 @@ questions, the set and metric agentmemory and MemPalace report:
 
 | | recall_any@5 | recall_all@5 | recall_any@10 |
 |---|---|---|---|
-| sourcedrecall (message search) | 98.4% | 92.2% | 99.0% |
+| sourcedrecall (message search) | 98.8% | 92.6% | 99.2% |
 | bge-small embeddings, same index | 96.8% | 89.8% | 98.4% |
 | BM25, same index | 93.4% | 77.6% | 96.2% |
 | agentmemory, as published | 95.2% | | |
 | MemPalace, as published | 96.6% | | |
 
 Without the 30 abstention questions (the official retrieval set, n=470):
-any@5 98.3%, all@5 93.0%. Per question type, k=1 to 10, and turn-level
-figures are in `report.md`. The weakest type is single-session-preference
-(any@5 90.0%, where plain embeddings get 96.7%).
+any@5 98.7%, all@5 93.4%. Per question type, k=1 to 10, and turn-level
+figures are in `release_report.md` (first run: `report.md`).
+Single-session-preference, the weakest type in the first run (any@5 90.0%,
+plain embeddings 96.7%), is 96.7% since requests for advice are ranked by
+embeddings; that routing was chosen on those 30 questions.
 
 ## What was measured, exactly
 
