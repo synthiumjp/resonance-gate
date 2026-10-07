@@ -52,6 +52,33 @@ answer view, audited by an agent with the same rule for every system.
 Plain retrieval (top 3 user messages by bge-small) runs on the same set as
 the reference.
 
+## How each hypothesis is measured (fixed 2026-10-08, before the set exists)
+
+The set uses the benchmark's format (`class` a-f, probes with `forbid.prop`
+and `expect.terms`); `subtype` starts with the part letter (`A_`, `B_`, ...)
+and `split` is `v5`.
+
+- A, B: class b; `forbid.prop` is the old state as current, `expect.terms`
+  the new one. H1, H2 (first half): `score.py`, false memories per part.
+  H2 (second half): `screen_labels.py` on part B, lines about the
+  out-of-date state carrying "may have changed since" or "no longer true".
+- C: class f; `expect.terms` the unchanged current value. H3:
+  `screen_labels.py` on part C, change labels on lines about the current
+  state or in the scenario.
+- D: accepted and reversed decisions as class f (`expect.terms` the choice
+  in force), declined or deferred as class e (`forbid.prop` "The user
+  decided to ..."). H4: class f recall over the accepted ones; class e false
+  memories.
+- E: false claims as probes (class a denied or hedged, c never said, e said
+  only by the assistant, b out of date) and true current claims in
+  `positives_v5.jsonl`; `check_eval.py --counts-only`. H5: "supported"
+  returned for a, c or e claims.
+- F: class f with `gold_conversation` (the index of the conversation that
+  holds the answer). H6: `v5_advice.py`, that conversation among the first
+  five reached by `profile_memory._messages_for(question, k=50)`, the
+  LongMemEval protocol.
+- H7: `screen_labels.py` on the whole set.
+
 ## Procedure
 
 1. JP reviews this file; the version reviewed is committed (and may be
