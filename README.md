@@ -54,19 +54,26 @@ searches every project at once, found (it also offered 9 false ones).
 LoCoMo (conversations 2-9, 1,307 questions), against Mem0, with the same
 local reader and judge (Qwen3-14B):
 
-| | sourcedrecall | sourcedrecall, notes mode | Mem0 2.2.1 | plain retrieval |
-|---|---|---|---|---|
-| answered correctly | 64.7% | 73.1% | 64.6% | 56.6% |
-| temporal questions | 56.2% | 57.4% | 37.2% | 49.6% |
-| single-hop | 74.8% | 85.4% | 77.9% | 66.9% |
-| multi-hop | 53.6% | 62.3% | 61.9% | 39.3% |
-| model calls to store the conversations | 0 | 468 | 941 | 0 (one embedding per message) |
-| context per question (tokens) | 845 | 1,230 | 722 | 356 |
+| | sourcedrecall | with the built-in notes model | with notes by Qwen3-14B | Mem0 2.2.1 | plain retrieval |
+|---|---|---|---|---|---|
+| answered correctly | 64.7% | 68.2% (small) / 70.3% (standard) | 73.1% | 64.6% | 56.6% |
+| temporal questions | 56.2% | 58.9% / 57.4% | 57.4% | 37.2% | 49.6% |
+| single-hop | 74.8% | 79.0% / 81.6% | 85.4% | 77.9% | 66.9% |
+| multi-hop | 53.6% | 55.2% / 59.0% | 62.3% | 61.9% | 39.3% |
+| model calls to store the conversations | 0 | 468, in-process | 468, to a local server | 941 | 0 (one embedding per message) |
+| context per question (tokens) | 845 | 1,048 / 1,037 | 1,230 | 722 | 356 |
 
-Notes mode is optional: your own local model (here the same Qwen3-14B)
-writes short notes once per stored conversation, labelled as its notes and
-kept only where they are grounded in your own words. With the context cut
-to 994 tokens it scores 71.1% (multi-hop 61.5%).
+Notes are optional. A small model writes short notes once per stored
+conversation, labelled as its notes and kept only where they are grounded in
+your own words. The built-in models run inside sourcedrecall on the CPU,
+with no server: small (Qwen3-0.6B trained for this, 0.5 GB, 2-3 s a
+conversation) and standard (Qwen3-1.7B, 1.4 GB, about 4.5 s). Your own
+local model can write them instead through any OpenAI-compatible server
+(the Qwen3-14B column). On the held-out false-memory sets the notes add
+none (0 of 30 on v3; an old state given as current 3 and 4 of 44 on v4,
+against 2 without notes and 3 with Qwen3-14B's). How the notes models were
+made and checked: [the model card](https://huggingface.co/synthiumjp/sourcedrecall-notes-en)
+and `tools/distil`.
 
 About these numbers: the answers were read and judged by local models, the
 same for every system, so the comparison inside each table is fair, but the
@@ -77,7 +84,8 @@ one rule for every system. The false-memory sets are synthetic and small
 (44-100 scenarios each).
 
 The systems hand the reader different amounts: sourcedrecall its memory
-block (845 tokens a question on LoCoMo, 1,230 in notes mode), Mem0 its top
+block (845 tokens a question on LoCoMo, about 1,040 with the built-in notes
+model, 1,230 with Qwen3-14B's notes), Mem0 its top
 5 memories (722), agentmemory and ai-memory their top 5 results, plain
 retrieval its top 3 messages (356). Mem0 2.2.1 used the same local Qwen3-14B
 for its own calls, with thinking turned off and its JSON response format
@@ -89,14 +97,17 @@ here.
 
 LoCoMo conversations 2-9 were run for each version reported, so they are
 not untouched: notes mode was changed after its first run there (72.1%)
-and scored 73.1% after. Measured at: LoCoMo default f078bf4, notes mode
-49561c4, LongMemEval e8b8c0f, false-memory head-to-head on the published
+and scored 73.1% after, and three more notes models were each run once there
+(Qwen3-1.7B untrained 69.3%, then the two built-in models above). Measured
+at: LoCoMo default f078bf4, Qwen3-14B notes 49561c4, built-in notes models
+e3283d4, LongMemEval e8b8c0f, false-memory head-to-head on the published
 runs listed in `bench/false_memory/HEAD_TO_HEAD.md`. The release will be
 measured again in one run.
 
 Where it is weaker: without a model, questions that need several facts
 from different conversations put together (LoCoMo multi-hop, 53.6% against
-Mem0's 61.9%); notes mode closes that gap. Better retrieval alone did not:
+Mem0's 61.9%). Notes by Qwen3-14B close that gap (62.3%); the built-in
+models narrow it (55.2% and 59.0%). Better retrieval alone did not:
 three rankers that found more of the right messages answered no better. Only your own messages are searched, so something
 only the assistant said is not found by itself.
 
@@ -150,6 +161,16 @@ sourcedrecall-memory context "Where do I live?"
 
 Needs Python 3.10+. The install is about 0.9 GB with its models and takes a minute or two; no PyTorch.
 After setup it runs offline.
+
+Notes, optional:
+
+```bash
+pip install -e './server[notes]'
+sourcedrecall-setup --notes            # small, 0.5 GB
+sourcedrecall-setup --notes standard   # 1.4 GB
+```
+
+`SOURCEDRECALL_NOTES=off` turns them off again.
 
 ## Privacy
 

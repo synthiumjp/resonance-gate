@@ -6,6 +6,15 @@ has the details behind each change.
 
 ## Unreleased
 
+- Built-in notes models that need no server: `pip install
+  'sourcedrecall[notes]'` and `sourcedrecall-setup --notes` (small, 0.5 GB)
+  or `--notes standard` (1.4 GB). Qwen3 trained to write the user's lasting
+  facts, run in-process on onnxruntime-genai. LoCoMo test 68.2% and 70.3%
+  (64.7% without notes, Mem0 64.6%). Before the model reads a conversation,
+  pronouns are replaced by who they refer to ("my kids" from the other side
+  becomes "Other's kids"), so its notes give the user fewer of the other
+  person's facts. A long session is read in parts instead of cut at 12,000
+  characters.
 - `profile_check(claim)` and `sourcedrecall-memory check`: did the user say
   this? The verdict (said, contradicted, unconfirmed, unclear, not found),
   what is known since (no longer true, may have changed, no later change
