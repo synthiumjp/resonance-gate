@@ -1947,6 +1947,68 @@ class Memory:
                         return True
         return False
 
+    def _digest(self, query, visible):
+        """A list question ("What instruments does Caroline play?") asks for
+        things of one kind said across many conversations. The message
+        search ranks chatty messages low, so the evidence for a list is the
+        part most often missing (LoCoMo multi-hop, notebook e311). This reads
+        the kind from the question's plural noun and collects the parser's
+        facts whose object is that kind in WordNet's hypernym hierarchy (a
+        clarinet and a violin are musical instruments), oldest first, as one
+        line. Too broad a kind (more than 12 facts: "activities") gives
+        nothing rather than everything."""
+        try:
+            from nltk.corpus import wordnet as wn
+        except Exception:
+            return None
+        m = re.search(r"\b(?:what|which)\s+(?:kinds?\s+of\s+|types?\s+of\s+)?"
+                      r"(?:\w+\s+){0,2}?([a-z]{3,}s)\b", query or "", re.I)
+        if not m:
+            return None
+        head = wn.morphy(m.group(1).lower(), wn.NOUN)
+        if not head:
+            return None
+        # every sense ("instrument" as music is its sixth), plus the
+        # change-detection roots for kinds WordNet does not file under the
+        # word itself (a cat is a feline, not a "pet")
+        targets = set(wn.synsets(head, pos=wn.NOUN))
+        try:
+            from currency import _CATEGORY_ROOTS
+            targets |= {wn.synset(x) for x in _CATEGORY_ROOTS.get(head, ())}
+        except Exception:
+            pass
+        if not targets:
+            return None
+        hits = []
+        for store in (self.g.nodes, self.g.provisional):
+            for nd in store.values():
+                text = nd.get("text") or ""
+                if (self.owner and not text.startswith(self.owner)) or nd.get("current") is False:
+                    continue
+                convs = nd.get("convs") or {}
+                if not any(visible({"conv": c}) for c in convs):
+                    continue
+                kind = False
+                for w in re.findall(r"[a-z]+", str(nd.get("value") or "").lower()):
+                    syns = wn.synsets(w, pos=wn.NOUN)[:1]
+                    if syns and (targets & set(syns[0].closure(lambda x: x.hypernyms()))
+                                 or targets & set(syns)):
+                        kind = True
+                        break
+                if kind:
+                    hits.append((str(min(convs.values()) if convs else ""), text))
+        if not hits or len(hits) > 12:
+            return None
+        seen, parts = set(), []
+        for date, text in sorted(hits):
+            t = text[len(self.owner):].strip() if self.owner else text
+            if t.lower() in seen:
+                continue
+            seen.add(t.lower())
+            parts.append(f"{t} ({date})" if date else t)
+        return (f"- (the memory's list of {m.group(1).lower()} from what "
+                f"{self.owner or 'the user'} said) " + "; ".join(parts))
+
     def _messages_block(self, query, max_facts):
         """2026-10-04: messages-first evidence (RG_EVIDENCE=messages). The
         user's own best-matching messages, dated, oldest first, with the
@@ -2058,6 +2120,12 @@ class Memory:
             if n:
                 line += "  (" + "; ".join(n) + ")"
             lines.append(line)
+        # 2026-10-07 (RG_DIGEST=1, experiment): for a list question, the
+        # parser's facts whose object is a kind of what is asked, one line
+        if listy and os.environ.get("RG_DIGEST") == "1":
+            d = self._digest(query, visible)
+            if d:
+                lines.append(d)
         # 2026-10-05: notes written by the user's own model (notes.py, opt-in)
         nf = getattr(self, "notes_for", None)
         rules = _RULES_MSG

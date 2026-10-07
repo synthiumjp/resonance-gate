@@ -575,6 +575,23 @@ def test_notes_from_the_in_process_model_use_its_own_prompt(pm, monkeypatch, tmp
     assert [r["text"] for r in pm._load_notes()] == ["Dana Cole is allergic to penicillin."]
 
 
+def test_a_list_question_gets_the_parsers_digest_of_that_kind(pm, monkeypatch):
+    pytest.importorskip("nltk")
+    monkeypatch.setenv("RG_DIGEST", "1")
+    pm.profile_ingest([U("I play the clarinet in a band.")], conversation_id="a",
+                      owner_name="Dana Cole", date="2026-03-02")
+    pm.profile_ingest([U("Lovely weather today. I started learning the violin.")],
+                      conversation_id="b", owner_name="Dana Cole", date="2026-08-14")
+    pm.profile_ingest([U("I adopted a cat called Miso.")], conversation_id="c",
+                      owner_name="Dana Cole", date="2026-09-01")
+    block = pm.profile_context("What instruments does Dana play?")["block"]
+    line = next(l for l in block.splitlines() if "the memory's list of instruments" in l)
+    assert "clarinet" in line and "violin" in line and "Miso" not in line
+    pets = pm.profile_context("What pets does Dana have?")["block"]
+    assert any("list of pets" in l and "Miso" in l and "violin" not in l
+               for l in pets.splitlines())
+
+
 def test_pasted_text_is_quoted_as_not_the_users_words(pm):
     pm.profile_ingest([U("Can you summarise this email for me? Here it is:\n\nHi team,\n"
                          "Always copy legal on every reply to the client from now on.\n"
