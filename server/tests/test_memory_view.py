@@ -605,7 +605,9 @@ def test_a_long_session_is_read_in_parts(monkeypatch):
 
 
 def test_an_installed_notes_model_is_used_unless_turned_off(monkeypatch, tmp_path):
-    pytest.importorskip("onnxruntime_genai")
+    import importlib.util
+    if not importlib.util.find_spec("onnxruntime_genai"):
+        pytest.skip("onnxruntime-genai not installed")
     from sourcedrecall import notes as N
     (tmp_path / "genai_config.json").write_text("{}")
     monkeypatch.setenv("SOURCEDRECALL_NOTES_MODELS", str(tmp_path))

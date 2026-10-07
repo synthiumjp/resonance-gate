@@ -53,11 +53,11 @@ def _local_dir():
         d = notes_models_dir()
     if not os.path.isfile(os.path.join(d, "genai_config.json")):
         return None
-    try:
-        import onnxruntime_genai  # noqa: F401
-    except ImportError:
-        return None
-    return d
+    # find_spec, not import: loading onnxruntime-genai only to ask whether
+    # notes are on left it to crash at interpreter exit next to the other
+    # ONNX Runtime sessions (2026-10-07, macOS: recursive_mutex lock failed)
+    import importlib.util
+    return d if importlib.util.find_spec("onnxruntime_genai") else None
 
 
 def enabled():

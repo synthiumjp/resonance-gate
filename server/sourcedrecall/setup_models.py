@@ -49,11 +49,20 @@ PARSER_ARCHIVE = ("https://huggingface.co/synthiumjp/sourcedrecall-parser-en/res
 PARSER_SHA256 = "921281ed755e8a4454cce27df56e18557123920e1df4b02443cade72e0e2f105"
 
 
-# 2026-10-06: the optional in-process notes model (notes.py): Qwen3-0.6B
-# trained to write the user's lasting facts, int4 ONNX for onnxruntime-genai.
-# Set at release time; SOURCEDRECALL_NOTES_ARCHIVE overrides.
-NOTES_ARCHIVE = None
-NOTES_SHA256 = None
+# 2026-10-07: the optional in-process notes models (notes.py), Qwen3 trained
+# to write the user's lasting facts, int4 ONNX for onnxruntime-genai
+# (tools/distil, MODEL_CARD_notes.md). LoCoMo test 68.2% (small) and 70.3%
+# (standard) against 64.7% without notes. SOURCEDRECALL_NOTES_ARCHIVE
+# overrides with a path or URL.
+_HF_NOTES = "https://huggingface.co/synthiumjp/sourcedrecall-notes-en/resolve/main/"
+NOTES_MODELS = {
+    "small": (_HF_NOTES + "sourcedrecall-notes-en-0.6b.tar.gz",
+              "db1b22779c3502665546780c91c5a8f3a1380f6e99570c05d3811e44b0c3d21e",
+              "~0.5 GB, 2-3 s a conversation"),
+    "standard": (_HF_NOTES + "sourcedrecall-notes-en-1.7b.tar.gz",
+                 "0202bbb89468ee44fc397af37df1628dc55b7b46a414bb09b549101634ce5d91",
+                 "~1.4 GB, about 4.5 s a conversation"),
+}
 
 
 def install_parser_archive(src, sha256=None):
@@ -130,23 +139,23 @@ def _mb(n):
     return f"{n / 1e6:,.0f} MB"
 
 
-def install_notes():
-    """`sourcedrecall-setup --notes`: install the notes model, which turns
-    notes on (about 0.5 GB; needs pip install 'sourcedrecall[notes]')."""
-    try:
-        import onnxruntime_genai  # noqa: F401
-    except ImportError:
+def install_notes(tier="small"):
+    """`sourcedrecall-setup --notes [small|standard]`: install a notes model,
+    which turns notes on (needs pip install 'sourcedrecall[notes]')."""
+    if tier not in NOTES_MODELS:
+        print(f"Unknown notes model '{tier}': small or standard.")
+        return 1
+    import importlib.util
+    if not importlib.util.find_spec("onnxruntime_genai"):
         print("Notes need onnxruntime-genai: pip install 'sourcedrecall[notes]'")
         return 1
-    src = os.environ.get("SOURCEDRECALL_NOTES_ARCHIVE") or NOTES_ARCHIVE
-    if not src:
-        print("No notes model has been published yet.")
-        return 1
+    url, sha, size = NOTES_MODELS[tier]
+    src = os.environ.get("SOURCEDRECALL_NOTES_ARCHIVE") or url
     from sourcedrecall.paths import notes_models_dir
     sha = (os.environ.get("SOURCEDRECALL_NOTES_SHA256")
-           or (NOTES_SHA256 if src == NOTES_ARCHIVE else None))
-    print("Notes model (writes short notes of what you said, in this process,"
-          " no server) -- ~0.5 GB", flush=True)
+           or (sha if src == url else None))
+    print(f"Notes model, {tier} (writes short notes of what you said, in this "
+          f"process, no server) -- {size}", flush=True)
     d = install_archive(src, sha, notes_models_dir(), "genai_config.json", "notes")
     print(f"      -> {d} ({_mb(_du(d))})\nNotes are on. To turn them off: "
           "SOURCEDRECALL_NOTES=off, or delete that folder.")
@@ -156,7 +165,9 @@ def install_notes():
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     if "--notes" in argv:
-        return install_notes()
+        i = argv.index("--notes")
+        tier = argv[i + 1] if i + 1 < len(argv) and not argv[i + 1].startswith("-") else "small"
+        return install_notes(tier)
     t0 = time.time()
     print("sourcedrecall setup: downloading the models the server uses.\n"
           "This is the only step that touches the network.\n")
