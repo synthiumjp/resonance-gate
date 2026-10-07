@@ -89,7 +89,10 @@ def install_archive(src, sha256, dest, marker, what):
             for m in t.getmembers():
                 if m.name.startswith(("/", "..")) or ".." in m.name.split("/"):
                     raise RuntimeError(f"{what} model archive: unsafe path " + m.name)
-            t.extractall(out)
+            try:
+                t.extractall(out, filter="data")      # Python 3.12+: no links out, no odd modes
+            except TypeError:
+                t.extractall(out)
         # the archive holds the marker file at its top or in one folder
         top = out
         if not os.path.exists(os.path.join(top, marker)):
