@@ -15382,3 +15382,27 @@ and how to run everything).
   against r5). Explicit person helps but does not close the gap: many of the
   remaining errors carry no pronoun ("the kids", "the trip").
 - Held-out next for r6: blind false memory v3/v4, then the LoCoMo test.
+
+## Entry 315 — 2026-10-07/08 (notes models published; release run; demo; pasted-text label; list digest)
+
+- Built-in notes models on HF (synthiumjp/sourcedrecall-notes-en; JP ran the
+  upload, the classifier blocks creating public repos): small = r6
+  (Qwen3-0.6B), standard = L1 (Qwen3-1.7B, same recipe). Installed from the
+  live URLs with the pinned sha256 on the Mac. Plugin option Notes = off |
+  small | standard (background install after the base; off by default).
+- Release run on 1754180 (tools/release_measure.sh, bench/RELEASE_1754180.log):
+  suite 1,176 passed; LoCoMo test 64.7 / 68.2 / 70.3 (default, small,
+  standard; the notes runs identical to their first runs, the default the
+  same 845 right as f078bf4 with categories 52.3/53.5/75.5 and 696 tokens);
+  LongMemEval any@5 98.8% (500); held out v3 0/30, v4 2/44 (new 41/44),
+  coding 0/51, projects 0/32 (unchanged facts 11/13, was 8). README numbers
+  now all from this one run.
+- bench/demo/demo.py: job change (plain retrieval returns only the old job),
+  an assistant's guess ("since you're vegan": plain retrieval's top result),
+  a pasted email. It showed pasted text quoted as the user's own in the
+  context; now `[pasted in, not the user's words: "..."]` (prose._drop_pasted;
+  changes no LoCoMo or development message, 1 held-out coding message).
+- RG_DIGEST=1 (off): a list question gets the parser's facts whose object is
+  that kind in WordNet (all senses + the change-detection category roots).
+  On dev list questions it fires on about a third, useful on about half of
+  those (books, plans; instruments and pets partial; "symbols" noise).
