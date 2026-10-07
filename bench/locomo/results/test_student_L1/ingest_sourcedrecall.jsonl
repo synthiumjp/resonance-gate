@@ -1,0 +1,16 @@
+{"speaker": "John", "messages": 663, "model_calls": 32, "seconds": 196.98380589485168, "conv": 2, "system": "sourcedrecall"}
+{"speaker": "Maria", "messages": 663, "model_calls": 32, "seconds": 191.73081588745117, "conv": 2, "system": "sourcedrecall"}
+{"speaker": "Joanna", "messages": 629, "model_calls": 29, "seconds": 160.3163194656372, "conv": 3, "system": "sourcedrecall"}
+{"speaker": "Nate", "messages": 629, "model_calls": 29, "seconds": 150.7853729724884, "conv": 3, "system": "sourcedrecall"}
+{"speaker": "Tim", "messages": 680, "model_calls": 29, "seconds": 177.5629439353943, "conv": 4, "system": "sourcedrecall"}
+{"speaker": "John", "messages": 680, "model_calls": 29, "seconds": 183.85571193695068, "conv": 4, "system": "sourcedrecall"}
+{"speaker": "Audrey", "messages": 675, "model_calls": 28, "seconds": 162.7128131389618, "conv": 5, "system": "sourcedrecall"}
+{"speaker": "Andrew", "messages": 675, "model_calls": 28, "seconds": 171.3160171508789, "conv": 5, "system": "sourcedrecall"}
+{"speaker": "James", "messages": 689, "model_calls": 31, "seconds": 172.2252562046051, "conv": 6, "system": "sourcedrecall"}
+{"speaker": "John", "messages": 689, "model_calls": 31, "seconds": 191.5369837284088, "conv": 6, "system": "sourcedrecall"}
+{"speaker": "Deborah", "messages": 681, "model_calls": 30, "seconds": 158.38840794563293, "conv": 7, "system": "sourcedrecall"}
+{"speaker": "Jolene", "messages": 681, "model_calls": 30, "seconds": 191.40299582481384, "conv": 7, "system": "sourcedrecall"}
+{"speaker": "Evan", "messages": 509, "model_calls": 25, "seconds": 145.98094701766968, "conv": 8, "system": "sourcedrecall"}
+{"speaker": "Sam", "messages": 509, "model_calls": 25, "seconds": 130.8779799938202, "conv": 8, "system": "sourcedrecall"}
+{"speaker": "Calvin", "messages": 568, "model_calls": 30, "seconds": 172.3246681690216, "conv": 9, "system": "sourcedrecall"}
+{"speaker": "Dave", "messages": 568, "model_calls": 30, "seconds": 175.97606897354126, "conv": 9, "system": "sourcedrecall"}
