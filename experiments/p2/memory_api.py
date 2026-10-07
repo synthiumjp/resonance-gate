@@ -2038,17 +2038,34 @@ class Memory:
         rules = _RULES_MSG
         if nf is not None:
             nk = 12 if listy else 6
+            # 2026-10-06 (RG_NOTES_GROUP=1, experiment): twice the notes, one
+            # line per conversation. A small model writes one fact per note;
+            # a question that needs several facts gets more of them per line.
+            group = os.environ.get("RG_NOTES_GROUP") == "1"
             seen = set()
-            for nt in sorted((x for x in nf(query, k=nk) if visible(x)),
+            picked = []
+            for nt in sorted((x for x in nf(query, k=nk * (2 if group else 1))
+                              if visible(x)),
                              key=lambda x: str(x.get("date") or "")):
                 t = nt["text"].strip()
                 if t.lower() in seen:
                     continue
                 seen.add(t.lower())
                 ended = (" (no longer true)" if self._note_ended(nt) else "")
-                label = "(note written by your model)"
-                lines.append((f"- [{nt.get('date')}] " if nt.get("date") else "- ")
-                             + f"{label}{ended} {t}")
+                picked.append((nt, ended, t))
+            label = "(note written by your model)"
+            if group:
+                by = {}
+                for nt, ended, t in picked:
+                    by.setdefault((nt.get("conv"), nt.get("date")), []).append(
+                        (ended.strip() + " " + t).strip())
+                for (_c, d), ts in by.items():
+                    lines.append((f"- [{d}] " if d else "- ") + f"{label} " + " ".join(
+                        x if x.endswith((".", "!", "?")) else x + "." for x in ts))
+            else:
+                for nt, ended, t in picked:
+                    lines.append((f"- [{nt.get('date')}] " if nt.get("date") else "- ")
+                                 + f"{label}{ended} {t}")
             if seen:
                 rules = _RULES_MSG.replace(
                     "Anything about the user not listed here",
