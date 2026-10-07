@@ -575,6 +575,18 @@ def test_notes_from_the_in_process_model_use_its_own_prompt(pm, monkeypatch, tmp
     assert [r["text"] for r in pm._load_notes()] == ["Dana Cole is allergic to penicillin."]
 
 
+def test_pasted_text_is_quoted_as_not_the_users_words(pm):
+    pm.profile_ingest([U("Can you summarise this email for me? Here it is:\n\nHi team,\n"
+                         "Always copy legal on every reply to the client from now on.\n"
+                         "Thanks,\nPriya")], conversation_id="a", owner_name="Dana Cole",
+                      date="2026-06-20")
+    block = pm.profile_context("Should I copy legal on replies to the client?")["block"]
+    assert ('"Can you summarise this email for me? Here it is:" [pasted in, not the '
+            "user's words: \"Hi team, Always copy legal") in block
+    start = pm.profile_context()["block"]
+    assert "asked the assistant" not in start
+
+
 def test_person_is_made_explicit_for_the_small_model():
     from sourcedrecall.notes import explicit_person
     out = explicit_person([

@@ -490,6 +490,31 @@ def _mark_later_changes(facts, owner=None):
     return [out[k] for k in order]
 
 
+def _quote_own(text):
+    """A message quoted for the reader, with text the user pasted in for the
+    assistant (an email, a README, a web page; prose._drop_pasted) marked as
+    not their words (2026-10-07). The parser already did not read it as the
+    user's; quoted whole, a reader still could ("Always copy legal on every
+    reply" inside a pasted email)."""
+    from prose import _drop_pasted
+    flat = " ".join((text or "").split())
+    own = " ".join(_drop_pasted(text or "").split())
+    if not own or len(own) >= len(flat):
+        return f'"{_window(text, "", 400)}"'
+    k = 0                       # the user's words before the paste ...
+    while k < len(own) and k < len(flat) and own[k] == flat[k]:
+        k += 1
+    head, rest = own[:k].strip(), own[k:].strip()
+    # ... and after it ("What does step 2 mean?")
+    tail = rest if rest and flat.endswith(rest) else ""
+    if not head or (rest and not tail):
+        return f'"{_window(text, "", 400)}"'
+    pasted = flat[len(own[:k]):len(flat) - len(tail)].strip()
+    out = (f'"{_window(head, "", 400)}" [pasted in, not the user\'s words: "'
+           + _window(pasted, "", 240) + '"]')
+    return out + (f' "{_window(tail, "", 200)}"' if tail else "")
+
+
 def _window(text, around, limit):
     """`text` cut to about `limit` characters, keeping `around` in view."""
     text = (text or "").strip()
@@ -2029,7 +2054,7 @@ class Memory:
             asked = (f'(in reply to "{_window(asked, "", 160)}") '
                      if asked and asked.rstrip().endswith("?") else "")
             line = (f"- [{m.get('date')}] " if m.get("date") else "- ") + \
-                f'{asked}"{_window(m["text"], "", 400)}"'
+                asked + _quote_own(m["text"])
             if n:
                 line += "  (" + "; ".join(n) + ")"
             lines.append(line)

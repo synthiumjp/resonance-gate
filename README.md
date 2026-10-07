@@ -117,6 +117,19 @@ tools: `bench/false_memory/HEAD_TO_HEAD.md`; LongMemEval:
 `bench/longmemeval/`). See [the write-up](docs/launch/WRITEUP_DRAFT.md) for
 the method and how to rerun it.
 
+## See it
+
+`python bench/demo/demo.py` stores three short conversations and shows, for
+three questions, what plain retrieval hands the assistant and what
+sourcedrecall does ([the output](bench/demo/OUTPUT.txt); no language model,
+the same on every run). Asked where Dana works after a job change, plain
+retrieval returns only the old job; sourcedrecall returns both, the old one
+marked "no longer true". Asked whether Dana is vegan, plain retrieval's top
+result is the assistant's own guess ("Since you're vegan..."); sourcedrecall
+has nothing, because Dana never said it. A pasted email's "Always copy legal
+on every reply" is shown as pasted, not as Dana's words, and never becomes
+a standing instruction.
+
 ## What it does
 
 - Stores your messages as you wrote them, with the date and the question

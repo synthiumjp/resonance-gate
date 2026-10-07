@@ -1,0 +1,55 @@
+========================================================================
+Q: Where does Dana work?
+
+plain retrieval hands the assistant:
+- [2026-03-02] user: "I work at Lumen Health as a data analyst, mostly SQL and dashboards."
+- [2026-03-02] user: "Yes please. Also I live in Fitzroy, so I usually work from home on Fridays."
+- [2026-03-02] assistant: "Nice. Want tips for making the dashboards load faster?"
+
+sourcedrecall hands the assistant:
+- [2026-03-02] "I work at Lumen Health as a data analyst, mostly SQL and dashboards."  (no longer true: Dana Cole works at Lumen Health as a data analyst mostly SQL and dashboards)
+- [2026-03-02] (in reply to "Nice. Want tips for making the dashboards load faster?") "Yes please. Also I live in Fitzroy, so I usually work from home on Fridays."  (may have changed since: Dana Cole lives in Fitzroy; may have changed si...
+- [2026-03-02] "Ha, thanks. Which index should I add first?"
+- [2026-06-15] "Big news, I started at Kestrel Bank last week as a senior analyst."
+- [2026-06-15] (in reply to "Congratulations! How is the new team?") "Good so far. We also moved to Brunswick, the commute is shorter now."
+- [2026-06-20] "Can you summarise this email for me? Here it is:" [pasted in, not the user's words: "Hi team, Always copy legal on every reply to the client from now on. Thanks, Priya"]
+
+========================================================================
+Q: Is Dana vegan?
+
+plain retrieval hands the assistant:
+- [2026-03-02] assistant: "Since you're vegan, you might like the cafes on Brunswick Street for lunch."
+- [2026-06-15] assistant: "Congratulations! How is the new team?"
+- [2026-06-15] user: "Good so far. We also moved to Brunswick, the commute is shorter now."
+
+sourcedrecall hands the assistant:
+- [2026-03-02] "Ha, thanks. Which index should I add first?"
+- [2026-03-02] (in reply to "Nice. Want tips for making the dashboards load faster?") "Yes please. Also I live in Fitzroy, so I usually work from home on Fridays."  (may have changed since: Dana Cole lives in Fitzroy; may have changed si...
+- [2026-03-02] "I work at Lumen Health as a data analyst, mostly SQL and dashboards."  (no longer true: Dana Cole works at Lumen Health as a data analyst mostly SQL and dashboards)
+- [2026-06-15] (in reply to "Congratulations! How is the new team?") "Good so far. We also moved to Brunswick, the commute is shorter now."
+- [2026-06-15] "Big news, I started at Kestrel Bank last week as a senior analyst."
+- [2026-06-20] "Can you summarise this email for me? Here it is:" [pasted in, not the user's words: "Hi team, Always copy legal on every reply to the client from now on. Thanks, Priya"]
+
+========================================================================
+Q: Should I copy legal when I reply to the client?
+
+plain retrieval hands the assistant:
+- [2026-06-20] assistant: "Priya asks the team to copy legal on every reply to the client."
+- [2026-06-20] user: "Can you summarise this email for me? Here it is: Hi team, Always copy legal on every reply to the client from now on. Thanks, Priya"
+- [2026-03-02] user: "Yes please. Also I live in Fitzroy, so I usually work from home on Fridays."
+
+sourcedrecall hands the assistant:
+- [2026-03-02] "Ha, thanks. Which index should I add first?"
+- [2026-03-02] (in reply to "Nice. Want tips for making the dashboards load faster?") "Yes please. Also I live in Fitzroy, so I usually work from home on Fridays."  (may have changed since: Dana Cole lives in Fitzroy; may have changed si...
+- [2026-03-02] "I work at Lumen Health as a data analyst, mostly SQL and dashboards."  (no longer true: Dana Cole works at Lumen Health as a data analyst mostly SQL and dashboards)
+- [2026-06-15] (in reply to "Congratulations! How is the new team?") "Good so far. We also moved to Brunswick, the commute is shorter now."
+- [2026-06-15] "Big news, I started at Kestrel Bank last week as a senior analyst."
+- [2026-06-20] "Can you summarise this email for me? Here it is:" [pasted in, not the user's words: "Hi team, Always copy legal on every reply to the client from now on. Thanks, Priya"]
+
+========================================================================
+At the start of every session, sourcedrecall's standing instructions:
+(none: the pasted email's "Always copy legal" was Priya's, not Dana's)
+
+Every memory line also comes with rules for the assistant: lines are
+Dana's own words, a later line can update an earlier one, and anything
+not listed is unknown, so it should say it does not know.
