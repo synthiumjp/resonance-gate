@@ -135,6 +135,12 @@ _ADVICE_Q = re.compile(
     r"|\b(?:what|which|where|how)\b(?:\s+[\w'-]+){0,3}?\s+should i\b"
     r"|^\W*(?:[\w'-]+\s+){0,8}?should i (?:go|get|buy|use|pick|choose|try|switch|learn|take)\b",
     re.I)
+# 2026-10-09 (adversarial review): not advice -- the past ("how should I have
+# known"), what to expect or see ("what should I expect from this regex"),
+# how long or how much ("how long should I wait")
+_NOT_ADVICE = re.compile(
+    r"\bshould i have\b|\bshould i (?:expect|see|be seeing|get back|be getting)\b|"
+    r"\bhow (?:long|many|much|often|far)\b[^?]*\bshould i\b", re.I)
 _ADVICE_RULE = ("This is a request for advice: fit it to what the user said "
                 "above (what they own, use, like, cannot do or have decided), "
                 "and say which of their lines you relied on.")
@@ -2097,7 +2103,7 @@ class Memory:
             return ("[MEMORY] Nothing stored matches this topic. The user's "
                     "details on this are UNKNOWN: say so rather than "
                     "guessing.\n" + _RULES_MSG)
-        advice = bool(_ADVICE_Q.search(query or ""))
+        advice = bool(_ADVICE_Q.search(query or "")) and not _NOT_ADVICE.search(query or "")
         advice = advice and os.environ.get("RG_ADVICE_RULE") != "0"
         if advice:
             # the message search's two best first (for advice it ranks by

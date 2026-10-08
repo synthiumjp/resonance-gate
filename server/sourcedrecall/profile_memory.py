@@ -661,6 +661,12 @@ _ADVICE_Q = re.compile(
     r"|\b(?:what|which|where|how)\b(?:\s+[\w'-]+){0,3}?\s+should i\b"
     r"|^\W*(?:[\w'-]+\s+){0,8}?should i (?:go|get|buy|use|pick|choose|try|switch|learn|take)\b",
     re.I)
+# 2026-10-09 (adversarial review): not advice -- the past ("how should I have
+# known"), what to expect or see ("what should I expect from this regex"),
+# how long or how much ("how long should I wait")
+_NOT_ADVICE = re.compile(
+    r"\bshould i have\b|\bshould i (?:expect|see|be seeing|get back|be getting)\b|"
+    r"\bhow (?:long|many|much|often|far)\b[^?]*\bshould i\b", re.I)
 
 
 def _messages_for(query, k=3):
@@ -703,7 +709,7 @@ def _messages_for(query, k=3):
                                   fuse=(tuple(float(x) for x in os.environ.get(
                                       "RG_FUSE3_W", "0.3/0.3").split("/"))
                                         if os.environ.get("RG_FUSE3") == "1"
-                                        else (0.2, 0.0) if (_ADVICE_Q.search(query or "")
+                                        else (0.2, 0.0) if (_ADVICE_Q.search(query or "") and not _NOT_ADVICE.search(query or "")
                                                             and os.environ.get("RG_ADVICE_ROUTE", "1") != "0")
                                         else None),
                                   colbert=(0.3, 1.0, 0.3) if os.environ.get("RG_COLBERT_DIR") else None)
