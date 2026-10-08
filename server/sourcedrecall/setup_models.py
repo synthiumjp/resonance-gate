@@ -102,6 +102,11 @@ def install_archive(src, sha256, dest, marker, what):
             try:
                 t.extractall(out, filter="data")      # Python 3.12+: no links out, no odd modes
             except TypeError:
+                # 2026-10-09 (security review): older Pythons have no filter;
+                # only plain files and folders are accepted there
+                bad = [m.name for m in t.getmembers() if not (m.isfile() or m.isdir())]
+                if bad:
+                    raise RuntimeError(f"{what} model archive: unexpected member {bad[0]}")
                 t.extractall(out)
         # the archive holds the marker file at its top or in one folder
         top = out

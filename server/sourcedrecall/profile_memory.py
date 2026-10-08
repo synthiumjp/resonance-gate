@@ -300,7 +300,7 @@ def _iso_date(date):
 
 
 def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
-                   date=None, scope=None):
+                   date=None, scope=None, instructions=True):
     """Turn ONE conversation into new profile-memory facts -- the only WRITE
     path in this module that runs an extractor, and it is rgx: a deterministic
     parser, NOT a language model. No prompt, no sampling, no invented text --
@@ -456,7 +456,11 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
                                    prev=before if role == "user" else None)
             facts = [f for f in (_rgx_facts.to_fact(r) for r in recs)
                      if f is not None and MARK not in str(f.get("value"))
-                     and MARK not in str(f.get("text"))]
+                     and MARK not in str(f.get("text"))
+                     # 2026-10-09 (security review): what an agent stores
+                     # through the MCP tool cannot become a standing
+                     # instruction that leads every later session
+                     and (instructions or f.get("attribute") != "instruction")]
             for f in facts:
                 if f.get("evidential") == "report":
                     n_hearsay += 1

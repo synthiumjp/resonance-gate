@@ -255,10 +255,15 @@ def profile_ingest(turns: list[dict], conversation_id: str = None,
 
     `date` (ISO, e.g. "2026-09-25" or "2026-09-25T14:00:00Z") is when the
     conversation HAPPENED; default now. Pass it when importing older chats:
-    which of two statements is newer decides what is "no longer true"."""
+    which of two statements is newer decides what is "no longer true".
+
+    Standing instructions are not stored from this tool: an agent that was
+    talked into calling it could otherwise plant one that leads every later
+    session. Sessions captured by the hooks store them as usual."""
     from sourcedrecall.paths import current_scope
     return pmem.profile_ingest(turns, conversation_id, title, owner_name,
-                               date=date, scope=current_scope(scope))
+                               date=date, scope=current_scope(scope),
+                               instructions=False)
 
 
 def _default_memory_dir():
