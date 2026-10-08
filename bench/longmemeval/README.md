@@ -55,3 +55,11 @@ embeddings; that routing was chosen on those 30 questions.
 turns); `report.py` computes the tables. The results also carry a column
 from an option (`RG_FUSE`) that was tested on LoCoMo and not adopted; it is
 not reported.
+
+## Preference questions, answer level (2026-10-08)
+
+`pref_answers.py`: each of the 30 single-session-preference questions is
+stored, sourcedrecall builds its block, the local Qwen3-14B answers, and the
+same model judges the answer against the question's own description of what
+the user would prefer. With the advice handling (commit 632d83a) 16/30,
+without it 13/30 (+5/-2): `pref_answers_on.jsonl`, `pref_answers_off.jsonl`.

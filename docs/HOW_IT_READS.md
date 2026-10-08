@@ -203,13 +203,25 @@ Tried and refuted for the same problem (output filters, after the model):
 
 **A request for advice is answered by what the user owns or likes.**
 Questions addressed to the assistant ("Can you recommend...", "any tips
-for...", "what should I...") rank messages by embeddings with a little BM25
-instead of the cross-encoder trained on web queries.
+for...", "which editor should I use", "how should I...") rank messages by
+embeddings with a little BM25 instead of the cross-encoder trained on web
+queries; and the block tells the reader to fit the advice to what the user
+said, with the best-matching messages first.
 - LongMemEval single-session preference questions (30): session recall@5
-  90.0% -> 100%, @1 56.7% -> 70.0%. The weighting was chosen on those 30, so
-  this is not a held-out figure. The pattern matched none of the other 470
-  LongMemEval questions or LoCoMo's 1,986.
-- Status: supported, tuned.
+  90.0% -> 100%, @1 56.7% -> 70.0% (weighting chosen on those 30).
+- Held-out v5 found the reader not using what was found: the earlier mention
+  was in the block 10/10 times and in the answer 2/10 (plain retrieval's
+  three messages: 8/10). The memory's own rule, "anything about the user not
+  listed here is UNKNOWN: say you don't know", read as a reason not to
+  advise. Reworded for advice, with a line asking for advice fitted to the
+  user's words and the best matches first: development advice set (24) the
+  mention used 10 -> 21 (plain retrieval 15), "I don't know" 11 -> 2.
+  Confirmed on data it was not tuned on: LongMemEval preference answers
+  judged against each question's own description of what the user would
+  prefer, 13 -> 16 of 30 (+5/-2).
+- The pattern matches none of LongMemEval's 470 other questions or LoCoMo's
+  1,986, so those results cannot move.
+- Status: supported; the answer-level gain held out is small.
 
 ## Checking a claim
 

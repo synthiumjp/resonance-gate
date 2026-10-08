@@ -6,6 +6,13 @@ has the details behind each change.
 
 ## Unreleased
 
+- Requests for advice use what you told the assistant: the memory no
+  longer reads its "unknown" rule as a reason to give no advice, and puts
+  the best-matching messages first. Development advice set: your earlier
+  mention used in 21 of 24 answers (10 before); LongMemEval preference
+  answers 16 of 30 (13 before). Found by the held-out set v5.
+- Text you paste for the assistant (an email, a README) is shown to it as
+  pasted, not as your words.
 - Built-in notes models that need no server: `pip install
   'sourcedrecall[notes]'` and `sourcedrecall-setup --notes` (small, 0.5 GB)
   or `--notes standard` (1.4 GB). Qwen3 trained to write the user's lasting
