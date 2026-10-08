@@ -10,7 +10,8 @@ has the details behind each change.
   longer reads its "unknown" rule as a reason to give no advice, and puts
   the best-matching messages first. Development advice set: your earlier
   mention used in 21 of 24 answers (10 before); LongMemEval preference
-  answers 16 of 30 (13 before). Found by the held-out set v5.
+  answers 16 of 30 (13 before; not significant). Found by the held-out set
+  v5; no held-out number for the fix yet.
 - Text you paste for the assistant (an email, a README) is shown to it as
   pasted, not as your words.
 - Built-in notes models that need no server: `pip install

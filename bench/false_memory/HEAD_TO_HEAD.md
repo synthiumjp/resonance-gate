@@ -1,7 +1,7 @@
 # Head-to-head: memory tools that store without a language model
 
 2026-10-05. Two other open-source memory tools that, like sourcedrecall, make
-no model calls when they store a conversation, run on the held-out
+no model calls when they store a conversation, run on the
 false-memory sets with the same reader and judge as the published runs.
 
 | | version | how a conversation was stored | what a question returns |
@@ -17,7 +17,17 @@ the judge (Qwen3-14B) decides whether the answer states the out-of-date or
 never-said proposition as currently true. Adapters:
 `adapters_h2h.py`; runner: `run_system.py agentmemory|ai-memory`.
 
-## Results (held out, audited)
+## Results
+
+Caveats found by the adversarial review of 2026-10-09
+(`docs/REVIEW_2026-10-09.md`), to be read before these numbers: the reader
+got sourcedrecall's lines with the product's rules paragraph and the other
+systems' lines without it (`answer.py`), so part of a difference may be the
+instruction; only the projects false-memory row is a statistically clear
+difference (Fisher p=0.002; v4 2 vs 5 p=0.43, coding 0 vs 2 p=0.50); these
+sets were written for this project and have been run many times during
+development; the judge does not see the question. A rerun with one
+instruction for every system and a blinded audit replaces this table.
 
 | | sourcedrecall | agentmemory | ai-memory | plain retrieval |
 |---|---|---|---|---|

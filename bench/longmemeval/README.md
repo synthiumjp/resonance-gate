@@ -62,4 +62,6 @@ not reported.
 stored, sourcedrecall builds its block, the local Qwen3-14B answers, and the
 same model judges the answer against the question's own description of what
 the user would prefer. With the advice handling (commit 632d83a) 16/30,
-without it 13/30 (+5/-2): `pref_answers_on.jsonl`, `pref_answers_off.jsonl`.
+without it 13/30 (+5/-2, sign test p~0.45, not significant):
+`pref_answers_on.jsonl`, `pref_answers_off.jsonl`. The retrieval routing for
+these questions was chosen on the same 30, so this is not held out.

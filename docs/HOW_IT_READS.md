@@ -11,7 +11,9 @@ The parser is Stanza 1.14.0's English pipeline (Universal Dependencies
 parses), run without PyTorch through `stanza_ort`; the rules are in `rgx/`
 and `experiments/p2/`. Measurements come from `bench/` (readable development
 sets unless marked held out; held-out sets were written before any system
-saw them and are read only as counts). Last measured 2026-10-07.
+saw them and are read only as counts, but v2-v4 and the coding and projects
+sets have since been run many times and some rules were written from their
+error categories, so only v5 is clean; see `docs/REVIEW_2026-10-09.md`). Last measured 2026-10-07.
 
 ## Held-out test (v5, pre-registered)
 
@@ -216,12 +218,15 @@ said, with the best-matching messages first.
   advise. Reworded for advice, with a line asking for advice fitted to the
   user's words and the best matches first: development advice set (24) the
   mention used 10 -> 21 (plain retrieval 15), "I don't know" 11 -> 2.
-  Confirmed on data it was not tuned on: LongMemEval preference answers
-  judged against each question's own description of what the user would
-  prefer, 13 -> 16 of 30 (+5/-2).
+  On LongMemEval's preference answers, judged against each question's own
+  description of what the user would prefer: 13 -> 16 of 30 (+5/-2, not
+  significant, and the retrieval routing was chosen on these same 30).
 - The pattern matches none of LongMemEval's 470 other questions or LoCoMo's
   1,986, so those results cannot move.
-- Status: supported; the answer-level gain held out is small.
+- Status: supported on development data; no held-out answer-level number.
+  The adversarial review found the pattern also fires on ordinary coding
+  questions ("Where should I put the config file?") and on "how should I
+  have known"; to be narrowed and measured on a coding set.
 
 ## Checking a claim
 
