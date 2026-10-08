@@ -5,6 +5,7 @@ conversations ranked by first appearance among
 profile_memory._messages_for(question, k=50). Prints counts and ids only.
 
     FM_CASES=cases_v5.jsonl python v5_advice.py
+    FM_CASES=cases_dev_advice.jsonl ADVICE_SUBTYPE=advice_ python v5_advice.py
 """
 import json
 import os
@@ -26,7 +27,7 @@ def main():
     hit = n = 0
     miss = []
     for c in cases:
-        if not str(c.get("subtype", "")).startswith("F_"):
+        if not str(c.get("subtype", "")).startswith(os.environ.get("ADVICE_SUBTYPE", "F_")):
             continue
         wd = tempfile.mkdtemp(prefix="v5f-")
         os.environ["RG_MEMORY_DIR"] = wd

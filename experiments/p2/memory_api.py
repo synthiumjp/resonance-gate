@@ -110,6 +110,25 @@ def _personal_sentences(text):
 
 
 # the rules for messages-first evidence (RG_EVIDENCE=messages)
+# 2026-10-08 (held-out v5): asked for advice, a reader given these lines
+# used the user's earlier mention in 2 of 10 answers (plain retrieval's three
+# messages: 8), though the mention was in the block every time. Candidates,
+# measured on cases_dev_advice.jsonl: RG_ADVICE_RULE=1 (a line telling it to
+# fit the advice to what the user said), RG_ADVICE_FIRST=1 (the best-matching
+# messages first).
+_ADVICE_Q = re.compile(
+    r"\b(?:can|could|would) you (?:please )?(?:recommend|suggest|give me (?:some|any)|"
+    r"help me (?:find|choose|pick|plan|decide))"
+    r"|\bany (?:tips|ideas|advice|suggestions|recommendations)\b"
+    r"|\bwhat should i\b|\bwhich (?:\w+ )?should i\b"
+    r"|\bdo you have any (?:tips|ideas|advice|suggestions|recommendations)\b"
+    r"|\b(?:recommend|suggest) (?:me|some|a few)\b"
+    r"|\bi(?:'d| would) (?:love|like) (?:some|a few) (?:tips|ideas|suggestions|recommendations)\b",
+    re.I)
+_ADVICE_RULE = ("This is a request for advice: fit it to what the user said "
+                "above (what they own, use, like, cannot do or have decided), "
+                "and say which of their lines you relied on.")
+
 _RULES_MSG = ("[MEMORY RULES] Each line is something the user said, word for "
               "word, with the date; (in reply to \"...\") is the question they "
               "were answering. Lines run oldest first and a later line can "
@@ -2035,7 +2054,17 @@ class Memory:
             return ("[MEMORY] Nothing stored matches this topic. The user's "
                     "details on this are UNKNOWN: say so rather than "
                     "guessing.\n" + _RULES_MSG)
-        msgs.sort(key=lambda m: str(m.get("date") or ""))
+        advice = bool(_ADVICE_Q.search(query or ""))
+        if advice and os.environ.get("RG_ADVICE_FIRST") == "1":
+            # the message search's two best first (for advice it ranks by
+            # embeddings, profile_memory._ADVICE_Q), then the rest oldest first
+            best = {re.sub(r"\W+", " ", m["text"]).strip().lower() for m in hits[:2]}
+            key = lambda m: re.sub(r"\W+", " ", m["text"]).strip().lower()
+            top = [m for m in msgs if key(m) in best]
+            msgs = top + sorted((m for m in msgs if key(m) not in best),
+                                key=lambda m: str(m.get("date") or ""))
+        else:
+            msgs.sort(key=lambda m: str(m.get("date") or ""))
         notes = self._message_notes(msgs)
         # a phrase the user linked to a name ("my home country, Sweden"),
         # used without the name: the name goes in the note
@@ -2098,6 +2127,8 @@ class Memory:
                     "user's own model wrote from a conversation on that date; "
                     "the quoted lines are what the user actually said. "
                     "Anything about the user not listed here")
+        if advice and os.environ.get("RG_ADVICE_RULE") == "1":
+            rules += " " + _ADVICE_RULE
         return head + "\n" + "\n".join(lines) + "\n" + rules
 
     def context_block(self, query=None, max_facts=15):
