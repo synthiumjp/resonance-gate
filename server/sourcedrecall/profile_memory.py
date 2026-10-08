@@ -333,7 +333,8 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
     # 2026-10-09 (security review): the title too -- hooks make it from the
     # first 60 characters of the first message, before any scrubbing
     title = scrub(title) if title else title
-    turns = [dict(t, content=scrub(t.get("content")))
+    _fk = _forgotten_keys() if os.environ.get("RG_MEMORY_DIR") else set()
+    turns = [dict(t, content=_strip_forgotten(scrub(t.get("content")), _fk))
              if isinstance(t, dict) and isinstance(t.get("content"), str) else t
              for t in turns]
     if not turns:
@@ -1528,6 +1529,105 @@ def _note_id(r):
     return "n" + hashlib.sha1(f"{r.get('conv')}\x00{r['text']}".encode()).hexdigest()[:5]
 
 
+# 2026-10-09 (security review): forgetting only appended a "deny" line --
+# which itself kept the sentence in clear -- and hid it at read time; the
+# words stayed in conversations.json and the cache. Now the sentence is
+# erased from both, only a hash of it is kept (forgotten.jsonl), and the
+# same hashes strip it from every message stored later, so a resumed
+# session that re-sends the transcript does not bring it back.
+_PIECES = re.compile(r"((?<=[.!?])\s+|\n+)")
+
+
+def _forget_key(text):
+    import hashlib
+    k = re.sub(r"\W+", " ", text or "").strip().lower()
+    return hashlib.sha256(k.encode()).hexdigest() if k else None
+
+
+def _forgotten_path():
+    return os.path.join(_data_dir(), "forgotten.jsonl")
+
+
+def _forgotten_keys():
+    try:
+        with open(_forgotten_path(), encoding="utf-8") as fh:
+            return {json.loads(l)["h"] for l in fh if l.strip()}
+    except (OSError, ValueError, KeyError):
+        return set()
+
+
+def _strip_forgotten(text, keys):
+    """The text without the sentences whose key is forgotten."""
+    if not keys or not text:
+        return text
+    parts = _PIECES.split(str(text))
+    out, dropped = [], False
+    for i in range(0, len(parts), 2):
+        piece = parts[i]
+        sep = parts[i + 1] if i + 1 < len(parts) else ""
+        if piece.strip() and _forget_key(piece) in keys:
+            dropped = True
+            continue
+        out.append(piece + sep)
+    if not dropped:
+        return text
+    rest = "".join(out).strip()
+    return rest or "[forgotten]"
+
+
+def _erase(said):
+    """Erase a sentence the user asked to forget from everything on disk."""
+    key = _forget_key(said)
+    if not key:
+        return False
+    with _lock:
+        keys = _forgotten_keys() | {key}
+        with open(_forgotten_path(), "a", encoding="utf-8") as fh:
+            fh.write(json.dumps({"h": key}) + "\n")
+        conv_path = _conversations_path()
+        try:
+            convs = json.load(open(conv_path))
+        except (OSError, ValueError):
+            convs = []
+        for c in convs:
+            for m in c.get("chat_messages") or []:
+                if m.get("text"):
+                    m["text"] = _strip_forgotten(m["text"], keys)
+        tmp = conv_path + f".{os.getpid()}.tmp"
+        with open(tmp, "w", encoding="utf-8") as fh:
+            json.dump(convs, fh)
+        os.replace(tmp, conv_path)
+        cache = _cache_path()
+        if os.path.exists(cache):
+            lines = []
+            for line in open(cache, encoding="utf-8"):
+                try:
+                    r = json.loads(line)
+                except ValueError:
+                    continue
+                r["f"] = [f for f in r.get("f") or []
+                          if _forget_key(f.get("source") or f.get("said") or "") not in keys]
+                lines.append(json.dumps(r))
+            tmp = cache + f".{os.getpid()}.tmp"
+            with open(tmp, "w", encoding="utf-8") as fh:
+                fh.write("".join(l + "\n" for l in lines))
+            os.replace(tmp, cache)
+        # the deny line kept the sentence in clear; nothing is left to hide
+        cpath = _corrections_path()
+        if os.path.exists(cpath):
+            kept = [l for l in open(cpath, encoding="utf-8")
+                    if not (l.strip() and _forget_key(json.loads(l).get("said") or "") == key)]
+            tmp = cpath + f".{os.getpid()}.tmp"
+            with open(tmp, "w", encoding="utf-8") as fh:
+                fh.write("".join(kept))
+            os.replace(tmp, cpath)
+        _state["transcripts"] = None
+        _state["msg_index"] = None
+        _drop_embeddings()
+        _reload_locked()
+    return True
+
+
 def profile_forget(fact_id):
     """Remove one fact by its id (as shown in recall results and MEMORY.md).
     A quoted sentence ("their words", ids starting with "u") can be
@@ -1553,6 +1653,7 @@ def profile_forget(fact_id):
         if u is None:
             return {"forgotten": False, "error": f"no fact with id {fact_id}"}
         profile_correct("deny", "said", u["value"], exact=True, said=u["value"])
+        _erase(u["value"])
         _export_quietly()
         return {"forgotten": True, "fact": {"id": fact_id, "text": None,
                                             "said": u["value"]},
@@ -1565,8 +1666,9 @@ def profile_forget(fact_id):
     # current again -- and covers the hearsay tier; the names the sentence
     # introduced ("my dog Biscuit") leave the parser's saved world.
     _forget_names(f.get("said"))
-    with _lock:
-        _reload_locked()
+    if not _erase(f.get("said")):
+        with _lock:
+            _reload_locked()
     _export_quietly()
     return {"forgotten": True, "fact": {k: f[k] for k in ("id", "text", "said")},
             "applied": out.get("applied")}

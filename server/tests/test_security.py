@@ -151,3 +151,50 @@ def test_processes_writing_at_once_lose_nothing(tmp_path):
     assert all(p.wait(timeout=600) == 0 for p in procs)
     convs = json.load(open(tmp_path / "mem" / "conversations.json"))
     assert len(convs) == 20
+
+
+# ---- forget erases, and stays forgotten ------------------------------------
+
+@pytest.fixture
+def pmem(tmp_path, monkeypatch):
+    monkeypatch.setenv("RG_MEMORY_DIR", str(tmp_path))
+    monkeypatch.setenv("RG_NLI", "0")
+    monkeypatch.setenv("SOURCEDRECALL_NOTES_MODELS", str(tmp_path / "no-notes-model"))
+    import sourcedrecall.profile_memory as pm
+    pm._state.update({"mem": None, "audit_pass": None, "needs_reload": False,
+                      "uncached_turns": None, "transcripts": None})
+    return pm
+
+
+def _all_files_text(d):
+    out = ""
+    for root, _dirs, files in os.walk(d):
+        for f in files:
+            if f.endswith((".json", ".jsonl", ".md")):
+                out += open(os.path.join(root, f), encoding="utf-8", errors="replace").read()
+    return out
+
+
+def test_forget_erases_the_sentence_everywhere_and_it_stays_forgotten(pmem, tmp_path, monkeypatch):
+    pm = pmem
+    from sourcedrecall import notes as N
+    monkeypatch.setenv("SOURCEDRECALL_NOTES_URL", "http://127.0.0.1:9/v1")
+    monkeypatch.setenv("SOURCEDRECALL_NOTES_MODEL", "fake")
+    monkeypatch.setattr(N, "_call", lambda prompt, timeout=600: "\n".join(
+        l for l in ("Dana Cole lives in Fitzroy.", "Dana Cole works at Acme.")
+        if l.split()[-1].rstrip(".") in prompt))
+    turns = [{"role": "user", "content": "I live in Fitzroy and my dog is called Biscuit. "
+                                         "I work at Acme."}]
+    pm.profile_ingest(turns, conversation_id="a", owner_name="Dana Cole", date="2026-03-02")
+    hit = next(f for f in pm.profile_recall("Where do I live?")["ranked"]
+               if "Fitzroy" in (f.get("said") or ""))
+    pm.profile_forget(hit["id"])
+    assert "Fitzroy" not in _all_files_text(tmp_path)
+    assert "Fitzroy" not in pm.profile_context("Where do I live?")["block"]
+    assert "Acme" in pm.profile_context("Where do I work?")["block"]
+    # a resumed session re-sends the whole transcript
+    pm.profile_ingest(turns + [{"role": "assistant", "content": "Noted."},
+                               {"role": "user", "content": "I also like hiking."}],
+                      conversation_id="a", owner_name="Dana Cole", date="2026-03-02")
+    assert "Fitzroy" not in _all_files_text(tmp_path)
+    assert not any("Fitzroy" in n["text"] for n in pm._load_notes())

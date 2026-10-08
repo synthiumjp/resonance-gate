@@ -170,10 +170,15 @@ become a standing instruction.
 - For a question, it finds your messages two ways, through the parser's
   facts and through a search over the messages themselves (small embedding
   and re-ranking models, run locally), and shows them oldest first.
-- `MEMORY.md` and a local web page show everything stored. Forget anything
-  by its id and it is no longer recalled or quoted.
+- `MEMORY.md` and a local web page (its address, with a key for this run,
+  from `sourcedrecall-memory view`) show everything stored. Forget anything
+  by its id and the sentence it came from is erased from the stored
+  messages, the facts and the notes; only a fingerprint of it is kept, so a
+  resumed session that sends it again does not bring it back.
 - Common secret formats (API keys and tokens, private keys, card numbers,
-  "password: ...") are removed before anything is stored.
+  "password: ...", `DB_PASSWORD=...` in a pasted config) are removed before
+  anything is stored, from titles too. The memory folder is readable by you
+  only.
 - Memory about a project stays with that project. Standing instructions
   ("never add comments to my code") lead every session.
 - Text you paste in for the assistant with an introduction ("Here's the
