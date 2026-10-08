@@ -361,6 +361,10 @@ def _export_json(path):
                          if os.path.basename(n) == "conversations.json"), None)
             if name is None:
                 raise ValueError("no conversations.json in " + path)
+            # 2026-10-09 (security review): a crafted zip can expand to far
+            # more than it looks; real exports are well under this
+            if z.getinfo(name).file_size > 4 * 1024 ** 3:
+                raise ValueError("conversations.json in " + path + " is over 4 GB")
             return json.loads(z.read(name).decode("utf-8"))
     if os.path.isdir(path):
         path = os.path.join(path, "conversations.json")

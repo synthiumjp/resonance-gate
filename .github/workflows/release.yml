@@ -3,7 +3,8 @@
 # anywhere. One-time setup on pypi.org (project "sourcedrecall"): add a
 # trusted publisher for this repository, workflow "release.yml",
 # environment "pypi". Until then this workflow fails at the upload step and
-# publishes nothing.
+# publishes nothing. Actions are pinned to commits (2026-10-09 review); on
+# pypi.org, also require a reviewer for the "pypi" environment.
 name: release
 on:
   push:
@@ -12,8 +13,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262  # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
         with: {python-version: "3.12"}
       - run: python -m pip install build
       - name: version in the tag matches the package
@@ -21,7 +22,7 @@ jobs:
           v=$(sed -n 's/^version = "\(.*\)"/\1/p' server/pyproject.toml)
           test "sourcedrecall-v$v" = "${GITHUB_REF_NAME}" || { echo "tag ${GITHUB_REF_NAME} but pyproject has $v"; exit 1; }
       - run: python tools/build_wheel.py
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
         with: {name: dist, path: server/dist/}
   publish:
     needs: build
@@ -30,6 +31,6 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093  # v4
         with: {name: dist, path: dist/}
-      - uses: pypa/gh-action-pypi-publish@release/v1
+      - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33  # release/v1
