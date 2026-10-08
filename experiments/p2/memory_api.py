@@ -112,10 +112,13 @@ def _personal_sentences(text):
 # the rules for messages-first evidence (RG_EVIDENCE=messages)
 # 2026-10-08 (held-out v5): asked for advice, a reader given these lines
 # used the user's earlier mention in 2 of 10 answers (plain retrieval's three
-# messages: 8), though the mention was in the block every time. Candidates,
-# measured on cases_dev_advice.jsonl: RG_ADVICE_RULE=1 (a line telling it to
-# fit the advice to what the user said), RG_ADVICE_FIRST=1 (the best-matching
-# messages first).
+# messages: 8), though the mention was in the block every time; it answered
+# "I don't know", reading the UNKNOWN rule as a reason not to advise. On the
+# development advice set (cases_dev_advice.jsonl, 24) the mention was used in
+# 10/24; a line asking it to fit the advice to what the user said, that rule
+# reworded for advice, and the message search's two best first: 15/24 (plain
+# retrieval 15; each part alone 13-14, three messages only 14). The default
+# for requests for advice; RG_ADVICE_RULE=0 turns it off.
 _ADVICE_Q = re.compile(
     r"\b(?:can|could|would) you (?:please )?(?:recommend|suggest|give me (?:some|any)|"
     r"help me (?:find|choose|pick|plan|decide))"
@@ -123,11 +126,24 @@ _ADVICE_Q = re.compile(
     r"|\bwhat should i\b|\bwhich (?:\w+ )?should i\b"
     r"|\bdo you have any (?:tips|ideas|advice|suggestions|recommendations)\b"
     r"|\b(?:recommend|suggest) (?:me|some|a few)\b"
-    r"|\bi(?:'d| would) (?:love|like) (?:some|a few) (?:tips|ideas|suggestions|recommendations)\b",
+    r"|\bi(?:'d| would) (?:love|like) (?:some|a few) (?:tips|ideas|suggestions|recommendations)\b"
+    # 2026-10-08 (dev advice set: 10 of 24 requests matched): "which code
+    # editor should I use", "how should I hang", "should I go electric";
+    # still none of LongMemEval's 470 other questions or LoCoMo's 1,986
+    r"|\b(?:what|which|where|how)\b(?:\s+[\w'-]+){0,3}?\s+should i\b"
+    r"|^\W*(?:[\w'-]+\s+){0,8}?should i (?:go|get|buy|use|pick|choose|try|switch|learn|take)\b",
     re.I)
 _ADVICE_RULE = ("This is a request for advice: fit it to what the user said "
                 "above (what they own, use, like, cannot do or have decided), "
                 "and say which of their lines you relied on.")
+# 2026-10-08 (dev advice set): with the line above added, 5 of 24 answers
+# were still "I don't know": the reader read "anything about the user not
+# listed here is UNKNOWN: say you don't know" as a reason not to advise. For
+# a request for advice that sentence becomes this one.
+_UNKNOWN = ("Anything about the user not listed here is UNKNOWN: say you "
+            "don't know rather than guessing.")
+_UNKNOWN_ADVICE = ("Give the advice asked for; facts about the user not "
+                   "listed here are unknown, so do not assume them.")
 
 _RULES_MSG = ("[MEMORY RULES] Each line is something the user said, word for "
               "word, with the date; (in reply to \"...\") is the question they "
@@ -2055,7 +2071,8 @@ class Memory:
                     "details on this are UNKNOWN: say so rather than "
                     "guessing.\n" + _RULES_MSG)
         advice = bool(_ADVICE_Q.search(query or ""))
-        if advice and os.environ.get("RG_ADVICE_FIRST") == "1":
+        advice = advice and os.environ.get("RG_ADVICE_RULE") != "0"
+        if advice:
             # the message search's two best first (for advice it ranks by
             # embeddings, profile_memory._ADVICE_Q), then the rest oldest first
             best = {re.sub(r"\W+", " ", m["text"]).strip().lower() for m in hits[:2]}
@@ -2127,8 +2144,8 @@ class Memory:
                     "user's own model wrote from a conversation on that date; "
                     "the quoted lines are what the user actually said. "
                     "Anything about the user not listed here")
-        if advice and os.environ.get("RG_ADVICE_RULE") == "1":
-            rules += " " + _ADVICE_RULE
+        if advice:
+            rules = rules.replace(_UNKNOWN, _UNKNOWN_ADVICE) + " " + _ADVICE_RULE
         return head + "\n" + "\n".join(lines) + "\n" + rules
 
     def context_block(self, query=None, max_facts=15):

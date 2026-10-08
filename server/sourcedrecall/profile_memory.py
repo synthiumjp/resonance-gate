@@ -589,7 +589,12 @@ _ADVICE_Q = re.compile(
     r"|\bwhat should i\b|\bwhich (?:\w+ )?should i\b"
     r"|\bdo you have any (?:tips|ideas|advice|suggestions|recommendations)\b"
     r"|\b(?:recommend|suggest) (?:me|some|a few)\b"
-    r"|\bi(?:'d| would) (?:love|like) (?:some|a few) (?:tips|ideas|suggestions|recommendations)\b",
+    r"|\bi(?:'d| would) (?:love|like) (?:some|a few) (?:tips|ideas|suggestions|recommendations)\b"
+    # 2026-10-08 (dev advice set: 10 of 24 requests matched): "which code
+    # editor should I use", "how should I hang", "should I go electric";
+    # still none of LongMemEval's 470 other questions or LoCoMo's 1,986
+    r"|\b(?:what|which|where|how)\b(?:\s+[\w'-]+){0,3}?\s+should i\b"
+    r"|^\W*(?:[\w'-]+\s+){0,8}?should i (?:go|get|buy|use|pick|choose|try|switch|learn|take)\b",
     re.I)
 
 
