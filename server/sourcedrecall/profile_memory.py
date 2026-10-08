@@ -68,7 +68,59 @@ import rgx.facts as _rgx_facts  # noqa: E402 -- same bridge; the rgx package
 _VALID_ACTIONS = ("deny", "confirm", "retype")
 _SOURCE = "rg-p2-memory"
 
-_lock = threading.RLock()
+class _MemoryLock:
+    """2026-10-09 (security review: 4 processes ingesting at once stored 3
+    conversations). A thread lock was not enough: the hook worker, the
+    pending-queue worker and the MCP server are separate processes writing
+    the same files. Re-entrant within a thread; across processes an
+    exclusive lock on RG_MEMORY_DIR/.lock while the outermost holder runs."""
+
+    def __init__(self):
+        self._t = threading.RLock()
+        self._depth = 0
+        self._fh = None
+
+    def __enter__(self):
+        self._t.acquire()
+        if self._depth == 0:
+            self._fh = None
+            d = os.environ.get("RG_MEMORY_DIR")
+            if d:
+                try:
+                    os.makedirs(d, exist_ok=True)
+                    fh = open(os.path.join(d, ".lock"), "a+")
+                    try:
+                        import fcntl
+                        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+                    except ImportError:                 # Windows
+                        import msvcrt
+                        fh.seek(0)
+                        msvcrt.locking(fh.fileno(), msvcrt.LK_LOCK, 1)
+                    self._fh = fh
+                except Exception:
+                    self._fh = None
+        self._depth += 1
+        return self
+
+    def __exit__(self, *exc):
+        self._depth -= 1
+        if self._depth == 0 and self._fh is not None:
+            try:
+                try:
+                    import fcntl
+                    fcntl.flock(self._fh.fileno(), fcntl.LOCK_UN)
+                except ImportError:
+                    import msvcrt
+                    self._fh.seek(0)
+                    msvcrt.locking(self._fh.fileno(), msvcrt.LK_UNLCK, 1)
+            finally:
+                self._fh.close()
+                self._fh = None
+        self._t.release()
+        return False
+
+
+_lock = _MemoryLock()
 _state = {"mem": None, "audit_pass": None, "needs_reload": False,
           "uncached_turns": None, "transcripts": None}
 # profile_ingest's Extractor: a stanza pipeline load is tens of seconds, so
@@ -345,7 +397,7 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
             chat_messages.append(msg)
         # atomic: a crash mid-write must not leave half a memory (review
         # 2026-09-05 E, non-atomic conversations.json)
-        _tmp = conv_path + ".tmp"
+        _tmp = conv_path + f".{os.getpid()}.tmp"
         with open(_tmp, "w", encoding="utf-8") as fh:
             json.dump(convs, fh)
         os.replace(_tmp, conv_path)
@@ -416,7 +468,7 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
             with open(cache_path, "a", encoding="utf-8") as fh:
                 for line in new_lines:
                     fh.write(line + "\n")
-            tmp = world_path + ".tmp"
+            tmp = world_path + f".{os.getpid()}.tmp"
             with open(tmp, "w", encoding="utf-8") as fh:
                 json.dump(ex._world, fh)
             os.replace(tmp, world_path)
@@ -1354,7 +1406,7 @@ def profile_news(mark=True):
             seen = set()
         new = [f for f in facts if f["id"] not in seen]
         if mark and new:
-            tmp = path + ".tmp"
+            tmp = path + f".{os.getpid()}.tmp"
             with open(tmp, "w", encoding="utf-8") as fh:
                 json.dump({"ids": sorted(seen | {f["id"] for f in facts})}, fh)
             os.replace(tmp, path)
@@ -1449,7 +1501,7 @@ def export_markdown(path=None):
     if not groups and not notes:
         lines += ["Nothing stored yet.", ""]
     path = path or memory_file()
-    tmp = path + ".tmp"
+    tmp = path + f".{os.getpid()}.tmp"
     with open(tmp, "w", encoding="utf-8") as fh:
         fh.write("\n".join(lines))
     os.replace(tmp, path)
@@ -1533,7 +1585,7 @@ def _load_notes():
 
 
 def _write_notes_file(rows):
-    tmp = _notes_path() + ".tmp"
+    tmp = _notes_path() + f".{os.getpid()}.tmp"
     with open(tmp, "w", encoding="utf-8") as fh:
         for r in rows:
             fh.write(json.dumps(r, ensure_ascii=False) + "\n")
@@ -1623,7 +1675,7 @@ def _forget_names(sentence):
             # that named it
             and not (k.startswith("=") and set(str(v).lower().split()) <= words)}
     if len(kept) != len(world):
-        tmp = path + ".tmp"
+        tmp = path + f".{os.getpid()}.tmp"
         with open(tmp, "w", encoding="utf-8") as fh:
             json.dump(kept, fh)
         os.replace(tmp, path)

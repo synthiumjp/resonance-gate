@@ -118,3 +118,36 @@ def test_the_browser_needs_its_key_and_a_loopback_host(tmp_path, monkeypatch):
         assert _get(port, "/", host="attacker.example", cookie=cookie)[0] == 403
     finally:
         httpd.shutdown()
+
+
+# ---- several processes writing at once ------------------------------------
+
+_WRITER = r'''
+import os, sys
+sys.path.insert(0, sys.argv[2])
+import sourcedrecall.profile_memory as pm
+class _Stub:
+    _world = {}
+    def extract_turn(self, *a, **k): return []
+    def prefetch(self, *a, **k): pass
+pm._get_extractor = lambda owner: _Stub()
+for i in range(5):
+    pm.profile_ingest([{"role": "user", "content": f"message {sys.argv[1]}-{i} about Leeds"}],
+                      conversation_id=f"c{sys.argv[1]}-{i}", owner_name="Dana Cole",
+                      date="2026-03-02")
+'''
+
+
+def test_processes_writing_at_once_lose_nothing(tmp_path):
+    import subprocess
+    import sys
+    script = tmp_path / "w.py"
+    script.write_text(_WRITER)
+    server = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    env = dict(os.environ, RG_MEMORY_DIR=str(tmp_path / "mem"), RG_NLI="0",
+               SOURCEDRECALL_NOTES="off")
+    procs = [subprocess.Popen([sys.executable, str(script), str(n), server], env=env)
+             for n in range(4)]
+    assert all(p.wait(timeout=600) == 0 for p in procs)
+    convs = json.load(open(tmp_path / "mem" / "conversations.json"))
+    assert len(convs) == 20
