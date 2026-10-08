@@ -253,6 +253,56 @@ stopped marking ordinary events said today; an instruction rule took
 "Summarize this paragraph for me" as standing. Each is fixed as described
 above and measured again on the benchmark sets.
 
+## Fixes from the adversarial review (2026-10-09)
+
+Counterexamples from `docs/REVIEW_2026-10-09.md` are now tests
+(`rgx/test_adversarial.py`, `server/tests/test_review_rules.py`,
+`experiments/p2/test_prose.py`).
+
+**A change must have happened.** The newer statement's own wording (the
+parser's proposition) is checked before it can mark an older fact: a modal
+(might, will, could; lower case, so "finalised in May" and an owner called
+Will are not), a plan or intention ("is going to", "wants to"), a future time
+("next year", "on Monday" with the present tense), a negation about
+something else ("I didn't move to Brunswick after all"), or the past ("I
+lived in Fitzroy for ten years", said after the move) is not a change. A
+change of polarity counts only about the same thing ("I don't live in
+Fitzroy any more"). Development change sets: "no longer true" and "may have
+changed since" on a current-state line 0 before and after; on out-of-date
+lines unchanged except 2 fewer wrong "may have changed since" marks.
+
+**A hedge or a report leaves no bare fact.** "I guess I live in Leeds now",
+"I heard I'm getting promoted", "I'm told I work in Finance", "I said I work
+at Google as a joke", "I used to think I was allergic": the frame is kept,
+the complement is not stored on its own; a sentence opened by "allegedly",
+"supposedly", "let's say", "yeah right" stores nothing. "I think" and "I
+believe" keep their complement: they mostly state the user's own view. Cost:
+"I told my mum I moved to Leeds" no longer stores "moved to Leeds" by itself
+(the message is still quoted).
+
+**An idiom is not an instruction, and an instruction keeps its contrast.**
+"Never mind", "Keep the change", "Don't worry about it", a subjectless
+"Don't know what to do" are not standing instructions; "Always use tabs, not
+spaces" keeps "not spaces"; "Never again will I use that vendor" (fronted
+negative with inversion) stores nothing rather than "will use that vendor".
+Still missed (known): "Be concise", "Call me Dan", "use tabs from now on".
+
+**Pasted text, both ways.** An email's header lines, quoted replies ("> ...")
+and "summarise this" without a noun mark what follows as pasted; the user's
+own material ("Here are my notes:", "Following my last message:") and
+first-person text after an introduction that asks for no rewrite are kept
+as theirs, unless the introduction names another author ("My partner sent
+this text:"). No LoCoMo, development or held-out message changed: the
+benchmarks do not test pasted text, so these rules are measured only by the
+tests above.
+
+**Notes.** The pronoun rewrite leaves quotes and code alone and reads phone
+apostrophes; a note must keep the user's numbers and polarity ("does not eat
+meat" is rejected against "I eat meat now"); the owner check is a whole word;
+a note cut off at the length limit is dropped; a session that got no notes is
+given them later, and `sourcedrecall-memory notes-backfill` covers earlier
+history.
+
 ## Tried and refuted
 
 Kept here with their numbers, because a rule that failed is part of the

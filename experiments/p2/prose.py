@@ -64,8 +64,42 @@ _OWN_LAST = re.compile(r"^(?:i|i'm|i’m|i've|i’ve|my|we|can|could|would|what|
                        re.I)
 
 
+# 2026-10-09 (adversarial review). Missed: an email introduced without a
+# noun ("what do you make of this" + From:/Subject: lines), quoted replies
+# ("> ..."), "Can you summarise this?" + a paragraph. Wrongly taken: the
+# user's own material ("Here are my notes: I'm vegan...", "Following my last
+# message: I live in Leeds"), and first-person text after an introduction
+# that asks for nothing ("Quick question on this thread: my manager said...").
+_HEADER = re.compile(r"^(?:from|to|subject|sent|date|cc|reply-to)\s*:\s*\S", re.I)
+_ASK_THIS = re.compile(
+    r"\b(?:summari[sz]e|translate|proofread|rewrite|reword|tidy(?: up)?|clean up|"
+    r"check|review|reply to|respond to|explain|make of|think of|thoughts on)\s+"
+    r"(?:this|the following|it)\b[^\n]*(?:\n\s*\n|:\s*\S)", re.I)
+_OWN_MATERIAL = re.compile(r"(?<!from )\bmy\s+(?:\w+\s+){0,2}?(?:" + _MATERIAL + r")\b|"
+                           r"\b(?:summary|notes|bio|description) (?:of|about) me\b", re.I)
+# a request to work on someone else's text, not about the user's own problem
+_TRANSFORM = re.compile(r"\b(?:summari[sz]e|translate|proofread|rewrite|reword|"
+                        r"reply to|respond to|tl;?dr|tidy|clean up|shorten|edit)\b", re.I)
+# the introduction names another author: "My partner sent this text:"
+_OTHER_AUTHOR = re.compile(r"\b(?:sent|wrote|written|forwarded|received|posted|said|"
+                           r"replied|messaged|texted|emailed|from (?!my\b)\w+|by (?!me\b)\w+)\b",
+                           re.I)
+_FIRST = re.compile(r"\b(?:i|i'm|i’m|i've|i’ve|i'd|my|me|mine)\b", re.I)
+
+
+def _first_person_heavy(text):
+    words = re.findall(r"[\w'’]+", text)
+    return bool(words) and len(_FIRST.findall(text)) * 10 >= len(words)
+
+
 def _drop_pasted(text):
     lines = text.split("\n")
+    # quoted reply lines and an email's header block are someone else's
+    if any(l.lstrip().startswith(">") for l in lines[1:] + lines[:1]):
+        lines = [l for l in lines if not l.lstrip().startswith(">")]
+    hdr = next((i for i, l in enumerate(lines) if i and _HEADER.match(l.strip())), None)
+    if hdr is not None:
+        lines = lines[:hdr]
     # an email-shaped block (greeting line ... sign-off line) after the
     # message's first line: a letter the user pasted, not one to the assistant
     for i, ln in enumerate(lines):
@@ -80,14 +114,27 @@ def _drop_pasted(text):
     # followed by a colon in the same line, or by more paragraphs: what comes
     # after it is the pasted material
     m = _PASTE_INTRO.search(text)
-    if not m:
+    if m:
+        m_start, m_end, intro_text = m.start(), m.end(), m.group(0)
+    else:
+        a = _ASK_THIS.search(text)
+        if not a:
+            return text
+        t = re.search(r"\b(?:this|the following|it)\b", a.group(0), re.I)
+        m_start, m_end, intro_text = a.start(), a.start() + t.end(), a.group(0)[:t.end()]
+    if _OWN_MATERIAL.search(intro_text):
         return text
-    rest = text[m.end():]
+    rest = text[m_end:]
     colon = re.match(r"[^.?!\n]*?:[ \t]*\S", rest)
     if colon:
-        return text[:m.end() + colon.end() - 1]
+        intro = text[text.rfind("\n", 0, m_start) + 1:m_end + colon.end() - 1]
+        pasted = text[m_end + colon.end() - 1:]
+        if (_first_person_heavy(pasted) and not _TRANSFORM.search(intro)
+                and not _OTHER_AUTHOR.search(intro)):
+            return text
+        return text[:m_end + colon.end() - 1]
     para = re.search(r"\n\s*\n", rest)
-    line = text[text.rfind("\n", 0, m.start()) + 1:m.end()] + rest.split("\n", 1)[0]
+    line = text[text.rfind("\n", 0, m_start) + 1:m_end] + rest.split("\n", 1)[0]
     if para and not (line.rstrip().endswith(":") or _ASK.search(line)):
         para = None     # "I loved this article.\n\nI live in Leeds." is not a paste
     if not para:
@@ -95,9 +142,9 @@ def _drop_pasted(text):
         nl = re.match(r"[^\n]*:[ \t]*\n", rest)
         if not nl:
             return text
-        head, pasted = text[:m.end() + nl.end()], rest[nl.end():]
+        head, pasted = text[:m_end + nl.end()], rest[nl.end():]
     else:
-        head, pasted = text[:m.end() + para.start()], rest[para.end():]
+        head, pasted = text[:m_end + para.start()], rest[para.end():]
     paras = [p for p in re.split(r"\n\s*\n", pasted) if p.strip()]
     # a closing line of the user's own after the pasted part ("I already
     # tried reinstalling.", "What does step 2 mean?")

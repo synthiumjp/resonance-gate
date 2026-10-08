@@ -485,11 +485,15 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
     # ---- (c2) optional model-written notes (notes.py; off by default) ----
     model_calls = 0
     from sourcedrecall import notes as _notes
-    if _notes.enabled() and owner and n_turns > n_skipped:
+    # 2026-10-09 (review): a session whose notes failed once, or that was
+    # stored before notes were turned on, used to get none ever
+    if _notes.enabled() and owner and (n_turns > n_skipped
+                                       or conv_id not in _notes_done()):
         try:
             written = _notes.write_notes(owner, created_at[:10], turns)
             model_calls = _notes.CALLS["last"]
             _save_notes(conv_id, created_at[:10], written)
+            _mark_notes_done(conv_id)
         except Exception as e:      # a model that is down must not lose the session
             print(f"sourcedrecall: notes not written ({e})", file=sys.stderr)
 
@@ -1676,6 +1680,57 @@ def profile_forget(fact_id):
     _export_quietly()
     return {"forgotten": True, "fact": {k: f[k] for k in ("id", "text", "said")},
             "applied": out.get("applied")}
+
+
+def _notes_done_path():
+    return os.path.join(_data_dir(), "notes_done.json")
+
+
+def _notes_done():
+    try:
+        return set(json.load(open(_notes_done_path())))
+    except (OSError, ValueError):
+        return set()
+
+
+def _mark_notes_done(conv_id):
+    with _lock:
+        done = _notes_done() | {conv_id}
+        tmp = _notes_done_path() + f".{os.getpid()}.tmp"
+        with open(tmp, "w") as fh:
+            json.dump(sorted(done), fh)
+        os.replace(tmp, _notes_done_path())
+
+
+def notes_backfill(owner=None):
+    """Write notes for stored conversations that have none (installed
+    after they were stored, or failed). -> number of conversations done."""
+    from sourcedrecall import notes as _notes
+    if not _notes.enabled():
+        return 0
+    owner = owner or os.environ.get("SOURCEDRECALL_OWNER") or _discover_owner_name()
+    if not owner:
+        return 0
+    done = _notes_done()
+    try:
+        convs = json.load(open(_conversations_path()))
+    except (OSError, ValueError):
+        return 0
+    n = 0
+    for c in convs:
+        cid = c.get("uuid")
+        if not cid or cid in done:
+            continue
+        turns = [{"role": "user" if m.get("sender") == "human" else "assistant",
+                  "content": m.get("text") or ""} for m in c.get("chat_messages") or []]
+        date = (c.get("created_at") or "")[:10]
+        try:
+            _save_notes(cid, date, _notes.write_notes(owner, date, turns))
+            _mark_notes_done(cid)
+            n += 1
+        except Exception as e:
+            print(f"sourcedrecall: notes not written for {cid} ({e})", file=sys.stderr)
+    return n
 
 
 def _notes_path():

@@ -69,3 +69,39 @@ def test_not_a_standing_instruction(ex, turn):
 def test_a_reminder_to_act_still_is(ex):
     out = texts(ex, "Don't forget to run the tests before you commit.")
     assert any("asked the assistant" in t for t in out), out
+
+
+# ---- adversarial review, 2026-10-09 -----------------------------------------
+
+@pytest.mark.parametrize("turn,bad", [
+    ("I guess I live in Leeds now", "Dana Cole lives in Leeds now"),
+    ("I heard I'm getting promoted", "Dana Cole is getting promoted"),
+    ("I'm told I work in Finance", "Dana Cole works in Finance"),
+    ("I'd guess I'm about 40", "Dana Cole is about 40"),
+    ("I used to think I was allergic to cats", "Dana Cole was allergic to cats"),
+    ("I said I work at Google as a joke", "Dana Cole works at Google as a joke"),
+    ("allegedly I live in Paris", "Dana Cole lives in Paris"),
+    ("let's say I'm 40 and live in Boston", "Dana Cole lives in Boston"),
+    ("yeah right, like I work at Google", "Dana Cole works at Google"),
+])
+def test_a_hedge_or_report_leaves_no_bare_fact(ex, turn, bad):
+    assert bad not in texts(ex, turn)
+
+
+def test_plain_statements_and_opinions_still_stand(ex):
+    assert "Dana Cole lives in Leeds" in texts(ex, "I live in Leeds")
+    assert any("lives in Leeds" in t for t in texts(ex, "I think I live in Leeds"))
+
+
+@pytest.mark.parametrize("turn", ["Never mind", "Don't worry about it", "Don't know what to do",
+                                  "Keep the change", "Don't get me started"])
+def test_an_idiom_is_not_a_standing_instruction(ex, turn):
+    assert not any("asked the assistant" in t for t in texts(ex, turn))
+
+
+def test_an_instruction_keeps_its_contrast_and_a_fronted_negative_its_polarity(ex):
+    assert "Dana Cole asked the assistant: Always use tabs not spaces" in texts(
+        ex, "Always use tabs not spaces")
+    assert any("never spaces" in t for t in texts(ex, "Always use tabs, never spaces"))
+    assert not any("will use that vendor" in t for t in texts(ex, "Never again will I use that vendor"))
+    assert not any(t.endswith(" five") for t in texts(ex, "Explain it like I'm five"))

@@ -164,7 +164,8 @@ def install_notes(tier="small"):
           f"process, no server) -- {size}", flush=True)
     d = install_archive(src, sha, notes_models_dir(), "genai_config.json", "notes")
     print(f"      -> {d} ({_mb(_du(d))})\nNotes are on. To turn them off: "
-          "SOURCEDRECALL_NOTES=off, or delete that folder.")
+          "SOURCEDRECALL_NOTES=off, or delete that folder. For conversations "
+          "stored before now: sourcedrecall-memory notes-backfill")
     return 0
 
 

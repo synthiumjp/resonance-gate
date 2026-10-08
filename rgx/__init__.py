@@ -76,6 +76,57 @@ class Record:
         return self.text
 
 
+# 2026-10-09 (adversarial review): a hedge or report frame left its
+# complement behind as a plain fact: "I guess I live in Leeds now" stored
+# "lives in Leeds now" beside "guesses ... lives in Leeds now"; so did "I
+# heard I'm getting promoted", "I'm told I work in Finance", "I said I work
+# at Google as a joke". The frame is kept (it is what was said); the bare
+# complement is not. A sentence opened by a hedge ("allegedly", "let's say",
+# "yeah right, like ...") stores nothing.
+# "I think" / "I believe" mostly state the user's own view ("I think I'll go
+# with pnpm") and keep their complement; "used to think" does not.
+_FRAME_PREDS = {"guess", "suppose", "reckon", "hear", "tell",
+                "say", "claim", "imagine", "assume", "suspect", "doubt", "wonder",
+                "hope", "wish", "pretend", "joke", "dream", "bet", "figure",
+                "fear", "worry", "joke", "lie", "rumour", "rumor"}
+_HEDGE_OPEN = re.compile(
+    r"^\W*(?:allegedly|supposedly|apparently|reportedly|hypothetically|in theory|"
+    # not "like I": "Like I said, I live in Leeds" is the user's own
+    r"let'?s say|say|suppose|imagine|pretend|yeah right|as if)\b", re.I)
+
+
+# "Never again will I use that vendor" kept "will use that vendor": a fronted
+# negative with the auxiliary before the subject negates the clause
+_NEG_INVERSION = re.compile(
+    r"^\W*(?:never(?: again| ever)?|not once|at no time|under no circumstances|"
+    r"in no way|no way|nowhere|seldom|rarely|hardly ever)\b,?\s+(?:will|would|do|does|"
+    r"did|have|has|had|can|could|shall|should|am|is|are|was|were)\s+(?:i|we)\b", re.I)
+# "Explain it like I'm five" stored "is five"
+_LIKE_I = re.compile(r"\b(?:like|as if|as though)\s+(?:i'm|i am|i was|i were)\s+(\w+)", re.I)
+
+
+def _drop_framed(records):
+    frames = [r for r in records
+              if any(t in _FRAME_PREDS for t in (r.predicate or "").split("_"))
+              or re.search(r"\b(?:used to think|used to believe|told|tells|says|said)\b",
+                           r.text or "")]
+    framed = {(r.value or "").strip().lower() for r in frames if r.value}
+    keep = []
+    for r in records:
+        t = (r.text or "").strip().lower()
+        if r not in frames and (t in framed or any(
+                t and t != (f.text or "").strip().lower()
+                and t.split(" ", 2)[-1] in (f.text or "").lower() for f in frames)):
+            continue
+        if r.source and (_HEDGE_OPEN.match(r.source) or _NEG_INVERSION.match(r.source)):
+            continue
+        m = _LIKE_I.search(r.source or "")
+        if m and t.endswith(" " + m.group(1).lower()):
+            continue
+        keep.append(r)
+    return keep
+
+
 @dataclass
 class Extractor:
     """Deterministic extractor. Loads a parser once and reuses it.
@@ -212,7 +263,7 @@ class Extractor:
                               turn=turn, role=role, predicate=pred, value=val,
                               evidential=evi, source=orig.get(src, src),
                               quality=C.quality(prop, text, self.owner_name)))
-        return out
+        return _drop_framed(out)
 
     def reset_world(self):
         """Forget the accumulated world (e269). Call between owners."""

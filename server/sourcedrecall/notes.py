@@ -90,15 +90,19 @@ def _local(prompt, max_new=300):
     # from 1.2 to 3.9 GB; in parts it is 2.0 GB, with the same notes.
     for i in range(0, len(ids), 256):
         g.append_tokens(ids[i:i + 256])
-    stream, text, seen = tok.create_stream(), "", []
+    stream, text, seen, n = tok.create_stream(), "", [], 0
     while not g.is_done():
         g.generate_next_token()
+        n += 1
         text += stream.decode(g.get_next_tokens()[0])
         if text.endswith("\n"):
             line = text.rstrip("\n").rsplit("\n", 1)[-1].strip()
             if line and seen.count(line) >= 2:
                 break                 # a small model can repeat a line forever
             seen.append(line)
+    if n >= max_new:
+        # stopped at the length limit: the last line is cut off (2026-10-09)
+        text = text.rsplit("\n", 1)[0] if "\n" in text.strip() else ""
     return re.sub(r"<think>.*?</think>", "", text, flags=re.S).strip()
 
 
@@ -122,9 +126,28 @@ _AGREE = {"am": "is", "'m": " is", "'ve": " has", "have": "has", "'ll": " will",
           "'d": " would", "was": "was", "were": "was", "are": "is", "'re": " is"}
 
 
+# 2026-10-09 (adversarial review): quotes and code inside a message belong
+# to someone else ("Mary said: 'I am tired'", a landlord's email "I own three
+# buildings", print("I am here")); curly apostrophes from phones broke the
+# rewrite ("I’m" -> "Dan’m"); "a gold mine" became "a gold Dana's".
+_QUOTED = re.compile(r'"[^"\n]*"|“[^”\n]*”|`[^`\n]*`|(?<![\w])\'[^\'\n]{2,}\'(?![\w])')
+
+
 def _deixis(text, me, you):
     """Rewrite the pronouns of one speaker's line: first person -> `me`,
-    second person -> `you` (names or "Other")."""
+    second person -> `you` (names or "Other"). Quotes and code are left as
+    they are."""
+    text = (text or "").replace("’", "'").replace("‘", "'")
+    out, last = [], 0
+    for m in _QUOTED.finditer(text):
+        out.append(_deixis_plain(text[last:m.start()], me, you))
+        out.append(m.group(0))
+        last = m.end()
+    out.append(_deixis_plain(text[last:], me, you))
+    return "".join(out)
+
+
+def _deixis_plain(text, me, you):
     def subj(name):
         def f(m):
             aux = m.group(2) or ""
@@ -134,10 +157,11 @@ def _deixis(text, me, you):
     t = re.sub(r"\byours\b", you + "'s", text, flags=re.I)
     t = re.sub(r"\byour\b", you + "'s", t, flags=re.I)
     t = re.sub(r"\byourself\b", you, t, flags=re.I)
-    t = re.sub(r"\b(I)(?!\w)('m|'ve|'ll|'d|\s+am\b|\s+have\b|\s+was\b)?", subj(me), t)
+    t = re.sub(r"\b(I)(?!\w)((?i:'m|'ve|'ll|'d|\s+am\b|\s+have\b|\s+was\b))?", subj(me), t)
     t = re.sub(r"\b(you)(?!\w)('re|'ve|'ll|'d|\s+are\b|\s+have\b|\s+were\b)?", subj(you), t, flags=re.I)
     t = re.sub(r"\bmy\b", me + "'s", t, flags=re.I)
-    t = re.sub(r"\bmine\b", me + "'s", t, flags=re.I)
+    t = re.sub(r"(?<!\bthe )(?<!\ba )(?<!gold )(?<!coal )(?<!salt )\bmine\b", me + "'s", t,
+               flags=re.I)
     t = re.sub(r"\b(me|myself)\b", me, t, flags=re.I)
     return t
 
@@ -194,9 +218,9 @@ def write_notes(owner, date, turns):
         ln = re.sub(r"^\s*(?:[-*•]|\d+[.)])\s*", "", ln).strip()
         if not ln or ln.upper().startswith("NONE"):
             continue
-        if owner.split()[0].lower() not in ln.lower():
+        if not re.search(r"\b" + re.escape(owner.split()[0]) + r"\b", ln, re.I):
             continue          # a note must be about the owner
-        if not grounded(ln, said, owner):
+        if not grounded(ln, said, owner) or not faithful(ln, said, owner):
             continue          # what the other side said is not a note
         if ln not in out:
             out.append(ln)
@@ -231,3 +255,27 @@ def grounded(note, said, owner, share=0.6):
     if not words:
         return False
     return len(words & _stems(said)) / len(words) >= share
+
+
+_NUM = re.compile(r"\b\d[\d.,]*\b|\b(?:one|two|three|four|five|six|seven|eight|nine|ten|"
+                  r"eleven|twelve|twenty|thirty|forty|fifty|hundred|thousand|million)\b", re.I)
+_NEG = re.compile(r"\b(?:not|no|never|n't|none|nothing|nobody)\b|n't\b", re.I)
+
+
+def faithful(note, said, owner):
+    """2026-10-09 (adversarial review): grounded() takes words, not meaning.
+    "Dana does not eat meat" passed against "I eat meat now", "has 5 kids"
+    against "I have 3 kids". A number in the note must be in what the user
+    wrote, and the note's polarity must match a sentence of theirs about the
+    same thing."""
+    low_said = said.lower()
+    for n in _NUM.findall(note):
+        if n.lower() not in low_said:
+            return False
+    words = _stems(note) - _stems(owner)
+    sents = [x for x in re.split(r"(?<=[.!?])\s+|\n+", said) if x.strip()]
+    near = [x for x in sents if words and len(words & _stems(x)) * 2 >= len(words)]
+    if not near:
+        return True
+    neg = bool(_NEG.search(note))
+    return any(bool(_NEG.search(x)) == neg for x in near)

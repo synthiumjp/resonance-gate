@@ -505,7 +505,11 @@ def _mark_later_changes(facts, owner=None):
         # the change word must be in the fact's own clause, not elsewhere in
         # the sentence ("I hired a Mazda 3, and my brother bought a new Kia")
         nclause = new.get("text") or new.get("said") or ""
-        changes = bool(_CHANGE.search(nclause))
+        import currency
+        # 2026-10-09 (adversarial review): "I might move to Brunswick", "I
+        # didn't move to Brunswick after all" marked "I live in Fitzroy"
+        changes = bool(_CHANGE.search(nclause)) and not currency._not_a_change(
+            {"text": nclause})
         for old in out:
             if old is new or not about_user(old) or old.get("current") is False \
                     or old.get("changed_later"):
@@ -514,7 +518,10 @@ def _mark_later_changes(facts, owner=None):
                 continue
             if not related(old, new):
                 continue
-            flip = bool(_NEGATED.search(old.get("text") or "")) != bool(_NEGATED.search(nclause))
+            # a change of polarity about the SAME thing ("I don't live in
+            # Fitzroy any more"), not a negation about something else
+            flip = (bool(_NEGATED.search(old.get("text") or "")) != bool(_NEGATED.search(nclause))
+                    and bool(currency._content(old.get("value")) & currency._content(new.get("value"))))
             if changes or flip:
                 old["changed_later"] = new.get("id")
     # the later statement before the earlier one it updates

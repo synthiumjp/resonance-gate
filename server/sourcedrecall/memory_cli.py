@@ -9,6 +9,7 @@ agent or model -- no MCP client needed.
     sourcedrecall-memory recall <question>    what is stored about a question
     sourcedrecall-memory ingest [file]        store a conversation
     sourcedrecall-memory view [--port N]      browse it at http://127.0.0.1:7071
+    sourcedrecall-memory notes-backfill       notes for conversations stored before notes were on
 
 `ingest` reads JSON Lines from the file or stdin, one message per line:
     {"role": "user", "content": "I moved to Brunswick last week."}
@@ -59,7 +60,8 @@ def main(argv=None):
     ap = argparse.ArgumentParser(prog="sourcedrecall-memory",
                                  description="Use the memory from a terminal.")
     ap.add_argument("command", choices=["show", "path", "forget", "confirm",
-                                        "context", "recall", "check", "ingest", "view"])
+                                        "context", "recall", "check", "ingest", "view",
+                                        "notes-backfill"])
     ap.add_argument("arg", nargs="*", help="a fact id, a question, or a file")
     ap.add_argument("--owner", default=os.environ.get("SOURCEDRECALL_OWNER"))
     ap.add_argument("--id", dest="conv_id")
@@ -79,6 +81,10 @@ def main(argv=None):
     if a.command == "path":
         print(d)
         print(os.path.join(d, "MEMORY.md"))
+        return 0
+    if a.command == "notes-backfill":
+        n = pm.notes_backfill(a.owner)
+        print(f"notes written for {n} stored conversation(s)")
         return 0
     if a.command == "show":
         path = pm.export_markdown()

@@ -892,6 +892,40 @@ def passing(text=None, said=None, attr=None, value=None):
     return False
 
 
+# 2026-10-09 (adversarial review): plans, possibilities, negations and the
+# past marked the current state "no longer true": "I might move to
+# Brunswick", "I'm moving to Brunswick next year", "I didn't move to
+# Brunswick after all", "I start at Birch on Monday", and "I lived in
+# Fitzroy for ten years" said AFTER the move marked the new home. A fact can
+# replace another only if its own wording (the parser's proposition) states
+# a change that has happened.
+_NOT_YET = re.compile(
+    # modals in lower case only: "finalised in May", an owner called Will
+    r"(?-i:\b(?:might|may|could|would|should|will|shall|can)\b)|"
+    r"\b(?:won't|wouldn't|not|n't|never|no longer|"
+    r"wants? to|wanted to|hopes? to|hoped to|plans? to|planned to|plans on|"
+    r"intends? to|is (?:thinking|planning|considering|hoping)|"
+    r"(?:was|were|is|am|are) going to|(?:was|were|is|am|are) about to|"
+    r"if|unless|someday|some day|one day|eventually|"
+    r"next (?:week|weekend|month|year|monday|tuesday|wednesday|thursday|friday|"
+    r"saturday|sunday|spring|summer|autumn|fall|winter)|tomorrow|tonight|soon|"
+    r"later this (?:week|month|year)|in (?:a|an|one|two|three|four|five|six|\d+) "
+    r"(?:days?|weeks?|months?|years?))\b", re.I)
+_UPCOMING = re.compile(
+    r"\b(?:is|am|are) \w+ing\b.*\b(?:on|this) (?:monday|tuesday|wednesday|"
+    r"thursday|friday|saturday|sunday)\b|"
+    r"\b(?:moves|starts|begins|joins|leaves|relocates)\b.*\b(?:on|this) "
+    r"(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b", re.I)
+_PAST_STATE = re.compile(r"\b(?:lived|worked|used to|had been|studied|"
+                         r"was living|was working|was studying|dated)\b", re.I)
+
+
+def _not_a_change(nd):
+    """True when this fact's own wording does not say a change happened."""
+    t = nd.get("text") or ""
+    return bool(_NOT_YET.search(t) or _UPCOMING.search(t) or _PAST_STATE.search(t))
+
+
 def mark_state_changes(g, order=None):
     """Mark facts a LATER statement in the same state family replaced.
     Returns [(old_node_id, new_node_id)].
@@ -927,6 +961,7 @@ def mark_state_changes(g, order=None):
             later = [(cid, ctoks, cwhen) for cid, _c, ctoks, cwhen, cadd in items
                      if cid != nid and cwhen != "" and when != ""
                      and cwhen > when and not cadd
+                     and not _not_a_change(_c)
                      and _different(fam, toks, ctoks)]
             if not later:
                 continue
@@ -1130,6 +1165,8 @@ def mark_domain_changes(g, owner=None, order=None):
     out = []
     for nid, new in nodes:
         if not (mine(new) or causative(new)):
+            continue
+        if _not_a_change(new):      # a plan, a possibility, a negation, the past
             continue
         # news about the user's people is not a change of the user's state:
         # "Martin's friend Dev just started at Birch", "George's mum stopped

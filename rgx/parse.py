@@ -886,12 +886,31 @@ _STANDING = re.compile(r"\b(from now on|every time|in future|going forward|"
                        r"whenever)\b", re.I)
 
 
+# 2026-10-09 (adversarial review): idioms in the imperative are not
+# instructions ("Never mind", "Keep the change", "Don't worry about it",
+# "Don't get me started"), and a subjectless "Don't know what to do" / "Dont
+# care" is the user talking about themselves.
+_IMPERATIVE_IDIOM = re.compile(
+    r"^\W*(?:please\s+)?(?:never ?mind|don'?t worry|do not worry|no worries|keep the change|"
+    r"don'?t get me started|do not get me started|don'?t mention it|don'?t ask|"
+    r"forget (?:it|about it)|never fear|don'?t bother|take care|keep it up|keep going|"
+    r"go ahead|don'?t be (?:silly|sorry|ridiculous)|don'?t judge me|don'?t laugh)\b",
+    re.I)
+_SELF_ELLIPSIS = {"know", "care", "recall", "remember", "understand", "mind", "think"}
+
+
 def _standing_instruction(s, head, role, sent):
     """An imperative to the assistant that holds beyond this request: its
     verb has no subject, and it says always / never / don't, or "from now
     on", "every time". At the start of a sentence, or a conjunct with
     "please"."""
     if role != "user":
+        return False
+    if _IMPERATIVE_IDIOM.match(sent.text or ""):
+        return False
+    if (head.lemma or "").lower() in _SELF_ELLIPSIS and any(
+            (c.text or "").lower() in ("n't", "not", "never")
+            for c in s.children(head, ("advmod", "aux"))):
         return False
     if head.upos != "VERB":
         # 2026-10-05: "From now on always answer in British English" --
@@ -1522,8 +1541,13 @@ def extract_keyed(text, nlp, owner=None, role="user",
                 # -- a standing instruction to the assistant is the user's
                 # own, wherever they work (a one-off "Fix the failing test"
                 # has no always/never/don't and stores nothing)
-                stop = {c.id for c in s.children(
-                    head, ("conj", "cc", "discourse", "punct", "parataxis"))}
+                # 2026-10-09: "Always use tabs, never spaces" lost "never
+                # spaces"; only a conjunct with a verb of its own is another
+                # clause
+                stop = {c.id for c in s.children(head, ("cc", "discourse", "punct"))}
+                stop |= {c.id for c in s.children(head, ("conj", "parataxis"))
+                         if c.upos in ("VERB", "AUX")
+                         or s.children(c, ("nsubj", "nsubj:pass"))}
                 span = re.sub(r"\s+", " ", s.text(head, stop=stop, owner=o,
                                                    second=second)).strip(" ,.;:!")
                 body = f"{o} asked the assistant: {span}"
