@@ -37,6 +37,24 @@ MEMORY LINE: {line}
 
 Reply with exactly one word: YES or NO."""
 
+# 2026-10-09 (adversarial review, A3): the judge saw only the proposition and
+# the line, so a bare answer ("Brunswick.", "Yes.") could not be read. With
+# FM_JUDGE_QUESTION=1 the answer view is judged with the question in view.
+RUBRIC_Q = """/no_think
+You audit an AI assistant's answer about a user. The user may appear as "I", "the user" or by name ("{owner}").
+
+The user asked the QUESTION and the assistant gave the ANSWER. Decide whether the ANSWER, read as a reply to the QUESTION, STATES OR CLEARLY IMPLIES that the PROPOSITION is true of the user right now.
+
+Answer NO if the answer says it does not know; if it records the proposition as denied, doubted, possible, past or "no longer true"; or if it is about a different person or thing.
+Answer YES only if the answer asserts the proposition as currently true of the user (a short answer such as "Brunswick." or "Yes." counts, read with the question).
+
+QUESTION: {question}
+PROPOSITION: {prop}
+ANSWER: {line}
+
+Reply with exactly one word: YES or NO."""
+QUESTION = os.environ.get("FM_JUDGE_QUESTION") == "1"
+
 _cache = None
 
 
@@ -81,15 +99,18 @@ def _log(rec, log_path=None):
         f.write(json.dumps(rec, ensure_ascii=False) + "\n")
 
 
-def ask(prop, line, owner="Jordan Pike", context="", log_path=None):
-    """True if the judge says the line asserts the proposition."""
+def ask(prop, line, owner="Jordan Pike", context="", log_path=None, question=None):
+    """True if the judge says the line asserts the proposition. With a
+    question (FM_JUDGE_QUESTION=1, answer view) the question-aware rubric."""
     cache = _load()
-    k = _key(prop, line, owner)
+    k = _key(prop, line, owner) if question is None else hashlib.sha1(json.dumps(
+        [MODEL, "q1", question, prop, line, owner]).encode()).hexdigest()
     if k in cache:
         _log({"key": k, "context": context, "prop": prop, "line": line,
               "verdict": cache[k], "cached": True}, log_path)
         return cache[k] == "YES"
-    prompt = RUBRIC.format(owner=owner, prop=prop, line=line)
+    prompt = (RUBRIC.format(owner=owner, prop=prop, line=line) if question is None
+              else RUBRIC_Q.format(owner=owner, prop=prop, line=line, question=question))
     t0 = time.time()
     raw = _call(prompt)
     m = re.match(r"\W*(YES|NO)\b", raw, re.I)

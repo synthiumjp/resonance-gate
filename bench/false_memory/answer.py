@@ -33,6 +33,22 @@ PROMPT = """You are an assistant with a memory of earlier conversations with the
 QUESTION: {q} /no_think"""
 
 
+# 2026-10-09 (adversarial review, A1): the reader got sourcedrecall's lines
+# with the product's rules and every other system's lines bare. With
+# FM_READER_SAME=1 every system gets this same instruction; FM_OURS_RULES=0
+# also removes sourcedrecall's own rules and notes paragraph from its block,
+# so what is compared is the memory, not the instruction.
+SAME = os.environ.get("FM_READER_SAME") == "1"
+OURS_RULES = os.environ.get("FM_OURS_RULES", "1") != "0"
+SAME_RULES = ("Each memory line is something from earlier conversations, with its "
+              "date where known. A later line can update an earlier one. If the "
+              "memory does not answer the question, say you don't know.\n\n")
+
+
+def _strip_rules(block):
+    return block.split("[MEMORY RULES]")[0].rstrip()
+
+
 def _rules():
     try:
         src = open(os.path.join(HERE, "..", "..", "experiments", "p2",
@@ -78,11 +94,15 @@ def main(systems):
                 mem = "\n".join(f"- {l}" for l in (lines or [])) or "(nothing)"
                 if p.get("block"):
                     # the exact block an agent receives (header and rules)
-                    prompts.append(PROMPT.format(today=today, q=p["q"],
-                                                 memory=p["block"], rules=""))
+                    block = p["block"] if OURS_RULES else _strip_rules(p["block"])
+                    prompts.append(PROMPT.format(today=today, q=p["q"], memory=block,
+                                                 rules=SAME_RULES if SAME else ""))
                     continue
-                prompts.append(PROMPT.format(today=today, q=p["q"], memory=mem,
-                                             rules=rules if s == "sourcedrecall" else ""))
+                if SAME:
+                    r_ = (rules if (s == "sourcedrecall" and OURS_RULES) else "") + SAME_RULES
+                else:
+                    r_ = rules if s == "sourcedrecall" else ""
+                prompts.append(PROMPT.format(today=today, q=p["q"], memory=mem, rules=r_))
             key = hashlib.sha1(json.dumps([MODEL, prompts]).encode()).hexdigest()
             if r["id"] in done and done[r["id"]].get("key") == key:
                 fresh[r["id"]] = done[r["id"]]

@@ -27,6 +27,7 @@ Bootstrap: percentile 95% CI, cluster resampling over scenarios, seeded.
 import json
 import os
 import random
+import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -49,10 +50,28 @@ def load(path):
     return [json.loads(l) for l in open(path)] if os.path.exists(path) else []
 
 
-def asserts(cls, prop, question, line, owner, ctx):
+def asserts(cls, prop, question, line, owner, ctx, view=None):
     if cls in PREFILTER_CLASSES and not judge.lexical_overlap(prop, question, line):
         return False
+    if judge.QUESTION and view == "answer":
+        return judge.ask(prop, line, owner, context=ctx, question=question)
     return judge.ask(prop, line, owner, context=ctx)
+
+
+# 2026-10-09 (adversarial review, A4, A5), FM_STRICT=1: an expected term
+# counts only as a whole word that is not already in the question ("I don't
+# know" matched "no"), and a scenario the system failed on, or a probe with
+# no answer, is a failure, not a pass.
+STRICT = os.environ.get("FM_STRICT") == "1"
+
+
+def _term_hit(terms, blob, question):
+    if not STRICT:
+        return any(t.lower() in blob for t in terms)
+    q = question.lower()
+    return any(re.search(r"(?<![a-z0-9])" + re.escape(t.lower()) + r"(?![a-z0-9])", blob)
+               for t in terms if not re.search(r"(?<![a-z0-9])" + re.escape(t.lower())
+                                                + r"(?![a-z0-9])", q))
 
 
 def score_view(cases, raw, view):
@@ -60,23 +79,24 @@ def score_view(cases, raw, view):
     for c in cases:
         r = raw.get(c["id"])
         for i, p in enumerate(c["probes"]):
-            if r is None or "error" in r:
+            if r is None or "error" in r or i >= len(r.get("probes") or []):
                 lines, err = [], True
             else:
                 pr = r["probes"][i]
-                lines = pr["lines"] if view == "lines" else pr["views"].get(view, [])
-                err = False
+                got = pr["lines"] if view == "lines" else (pr.get("views") or {}).get(view)
+                err = STRICT and (got is None or (view == "answer" and not got))
+                lines = got or []
             row = {"id": c["id"], "class": c["class"], "split": c["split"], "error": err,
                    "empty": not lines, "lines": lines}
             if "forbid" in p:
                 prop = p["forbid"]["prop"]
                 bad = [l for l in lines if asserts(c["class"], prop, p["q"], l, c["owner"],
-                                                   f'{c["id"]}/{p["q"]}')]
-                row["fm"] = bool(bad)
+                                                   f'{c["id"]}/{p["q"]}', view=view)]
+                row["fm"] = bool(bad) or (STRICT and err)
                 row["bad"] = bad
             if "expect" in p:
                 blob = " ".join(lines).lower()
-                row["hit"] = any(t.lower() in blob for t in p["expect"]["terms"])
+                row["hit"] = (not err) and _term_hit(p["expect"]["terms"], blob, p["q"])
             rows.append(row)
     return rows
 
