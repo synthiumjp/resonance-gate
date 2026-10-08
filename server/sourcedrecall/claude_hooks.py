@@ -30,6 +30,7 @@ Two constraints from the Claude Code hooks reference shaped this:
     thinking, meta and sidechain lines, slash-command echoes), so an unknown
     new line type is ignored rather than stored.
 """
+import sourcedrecall.paths  # noqa: F401  (offline mode first)
 import argparse
 import json
 import os
@@ -193,7 +194,10 @@ def session_end(event, owner=None, sync=False, agent="claude"):
     json.dump({"transcript_path": path, "session_id": sid, "owner": owner,
                "cwd": cwd, "agent": agent}, job)
     job.close()
-    log = os.path.join(tempfile.gettempdir(), "sourcedrecall-hook.log")
+    # 2026-10-09 (security review): in the private state dir, not a
+    # predictable /tmp path anyone can read or pre-create as a symlink
+    from sourcedrecall.paths import private_dir, state_dir
+    log = os.path.join(private_dir(state_dir()), "hook.log")
     with open(log, "a") as lf:
         subprocess.Popen([sys.executable, "-m", "sourcedrecall.claude_hooks",
                           "_worker", job.name],

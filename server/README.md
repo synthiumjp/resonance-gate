@@ -276,7 +276,7 @@ one starts. Add to `~/.claude/settings.json` (or a project's
 `session-end` reads the session transcript and stores what you typed and the
 assistant's replies (not tool calls, tool output or anything injected by the
 harness). It hands the work to a background process and returns at once; a
-log goes to `$TMPDIR/sourcedrecall-hook.log`. Resuming a session and ending
+log goes to `~/.sourcedrecall/hook.log`. Resuming a session and ending
 it again only adds the new turns. `session-start` adds nothing while the
 memory is empty.
 

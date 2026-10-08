@@ -4,6 +4,33 @@ dependency) just to find the memory. Read from the environment at CALL time,
 not import time."""
 import os
 
+# 2026-10-09 (security review): only the MCP server set offline mode; the
+# hook worker and the command line did not, so a missing model could be
+# fetched from the network. Every entry point imports this module.
+# sourcedrecall-setup, the one step allowed to download, sets
+# SOURCEDRECALL_SETUP=1 first.
+if os.environ.get("SOURCEDRECALL_SETUP") != "1":
+    os.environ["HF_HUB_OFFLINE"] = "1"
+    os.environ["TRANSFORMERS_OFFLINE"] = "1"
+
+
+def private_dir(d):
+    """Create `d` readable by this user only, and make an existing one so
+    (2026-10-09, security review: the memory was 0755 with 0644 files, so
+    anyone on the machine could read every message). New files are created
+    private too (umask)."""
+    os.makedirs(d, mode=0o700, exist_ok=True)
+    try:
+        if os.stat(d).st_mode & 0o077:
+            os.chmod(d, 0o700)
+    except OSError:
+        pass
+    try:
+        os.umask(os.umask(0o077) | 0o077)
+    except Exception:
+        pass
+    return d
+
 
 def state_dir():
     return os.environ.get("SOURCEDRECALL_STATE",
@@ -19,8 +46,11 @@ def default_memory_dir():
     SOURCEDRECALL_STATE."""
     if not os.environ.get("RG_MEMORY_DIR"):
         d = os.path.join(state_dir(), "conversations")
-        os.makedirs(d, exist_ok=True)
+        private_dir(state_dir())
+        private_dir(d)
         os.environ["RG_MEMORY_DIR"] = d
+    else:
+        private_dir(os.environ["RG_MEMORY_DIR"])
     return os.environ["RG_MEMORY_DIR"]
 
 

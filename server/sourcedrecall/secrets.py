@@ -25,8 +25,11 @@ import re
 
 MARK = "[secret removed]"
 
+# 2026-10-09 (security review): the left edge was \b, and "_" is a word
+# character, so DB_PASSWORD=hunter2 and STRIPE_SECRET_KEY=... got through;
+# the edges are now "not a letter or digit".
 _KEYWORD = re.compile(
-    r"\b(?:pass(?:word|words|wd|code|codes|phrase|phrases)?|pw|pwd|mdp|"
+    r"(?<![A-Za-z0-9])(?:pass(?:word|words|wd|code|codes|phrase|phrases)?|pw|pwd|mdp|"
     r"pins?|pin codes?|logins?|credentials?|creds|username and password|"
     r"api[ _-]?keys?|access[ _-]?keys?|secret[ _-]?keys?|private[ _-]?keys?|"
     r"ssh[ _-]?keys?|(?:wifi|wi-fi|product|licen[cs]e|encryption|recovery|"
@@ -41,19 +44,33 @@ _KEYWORD = re.compile(
     r"passport(?: numbers?)?|(?:driver'?s? )?licen[cs]e numbers?|"
     r"national insurance(?: numbers?)?|ni number|tax file number|tfn|sin|"
     r"aadhaar|medicare number|code to the \w+|combination to the \w+|"
-    r"key(?=\s+(?:is|was|:|=)\s+\S*\d))\b",
+    r"key(?=\s+(?:is|was|:|=)\s+\S*\d))(?![A-Za-z0-9])",
     re.I)
 # not credentials, though they share a word
 _HARMLESS = re.compile(
     r"\b(?:password manager|passport photo|pin(?:s)? (?:down|up|it|them|in "
     r"the)|pinned|card game|birthday card|business card|gift card shop|"
     r"forgot (?:my|the) password|reset (?:my|the) password|change(?:d)? "
-    r"(?:my|the) password)\b", re.I)
+    r"(?:my|the) password|"
+    # a count of tokens, not a token (max_tokens: 512, "tokens: 30000")
+    r"(?:max|num|n|total|input|output|prompt|completion|context)?[_ ]?tokens?"
+    r"\s*[:=]\s*\d[\d,_]*(?![\w-])"
+    r")\b", re.I)
 _VALUE_HINT = re.compile(r"\d|[:=/]|\b(?:is|was|are|to|as|'s)\b|\w+[@#$%^&*!]")
 
 _FORMATS = [
     re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----.*?-----END [A-Z ]*PRIVATE KEY-----",
                re.S),
+    # a key block cut off before its END line: everything after BEGIN
+    re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----.*", re.S),
+    # 2026-10-09: an assignment whose name says what it is, as in a pasted
+    # .env or config file (DB_PASSWORD=..., client_secret = '...',
+    # STRIPE_SECRET_KEY: ...)
+    re.compile(r"(?i)\b[\w.-]*(?:password|passwd|pwd|secret|token|api[_-]?key|"
+               r"access[_-]?key|private[_-]?key)[\w.-]*\s*[:=]\s*"
+               # a value, not a count ("max_tokens: 512")
+               r"(?=['\"]?[^\s'\"]*[A-Za-z]|['\"]?[^\s'\"]{6,})"
+               r"(?:'[^'\n]*'|\"[^\"\n]*\"|[^\s,;]+)"),
     re.compile(r"\b[a-z][a-z0-9+.-]*://[^\s/:@]+:[^\s/@]+@\S+", re.I),
     re.compile(r"\b(?:sk|pk|rk)[-_](?:proj-|live[-_]|test[-_])?[A-Za-z0-9_-]{16,}"),
     re.compile(r"\b(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{20,}\b"),

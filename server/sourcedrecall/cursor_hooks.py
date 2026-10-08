@@ -38,6 +38,7 @@ Limits that follow from the documentation:
   * hooks in ~/.cursor/hooks.json do not run in Cursor's cloud agents
     (project hooks do, but sessionStart and sessionEnd do not).
 """
+import sourcedrecall.paths  # noqa: F401  (offline mode first)
 import json
 import os
 import re
@@ -53,7 +54,7 @@ _KEEP_DAYS = 30
 def _spool_dir():
     from sourcedrecall.paths import state_dir
     d = os.path.join(state_dir(), "cursor-spool")
-    os.makedirs(d, exist_ok=True)
+    os.makedirs(d, mode=0o700, exist_ok=True)
     return d
 
 
@@ -70,10 +71,14 @@ def _append(conversation_id, role, text, cwd=None):
     text = (text or "").strip()
     if not text:
         return
-    rec = {"role": role, "content": text, "ts": _now()}
+    # 2026-10-09 (security review): the spool was the raw text, readable by
+    # anyone on the machine, and kept until the session ended
+    from sourcedrecall.secrets import scrub
+    rec = {"role": role, "content": scrub(text), "ts": _now()}
     if cwd:
         rec["cwd"] = cwd
-    with open(spool_path(conversation_id), "a", encoding="utf-8") as f:
+    fd = os.open(spool_path(conversation_id), os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
+    with os.fdopen(fd, "a", encoding="utf-8") as f:
         f.write(json.dumps(rec) + "\n")
 
 
@@ -142,7 +147,10 @@ def _store(conversation_id, owner, cwd, delete, sync):
     json.dump({"spool": path, "conversation_id": conversation_id, "owner": owner,
                "cwd": cwd, "delete": delete}, job)
     job.close()
-    log = os.path.join(tempfile.gettempdir(), "sourcedrecall-hook.log")
+    # 2026-10-09 (security review): in the private state dir, not a
+    # predictable /tmp path anyone can read or pre-create as a symlink
+    from sourcedrecall.paths import private_dir, state_dir
+    log = os.path.join(private_dir(state_dir()), "hook.log")
     with open(log, "a") as lf:
         subprocess.Popen([sys.executable, "-m", "sourcedrecall.claude_hooks",
                           "_worker", job.name],

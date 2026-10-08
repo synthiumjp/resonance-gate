@@ -157,19 +157,75 @@ def _render_memory(owner, groups, q="", rec=None):
     return MEM_PAGE.format(title=title, n=n, q=e(q), result=result, body=body)
 
 
-def make_handler(service):
+# 2026-10-09 (security review): the browser answered any Host header (a web
+# page could rebind its name to 127.0.0.1 and read the memory) and anyone on
+# the machine. Now: loopback Host names only, a random token per run (in the
+# printed address once, then a strict cookie), and headers that keep the
+# page from being framed, sniffed, cached or running scripts.
+_HEADERS = {
+    "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; "
+                               "form-action 'self'; frame-ancestors 'none'",
+    "X-Frame-Options": "DENY",
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "no-referrer",
+    "Cache-Control": "no-store",
+}
+
+
+def new_token():
+    import secrets
+    return secrets.token_urlsafe(18)
+
+
+def make_handler(service, token=None):
     class Handler(http.server.BaseHTTPRequestHandler):
-        def _send(self, body, ctype="text/html; charset=utf-8"):
+        def _send(self, body, ctype="text/html; charset=utf-8", status=200, cookie=None):
             data = body.encode() if isinstance(body, str) else body
-            self.send_response(200)
+            self.send_response(status)
             self.send_header("Content-Type", ctype)
             self.send_header("Content-Length", str(len(data)))
+            for k, v in _HEADERS.items():
+                self.send_header(k, v)
+            if cookie:
+                self.send_header("Set-Cookie", f"sdr={cookie}; HttpOnly; SameSite=Strict; Path=/")
             self.end_headers()
             self.wfile.write(data)
+
+        def _allowed(self, query):
+            port = self.server.server_address[1]
+            host = (self.headers.get("Host") or "").strip().lower()
+            if host not in {f"127.0.0.1:{port}", f"localhost:{port}", f"[::1]:{port}"}:
+                return False, None
+            if not token:
+                return True, None
+            import hmac
+            given = (query.get("t") or [""])[0]
+            if given and hmac.compare_digest(given, token):
+                return True, token                       # set the cookie
+            for part in (self.headers.get("Cookie") or "").split(";"):
+                k, _, v = part.strip().partition("=")
+                if k == "sdr" and hmac.compare_digest(v, token):
+                    return True, None
+            return False, None
 
         def do_GET(self):
             from urllib.parse import urlparse, parse_qs
             u = urlparse(self.path)
+            ok, cookie = self._allowed(parse_qs(u.query))
+            if not ok:
+                self._send("Open the address printed by `sourcedrecall-memory view` "
+                           "(it carries this run's key).", "text/plain; charset=utf-8", 403)
+                return
+            if cookie:
+                # drop the key from the address bar
+                self.send_response(303)
+                self.send_header("Location", u.path or "/")
+                for k, v in _HEADERS.items():
+                    self.send_header(k, v)
+                self.send_header("Set-Cookie", f"sdr={cookie}; HttpOnly; SameSite=Strict; Path=/")
+                self.send_header("Content-Length", "0")
+                self.end_headers()
+                return
             if u.path.startswith("/api/records") and service is not None:
                 self._send(json.dumps(service.all_records()),
                            "application/json")
@@ -189,11 +245,25 @@ def make_handler(service):
     return Handler
 
 
+def url_file():
+    from sourcedrecall.paths import private_dir, state_dir
+    import os
+    return os.path.join(private_dir(state_dir()), "browser-url")
+
+
 def start_browser(service, port=7071, host="127.0.0.1"):
     """Start the read-only browser on host:port in a daemon thread. host is
-    forced to loopback — the browser never binds a public interface."""
+    forced to loopback — the browser never binds a public interface. Its
+    address, with this run's key, is written to browser-url in the private
+    state dir (`sourcedrecall-memory view` prints it)."""
     if host not in ("127.0.0.1", "localhost", "::1"):
         raise ValueError("browser binds loopback only")
-    httpd = http.server.HTTPServer((host, port), make_handler(service))
+    token = new_token()
+    httpd = http.server.HTTPServer((host, port), make_handler(service, token))
     threading.Thread(target=httpd.serve_forever, daemon=True).start()
+    try:
+        with open(url_file(), "w") as f:
+            f.write(f"http://127.0.0.1:{port}/?t={token}\n")
+    except OSError:
+        pass
     return httpd

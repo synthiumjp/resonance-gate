@@ -40,6 +40,7 @@ Env:
                   (see profile_ingest's docstring for the full chain).
 
 Loading is a LAZY module-level singleton: the first tool call builds Memory
+import sourcedrecall.paths  # noqa: F401  (offline mode first)
 from the cache (can take tens of seconds on a big export) and keeps it in
 process; reload() rebuilds it (also reachable via profile_status(reload=True)).
 """
@@ -277,6 +278,9 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
     # 2026-10-02: credentials never enter the memory -- not the stored
     # transcript, not a fact, not a quoted sentence (sourcedrecall.secrets).
     from sourcedrecall.secrets import scrub, MARK
+    # 2026-10-09 (security review): the title too -- hooks make it from the
+    # first 60 characters of the first message, before any scrubbing
+    title = scrub(title) if title else title
     turns = [dict(t, content=scrub(t.get("content")))
              if isinstance(t, dict) and isinstance(t.get("content"), str) else t
              for t in turns]

@@ -18,6 +18,7 @@ import sys
 import time
 
 # Network allowed for THIS process only, and before any HF import reads it.
+os.environ["SOURCEDRECALL_SETUP"] = "1"   # paths.py leaves offline mode off
 os.environ["HF_HUB_OFFLINE"] = "0"
 os.environ["TRANSFORMERS_OFFLINE"] = "0"
 

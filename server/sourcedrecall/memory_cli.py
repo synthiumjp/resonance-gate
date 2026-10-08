@@ -20,6 +20,7 @@ happened), --scope (a project directory).
 
 `context` and `recall` print plain text by default and JSON with --json.
 """
+import sourcedrecall.paths  # noqa: F401  (offline mode first)
 import argparse
 import json
 import os
@@ -85,9 +86,19 @@ def main(argv=None):
         return 0
     if a.command == "view":
         import http.server
-        from sourcedrecall.browser import make_handler
-        httpd = http.server.HTTPServer(("127.0.0.1", a.port), make_handler(None))
-        print(f"memory at http://127.0.0.1:{a.port}  (Ctrl-C to stop)", flush=True)
+        from sourcedrecall.browser import make_handler, new_token
+        token = new_token()
+        try:
+            httpd = http.server.HTTPServer(("127.0.0.1", a.port), make_handler(None, token))
+        except OSError:
+            # the MCP server already serves it on this port: its address
+            from sourcedrecall.browser import url_file
+            try:
+                print("memory at " + open(url_file()).read().strip())
+                return 0
+            except OSError:
+                raise
+        print(f"memory at http://127.0.0.1:{a.port}/?t={token}  (Ctrl-C to stop)", flush=True)
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:

@@ -80,6 +80,7 @@ turns this reader can see, which may differ from Codex's. Sub-agent and
 internal rollouts (session_meta "source" of subagent or internal) are not
 read: their user messages are synthetic.
 """
+import sourcedrecall.paths  # noqa: F401  (offline mode first)
 import argparse
 import json
 import os
