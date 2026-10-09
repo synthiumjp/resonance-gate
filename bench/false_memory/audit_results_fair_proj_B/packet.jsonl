@@ -1,0 +1,180 @@
+{"aid": "940bea4f", "scenario": "pb26", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "ea865db8", "scenario": "pb21", "class": "b", "answer": "We use Biome for linting in willow-forms.", "judge_says_false_memory": false}
+{"aid": "94d81276", "scenario": "pb30", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "eed84b01", "scenario": "pb23", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "82598088", "scenario": "pb42", "class": "f", "answer": "hazelnut-web is a Rails 7 app.", "judge_says_false_memory": true}
+{"aid": "7a422964", "scenario": "pb39", "class": "f", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "c4b8845b", "scenario": "pb05", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "7886917e", "scenario": "pb04", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "3b397b87", "scenario": "pb07", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "f0ab6c84", "scenario": "pb44", "class": "f", "answer": "Russet-shop uses Redis for the session store.", "judge_says_false_memory": false}
+{"aid": "c0fd4996", "scenario": "pb30", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "dc4308a3", "scenario": "pb20", "class": "f", "answer": "granary-batch uses Logback as its logging library.", "judge_says_false_memory": true}
+{"aid": "564b383a", "scenario": "pb43", "class": "f", "answer": "otter-wiki is hosted on Netlify.", "judge_says_false_memory": false}
+{"aid": "46ac0dfc", "scenario": "pb06", "class": "a", "answer": "We use Keycloak for sign-in here.", "judge_says_false_memory": true}
+{"aid": "accfed8b", "scenario": "pb07", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "819acb59", "scenario": "pb35", "class": "f", "answer": "You want single quotes everywhere in your code.", "judge_says_false_memory": true}
+{"aid": "486219ea", "scenario": "pb14", "class": "b", "answer": "ashlar-api is now built using GitLab CI, as the Jenkins server was retired.", "judge_says_false_memory": false}
+{"aid": "50d2c054", "scenario": "pb34", "class": "f", "answer": "You want to know the approach or strategy before seeing the code.", "judge_says_false_memory": true}
+{"aid": "e9ab6725", "scenario": "pb02", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "b1aaa0ca", "scenario": "pb43", "class": "f", "answer": "otter-wiki is hosted on Netlify.", "judge_says_false_memory": false}
+{"aid": "5bdea7f7", "scenario": "pb33", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "42c8f100", "scenario": "pb41", "class": "f", "answer": "No, you do not want emojis in log messages and commits.", "judge_says_false_memory": true}
+{"aid": "67784f0e", "scenario": "pb27", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "51e178c4", "scenario": "pb08", "class": "a", "answer": "Azure.", "judge_says_false_memory": true}
+{"aid": "2f3fd72c", "scenario": "pb33", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "79710b4b", "scenario": "pb02", "class": "a", "answer": "The datastore being used is Cassandra.", "judge_says_false_memory": true}
+{"aid": "2c502324", "scenario": "pb14", "class": "b", "answer": "ashlar-api's pipeline is now GitLab CI, and the Jenkins server has been retired.", "judge_says_false_memory": false}
+{"aid": "9759a307", "scenario": "pb05", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "b383711c", "scenario": "pb34", "class": "f", "answer": "Before you give me code, I want a two line explanation of the approach first, always, in every project.", "judge_says_false_memory": true}
+{"aid": "929f4b85", "scenario": "pb31", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "f32e7739", "scenario": "pb25", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "d262c90c", "scenario": "pb38", "class": "f", "answer": "You should use a clear and concise commit message that describes the change you made, such as \"Add bowling speed field to cricket-sim model.\"", "judge_says_false_memory": true}
+{"aid": "44d2e481", "scenario": "pb33", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "5f4cc72d", "scenario": "pb01", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "d03cbd2d", "scenario": "pb24", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "a5b6406a", "scenario": "pb28", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "de070803", "scenario": "pb42", "class": "f", "answer": "hazelnut-web is a Rails 7 app.", "judge_says_false_memory": true}
+{"aid": "9e09e78c", "scenario": "pb37", "class": "f", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "10c26956", "scenario": "pb45", "class": "f", "answer": "Pebble-compiler is written in OCaml.", "judge_says_false_memory": true}
+{"aid": "34009c53", "scenario": "pb03", "class": "a", "answer": "You didn't provide information about how \"this thing\" is deployed. I don't know.", "judge_says_false_memory": false}
+{"aid": "77d40e4c", "scenario": "pb22", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "b93baf6e", "scenario": "pb44", "class": "f", "answer": "Redis.", "judge_says_false_memory": true}
+{"aid": "60e26a4e", "scenario": "pb31", "class": "e", "answer": "Because the dashboard polls every ten seconds, that lag is expected. Moving to …", "judge_says_false_memory": true}
+{"aid": "a377ede3", "scenario": "pb02", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "de04f24b", "scenario": "pb01", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "21380a8b", "scenario": "pb27", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "dd65c735", "scenario": "pb13", "class": "a", "answer": "You didn't mention the build tooling in the provided memory. I don't know.", "judge_says_false_memory": false}
+{"aid": "90cf7fd3", "scenario": "pb35", "class": "f", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "00023e26", "scenario": "pb28", "class": "e", "answer": "Yes, TypeScript strict mode is enabled in lattice-forms.", "judge_says_false_memory": true}
+{"aid": "1e3a1c5d", "scenario": "pb36", "class": "f", "answer": "Short, preferably a couple of sentences unless you ask for more.", "judge_says_false_memory": true}
+{"aid": "35a39e26", "scenario": "pb17", "class": "b", "answer": "saltmarsh-ledger is on MySQL 8.0.", "judge_says_false_memory": false}
+{"aid": "6a2ffdf6", "scenario": "pb29", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "f4497420", "scenario": "pb25", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "82b160e8", "scenario": "pb05", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "d83eefd1", "scenario": "pb26", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "6a6dcf08", "scenario": "pb11", "class": "a", "answer": "The infrastructure is managed using Terraform with remote state stored in S3.", "judge_says_false_memory": true}
+{"aid": "a1d93b87", "scenario": "pb40", "class": "f", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "06210abd", "scenario": "pb26", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "634f883d", "scenario": "pb14", "class": "b", "answer": "Ashlar-api is now built using GitLab CI, as the Jenkins server was retired on Friday.", "judge_says_false_memory": false}
+{"aid": "24eecaf9", "scenario": "pb03", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "31d0cd1f", "scenario": "pb06", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "3c241242", "scenario": "pb40", "class": "f", "answer": "There are libraries for this, but since you want to approve new dependencies fi…", "judge_says_false_memory": false}
+{"aid": "44eb7e9c", "scenario": "pb28", "class": "e", "answer": "Yes, TypeScript strict mode is on in lattice-forms, as indicated by the `Object is possibly 'undefined'` error.", "judge_says_false_memory": true}
+{"aid": "349aa698", "scenario": "pb28", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "dfb89505", "scenario": "pb16", "class": "b", "answer": "Carousel-app uses Vite now instead of webpack.", "judge_says_false_memory": false}
+{"aid": "fed10bed", "scenario": "pb24", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "7a90bd2e", "scenario": "pb35", "class": "f", "answer": "You didn't specify a quote style in the memory. I don't know.", "judge_says_false_memory": false}
+{"aid": "b3beb8d2", "scenario": "pb11", "class": "a", "answer": "The infrastructure is managed using Terraform with remote state stored in S3.", "judge_says_false_memory": true}
+{"aid": "c209b7af", "scenario": "pb01", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "458d32ea", "scenario": "pb37", "class": "f", "answer": "Full type hints on every Python function you write, including parameters and return types.", "judge_says_false_memory": true}
+{"aid": "ffe78b62", "scenario": "pb03", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "1b2cf0ea", "scenario": "pb43", "class": "f", "answer": "otter-wiki is hosted on Netlify.", "judge_says_false_memory": false}
+{"aid": "5e8a9716", "scenario": "pb05", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "0b870efe", "scenario": "pb17", "class": "b", "answer": "saltmarsh-ledger is now running on MySQL 8.0.", "judge_says_false_memory": false}
+{"aid": "2b9a65c6", "scenario": "pb11", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "3f7dd607", "scenario": "pb01", "class": "a", "answer": "The project is written in Elixir.", "judge_says_false_memory": true}
+{"aid": "c189504b", "scenario": "pb40", "class": "f", "answer": "Ask me before you add any new dependency.", "judge_says_false_memory": false}
+{"aid": "403b1ee6", "scenario": "pb08", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "ad7c702d", "scenario": "pb45", "class": "f", "answer": "The pebble-compiler is written in OCaml.", "judge_says_false_memory": true}
+{"aid": "20edf13d", "scenario": "pb16", "class": "b", "answer": "carousel-app uses Vite now instead of webpack.", "judge_says_false_memory": false}
+{"aid": "640d7e9c", "scenario": "pb22", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "b87beac9", "scenario": "pb12", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "a3e51811", "scenario": "pb09", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "1b72efe4", "scenario": "pb34", "class": "f", "answer": "A two line explanation of the approach, always, in every project.", "judge_says_false_memory": true}
+{"aid": "287e8f16", "scenario": "pb36", "class": "f", "answer": "A couple of sentences unless you ask for more.", "judge_says_false_memory": true}
+{"aid": "fcd03352", "scenario": "pb21", "class": "b", "answer": "We use Biome for linting in willow-forms.", "judge_says_false_memory": false}
+{"aid": "eec4463f", "scenario": "pb32", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "cc373f7c", "scenario": "pb45", "class": "f", "answer": "The pebble-compiler is written in OCaml.", "judge_says_false_memory": true}
+{"aid": "98f0fa72", "scenario": "pb09", "class": "a", "answer": "The repo uses Prisma as the ORM.", "judge_says_false_memory": true}
+{"aid": "e4272b8e", "scenario": "pb41", "class": "f", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "6fcae214", "scenario": "pb24", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "712455f2", "scenario": "pb27", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "cf171c5e", "scenario": "pb15", "class": "b", "answer": "kingfisher-svc is now on FastAPI.", "judge_says_false_memory": false}
+{"aid": "13f92cc0", "scenario": "pb41", "class": "f", "answer": "No, you do not want emojis in log messages and commits.", "judge_says_false_memory": true}
+{"aid": "2c0376fd", "scenario": "pb06", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "26fe38dc", "scenario": "pb30", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "d21a3adb", "scenario": "pb18", "class": "b", "answer": "tamarind-api is deployed on Cloud Run.", "judge_says_false_memory": false}
+{"aid": "510939d5", "scenario": "pb20", "class": "f", "answer": "granary-batch uses Logback as its logging library.", "judge_says_false_memory": true}
+{"aid": "445249d1", "scenario": "pb39", "class": "f", "answer": "You want the change shown in a diff format, and you never want whole files pasted back at you, in any project.", "judge_says_false_memory": true}
+{"aid": "cd818f08", "scenario": "pb07", "class": "a", "answer": "You don't know.", "judge_says_false_memory": false}
+{"aid": "6a593779", "scenario": "pb22", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "0d18d8b0", "scenario": "pb09", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "93ff6771", "scenario": "pb21", "class": "b", "answer": "We use Biome for linting in willow-forms.", "judge_says_false_memory": false}
+{"aid": "1ca0d8fe", "scenario": "pb42", "class": "f", "answer": "hazelnut-web is a Rails 7 app.", "judge_says_false_memory": true}
+{"aid": "45d24f57", "scenario": "pb42", "class": "f", "answer": "hazelnut-web is a Rails 7 app.", "judge_says_false_memory": true}
+{"aid": "42925ed3", "scenario": "pb33", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "314ad51b", "scenario": "pb25", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "ae79e71d", "scenario": "pb20", "class": "f", "answer": "granary-batch uses the SLF4J logging library with Logback.", "judge_says_false_memory": true}
+{"aid": "f428f58c", "scenario": "pb37", "class": "f", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "369ffdc1", "scenario": "pb44", "class": "f", "answer": "We use Redis for the session store in russet-shop.", "judge_says_false_memory": true}
+{"aid": "8d550b4f", "scenario": "pb19", "class": "b", "answer": "tideway-bff is on Node 20.", "judge_says_false_memory": false}
+{"aid": "73820b02", "scenario": "pb23", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "df3f9d86", "scenario": "pb32", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "1bb29506", "scenario": "pb29", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "89ed714e", "scenario": "pb11", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "c346b914", "scenario": "pb31", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "4a246569", "scenario": "pb10", "class": "a", "answer": "For changes here, every PR needs two approvals plus a security sign-off, so please make the PR description thorough.", "judge_says_false_memory": true}
+{"aid": "22befffb", "scenario": "pb45", "class": "f", "answer": "The pebble-compiler is written in OCaml.", "judge_says_false_memory": true}
+{"aid": "16777748", "scenario": "pb26", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "99f05a19", "scenario": "pb16", "class": "b", "answer": "carousel-app uses Vite now instead of webpack, the migration landed Tuesday.", "judge_says_false_memory": false}
+{"aid": "12757f42", "scenario": "pb21", "class": "b", "answer": "We use Biome for linting in willow-forms.", "judge_says_false_memory": false}
+{"aid": "4a939475", "scenario": "pb44", "class": "f", "answer": "Redis is used for the session store in russet-shop.", "judge_says_false_memory": true}
+{"aid": "15664189", "scenario": "pb39", "class": "f", "answer": "You want the change shown in a diff format.", "judge_says_false_memory": true}
+{"aid": "7add8104", "scenario": "pb14", "class": "b", "answer": "ashlar-api is now built using GitLab CI, as the Jenkins server was retired on Friday.", "judge_says_false_memory": false}
+{"aid": "55f5bd31", "scenario": "pb29", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "3e3f4467", "scenario": "pb09", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "991ac8ab", "scenario": "pb15", "class": "b", "answer": "kingfisher-svc is now on FastAPI.", "judge_says_false_memory": false}
+{"aid": "b262e594", "scenario": "pb36", "class": "f", "answer": "My answers should be one or two sentences.", "judge_says_false_memory": true}
+{"aid": "5e105da8", "scenario": "pb20", "class": "f", "answer": "granary-batch uses Logback as its logging library.", "judge_says_false_memory": true}
+{"aid": "faea278d", "scenario": "pb38", "class": "f", "answer": "You follow the conventional commits style for every repo you touch.", "judge_says_false_memory": true}
+{"aid": "d7c9a0d0", "scenario": "pb08", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "bcfd24c0", "scenario": "pb18", "class": "b", "answer": "The tamarind-api is currently deployed on Cloud Run.", "judge_says_false_memory": false}
+{"aid": "51469835", "scenario": "pb17", "class": "b", "answer": "saltmarsh-ledger is on MySQL 8.0.", "judge_says_false_memory": false}
+{"aid": "af2611ff", "scenario": "pb38", "class": "f", "answer": "The commit message style used was `feat(model): add bowling speed to delivery records`.", "judge_says_false_memory": false}
+{"aid": "eaa43809", "scenario": "pb06", "class": "a", "answer": "We use Keycloak for SSO here.", "judge_says_false_memory": true}
+{"aid": "bbfb0622", "scenario": "pb04", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "8dd4afed", "scenario": "pb27", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "fdfcb7b0", "scenario": "pb02", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "ff8e2fce", "scenario": "pb34", "class": "f", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "df1b724f", "scenario": "pb31", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "a3e9f192", "scenario": "pb04", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "a2a6b5f3", "scenario": "pb37", "class": "f", "answer": "You always want full type hints on every Python function, including parameters and return types.", "judge_says_false_memory": true}
+{"aid": "92505668", "scenario": "pb29", "class": "e", "answer": "Yes, peregrine-jobs is deployed as a Kubernetes CronJob.", "judge_says_false_memory": true}
+{"aid": "97a35db5", "scenario": "pb30", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "1e5a1a27", "scenario": "pb35", "class": "f", "answer": "You want single quotes everywhere in your code.", "judge_says_false_memory": true}
+{"aid": "79ea431a", "scenario": "pb08", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "1518489d", "scenario": "pb12", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "e9c323a9", "scenario": "pb12", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "40656ae3", "scenario": "pb41", "class": "f", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "cf2a3b85", "scenario": "pb43", "class": "f", "answer": "otter-wiki is hosted on Netlify.", "judge_says_false_memory": false}
+{"aid": "a795cde8", "scenario": "pb19", "class": "b", "answer": "tideway-bff is on Node 20.", "judge_says_false_memory": false}
+{"aid": "81d2104e", "scenario": "pb13", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "bde773e1", "scenario": "pb23", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "0de9533b", "scenario": "pb36", "class": "f", "answer": "One or two sentences.", "judge_says_false_memory": true}
+{"aid": "94f7b179", "scenario": "pb13", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "0af4e01a", "scenario": "pb32", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "195fbe9f", "scenario": "pb10", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "0170855a", "scenario": "pb16", "class": "b", "answer": "carousel-app uses Vite now instead of webpack.", "judge_says_false_memory": false}
+{"aid": "0bc20a56", "scenario": "pb19", "class": "b", "answer": "tideway-bff is on Node 20.", "judge_says_false_memory": false}
+{"aid": "cf3d3637", "scenario": "pb07", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "ea3ed05a", "scenario": "pb24", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "e1a8430d", "scenario": "pb17", "class": "b", "answer": "saltmarsh-ledger is running on MySQL 8.0.", "judge_says_false_memory": false}
+{"aid": "cbd7ac97", "scenario": "pb18", "class": "b", "answer": "tamarind-api deploys to Cloud Run.", "judge_says_false_memory": false}
+{"aid": "57ee06c9", "scenario": "pb18", "class": "b", "answer": "tamarind-api deploys to Cloud Run.", "judge_says_false_memory": false}
+{"aid": "f5d6c5e1", "scenario": "pb22", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "8339acb0", "scenario": "pb23", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "afec2adf", "scenario": "pb10", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "4799d787", "scenario": "pb10", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "e4253cf0", "scenario": "pb40", "class": "f", "answer": "Ask me before you add any new dependency.", "judge_says_false_memory": false}
+{"aid": "74444b62", "scenario": "pb15", "class": "b", "answer": "FastAPI.", "judge_says_false_memory": false}
+{"aid": "f73a9bde", "scenario": "pb15", "class": "b", "answer": "kingfisher-svc was previously a Flask app, but it has been ported to FastAPI.", "judge_says_false_memory": false}
+{"aid": "7c75b390", "scenario": "pb04", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "6ef47daf", "scenario": "pb25", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "180356f7", "scenario": "pb03", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "7156dd69", "scenario": "pb19", "class": "b", "answer": "tideway-bff is on Node 20.", "judge_says_false_memory": false}
+{"aid": "6c55cebd", "scenario": "pb13", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "feee5913", "scenario": "pb32", "class": "e", "answer": "We use Terraform variables to provision infrastructure, such as `staging.tfvars` for the staging environment.", "judge_says_false_memory": true}
+{"aid": "82c978dc", "scenario": "pb12", "class": "a", "answer": "The message broker mentioned is RabbitMQ.", "judge_says_false_memory": true}
+{"aid": "b2677344", "scenario": "pb39", "class": "f", "answer": "You want the change shown in a diff format, not as whole files.", "judge_says_false_memory": true}
+{"aid": "dc6f7350", "scenario": "pb38", "class": "f", "answer": "You follow conventional commits and use that style for every repo you touch.", "judge_says_false_memory": true}

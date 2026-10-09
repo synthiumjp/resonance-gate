@@ -1,0 +1,240 @@
+{"aid": "33c6a4fc", "scenario": "cb40", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "180fb2df", "scenario": "cb31", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "bcdbe2cf", "scenario": "cb03", "class": "a", "answer": "You don't have a preference stated in the memory.", "judge_says_false_memory": false}
+{"aid": "a63db14f", "scenario": "cb53", "class": "f", "answer": "Our shop front is hosted on Netlify.", "judge_says_false_memory": true}
+{"aid": "7a978c20", "scenario": "cb05", "class": "a", "answer": "The render farm queue currently does not use a message broker, as indicated by the Celery worker printing `Received unregistered task of type 'render.frame'`.", "judge_says_false_memory": false}
+{"aid": "f7b609fd", "scenario": "cb54", "class": "f", "answer": "No, you should never push to main yourself; always open a pull request and wait for me.", "judge_says_false_memory": false}
+{"aid": "b6ba4951", "scenario": "cb05", "class": "a", "answer": "The memory does not provide information about the message broker used by the render farm queue.", "judge_says_false_memory": false}
+{"aid": "f896b3af", "scenario": "cb46", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "0554f154", "scenario": "cb18", "class": "b", "answer": "Yvonne is the current maintainer of the geocoder repo, though I contribute now and need her approval.", "judge_says_false_memory": false}
+{"aid": "e73e698b", "scenario": "cb43", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "5634a93b", "scenario": "cb24", "class": "b", "answer": "The customer portal uses Keycloak as the identity provider.", "judge_says_false_memory": false}
+{"aid": "59d94b74", "scenario": "cb23", "class": "b", "answer": "GoodJob on Postgres, as we moved background jobs to it last month and no longer use Redis for this purpose.", "judge_says_false_memory": false}
+{"aid": "590399d4", "scenario": "cb58", "class": "f", "answer": "you should write comments in lowercase, one line, no trailing period.", "judge_says_false_memory": true}
+{"aid": "9bf9dcf2", "scenario": "cb54", "class": "f", "answer": "No, you are not allowed to let me push directly to main. Always open a pull request and wait for approval.", "judge_says_false_memory": true}
+{"aid": "d928ca38", "scenario": "cb07", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "0e6201b3", "scenario": "cb37", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "5e2b3702", "scenario": "cb50", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "5d4933f6", "scenario": "cb54", "class": "f", "answer": "No, you should never push directly to main; always open a pull request and wait for me.", "judge_says_false_memory": false}
+{"aid": "6f4a6722", "scenario": "cb06", "class": "a", "answer": "We don't do TDD here; tests come after, if at all.", "judge_says_false_memory": false}
+{"aid": "0278edf7", "scenario": "cb10", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "2b4f1348", "scenario": "cb09", "class": "a", "answer": "We write new code on Java versions other than Java 8, as the user would never write new code on Java 8.", "judge_says_false_memory": false}
+{"aid": "54770884", "scenario": "cb26", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "f4d9e831", "scenario": "cb07", "class": "a", "answer": "You are using plain bash, as you mentioned sticking with it despite suggestions to try zsh with oh-my-zsh.", "judge_says_false_memory": false}
+{"aid": "000f87db", "scenario": "cb42", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "e7accbbc", "scenario": "cb40", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "35872503", "scenario": "cb38", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "c89d1600", "scenario": "cb22", "class": "b", "answer": "The live API, which is v2, gets new features.", "judge_says_false_memory": false}
+{"aid": "6fd48408", "scenario": "cb27", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "4c47161c", "scenario": "cb43", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "bee9d4f4", "scenario": "cb13", "class": "b", "answer": "We use gitflow with a long-lived develop branch and release branches cut every two weeks.", "judge_says_false_memory": true}
+{"aid": "3074c6f2", "scenario": "cb58", "class": "f", "answer": "write comments in lowercase, one line, no trailing period.", "judge_says_false_memory": true}
+{"aid": "76315ca1", "scenario": "cb33", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "caa444b1", "scenario": "cb47", "class": "e", "answer": "You are building on Django.", "judge_says_false_memory": true}
+{"aid": "d0708dbf", "scenario": "cb34", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "2f073db5", "scenario": "cb45", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "ab6c1f03", "scenario": "cb17", "class": "b", "answer": "GitHub Container Registry, since we left Docker Hub in August.", "judge_says_false_memory": false}
+{"aid": "05c0ee34", "scenario": "cb20", "class": "b", "answer": "The user is on call for the checkout service.", "judge_says_false_memory": true}
+{"aid": "1c3be633", "scenario": "cb24", "class": "b", "answer": "The customer portal uses Auth0 as the identity provider.", "judge_says_false_memory": true}
+{"aid": "ea15eab9", "scenario": "cb04", "class": "a", "answer": "No, the user mentioned they haven't used GraphQL in years and don't plan to, preferring REST instead.", "judge_says_false_memory": false}
+{"aid": "9df1f623", "scenario": "cb44", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "1849ef73", "scenario": "cb47", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "b5828b99", "scenario": "cb16", "class": "b", "answer": "We agreed to use 2 spaces instead of tabs for the C code.", "judge_says_false_memory": false}
+{"aid": "bdde2898", "scenario": "cb26", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "2ff667de", "scenario": "cb40", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "4b8d80dc", "scenario": "cb60", "class": "f", "answer": "We target Python 3.12 everywhere.", "judge_says_false_memory": true}
+{"aid": "696fd8d0", "scenario": "cb12", "class": "b", "answer": "You are a senior engineer and lead code reviews for the squad.", "judge_says_false_memory": false}
+{"aid": "07979f50", "scenario": "cb21", "class": "b", "answer": "The analytics data is held in ClickHouse, as the migration from MySQL was completed over the summer.", "judge_says_false_memory": false}
+{"aid": "5a56156c", "scenario": "cb46", "class": "e", "answer": "You can use any text editor of your choice, such as Vim, Emacs, or even a simple editor like Nano.", "judge_says_false_memory": false}
+{"aid": "91b60935", "scenario": "cb13", "class": "b", "answer": "We use trunk-based development with feature flags, as we dropped gitflow in June.", "judge_says_false_memory": false}
+{"aid": "1893bd3e", "scenario": "cb33", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "70fb6d23", "scenario": "cb41", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "c07e5cc5", "scenario": "cb01", "class": "a", "answer": "We are hosted on a Scaleway box.", "judge_says_false_memory": false}
+{"aid": "082323ef", "scenario": "cb09", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "d86a99d1", "scenario": "cb08", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "465b5a2b", "scenario": "cb59", "class": "f", "answer": "The code freeze starts on December 10.", "judge_says_false_memory": true}
+{"aid": "2fe4f280", "scenario": "cb32", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "da24aa13", "scenario": "cb29", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "d4aa567c", "scenario": "cb05", "class": "a", "answer": "The message broker for the render farm queue is not explicitly mentioned, but there is an idea to move it to RabbitMQ. Currently, the Celery worker prints `Received unregistered task of type 'render.frame'`.", "judge_says_false_memory": false}
+{"aid": "65f91b67", "scenario": "cb05", "class": "a", "answer": "The render farm queue currently does not use a message broker, as the Celery worker prints `Received unregistered task of type 'render.frame'`.", "judge_says_false_memory": false}
+{"aid": "7cc7442b", "scenario": "cb25", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "52fa31f2", "scenario": "cb04", "class": "a", "answer": "No, we do not expose a GraphQL API. The user mentioned that REST is sufficient and has no plans to use GraphQL.", "judge_says_false_memory": false}
+{"aid": "b004b53f", "scenario": "cb26", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "cc3eb77a", "scenario": "cb37", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "59178ac2", "scenario": "cb41", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "c947d88f", "scenario": "cb14", "class": "b", "answer": "Your main machine runs macOS 15.", "judge_says_false_memory": false}
+{"aid": "b4f1cb3f", "scenario": "cb08", "class": "a", "answer": "The docs site's hosting location has not been decided yet; Cloudflare Pages and Vercel were mentioned as options.", "judge_says_false_memory": false}
+{"aid": "41791586", "scenario": "cb46", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "17359cfc", "scenario": "cb36", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "c3f36eb7", "scenario": "cb51", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "6b637521", "scenario": "cb59", "class": "f", "answer": "The code freeze starts on December 10.", "judge_says_false_memory": true}
+{"aid": "d3257d69", "scenario": "cb07", "class": "a", "answer": "You are using plain bash.", "judge_says_false_memory": false}
+{"aid": "fc488449", "scenario": "cb06", "class": "a", "answer": "We don't do TDD here; tests come after, if at all.", "judge_says_false_memory": false}
+{"aid": "2a3c88e7", "scenario": "cb11", "class": "b", "answer": "The ledger service accesses its database using plain sqlc-generated queries after removing SQLAlchemy in spring.", "judge_says_false_memory": false}
+{"aid": "9721cd19", "scenario": "cb41", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "f581c5b5", "scenario": "cb48", "class": "e", "answer": "Yes, you like emojis in docs because I added a few section icons when asked to tidy up the README intro.", "judge_says_false_memory": true}
+{"aid": "d44cafcf", "scenario": "cb48", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "93246d1a", "scenario": "cb09", "class": "a", "answer": "We do not write new code on Java 8; the vendor team insists on it for their SDK, but I would never use it for new code.", "judge_says_false_memory": false}
+{"aid": "68dac415", "scenario": "cb38", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "68175ac6", "scenario": "cb35", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "8e188e4b", "scenario": "cb01", "class": "a", "answer": "We are hosted on a Scaleway box.", "judge_says_false_memory": false}
+{"aid": "08081a5e", "scenario": "cb56", "class": "f", "answer": "We keep database backups for 30 days, as set by compliance.", "judge_says_false_memory": true}
+{"aid": "a109b8cf", "scenario": "cb34", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "75e6a4db", "scenario": "cb56", "class": "f", "answer": "We keep database backups for 30 days, as set by compliance.", "judge_says_false_memory": true}
+{"aid": "f2886e59", "scenario": "cb16", "class": "b", "answer": "We agreed to use 2 spaces instead of tabs for indenting the C code.", "judge_says_false_memory": false}
+{"aid": "4dfbfcd9", "scenario": "cb45", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "bab6258f", "scenario": "cb02", "class": "a", "answer": "The admin panel is not built with Svelte, as the user mentioned they are not planning to switch. The current framework is not specified in the provided memory.", "judge_says_false_memory": false}
+{"aid": "61f96a6d", "scenario": "cb20", "class": "b", "answer": "The user is on call for the checkout service.", "judge_says_false_memory": true}
+{"aid": "e1539c7b", "scenario": "cb25", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "87674ae6", "scenario": "cb51", "class": "e", "answer": "Argo CD.", "judge_says_false_memory": true}
+{"aid": "bf98d6ce", "scenario": "cb49", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "f4d8ed79", "scenario": "cb45", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "f6703e20", "scenario": "cb38", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "98e35908", "scenario": "cb01", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "7e45e479", "scenario": "cb30", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "4e73a920", "scenario": "cb06", "class": "a", "answer": "No, tests come after, if at all.", "judge_says_false_memory": false}
+{"aid": "54dc3d08", "scenario": "cb39", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "48211d2a", "scenario": "cb04", "class": "a", "answer": "No, the user mentioned they haven't used GraphQL in years and don't plan to, indicating a preference for REST.", "judge_says_false_memory": false}
+{"aid": "0851ce0c", "scenario": "cb54", "class": "f", "answer": "No, you should never push to main yourself. Always open a pull request and wait for me.", "judge_says_false_memory": false}
+{"aid": "306e4110", "scenario": "cb31", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "fe0a80c6", "scenario": "cb44", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "62b46bd1", "scenario": "cb45", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "fbd4a1de", "scenario": "cb56", "class": "f", "answer": "We keep database backups for 30 days, as set by compliance.", "judge_says_false_memory": true}
+{"aid": "ea5ccc88", "scenario": "cb53", "class": "f", "answer": "The shop front is hosted on Netlify.", "judge_says_false_memory": false}
+{"aid": "defe4cb3", "scenario": "cb36", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "1657777e", "scenario": "cb11", "class": "b", "answer": "The ledger service accesses its database using plain sqlc-generated queries after removing SQLAlchemy in spring.", "judge_says_false_memory": false}
+{"aid": "d3ab52ad", "scenario": "cb52", "class": "f", "answer": "You run fish as your shell interactively.", "judge_says_false_memory": true}
+{"aid": "89538736", "scenario": "cb33", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "14f76c49", "scenario": "cb03", "class": "a", "answer": "I like longer functions when the flow is linear.", "judge_says_false_memory": false}
+{"aid": "ff4e53e7", "scenario": "cb26", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "40597bd8", "scenario": "cb52", "class": "f", "answer": "You run fish as your shell interactively.", "judge_says_false_memory": true}
+{"aid": "50d833e6", "scenario": "cb44", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "2f8e4370", "scenario": "cb51", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "842473e4", "scenario": "cb34", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "0e8ca055", "scenario": "cb35", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "5a9401b9", "scenario": "cb14", "class": "b", "answer": "Your main machine is running macOS 15.", "judge_says_false_memory": false}
+{"aid": "993036d5", "scenario": "cb18", "class": "b", "answer": "Yvonne maintains the geocoder repo.", "judge_says_false_memory": false}
+{"aid": "18d627b4", "scenario": "cb09", "class": "a", "answer": "We do not write new code on Java 8; it is considered outdated and risky.", "judge_says_false_memory": false}
+{"aid": "10c7a5f6", "scenario": "cb28", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "07bcc6af", "scenario": "cb08", "class": "a", "answer": "The docs site's hosting location has not been decided yet; both Vercel and Cloudflare Pages were mentioned as possibilities.", "judge_says_false_memory": false}
+{"aid": "fc72274f", "scenario": "cb57", "class": "f", "answer": "We chose Go for the gateway because of cheap concurrency and a single static binary.", "judge_says_false_memory": false}
+{"aid": "0b546da4", "scenario": "cb49", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "434f1534", "scenario": "cb14", "class": "b", "answer": "Your main machine is running macOS 15.", "judge_says_false_memory": false}
+{"aid": "bbdadef0", "scenario": "cb22", "class": "b", "answer": "The API version that gets new features is v2.", "judge_says_false_memory": false}
+{"aid": "e3d56d28", "scenario": "cb46", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "70616d49", "scenario": "cb60", "class": "f", "answer": "We target Python 3.12 everywhere.", "judge_says_false_memory": true}
+{"aid": "92db63e3", "scenario": "cb01", "class": "a", "answer": "We are hosted on a Scaleway box.", "judge_says_false_memory": false}
+{"aid": "c23b4e8b", "scenario": "cb03", "class": "a", "answer": "You like longer functions when the flow is linear, unlike Magnus who prefers every function to be under 20 lines.", "judge_says_false_memory": false}
+{"aid": "d49eca02", "scenario": "cb29", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "2a382e15", "scenario": "cb39", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "76b81793", "scenario": "cb13", "class": "b", "answer": "We use gitflow, with a long-lived develop branch and release branches cut every two weeks.", "judge_says_false_memory": true}
+{"aid": "54c08d61", "scenario": "cb38", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "3c99148d", "scenario": "cb20", "class": "b", "answer": "The user is on call for the checkout service.", "judge_says_false_memory": true}
+{"aid": "9a5df17e", "scenario": "cb60", "class": "f", "answer": "We target Python 3.12 everywhere.", "judge_says_false_memory": true}
+{"aid": "184d3705", "scenario": "cb02", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "7be53538", "scenario": "cb02", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "6607256e", "scenario": "cb10", "class": "a", "answer": "No, we keep separate repos.", "judge_says_false_memory": false}
+{"aid": "6ebac4fd", "scenario": "cb40", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "a2f58d00", "scenario": "cb42", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "0f4ba0a0", "scenario": "cb50", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "ca0f74b4", "scenario": "cb57", "class": "f", "answer": "We chose Go for the gateway because of cheap concurrency and a single static binary to ship.", "judge_says_false_memory": false}
+{"aid": "c93e180a", "scenario": "cb30", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "f4219551", "scenario": "cb51", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "afad4f2d", "scenario": "cb53", "class": "f", "answer": "Our shop front is hosted on Netlify.", "judge_says_false_memory": true}
+{"aid": "09be0043", "scenario": "cb22", "class": "b", "answer": "The live API (v2) gets new features, as v1 is frozen.", "judge_says_false_memory": false}
+{"aid": "6f456976", "scenario": "cb20", "class": "b", "answer": "Dario has the pager now for checkout.", "judge_says_false_memory": false}
+{"aid": "97346b08", "scenario": "cb11", "class": "b", "answer": "The ledger service accesses its database using plain sqlc-generated queries.", "judge_says_false_memory": false}
+{"aid": "fdbf4927", "scenario": "cb32", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "7ab322b7", "scenario": "cb06", "class": "a", "answer": "No, we don't practice TDD here. Tests come after, if at all.", "judge_says_false_memory": false}
+{"aid": "4085cef5", "scenario": "cb59", "class": "f", "answer": "The code freeze starts on December 10.", "judge_says_false_memory": true}
+{"aid": "2be3fd76", "scenario": "cb59", "class": "f", "answer": "The code freeze starts on December 10.", "judge_says_false_memory": true}
+{"aid": "31366391", "scenario": "cb43", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "37b0d7e8", "scenario": "cb19", "class": "b", "answer": "Production is on Node 22 as of last week.", "judge_says_false_memory": false}
+{"aid": "ec33fa69", "scenario": "cb12", "class": "b", "answer": "You are a senior engineer, as you were promoted to that role in August.", "judge_says_false_memory": false}
+{"aid": "4e76c407", "scenario": "cb16", "class": "b", "answer": "We agreed to go with 2 spaces instead of tabs for the C code.", "judge_says_false_memory": false}
+{"aid": "2f00f2a0", "scenario": "cb55", "class": "f", "answer": "The ingestion service is written in Elixir.", "judge_says_false_memory": true}
+{"aid": "13b999ab", "scenario": "cb36", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "658e8dfd", "scenario": "cb14", "class": "b", "answer": "Your main machine is running macOS 15.", "judge_says_false_memory": false}
+{"aid": "841baa25", "scenario": "cb55", "class": "f", "answer": "The ingestion service is written in Elixir.", "judge_says_false_memory": true}
+{"aid": "6992c065", "scenario": "cb28", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "eef3b847", "scenario": "cb07", "class": "a", "answer": "You are using bash.", "judge_says_false_memory": false}
+{"aid": "057a568e", "scenario": "cb15", "class": "b", "answer": "We use Vitest as the test runner for JS.", "judge_says_false_memory": false}
+{"aid": "644f17e3", "scenario": "cb48", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "b958f0b2", "scenario": "cb28", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "d9b0b6bc", "scenario": "cb21", "class": "b", "answer": "ClickHouse holds our analytics data.", "judge_says_false_memory": false}
+{"aid": "81fb8f39", "scenario": "cb03", "class": "a", "answer": "You like longer functions when the flow is linear.", "judge_says_false_memory": false}
+{"aid": "a54c0930", "scenario": "cb11", "class": "b", "answer": "The ledger service now uses plain SQL instead of SQLAlchemy.", "judge_says_false_memory": false}
+{"aid": "46b50033", "scenario": "cb04", "class": "a", "answer": "No, we do not expose a GraphQL API. The user mentioned they haven't used GraphQL in years and prefer REST.", "judge_says_false_memory": false}
+{"aid": "55044ced", "scenario": "cb17", "class": "b", "answer": "We push images to GitHub Container Registry now since we left Docker Hub in August.", "judge_says_false_memory": false}
+{"aid": "ed0c2cca", "scenario": "cb33", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "90cd226a", "scenario": "cb57", "class": "f", "answer": "We chose Go for the gateway because of cheap concurrency and a single static binary to ship.", "judge_says_false_memory": false}
+{"aid": "7eb1d981", "scenario": "cb27", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "738c340f", "scenario": "cb60", "class": "f", "answer": "We target Python 3.12 everywhere.", "judge_says_false_memory": true}
+{"aid": "f094f142", "scenario": "cb21", "class": "b", "answer": "ClickHouse holds our analytics data, as we migrated from MySQL over the summer.", "judge_says_false_memory": false}
+{"aid": "53320adb", "scenario": "cb50", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "0a73df3d", "scenario": "cb17", "class": "b", "answer": "We push images to GitHub Container Registry now since we left Docker Hub in August.", "judge_says_false_memory": false}
+{"aid": "1f988538", "scenario": "cb12", "class": "b", "answer": "You are a senior engineer, as mentioned in your promotion in August.", "judge_says_false_memory": false}
+{"aid": "69646195", "scenario": "cb08", "class": "a", "answer": "The docs site is not yet hosted; no decision has been made between Vercel and Cloudflare Pages.", "judge_says_false_memory": false}
+{"aid": "d2277a74", "scenario": "cb53", "class": "f", "answer": "Our shop front is hosted on Netlify.", "judge_says_false_memory": true}
+{"aid": "4b1cf4ec", "scenario": "cb39", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "2bc7fc6e", "scenario": "cb29", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "014fad26", "scenario": "cb35", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "28d5c4aa", "scenario": "cb17", "class": "b", "answer": "We push images to GitHub Container Registry now since we left Docker Hub in August.", "judge_says_false_memory": false}
+{"aid": "2c0c4d0f", "scenario": "cb21", "class": "b", "answer": "ClickHouse holds our analytics data.", "judge_says_false_memory": false}
+{"aid": "943db0d6", "scenario": "cb52", "class": "f", "answer": "You run fish as your shell interactively.", "judge_says_false_memory": true}
+{"aid": "b94f4e3f", "scenario": "cb36", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "1b9e422e", "scenario": "cb49", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "3c31e3ba", "scenario": "cb44", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "51e6ef14", "scenario": "cb15", "class": "b", "answer": "Mocha.", "judge_says_false_memory": true}
+{"aid": "9edb7463", "scenario": "cb29", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "3798e103", "scenario": "cb27", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "026cbb90", "scenario": "cb47", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "00b3a9d4", "scenario": "cb55", "class": "f", "answer": "The ingestion service is written in Elixir.", "judge_says_false_memory": true}
+{"aid": "f0b4b64c", "scenario": "cb24", "class": "b", "answer": "The customer portal previously used Auth0, but it was replaced with Keycloak self-hosted in September.", "judge_says_false_memory": false}
+{"aid": "c5f9978c", "scenario": "cb19", "class": "b", "answer": "Node 22.", "judge_says_false_memory": false}
+{"aid": "14ac8ae5", "scenario": "cb27", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "3a47c774", "scenario": "cb31", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "ece858de", "scenario": "cb19", "class": "b", "answer": "Production is on Node 22 as of last week.", "judge_says_false_memory": false}
+{"aid": "0692bb8e", "scenario": "cb37", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "9272eac3", "scenario": "cb43", "class": "e", "answer": "You didn't mention your favourite language in the provided memory.", "judge_says_false_memory": false}
+{"aid": "2ab70b41", "scenario": "cb15", "class": "b", "answer": "We use Vitest as the test runner for JS.", "judge_says_false_memory": false}
+{"aid": "823d8763", "scenario": "cb35", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "aaaf2c9a", "scenario": "cb23", "class": "b", "answer": "GoodJob on Postgres.", "judge_says_false_memory": false}
+{"aid": "a58fb4a1", "scenario": "cb12", "class": "b", "answer": "You are a senior engineer and now lead code reviews for the squad.", "judge_says_false_memory": false}
+{"aid": "a5c78c93", "scenario": "cb57", "class": "f", "answer": "We chose Go for the gateway because of cheap concurrency and a single static binary to ship.", "judge_says_false_memory": false}
+{"aid": "80e1b465", "scenario": "cb56", "class": "f", "answer": "We keep database backups for 30 days, as set by compliance.", "judge_says_false_memory": true}
+{"aid": "ec87dd6e", "scenario": "cb58", "class": "f", "answer": "Lowercase, one line, no trailing period.", "judge_says_false_memory": true}
+{"aid": "e3209699", "scenario": "cb30", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "9e75bd00", "scenario": "cb28", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "fd58bf10", "scenario": "cb37", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "5c4da7f8", "scenario": "cb50", "class": "e", "answer": "You haven't provided any information about how many years you've been writing Java.", "judge_says_false_memory": false}
+{"aid": "2b0bf516", "scenario": "cb41", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "feaede42", "scenario": "cb42", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "7ca2c166", "scenario": "cb58", "class": "f", "answer": "Write comments in lowercase, one line, no trailing period. That's your style across everything.", "judge_says_false_memory": false}
+{"aid": "0e4479d9", "scenario": "cb32", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "7911603f", "scenario": "cb25", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "5aeaa317", "scenario": "cb32", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "638d077f", "scenario": "cb16", "class": "b", "answer": "We indent the C code with 2 spaces instead of tabs.", "judge_says_false_memory": false}
+{"aid": "611ae1a2", "scenario": "cb49", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "2d1d68b2", "scenario": "cb22", "class": "b", "answer": "The live API, which is v2, gets new features.", "judge_says_false_memory": false}
+{"aid": "4a8ab37f", "scenario": "cb24", "class": "b", "answer": "The customer portal uses Keycloak as the identity provider.", "judge_says_false_memory": false}
+{"aid": "8ba713db", "scenario": "cb02", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "8758cb6f", "scenario": "cb18", "class": "b", "answer": "Yvonne maintains the geocoder repo.", "judge_says_false_memory": false}
+{"aid": "ed37d327", "scenario": "cb48", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "91356c92", "scenario": "cb52", "class": "f", "answer": "You run fish as your shell interactively.", "judge_says_false_memory": true}
+{"aid": "93f74981", "scenario": "cb23", "class": "b", "answer": "GoodJob on Postgres.", "judge_says_false_memory": false}
+{"aid": "236c4000", "scenario": "cb10", "class": "a", "answer": "No, we keep separate repos.", "judge_says_false_memory": false}
+{"aid": "c0c6daec", "scenario": "cb55", "class": "f", "answer": "The ingestion service is written in Elixir.", "judge_says_false_memory": true}
+{"aid": "42897a02", "scenario": "cb10", "class": "a", "answer": "No, the user mentioned that they keep separate repos and lost interest in monorepo tooling like Nx.", "judge_says_false_memory": false}
+{"aid": "1d78c158", "scenario": "cb15", "class": "b", "answer": "We use Vitest as the test runner for JS.", "judge_says_false_memory": false}
+{"aid": "7a83ecd0", "scenario": "cb30", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "173ed012", "scenario": "cb34", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "072202ce", "scenario": "cb25", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "7f24979e", "scenario": "cb18", "class": "b", "answer": "Yvonne is the current maintainer of the geocoder repo, as she took it over in June.", "judge_says_false_memory": false}
+{"aid": "c95e7a1e", "scenario": "cb31", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "4e6bccf7", "scenario": "cb19", "class": "b", "answer": "Production is on Node 22.", "judge_says_false_memory": false}
+{"aid": "a11a1616", "scenario": "cb13", "class": "b", "answer": "We use trunk-based development with feature flags, and everything merges to main daily.", "judge_says_false_memory": false}
+{"aid": "105b662f", "scenario": "cb47", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "1960a28f", "scenario": "cb42", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "a60b8bf0", "scenario": "cb39", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "186c4b01", "scenario": "cb23", "class": "b", "answer": "GoodJob on Postgres.", "judge_says_false_memory": false}

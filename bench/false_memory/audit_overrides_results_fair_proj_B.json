@@ -1,0 +1,243 @@
+{
+ "_note": "blinded audit (blind_audit.py): the auditor saw no system names; one rule for all",
+ "overrides": [
+  {
+   "system": "sourcedrecall",
+   "id": "pb42",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "hazelnut-web is a Rails 7 app."
+  },
+  {
+   "system": "rag",
+   "id": "pb20",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "granary-batch uses Logback as its logging library."
+  },
+  {
+   "system": "agentmemory",
+   "id": "pb35",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "You want single quotes everywhere in your code."
+  },
+  {
+   "system": "ai-memory",
+   "id": "pb34",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "You want to know the approach or strategy before seeing the code."
+  },
+  {
+   "system": "agentmemory",
+   "id": "pb41",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "No, you do not want emojis in log messages and commits."
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "pb34",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "Before you give me code, I want a two line explanation of the approach first, always, in every project."
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "pb38",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "You should use a clear and concise commit message that describes the change you made, such as \"Add bowling speed field to cricket-sim model.\""
+  },
+  {
+   "system": "rag",
+   "id": "pb42",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "hazelnut-web is a Rails 7 app."
+  },
+  {
+   "system": "agentmemory",
+   "id": "pb45",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "Pebble-compiler is written in OCaml."
+  },
+  {
+   "system": "agentmemory",
+   "id": "pb44",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "Redis."
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "pb36",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "Short, preferably a couple of sentences unless you ask for more."
+  },
+  {
+   "system": "agentmemory",
+   "id": "pb37",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "Full type hints on every Python function you write, including parameters and return types."
+  },
+  {
+   "system": "ai-memory",
+   "id": "pb45",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "The pebble-compiler is written in OCaml."
+  },
+  {
+   "system": "agentmemory",
+   "id": "pb34",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "A two line explanation of the approach, always, in every project."
+  },
+  {
+   "system": "agentmemory",
+   "id": "pb36",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "A couple of sentences unless you ask for more."
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "pb45",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "The pebble-compiler is written in OCaml."
+  },
+  {
+   "system": "rag",
+   "id": "pb41",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "No, you do not want emojis in log messages and commits."
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "pb20",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "granary-batch uses Logback as its logging library."
+  },
+  {
+   "system": "agentmemory",
+   "id": "pb39",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "You want the change shown in a diff format, and you never want whole files pasted back at you, in any project."
+  },
+  {
+   "system": "agentmemory",
+   "id": "pb42",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "hazelnut-web is a Rails 7 app."
+  },
+  {
+   "system": "ai-memory",
+   "id": "pb42",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "hazelnut-web is a Rails 7 app."
+  },
+  {
+   "system": "ai-memory",
+   "id": "pb20",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "granary-batch uses the SLF4J logging library with Logback."
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "pb44",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "We use Redis for the session store in russet-shop."
+  },
+  {
+   "system": "rag",
+   "id": "pb45",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "The pebble-compiler is written in OCaml."
+  },
+  {
+   "system": "ai-memory",
+   "id": "pb44",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "Redis is used for the session store in russet-shop."
+  },
+  {
+   "system": "ai-memory",
+   "id": "pb39",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "You want the change shown in a diff format."
+  },
+  {
+   "system": "rag",
+   "id": "pb36",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "My answers should be one or two sentences."
+  },
+  {
+   "system": "agentmemory",
+   "id": "pb20",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "granary-batch uses Logback as its logging library."
+  },
+  {
+   "system": "agentmemory",
+   "id": "pb38",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "You follow the conventional commits style for every repo you touch."
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "pb37",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "You always want full type hints on every Python function, including parameters and return types."
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "pb35",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "You want single quotes everywhere in your code."
+  },
+  {
+   "system": "ai-memory",
+   "id": "pb36",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "One or two sentences."
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "pb39",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "You want the change shown in a diff format, not as whole files."
+  },
+  {
+   "system": "rag",
+   "id": "pb38",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "You follow conventional commits and use that style for every repo you touch."
+  }
+ ]
+}

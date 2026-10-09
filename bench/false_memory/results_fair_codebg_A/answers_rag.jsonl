@@ -1,0 +1,60 @@
+{"id": "cb01", "key": "72e6bed17de6dcc2544814c624c00f522846559d", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We are hosted on a Scaleway box."]}
+{"id": "cb02", "key": "608bd7efd916727ee6a3d51c52e0738a30f3684d", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cb03", "key": "802b74f6457e602efb60646875a8a3175f02117e", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You like longer functions when the flow is linear."]}
+{"id": "cb04", "key": "83bbf42b46c7400d94d9f7b3c9fdbaba4a6103f4", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["No, we do not expose a GraphQL API. The user mentioned they haven't used GraphQL in years and prefer REST."]}
+{"id": "cb05", "key": "7b457976779ba55fb5efe6d73103fbc58bc27541", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The message broker for the render farm queue is not explicitly mentioned, but there is an idea to move it to RabbitMQ. Currently, the Celery worker prints `Received unregistered task of type 'render.frame'`."]}
+{"id": "cb06", "key": "15c3488618b3795470a532437e9d825576cddc7f", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We don't do TDD here; tests come after, if at all."]}
+{"id": "cb07", "key": "372e7470755badd97174d68d5af017d08ef105de", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are using plain bash, as you mentioned sticking with it despite suggestions to try zsh with oh-my-zsh."]}
+{"id": "cb08", "key": "e5e4c0d2c66405e484ffcb8bba1b11559ed45024", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The docs site's hosting location has not been decided yet; Cloudflare Pages and Vercel were mentioned as options."]}
+{"id": "cb09", "key": "83440ed7831547439a7cd7a59eccb83de967b4fe", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We do not write new code on Java 8; the vendor team insists on it for their SDK, but I would never use it for new code."]}
+{"id": "cb10", "key": "b29ef626ea669a9956465f3e58870abd82ceca70", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["No, we keep separate repos."]}
+{"id": "cb11", "key": "3d7f626a175c91212414fa8e54ad574fc52b81bc", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The ledger service accesses its database using plain sqlc-generated queries after removing SQLAlchemy in spring."]}
+{"id": "cb12", "key": "0b83cc9226be68b0add9f33b1853e7d85dd901cb", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are a senior engineer and lead code reviews for the squad."]}
+{"id": "cb13", "key": "d0cc03c954ad43d9c110c38fb6edfb9a7568c7a3", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We use gitflow, with a long-lived develop branch and release branches cut every two weeks."]}
+{"id": "cb14", "key": "62fd34a5864e0a979c00d7c17dfff1fdc922c38f", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Your main machine is running macOS 15."]}
+{"id": "cb15", "key": "2bb1369c431bb0f7ff87bd6aecc4f082bbb88173", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We use Vitest as the test runner for JS."]}
+{"id": "cb16", "key": "f49c391c4b275e797f4ab2eb50edcd665ab3f42e", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We agreed to use 2 spaces instead of tabs for indenting the C code."]}
+{"id": "cb17", "key": "97b384d38f2abba2ff0eae050dcfe3fb3c086d91", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We push images to GitHub Container Registry now since we left Docker Hub in August."]}
+{"id": "cb18", "key": "4ad44d3eebd5d550d93bc0c915acfef5f521db51", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Yvonne is the current maintainer of the geocoder repo, though I contribute now and need her approval."]}
+{"id": "cb19", "key": "73a886e63336b0e6cc50bc2d13c3f42833f203eb", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Node 22."]}
+{"id": "cb20", "key": "1cd34d69f34a87f05571b495ac72c72abc3037d2", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The user is on call for the checkout service."]}
+{"id": "cb21", "key": "2b975df183b0e142000547e6b65d7900bf0420b6", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["ClickHouse holds our analytics data, as we migrated from MySQL over the summer."]}
+{"id": "cb22", "key": "196a8bc452818d516c08d6181c77217feffadb3f", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The live API, which is v2, gets new features."]}
+{"id": "cb23", "key": "8bc7d9e7b11d1cbc4fa1c65b2c3a473685ab0413", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["GoodJob on Postgres."]}
+{"id": "cb24", "key": "cc1f79b1d4793498b7b26030be0ec3312b86abab", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The customer portal uses Auth0 as the identity provider."]}
+{"id": "cb25", "key": "7c9a98e1c1ad56be827cf1c95c9155deff7fd7ca", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cb26", "key": "6e02b0ba14a40f0a2b04852ed3c37ce9b9cec0a7", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cb27", "key": "76d4ec5f3afad86634e152d9b088864e500be1ba", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cb28", "key": "e3133382baa7f56b0cf7d08830fa8ab3a37cb0db", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cb29", "key": "212ae6b4af2f69d7161eb447494b1c061d9de772", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cb30", "key": "2830ff4dfa8bd05bd7511f95b83a34932c914d8b", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cb31", "key": "fdf5dc79a22ebd6e74410baa0c0f7cdbe1ece808", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cb32", "key": "8d4de1cc388279bbaa3698dd655338ff67ecb62e", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cb33", "key": "c97d0d48e94f1739406d8e63f1f8174401f722f6", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cb34", "key": "477228634e202b0f6a4cc12900128d4fdcdcdf13", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cb35", "key": "460b59086867088f8221a55461eae0007665ba5e", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cb36", "key": "5ab3846b044b4ff35195932cc317b4d577dd4329", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cb37", "key": "8f325c771f4da069a088a155e8bc878894037ab6", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cb38", "key": "e24159a8762f30046726f8caaa6f3fd6e60d4021", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cb39", "key": "c1b33a4b10bc0bea0cfa9cf8093f235df7d84e48", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cb40", "key": "86181ef8a9b83c00a215ce526721ce01ecac6d0b", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cb41", "key": "5ccfeeec46366fbaa50f8265e1748cafdcff5423", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cb42", "key": "3df80f9f5183b60dc42603914cca574597741381", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cb43", "key": "affb99424a7afee348ee98c95dd4cb314be882d3", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cb44", "key": "4b1e42984b018d84ede3fa82909d169ca875f9e6", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cb45", "key": "ee77ca01aeff0098bc459cdae72ff4d9635477b7", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cb46", "key": "092bbfb4eaec278ff90990dfef0e3691d302af90", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cb47", "key": "0dd66acb7c40239b48ee50e201519f7a9a546062", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cb48", "key": "c49b1270d9142a12567a7019612a08c43f544adf", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cb49", "key": "a2adc9a70fcb9c3312dc6de7eff553b35437bfda", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cb50", "key": "e030f9bf4863116a138946dc108af6142a1fc5f5", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cb51", "key": "9ea6c408b4814ff1ba3040e3bb1907e4e753e49b", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "cb52", "key": "300f0e8bb90127e7829629616817c61dcba8b198", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You run fish as your shell interactively."]}
+{"id": "cb53", "key": "ebfe5f56ebd1dbb24c01628c5cf50c722e85be71", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Our shop front is hosted on Netlify."]}
+{"id": "cb54", "key": "29fdbc4be8fdc937149f5d760d0cd9b5e51827a3", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["No, you should never push directly to main; always open a pull request and wait for me."]}
+{"id": "cb55", "key": "93075fab47b67fa7ab529fa3c71ae625f53a299d", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The ingestion service is written in Elixir."]}
+{"id": "cb56", "key": "faae23c083b28c058d9c555b13e8ffa85ac01c8f", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We keep database backups for 30 days, as set by compliance."]}
+{"id": "cb57", "key": "807d2db1dd4eba1100ae71a08bd017355399c1cb", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We chose Go for the gateway because of cheap concurrency and a single static binary to ship."]}
+{"id": "cb58", "key": "27e7cf34ade20d5a75756b07dc4daa34130972b8", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["write comments in lowercase, one line, no trailing period."]}
+{"id": "cb59", "key": "0e9cad02d3c2ba8e57e6432a88d48fe8918c5498", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The code freeze starts on December 10."]}
+{"id": "cb60", "key": "33aa42d15d0dd6eb4f66475fa5ab99f1b1656ade", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We target Python 3.12 everywhere."]}

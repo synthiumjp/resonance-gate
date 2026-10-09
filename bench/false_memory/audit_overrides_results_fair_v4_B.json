@@ -1,0 +1,12 @@
+{
+ "_note": "blinded audit (blind_audit.py): the auditor saw no system names; one rule for all",
+ "overrides": [
+  {
+   "system": "rag",
+   "id": "s05",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "You have been vegetarian for years but started eating meat again in the spring."
+  }
+ ]
+}

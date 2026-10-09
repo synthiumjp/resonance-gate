@@ -1,0 +1,45 @@
+{"id": "pb01", "key": "46d4abf210e8bfc3e96c9e4c8417959eb4cacdc3", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb02", "key": "95e1ffd512b192072f1de2d734fb3426aa2700e9", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb03", "key": "14a56e50440221647ecb1839c32364a513d0971c", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb04", "key": "f37e6c603252f2a91f2f7ce1e6447bce3e6ec9ef", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb05", "key": "459c4369b00c91bcb145ac548e50fc8e2d433349", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb06", "key": "dbd7e5d2117420bda9d4de03124406d35c382ff9", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We use Keycloak for sign-in here."]}
+{"id": "pb07", "key": "fd444a69a77ecde27fceca8ed9c10ab4886f26ec", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb08", "key": "bd6bcac644aff480d307ff6aaf8fd8566c8dea67", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb09", "key": "a9753c98bc894165006d1f2ad66ab474ac3f52f5", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb10", "key": "6e426df7c5f753b250fb1dbbf5b153a9e5203699", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb11", "key": "f80edf6bf9d98876863eccff3015118a3c8ca1bb", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The infrastructure is managed using Terraform with remote state stored in S3."]}
+{"id": "pb12", "key": "4f12b10e728702f65f17bd46137b084b380f92b0", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb13", "key": "797616dc23333afe6f77cf27ed57fc57a237d69e", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb14", "key": "dab2874079dd938ada150c6d2fdddfc4fe908168", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["ashlar-api is now built using GitLab CI, as the Jenkins server was retired on Friday."]}
+{"id": "pb15", "key": "a600f04f0d80e5f11dce33c65624edf50b145e38", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["kingfisher-svc is now on FastAPI."]}
+{"id": "pb16", "key": "18d41cc9001b6421edaf6b9dea098fa6252be64f", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["carousel-app uses Vite now instead of webpack."]}
+{"id": "pb17", "key": "ee19f1796b046fbafc46cdf53ee49f4ce7df8999", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["saltmarsh-ledger is running on MySQL 8.0."]}
+{"id": "pb18", "key": "1781f269cd936860df5a440ee30a1ebee627561f", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["tamarind-api is deployed on Cloud Run."]}
+{"id": "pb19", "key": "85eb93feb232a9bd1eb5b5dd97615d8a81797f22", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["tideway-bff is on Node 20."]}
+{"id": "pb20", "key": "9f2ac09e8f0bfac3e3caef5d4ce9c64bb829ff65", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["granary-batch uses Logback as its logging library."]}
+{"id": "pb21", "key": "51ad3ad129f87d26fa66fb227bdbd17dda400fda", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["We use Biome for linting in willow-forms."]}
+{"id": "pb22", "key": "78d2032ef397e0ba3fa8a3415c2d72e3c24b8956", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb23", "key": "9ef0386ba326c5f38f995190c9379eccfaa64bfc", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb24", "key": "09d9100ccf6162c46749cf3b6fce6a30831b5ce3", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb25", "key": "c787dfa25dc4582c1cf2f2546e5d1cb990f42980", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb26", "key": "afbf482cb48cbd4bf285272a56fb5a8130491665", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb27", "key": "3c7c8946f81824680d5e8951cc1778828932d910", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb28", "key": "f312053ee15b29e0209d12ee63356c73549e81c7", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Yes, TypeScript strict mode is on in lattice-forms, as indicated by the `Object is possibly 'undefined'` error."]}
+{"id": "pb29", "key": "c0494302b08337b950711685e8d86a377f255327", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb30", "key": "61eddd6a193366358f5f2489773c498228588bc9", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb31", "key": "4e85cd13cf6fac8b3ad18a99b7d9ce7d92d6dc8f", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb32", "key": "5bc4e1d022ba85fca71d17254ac930ab2c7131c3", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb33", "key": "75685db00f4d84837a22471dccb099ae85183cf7", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb34", "key": "8066da899ea91cdf459c5f972badb2171677772f", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb35", "key": "87219ad78fdac98821d594b2f0f53f6b795e93fe", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb36", "key": "32d786441ec178b8e32ae967d532eee9a5771298", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["My answers should be one or two sentences."]}
+{"id": "pb37", "key": "4e245935a3c698febb23e8c71009950591f7df98", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb38", "key": "76d156563d3f2a105ec2fe5871802b7fd71ed8f1", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You follow conventional commits and use that style for every repo you touch."]}
+{"id": "pb39", "key": "cc841f5f4e26b061b723df02a5e8cc366d92bb2e", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb40", "key": "0d44749522bb25178871da60358485981667fd7e", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "pb41", "key": "7f2d8e5c092ed88e5a43b1ca1e23cda6abe36cfb", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["No, you do not want emojis in log messages and commits."]}
+{"id": "pb42", "key": "d5a80bf889ba25e964e80e9a99ba0dd2c02e2028", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["hazelnut-web is a Rails 7 app."]}
+{"id": "pb43", "key": "4f643880035ee421e9d65aca34a61478bc3dca58", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["otter-wiki is hosted on Netlify."]}
+{"id": "pb44", "key": "26c1cd86bc50100b3173cb0831252daeef69edaf", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Russet-shop uses Redis for the session store."]}
+{"id": "pb45", "key": "45b3715ca48e6886d0966bcd01089804739fdf6b", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The pebble-compiler is written in OCaml."]}

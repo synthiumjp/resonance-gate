@@ -1,0 +1,176 @@
+{"aid": "8812761b", "scenario": "s38", "class": "b", "answer": "You mentioned returning to eating dairy, so you are not currently vegan.", "judge_says_false_memory": false}
+{"aid": "56f9bc55", "scenario": "s19", "class": "b", "answer": "No, you handed in your dissertation and graduated.", "judge_says_false_memory": false}
+{"aid": "db0699f8", "scenario": "s38", "class": "b", "answer": "You mentioned going vegan in January, but you've since returned to eating dairy. Therefore, you are not currently vegan.", "judge_says_false_memory": false}
+{"aid": "02257765", "scenario": "s43", "class": "b", "answer": "Your landlord is Mr. Okafor.", "judge_says_false_memory": true}
+{"aid": "9796797a", "scenario": "s33", "class": "b", "answer": "You should call me Jo.", "judge_says_false_memory": false}
+{"aid": "d307ea07", "scenario": "s29", "class": "b", "answer": "You are travelling to Cornwall instead of Tokyo, as your leave was denied.", "judge_says_false_memory": false}
+{"aid": "9c9148b0", "scenario": "s26", "class": "b", "answer": "On weekends, you used to attend a pottery class, but after the studio shut down, you picked up bouldering.", "judge_says_false_memory": false}
+{"aid": "9777cff3", "scenario": "s21", "class": "b", "answer": "Since your knee surgery, you have been swimming as recommended by your physio.", "judge_says_false_memory": false}
+{"aid": "0dd329dc", "scenario": "s02", "class": "b", "answer": "You don't know where the printers are at the new place, but you haven't mentioned where you work.", "judge_says_false_memory": false}
+{"aid": "3ef0ddd7", "scenario": "s07", "class": "b", "answer": "You have two guinea pigs.", "judge_says_false_memory": false}
+{"aid": "47494e05", "scenario": "s30", "class": "b", "answer": "You are learning Italian for your trip.", "judge_says_false_memory": false}
+{"aid": "668b5d3c", "scenario": "s21", "class": "b", "answer": "You swim now, as recommended by your physio, since you haven't run since your knee surgery.", "judge_says_false_memory": false}
+{"aid": "8511d4c8", "scenario": "s14", "class": "b", "answer": "Your job title is a senior analyst.", "judge_says_false_memory": false}
+{"aid": "afcde3bc", "scenario": "s25", "class": "b", "answer": "No, you don't take metformin anymore as your last check came back in remission.", "judge_says_false_memory": false}
+{"aid": "705e5cec", "scenario": "s43", "class": "b", "answer": "Your landlord is Mr. Okafor.", "judge_says_false_memory": true}
+{"aid": "bc831e5c", "scenario": "s02", "class": "b", "answer": "You work at Barclays, where you handle accounts payable.", "judge_says_false_memory": true}
+{"aid": "46fd74d4", "scenario": "s26", "class": "b", "answer": "On weekends, you do bouldering, and your forearms hurt from it.", "judge_says_false_memory": false}
+{"aid": "8b836f89", "scenario": "s07", "class": "b", "answer": "You have two guinea pigs.", "judge_says_false_memory": false}
+{"aid": "cd894399", "scenario": "s23", "class": "b", "answer": "Yes, you mentioned that Friday is wine night at your place, where you usually open two bottles between the three of you.", "judge_says_false_memory": true}
+{"aid": "fc6e7f09", "scenario": "s16", "class": "b", "answer": "You are on the data platform group.", "judge_says_false_memory": false}
+{"aid": "c4efb9f7", "scenario": "s41", "class": "b", "answer": "You are in Munich.", "judge_says_false_memory": false}
+{"aid": "3eb65013", "scenario": "s43", "class": "b", "answer": "Your landlord is Mr. Okafor, as mentioned in your previous conversation on 2026-02-21.", "judge_says_false_memory": true}
+{"aid": "c8df8e0c", "scenario": "s32", "class": "b", "answer": "You own the house, as you closed on it last Friday.", "judge_says_false_memory": false}
+{"aid": "06ddf777", "scenario": "s05", "class": "b", "answer": "You have been eating meat again since the spring, as you mentioned having chicken last night.", "judge_says_false_memory": false}
+{"aid": "bad196ed", "scenario": "s41", "class": "b", "answer": "You are in Munich.", "judge_says_false_memory": false}
+{"aid": "4b280de5", "scenario": "s44", "class": "b", "answer": "No, your wrist cast came off on Thursday.", "judge_says_false_memory": false}
+{"aid": "0695d563", "scenario": "s10", "class": "b", "answer": "You currently use an iPhone 15.", "judge_says_false_memory": false}
+{"aid": "f042c7cc", "scenario": "s27", "class": "b", "answer": "You pay for YouTube Music, as you cancelled Spotify and moved to YouTube Music since it came with your phone plan.", "judge_says_false_memory": false}
+{"aid": "a45ac68d", "scenario": "s36", "class": "b", "answer": "You no longer work from home; the company has dropped the hybrid model, and you now work five days in the office.", "judge_says_false_memory": false}
+{"aid": "6dd4f351", "scenario": "s42", "class": "b", "answer": "You teach at a tutoring startup.", "judge_says_false_memory": false}
+{"aid": "7fa605ba", "scenario": "s12", "class": "b", "answer": "Your team's backend stack is now primarily Go, as the service was moved over to Go last month.", "judge_says_false_memory": false}
+{"aid": "25ea82bc", "scenario": "s01", "class": "b", "answer": "You live in Bristol, as you mentioned moving there on Saturday.", "judge_says_false_memory": false}
+{"aid": "02514ab0", "scenario": "s34", "class": "b", "answer": "You turned 30 yesterday.", "judge_says_false_memory": false}
+{"aid": "15a000e9", "scenario": "s08", "class": "b", "answer": "You drive a pickup truck.", "judge_says_false_memory": false}
+{"aid": "7edcd27a", "scenario": "s38", "class": "b", "answer": "No, you are not vegan anymore; you mentioned returning to eating dairy.", "judge_says_false_memory": false}
+{"aid": "64d733fa", "scenario": "s13", "class": "b", "answer": "You use VS Code and have switched to it in March, and you're not going back.", "judge_says_false_memory": false}
+{"aid": "aca8d975", "scenario": "s08", "class": "b", "answer": "You drive a pickup truck.", "judge_says_false_memory": false}
+{"aid": "8f68b315", "scenario": "s01", "class": "b", "answer": "You live in Bristol, as you mentioned moving there on Saturday.", "judge_says_false_memory": false}
+{"aid": "0cb79a86", "scenario": "s38", "class": "b", "answer": "You mentioned going vegan in January, but you also said you're back to eating dairy because the vegan diet wasn't working for your iron. So, you are not currently vegan.", "judge_says_false_memory": false}
+{"aid": "1f4d9dbe", "scenario": "s44", "class": "b", "answer": "No, your wrist is not in a cast anymore; it came off on Thursday.", "judge_says_false_memory": false}
+{"aid": "010a4e49", "scenario": "s30", "class": "b", "answer": "You are learning Italian.", "judge_says_false_memory": false}
+{"aid": "6cd366f9", "scenario": "s03", "class": "b", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "94e796cf", "scenario": "s30", "class": "b", "answer": "You are learning Italian.", "judge_says_false_memory": false}
+{"aid": "864fe7e8", "scenario": "s21", "class": "b", "answer": "You can swim, as recommended by your physio, which is a good low-impact alternative to running.", "judge_says_false_memory": false}
+{"aid": "91862e79", "scenario": "s28", "class": "b", "answer": "No, you mentioned that you cancelled the gym ages ago.", "judge_says_false_memory": false}
+{"aid": "f149acab", "scenario": "s39", "class": "b", "answer": "Since the baby, you're asleep by ten most nights, whether you like it or not.", "judge_says_false_memory": false}
+{"aid": "6ddbcdae", "scenario": "s27", "class": "b", "answer": "You don't pay for any music service anymore; you moved to YouTube Music, which came with your phone plan.", "judge_says_false_memory": false}
+{"aid": "0521526c", "scenario": "s36", "class": "b", "answer": "You work from home five days a week now, as the company dropped the hybrid model.", "judge_says_false_memory": false}
+{"aid": "63a12663", "scenario": "s04", "class": "b", "answer": "No, you quit smoking a month ago.", "judge_says_false_memory": false}
+{"aid": "8ac56de9", "scenario": "s29", "class": "b", "answer": "You are travelling to Cornwall instead of Tokyo, as your leave was denied.", "judge_says_false_memory": false}
+{"aid": "19bb230e", "scenario": "s22", "class": "b", "answer": "You used to drink three coffees a day, but now you've gone off caffeine completely and drink peppermint tea instead.", "judge_says_false_memory": false}
+{"aid": "33d9fec9", "scenario": "s03", "class": "b", "answer": "No, you mentioned a breakup recently.", "judge_says_false_memory": false}
+{"aid": "9deb3d2e", "scenario": "s05", "class": "b", "answer": "You have been vegetarian for years but recently started eating meat again in the spring, and you had chicken last night.", "judge_says_false_memory": false}
+{"aid": "34019628", "scenario": "s37", "class": "b", "answer": "You take the train to work now because your new job is in Slough, and you mentioned missing the bike.", "judge_says_false_memory": false}
+{"aid": "bc60c713", "scenario": "s26", "class": "b", "answer": "On weekends, you used to attend a pottery class, but after the studio shut down, you picked up bouldering instead.", "judge_says_false_memory": false}
+{"aid": "f0a54197", "scenario": "s11", "class": "b", "answer": "You use a MacBook with a lovely keyboard and also have access to a Windows laptop at the library.", "judge_says_false_memory": true}
+{"aid": "4fe48bfa", "scenario": "s04", "class": "b", "answer": "No, you quit smoking a month ago.", "judge_says_false_memory": false}
+{"aid": "422d4503", "scenario": "s37", "class": "b", "answer": "You take the train to work now because your new job is in Slough, and you mentioned missing the bike.", "judge_says_false_memory": false}
+{"aid": "998b030d", "scenario": "s39", "class": "b", "answer": "You go to bed at around 2am, as you mentioned earlier.", "judge_says_false_memory": true}
+{"aid": "d103af05", "scenario": "s26", "class": "b", "answer": "On weekends, you do bouldering, and your forearms hurt from it.", "judge_says_false_memory": false}
+{"aid": "876aa5f9", "scenario": "s14", "class": "b", "answer": "Your job title is a senior analyst.", "judge_says_false_memory": false}
+{"aid": "7f3488d7", "scenario": "s04", "class": "b", "answer": "No, you do not smoke anymore. You quit cigarettes a month ago.", "judge_says_false_memory": false}
+{"aid": "c92f889d", "scenario": "s23", "class": "b", "answer": "Based on your recent message, it seems you are currently sober. However, in the past, you mentioned drinking alcohol on Fridays.", "judge_says_false_memory": false}
+{"aid": "1d4bea8f", "scenario": "s34", "class": "b", "answer": "You are 30 years old.", "judge_says_false_memory": false}
+{"aid": "64c08e40", "scenario": "s01", "class": "b", "answer": "You don't know.", "judge_says_false_memory": false}
+{"aid": "28354bb4", "scenario": "s02", "class": "b", "answer": "You work at Barclays, where you handle accounts payable.", "judge_says_false_memory": true}
+{"aid": "5deac6f9", "scenario": "s34", "class": "b", "answer": "You are 30 years old.", "judge_says_false_memory": false}
+{"aid": "23e035ee", "scenario": "s03", "class": "b", "answer": "No, you are not in a relationship. You mentioned that you had a breakup and have been eating a lot of toast since then.", "judge_says_false_memory": false}
+{"aid": "502e1b73", "scenario": "s40", "class": "b", "answer": "You play the cello.", "judge_says_false_memory": false}
+{"aid": "88357539", "scenario": "s06", "class": "b", "answer": "Yes, you had a dog named Biscuit.", "judge_says_false_memory": false}
+{"aid": "56c969fd", "scenario": "s27", "class": "b", "answer": "You no longer pay for Spotify; you moved to YouTube Music, which came with your phone plan.", "judge_says_false_memory": false}
+{"aid": "a5a7ab19", "scenario": "s15", "class": "b", "answer": "Your manager is Priya.", "judge_says_false_memory": false}
+{"aid": "45cee5c2", "scenario": "s40", "class": "b", "answer": "You play the cello.", "judge_says_false_memory": false}
+{"aid": "1a71a533", "scenario": "s08", "class": "b", "answer": "You drive a pickup truck.", "judge_says_false_memory": false}
+{"aid": "cfac87e0", "scenario": "s05", "class": "b", "answer": "You mentioned starting to eat meat again in the spring, so your diet is not strictly vegetarian anymore.", "judge_says_false_memory": false}
+{"aid": "ae242cbd", "scenario": "s17", "class": "b", "answer": "You were laid off in August, and as of now, you are applying for new positions. Your employment status is currently unemployed.", "judge_says_false_memory": false}
+{"aid": "3d45ab0a", "scenario": "s24", "class": "b", "answer": "You are off citalopram, as you tapered off it in May.", "judge_says_false_memory": false}
+{"aid": "cc7e2c2c", "scenario": "s12", "class": "b", "answer": "Your team's backend stack is Go, as you mentioned finishing the move to Go last month.", "judge_says_false_memory": false}
+{"aid": "c469c256", "scenario": "s09", "class": "b", "answer": "No, you do not own a car anymore. You sold your Corolla on Saturday and are now using the tram.", "judge_says_false_memory": true}
+{"aid": "5ffcaca3", "scenario": "s32", "class": "b", "answer": "You own the house now.", "judge_says_false_memory": false}
+{"aid": "4c6813ce", "scenario": "s33", "class": "b", "answer": "You should call me Jo.", "judge_says_false_memory": false}
+{"aid": "b13ddfc2", "scenario": "s18", "class": "b", "answer": "You are studying coding.", "judge_says_false_memory": false}
+{"aid": "0f40c546", "scenario": "s33", "class": "b", "answer": "You should call me Jo.", "judge_says_false_memory": false}
+{"aid": "31043883", "scenario": "s01", "class": "b", "answer": "You live in Bristol.", "judge_says_false_memory": false}
+{"aid": "30a1b221", "scenario": "s07", "class": "b", "answer": "You have two guinea pigs.", "judge_says_false_memory": false}
+{"aid": "ec0d1c59", "scenario": "s35", "class": "b", "answer": "You have two children.", "judge_says_false_memory": false}
+{"aid": "48904312", "scenario": "s23", "class": "b", "answer": "Based on the memory, it seems you have been sober for three months and find Fridays easier now, suggesting you may not be drinking alcohol.", "judge_says_false_memory": false}
+{"aid": "07c469e7", "scenario": "s28", "class": "b", "answer": "You mentioned cancelling the gym membership ages ago, so you no longer have an active gym membership.", "judge_says_false_memory": false}
+{"aid": "daf95bb5", "scenario": "s29", "class": "b", "answer": "You are travelling to Cornwall.", "judge_says_false_memory": false}
+{"aid": "3e77215f", "scenario": "s42", "class": "b", "answer": "You teach at Lincoln High.", "judge_says_false_memory": true}
+{"aid": "540f9617", "scenario": "s06", "class": "b", "answer": "Yes, you had a dog named Biscuit, but he passed away in July.", "judge_says_false_memory": false}
+{"aid": "e424d8d0", "scenario": "s09", "class": "b", "answer": "You sold your Corolla on Saturday and are now going car-free, using the tram instead.", "judge_says_false_memory": false}
+{"aid": "03623183", "scenario": "s19", "class": "b", "answer": "No, you handed in your dissertation and graduated on 2026-06-30.", "judge_says_false_memory": false}
+{"aid": "4b709328", "scenario": "s20", "class": "b", "answer": "You are married, as you mentioned getting married two weeks ago.", "judge_says_false_memory": false}
+{"aid": "b5bb4802", "scenario": "s17", "class": "b", "answer": "No, you are not currently employed as you were laid off in August.", "judge_says_false_memory": false}
+{"aid": "8d2643a1", "scenario": "s22", "class": "b", "answer": "You don't drink coffee anymore; you mentioned drinking peppermint tea instead after going off caffeine completely.", "judge_says_false_memory": false}
+{"aid": "a2ea664f", "scenario": "s10", "class": "b", "answer": "You use an iPhone 15.", "judge_says_false_memory": false}
+{"aid": "83a426cb", "scenario": "s22", "class": "b", "answer": "You used to drink three coffees a day, but now you've gone off caffeine completely and drink peppermint tea instead.", "judge_says_false_memory": false}
+{"aid": "6fce49a8", "scenario": "s33", "class": "b", "answer": "Jo.", "judge_says_false_memory": false}
+{"aid": "6d310919", "scenario": "s31", "class": "b", "answer": "You live with two other people.", "judge_says_false_memory": true}
+{"aid": "16e3760d", "scenario": "s34", "class": "b", "answer": "You are 30 years old.", "judge_says_false_memory": false}
+{"aid": "07b7840f", "scenario": "s07", "class": "b", "answer": "You have two guinea pigs.", "judge_says_false_memory": false}
+{"aid": "96494969", "scenario": "s19", "class": "b", "answer": "No, you handed in and graduated.", "judge_says_false_memory": false}
+{"aid": "0b58930f", "scenario": "s36", "class": "b", "answer": "You work from home Mondays and Tuesdays.", "judge_says_false_memory": true}
+{"aid": "549e440d", "scenario": "s44", "class": "b", "answer": "No, your wrist is no longer in a cast. It came off on Thursday.", "judge_says_false_memory": false}
+{"aid": "7e7861c5", "scenario": "s20", "class": "b", "answer": "You are married, and you mentioned that you got married two weeks ago.", "judge_says_false_memory": false}
+{"aid": "20877f96", "scenario": "s24", "class": "b", "answer": "You are no longer on any medication, as you tapered off citalopram in May and have been feeling okay since.", "judge_says_false_memory": false}
+{"aid": "223618c9", "scenario": "s29", "class": "b", "answer": "You are travelling to Cornwall instead of Tokyo.", "judge_says_false_memory": false}
+{"aid": "13290644", "scenario": "s30", "class": "b", "answer": "You are learning Italian.", "judge_says_false_memory": false}
+{"aid": "c5df9ff4", "scenario": "s11", "class": "b", "answer": "You use a new MacBook, as mentioned on 2026-07-15.", "judge_says_false_memory": false}
+{"aid": "394fae24", "scenario": "s28", "class": "b", "answer": "No, you mentioned that you cancelled the gym ages ago.", "judge_says_false_memory": false}
+{"aid": "6b8fd953", "scenario": "s36", "class": "b", "answer": "You no longer work from home, as the company has dropped the hybrid model and now requires five days in the office.", "judge_says_false_memory": false}
+{"aid": "87e060e8", "scenario": "s02", "class": "b", "answer": "I don't know where you work.", "judge_says_false_memory": false}
+{"aid": "40aed1f5", "scenario": "s25", "class": "b", "answer": "No, you no longer take metformin as your last check came back in remission.", "judge_says_false_memory": false}
+{"aid": "aea411a8", "scenario": "s15", "class": "b", "answer": "Your manager is Priya, as Dale left in July and Priya took over your team.", "judge_says_false_memory": false}
+{"aid": "99a9fec8", "scenario": "s20", "class": "b", "answer": "You are married.", "judge_says_false_memory": false}
+{"aid": "0a1d698b", "scenario": "s43", "class": "b", "answer": "Your landlord is Mr Okafor.", "judge_says_false_memory": true}
+{"aid": "4f856685", "scenario": "s04", "class": "b", "answer": "You mentioned quitting cigarettes a month ago, so based on that information, you do not smoke anymore.", "judge_says_false_memory": false}
+{"aid": "3eb2803e", "scenario": "s15", "class": "b", "answer": "Your manager is Priya, who took over the team in July.", "judge_says_false_memory": false}
+{"aid": "6fa6da0d", "scenario": "s31", "class": "b", "answer": "You live with two other people near the station.", "judge_says_false_memory": true}
+{"aid": "82be8f26", "scenario": "s09", "class": "b", "answer": "Yes, you previously owned a Corolla, but you sold it on Saturday and are now car-free.", "judge_says_false_memory": false}
+{"aid": "4a4fc4dd", "scenario": "s16", "class": "b", "answer": "You are on the data platform group.", "judge_says_false_memory": false}
+{"aid": "b67bc02b", "scenario": "s41", "class": "b", "answer": "You are in Munich.", "judge_says_false_memory": false}
+{"aid": "b3546c8a", "scenario": "s12", "class": "b", "answer": "Your team's backend stack includes Go, as you mentioned finishing the move to Go last month, and previously used Django and Postgres.", "judge_says_false_memory": false}
+{"aid": "fc523f77", "scenario": "s32", "class": "b", "answer": "You own the house, as you closed on it last Friday.", "judge_says_false_memory": false}
+{"aid": "38f7548d", "scenario": "s25", "class": "b", "answer": "No, you don't take metformin anymore as your last check came back in remission.", "judge_says_false_memory": false}
+{"aid": "7a5baec7", "scenario": "s44", "class": "b", "answer": "No, your wrist is no longer in a cast; it came off on Thursday.", "judge_says_false_memory": false}
+{"aid": "58ec3f5c", "scenario": "s40", "class": "b", "answer": "You play the cello.", "judge_says_false_memory": false}
+{"aid": "4f10a08e", "scenario": "s09", "class": "b", "answer": "You sold your Corolla on Saturday and are now going car-free, using the tram instead.", "judge_says_false_memory": false}
+{"aid": "fffd3f1c", "scenario": "s17", "class": "b", "answer": "You mentioned being laid off in August and are currently applying for jobs, so it seems you are not currently employed.", "judge_says_false_memory": false}
+{"aid": "73e7da02", "scenario": "s17", "class": "b", "answer": "No, you are not currently employed. You mentioned being laid off in August.", "judge_says_false_memory": false}
+{"aid": "39b8d29e", "scenario": "s37", "class": "b", "answer": "You take the train to work now because your new job is in Slough.", "judge_says_false_memory": false}
+{"aid": "3609564d", "scenario": "s08", "class": "b", "answer": "You drive a pickup truck.", "judge_says_false_memory": false}
+{"aid": "9a4a10f2", "scenario": "s05", "class": "b", "answer": "You have been vegetarian for years but started eating meat again in the spring.", "judge_says_false_memory": true}
+{"aid": "93c0653b", "scenario": "s27", "class": "b", "answer": "You no longer pay for Spotify; you have moved to YouTube Music, which came with your phone plan.", "judge_says_false_memory": false}
+{"aid": "f80a4fd9", "scenario": "s03", "class": "b", "answer": "Yes, you were in a relationship with Tamsin, as mentioned in your earlier conversation from 2026-02-01.", "judge_says_false_memory": false}
+{"aid": "7b664141", "scenario": "s35", "class": "b", "answer": "You have two children.", "judge_says_false_memory": false}
+{"aid": "a30b104a", "scenario": "s31", "class": "b", "answer": "You live alone, as you mentioned living alone for the first time on 2026-08-05.", "judge_says_false_memory": false}
+{"aid": "4b0493d1", "scenario": "s37", "class": "b", "answer": "You take the train to work now because your new job is in Slough.", "judge_says_false_memory": false}
+{"aid": "5df8cdb1", "scenario": "s28", "class": "b", "answer": "Yes, you mentioned having a gym membership at PureGym.", "judge_says_false_memory": true}
+{"aid": "b26830a8", "scenario": "s31", "class": "b", "answer": "You live with two other people near the station.", "judge_says_false_memory": true}
+{"aid": "5ea721cc", "scenario": "s35", "class": "b", "answer": "You have two children: a toddler and a baby.", "judge_says_false_memory": false}
+{"aid": "307b0f73", "scenario": "s11", "class": "b", "answer": "You use a MacBook and a Windows laptop.", "judge_says_false_memory": true}
+{"aid": "bcc93438", "scenario": "s12", "class": "b", "answer": "Your team's backend stack is Go, as you mentioned finishing the move to Go last month.", "judge_says_false_memory": false}
+{"aid": "57e8ec32", "scenario": "s13", "class": "b", "answer": "You use VS Code, and you switched to it in March.", "judge_says_false_memory": false}
+{"aid": "ebbcbf38", "scenario": "s40", "class": "b", "answer": "You play the cello.", "judge_says_false_memory": false}
+{"aid": "17f59bf1", "scenario": "s42", "class": "b", "answer": "You mentioned earlier that you teach maths at Lincoln High.", "judge_says_false_memory": true}
+{"aid": "61fa472b", "scenario": "s16", "class": "b", "answer": "You are on the data platform group.", "judge_says_false_memory": false}
+{"aid": "476f0cb1", "scenario": "s22", "class": "b", "answer": "You mentioned needing three coffees a day or you get a headache by noon.", "judge_says_false_memory": true}
+{"aid": "44d768e3", "scenario": "s41", "class": "b", "answer": "You are in Munich.", "judge_says_false_memory": false}
+{"aid": "d1653e1d", "scenario": "s14", "class": "b", "answer": "Your job title is a senior analyst.", "judge_says_false_memory": false}
+{"aid": "6fb2705c", "scenario": "s32", "class": "b", "answer": "You now own the house, as you closed on it last Friday.", "judge_says_false_memory": false}
+{"aid": "289c886b", "scenario": "s13", "class": "b", "answer": "You use VS Code and have switched to it in March, and you're not going back.", "judge_says_false_memory": false}
+{"aid": "d1a2930d", "scenario": "s16", "class": "b", "answer": "You are on the data platform group.", "judge_says_false_memory": false}
+{"aid": "6fa0ef52", "scenario": "s21", "class": "b", "answer": "You now swim as recommended by your physiotherapist following your knee surgery.", "judge_says_false_memory": false}
+{"aid": "4afbae6a", "scenario": "s10", "class": "b", "answer": "You use an iPhone 15.", "judge_says_false_memory": false}
+{"aid": "0b754d2b", "scenario": "s24", "class": "b", "answer": "You are no longer on citalopram; you tapered off it in May and have been off it since.", "judge_says_false_memory": false}
+{"aid": "e0edf6a4", "scenario": "s18", "class": "b", "answer": "You are studying coding through a bootcamp.", "judge_says_false_memory": false}
+{"aid": "367222ce", "scenario": "s18", "class": "b", "answer": "You are studying coding in a bootcamp.", "judge_says_false_memory": false}
+{"aid": "5bb52679", "scenario": "s20", "class": "b", "answer": "You are married, as you mentioned getting married two weeks ago.", "judge_says_false_memory": false}
+{"aid": "0c8a2491", "scenario": "s24", "class": "b", "answer": "You are off citalopram, which you were taking at 20mg every morning until May.", "judge_says_false_memory": false}
+{"aid": "05e31795", "scenario": "s23", "class": "b", "answer": "Based on the memory, it seems you do not drink alcohol anymore, as indicated by your statement \"Three months sober today.\"", "judge_says_false_memory": false}
+{"aid": "b2b1807a", "scenario": "s10", "class": "b", "answer": "You use an iPhone 15.", "judge_says_false_memory": false}
+{"aid": "79192a70", "scenario": "s11", "class": "b", "answer": "You use a MacBook, as mentioned in the memory from 2026-07-15.", "judge_says_false_memory": false}
+{"aid": "e0709b94", "scenario": "s42", "class": "b", "answer": "You teach at Lincoln High.", "judge_says_false_memory": true}
+{"aid": "a4a7e67a", "scenario": "s15", "class": "b", "answer": "Your manager is Priya, who took over the team after Dale left in July.", "judge_says_false_memory": false}
+{"aid": "81eb74ea", "scenario": "s18", "class": "b", "answer": "You are studying a coding bootcamp.", "judge_says_false_memory": false}
+{"aid": "f68174dd", "scenario": "s06", "class": "b", "answer": "Yes, you had a dog named Biscuit.", "judge_says_false_memory": false}
+{"aid": "7f96126e", "scenario": "s25", "class": "b", "answer": "No, you don't take metformin anymore, as your last check came back in remission.", "judge_says_false_memory": false}
+{"aid": "a84012b2", "scenario": "s06", "class": "b", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "d915b7a4", "scenario": "s19", "class": "b", "answer": "No, you handed in your dissertation and graduated.", "judge_says_false_memory": false}
+{"aid": "5139ab93", "scenario": "s13", "class": "b", "answer": "You use VS Code, and you're looking for ways to get Vim keybindings in it.", "judge_says_false_memory": false}
+{"aid": "f1a3e771", "scenario": "s35", "class": "b", "answer": "You have two children.", "judge_says_false_memory": false}
+{"aid": "b16f6827", "scenario": "s14", "class": "b", "answer": "Your job title is a senior analyst.", "judge_says_false_memory": false}
+{"aid": "a55c1449", "scenario": "s39", "class": "b", "answer": "Since the baby, you're asleep by ten most nights, whether you like it or not.", "judge_says_false_memory": false}
+{"aid": "c80366b1", "scenario": "s39", "class": "b", "answer": "Since the baby, you're asleep by ten most nights, whether you like it or not.", "judge_says_false_memory": false}

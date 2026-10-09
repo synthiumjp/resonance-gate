@@ -1,0 +1,19 @@
+{
+ "_note": "blinded audit (blind_audit.py): the auditor saw no system names; one rule for all",
+ "overrides": [
+  {
+   "system": "mem0",
+   "id": "b03",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "No, you are not in a relationship anymore; you and your boyfriend Dan broke up around September 2, 2026."
+  },
+  {
+   "system": "mem0",
+   "id": "e03",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "No, you do not have any dietary restrictions mentioned. You are open to having a stir fry for dinner and clarified that you are not lactose intolerant."
+  }
+ ]
+}

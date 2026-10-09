@@ -1,0 +1,194 @@
+{
+ "_note": "blinded audit (blind_audit.py): the auditor saw no system names; one rule for all",
+ "overrides": [
+  {
+   "system": "rag",
+   "id": "cb53",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "Our shop front is hosted on Netlify."
+  },
+  {
+   "system": "agentmemory",
+   "id": "cb58",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "you should write comments in lowercase, one line, no trailing period."
+  },
+  {
+   "system": "ai-memory",
+   "id": "cb54",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "No, you are not allowed to let me push directly to main. Always open a pull request and wait for approval."
+  },
+  {
+   "system": "rag",
+   "id": "cb58",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "write comments in lowercase, one line, no trailing period."
+  },
+  {
+   "system": "ai-memory",
+   "id": "cb60",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "We target Python 3.12 everywhere."
+  },
+  {
+   "system": "rag",
+   "id": "cb59",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "The code freeze starts on December 10."
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "cb59",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "The code freeze starts on December 10."
+  },
+  {
+   "system": "rag",
+   "id": "cb56",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "We keep database backups for 30 days, as set by compliance."
+  },
+  {
+   "system": "agentmemory",
+   "id": "cb56",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "We keep database backups for 30 days, as set by compliance."
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "cb56",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "We keep database backups for 30 days, as set by compliance."
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "cb52",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "You run fish as your shell interactively."
+  },
+  {
+   "system": "agentmemory",
+   "id": "cb52",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "You run fish as your shell interactively."
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "cb60",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "We target Python 3.12 everywhere."
+  },
+  {
+   "system": "agentmemory",
+   "id": "cb60",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "We target Python 3.12 everywhere."
+  },
+  {
+   "system": "agentmemory",
+   "id": "cb53",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "Our shop front is hosted on Netlify."
+  },
+  {
+   "system": "ai-memory",
+   "id": "cb59",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "The code freeze starts on December 10."
+  },
+  {
+   "system": "agentmemory",
+   "id": "cb59",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "The code freeze starts on December 10."
+  },
+  {
+   "system": "ai-memory",
+   "id": "cb55",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "The ingestion service is written in Elixir."
+  },
+  {
+   "system": "rag",
+   "id": "cb55",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "The ingestion service is written in Elixir."
+  },
+  {
+   "system": "rag",
+   "id": "cb60",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "We target Python 3.12 everywhere."
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "cb53",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "Our shop front is hosted on Netlify."
+  },
+  {
+   "system": "ai-memory",
+   "id": "cb52",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "You run fish as your shell interactively."
+  },
+  {
+   "system": "agentmemory",
+   "id": "cb55",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "The ingestion service is written in Elixir."
+  },
+  {
+   "system": "ai-memory",
+   "id": "cb56",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "We keep database backups for 30 days, as set by compliance."
+  },
+  {
+   "system": "ai-memory",
+   "id": "cb58",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "Lowercase, one line, no trailing period."
+  },
+  {
+   "system": "rag",
+   "id": "cb52",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "You run fish as your shell interactively."
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "cb55",
+   "fm": false,
+   "reason": "judge verdict contradicts the answer's actual claim",
+   "line": "The ingestion service is written in Elixir."
+  }
+ ]
+}

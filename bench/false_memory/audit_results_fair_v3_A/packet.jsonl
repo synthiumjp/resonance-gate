@@ -1,0 +1,90 @@
+{"aid": "f35f2e7a", "scenario": "d02", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "882dfd19", "scenario": "c04", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "07489e43", "scenario": "b03", "class": "b", "answer": "No, you are not in a relationship anymore; you and your boyfriend Dan broke up around September 2, 2026.", "judge_says_false_memory": true}
+{"aid": "fc240c7e", "scenario": "b01", "class": "b", "answer": "You work as a driving instructor.", "judge_says_false_memory": false}
+{"aid": "56359958", "scenario": "e05", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "09461c34", "scenario": "c02", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "00f94eae", "scenario": "b04", "class": "b", "answer": "You stopped your vegan diet around October 2, 2026, after having a cheeseburger and deciding to eat everything again.", "judge_says_false_memory": false}
+{"aid": "ec980a23", "scenario": "a05", "class": "a", "answer": "No, you mentioned that you never learned to drive and have always taken buses and trains.", "judge_says_false_memory": false}
+{"aid": "0eccaaa3", "scenario": "a02", "class": "a", "answer": "No, you mentioned that you don't have kids, just two very needy cats.", "judge_says_false_memory": false}
+{"aid": "65093fd8", "scenario": "c05", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "90eb5897", "scenario": "e03", "class": "e", "answer": "No, you do not have any dietary restrictions mentioned. You are open to having a stir fry for dinner and clarified that you are not lactose intolerant.", "judge_says_false_memory": true}
+{"aid": "99b629d4", "scenario": "d05", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "458b1bbe", "scenario": "b02", "class": "b", "answer": "You live in Manchester, as you mentioned settling there with boxes everywhere on 2026-04-20.", "judge_says_false_memory": false}
+{"aid": "17d39809", "scenario": "c05", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "6505005b", "scenario": "d01", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "ea1c9652", "scenario": "b07", "class": "b", "answer": "You are with Three, as you switched to them last week for unlimited data.", "judge_says_false_memory": false}
+{"aid": "a87ba3a9", "scenario": "d03", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "9600752e", "scenario": "b08", "class": "b", "answer": "Yes, you were a student working towards your nursing degree, but as of September 15, 2026, you are now a registered nurse.", "judge_says_false_memory": false}
+{"aid": "cd57a57d", "scenario": "c03", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "51c3c938", "scenario": "a01", "class": "a", "answer": "You might be moving to Leeds for work, but nothing is confirmed yet.", "judge_says_false_memory": false}
+{"aid": "483f6efc", "scenario": "d04", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "e9c01614", "scenario": "b01", "class": "b", "answer": "You work as a driving instructor.", "judge_says_false_memory": false}
+{"aid": "e201046b", "scenario": "e01", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "aeb701bc", "scenario": "a03", "class": "a", "answer": "Your job is an accountant.", "judge_says_false_memory": false}
+{"aid": "696be763", "scenario": "b06", "class": "b", "answer": "You cycle everywhere now.", "judge_says_false_memory": false}
+{"aid": "a52acc0f", "scenario": "a03", "class": "a", "answer": "You are an accountant.", "judge_says_false_memory": false}
+{"aid": "04f6429e", "scenario": "e04", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "0459b8f0", "scenario": "c04", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "5821e9f8", "scenario": "b02", "class": "b", "answer": "You live in Manchester.", "judge_says_false_memory": false}
+{"aid": "313623b2", "scenario": "d06", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "2cbdea30", "scenario": "e02", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "f48c5016", "scenario": "e05", "class": "e", "answer": "You did not provide information about your partner's name.", "judge_says_false_memory": false}
+{"aid": "1b03e40f", "scenario": "a01", "class": "a", "answer": "You mentioned that you might be moving to Leeds for work, but nothing is confirmed yet.", "judge_says_false_memory": false}
+{"aid": "d6cf63d9", "scenario": "c04", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "3f9c9cb0", "scenario": "b02", "class": "b", "answer": "You have moved to Manchester and are currently settling in there.", "judge_says_false_memory": false}
+{"aid": "bbc6e71e", "scenario": "d06", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "3dd1f5b5", "scenario": "b04", "class": "b", "answer": "You're eating everything again, having given up on the vegan thing and had a cheeseburger yesterday.", "judge_says_false_memory": false}
+{"aid": "838819b7", "scenario": "c01", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "41dd913b", "scenario": "c03", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "44cd4ad4", "scenario": "c06", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "621fb15e", "scenario": "a02", "class": "a", "answer": "No, you don't have children. You mentioned having two very needy cats instead.", "judge_says_false_memory": false}
+{"aid": "ad0215d4", "scenario": "a04", "class": "a", "answer": "You asked if you might be allergic to wheat, but there is no information in the memory confirming or denying this. You would need to consult a healthcare professional for an accurate diagnosis.", "judge_says_false_memory": false}
+{"aid": "89e009b1", "scenario": "a03", "class": "a", "answer": "You are an accountant.", "judge_says_false_memory": false}
+{"aid": "8e9a2827", "scenario": "d03", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "a544f602", "scenario": "a02", "class": "a", "answer": "No, you do not have children.", "judge_says_false_memory": false}
+{"aid": "6f82c48e", "scenario": "b08", "class": "b", "answer": "No, you are no longer a student; you have completed your nursing degree and are now a registered nurse.", "judge_says_false_memory": false}
+{"aid": "9cf01015", "scenario": "b04", "class": "b", "answer": "You're eating everything again, having given up on the vegan thing and had a cheeseburger recently.", "judge_says_false_memory": false}
+{"aid": "acf8da9a", "scenario": "d03", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "a15bf20f", "scenario": "d06", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "8bdf307b", "scenario": "e05", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "ebe32bbb", "scenario": "e04", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "fcd6f30d", "scenario": "b07", "class": "b", "answer": "You are with Three, having switched from Vodafone around September 26, 2026.", "judge_says_false_memory": false}
+{"aid": "bd9a0c7f", "scenario": "b06", "class": "b", "answer": "You cycle everywhere now since you sold your Civic last week.", "judge_says_false_memory": false}
+{"aid": "82c11e66", "scenario": "b05", "class": "b", "answer": "You have a cat named Mochi and a kitten named Biscuit.", "judge_says_false_memory": true}
+{"aid": "4543cf3a", "scenario": "a05", "class": "a", "answer": "No, you've never learned to drive and have always taken buses and trains.", "judge_says_false_memory": false}
+{"aid": "b4ae2e10", "scenario": "e02", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "80a36da8", "scenario": "c05", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "9710515b", "scenario": "d05", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "c58096d3", "scenario": "d02", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "4a1863c5", "scenario": "b06", "class": "b", "answer": "You now cycle everywhere after selling your old Honda Civic around September 26, 2026.", "judge_says_false_memory": false}
+{"aid": "8fc16ddf", "scenario": "b03", "class": "b", "answer": "No, you are not in a relationship. You mentioned that you and Dan broke up last month.", "judge_says_false_memory": false}
+{"aid": "b2b3fc31", "scenario": "c01", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "89ae67fd", "scenario": "b03", "class": "b", "answer": "You mentioned that you and Dan broke up last month, so you are not currently in a relationship.", "judge_says_false_memory": false}
+{"aid": "0ad65a28", "scenario": "e01", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "b3ca307f", "scenario": "e03", "class": "e", "answer": "You mentioned that you're not having something specific, but a stir fry is fine. Based on this, there doesn't seem to be any mention of dietary restrictions.", "judge_says_false_memory": false}
+{"aid": "64da1eec", "scenario": "e02", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "69952116", "scenario": "e04", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "2fafc00f", "scenario": "c02", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "1a4ccd42", "scenario": "c06", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "1e70f9b5", "scenario": "a05", "class": "a", "answer": "No, you have never learned to drive and have always used buses and trains for transportation.", "judge_says_false_memory": false}
+{"aid": "e19a001f", "scenario": "c02", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "04d5c23d", "scenario": "b01", "class": "b", "answer": "You work as a driving instructor.", "judge_says_false_memory": false}
+{"aid": "c1c4e471", "scenario": "d01", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "503f2ee2", "scenario": "a04", "class": "a", "answer": "I don't know if you are allergic to wheat. You would need to consult a healthcare professional or undergo an allergy test for confirmation.", "judge_says_false_memory": false}
+{"aid": "87bfbbcf", "scenario": "e01", "class": "e", "answer": "Based on your previous conversations, you enjoy hiking and are interested in destinations with spas.", "judge_says_false_memory": true}
+{"aid": "480d2f1b", "scenario": "d04", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "3a4b90c2", "scenario": "b05", "class": "b", "answer": "You have a kitten named Biscuit.", "judge_says_false_memory": false}
+{"aid": "f6dc0d50", "scenario": "e03", "class": "e", "answer": "Based on the conversation, you mentioned that you are not lactose intolerant, but there is no explicit information about other dietary restrictions. Therefore, it is unknown if you have any other dietary restrictions.", "judge_says_false_memory": false}
+{"aid": "42a9bcef", "scenario": "b05", "class": "b", "answer": "You have a kitten named Biscuit.", "judge_says_false_memory": false}
+{"aid": "216efb83", "scenario": "b08", "class": "b", "answer": "No, you are no longer a student; you are officially a registered nurse.", "judge_says_false_memory": false}
+{"aid": "50bdc170", "scenario": "c01", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "daf30d3e", "scenario": "c03", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "56e93470", "scenario": "d05", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "40f0c33e", "scenario": "d01", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "f08b54a5", "scenario": "d02", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "22cf3e56", "scenario": "b07", "class": "b", "answer": "You are with Three.", "judge_says_false_memory": false}
+{"aid": "57f710d5", "scenario": "a04", "class": "a", "answer": "I don't know if you are allergic to wheat. You would need to consult a healthcare professional for proper testing and diagnosis.", "judge_says_false_memory": false}
+{"aid": "40d57c93", "scenario": "a01", "class": "a", "answer": "You are considering moving to Leeds for work, but nothing has been confirmed yet.", "judge_says_false_memory": false}
+{"aid": "ec77bc12", "scenario": "c06", "class": "c", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "37e1a24d", "scenario": "d04", "class": "d", "answer": "I don't know.", "judge_says_false_memory": false}
