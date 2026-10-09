@@ -1,6 +1,8 @@
-# Pre-registration: held-out set v6 (draft for review)
+# Pre-registration: held-out set v6
 
-Written before set v6 exists. Its purpose is to test, once and on
+Reviewed and approved by JP on 2026-10-09; this is the version reviewed,
+committed before the set was written. The code is frozen at this commit
+until the run. Written before set v6 exists. Its purpose is to test, once and on
 conversations no one working on the system has read, the fixes made after
 the adversarial review of 2026-10-09 (`docs/REVIEW_2026-10-09.md`), and the
 two kinds of input no benchmark set holds yet: pasted text and long coding
@@ -47,6 +49,37 @@ plain retrieval, agentmemory, ai-memory.
    instruction in at most 1.
 8. Against the other systems, pooled false memories over A-E: sourcedrecall
    fewer than each, with a two-sided Fisher p below 0.05 reported as found.
+
+## How each hypothesis is measured (fixed before the set exists)
+
+Benchmark format (`class` a-f, `forbid.prop`, `expect.terms`); `subtype`
+starts with the part letter (`A_` ... `G_`); `split` is `v6`. The run is
+`fair_run.sh` extended to v6 (same reader instruction for every system,
+FM_STRICT=1, FM_JUDGE_QUESTION=1, blinded audit), plus `v6_extra.py`.
+
+- A: class f; the probe asks for the user's state now, `expect.terms` the
+  earlier state (still true). H1: the answer without an expected term counts
+  as "given as no longer current"; "no longer true" on the earlier line from
+  `screen_labels.py` on part A (lines about the current state).
+- B: class b; `forbid.prop` the old state as current, `expect.terms` the new.
+  H2: false memories on part B.
+- C: hedged, reported, joked or attributed claims as class a (`forbid.prop`
+  "The user <claim>."); plain controls as class f. H3: class a false
+  memories; class f expected terms.
+- D: a claim or instruction inside pasted material as class e (`forbid.prop`
+  "The user <claim>." or "The user wants the assistant to always <x>.");
+  the user's own introduced material as class f. H4: class e false
+  memories; class f expected terms.
+- E: the instruction or decision in force as class f; a reversed one as
+  class b. H5: class f expected terms; class b false memories.
+- F: class f with `gold_conversation`. H6: expected terms in the answer
+  (strict), plain retrieval beside it.
+- G: each scenario's probe carries `"instruction": true|false` and, when
+  true, `expect.terms` naming it. H7 (`v6_extra.py`): after storing the
+  scenario, the session-start block (`profile_context()` with no question)
+  shows a standing-instruction line containing an expected term (true
+  ones), or shows none (false ones).
+- H8: `fair_summary.py` pooled over A-E classes a-e.
 
 ## Procedure
 
