@@ -50,31 +50,30 @@ LongMemEval's 30 preference questions, and the parser was not used here.
 
 Changes of state and false memories, on sets written for this project
 (synthetic, 32-60 scenarios each), against two other memory tools that store
-without a language model. Each system's memory went to the same local
-reader, and the same local judge decided whether the answer states
-something out of date or never said as true:
+without a language model and plain retrieval. Every system's memory went to
+the same local reader with the same instruction, the judge saw the question
+with each answer, and every answer was audited blind (the auditor saw no
+system names; `bench/false_memory/FAIR_RERUN.md`):
 
 | | sourcedrecall | agentmemory 0.9 | ai-memory 2.5 | plain retrieval |
 |---|---|---|---|---|
-| old state given as current, of 44 changes | 2 | 5 | 7 | 7 |
-| new state given, of 44 | 41 | 38 | 33 | 36 |
-| coding sessions behind 120 others: false memories, of 51 | 0 | 2 | 6 | 3 |
-| several projects: false memories, of 32 | 0 | 9 | 4 | 3 |
-| several projects: unchanged facts answered, of 13 | 11 | 12 | 5 | 7 |
+| old state given as current, of 44 changes | 2 | 4 | 8 | 5 |
+| new state given, of 44 | 42 | 38 | 33 | 36 |
+| coding sessions behind 120 others: false memories, of 51 | 0 | 2 | 5 | 3 |
+| several projects: false memories, of 32 | 0 | 8 | 4 | 3 |
+| several projects: unchanged facts answered, of 13 | 11 | 11 | 6 | 6 |
+| the three sets together: false memories, of 127 | 2 | 14 (p=0.003) | 17 (p=0.0005) | 11 (p=0.02) |
 
-Read these with care. The reader got sourcedrecall's lines with its rules
-("a later line can update an earlier one...") and the other systems' lines
-without them, so part of the difference may be the instruction. Only the
-projects row is a statistically clear difference (0 against 9, Fisher
-p=0.002); the others are within what chance could give at these sizes. The
-other systems' answers were audited for judge errors in both directions,
-sourcedrecall's release-run answers were not. These sets have been run many
-times during development, and some rules were written from their error
-categories. A rerun with the same instruction for every system and a
-blinded audit is under way. The projects rows are a trade-off:
-sourcedrecall keeps a project's facts in that project, so it never offers
-another project's fact as true there, and it answered "I don't know" to 2
-facts that agentmemory, which searches every project at once, found.
+p is a two-sided Fisher exact test against sourcedrecall. Set by set, only
+the projects false memories against agentmemory (p=0.005) and the new state
+against ai-memory (p=0.01) are clear differences; together, all are. The
+counts were the same with and without sourcedrecall's own instructions to
+the reader, so the difference is in what the memories returned. These sets
+have been run many times during development and some rules were written
+from their errors, so they are not held out (that is v5, below). The
+projects rows are a trade-off: sourcedrecall keeps a project's facts in that
+project, so it never offers another project's fact as true there; most of
+agentmemory's project false memories are another project's fact.
 
 A pre-registered held-out set (v5: 120 scenarios nobody working on the
 system had read, hypotheses fixed beforehand, run once): old state given as

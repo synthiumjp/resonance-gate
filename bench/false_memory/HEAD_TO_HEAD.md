@@ -19,6 +19,10 @@ never-said proposition as currently true. Adapters:
 
 ## Results
 
+Superseded by the fair rerun of 2026-10-09 (`FAIR_RERUN.md`): same reader
+instruction for every system, the judge given the question, a blinded audit.
+The table below is kept as the record of the earlier run.
+
 Caveats found by the adversarial review of 2026-10-09
 (`docs/REVIEW_2026-10-09.md`), to be read before these numbers: the reader
 got sourcedrecall's lines with the product's rules paragraph and the other
