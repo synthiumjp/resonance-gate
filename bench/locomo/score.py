@@ -16,6 +16,19 @@ ctx = {s: {r["qid"]: r for r in C.jsonl_read(os.path.join(d, f"ctx_{s}.jsonl"))}
 common = set.intersection(*[set(a) for a in ans.values()]) if ans else set()
 out = []
 w = lambda s="": out.append(s)  # noqa: E731
+# LOCOMO_AUDIT=<errors.json> drops the questions whose gold answer the
+# Penfield Labs audit found wrong (99 of 1,540; citation-only entries kept).
+# The file is CC BY-NC, so it is not in this repo: fetch_audit.sh downloads
+# it at a pinned commit and checks its hash.
+if os.environ.get("LOCOMO_AUDIT"):
+    bad = {(int(x["question_id"].split("_")[1]), x["question"].strip())
+           for x in json.load(open(os.environ["LOCOMO_AUDIT"]))
+           if x["error_type"] != "WRONG_CITATION"}
+    a0 = ans[systems[0]]
+    n0 = len(common)
+    common = {q for q in common
+              if (int(q.split(":")[0]), a0[q]["question"].strip()) not in bad}
+    w(f"answer-key errors removed (LoCoMo audit): {n0 - len(common)}")
 w(f"questions answered by all systems: {len(common)}\n")
 w("| category | n | " + " | ".join(systems) + " |")
 w("|---|---|" + "---|" * len(systems))

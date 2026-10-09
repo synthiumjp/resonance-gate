@@ -121,7 +121,12 @@ local reader and judge:
 The tie with Mem0 comes from temporal questions, where Mem0 was handicapped:
 it accepts no timestamp, so dates were written into the messages. Without
 them, sourcedrecall answers 67.4% and Mem0 71.3%, and Mem0 leads on
-single-hop, multi-hop and open-domain questions. Mem0 was given its top 10
+single-hop, multi-hop and open-domain questions. An audit of LoCoMo
+(Penfield Labs, April 2026, github.com/dial481/locomo-audit) found 99 of its
+1,540 gold answers wrong, 80 of them in these conversations. Without those
+80: sourcedrecall 66.2%, with notes 69.4% (small) / 72.3% (standard) / 74.5%
+(Qwen3-14B), Mem0 66.8%, plain retrieval 58.2% (`LOCOMO_AUDIT` in
+`bench/locomo/score.py`). Mem0 was given its top 10
 memories for each speaker and plain retrieval its top 10 messages; Mem0
 used the same local Qwen3-14B for its own calls, with thinking off and its
 JSON response format removed (the local server does not support it). The
