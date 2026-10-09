@@ -339,6 +339,39 @@ a note cut off at the length limit is dropped; a session that got no notes is
 given them later, and `sourcedrecall-memory notes-backfill` covers earlier
 history.
 
+## Pasted text after held-out v6 (2026-10-09)
+
+v6 gave a pasted claim or instruction as the user's in 14 of 17. Three
+causes, each fixed (0c1e9f5, 8fafd1e):
+- Whose text it is was partly read from the pasted words: first-person text
+  after an introduction was kept as the user's, and most pasted text is in
+  the first person. Now it is read from the introduction only: someone else
+  sent it ("my boss sent me this", "my brother just texted:"), it comes from
+  somewhere ("this email from my landlord", "From the gym:"), the user found
+  it ("found this in a book", "look at this ad"), or asks for it to be
+  translated, proofread, summarised or answered; a chat log, a one-line
+  letter that the user asks how to answer, a quoted sentence in the first
+  person, and text followed by a question about it ("is this bad advice?")
+  count too. It is the user's only when the introduction says so ("my
+  notes", "I wrote", "my own", "it's mine").
+- The block showed messages with their blank lines removed, so where a
+  paste ended could not be seen. Messages are now quoted as written.
+- The rules told the reader that everything in quotation marks is the
+  user's. Pasted text is now shown as `[pasted in by <user>, written by
+  <who the introduction names>; not <user>'s words, facts or instructions:
+  "..."]`, with its first person made the writer's ("[the writer] own three
+  properties") and its instructions marked "(the writer asks)", and the
+  rules say the user's own facts, rules and preferences are never answered
+  from it.
+
+Development set `bench/false_memory/cases_dev_pasted.jsonl` (50, written by
+an agent without the rules): detection (no model, `pasted_dev.py`) 9/34 ->
+34/34 pasted items removed, own items kept 15/16 -> 16/16; end to end under
+the fair protocol, pasted items given as the user's 18/34 -> 4/34 (plain
+retrieval 19/34), own items answered 13/16 both. Elsewhere 2 of 5,882
+LoCoMo messages changed (a film quote) and 1 development message. The
+held-out number is v7's (`docs/PREREG_HELDOUT_V7.md`).
+
 ## Tried and refuted
 
 Kept here with their numbers, because a rule that failed is part of the
