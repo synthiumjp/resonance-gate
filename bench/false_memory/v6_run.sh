@@ -20,6 +20,7 @@ bash run_all.sh rag ours > $R/run.log 2>&1
 # the competitors' adapters need their scratch inside FM_H2H (2026-10-09:
 # the first v6 run used ~/jpwork/fm_scratch_v6 and both failed every scenario;
 # they were rerun alone with this, sourcedrecall's and plain retrieval's kept)
+mkdir -p $FM_H2H/scratch_v6
 for s in agentmemory ai-memory; do FM_SCRATCH=$FM_H2H/scratch_v6 $P run_system.py $s >> $R/run.log 2>&1; done
 pgrep -fl "agentmemory|bin/iii|ai-memory serve" >/dev/null && echo "warning: tool servers left running"
 /usr/bin/python3 answer.py sourcedrecall rag agentmemory ai-memory > $R/answer.log 2>&1
