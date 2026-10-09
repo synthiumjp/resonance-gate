@@ -1,0 +1,46 @@
+== release measure 181aff3 Fri Oct  9 19:43:26 AEDT 2026
+== 1. full suite
+1255 passed, 5 skipped in 208.11s (0:03:28)
+== 2. LoCoMo test (convs 2-9), default and each notes model
+-- locomo test default
+| 1 multi-hop | 239 | 125/239 = 52.3% | 148/239 = 61.9% | 94/239 = 39.3% |
+| 2 temporal | 258 | 137/258 = 53.1% | 96/258 = 37.2% | 128/258 = 49.6% |
+| 4 single-hop | 727 | 550/727 = 75.7% | 566/727 = 77.9% | 486/727 = 66.9% |
+| overall (1-4) | 1307 | 844/1307 = 64.6% | 844/1307 = 64.6% | 740/1307 = 56.6% |
+| mean context tokens (len/4) | 695 | 722 | 356 |
+-- locomo test small
+| 1 multi-hop | 239 | 133/239 = 55.6% | 148/239 = 61.9% | 94/239 = 39.3% |
+| 2 temporal | 258 | 145/258 = 56.2% | 96/258 = 37.2% | 128/258 = 49.6% |
+| 4 single-hop | 727 | 572/727 = 78.7% | 566/727 = 77.9% | 486/727 = 66.9% |
+| overall (1-4) | 1307 | 885/1307 = 67.7% | 844/1307 = 64.6% | 740/1307 = 56.6% |
+| mean context tokens (len/4) | 1044 | 722 | 356 |
+-- locomo test standard
+| 1 multi-hop | 239 | 145/239 = 60.7% | 148/239 = 61.9% | 94/239 = 39.3% |
+| 2 temporal | 258 | 143/258 = 55.4% | 96/258 = 37.2% | 128/258 = 49.6% |
+| 4 single-hop | 727 | 588/727 = 80.9% | 566/727 = 77.9% | 486/727 = 66.9% |
+| overall (1-4) | 1307 | 914/1307 = 69.9% | 844/1307 = 64.6% | 740/1307 = 56.6% |
+| mean context tokens (len/4) | 1037 | 722 | 356 |
+== 3. LongMemEval-S retrieval (500 q)
+questions run: 500 (non-abstention 470)
+
+SESSION-LEVEL, non-abstention, all types (n=470)
+| system | any@1 | all@1 | any@3 | all@3 | any@5 | all@5 | any@10 | all@10 |
+|---|---|---|---|---|---|---|---|---|
+| ours | 94.9 | 33.0 | 97.2 | 85.7 | 98.7 | 93.4 | 99.1 | 97.4 |
+| bm25 | 80.0 | 27.9 | 90.6 | 72.8 | 93.6 | 78.5 | 96.4 | 87.0 |
+| bge | 88.9 | 30.4 | 95.5 | 81.3 | 97.0 | 90.4 | 98.5 | 96.2 |
+
+SESSION-LEVEL, non-abstention, excluding single-session-assistant (n=414)
+| system | any@1 | all@1 | any@3 | all@3 | any@5 | all@5 | any@10 | all@10 |
+|---|---|---|---|---|---|---|---|---|
+== 4. false memory, held out (counts only)
+v3 release sourcedrecall {'false_memory_all': '0/30', 'false_memory_a': '0/5', 'false_memory_b': '0/8', 'false_memory_c': '0/6', 'false_memory_d': '0/6', 'false_memory_e': '0/5', 'control_recall': '23/23', 'abstain_explicit_cd': '0/12', 'abstain_lenient_cd': '12/12', 'side_recall_abe': '8/8'}
+v3 release mem0 {'false_memory_all': '2/30', 'false_memory_a': '0/5', 'false_memory_b': '1/8', 'false_memory_c': '0/6', 'false_memory_d': '0/6', 'false_memory_e': '1/5', 'control_recall': '23/23', 'abstain_explicit_cd': '0/12', 'abstain_lenient_cd': '12/12', 'side_recall_abe': '8/8'}
+v3 release rag {'false_memory_all': '0/30', 'false_memory_a': '0/5', 'false_memory_b': '0/8', 'false_memory_c': '0/6', 'false_memory_d': '0/6', 'false_memory_e': '0/5', 'control_recall': '23/23', 'abstain_explicit_cd': '0/12', 'abstain_lenient_cd': '12/12', 'side_recall_abe': '8/8'}
+v4 release sourcedrecall {'false_memory_all': '2/44', 'false_memory_b': '2/44', 'control_recall': '16/16', 'side_recall_abe': '41/44'}
+v4 release rag {'false_memory_all': '7/44', 'false_memory_b': '7/44', 'control_recall': '16/16', 'side_recall_abe': '36/44'}
+codebg release sourcedrecall {'false_memory_all': '0/51', 'false_memory_a': '0/10', 'false_memory_b': '0/14', 'false_memory_c': '0/9', 'false_memory_d': '0/9', 'false_memory_e': '0/9', 'control_recall': '9/9', 'abstain_explicit_cd': '0/18', 'abstain_lenient_cd': '18/18', 'side_recall_abe': '14/14'}
+codebg release rag {'false_memory_all': '3/51', 'false_memory_a': '0/10', 'false_memory_b': '3/14', 'false_memory_c': '0/9', 'false_memory_d': '0/9', 'false_memory_e': '0/9', 'control_recall': '9/9', 'abstain_explicit_cd': '0/18', 'abstain_lenient_cd': '18/18', 'side_recall_abe': '11/14'}
+proj release sourcedrecall {'false_memory_all': '0/32', 'false_memory_a': '0/13', 'false_memory_b': '0/7', 'false_memory_c': '0/6', 'false_memory_e': '0/6', 'control_recall': '11/13', 'abstain_explicit_cd': '0/6', 'abstain_lenient_cd': '6/6', 'side_recall_abe': '7/7'}
+proj release rag {'false_memory_all': '3/32', 'false_memory_a': '2/13', 'false_memory_b': '0/7', 'false_memory_c': '0/6', 'false_memory_e': '1/6', 'control_recall': '7/13', 'abstain_explicit_cd': '0/6', 'abstain_lenient_cd': '6/6', 'side_recall_abe': '7/7'}
+== release measure done Sat Oct 10 06:09:14 AEDT 2026
