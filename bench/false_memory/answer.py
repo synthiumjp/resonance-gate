@@ -43,6 +43,14 @@ OURS_RULES = os.environ.get("FM_OURS_RULES", "1") != "0"
 SAME_RULES = ("Each memory line is something from earlier conversations, with its "
               "date where known. A later line can update an earlier one. If the "
               "memory does not answer the question, say you don't know.\n\n")
+# 2026-10-10 (docs/PREREG_HELDOUT_V7.md): v6's shared instruction made every
+# system refuse advice requests; FM_SAME_V7=1 is v7's, the same for every system
+if os.environ.get("FM_SAME_V7") == "1":
+    SAME_RULES = ("Each memory line is something from earlier conversations, with its "
+                  "date where known. A later line can update an earlier one. If a "
+                  "question about the user is not answered by the memory, say you "
+                  "don't know. If the user asks for a recommendation, use what the "
+                  "memory says about them.\n\n")
 
 
 def _strip_rules(block):

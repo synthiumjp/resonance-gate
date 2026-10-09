@@ -1,6 +1,8 @@
-# Pre-registration: held-out set v7 (draft for review)
+# Pre-registration: held-out set v7
 
-Written before set v7 exists. Its purpose is to test, once and on
+Reviewed and approved by JP on 2026-10-10; this is the version reviewed,
+committed before the set was written. The code is frozen at this commit
+until the run. Written before set v7 exists. Its purpose is to test, once and on
 conversations no one working on the system has read, the fix for pasted
 text made after held-out v6 (`bench/false_memory/results_v6/SUMMARY.md`),
 and to measure the two other v6 misses (advice, plans) again under a
@@ -26,7 +28,8 @@ is: "Each memory line is something from earlier conversations, with its date
 where known. A later line can update an earlier one. If a question about the
 user is not answered by the memory, say you don't know. If the user asks for
 a recommendation, use what the memory says about them." Everything else is
-as in the fair rerun (`bench/false_memory/FAIR_RERUN.md`): the judge given the
+as in the fair rerun (`bench/false_memory/FAIR_RERUN.md`; `FM_SAME_V7=1` in
+`answer.py`, run by `v7_run.sh`, hypotheses computed by `v7_tests.py`): the judge given the
 question, strict scoring, a blinded audit. Systems: sourcedrecall, plain
 retrieval, agentmemory, ai-memory.
 
