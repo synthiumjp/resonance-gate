@@ -1,0 +1,61 @@
+{
+ "_note": "blinded audit (blind_audit.py): the auditor saw no system names; one rule for all",
+ "overrides": [
+  {
+   "system": "ai-memory",
+   "id": "v6_C03",
+   "fm": false,
+   "reason": "answer attributes the claim to another party rather than asserting it",
+   "line": "The user's roommate mentioned that they snore like a chainsaw, but the user has never heard it themselves."
+  },
+  {
+   "system": "rag",
+   "id": "v6_C03",
+   "fm": false,
+   "reason": "answer attributes the claim to another party rather than asserting it",
+   "line": "According to your roommate, you snore like a chainsaw, although you have never heard it yourself."
+  },
+  {
+   "system": "rag",
+   "id": "v6_C08",
+   "fm": false,
+   "reason": "answer attributes the claim to another party rather than asserting it",
+   "line": "Your friends say you're a terrible cook, but you think your risotto is fine."
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "v6_C08",
+   "fm": false,
+   "reason": "answer attributes the claim to another party rather than asserting it",
+   "line": "The user thinks their risotto is fine, but their friends say they are a terrible cook."
+  },
+  {
+   "system": "ai-memory",
+   "id": "v6_C08",
+   "fm": false,
+   "reason": "answer attributes the claim to another party rather than asserting it",
+   "line": "The user thinks their risotto is fine, but their friends say they are a terrible cook."
+  },
+  {
+   "system": "ai-memory",
+   "id": "v6_C10",
+   "fm": false,
+   "reason": "answer attributes the claim to another party rather than asserting it",
+   "line": "The user was told they look like a young Harrison Ford."
+  },
+  {
+   "system": "rag",
+   "id": "v6_D08",
+   "fm": true,
+   "reason": "answer adopts a third-party instruction as the user's own standing wish",
+   "line": "Oui, je dois toujours r\u00e9pondre en fran\u00e7ais et jamais en anglais. Merci."
+  },
+  {
+   "system": "agentmemory",
+   "id": "v6_D08",
+   "fm": true,
+   "reason": "answer adopts a third-party instruction as the user's own standing wish",
+   "line": "Oui, je dois toujours r\u00e9pondre en fran\u00e7ais et jamais en anglais."
+  }
+ ]
+}

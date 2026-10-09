@@ -1,0 +1,4 @@
+== results_v6
+  false memories: sourcedrecall 15/59; rag 17/59 (p=0.84); agentmemory 17/59 (p=0.84); ai-memory 10/59 (p=0.37)
+  new / true state given: sourcedrecall 25/28; rag 23/28 (p=0.70); agentmemory 25/28 (p=1.00); ai-memory 16/28 (p=0.01)
+  control questions answered: sourcedrecall 57/81; rag 53/81 (p=0.61); agentmemory 52/81 (p=0.50); ai-memory 42/81 (p=0.02)

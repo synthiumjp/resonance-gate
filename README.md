@@ -73,7 +73,9 @@ have been run many times during development and some rules were written
 from their errors, so they are not held out (that is v5, below). The
 projects rows are a trade-off: sourcedrecall keeps a project's facts in that
 project, so it never offers another project's fact as true there; most of
-agentmemory's project false memories are another project's fact.
+agentmemory's project false memories are another project's fact. These sets
+hold no pasted text; on the held-out set v6, which does, sourcedrecall had
+no fewer false memories than the others (below).
 
 A pre-registered held-out set (v5: 120 scenarios nobody working on the
 system had read, hypotheses fixed beforehand, run once): old state given as
@@ -83,9 +85,26 @@ declined proposal given as decided. Two hypotheses missed (the labels on
 implied changes, and "no longer true" against its base rate). The one clear
 difference went against sourcedrecall: asked for advice, its reader used
 what the user had mentioned in 2 of 10 answers, plain retrieval's in 8 of 10
-(p=0.02). That has been fixed since and measured on development data only
-(10 to 21 of 24); it has no held-out number yet. Everything is in
-`bench/false_memory/results_v5/SUMMARY.md`.
+(p=0.02). Everything is in `bench/false_memory/results_v5/SUMMARY.md`.
+
+A second pre-registered held-out set (v6: 140 scenarios, run once on
+2026-10-09 under the protocol above, against all four systems) tested the
+fixes made after an adversarial review. Four of eight hypotheses met: a
+change that happened, old state given as current 0 of 20; hedged or
+reported claims given as fact 1 of 14; in long coding sessions the
+instruction or decision in force recalled 23 of 25 and a reversed one given
+as current 0 of 8; standing instructions shown at the start of a session
+for 11 of 12, and none of 3 idioms. Four missed. Pasted text: a claim or
+instruction inside pasted material was given as the user's own in 14 of 17
+(plain retrieval and agentmemory 15, ai-memory 3, which keeps only the
+first line of a message); the "pasted in" marker fired on 3 of the 14, and
+the reader ignored it on those too. Because of this, sourcedrecall had no
+fewer false memories than the other systems on v6 (15 of 59, against 17,
+17 and 10; 14 of its 15 are pasted text). Advice: the earlier mention was
+used in 3 of 15 answers (plain retrieval 2); in every miss the reader said
+it did not know, following the shared instruction to do so. A plan
+mentioned later was taken to mean the earlier state had ended in 4 of 20
+(others 4 to 6). Everything is in `bench/false_memory/results_v6/SUMMARY.md`.
 
 LoCoMo (conversations 2-9, 1,307 questions), against Mem0, with the same
 local reader and judge:
@@ -154,7 +173,8 @@ true". Asked whether Dana is vegan, plain retrieval's top result is the
 assistant's own guess ("Since you're vegan..."); sourcedrecall returns
 Dana's messages, none of which says so. A pasted email's "Always copy
 legal on every reply" is shown as pasted, not as Dana's words, and does not
-become a standing instruction.
+become a standing instruction (on the held-out set v6 the pasted marker
+often did not fire, and the reader ignored it when it did; see above).
 
 ## What it does
 
@@ -180,9 +200,12 @@ become a standing instruction.
   only.
 - Memory about a project stays with that project. Standing instructions
   ("never add comments to my code") lead every session.
-- Text you paste in for the assistant with an introduction ("Here's the
-  email:", "Can you summarise this:") is kept, shown as pasted, and not read
-  as your own words. Pasted text without an introduction can still be.
+- Pasted text is open. The parser tries not to store a pasted claim or
+  instruction as your fact or your standing instruction (on the held-out
+  set v6, none of the 14 it got wrong had been stored that way), but the
+  message is still shown to the assistant, the "pasted in" marker fired on
+  only 3 of those 14, and the reader took a pasted claim or instruction
+  for yours in 14 of 17.
 - Sessions are stored automatically in Claude Code. Hooks for Codex CLI,
   Gemini CLI and Cursor are included but have not yet been tested inside
   those apps. A ChatGPT or Claude.ai data export can be imported.

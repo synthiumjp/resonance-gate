@@ -15406,3 +15406,31 @@ and how to run everything).
   that kind in WordNet (all senses + the change-detection category roots).
   On dev list questions it fires on about a third, useful on about half of
   those (books, plans; instruments and pets partial; "symbols" noise).
+
+## Entry 316 — 2026-10-09 (adversarial review, fixes, fair rerun, held-out v6)
+
+- Five adversarial reviewers (one Opus, four Sonnet; docs/REVIEW_2026-10-09.md).
+  Claims fixed in the README; security and privacy fixes (forget erases,
+  cross-process lock, private folders, browser key, offline everywhere);
+  parser and notes fixes, each with the reviewers' counterexamples as tests.
+- Fair rerun (FAIR_RERUN.md): one reader instruction for every system, the
+  judge given the question, strict terms, blinded two-way audit. Pooled over
+  v3, v4, coding and projects: false memories 2/127 against 14, 17, 11; the
+  same with and without our rules paragraph.
+- Held-out v6 (PREREG_HELDOUT_V6.md, 140 scenarios, results_v6/SUMMARY.md):
+  4 of 8 met (changes 0/20, hedges 1/14, coding 23/25 and 0/8, instructions
+  11/12 and 0/3), 4 missed (pasted 14/17, advice 3/15, plans 4/20, pooled
+  15/59 vs 17, 17, 10). The competitors' first run failed on a scratch-folder
+  path and was rerun alone.
+- What the misses say: (1) pasted text is the weak point. The marker fired on
+  3 of 14; usually the introduction and the paste are one message line, which
+  _drop_pasted does not split; the reader ignored the marker anyway. A fix
+  has to change what the reader sees (keep pasted text out of the user's
+  quoted words, or attribute it in the line itself), not add a label.
+  (2) The fair protocol's "say you don't know" overrides our advice
+  instruction (in the block 10/15; all 12 misses refusals); plain retrieval
+  fell from 8/10 on v5 to 2/15. The advice instruction should not depend on
+  winning against a later reader instruction. (3) Plans: the reader, not the
+  labels; all systems 4-6/20.
+- Overnight re-measurement (LoCoMo, LongMemEval, the false-memory sets) on
+  181aff3 is running (tools/release_measure.sh, ~/jpwork/release3.log).

@@ -1,0 +1,6 @@
+lines 90: about the out-of-date state 0, about the current state 24, in no-change scenarios 90
+unlabelled lines: 89, of which out-of-date 0 (0.0%)
+no longer true: never fired
+may have changed since: fired 1 | on out-of-date lines 0/0 | on CURRENT lines 1/24 | in no-change scenarios 1/90 | precision 0/1 = 0.0% vs unlabelled 0.0%
+said in passing: never fired
+model note: never fired

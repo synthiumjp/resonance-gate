@@ -34,6 +34,27 @@ two missed:
   rate as screened (3 of its 4 lines marked the right fact, phrased as an
   event the screen could not match).
 
+## Held-out test (v6, pre-registered)
+
+The fixes from the adversarial review (below) were tested once on a second
+unread set, 140 scenarios (`docs/PREREG_HELDOUT_V6.md`, results in
+`bench/false_memory/results_v6/SUMMARY.md`), every system under the same
+reader instruction. Four of eight met, four missed:
+- met: a change that happened, old state given as current 0/20; hedged or
+  reported claims given as the user's fact 1/14, plain controls 6/6;
+  coding sessions, the instruction or decision in force 23/25 and a
+  reversed one given as current 0/8; standing instructions at session start
+  11/12, idioms 0/3.
+- missed: pasted text, a pasted claim or instruction given as the user's
+  14/17 (the "pasted in" marker fired on 3 of the 14; in 11 the
+  introduction and the pasted text were one line; the reader ignored the
+  marker too); advice, the mention used in 3/15 (every miss a refusal under
+  the shared "say you don't know" instruction; our advice instruction was
+  in the block for 10 of 15); plans, the earlier state given as ended in
+  4/20 (both lines in the block in all 4; "no longer true" never fired on
+  part A, which is the half of H1 the rules control); pooled false
+  memories, 15/59 against 17, 17 and 10, 14 of ours from pasted text.
+
 ## Which words count as the user's own
 
 **Questions are not statements.** A clause whose subject or head is a
@@ -308,7 +329,8 @@ first-person text after an introduction that asks for no rewrite are kept
 as theirs, unless the introduction names another author ("My partner sent
 this text:"). No LoCoMo, development or held-out message changed: the
 benchmarks do not test pasted text, so these rules are measured only by the
-tests above.
+tests above. Held out (v6): the marker fired on 3 of 14 pasted items that
+became false memories, and did not stop the reader on those 3.
 
 **Notes.** The pronoun rewrite leaves quotes and code alone and reads phone
 apostrophes; a note must keep the user's numbers and polarity ("does not eat

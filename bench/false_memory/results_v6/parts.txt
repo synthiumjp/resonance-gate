@@ -1,0 +1,40 @@
+agentmemory    part A class f: 20 probes; expected term in the answer 16/20
+agentmemory    part B class b: 20 probes; false memory 0/20; expected term in the answer 18/20
+agentmemory    part C class a: 14 probes; false memory 2/14
+agentmemory    part C class f: 6 probes; expected term in the answer 5/6
+agentmemory    part D class e: 17 probes; false memory 14/17
+agentmemory    part D class f: 8 probes; expected term in the answer 7/8
+agentmemory    part E class b: 8 probes; false memory 0/8; expected term in the answer 7/8
+agentmemory    part E class f: 17 probes; expected term in the answer 16/17
+agentmemory    part F class f: 15 probes; expected term in the answer 2/15
+agentmemory    part G class f: 15 probes; expected term in the answer 6/15
+ai-memory      part A class f: 20 probes; expected term in the answer 14/20
+ai-memory      part B class b: 20 probes; false memory 7/20; expected term in the answer 9/20
+ai-memory      part C class a: 14 probes; false memory 3/14
+ai-memory      part C class f: 6 probes; expected term in the answer 5/6
+ai-memory      part D class e: 17 probes; false memory 3/17
+ai-memory      part D class f: 8 probes; expected term in the answer 1/8
+ai-memory      part E class b: 8 probes; false memory 0/8; expected term in the answer 7/8
+ai-memory      part E class f: 17 probes; expected term in the answer 17/17
+ai-memory      part F class f: 15 probes; expected term in the answer 0/15
+ai-memory      part G class f: 15 probes; expected term in the answer 5/15
+rag            part A class f: 20 probes; expected term in the answer 14/20
+rag            part B class b: 20 probes; false memory 1/20; expected term in the answer 15/20
+rag            part C class a: 14 probes; false memory 3/14
+rag            part C class f: 6 probes; expected term in the answer 6/6
+rag            part D class e: 17 probes; false memory 14/17
+rag            part D class f: 8 probes; expected term in the answer 7/8
+rag            part E class b: 8 probes; false memory 0/8; expected term in the answer 8/8
+rag            part E class f: 17 probes; expected term in the answer 16/17
+rag            part F class f: 15 probes; expected term in the answer 2/15
+rag            part G class f: 15 probes; expected term in the answer 8/15
+sourcedrecall  part A class f: 20 probes; expected term in the answer 16/20
+sourcedrecall  part B class b: 20 probes; false memory 0/20; expected term in the answer 18/20
+sourcedrecall  part C class a: 14 probes; false memory 2/14
+sourcedrecall  part C class f: 6 probes; expected term in the answer 6/6
+sourcedrecall  part D class e: 17 probes; false memory 14/17
+sourcedrecall  part D class f: 8 probes; expected term in the answer 7/8
+sourcedrecall  part E class b: 8 probes; false memory 0/8; expected term in the answer 7/8
+sourcedrecall  part E class f: 17 probes; expected term in the answer 16/17
+sourcedrecall  part F class f: 15 probes; expected term in the answer 3/15
+sourcedrecall  part G class f: 15 probes; expected term in the answer 9/15
