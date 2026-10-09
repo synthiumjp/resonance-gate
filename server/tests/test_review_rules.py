@@ -11,7 +11,7 @@ def pm(tmp_path, monkeypatch):
     monkeypatch.setenv("SOURCEDRECALL_NOTES_MODELS", str(tmp_path / "no-notes-model"))
     import sourcedrecall.profile_memory as mod
     mod._state.update({"mem": None, "audit_pass": None, "needs_reload": False,
-                       "uncached_turns": None, "transcripts": None})
+                       "uncached_turns": None, "transcripts": None, "msg_index": None})
     return mod
 
 
@@ -151,3 +151,20 @@ def test_pasted_text_names_its_writer_and_takes_their_person():
     assert "not Ana Diaz's words, facts or instructions" in q
     assert "[the writer] own three properties" in q and "[the writer] is raising" in q
     assert "I own" not in q
+
+
+def test_an_instruction_in_pasted_text_is_the_writers():
+    from memory_api import _quote_own
+    q = _quote_own("Hi Siobhan,\n\nI'm a solicitor. Please always send documents as PDF.\n\n"
+                   "Regards,\nPatrick\n\nwhat should I reply?", "Siobhan Doyle")
+    assert "(the writer asks) Please always send documents as PDF" in q
+    assert q.endswith('"what should I reply?"')
+
+
+def test_a_message_is_quoted_as_written_so_a_paste_after_a_blank_line_is_seen(pm):
+    pm.profile_ingest([{"role": "user", "content": "I've been running marathons for 20 years "
+                         "and I never stretch.\n\nis this bad advice?"}], conversation_id="a", owner_name="Helen Brandt",
+                      date="2026-01-19")
+    block = pm.profile_context("Do I run marathons?")["block"]
+    assert "[pasted in by Helen Brandt" in block
+    assert '"I\'ve been running marathons' not in block

@@ -595,10 +595,12 @@ def _message_of(conversation_id, said):
                         denied.append(str(c["value"]))
         except (OSError, ValueError):
             pass
-        sents = [x for x in _SENT_SPLIT.split(t["text"].strip())
-                 if not _denied_sentence(x, denied, denied_said)]
+        every = _SENT_SPLIT.split(t["text"].strip())
+        sents = [x for x in every if not _denied_sentence(x, denied, denied_said)]
         prev = (turns[i - 1]["text"] if i and turns[i - 1]["role"] == "assistant"
                 else None)
+        if sents and len(sents) == len(every):
+            return t["text"].strip(), prev     # as written (see _messages_for)
         return " ".join(sents) or None, prev
     return None, None
 
@@ -690,14 +692,19 @@ def _messages_for(query, k=3):
                 for i, t in enumerate(turns):
                     if t["role"] != "human" or "[MEMORY" in t["text"]:
                         continue
-                    sents = [x for x in _SENT_SPLIT.split(t["text"].strip())
+                    every = _SENT_SPLIT.split(t["text"].strip())
+                    sents = [x for x in every
                              if not _denied_sentence(x, denied, denied_said)]
                     text = " ".join(sents).strip()
                     if len(text.split()) < 3:
                         continue
                     prev = (turns[i - 1]["text"] if i and turns[i - 1]["role"]
                             == "assistant" else None)
-                    docs.append({"attr": "", "value": text, "text": text,
+                    # 2026-10-09: the message as written (its blank lines show
+                    # where pasted text starts and ends); flattened only when
+                    # a forgotten sentence was taken out. Search uses `value`.
+                    shown = t["text"].strip() if len(sents) == len(every) else text
+                    docs.append({"attr": "", "value": text, "text": shown,
                                  "date": conv["date"], "asked": prev,
                                  "conv": cid})
             cached = (tr, _RV3.IndexV3(None, facts=docs) if docs else None)
