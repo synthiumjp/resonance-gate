@@ -47,7 +47,7 @@ def main():
             r = rows[k]
             if (v, r["qid"]) in done:
                 continue
-            j = C.llm(C.JUDGE.format(question=r["question"], gold=r["answer"], pred=wa[k]), max_tokens=120)
+            j = C.llm(C.judge_prompt().format(question=r["question"], gold=r["answer"], pred=wa[k]), max_tokens=120)
             C.jsonl_append(a.out, {"v": v, "qid": r["qid"], "category": r["category"],
                                    "label": C.judge_label(j), "judge_text": j})
             if i % 50 == 0:

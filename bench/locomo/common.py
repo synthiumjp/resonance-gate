@@ -148,6 +148,28 @@ First, provide a short (one sentence) explanation of your reasoning, then finish
 Do NOT include both CORRECT and WRONG in your response, or it will break the evaluation script."""
 
 
+# 2026-10-10: the LoCoMo audit (fetch_audit.sh) found the JUDGE prompt above
+# (Mem0's, "be generous") accepts 63% of deliberately vague wrong answers with
+# gpt-4o-mini; ours accepted 68.5% (judge_stress.py). LOCOMO_JUDGE=strict
+# uses this one instead.
+JUDGE_STRICT = """Your task is to label an answer to a question as 'CORRECT' or 'WRONG'. You will be given a question, a gold (ground truth) answer and a generated answer.
+
+Label it CORRECT only if the generated answer states the same specific fact as the gold answer: the same person, thing, place, number, date or item. Different wording, format or extra detail is fine.
+
+Label it WRONG if it is vague, only on the same topic, hedged between options, or misses the key detail. For a date or time, the same date or period at the gold answer's precision is CORRECT ("7 May 2023" and "May 7, 2023"; "the week before 9 June" when that is the same week); a vaguer period is WRONG ("spring 2023" for "7 May 2023"). If the gold answer lists several items, the generated answer must name most of them.
+
+Question: {question}
+Gold answer: {gold}
+Generated answer: {pred}
+
+First, provide a short (one sentence) explanation of your reasoning, then finish with CORRECT or WRONG.
+Do NOT include both CORRECT and WRONG in your response, or it will break the evaluation script."""
+
+
+def judge_prompt():
+    return JUDGE_STRICT if os.environ.get("LOCOMO_JUDGE") == "strict" else JUDGE
+
+
 def judge_label(text):
     m = re.findall(r"\b(CORRECT|WRONG)\b", text.upper())
     return m[-1] if m else "WRONG"
