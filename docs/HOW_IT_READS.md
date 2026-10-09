@@ -255,6 +255,11 @@ above and measured again on the benchmark sets.
 
 ## Fixes from the adversarial review (2026-10-09)
 
+**A bare acknowledgement of advice is not a decision.** "ok", "ok thanks",
+"fine" alone accept only an offer put as a question ("Want me to...?") or
+a joint proposal ("Let's deploy on Heroku"), not "You could..." or "I'd
+suggest...". Development decision set: the same 22 decisions as before.
+
 Counterexamples from `docs/REVIEW_2026-10-09.md` are now tests
 (`rgx/test_adversarial.py`, `server/tests/test_review_rules.py`,
 `experiments/p2/test_prose.py`).
@@ -285,7 +290,16 @@ believe" keep their complement: they mostly state the user's own view. Cost:
 "Don't know what to do" are not standing instructions; "Always use tabs, not
 spaces" keeps "not spaces"; "Never again will I use that vendor" (fronted
 negative with inversion) stores nothing rather than "will use that vendor".
-Still missed (known): "Be concise", "Call me Dan", "use tabs from now on".
+Now also stored: "use tabs from now on", "Stop using emojis", "Be concise"
+(be + a style adjective), "dont ever apologise", "Do not under any
+circumstances touch the prod db", "Call me Dan" ("asked to be called
+Dan"). And not stored: an imperative with a modal ("Can't wait to see it",
+"Won't let anything hold me back"), "did"/"does" ("Did not see any
+bands"), encouragement to the listener ("Keep up the great work", "Never
+give up", "Don't let anything stop you", "Take care"). Over LoCoMo's 5,882
+chat messages, standing instructions fell from 227 to 10 (most had been
+"Can't wait ..."); the development preference, coding and project sets lost
+none (3 -> 4 on preferences).
 
 **Pasted text, both ways.** An email's header lines, quoted replies ("> ...")
 and "summarise this" without a noun mark what follows as pasted; the user's

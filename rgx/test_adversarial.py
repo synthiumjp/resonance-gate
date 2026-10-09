@@ -105,3 +105,34 @@ def test_an_instruction_keeps_its_contrast_and_a_fronted_negative_its_polarity(e
     assert any("never spaces" in t for t in texts(ex, "Always use tabs, never spaces"))
     assert not any("will use that vendor" in t for t in texts(ex, "Never again will I use that vendor"))
     assert not any(t.endswith(" five") for t in texts(ex, "Explain it like I'm five"))
+
+
+@pytest.mark.parametrize("turn,want", [
+    ("use tabs from now on", "Dana Cole asked the assistant: use tabs from now on"),
+    ("Stop using emojis", "Dana Cole asked the assistant: Stop using emojis"),
+    ("Be concise", "Dana Cole asked the assistant: Be concise"),
+    ("dont ever apologise to me", "Dana Cole asked the assistant: don't ever apologise to Dana Cole"),
+    ("Do not under any circumstances touch the prod db",
+     "Dana Cole asked the assistant: Do not under any circumstances touch the prod db"),
+    ("Call me Dan", "Dana Cole asked to be called Dan"),
+])
+def test_more_ways_to_give_a_standing_instruction(ex, turn, want):
+    assert want in texts(ex, turn)
+
+
+@pytest.mark.parametrize("user,assistant", [
+    ("ok thanks", "You could migrate the database to Postgres. SQLite will struggle past a few thousand writes."),
+    ("ok", "I'd suggest checking the logs first, then restarting the service."),
+    ("fine", "I'd suggest checking the logs first, then restarting the service."),
+])
+def test_a_bare_acknowledgement_of_advice_is_not_a_decision(ex, user, assistant):
+    assert not any("decided with the assistant" in t for t in texts(ex, user, assistant))
+
+
+def test_a_bare_ok_to_an_offer_is_still_a_decision(ex):
+    assert any("decided with the assistant" in t
+               for t in texts(ex, "ok", "We could use pnpm. Want me to switch the lockfile?"))
+
+
+def test_a_presupposed_job_that_ended_is_not_current(ex):
+    assert not any(t.endswith(" now") for t in texts(ex, "Third week at Kestrel Print was when they fired me"))

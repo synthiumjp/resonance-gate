@@ -100,6 +100,20 @@ def proposal(assistant_text):
     return _clean(st[1]) if st else None
 
 
+# 2026-10-09 (review): "ok thanks" after "You could migrate to Postgres.
+# SQLite will struggle..." was taken as a decision. A weak acknowledgement
+# alone accepts only an offer put as a question ("Want me to...?").
+_WEAK = re.compile(r"^\W*(?:ok|okay|fine|cool|thanks|thank you|got it|noted|right|alright)"
+                   r"(?:[\s,!.]+(?:ok|okay|thanks|thank you|cool|got it|noted))*[\s,!.]*$", re.I)
+
+
+def _offered(assistant_text):
+    """An offer put as a question, or a joint proposal ("Let's deploy on
+    Heroku"): both invite a yes."""
+    t = assistant_text or ""
+    return any(rx.search(t) for rx in _PROPOSAL[:3]) or bool(re.search(r"\blet'?s\s+\w", t, re.I))
+
+
 def _lets(clause):
     m = _LETS.match(clause)
     if not m:
@@ -121,6 +135,8 @@ def decision(user_text, assistant_text=None):
     pnpm", "alright let's switch to Tailwind")."""
     t = (user_text or "").strip()
     if not t or t.endswith("?"):
+        return None
+    if _WEAK.match(t) and not _offered(assistant_text):
         return None
     first = re.split(r"(?<=[.!?])\s+", t)[0]
     if len(re.split(r"(?<=[.!?])\s+", t)) > 2:

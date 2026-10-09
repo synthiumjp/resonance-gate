@@ -160,7 +160,9 @@ def prefilter(prop, turn, owner=None, min_grounded=0.85, min_content=1,
     # whose object was extracted leaves the verb with a stranded preposition
     # -- "The ward I work on has 30 beds" also yielded "<owner> works on".
     # A record ending in a bare preposition says nothing.
-    if _STRANDED.search(text):
+    # (2026-10-09: "use tabs from now on" ends in "on" but is complete)
+    if _STRANDED.search(text) and not re.search(
+            r"\b(?:now|then|later|so|carry|hold|going|from then) on\s*[.!?]?$", text, re.I):
         return False, "stranded preposition (object was extracted)"
 
     # "user" is a subject token too -- gold writes the name point as "User's

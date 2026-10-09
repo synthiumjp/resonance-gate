@@ -290,6 +290,8 @@ _PAST = re.compile(r"\b(back in|ago|last (?:year|month|week|summer|winter|time)|
                    r"in (?:19|20)\d\d|ended|finished|cancel+ed|broke up|split up|"
                    r"used to|when i was|years? before|in the (?:book|film|movie|show|story|game)|"
                    r"was over|didn'?t last|quit|left|resigned|got fired|laid off|"
+                   # 2026-10-09 (review): "...was when they fired me"
+                   r"fired|let go|sacked|was when|were when|that was|"
                    r"handed in)\b", re.I)
 _IDIOM = re.compile(r"^(?:a result|a kid|a child|a teen\w*|a baby|a joke|a whole|"
                     r"a matter|a favour|a favor|usual|always|ever)\b", re.I)

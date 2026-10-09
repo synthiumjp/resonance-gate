@@ -891,12 +891,31 @@ _STANDING = re.compile(r"\b(from now on|every time|in future|going forward|"
 # "Don't get me started"), and a subjectless "Don't know what to do" / "Dont
 # care" is the user talking about themselves.
 _IMPERATIVE_IDIOM = re.compile(
-    r"^\W*(?:please\s+)?(?:never ?mind|don'?t worry|do not worry|no worries|keep the change|"
+    # encouragement to whoever is listening, not an instruction (LoCoMo:
+    # "Keep up the great work", "Never give up", "Don't let anything stop you")
+    r"^\W*(?:please\s+)?(?:keep (?:it )?up|keep up the|keep going|keep at it|keep pushing|"
+    r"(?:never|don'?t|do not) (?:ever )?give up|(?:don'?t|do not) quit|"
+    r"(?:don'?t|do not|never) let (?:anything|anyone|it|that|them|this|the \w+|those \w+|"
+    r"\w+) (?:\w+ )?(?:stop|get|bring|hold|keep|take|break|discourage)|"
+    r"hang in there|stay (?:strong|safe|positive|tuned|cool|calm)|chin up|"
+    r"keep (?:in touch|rockin\w*|it real|being|exploring|smiling|shining|dreaming)|"
+    r"take care|take it easy|look after yourself|feel free|never say never|why not|"
+    r"let (?:me|us|\w+) know|(?:don'?t|do not) forget to (?:relax|enjoy|have fun|take "
+    r"(?:a |some )?breaks?|take (?:some )?(?:time|care|pictures|photos|it easy)|look after)|"
+    r"(?:don'?t|do not) (?:ever )?(?:stop|quit) (?:pushing|on|believing|dreaming|trying)|"
+    r"(?:don'?t|do not) stress|(?:don'?t|do not) be (?:so )?hard on|"
+    r"never ?mind|don'?t worry|do not worry|no worries|keep the change|"
     r"don'?t get me started|do not get me started|don'?t mention it|don'?t ask|"
     r"forget (?:it|about it)|never fear|don'?t bother|take care|keep it up|keep going|"
     r"go ahead|don'?t be (?:silly|sorry|ridiculous)|don'?t judge me|don'?t laugh)\b",
     re.I)
-_SELF_ELLIPSIS = {"know", "care", "recall", "remember", "understand", "mind", "think"}
+_SELF_ELLIPSIS = {"know", "care", "recall", "remember", "understand", "mind", "think",
+                  "feel", "love", "like", "want", "hope", "see", "get", "mean"}
+# "Be concise", "Please be brief in future": how the assistant should answer
+_STYLE_ADJ = {"concise", "brief", "terse", "succinct", "direct", "blunt", "short",
+              "formal", "informal", "casual", "polite", "detailed", "thorough",
+              "specific", "explicit", "clear", "precise", "honest", "candid",
+              "friendly", "professional", "patient", "careful"}
 
 
 def _standing_instruction(s, head, role, sent):
@@ -909,9 +928,27 @@ def _standing_instruction(s, head, role, sent):
     if _IMPERATIVE_IDIOM.match(sent.text or ""):
         return False
     if (head.lemma or "").lower() in _SELF_ELLIPSIS and any(
-            (c.text or "").lower() in ("n't", "not", "never")
+            (c.text or "").lower() in ("n't", "not", "never", "always")
             for c in s.children(head, ("advmod", "aux"))):
         return False
+    # "Did not see any bands": "did"/"does" are not the imperative's "do"
+    if any((c.text or "").lower() in ("did", "does", "didnt", "doesnt")
+           for c in s.children(head, ("aux",))):
+        return False
+    # 2026-10-09 (review): "Be concise", "Please be brief in future" -- an
+    # imperative copula with a style adjective, no subject
+    if (head.upos == "ADJ" and (head.lemma or "").lower() in _STYLE_ADJ
+            and any((c.lemma or "").lower() == "be" and (c.xpos or "") == "VB"
+                    for c in s.children(head, ("cop",)))
+            and not s.children(head, ("nsubj", "nsubj:pass", "expl"))
+            and head.deprel == "root"):
+        return True
+    # "Call me Dan": how the user wants to be addressed
+    if ((head.lemma or "").lower() == "call" and (head.xpos or "") == "VB"
+            and any((c.text or "").lower() == "me" for c in s.children(head, ("obj",)))
+            and any(c.upos == "PROPN" for c in s.children(head, ("vocative", "xcomp", "obj", "obl")))
+            and not s.children(head, ("nsubj",))):
+        return True
     if head.upos != "VERB":
         # 2026-10-05: "From now on always answer in British English" --
         # Stanza tags "answer" a NOUN. A root noun right after always/never,
@@ -931,6 +968,13 @@ def _standing_instruction(s, head, role, sent):
     # form (VB) with no perfect or progressive auxiliary; "don't" is the
     # only auxiliary it takes.
     if head.upos == "VERB" and (head.xpos or "") != "VB":
+        return False
+    # 2026-10-09: an imperative takes "do" and nothing else -- "Can't wait to
+    # see it" and "Won't let anything hold me back" are the speaker's own
+    # (227 LoCoMo chat messages had been stored as instructions)
+    if any((c.lemma or "").lower() in ("can", "could", "will", "would", "shall",
+                                       "should", "may", "might", "must")
+           for c in s.children(head, ("aux",))):
         return False
     if any((c.lemma or "").lower() in ("have", "be") for c in s.children(head, ("aux",))):
         return False
@@ -957,14 +1001,31 @@ def _standing_instruction(s, head, role, sent):
             and head.id == min(w.id for w in sent.words if w.upos != "PUNCT")):
         lead = [w for w in sent.words if w.id < head.id and w.upos != "PUNCT"]
         lead_text = " ".join(w.text for w in lead)
+        # (2026-10-09) "Do not under any circumstances touch ...": a phrase
+        # attached to the verb may stand before it
+        obl_ids = {c.id for c in s.children(head, ("obl",))}
+        def _in_obl(w):
+            seen = set()
+            while w is not None and w.id not in seen:
+                seen.add(w.id)
+                if w.id in obl_ids:
+                    return True
+                w = s.w.get(w.head)
+            return False
         if not _STANDING.match(lead_text) and any(
-                w.head != head.id or w.deprel not in ("advmod", "aux", "discourse")
+                (w.head != head.id or w.deprel not in ("advmod", "aux", "discourse"))
+                and not _in_obl(w)
                 for w in lead):
             return False
     else:
         return False
     marks = {(c.text or "").lower() for c in s.children(head, ("advmod", "aux"))}
-    if marks & {"always", "never", "n't", "not"}:
+    if marks & {"always", "never", "n't", "not", "nt"}:      # "dont" -> do + nt
+        return True
+    # "Stop using emojis": stop doing something, from now on
+    if (head.lemma or "").lower() in ("stop", "quit") and any(
+            "VerbForm=Ger" in (c.feats or "") or (c.xpos or "") == "VBG"
+            for c in s.children(head, ("xcomp",))):
         return True
     text = " ".join(w.text for w in sent.words)
     if _STANDING.search(text):
@@ -1550,7 +1611,12 @@ def extract_keyed(text, nlp, owner=None, role="user",
                          or s.children(c, ("nsubj", "nsubj:pass"))}
                 span = re.sub(r"\s+", " ", s.text(head, stop=stop, owner=o,
                                                    second=second)).strip(" ,.;:!")
-                body = f"{o} asked the assistant: {span}"
+                shown = re.sub(r"\b([Dd])o nt\b", r"\1on't", span)    # "dont"
+                body = f"{o} asked the assistant: {shown}"
+                name = next((c.text for c in s.children(head, ("vocative", "xcomp", "obj", "obl"))
+                             if c.upos == "PROPN"), None)
+                if (head.lemma or "").lower() == "call" and name:
+                    body = f"{o} asked to be called {name}"     # "Call me Dan"
                 if span and body.lower()[:90] not in seen:
                     seen.add(body.lower()[:90])
                     out.append((body, "attr", "instruction", span, None, sent.text)
