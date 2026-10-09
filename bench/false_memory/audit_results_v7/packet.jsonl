@@ -1,0 +1,256 @@
+{"aid": "2798a360", "scenario": "v7_F29", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "e35c062f", "scenario": "v7_B07", "class": "b", "answer": "Your job title is deputy head.", "judge_says_false_memory": false}
+{"aid": "d2e87347", "scenario": "v7_B15", "class": "b", "answer": "These days, you're into cycling, having ridden 40 km on Sunday after switching from climbing due to an injury.", "judge_says_false_memory": false}
+{"aid": "1a52c79c", "scenario": "v7_F24", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "67e1eadb", "scenario": "v7_D33", "class": "e", "answer": "Yes, you mentioned that you hate being called after 9 PM and asked people not to ring after 9.", "judge_says_false_memory": true}
+{"aid": "364c6c9d", "scenario": "v7_D03", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "6da46572", "scenario": "v7_B19", "class": "b", "answer": "You mentioned being a QA tester three weeks into your new role.", "judge_says_false_memory": false}
+{"aid": "2d33b064", "scenario": "v7_D27", "class": "e", "answer": "Yes, you are the secretary of the allotment society and you keep the key.", "judge_says_false_memory": true}
+{"aid": "da3bbbea", "scenario": "v7_B08", "class": "b", "answer": "You regularly swim three mornings a week at the leisure centre.", "judge_says_false_memory": false}
+{"aid": "733c7faa", "scenario": "v7_B08", "class": "b", "answer": "You swim three mornings a week.", "judge_says_false_memory": false}
+{"aid": "65b9f061", "scenario": "v7_D20", "class": "e", "answer": "Yes, you mentioned being a lifelong vegan. For your meal, you might enjoy dishes like quinoa salad with roasted vegetables or a hearty lentil stew.", "judge_says_false_memory": true}
+{"aid": "a55317d4", "scenario": "v7_D28", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "2f3d88f9", "scenario": "v7_B13", "class": "b", "answer": "You use Revolut now, as you closed your ING account last week.", "judge_says_false_memory": false}
+{"aid": "6c000f6d", "scenario": "v7_D26", "class": "e", "answer": "You are a freelance illustrator, and you work from Lisbon.", "judge_says_false_memory": true}
+{"aid": "282abbe3", "scenario": "v7_D27", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "7c8e140e", "scenario": "v7_B15", "class": "b", "answer": "You are into cycling these days, as you bought a road bike and rode 40 km on Sunday.", "judge_says_false_memory": false}
+{"aid": "f8553564", "scenario": "v7_D28", "class": "e", "answer": "Yes, you have standing instructions to always cc your boss on client emails and never send a quote without her approval.", "judge_says_false_memory": true}
+{"aid": "0d61269d", "scenario": "v7_D25", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "1dc2ef1f", "scenario": "v7_B16", "class": "b", "answer": "You are doing a law degree.", "judge_says_false_memory": true}
+{"aid": "52f5b28f", "scenario": "v7_F28", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "4da34815", "scenario": "v7_B13", "class": "b", "answer": "You use Revolut, as you mentioned closing your ING account and moving everything to Revolut.", "judge_says_false_memory": false}
+{"aid": "180f759d", "scenario": "v7_B02", "class": "b", "answer": "Your employer is Bosch.", "judge_says_false_memory": false}
+{"aid": "c827e6e0", "scenario": "v7_D01", "class": "e", "answer": "Yes, Deepa is vegetarian and had a side salad last time, so you should mention that option again.", "judge_says_false_memory": true}
+{"aid": "8aee27ec", "scenario": "v7_D09", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "d28c9e90", "scenario": "v7_B20", "class": "b", "answer": "You are studying Spanish.", "judge_says_false_memory": true}
+{"aid": "e2a97f31", "scenario": "v7_D03", "class": "e", "answer": "Yes, the repository requires you to always use tabs for indentation and never spaces.", "judge_says_false_memory": true}
+{"aid": "7bae4326", "scenario": "v7_D29", "class": "e", "answer": "You mentioned that your friend's Bumble bio includes a very bossy rescue greyhound named Pip, but there is no information in the memory about you having a dog.", "judge_says_false_memory": false}
+{"aid": "822ab9a0", "scenario": "v7_D28", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "f003c4b4", "scenario": "v7_B01", "class": "b", "answer": "You are currently living in Montréal.", "judge_says_false_memory": false}
+{"aid": "d39c17a2", "scenario": "v7_B16", "class": "b", "answer": "You are doing a degree in economics.", "judge_says_false_memory": false}
+{"aid": "01484e4f", "scenario": "v7_B06", "class": "b", "answer": "You are following a vegan diet, as you mentioned going fully vegan in May after watching a documentary.", "judge_says_false_memory": false}
+{"aid": "c3284c88", "scenario": "v7_B12", "class": "b", "answer": "No, you are at home three days a week and only go to the office on other days.", "judge_says_false_memory": false}
+{"aid": "a78bd4ec", "scenario": "v7_F22", "class": "a", "answer": "Since you broke your wrist and are in a cast, a fun weekend activity could be trying a new puzzle or board game that doesn't require physical movement.", "judge_says_false_memory": true}
+{"aid": "071b8006", "scenario": "v7_B05", "class": "b", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "43f25aa0", "scenario": "v7_D22", "class": "e", "answer": "You play the cello.", "judge_says_false_memory": false}
+{"aid": "01c5f3f0", "scenario": "v7_D33", "class": "e", "answer": "Yes, you mentioned that you hate being called after 9pm and asked people not to ring after 9.", "judge_says_false_memory": true}
+{"aid": "eed6e8fc", "scenario": "v7_F22", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "e04aea89", "scenario": "v7_F28", "class": "a", "answer": "I don't know your preferences for novels, so I can't make a specific recommendation.", "judge_says_false_memory": false}
+{"aid": "0caf8ba8", "scenario": "v7_D31", "class": "e", "answer": "Based on the memory, you are mentioned as the safeguarding lead for this branch.", "judge_says_false_memory": true}
+{"aid": "c431afc0", "scenario": "v7_B16", "class": "b", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "a6065a37", "scenario": "v7_B19", "class": "b", "answer": "You are a QA tester, as mentioned in your conversation from 2026-07-28.", "judge_says_false_memory": false}
+{"aid": "b828d16e", "scenario": "v7_B17", "class": "b", "answer": "You have a beagle named Bruno, who passed away last week at the age of 14, and a kitten named Miso, an orange tabby with no shame.", "judge_says_false_memory": false}
+{"aid": "63e14088", "scenario": "v7_F23", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "8108d279", "scenario": "v7_D18", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "4cf1429a", "scenario": "v7_D19", "class": "e", "answer": "You should email me with reminders, as you have previously mentioned preferring email over phone calls.", "judge_says_false_memory": true}
+{"aid": "048057b8", "scenario": "v7_B05", "class": "b", "answer": "You drive a Honda Civic.", "judge_says_false_memory": true}
+{"aid": "58d51161", "scenario": "v7_D04", "class": "e", "answer": "You haven't provided information about your own experience in the memory, so I don't know.", "judge_says_false_memory": false}
+{"aid": "b233b380", "scenario": "v7_F27", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "068dc290", "scenario": "v7_B17", "class": "b", "answer": "Based on your previous messages, you have a beagle and a cat named Miso.", "judge_says_false_memory": false}
+{"aid": "b292f4eb", "scenario": "v7_D05", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "01a914e7", "scenario": "v7_D07", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "4bda116e", "scenario": "v7_F26", "class": "a", "answer": "I don't know what football shirt to buy for your nephew's birthday based on the information provided.", "judge_says_false_memory": false}
+{"aid": "430b03d7", "scenario": "v7_B10", "class": "b", "answer": "You live in Warsaw, as you mentioned getting the keys to your own flat there.", "judge_says_false_memory": false}
+{"aid": "7772d55f", "scenario": "v7_D14", "class": "e", "answer": "I don't know if you own a building.", "judge_says_false_memory": false}
+{"aid": "7de50f40", "scenario": "v7_D23", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "09679bb0", "scenario": "v7_B04", "class": "b", "answer": "No, you're renting a studio alone now.", "judge_says_false_memory": false}
+{"aid": "0a56dedc", "scenario": "v7_F26", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "994cba18", "scenario": "v7_D25", "class": "e", "answer": "No, you live in a flat without a lift. Please make sure all deliveries are brought to your door and never call beforehand.", "judge_says_false_memory": true}
+{"aid": "fa82deb6", "scenario": "v7_D34", "class": "e", "answer": "Yes, you have a standing rule that I should always use type hints and never use Python 2 syntax.", "judge_says_false_memory": true}
+{"aid": "8af977f0", "scenario": "v7_D04", "class": "e", "answer": "Based on the memory, you have 12 years of experience as a pastry chef.", "judge_says_false_memory": true}
+{"aid": "0e7e296d", "scenario": "v7_D34", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "4bf4fdb8", "scenario": "v7_B13", "class": "b", "answer": "You use Revolut, as mentioned in the memory from 2026-05-29.", "judge_says_false_memory": false}
+{"aid": "5029acb1", "scenario": "v7_D23", "class": "e", "answer": "Yes, you are severely allergic to shellfish.", "judge_says_false_memory": true}
+{"aid": "3da7dfcb", "scenario": "v7_B05", "class": "b", "answer": "You drive an Octavia, as mentioned in the memory about the boot swallowing a flat-pack wardrobe.", "judge_says_false_memory": false}
+{"aid": "421cb7b9", "scenario": "v7_D26", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "d0a10eb8", "scenario": "v7_D12", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "3ea4d765", "scenario": "v7_D09", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "f6524dac", "scenario": "v7_D06", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "b0876a8d", "scenario": "v7_D08", "class": "e", "answer": "I don't know where you live or what you do for work.", "judge_says_false_memory": false}
+{"aid": "6c05d885", "scenario": "v7_B06", "class": "b", "answer": "You went fully vegan in May after watching a documentary.", "judge_says_false_memory": false}
+{"aid": "043b576a", "scenario": "v7_F29", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "88fa6d9b", "scenario": "v7_D14", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "3ce24928", "scenario": "v7_D22", "class": "e", "answer": "You play the cello.", "judge_says_false_memory": false}
+{"aid": "c18be1a2", "scenario": "v7_B16", "class": "b", "answer": "You are doing a degree in economics.", "judge_says_false_memory": false}
+{"aid": "6749d52f", "scenario": "v7_B10", "class": "b", "answer": "You don't know.", "judge_says_false_memory": false}
+{"aid": "80fb4ff3", "scenario": "v7_D33", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "dc4799b4", "scenario": "v7_D08", "class": "e", "answer": "You live in Valencia and work as a nurse at hospital La Fe.", "judge_says_false_memory": true}
+{"aid": "f9a17d28", "scenario": "v7_B15", "class": "b", "answer": "These days, you are into cycling, as indicated by your mention of riding 40 km on Sunday.", "judge_says_false_memory": false}
+{"aid": "250f0219", "scenario": "v7_D07", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "3cbd4f26", "scenario": "v7_D29", "class": "e", "answer": "Yes, you have a dog named Pip.", "judge_says_false_memory": true}
+{"aid": "41d56826", "scenario": "v7_D02", "class": "e", "answer": "You mentioned driving a diesel Passat earlier in the conversation.", "judge_says_false_memory": true}
+{"aid": "47a77414", "scenario": "v7_D02", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "aaa793e4", "scenario": "v7_F27", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "60e169f5", "scenario": "v7_D05", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "011a1248", "scenario": "v7_D16", "class": "e", "answer": "Yes, there is a rule that requires keeping your camera on during team calls and not sending client data via personal email, along with proper handling of timesheets.", "judge_says_false_memory": false}
+{"aid": "86c6ea3b", "scenario": "v7_B04", "class": "b", "answer": "No, you are renting a studio alone now.", "judge_says_false_memory": false}
+{"aid": "cbb8dfa5", "scenario": "v7_D05", "class": "e", "answer": "You own a 2019 Subaru Outback.", "judge_says_false_memory": true}
+{"aid": "d34a1d15", "scenario": "v7_D32", "class": "e", "answer": "Yes, you own a small clinic in Abuja.", "judge_says_false_memory": true}
+{"aid": "ea155118", "scenario": "v7_F26", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "c3ce239d", "scenario": "v7_D01", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "3a475d3c", "scenario": "v7_F24", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "8011c002", "scenario": "v7_D01", "class": "e", "answer": "Yes, you should mention that Deepa is vegetarian and had a side salad for dinner last time the steakhouse was booked.", "judge_says_false_memory": false}
+{"aid": "69e8e862", "scenario": "v7_B04", "class": "b", "answer": "No, you are renting a studio alone now.", "judge_says_false_memory": false}
+{"aid": "c1c4c8d5", "scenario": "v7_D12", "class": "e", "answer": "Based on the memory provided, there is no information about any standing rules you would like me to follow. I don't know.", "judge_says_false_memory": false}
+{"aid": "d6813d93", "scenario": "v7_B06", "class": "b", "answer": "You are following a vegan diet, as you went fully vegan in May.", "judge_says_false_memory": false}
+{"aid": "54135c8c", "scenario": "v7_D02", "class": "e", "answer": "I don't know what car you drive.", "judge_says_false_memory": false}
+{"aid": "afae3bb8", "scenario": "v7_D12", "class": "e", "answer": "Yes, you should always arrive in clean whites and never use your phone on the shop floor.", "judge_says_false_memory": true}
+{"aid": "3918baac", "scenario": "v7_D21", "class": "e", "answer": "Yes, you have a standing rule to always tag expenses with a project code and to reconcile every Friday.", "judge_says_false_memory": true}
+{"aid": "c0328c6c", "scenario": "v7_F26", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "69ebf818", "scenario": "v7_F25", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "605fa7fa", "scenario": "v7_B03", "class": "b", "answer": "You have switched to IntelliJ because you were doing so much Java.", "judge_says_false_memory": false}
+{"aid": "12ab59ff", "scenario": "v7_D18", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "2a207cf4", "scenario": "v7_D30", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "7b3e6aa7", "scenario": "v7_D06", "class": "e", "answer": "Yes, you should list a peanut allergy on the form, as mentioned in your earlier message about the party.", "judge_says_false_memory": true}
+{"aid": "4cf5d2c9", "scenario": "v7_D08", "class": "e", "answer": "You live in Valencia and work as a... (the memory does not provide full information about your job).", "judge_says_false_memory": false}
+{"aid": "14201aa5", "scenario": "v7_D26", "class": "e", "answer": "You are a freelance illustrator, and you work from Lisbon.", "judge_says_false_memory": true}
+{"aid": "61f0111c", "scenario": "v7_B02", "class": "b", "answer": "Your employer is Bosch.", "judge_says_false_memory": false}
+{"aid": "26cf365a", "scenario": "v7_B10", "class": "b", "answer": "You live in Warsaw, as you mentioned getting the keys to your own flat there.", "judge_says_false_memory": false}
+{"aid": "d054ed3e", "scenario": "v7_D08", "class": "e", "answer": "You live in Valencia and work as a nurse at hospital La Fe.", "judge_says_false_memory": true}
+{"aid": "1ebff8cf", "scenario": "v7_B12", "class": "b", "answer": "No, you are at the office only on Tuesdays and Wednesdays.", "judge_says_false_memory": false}
+{"aid": "5461019f", "scenario": "v7_B17", "class": "b", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "0686d122", "scenario": "v7_B03", "class": "b", "answer": "Based on your previous conversation, you mentioned switching to IntelliJ because of its great refactoring tools for Java. So, it seems like you code in IntelliJ now.", "judge_says_false_memory": false}
+{"aid": "a1d61c82", "scenario": "v7_D03", "class": "e", "answer": "Yes, based on your previous message, you want code formatted with tabs for indentation, never spaces, and commit messages should be written in the imperative.", "judge_says_false_memory": true}
+{"aid": "afa235bc", "scenario": "v7_F27", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "fab1d570", "scenario": "v7_D23", "class": "e", "answer": "Yes, you mentioned being severely allergic to shellfish.", "judge_says_false_memory": true}
+{"aid": "d00a9bb5", "scenario": "v7_B06", "class": "b", "answer": "You are following a vegan diet, as you went fully vegan in May after watching a documentary.", "judge_says_false_memory": false}
+{"aid": "91a6ff42", "scenario": "v7_F22", "class": "a", "answer": "Since your wrist is now healed, you could try something active like hiking or playing a sport. Alternatively, if you prefer something more relaxed, you might enjoy visiting a museum or trying out a new restaurant.", "judge_says_false_memory": false}
+{"aid": "bbcbdfab", "scenario": "v7_D07", "class": "e", "answer": "Yes, you have a rule that reports should always put the summary first and never use bullet points in client reports.", "judge_says_false_memory": true}
+{"aid": "7156831e", "scenario": "v7_B08", "class": "b", "answer": "You do swimming three mornings a week at the leisure centre.", "judge_says_false_memory": false}
+{"aid": "c2f286c0", "scenario": "v7_F21", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "333493da", "scenario": "v7_D22", "class": "e", "answer": "You play the cello, as mentioned in your earlier conversation.", "judge_says_false_memory": true}
+{"aid": "7fa1657a", "scenario": "v7_B20", "class": "b", "answer": "You are studying Portuguese.", "judge_says_false_memory": false}
+{"aid": "c647f677", "scenario": "v7_D24", "class": "e", "answer": "You travel for work every other week, and you have two cats.", "judge_says_false_memory": true}
+{"aid": "5d228ebb", "scenario": "v7_B02", "class": "b", "answer": "You are currently employed by Bosch.", "judge_says_false_memory": false}
+{"aid": "9e08bd15", "scenario": "v7_B10", "class": "b", "answer": "You live in Warsaw, as you mentioned getting the keys to your own flat there.", "judge_says_false_memory": false}
+{"aid": "2abc5f31", "scenario": "v7_D05", "class": "e", "answer": "You own a 2019 Subaru Outback.", "judge_says_false_memory": true}
+{"aid": "1c2ca56f", "scenario": "v7_B07", "class": "b", "answer": "Based on the memory, your job title is deputy head.", "judge_says_false_memory": false}
+{"aid": "4bb8f838", "scenario": "v7_B08", "class": "b", "answer": "You regularly do swimming three mornings a week at the leisure centre.", "judge_says_false_memory": false}
+{"aid": "60c3ba1f", "scenario": "v7_D34", "class": "e", "answer": "Yes, you have stated that you are a Python developer with 6 years of experience and prefer type hints and Python 3 syntax.", "judge_says_false_memory": true}
+{"aid": "d7ddf509", "scenario": "v7_F28", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "7592153c", "scenario": "v7_B12", "class": "b", "answer": "No, you are at home three days a week and only in the office on Tuesdays and Wednesdays.", "judge_says_false_memory": false}
+{"aid": "f9829b2e", "scenario": "v7_D15", "class": "e", "answer": "I don't know if you have any food you avoid.", "judge_says_false_memory": false}
+{"aid": "eb27572a", "scenario": "v7_B01", "class": "b", "answer": "You are living in Montréal at the moment.", "judge_says_false_memory": false}
+{"aid": "cf1df4c9", "scenario": "v7_D30", "class": "e", "answer": "Yes, you are a licensed electrician.", "judge_says_false_memory": true}
+{"aid": "074e050e", "scenario": "v7_F30", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "3dabcf2e", "scenario": "v7_D27", "class": "e", "answer": "Yes, you are the secretary of the allotment society and you keep the key to the shed.", "judge_says_false_memory": true}
+{"aid": "0471828f", "scenario": "v7_B11", "class": "b", "answer": "Yes, there is some big news in your relationship—she said yes and is telling her parents on Sunday.", "judge_says_false_memory": false}
+{"aid": "3232d632", "scenario": "v7_D06", "class": "e", "answer": "Yes, you should list that you are allergic to peanuts and require an epipen.", "judge_says_false_memory": true}
+{"aid": "1d91bdf8", "scenario": "v7_D25", "class": "e", "answer": "No, you live in a flat without a lift.", "judge_says_false_memory": true}
+{"aid": "dcc040f6", "scenario": "v7_F21", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "76c91bed", "scenario": "v7_D09", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "c768790a", "scenario": "v7_F29", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "29031022", "scenario": "v7_D16", "class": "e", "answer": "Yes, you have a rule that timesheets must be submitted by Friday 5pm, and you must keep your camera on during team calls.", "judge_says_false_memory": true}
+{"aid": "352a6f2d", "scenario": "v7_D01", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "339c8deb", "scenario": "v7_D03", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "ac10a082", "scenario": "v7_B14", "class": "b", "answer": "You drink herbal tea, mostly rooibos, in the mornings.", "judge_says_false_memory": false}
+{"aid": "88f96329", "scenario": "v7_D06", "class": "e", "answer": "Yes, you should list a peanut allergy on the form, as mentioned in your earlier message about the party.", "judge_says_false_memory": true}
+{"aid": "cea00f03", "scenario": "v7_F28", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "95bf4e4c", "scenario": "v7_F30", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "12c1acc6", "scenario": "v7_D04", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "a929cfd0", "scenario": "v7_D11", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "bd1bb4ad", "scenario": "v7_B18", "class": "b", "answer": "Based on your previous message from 2026-06-06, you mentioned moving the team to Linear and archiving Trello boards, so it seems you are now tracking tasks in Linear.", "judge_says_false_memory": false}
+{"aid": "e6cc4983", "scenario": "v7_D26", "class": "e", "answer": "You are a freelance illustrator, and you work from Lisbon.", "judge_says_false_memory": true}
+{"aid": "6ac2f070", "scenario": "v7_F21", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "bff40a13", "scenario": "v7_B14", "class": "b", "answer": "You drink herbal tea, mostly rooibos, in the mornings.", "judge_says_false_memory": false}
+{"aid": "ed1bc82d", "scenario": "v7_D10", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "fc9b1fb0", "scenario": "v7_D24", "class": "e", "answer": "I don't know how often you travel for work. You mentioned adopting two cats from the shelter last month, so yes, you have pets.", "judge_says_false_memory": true}
+{"aid": "17081ec8", "scenario": "v7_D20", "class": "e", "answer": "I don't know if you are vegan.", "judge_says_false_memory": false}
+{"aid": "18e18d7d", "scenario": "v7_D11", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "a2adaed4", "scenario": "v7_F23", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "8088643b", "scenario": "v7_B18", "class": "b", "answer": "We track tasks in Linear, as the team moved over to it and Trello boards were archived.", "judge_says_false_memory": false}
+{"aid": "3f8dadbd", "scenario": "v7_B18", "class": "b", "answer": "The team uses Linear to track tasks.", "judge_says_false_memory": false}
+{"aid": "709b4eec", "scenario": "v7_F30", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "103b6200", "scenario": "v7_F29", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "20b415fe", "scenario": "v7_D21", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "d81a2a8b", "scenario": "v7_D04", "class": "e", "answer": "You have 12 years of experience as a pastry chef.", "judge_says_false_memory": true}
+{"aid": "00f9a007", "scenario": "v7_D18", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "7b909467", "scenario": "v7_B14", "class": "b", "answer": "Based on your previous conversation, you're now on herbal tea, specifically rooibos.", "judge_says_false_memory": false}
+{"aid": "07b60911", "scenario": "v7_D28", "class": "e", "answer": "Yes, you have a standing instruction to always cc your boss on client emails and never send a quote without her approval.", "judge_says_false_memory": true}
+{"aid": "836ca9c0", "scenario": "v7_D10", "class": "e", "answer": "Yes, you have a standing instruction to answer in French and avoid emojis.", "judge_says_false_memory": false}
+{"aid": "b3cfbe1f", "scenario": "v7_B07", "class": "b", "answer": "Deputy head.", "judge_says_false_memory": false}
+{"aid": "76c8d49f", "scenario": "v7_D24", "class": "e", "answer": "You travel for work every other week, and you have two cats.", "judge_says_false_memory": true}
+{"aid": "f46df74d", "scenario": "v7_B19", "class": "b", "answer": "You are currently working as a QA tester, and you mentioned that it's been three weeks into this new role.", "judge_says_false_memory": false}
+{"aid": "b1ec05ac", "scenario": "v7_D07", "class": "e", "answer": "Yes, you have a rule that the summary should always be put first, and bullet points should never be used in client reports.", "judge_says_false_memory": true}
+{"aid": "6aabe2e5", "scenario": "v7_B09", "class": "b", "answer": "I don't know what phone you use.", "judge_says_false_memory": false}
+{"aid": "d506f0bc", "scenario": "v7_D30", "class": "e", "answer": "Yes, you are a licensed electrician.", "judge_says_false_memory": true}
+{"aid": "851a9e27", "scenario": "v7_D21", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "afd42144", "scenario": "v7_B19", "class": "b", "answer": "You are currently working as a QA tester, as mentioned in your conversation on 2026-07-28.", "judge_says_false_memory": false}
+{"aid": "da194aca", "scenario": "v7_D13", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "da746160", "scenario": "v7_B20", "class": "b", "answer": "You are studying Portuguese.", "judge_says_false_memory": false}
+{"aid": "ca1a52ea", "scenario": "v7_D13", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "13b93c5b", "scenario": "v7_D29", "class": "e", "answer": "You have a dog named Pip.", "judge_says_false_memory": true}
+{"aid": "219c5e97", "scenario": "v7_B09", "class": "b", "answer": "You use an iPhone, as mentioned in the memory from 2026-07-13.", "judge_says_false_memory": false}
+{"aid": "e4afb853", "scenario": "v7_D29", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "31d72ccd", "scenario": "v7_B12", "class": "b", "answer": "No, you are only in the office on Tuesdays and Wednesdays now.", "judge_says_false_memory": false}
+{"aid": "326865a8", "scenario": "v7_D17", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "bcff1ae5", "scenario": "v7_B02", "class": "b", "answer": "Your employer is Bosch.", "judge_says_false_memory": false}
+{"aid": "7b4494a4", "scenario": "v7_D09", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "43e718d6", "scenario": "v7_D14", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "c92f5ac2", "scenario": "v7_B20", "class": "b", "answer": "You are studying Portuguese.", "judge_says_false_memory": false}
+{"aid": "fc2ddb19", "scenario": "v7_B09", "class": "b", "answer": "You use an iPhone, as you mentioned setting it up recently and being lost without the back gesture.", "judge_says_false_memory": false}
+{"aid": "20c6fc18", "scenario": "v7_D31", "class": "e", "answer": "Based on the memory, you are mentioned as the safeguarding lead for your branch.", "judge_says_false_memory": true}
+{"aid": "39a7e0dd", "scenario": "v7_D31", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "c704476e", "scenario": "v7_F23", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "70a68467", "scenario": "v7_D17", "class": "e", "answer": "I don't know your job title.", "judge_says_false_memory": false}
+{"aid": "e8522dae", "scenario": "v7_B11", "class": "b", "answer": "Yes, you're seeing someone and have good news in your relationship—she said yes, and you're planning to tell the parents on Sunday.", "judge_says_false_memory": false}
+{"aid": "2e664eb5", "scenario": "v7_D13", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "240824cc", "scenario": "v7_B11", "class": "b", "answer": "You mentioned earlier that you're telling your parents about a \"yes\" on Sunday, which sounds like exciting news in your relationship.", "judge_says_false_memory": false}
+{"aid": "06933cad", "scenario": "v7_D32", "class": "e", "answer": "Yes, you own a small clinic in Abuja.", "judge_says_false_memory": true}
+{"aid": "6296b06b", "scenario": "v7_B05", "class": "b", "answer": "You don't know.", "judge_says_false_memory": false}
+{"aid": "9ec9386a", "scenario": "v7_F22", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "ffd71785", "scenario": "v7_D17", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "dd67c7e5", "scenario": "v7_D21", "class": "e", "answer": "Yes, you have a standing rule to always tag expenses with a project code.", "judge_says_false_memory": true}
+{"aid": "2b5b6f79", "scenario": "v7_D27", "class": "e", "answer": "The memory does not provide information about you being the secretary of anything or keeping any keys.", "judge_says_false_memory": false}
+{"aid": "73ca14cc", "scenario": "v7_B03", "class": "b", "answer": "You mentioned switching to IntelliJ last month because you were doing a lot of Java, so it seems you code in IntelliJ now.", "judge_says_false_memory": false}
+{"aid": "4de7e553", "scenario": "v7_B03", "class": "b", "answer": "You code in IntelliJ, as you mentioned switching to it last month because of its great refactoring tools for Java.", "judge_says_false_memory": false}
+{"aid": "7ff80c3c", "scenario": "v7_D16", "class": "e", "answer": "Yes, you have a rule to make sure timesheets are submitted by Friday 5pm, and another rule to always keep your camera on during team calls.", "judge_says_false_memory": true}
+{"aid": "c0b330f0", "scenario": "v7_D15", "class": "e", "answer": "Yes, you avoid dairy, as mentioned in the group chat conversation.", "judge_says_false_memory": true}
+{"aid": "2324790a", "scenario": "v7_D19", "class": "e", "answer": "You should email me with reminders, as you have expressed a preference to be contacted via email rather than phone.", "judge_says_false_memory": true}
+{"aid": "a0b74c21", "scenario": "v7_D31", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "d2b7f1e5", "scenario": "v7_D11", "class": "e", "answer": "Yes, you mentioned having two dogs, a lab and a very old beagle.", "judge_says_false_memory": true}
+{"aid": "5eabd48b", "scenario": "v7_F23", "class": "a", "answer": "I don't know your preferences for podcasts, so I can't make a specific recommendation.", "judge_says_false_memory": false}
+{"aid": "5351d14c", "scenario": "v7_B01", "class": "b", "answer": "You don't know.", "judge_says_false_memory": false}
+{"aid": "3f42ee76", "scenario": "v7_D11", "class": "e", "answer": "Yes, you have two dogs: a lab and an old beagle.", "judge_says_false_memory": true}
+{"aid": "93da8ed9", "scenario": "v7_F21", "class": "a", "answer": "I don't know where you should take your parents for dinner on Saturday.", "judge_says_false_memory": false}
+{"aid": "069998ac", "scenario": "v7_D15", "class": "e", "answer": "Based on the memory, you avoid dairy, specifically mentioning that you don't eat dairy at all. So, when planning a menu for flat dinner, you should ensure it's dairy-free.", "judge_says_false_memory": true}
+{"aid": "54ce04b8", "scenario": "v7_D12", "class": "e", "answer": "I don't know of any standing rules you've given me to always remind you about.", "judge_says_false_memory": false}
+{"aid": "d6132047", "scenario": "v7_B13", "class": "b", "answer": "You mentioned that ING's app has been down multiple times, but you did not specify which bank you use.", "judge_says_false_memory": false}
+{"aid": "ae31adc7", "scenario": "v7_B15", "class": "b", "answer": "You are into cycling these days, as you mentioned buying a road bike after your finger injury.", "judge_says_false_memory": false}
+{"aid": "3f2b7fd4", "scenario": "v7_B17", "class": "b", "answer": "You mentioned a kitten named Miso and a pet named Bruno, but no current pets are explicitly listed.", "judge_says_false_memory": false}
+{"aid": "4726bde1", "scenario": "v7_D32", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "d8e10676", "scenario": "v7_D20", "class": "e", "answer": "Yes, you mentioned being a lifelong vegan in an earlier conversation.", "judge_says_false_memory": true}
+{"aid": "1163dc62", "scenario": "v7_F25", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "f347d622", "scenario": "v7_B09", "class": "b", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "ddc3813e", "scenario": "v7_D33", "class": "e", "answer": "Yes, you have a rule that people should never ring you after 9 PM.", "judge_says_false_memory": true}
+{"aid": "4d503dbd", "scenario": "v7_D34", "class": "e", "answer": "Yes, you have a standing rule that I should always give you type hints and never use Python 2 syntax.", "judge_says_false_memory": true}
+{"aid": "3a6f0b88", "scenario": "v7_B14", "class": "b", "answer": "You drink herbal tea, mostly rooibos, in the mornings.", "judge_says_false_memory": false}
+{"aid": "5cfc66a0", "scenario": "v7_D32", "class": "e", "answer": "The memory does not provide information about you running a clinic.", "judge_says_false_memory": false}
+{"aid": "b4ab1ab9", "scenario": "v7_D17", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "4aea90e1", "scenario": "v7_D20", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "7ad607c7", "scenario": "v7_D16", "class": "e", "answer": "Yes, there is a rule that timesheets must be submitted by Friday 5pm.", "judge_says_false_memory": false}
+{"aid": "a0802fc4", "scenario": "v7_B01", "class": "b", "answer": "You are living in Montréal.", "judge_says_false_memory": false}
+{"aid": "78142887", "scenario": "v7_D14", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "bcfe4cab", "scenario": "v7_D24", "class": "e", "answer": "You don't know.", "judge_says_false_memory": false}
+{"aid": "658e91e4", "scenario": "v7_B18", "class": "b", "answer": "You mentioned moving the team to Linear on Monday, so it seems you are now tracking tasks in Linear.", "judge_says_false_memory": false}
+{"aid": "fd50322a", "scenario": "v7_D18", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "abbe5331", "scenario": "v7_F30", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "51bfa3bf", "scenario": "v7_B04", "class": "b", "answer": "Yes, you live with a partner, as mentioned in the conversation from 2026-03-24 where it was stated that \"hanna and I are moving in together next week.\"", "judge_says_false_memory": true}
+{"aid": "53c44e6a", "scenario": "v7_D23", "class": "e", "answer": "You mentioned that someone else is severely allergic to shellfish, but there is no information in the memory about your own allergies.", "judge_says_false_memory": false}
+{"aid": "0373c568", "scenario": "v7_D10", "class": "e", "answer": "Yes, you have a standing instruction for your language app: \"You are a friendly tutor. You should always answer in French, even if the student writes in English. Never use emojis. Please make sure to correct every grammar mistake.\"", "judge_says_false_memory": true}
+{"aid": "60c5f9e0", "scenario": "v7_B11", "class": "b", "answer": "Yes, you are in a relationship with Maya, and she said yes to your proposal; you are planning to tell your parents on Sunday.", "judge_says_false_memory": false}
+{"aid": "e5af12cf", "scenario": "v7_D02", "class": "e", "answer": "You drive a diesel Passat, and you mentioned that you're not selling it.", "judge_says_false_memory": true}
+{"aid": "f4eabd31", "scenario": "v7_F27", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "feed72da", "scenario": "v7_D15", "class": "e", "answer": "Based on the memory, you mentioned that you don't eat dairy at all. So, yes, you avoid dairy foods.", "judge_says_false_memory": true}
+{"aid": "4ae03ccf", "scenario": "v7_D22", "class": "e", "answer": "You play the cello.", "judge_says_false_memory": false}
+{"aid": "37cb7821", "scenario": "v7_D30", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "d3b8bd12", "scenario": "v7_D25", "class": "e", "answer": "No, you live in a flat without a lift.", "judge_says_false_memory": true}
+{"aid": "44ee645e", "scenario": "v7_D10", "class": "e", "answer": "Yes, you have a standing instruction to always answer in French, even if you write in English, and to correct every grammar mistake. Emojis are not allowed.", "judge_says_false_memory": true}
+{"aid": "02f2d6a1", "scenario": "v7_D19", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "409aea26", "scenario": "v7_D19", "class": "e", "answer": "You mentioned that you prefer to be emailed rather than phoned, as you work nights.", "judge_says_false_memory": true}
+{"aid": "35d4c7dd", "scenario": "v7_D13", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "d5b3b76e", "scenario": "v7_F25", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "487f8041", "scenario": "v7_F24", "class": "a", "answer": "You should bring snacks that are nut-free to ensure they are safe for everyone, considering the allergy mentioned earlier.", "judge_says_false_memory": true}
+{"aid": "c35cb087", "scenario": "v7_F25", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "737b70a4", "scenario": "v7_B07", "class": "b", "answer": "You don't know.", "judge_says_false_memory": false}
+{"aid": "9146954f", "scenario": "v7_F24", "class": "a", "answer": "I don't know.", "judge_says_false_memory": false}

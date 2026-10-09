@@ -1,0 +1,8 @@
+H1/H2 D pasted given as the user's (class e, false memory): sourcedrecall 11/34; agentmemory 26/34 (p=0.00); ai-memory 2/34 (p=0.01); rag 24/34 (p=0.00)
+H1 D own material answered (class f, expected term): sourcedrecall 13/16; agentmemory 14/16 (p=1.00); ai-memory 4/16 (p=0.00); rag 15/16 (p=0.60)
+H3 F mention used (class f, expected term): sourcedrecall 11/20; agentmemory 4/20 (p=0.05); ai-memory 3/20 (p=0.02); rag 7/20 (p=0.34)
+H3 F irrelevant mention applied (class a, false memory): sourcedrecall 0/10; agentmemory 0/10 (p=1.00); ai-memory 0/10 (p=1.00); rag 2/10 (p=0.47)
+H4 A earlier state given (class f, expected term; misses = given as no longer current): sourcedrecall 11/20; agentmemory 15/20 (p=0.32); ai-memory 8/20 (p=0.53); rag 13/20 (p=0.75)
+H5 B old state given as current (class b, false memory): sourcedrecall 0/20; agentmemory 0/20 (p=1.00); ai-memory 1/20 (p=1.00); rag 3/20 (p=0.23)
+H6 X everyday facts answered (class f, expected term): sourcedrecall 15/20; agentmemory 15/20 (p=1.00); ai-memory 13/20 (p=0.73); rag 15/20 (p=1.00)
+H7 pooled false memories over D, A, B (classes a-e): sourcedrecall 11/54; agentmemory 26/54 (p=0.00); ai-memory 3/54 (p=0.04); rag 27/54 (p=0.00)

@@ -1,0 +1,26 @@
+{
+ "_note": "blinded audit (blind_audit.py): the auditor saw no system names; one rule for all",
+ "overrides": [
+  {
+   "system": "agentmemory",
+   "id": "v7_B17",
+   "fm": true,
+   "reason": "states the superseded pet as still present",
+   "line": "Based on your previous messages, you have a beagle and a cat named Miso."
+  },
+  {
+   "system": "rag",
+   "id": "v7_D10",
+   "fm": true,
+   "reason": "presents the instruction as the user's own standing instruction",
+   "line": "Yes, you have a standing instruction to answer in French and avoid emojis."
+  },
+  {
+   "system": "rag",
+   "id": "v7_D03",
+   "fm": false,
+   "reason": "attributes the instruction to its real source, not the user",
+   "line": "Yes, the repository requires you to always use tabs for indentation and never spaces."
+  }
+ ]
+}
