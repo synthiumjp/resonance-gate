@@ -21,7 +21,7 @@ _CODE_LINE = re.compile(r"^\s*(?:Traceback \(most recent|File \"[^\"]+\", line \
                         r"[{}\[\]();]+\s*$|(?: {4}|\t)\S)")
 
 
-def prose_only(text):
+def prose_only(text, owner=None):
     """The turn without fenced code blocks and code / stack-trace lines
     (2026-10-05): a developer's message is often a sentence of prose and a
     pasted snippet, and the prose can carry a preference ("I always use
@@ -29,7 +29,7 @@ def prose_only(text):
     else goes too (see _drop_pasted)."""
     t = _FENCE.sub("\n", text or "")
     keep = [ln for ln in t.splitlines() if not _CODE_LINE.match(ln)]
-    t = _drop_pasted("\n".join(keep))
+    t = _drop_pasted("\n".join(keep), owner)
     return re.sub(r"[ \t]+", " ", t).strip()
 
 
@@ -153,6 +153,121 @@ _EVAL_Q = re.compile(r"^(?=[^\n]{0,100}\b(?:this|these|that|it)\b)(?:is|are|does
                      r"the writer|the author|written|wrote|like this)\b", re.I)
 
 
+# 2026-10-10 (held-out v7: the 10 pasted items missed had introductions on a
+# line of their own before a blank line, or after the paste, worded in ways
+# the patterns above do not list; second development set
+# cases_dev_pasted2.jsonl: those patterns found 6 of 40). Read the message's
+# shape instead: a short paragraph of the user's (before or after) and a
+# block. The block is someone else's when it is shaped like someone else's
+# text, or the user's paragraph says where it came from; it is the user's
+# when their paragraph claims it.
+_GREETING_LINE = re.compile(r"^\s*(?:hi|hello|hey|dear|to whom it (?:may )?concerns?|good (?:morning|afternoon|evening))\b"
+                            r"[^\n.,!]{0,40}(?:[.,!]|$)", re.I)
+_SIGNOFF_TAIL = re.compile(r"(?:^|\n)\s*(?:(?:kind |best |warm |many )?regards|thanks|thank you|cheers|best|"
+                           r"sincerely|yours(?: sincerely| faithfully| truly)?|love|xx+|-+\s*signed|signed)\b"
+                           r"[^\n]{0,40}(?:\n\s*[^\n]{1,40})?\s*$", re.I)
+_CHAT_LINE = re.compile(r"^\s*(?:\[?\d{1,2}[:/.]\d{1,2}[^\]\n]{0,25}\]?\s*[-–]?\s*[^:\n]{1,30}:|<[\w.-]{1,20}>\s|"
+                        r"[A-Z][A-Z .'’-]{1,25}:\s|"
+                        r"[A-Z][\w .'’-]{0,30},?\s+\d{1,2}:\d{2}\s?(?:[AaPp][Mm])?\s*$|"
+                        r"(?!(?:From|To|Sent|Subject|Cc|Bcc|Date|Re|Fwd|Note|Update|Edit|PS|P\.S)\b)"
+                        r"[A-Z][\w'’-]+(?: [A-Z][\w'’-]+)?:\s+\S)", re.M)
+_DOC_HEAD = re.compile(r"^\s*(?:(?-i:[A-Z][A-Z0-9&'’.,-]+(?:\s+[A-Z0-9&'’.,()-]+){1,8})\s*(?:[-–:][^\n]*)?$|"
+                       r"(?:posted by|u/\w+|[★☆]{3,}|verified (?:purchase|buyer)|\d+ people found)\b[^\n]*$|"
+                       r"(?:profile|about me|bio|summary|subject|from|to|section \d+|bylaw|notice|"
+                       r"thread \d|@\w+)\b[^\n]*$|"
+                       r"\[[^\]\n]{3,40}(?:export|transcript|log)\])", re.I | re.M)
+_RULE_LIST = re.compile(r"^\s*(?:\d+[.)]|[-*•])\s+(?:always|never|don'?t|do not|make sure|please|you must|"
+                        r"you should|no )\b", re.I | re.M)
+_CODE_COMMENT = re.compile(r"^\s*(?:#|//|/\*|\*)\s*\S", re.M)
+_FRAME_SOURCE = re.compile(
+    r"\b(?:sent|received|landed|showed up|turned up|came (?:in|through)|going around|forwarded|"
+    r"posted|shared|pasting|pasted|copying|copied|inherited)\b|"
+    r"\b(?:got|found|saw|spotted) (?:this|that|these|it)\b|(?<!\bi )\bwrote\b|"
+    r"(?:^\W*|\b(?:this|that|it|these|which)(?:'s|’s| is| was| are)?\s+(?:\w+\s+){0,3}|"
+    r"\b(?:" + _MAT2 + r")\s+)from (?:the|my|a|an|her|his|their|our|some|this|that)\b|"
+    r"\b(?:written|posted|sent|shared) by (?:a|an|the|my|her|his|their|some)\b|"
+    r"\bnot mine\b|^\W*(?:for )?context\b|\bcontext (?:below|above|first)\b|^\s*\^|\(\s*[\w\s'’]+['’]s [\w\s]+\)|"
+    r"\b(?:her|his|their|[\w-]+['’]s) (?:" + _MAT2 + r")\b|"
+    r"\b(?:second|2nd|next|last|final|other) (?:bit|part|half|go|page)\b|\brest of it\b", re.I)
+# naming the material ("the tripadvisor review", "this email"): an
+# introduction only after the block, or before it ending in a colon ("I
+# loved this article about rowing.\n\nI row every Sunday." is the user's)
+_FRAME_MAT = re.compile(r"\b(?:the|a|an|this|that|these|those) (?:[\w-]+ ){0,2}(?:" + _THEIRS + r")\b", re.I)
+_FRAME_OWN = re.compile(
+    _OWN_MARK.pattern + r"|\bwhat i wrote\b|\b(?:i )?wrote (?:this|it)\b|\b(?:that|it|this)(?:'?s| is) mine\b|"
+    r"\bi'?m (?:sending|posting|writing|submitting|about to send)\b|\b(?:about|going) to (?:send|post)\b|"
+    r"\b(?:going|goes) on my\b|\bfor my (?:own )?(?:site|page|profile|speech|blog)\b|\bmy (?:speech|poem|post|ad|letter|reply)\b",
+    re.I)
+
+
+# the user's paragraph is a request to the assistant or a question
+_ASKS = re.compile(r"\?\s*(?:[\w' ]{0,20})?$|^\W*(?:can|could|would|will|what|how|is|are|does|do|should|"
+                   r"tell|check|help|thoughts|translate|proofread|summari[sz]e|tidy|fix|make|write|draft|"
+                   r"reply|explain|rate|review)\b", re.I)
+# asking to improve a text: the user's own draft
+_IMPROVE = re.compile(r"\b(?:add|change|improve|sound|sounds|ok to send|okay to send|too \w+|tone|edit|"
+                      r"tweak|polish|better|work\b|flow|shorten|tighten|is it ok|does it read)\b", re.I)
+
+
+def _other_voice(block):
+    lines = [l for l in block.split("\n") if l.strip()]
+    if not lines:
+        return False
+    return bool(_GREETING_LINE.match(lines[0]) or _SIGNOFF_TAIL.search(block)
+                or len(_CHAT_LINE.findall(block)) >= 2 or _DOC_HEAD.search(lines[0])
+                or (len(lines) > 1 and _DOC_HEAD.search(lines[1]))
+                or len(_RULE_LIST.findall(block)) >= 2 or len(_CODE_COMMENT.findall(block)) >= 2)
+
+
+def _structure_span(text):
+    """-> (start, end) of a block someone else wrote, "own", or None, from
+    the message's paragraphs (see above)."""
+    paras = [m for m in re.finditer(r"[^\n](?:.|\n(?!\s*\n))*", text) if m.group(0).strip()]
+    if len(paras) < 2:
+        return None
+    short = lambda m: len(m.group(0).split()) <= 45 and m.group(0).count("\n") <= 2  # noqa: E731
+    head = paras[0] if short(paras[0]) else None
+    tail = paras[-1] if short(paras[-1]) else None
+    if not head and not tail:
+        return None
+    if head and tail and len(paras) == 2:
+        # two short paragraphs: the user's is the one that says where the
+        # other came from or that it is theirs, else the shorter
+        cue = lambda m: bool(_FRAME_SOURCE.search(m.group(0)) or _FRAME_OWN.search(m.group(0)))  # noqa: E731
+        ask = lambda m: bool(_ASKS.search(m.group(0).strip()))  # noqa: E731
+        if ask(head) != ask(tail):
+            head, tail = (head, None) if ask(head) else (None, tail)
+        elif cue(head) != cue(tail):
+            head, tail = (head, None) if cue(head) else (None, tail)
+        elif len(head.group(0)) <= len(tail.group(0)):
+            tail = None
+        else:
+            head = None
+    frame = " ".join(m.group(0) for m in (head, tail) if m)
+    start = paras[1].start() if head else paras[0].start()
+    end = paras[-2].end() if tail else paras[-1].end()
+    if end <= start:
+        return None
+    block = text[start:end]
+    # a head shaped like the pasted text's own first line (a review's title)
+    if head and _DOC_HEAD.search(head.group(0)) and not _FRAME_OWN.search(head.group(0)):
+        start, frame = paras[0].start(), (tail.group(0) if tail else "")
+    if _FRAME_OWN.search(_QUOTE_SPAN.sub(" ", frame)):
+        return "own"
+    named = ((tail is not None and _FRAME_MAT.search(tail.group(0)))
+             or (head is not None and _FRAME_MAT.search(head.group(0))
+                 and head.group(0).rstrip().endswith(":")))
+    if _FRAME_SOURCE.search(frame) or named:
+        return start, end
+    if _other_voice(block):
+        lines = [l for l in block.split("\n") if l.strip()]
+        if (lines and _GREETING_LINE.match(lines[0]) and _IMPROVE.search(frame)
+                and not _REPLYISH.search(frame)):
+            return "own"
+        return start, end
+    return None
+
+
 def _own_tail(text):
     """Where a closing remark of the user's own starts in `text` (after a
     paste): a last sentence that is a question or a reply request."""
@@ -163,9 +278,35 @@ def _own_tail(text):
     return len(text)
 
 
-def _paste_span(text):
+def _paste_span(text, owner=None):
     """(start, end) of the text the user pasted in from someone else, or
     None. Read from the introduction and the text's shape, not its person."""
+    # a chat log or transcript (two or more speaker or time-stamped lines),
+    # wherever it sits in the message
+    chat = list(_CHAT_LINE.finditer(text))
+    if len(chat) >= 2:
+        start = chat[0].start()
+        after = text[chat[-1].start():]
+        nl = re.search(r"\n\s*\n|\n(?=[^\n]*$)", after)
+        end = chat[-1].start() + (nl.start() if nl else len(after))
+        intro = text[:start]
+        if _FRAME_OWN.search(_QUOTE_SPAN.sub(" ", intro)):
+            return "own"
+        return start, end
+    # "^ that's from my landlord": what is above the caret line is pasted
+    car = re.search(r"(?m)^\s*[\^↑]+\s*\S", text)
+    if car and car.start() > 0:
+        if _FRAME_OWN.search(text[car.start():]):
+            return "own"
+        return 0, car.start()
+    # a letter addressed to the user by name ("Hi Thabo, Mr Eze here")
+    first = (owner or "").split()[0] if owner else ""
+    if first and re.match(rf"\s*(?:hi|hello|hey|dear|morning|evening)\s+{re.escape(first)}\b", text, re.I):
+        st = _structure_span(text)
+        return st if isinstance(st, tuple) else (0, len(text))
+    st = _structure_span(text)
+    if st is not None:
+        return st
     # a chat log ("[12/03, 18:22] Sasha: ...", "Dana Whitfield  10:42 AM")
     m = _CHAT.search(text)
     if m:
@@ -203,7 +344,8 @@ def _paste_span(text):
     for q in _QUOTE_SPAN.finditer(text):
         body = q.group(1) or q.group(2)
         if (len(body.split()) >= 5 and len(q.group(0)) < 0.8 * len(text.strip()) and _SAID.search(body)
-                and not re.search(r"\b(?:called|named|titled|says|said|reads|read)\W*$", text[:q.start()], re.I)
+                and not re.search(r"\b(?:called|named|titled)\W*$", text[:q.start()], re.I)
+                and not _OWN_MARK.search(text[:q.start()])
                 and not _SELF_QUOTE.search(text[:q.start()])):
             return q.start(), q.end()
     # text, a blank line, then a question about it ("is this bad advice?")
@@ -214,8 +356,8 @@ def _paste_span(text):
     return None
 
 
-def _drop_pasted(text):
-    sp = _paste_span(text or "")
+def _drop_pasted(text, owner=None):
+    sp = _paste_span(text or "", owner)
     if sp == "own":
         return text
     if sp:

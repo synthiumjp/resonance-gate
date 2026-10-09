@@ -434,7 +434,7 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
         for t in turns:
             text = str(t.get("content", "")).strip()[:1800]
             if text and _rgx_facts.turn_hash(text) not in cached_hashes:
-                todo.append(_prose_only(text))
+                todo.append(_prose_only(text, owner))
         if len(todo) > 1 and hasattr(ex, "prefetch"):
             ex.prefetch(todo)
         prev = None     # the assistant message before a user turn (rgx.fragments)
@@ -449,7 +449,7 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
             if h in cached_hashes:
                 n_skipped += 1
                 continue
-            ptext = _prose_only(text)
+            ptext = _prose_only(text, owner)
             if not ptext:
                 continue
             recs = ex.extract_turn(ptext, role=role, session=0, turn=ti,
@@ -610,9 +610,9 @@ def _message_of(conversation_id, said):
 # spaces, in any code you write for me." ran into the C++ that followed and
 # nothing was stored. The parser reads the prose only; the stored message
 # keeps the code for quoting.
-def _prose_only(text):
+def _prose_only(text, owner=None):
     from prose import prose_only
-    return prose_only(text)
+    return prose_only(text, owner)
 
 
 def _denied_lists():

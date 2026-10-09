@@ -168,3 +168,37 @@ def test_a_message_is_quoted_as_written_so_a_paste_after_a_blank_line_is_seen(pm
     block = pm.profile_context("Do I run marathons?")["block"]
     assert "[pasted in by Helen Brandt" in block
     assert '"I\'ve been running marathons' not in block
+
+
+# ---- held-out v7 (2026-10-10): pasted text read from the message's shape ----
+
+@pytest.mark.parametrize("text,owner,gone", [
+    ("ok so this landed in my inbox\n\nHi Priya,\n\nI have two kids of my own. Never leave bikes in the stairwell.\n\nRegards,\nGordon",
+     "Priya Shah", "two kids"),
+    ("lol look\n[10:42] Dev Anand: fyi I'm vegan so no pizza\n[10:43] Mei Ling: ugh fair", "Sam Lee", "vegan"),
+    ("Hi Thabo, Mr Eze here. I'm a retired teacher. Always pay on the 1st.\nThanks\n^ that's from my landlord. is that normal",
+     "Thabo Mokoena", "retired teacher"),
+    ("Hey Gideon, quick one. I'm a former Olympic rower and I have bad knees.", "Gideon Halloran", "bad knees"),
+    ("we stayed 3 nights. As a wheelchair user I always check the lifts first.\n\nthe tripadvisor review that convinced me",
+     "Cedric Lamont", "wheelchair"),
+    ("I am the CEO of Hartwell Foods and I approve this message.\n\nwho writes sign-offs like this?", "Nadia Haddad", "CEO"),
+    ("this thread is going around, tell me if its nonsense\n\n@dr_amira: Thread 1/4. I'm a cardiologist.", "Al Rees", "cardiologist"),
+])
+def test_pasted_text_found_from_the_messages_shape(text, owner, gone):
+    from prose import prose_only
+    assert gone not in prose_only(text, owner)
+
+
+@pytest.mark.parametrize("text,kept", [
+    ("Hi Tom, just to confirm I'll be at the dentist Thursday morning. I'm in the office from 11.\n\nshould I add anything?",
+     "dentist"),
+    ("letter i'm sending, is it too angry\n\nDear Mr Hale,\nThe boiler is broken. I'm 67 and have asthma.\n\nRegards,\nJoaquin",
+     "asthma"),
+    ("the quiet in the barn since Dad died\nI'm sixty-one and still I listen\n\nthoughts?", "sixty-one"),
+    ("Rock climbing was awesome! I was really proud of myself.\n\n[Shares a photo of the view from the top]", "proud"),
+    ("mypy gives `error: Incompatible return value type (got None)` on:\n\n\nI tend to put type hints on every function.",
+     "type hints"),
+])
+def test_the_users_own_text_is_kept_whatever_its_shape(text, kept):
+    from prose import prose_only
+    assert kept in prose_only(text, "Joaquin Delgado")

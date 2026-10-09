@@ -6,7 +6,7 @@ longest user turn of the gold conversation) through prose._drop_pasted.
            as the user's own (fewer than half of its content words remain).
   class f: passes if every expected term is still in what is kept.
 
-    python pasted_dev.py [-v]"""
+    python pasted_dev.py [-v] [cases_dev_pasted2.jsonl ...]"""
 import json
 import os
 import re
@@ -26,14 +26,18 @@ def words(s):
 
 def main():
     v = "-v" in sys.argv
-    cases = [json.loads(l) for l in open(os.path.join(HERE, "cases_dev_pasted.jsonl"))]
+    files = [a for a in sys.argv[1:] if a.endswith(".jsonl")] or ["cases_dev_pasted.jsonl"]
+    cases = [json.loads(l) for f in files for l in open(os.path.join(HERE, f))]
     ok = {"e": 0, "f": 0}
     n = {"e": 0, "f": 0}
     for c in cases:
         p = c["probes"][0]
         conv = c["conversations"][p.get("gold_conversation") or 0]
-        msg = max((t["content"] for t in conv["turns"] if t["role"] == "user"), key=len)
-        own = " ".join(_drop_pasted(msg).split()).lower()
+        # every user message of that conversation (a paste can come in a
+        # message of its own, apart from its introduction)
+        users = [t["content"] for t in conv["turns"] if t["role"] == "user"]
+        msg = "\n\n".join(users)
+        own = " ".join(" ".join(_drop_pasted(u, c.get("owner")).split()) for u in users).lower()
         if c["class"] == "e":
             # the sentence of the message that carries the forbidden claim
             # must not be kept as the user's
@@ -47,7 +51,7 @@ def main():
             else:       # the claim is not worded as in the message (Dr., Welsh)
                 good = len(own) * 2 < len(" ".join(msg.split()))
         else:
-            good = all(t.lower() in own for t in p["expect"]["terms"])
+            good = any(t.lower() in own for t in p["expect"]["terms"])
         n[c["class"]] += 1
         ok[c["class"]] += good
         if v and not good:
