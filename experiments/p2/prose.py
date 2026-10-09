@@ -92,7 +92,140 @@ def _first_person_heavy(text):
     return bool(words) and len(_FIRST.findall(text)) * 10 >= len(words)
 
 
+# 2026-10-09 (held-out v6: pasted claims and instructions given as the
+# user's 14/17; the marker fired on 3). Development set
+# bench/false_memory/cases_dev_pasted.jsonl (pasted_dev.py). Most text people
+# paste is in the first person, so whether it is the user's is read from the
+# introduction, never from the pasted words: it is theirs only when the
+# introduction says so ("my notes", "I wrote", "my own", "it's mine").
+_MAT2 = _MATERIAL + r"|cv|resume|bio|ad|advert|rota|sign|menu|blog|newsletter|chat|dm|slack|whatsapp|book"
+_OWN_MARK = re.compile(
+    r"\bmy own\b|\bI\s+(?:wrote|have written|'ve written|’ve written|drafted|jotted)\b|"
+    r"\bwrote (?:it |this )?myself\b|\bfor myself\b|\bit'?s mine\b|\bit’s mine\b|\bnote to self\b|"
+    r"\bit'?s me writing\b|\b(?:about|of) me\b|"
+    r"\bmy\s+(?:(?:last|own|latest|first|previous|earlier|old|new|rough)\s+)?(?:notes?|draft|journal|diary|bio|cv|resume|cover letter|essay|rules|reply|"
+    r"answer|summary|post|message|email)\b(?!['’])", re.I)
+# an introduction: someone else sent it, it comes from somewhere, the user
+# found it, or asks for it to be translated or corrected
+_RECEIVED = re.compile(
+    r"(?:^|(?<=[.!?]\s)|(?<=\n))(?:[\w'’ -]{0,30}\s)?"
+    r"(?:my|our|his|her|their|the|a|an)\s+(?:(?!(?:i|you|we|he|she|they|it|that|which|who)\b)[\w'’-]+\s+){0,3}?"
+    r"(?:just\s+|also\s+|then\s+)?(?:sent|texted|emailed|messaged|wrote|posted|forwarded|replied|shared)\b"
+    r"(?:\s+(?:me|us|to me|in the group|over|back))*"
+    r"(?:\s*:[ \t]*|\s*\n\s*|\s+(?:this|the following)(?:\s*:[ \t]*|\s*\n\s*|\s+(?=(?-i:[A-Z])|[\"“'(\[])))", re.I)
+_PASTING = re.compile(
+    r"\b(?:pasting|pasted|copying|copied|forwarding|forwarded)\s+(?:in\s+)?"
+    r"(?:my|the|a|an|his|her|their|our|this)\s+(?:[\w'’-]+\s+){0,2}?(?:" + _MAT2 + r")\b[^:\n]{0,30}[:\n]\s*", re.I)
+_FROM_SOURCE = re.compile(
+    r"(?:^|(?<=[.!?]\s)|(?<=\n))(?:(?:(?:a|an|the)\s+)?(?:[\w-]+\s+){0,2}?(?:" + _MAT2 + r")\s+)?"
+    r"from\s+(?!me\b|myself\b)[^:\n.?!]{1,40}?(?::[ \t]*|\s*\n)\s*", re.I)
+_TRANSFORM_INTRO = re.compile(
+    r"\b(?:translate|proofread|summari[sz]e|tl;?dr|rewrite|reword|paraphrase|tighten|"
+    r"shorten|tidy(?: up)?|clean up|help me (?:reply|respond|answer)|draft a reply|"
+    r"what (?:does|do) (?:this|these|it) (?:mean|say))\b[^:\n]{0,80}?(?::[ \t]*|\n\s*)", re.I)
+_FOUND = re.compile(r"(?:^|(?<=\n)|(?<=[,.;!?]\s))(?:i\s+)?(?:found|saw|came across|spotted|read|got|look at|"
+                    r"check out|have a look at|take a look at)\s+this\b"
+                    r"[^:\n]{0,60}(?::[ \t]*|\n\s*|$)", re.I)
+_OTHERS_MAT = re.compile(
+    r"^(?:[^\n]{0,40}\s)?(?:my|our|his|her|their)\s+[\w-]+['’]s\s+(?:[\w-]+\s+){0,2}?(?:" + _MAT2 +
+    r")\b[^:\n]{0,50}(?::[ \t]*|\n\s*)", re.I)
+_THEIRS = (r"e-?mails?|messages?|texts?|letters?|articles?|reviews?|ad|advert|job ad|listing|"
+           r"posting|newsletter|policy|contract|cv|resume|bio|guide|readme|blog|announcement")
+_MAT_COLON = re.compile(r"^(?:[^\s:.!?\n]+\s+){0,6}?(?:" + _THEIRS + r")\b(?:\s+[^\s:.!?\n]+){0,6}\s*:[ \t]*\n?",
+                        re.I)
+_CHAT = re.compile(r"^\s*\[\d{1,2}/\d{1,2}(?:/\d{2,4})?,?\s+\d{1,2}:\d{2}(?:\s?[AP]M)?\]\s*[^:\n]{1,30}:|"
+                   r"^\s*[A-Z][\w'’-]+(?:\s+[A-Z][\w'’-]+)?\s{1,3}\d{1,2}:\d{2}\s?(?:[AaPp][Mm])?\s*$",
+                   re.M)
+_QUOTE_SPAN = re.compile(r"(?:^|(?<=[\s(:,]))(?:[\"“]([^\"”\n]{20,})[\"”]|'([^'\n]{20,})')(?![\w])")
+# a quoted sentence someone said: first person or an instruction, not a title
+_SAID = re.compile(r"\b(?:I|I'm|I’m|I've|I’ve|my|me|we|our)\b|^\W*(?:always|never|don'?t|do not|please|"
+                   r"you must|you should)\b", re.I)
+_SELF_QUOTE = re.compile(r"\bI\s+(?:said|wrote|told\s+\w+|always say|keep saying)\b[^.?!]{0,20}$", re.I)
+_GREET_INLINE = re.compile(r"^(?:hi|hello|hey|dear)\s+(?:mr|mrs|ms|dr)?\.?\s*[A-Z][\w.'’-]*"
+                           r"(?:\s+[A-Z][\w.'’-]*)?\s*,", re.I)
+_SIGN_INLINE = re.compile(r"\b(?i:regards|thanks|cheers|best|sincerely|love|thank you|"
+                          r"best wishes)\s*,?\s+[A-Z][a-z]+\.?(?=\s*(?:\n|$|[a-z]))")
+_REPLYISH = re.compile(r"\b(?:repl(?:y|ies)|respond|what (?:do|should|can) i (?:say|write|tell)|"
+                       r"how (?:do|should) i (?:answer|respond))\b", re.I)
+_EVAL_Q = re.compile(r"^(?=[^\n]{0,100}\b(?:this|these|that|it)\b)(?:is|are|does|do|who|what|would|should|how|can)\b"
+                     r"[^\n]{0,80}(?:advice|true|legit|real|accurate|scam|fair|reasonable|believable|"
+                     r"correct|serious|sign-?offs?|phrase|idiom|mean|say about|tell about|the speaker|"
+                     r"the writer|the author|written|wrote|like this)\b", re.I)
+
+
+def _own_tail(text):
+    """Where a closing remark of the user's own starts in `text` (after a
+    paste): a last sentence that is a question or a reply request."""
+    m = re.search(r"(?:(?<=[.!?])|(?<=lol)|\n)\s*([^.!?\n]{2,120}\?|(?:what|any|how|thoughts|"
+                  r"ideas|should|can|could|is|does)\b[^.!?\n]{0,120})\s*$", text, re.I)
+    if m and (m.group(1)[:1].islower() or _OWN_LAST.match(m.group(1)) or _REPLYISH.search(m.group(1))):
+        return m.start(1)
+    return len(text)
+
+
+def _paste_span(text):
+    """(start, end) of the text the user pasted in from someone else, or
+    None. Read from the introduction and the text's shape, not its person."""
+    # a chat log ("[12/03, 18:22] Sasha: ...", "Dana Whitfield  10:42 AM")
+    m = _CHAT.search(text)
+    if m:
+        end = len(text)
+        para = re.search(r"\n\s*\n", text[m.start():])
+        if para:
+            end = m.start() + para.start()
+        return m.start(), end
+    for pat in (_PASTING, _RECEIVED, _OTHERS_MAT, _FROM_SOURCE, _TRANSFORM_INTRO, _FOUND, _MAT_COLON):
+        m = pat.search(text)
+        if not m or not text[m.end():].strip():
+            continue
+        # the clause next to the pasted text decides ("ignore my own bio,
+        # read this CV:" introduces someone else's)
+        intro = re.split(r"[.;!?]\s|,\s(?=\w+\s+(?:this|the|my|it)\b)", text[:m.end()])[-1]
+        if _OWN_MARK.search(intro):
+            return "own"
+        if pat is _MAT_COLON and re.search(r"\b(?:question|update|context|issue|problem)\b", intro, re.I):
+            continue
+        rest = text[m.end():]
+        q = _QUOTE_SPAN.match(rest.strip())
+        start = m.end()
+        return start, start + _own_tail(rest)
+    # a letter on one line, addressed to someone, signed by someone else,
+    # that the user asks how to answer
+    g = _GREET_INLINE.match(text)
+    if g:
+        s = _SIGN_INLINE.search(text)
+        end = s.end() if s else (text.find("\n\n") if "\n\n" in text else len(text))
+        after = text[end:]
+        if _REPLYISH.search(after) and not _OWN_MARK.search(after):
+            return 0, end
+        return "own" if _OWN_MARK.search(after) else None
+    # quoted sentences ("'I always eat breakfast at 6.' what does this mean")
+    for q in _QUOTE_SPAN.finditer(text):
+        body = q.group(1) or q.group(2)
+        if (len(body.split()) >= 5 and len(q.group(0)) < 0.8 * len(text.strip()) and _SAID.search(body)
+                and not re.search(r"\b(?:called|named|titled|says|said|reads|read)\W*$", text[:q.start()], re.I)
+                and not _SELF_QUOTE.search(text[:q.start()])):
+            return q.start(), q.end()
+    # text, a blank line, then a question about it ("is this bad advice?")
+    paras = [p for p in re.split(r"\n\s*\n", text.strip()) if p.strip()]
+    if len(paras) >= 2 and _EVAL_Q.match(paras[-1].strip()):
+        cut = text.rstrip().rfind(paras[-1].strip())
+        return 0, cut
+    return None
+
+
 def _drop_pasted(text):
+    sp = _paste_span(text or "")
+    if sp == "own":
+        return text
+    if sp:
+        s, e = sp
+        head, tail = text[:s].rstrip(), text[e:].strip()
+        return (head + ("\n\n" + tail if tail else "")) if (head or tail) else ""
+    return _drop_pasted_old(text)
+
+
+def _drop_pasted_old(text):
     lines = text.split("\n")
     # quoted reply lines and an email's header block are someone else's
     if any(l.lstrip().startswith(">") for l in lines[1:] + lines[:1]):

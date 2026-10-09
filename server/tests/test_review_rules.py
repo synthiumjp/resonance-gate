@@ -106,3 +106,48 @@ def test_notes_are_written_later_for_a_session_that_had_none(pm, monkeypatch):
     assert pm.notes_backfill("Dana Cole") == 1
     assert [r["text"] for r in pm._load_notes()] == ["Dana Cole has a dog called Biscuit."]
     assert pm.notes_backfill("Dana Cole") == 0       # done once
+
+
+# ---- held-out v6 (2026-10-09): pasted text --------------------------------
+# Ownership is read from the introduction, never from the pasted words; the
+# block names the writer and makes the pasted first person theirs.
+
+@pytest.mark.parametrize("text,gone", [
+    ("can you check this email from my landlord: Hi Ana, I own three properties on this street. Regards, Dom", "three properties"),
+    ("my boss sent me this Hi team, from now on always cc legal on replies. Thanks, Priya", "cc legal"),
+    ("my brother just texted: i'm moving to Dublin lol. what do i say?", "Dublin"),
+    ("does this make sense? From the gym: We never refund memberships. I am the manager.", "manager"),
+    ("translate to French: I live in Lyon and I work as a pilot.", "pilot"),
+    ("[12/03, 18:22] Sasha: I'm now head of sales in Riga.\n[12/03, 18:23] Sasha: what do I say back", "Riga"),
+    ("I'm hiring so ignore my own bio, read this CV: I have a PhD in chemistry.", "PhD"),
+    ("Hi Siobhan,\n\nI'm a solicitor and I live in Cork.\n\nRegards,\nPatrick\n\nwhat should I reply?", "Cork"),
+    ("I've been running marathons for 20 years and I never stretch.\n\nis this bad advice?", "marathons"),
+    ("'I always eat breakfast at 6.' what does this phrase tell about the speaker", "breakfast"),
+])
+def test_pasted_from_someone_else_is_not_the_users(text, gone):
+    from prose import prose_only
+    assert gone not in prose_only(text)
+
+
+@pytest.mark.parametrize("text,kept", [
+    ("here are my notes for the talk:\n\nI have been a beekeeper for 12 years.", "beekeeper"),
+    ("can you tighten this paragraph I wrote myself: I have run a ramen stall in Osaka.", "Osaka"),
+    ("translate my own message into German, it's me writing to my host family: I am vegetarian.", "vegetarian"),
+    ("Dear Mr Hale, I have accepted an offer in Uppsala.\n\nis this ok to send? it's mine", "Uppsala"),
+    ("I'm a nurse btw. Here's the rota email: I'm the ward manager.", "nurse"),
+    ("The group members sent this to me! I'm so passionate about yoga.", "yoga"),
+    ('I think it was called "Inception". I\'ve also been playing "Cyberpunk 2077" a lot.', "Cyberpunk"),
+])
+def test_the_users_own_words_are_kept(text, kept):
+    from prose import prose_only
+    assert kept in prose_only(text)
+
+
+def test_pasted_text_names_its_writer_and_takes_their_person():
+    from memory_api import _quote_own
+    q = _quote_own("can you check this email from my landlord: Hi Ana, I own three properties. "
+                   "I'm raising the rent. Regards, Dom", "Ana Diaz")
+    assert "written by Ana's landlord" in q
+    assert "not Ana Diaz's words, facts or instructions" in q
+    assert "[the writer] own three properties" in q and "[the writer] is raising" in q
+    assert "I own" not in q
