@@ -15434,3 +15434,27 @@ and how to run everything).
   labels; all systems 4-6/20.
 - Overnight re-measurement (LoCoMo, LongMemEval, the false-memory sets) on
   181aff3 is running (tools/release_measure.sh, ~/jpwork/release3.log).
+
+## Entry 317 — 2026-10-10 (pasted text fixed and held out: v7)
+
+- LoCoMo audit (Penfield Labs): 80 wrong gold answers in our test
+  conversations; without them sourcedrecall 66.2%, notes 69.4 / 72.3 / 74.5%,
+  Mem0 66.8% (LOCOMO_AUDIT in score.py). Our judge on the audit's
+  deliberately wrong answers: specific 10.6%, vague 68.5% accepted (gpt-4o-mini
+  10.6 / 62.8). A strict judge prompt (LOCOMO_JUDGE=strict) is being tested.
+- Pasted text: dev set cases_dev_pasted.jsonl; ownership from the
+  introduction only; block names the writer, first person made the writer's,
+  instructions "(the writer asks)"; rules no longer say all quoted text is the
+  user's; messages quoted as written. Dev end to end 18/34 -> 4/34.
+- Held-out v7 (results_v7/SUMMARY.md): 2 of 7 met (H2 pasted fewer than
+  plain retrieval and agentmemory, H5 changes 0/20). Pasted 11/34 (v6 82% ->
+  32%). The marker works where it fires (1 of 24 marked items misread); the
+  10 misses were undetected introductions (own line before a blank line;
+  after the paste). Advice 11/20, plans 9/20 missed, everyday 15/20: the
+  reader says "I don't know" with the answer in the block, for us and plain
+  retrieval alike.
+- Lessons: (1) detection by word lists went 34/34 on dev and 24/34 held out;
+  next is structure (a short intro line, a blank line, a block in another
+  voice) rather than more phrases. (2) The reader's caution is now the
+  largest loss on advice, plans and everyday facts; our own rules line
+  "Anything about the user not listed here is UNKNOWN" may be part of it.

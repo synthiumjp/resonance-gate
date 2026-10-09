@@ -372,6 +372,16 @@ retrieval 19/34), own items answered 13/16 both. Elsewhere 2 of 5,882
 LoCoMo messages changed (a film quote) and 1 development message. The
 held-out number is v7's (`docs/PREREG_HELDOUT_V7.md`).
 
+Held out (v7, `bench/false_memory/results_v7/SUMMARY.md`): pasted claims or
+instructions given as the user's 11/34 (v6 82%, now 32%; plain retrieval
+24/34, agentmemory 26/34, p<0.01 each), own material 13/16. The marker fired
+on 24 of the 34 and the reader took a marked item for the user's once; 10
+were never detected (introduction on its own line before a blank line, 6;
+introduction only after the paste, 4), worded in ways the rules do not list.
+2 of the user's own items were wrongly marked. Missed the pre-registered
+4/34. The presentation works; detection by word lists does not generalise
+far enough.
+
 ## Tried and refuted
 
 Kept here with their numbers, because a rule that failed is part of the

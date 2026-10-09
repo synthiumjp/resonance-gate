@@ -74,8 +74,8 @@ from their errors, so they are not held out (that is v5, below). The
 projects rows are a trade-off: sourcedrecall keeps a project's facts in that
 project, so it never offers another project's fact as true there; most of
 agentmemory's project false memories are another project's fact. These sets
-hold no pasted text; on the held-out set v6, which does, sourcedrecall had
-no fewer false memories than the others (below).
+hold no pasted text; on the held-out sets with pasted text, v6 and v7, see
+below.
 
 A pre-registered held-out set (v5: 120 scenarios nobody working on the
 system had read, hypotheses fixed beforehand, run once): old state given as
@@ -105,6 +105,23 @@ used in 3 of 15 answers (plain retrieval 2); in every miss the reader said
 it did not know, following the shared instruction to do so. A plan
 mentioned later was taken to mean the earlier state had ended in 4 of 20
 (others 4 to 6). Everything is in `bench/false_memory/results_v6/SUMMARY.md`.
+
+Pasted text was then changed (whose text it is read from the introduction,
+the writer named in the block, the rules no longer calling quoted text the
+user's) and tested on a third pre-registered held-out set (v7: 140
+scenarios, run once on 2026-10-10, all four systems). A claim or instruction
+inside pasted material was given as the user's in 11 of 34 (32%, from 82%
+on v6), against plain retrieval's 24 and agentmemory's 26 (both p<0.01);
+ai-memory 2, again by keeping only first lines (it answered 4 of 16 of the
+user's own pasted material). Where the "pasted in" marker fired the reader
+almost never took the text for the user's; the 10 it missed had
+introductions worded in ways the rules do not cover. Old state given as
+current 0 of 20. Advice: the earlier mention used in 11 of 20 (plain
+retrieval 7), none of 10 irrelevant mentions applied. Five of seven
+hypotheses missed, including the 4-of-34 target for pasted text; in the
+advice, plan and everyday parts most misses were the reader saying it did
+not know with the answer in front of it. Everything is in
+`bench/false_memory/results_v7/SUMMARY.md`.
 
 LoCoMo (conversations 2-9, 1,307 questions), against Mem0, with the same
 local reader and judge:
@@ -178,8 +195,8 @@ true". Asked whether Dana is vegan, plain retrieval's top result is the
 assistant's own guess ("Since you're vegan..."); sourcedrecall returns
 Dana's messages, none of which says so. A pasted email's "Always copy
 legal on every reply" is shown as pasted, not as Dana's words, and does not
-become a standing instruction (on the held-out set v6 the pasted marker
-often did not fire, and the reader ignored it when it did; see above).
+become a standing instruction (on held-out sets the marker fired for most
+pasted text but not all; see above).
 
 ## What it does
 
@@ -205,12 +222,13 @@ often did not fire, and the reader ignored it when it did; see above).
   only.
 - Memory about a project stays with that project. Standing instructions
   ("never add comments to my code") lead every session.
-- Pasted text is open. The parser tries not to store a pasted claim or
-  instruction as your fact or your standing instruction (on the held-out
-  set v6, none of the 14 it got wrong had been stored that way), but the
-  message is still shown to the assistant, the "pasted in" marker fired on
-  only 3 of those 14, and the reader took a pasted claim or instruction
-  for yours in 14 of 17.
+- Text you paste in from someone else (an email, a chat, a document) is
+  shown to the assistant as theirs, with the writer named, when the
+  introduction says where it came from ("this email from my landlord", "my
+  boss sent me this", "translate this"). On the held-out set v7 that worked
+  for 24 of 34 pasted items; the other 10 were not recognised and a pasted
+  claim or instruction was taken for yours (11 of 34 in all, against 24 for
+  plain retrieval).
 - Sessions are stored automatically in Claude Code. Hooks for Codex CLI,
   Gemini CLI and Cursor are included but have not yet been tested inside
   those apps. A ChatGPT or Claude.ai data export can be imported.
