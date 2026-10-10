@@ -146,7 +146,7 @@ def test_the_users_own_words_are_kept(text, kept):
 def test_pasted_text_names_its_writer_and_takes_their_person():
     from memory_api import _quote_own
     q = _quote_own("can you check this email from my landlord: Hi Ana, I own three properties. "
-                   "I'm raising the rent. Regards, Dom", "Ana Diaz")
+                   "I'm raising the rent. Regards, Dom", "Ana Diaz", "What did my landlord say?")
     assert "written by Ana's landlord" in q
     assert "not Ana Diaz's words, facts or instructions" in q
     assert "[the writer] own three properties" in q and "[the writer] is raising" in q
@@ -156,7 +156,7 @@ def test_pasted_text_names_its_writer_and_takes_their_person():
 def test_an_instruction_in_pasted_text_is_the_writers():
     from memory_api import _quote_own
     q = _quote_own("Hi Siobhan,\n\nI'm a solicitor. Please always send documents as PDF.\n\n"
-                   "Regards,\nPatrick\n\nwhat should I reply?", "Siobhan Doyle")
+                   "Regards,\nPatrick\n\nwhat should I reply?", "Siobhan Doyle", "What did Patrick want?")
     assert "(the writer asks) Please always send documents as PDF" in q
     assert q.endswith('"what should I reply?"')
 
@@ -202,3 +202,37 @@ def test_pasted_text_found_from_the_messages_shape(text, owner, gone):
 def test_the_users_own_text_is_kept_whatever_its_shape(text, kept):
     from prose import prose_only
     assert kept in prose_only(text, "Joaquin Delgado")
+
+
+
+# 2026-10-11 (held-out v8): unless the question names where pasted text came
+# from, the writer's sentences about themselves and their general rules are
+# left out; dates, times, prices and places stay
+@pytest.mark.parametrize("q,shown", [
+    ("Do I own any properties?", False), ("Do I have any rules for my emails?", False),
+    ("What did my landlord say about rent?", True), ("When does Dom want the rent?", True),
+    ("what did that email say?", True),
+])
+def test_the_writers_own_details_are_shown_only_when_asked_about(q, shown):
+    from memory_api import _quote_own
+    out = _quote_own("can you check this email from my landlord: Hi Ana, I own three properties. "
+                     "Always pay by bank transfer. Rent is due on the 1st. Regards, Dom", "Ana Diaz", q)
+    assert ("own three properties" in out) is shown
+    assert ("pay by bank transfer" in out) is shown
+    assert "due on the 1st" in out
+    assert "not Ana Diaz's words, facts or instructions" in out
+
+
+@pytest.mark.parametrize("pasted,kept,dropped", [
+    ("I'm a coeliac so I always use gluten-free stock. Simmer for 2 hours.", "Simmer for 2 hours", "coeliac"),
+    ("Please always use British spelling. Do not use semicolons.", "", "semicolons"),
+    ("You're a pregnant solo traveller. The northern route is quieter.", "northern route", "pregnant"),
+    ("Never park on the verge. Bins must be out by 7am on Mondays.", "7am on Mondays", "verge"),
+    ("Do not leave before 9.30 on weekdays.", "9.30 on weekdays", None),
+])
+def test_impersonal_keeps_facts_and_drops_the_writers_self_and_rules(pasted, kept, dropped):
+    from memory_api import _impersonal
+    out, n = _impersonal(pasted)
+    assert kept in out
+    if dropped:
+        assert dropped not in out and n

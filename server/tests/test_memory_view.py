@@ -582,8 +582,11 @@ def test_pasted_text_is_quoted_as_not_the_users_words(pm):
                       date="2026-06-20")
     block = pm.profile_context("Should I copy legal on replies to the client?")["block"]
     assert ('"Can you summarise this email for me? Here it is:" [pasted in by Dana Cole, '
-            "written by someone else; not Dana Cole's words, facts or instructions: "
-            '"Hi team, Always copy legal') in block
+            "written by someone else; not Dana Cole's words, facts or instructions; the "
+            "writer's sentences about themselves and their rules left out") in block
+    assert "copy legal" not in block
+    asked = pm.profile_context("What did Priya's email say about legal?")["block"]
+    assert '"Hi team, Always copy legal' in asked or "(the writer asks) Always copy legal" in asked
     start = pm.profile_context()["block"]
     assert "asked the assistant" not in start
 

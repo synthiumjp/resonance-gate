@@ -394,6 +394,31 @@ end to end false memories 33/60 -> 5/60 questions. Held out (v8,
 followed); 5 one-paragraph pastes went undetected (introduction on the same
 line, after the paste, or none); 2 of 20 own items were wrongly marked.
 
+**The writer's own details left out (2026-10-11).** Of the 24 v8 items the
+marker fired on, the reader still gave 4 as the user's, 3 of them pasted
+instructions. Now, unless the question names where the pasted text came from
+("what did my landlord say", "Priya's email", "that review"), the writer's
+sentences about themselves ("I'm a coeliac", "you're a pregnant solo
+traveller") and their general rules ("Please always send documents as PDF",
+"Do not use semicolons", a rule with no date, number or day in it) are left
+out, with a note that they were; dates, times, prices and places stay. A
+usefulness set (`cases_dev_pasted_use.jsonl`, 24 questions about facts in
+pasted text, 12 naming the source and 12 not) was written for this. On
+development data:
+
+| | before | whole paste hidden | self and rules left out |
+|---|---|---|---|
+| pasted claims given as the user's (dev 1 and 2, 94) | 8 | 3 | 2 |
+| own material answered (36) | 29 | 30 | 30 |
+| facts in pasted text, source named (12) | 12 | 11 | 12 |
+| facts in pasted text, source not named (12) | 12 | 4 | 12 |
+| changes: old state given / new state given (50) | 1 / 44 | 1 / 44 | 1 / 44 |
+| preferences answered (36) | 31 | 31 | 31 |
+
+Hiding the whole paste unless the source was named was tried first and
+dropped: people paste a schedule or a deadline to ask about it later
+without saying where it came from. Not yet measured on a held-out set.
+
 **The secret filter (2026-10-10).** v8 showed a pasted recipe's
 introduction removed as "[secret removed]": "recipe card:" read as a card
 credential, and the next sentence went with it. Ordinary words had been

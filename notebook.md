@@ -15474,3 +15474,15 @@ and how to run everything).
 - Secret filter false positives (found via v8): 18 of 7,480 ordinary
   messages lost text ("recipe card:", "pass it on", "I code in Swift", "my
   login is slow"); now 0, all secret tests pass.
+
+## Entry 319 — 2026-10-11 (pasted text: the writer's own details left out)
+
+- Hiding the whole paste unless the question names its source: dev false
+  memories 8 -> 3 of 94, but a new usefulness set (24 questions about facts
+  in pasted text) fell 24 -> 15, unnamed questions 12 -> 4. Dropped.
+- All 5 removed false memories came from the writer's sentences about
+  themselves or from general always/never/do-not rules; none of the 24
+  useful answers sat in such a sentence. Kept: those sentences left out
+  unless the source is named. Dev: false memories 8 -> 2 of 94, own 29 -> 30
+  of 36, usefulness 24/24, changes and preferences unchanged. 1,309 tests
+  pass. Held-out measurement needs a new set (v9).

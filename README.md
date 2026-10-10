@@ -249,9 +249,11 @@ pasted text but not all; see above).
   shown to the assistant as theirs, with the writer named, when the
   introduction says where it came from ("this email from my landlord", "my
   boss sent me this", "translate this") or the pasted text is shaped like
-  someone else's (a letter, a chat log, a review). On the newest held-out
-  set (v8) a pasted claim or instruction was still taken for yours in 9 of
-  40 (plain retrieval 16).
+  someone else's (a letter, a chat log, a review). Unless you ask about
+  that text by its source, the writer's sentences about themselves and their
+  general rules are left out; dates, times and places stay. On the newest
+  held-out set (v8, before that last change) a pasted claim or instruction
+  was still taken for yours in 9 of 40 (plain retrieval 16).
 - Sessions are stored automatically in Claude Code. Hooks for Codex CLI,
   Gemini CLI and Cursor are included but have not yet been tested inside
   those apps. A ChatGPT or Claude.ai data export can be imported.
