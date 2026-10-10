@@ -1,6 +1,9 @@
-# Pre-registration: held-out set v8 (draft for review)
+# Pre-registration: held-out set v8
 
-Written before set v8 exists. Its purpose is to test, once and on
+Approved by JP on 2026-10-10 ("Keep going", in reply to the request to
+review it); this is the version shown, committed before the set was
+written. The code is frozen at this commit until the run. Written before
+set v8 exists. Its purpose is to test, once and on
 conversations no one working on the system has read, the change to how
 pasted text is detected made after held-out v7
 (`bench/false_memory/results_v7/SUMMARY.md`), with checks that it takes
@@ -20,7 +23,7 @@ nothing away elsewhere. The result is published whatever it is.
 - Second development set `cases_dev_pasted2.jsonl` (60, written by an agent
   without the rules, introductions varied on purpose): detection without a
   model 6/40 -> 37/40 pasted items removed, own items kept 15/20 -> 19/20;
-  end to end under the v7 protocol, false memories 33 -> 5, own material
+  end to end under the v7 protocol, false memories 33/60 -> 5/60 questions, own material
   answered 13/20 -> 16/20. First development set unchanged (3/34, 13/16).
 - A reworded rule on when the reader should say "I don't know" was tried
   and refuted on development data (22f45bf, reverted); nothing else changed.
