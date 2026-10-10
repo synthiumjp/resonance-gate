@@ -151,17 +151,8 @@ _ADVICE_RULE = ("This is a request for advice: fit it to what the user said "
 # were still "I don't know": the reader read "anything about the user not
 # listed here is UNKNOWN: say you don't know" as a reason not to advise. For
 # a request for advice that sentence becomes this one.
-# 2026-10-10 (held-out v7): with the answer in the block, the reader said "I
-# don't know" in 9 of 9 advice misses, 7 of 9 plan misses and 3 of 5
-# everyday ones (plain retrieval the same). The rule now says when to
-# refuse rather than only that it may; and a plan is not a change (the v7
-# plan misses were refusals beside a later plan).
-_UNKNOWN = ("Use any line that answers the question, even in other words, "
-            "and say which. Anything about the user not listed here is "
-            "unknown: say you don't know only when no line bears on the "
-            "question, and do not guess. A plan or a possibility in a later "
-            "line (\"might\", \"thinking of\", \"next month\") does not "
-            "change an earlier fact until a line says it happened.")
+_UNKNOWN = ("Anything about the user not listed here is UNKNOWN: say you "
+            "don't know rather than guessing.")
 _UNKNOWN_ADVICE = ("Give the advice asked for; facts about the user not "
                    "listed here are unknown, so do not assume them.")
 

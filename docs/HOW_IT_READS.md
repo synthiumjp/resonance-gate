@@ -384,6 +384,18 @@ far enough.
 
 ## Tried and refuted
 
+**Telling the reader when to refuse (2026-10-10).** Held-out v7's advice,
+plan and everyday misses were mostly "I don't know" with the answer in the
+block. The rules sentence "Anything about the user not listed here is
+UNKNOWN: say you don't know rather than guessing" was replaced by "Use any
+line that answers the question, even in other words, and say which ... say
+you don't know only when no line bears on the question", with "a plan or a
+possibility in a later line does not change an earlier fact until a line
+says it happened". Seven development sets under the v7 reader instruction:
+nothing answered more (advice 20/24, paraphrase 59/64, preferences 31/36,
+decisions 5/10, all unchanged), false memories up by one or two on three
+sets (changes 1 -> 2 and 3 -> 4, pasted 3 -> 5). Reverted.
+
 Kept here with their numbers, because a rule that failed is part of the
 evidence.
 
