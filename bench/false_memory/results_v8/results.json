@@ -1,0 +1,1073 @@
+{
+ "seed": 20261002,
+ "bootstrap_reps": 10000,
+ "judge_model": "qwen3-14b-a8cc1361.gguf",
+ "systems": {
+  "sourcedrecall": {
+   "ingest_cost": {
+    "messages": 1092,
+    "model_calls": 0,
+    "seconds": 218.4,
+    "calls_per_message": 0.0,
+    "seconds_per_message": 0.2,
+    "scenarios_with_error": 0
+   },
+   "views": {
+    "lines": {
+     "all": {
+      "false_memory_all": {
+       "rate": 0.45,
+       "lo": 0.31666666666666665,
+       "hi": 0.5833333333333334,
+       "n": 60,
+       "k": 27
+      },
+      "false_memory_a": null,
+      "false_memory_b": {
+       "rate": 0.7,
+       "lo": 0.5,
+       "hi": 0.9,
+       "n": 20,
+       "k": 14
+      },
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": {
+       "rate": 0.325,
+       "lo": 0.175,
+       "hi": 0.475,
+       "n": 40,
+       "k": 13
+      },
+      "control_recall": {
+       "rate": 0.8,
+       "lo": 0.675,
+       "hi": 0.925,
+       "n": 40,
+       "k": 32
+      },
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": {
+       "rate": 0.65,
+       "lo": 0.45,
+       "hi": 0.85,
+       "n": 20,
+       "k": 13
+      }
+     },
+     "heldout": {
+      "false_memory_all": null,
+      "false_memory_a": null,
+      "false_memory_b": null,
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": null,
+      "control_recall": null,
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": null
+     }
+    },
+    "context": {
+     "all": {
+      "false_memory_all": {
+       "rate": 0.5166666666666667,
+       "lo": 0.38333333333333336,
+       "hi": 0.6333333333333333,
+       "n": 60,
+       "k": 31
+      },
+      "false_memory_a": null,
+      "false_memory_b": {
+       "rate": 0.8,
+       "lo": 0.6,
+       "hi": 0.95,
+       "n": 20,
+       "k": 16
+      },
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": {
+       "rate": 0.375,
+       "lo": 0.225,
+       "hi": 0.525,
+       "n": 40,
+       "k": 15
+      },
+      "control_recall": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 40,
+       "k": 40
+      },
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": {
+       "rate": 0.9,
+       "lo": 0.75,
+       "hi": 1.0,
+       "n": 20,
+       "k": 18
+      }
+     },
+     "heldout": {
+      "false_memory_all": null,
+      "false_memory_a": null,
+      "false_memory_b": null,
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": null,
+      "control_recall": null,
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": null
+     }
+    },
+    "answer": {
+     "all": {
+      "false_memory_all": {
+       "rate": 0.18333333333333332,
+       "lo": 0.1,
+       "hi": 0.2833333333333333,
+       "n": 60,
+       "k": 11
+      },
+      "false_memory_a": null,
+      "false_memory_b": {
+       "rate": 0.1,
+       "lo": 0.0,
+       "hi": 0.25,
+       "n": 20,
+       "k": 2
+      },
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": {
+       "rate": 0.225,
+       "lo": 0.1,
+       "hi": 0.35,
+       "n": 40,
+       "k": 9
+      },
+      "control_recall": {
+       "rate": 0.85,
+       "lo": 0.725,
+       "hi": 0.95,
+       "n": 40,
+       "k": 34
+      },
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": {
+       "rate": 0.75,
+       "lo": 0.55,
+       "hi": 0.9,
+       "n": 20,
+       "k": 15
+      }
+     },
+     "heldout": {
+      "false_memory_all": null,
+      "false_memory_a": null,
+      "false_memory_b": null,
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": null,
+      "control_recall": null,
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": null
+     }
+    }
+   },
+   "views_audited": {
+    "lines": {
+     "all": {
+      "false_memory_all": {
+       "rate": 0.45,
+       "lo": 0.31666666666666665,
+       "hi": 0.5833333333333334,
+       "n": 60,
+       "k": 27
+      },
+      "false_memory_a": null,
+      "false_memory_b": {
+       "rate": 0.7,
+       "lo": 0.5,
+       "hi": 0.9,
+       "n": 20,
+       "k": 14
+      },
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": {
+       "rate": 0.325,
+       "lo": 0.175,
+       "hi": 0.475,
+       "n": 40,
+       "k": 13
+      },
+      "control_recall": {
+       "rate": 0.8,
+       "lo": 0.675,
+       "hi": 0.925,
+       "n": 40,
+       "k": 32
+      },
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": {
+       "rate": 0.65,
+       "lo": 0.45,
+       "hi": 0.85,
+       "n": 20,
+       "k": 13
+      }
+     },
+     "heldout": {
+      "false_memory_all": null,
+      "false_memory_a": null,
+      "false_memory_b": null,
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": null,
+      "control_recall": null,
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": null
+     }
+    },
+    "context": {
+     "all": {
+      "false_memory_all": {
+       "rate": 0.5166666666666667,
+       "lo": 0.38333333333333336,
+       "hi": 0.6333333333333333,
+       "n": 60,
+       "k": 31
+      },
+      "false_memory_a": null,
+      "false_memory_b": {
+       "rate": 0.8,
+       "lo": 0.6,
+       "hi": 0.95,
+       "n": 20,
+       "k": 16
+      },
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": {
+       "rate": 0.375,
+       "lo": 0.225,
+       "hi": 0.525,
+       "n": 40,
+       "k": 15
+      },
+      "control_recall": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 40,
+       "k": 40
+      },
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": {
+       "rate": 0.9,
+       "lo": 0.75,
+       "hi": 1.0,
+       "n": 20,
+       "k": 18
+      }
+     },
+     "heldout": {
+      "false_memory_all": null,
+      "false_memory_a": null,
+      "false_memory_b": null,
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": null,
+      "control_recall": null,
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": null
+     }
+    },
+    "answer": {
+     "all": {
+      "false_memory_all": {
+       "rate": 0.18333333333333332,
+       "lo": 0.1,
+       "hi": 0.2833333333333333,
+       "n": 60,
+       "k": 11
+      },
+      "false_memory_a": null,
+      "false_memory_b": {
+       "rate": 0.1,
+       "lo": 0.0,
+       "hi": 0.25,
+       "n": 20,
+       "k": 2
+      },
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": {
+       "rate": 0.225,
+       "lo": 0.1,
+       "hi": 0.35,
+       "n": 40,
+       "k": 9
+      },
+      "control_recall": {
+       "rate": 0.85,
+       "lo": 0.725,
+       "hi": 0.95,
+       "n": 40,
+       "k": 34
+      },
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": {
+       "rate": 0.75,
+       "lo": 0.55,
+       "hi": 0.9,
+       "n": 20,
+       "k": 15
+      }
+     },
+     "heldout": {
+      "false_memory_all": null,
+      "false_memory_a": null,
+      "false_memory_b": null,
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": null,
+      "control_recall": null,
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": null
+     }
+    }
+   }
+  },
+  "rag": {
+   "ingest_cost": {
+    "messages": 1092,
+    "model_calls": 728,
+    "seconds": 3.2,
+    "calls_per_message": 0.667,
+    "seconds_per_message": 0.003,
+    "scenarios_with_error": 0
+   },
+   "views": {
+    "lines": {
+     "all": {
+      "false_memory_all": {
+       "rate": 0.5333333333333333,
+       "lo": 0.4,
+       "hi": 0.6666666666666666,
+       "n": 60,
+       "k": 32
+      },
+      "false_memory_a": null,
+      "false_memory_b": {
+       "rate": 0.65,
+       "lo": 0.45,
+       "hi": 0.85,
+       "n": 20,
+       "k": 13
+      },
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": {
+       "rate": 0.475,
+       "lo": 0.325,
+       "hi": 0.625,
+       "n": 40,
+       "k": 19
+      },
+      "control_recall": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 40,
+       "k": 40
+      },
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": {
+       "rate": 0.85,
+       "lo": 0.7,
+       "hi": 1.0,
+       "n": 20,
+       "k": 17
+      }
+     },
+     "heldout": {
+      "false_memory_all": null,
+      "false_memory_a": null,
+      "false_memory_b": null,
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": null,
+      "control_recall": null,
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": null
+     }
+    },
+    "answer": {
+     "all": {
+      "false_memory_all": {
+       "rate": 0.3,
+       "lo": 0.18333333333333332,
+       "hi": 0.4166666666666667,
+       "n": 60,
+       "k": 18
+      },
+      "false_memory_a": null,
+      "false_memory_b": {
+       "rate": 0.1,
+       "lo": 0.0,
+       "hi": 0.25,
+       "n": 20,
+       "k": 2
+      },
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": {
+       "rate": 0.4,
+       "lo": 0.25,
+       "hi": 0.55,
+       "n": 40,
+       "k": 16
+      },
+      "control_recall": {
+       "rate": 0.95,
+       "lo": 0.875,
+       "hi": 1.0,
+       "n": 40,
+       "k": 38
+      },
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": {
+       "rate": 0.65,
+       "lo": 0.45,
+       "hi": 0.85,
+       "n": 20,
+       "k": 13
+      }
+     },
+     "heldout": {
+      "false_memory_all": null,
+      "false_memory_a": null,
+      "false_memory_b": null,
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": null,
+      "control_recall": null,
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": null
+     }
+    }
+   },
+   "views_audited": {
+    "lines": {
+     "all": {
+      "false_memory_all": {
+       "rate": 0.5333333333333333,
+       "lo": 0.4,
+       "hi": 0.6666666666666666,
+       "n": 60,
+       "k": 32
+      },
+      "false_memory_a": null,
+      "false_memory_b": {
+       "rate": 0.65,
+       "lo": 0.45,
+       "hi": 0.85,
+       "n": 20,
+       "k": 13
+      },
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": {
+       "rate": 0.475,
+       "lo": 0.325,
+       "hi": 0.625,
+       "n": 40,
+       "k": 19
+      },
+      "control_recall": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 40,
+       "k": 40
+      },
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": {
+       "rate": 0.85,
+       "lo": 0.7,
+       "hi": 1.0,
+       "n": 20,
+       "k": 17
+      }
+     },
+     "heldout": {
+      "false_memory_all": null,
+      "false_memory_a": null,
+      "false_memory_b": null,
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": null,
+      "control_recall": null,
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": null
+     }
+    },
+    "answer": {
+     "all": {
+      "false_memory_all": {
+       "rate": 0.3,
+       "lo": 0.18333333333333332,
+       "hi": 0.4166666666666667,
+       "n": 60,
+       "k": 18
+      },
+      "false_memory_a": null,
+      "false_memory_b": {
+       "rate": 0.1,
+       "lo": 0.0,
+       "hi": 0.25,
+       "n": 20,
+       "k": 2
+      },
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": {
+       "rate": 0.4,
+       "lo": 0.25,
+       "hi": 0.55,
+       "n": 40,
+       "k": 16
+      },
+      "control_recall": {
+       "rate": 0.95,
+       "lo": 0.875,
+       "hi": 1.0,
+       "n": 40,
+       "k": 38
+      },
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": {
+       "rate": 0.65,
+       "lo": 0.45,
+       "hi": 0.85,
+       "n": 20,
+       "k": 13
+      }
+     },
+     "heldout": {
+      "false_memory_all": null,
+      "false_memory_a": null,
+      "false_memory_b": null,
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": null,
+      "control_recall": null,
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": null
+     }
+    }
+   }
+  },
+  "agentmemory": {
+   "ingest_cost": {
+    "messages": 1092,
+    "model_calls": 0,
+    "seconds": 117.7,
+    "calls_per_message": 0.0,
+    "seconds_per_message": 0.108,
+    "scenarios_with_error": 0
+   },
+   "views": {
+    "lines": {
+     "all": {
+      "false_memory_all": {
+       "rate": 0.7833333333333333,
+       "lo": 0.6833333333333333,
+       "hi": 0.8833333333333333,
+       "n": 60,
+       "k": 47
+      },
+      "false_memory_a": null,
+      "false_memory_b": {
+       "rate": 0.85,
+       "lo": 0.7,
+       "hi": 1.0,
+       "n": 20,
+       "k": 17
+      },
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": {
+       "rate": 0.75,
+       "lo": 0.6,
+       "hi": 0.875,
+       "n": 40,
+       "k": 30
+      },
+      "control_recall": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 40,
+       "k": 40
+      },
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": {
+       "rate": 0.9,
+       "lo": 0.75,
+       "hi": 1.0,
+       "n": 20,
+       "k": 18
+      }
+     },
+     "heldout": {
+      "false_memory_all": null,
+      "false_memory_a": null,
+      "false_memory_b": null,
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": null,
+      "control_recall": null,
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": null
+     }
+    },
+    "answer": {
+     "all": {
+      "false_memory_all": {
+       "rate": 0.38333333333333336,
+       "lo": 0.26666666666666666,
+       "hi": 0.5,
+       "n": 60,
+       "k": 23
+      },
+      "false_memory_a": null,
+      "false_memory_b": {
+       "rate": 0.15,
+       "lo": 0.0,
+       "hi": 0.3,
+       "n": 20,
+       "k": 3
+      },
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": {
+       "rate": 0.5,
+       "lo": 0.35,
+       "hi": 0.65,
+       "n": 40,
+       "k": 20
+      },
+      "control_recall": {
+       "rate": 0.925,
+       "lo": 0.825,
+       "hi": 1.0,
+       "n": 40,
+       "k": 37
+      },
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": {
+       "rate": 0.75,
+       "lo": 0.55,
+       "hi": 0.9,
+       "n": 20,
+       "k": 15
+      }
+     },
+     "heldout": {
+      "false_memory_all": null,
+      "false_memory_a": null,
+      "false_memory_b": null,
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": null,
+      "control_recall": null,
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": null
+     }
+    }
+   },
+   "views_audited": {
+    "lines": {
+     "all": {
+      "false_memory_all": {
+       "rate": 0.7833333333333333,
+       "lo": 0.6833333333333333,
+       "hi": 0.8833333333333333,
+       "n": 60,
+       "k": 47
+      },
+      "false_memory_a": null,
+      "false_memory_b": {
+       "rate": 0.85,
+       "lo": 0.7,
+       "hi": 1.0,
+       "n": 20,
+       "k": 17
+      },
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": {
+       "rate": 0.75,
+       "lo": 0.6,
+       "hi": 0.875,
+       "n": 40,
+       "k": 30
+      },
+      "control_recall": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 40,
+       "k": 40
+      },
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": {
+       "rate": 0.9,
+       "lo": 0.75,
+       "hi": 1.0,
+       "n": 20,
+       "k": 18
+      }
+     },
+     "heldout": {
+      "false_memory_all": null,
+      "false_memory_a": null,
+      "false_memory_b": null,
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": null,
+      "control_recall": null,
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": null
+     }
+    },
+    "answer": {
+     "all": {
+      "false_memory_all": {
+       "rate": 0.36666666666666664,
+       "lo": 0.25,
+       "hi": 0.48333333333333334,
+       "n": 60,
+       "k": 22
+      },
+      "false_memory_a": null,
+      "false_memory_b": {
+       "rate": 0.1,
+       "lo": 0.0,
+       "hi": 0.25,
+       "n": 20,
+       "k": 2
+      },
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": {
+       "rate": 0.5,
+       "lo": 0.35,
+       "hi": 0.65,
+       "n": 40,
+       "k": 20
+      },
+      "control_recall": {
+       "rate": 0.925,
+       "lo": 0.825,
+       "hi": 1.0,
+       "n": 40,
+       "k": 37
+      },
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": {
+       "rate": 0.75,
+       "lo": 0.55,
+       "hi": 0.9,
+       "n": 20,
+       "k": 15
+      }
+     },
+     "heldout": {
+      "false_memory_all": null,
+      "false_memory_a": null,
+      "false_memory_b": null,
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": null,
+      "control_recall": null,
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": null
+     }
+    }
+   }
+  },
+  "ai-memory": {
+   "ingest_cost": {
+    "messages": 1092,
+    "model_calls": 0,
+    "seconds": 334.1,
+    "calls_per_message": 0.0,
+    "seconds_per_message": 0.306,
+    "scenarios_with_error": 0
+   },
+   "views": {
+    "lines": {
+     "all": {
+      "false_memory_all": {
+       "rate": 0.35,
+       "lo": 0.23333333333333334,
+       "hi": 0.4666666666666667,
+       "n": 60,
+       "k": 21
+      },
+      "false_memory_a": null,
+      "false_memory_b": {
+       "rate": 0.7,
+       "lo": 0.5,
+       "hi": 0.9,
+       "n": 20,
+       "k": 14
+      },
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": {
+       "rate": 0.175,
+       "lo": 0.075,
+       "hi": 0.3,
+       "n": 40,
+       "k": 7
+      },
+      "control_recall": {
+       "rate": 0.675,
+       "lo": 0.525,
+       "hi": 0.825,
+       "n": 40,
+       "k": 27
+      },
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": {
+       "rate": 0.9,
+       "lo": 0.75,
+       "hi": 1.0,
+       "n": 20,
+       "k": 18
+      }
+     },
+     "heldout": {
+      "false_memory_all": null,
+      "false_memory_a": null,
+      "false_memory_b": null,
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": null,
+      "control_recall": null,
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": null
+     }
+    },
+    "answer": {
+     "all": {
+      "false_memory_all": {
+       "rate": 0.06666666666666667,
+       "lo": 0.016666666666666666,
+       "hi": 0.13333333333333333,
+       "n": 60,
+       "k": 4
+      },
+      "false_memory_a": null,
+      "false_memory_b": {
+       "rate": 0.1,
+       "lo": 0.0,
+       "hi": 0.25,
+       "n": 20,
+       "k": 2
+      },
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": {
+       "rate": 0.05,
+       "lo": 0.0,
+       "hi": 0.125,
+       "n": 40,
+       "k": 2
+      },
+      "control_recall": {
+       "rate": 0.475,
+       "lo": 0.325,
+       "hi": 0.625,
+       "n": 40,
+       "k": 19
+      },
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": {
+       "rate": 0.5,
+       "lo": 0.3,
+       "hi": 0.7,
+       "n": 20,
+       "k": 10
+      }
+     },
+     "heldout": {
+      "false_memory_all": null,
+      "false_memory_a": null,
+      "false_memory_b": null,
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": null,
+      "control_recall": null,
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": null
+     }
+    }
+   },
+   "views_audited": {
+    "lines": {
+     "all": {
+      "false_memory_all": {
+       "rate": 0.35,
+       "lo": 0.23333333333333334,
+       "hi": 0.4666666666666667,
+       "n": 60,
+       "k": 21
+      },
+      "false_memory_a": null,
+      "false_memory_b": {
+       "rate": 0.7,
+       "lo": 0.5,
+       "hi": 0.9,
+       "n": 20,
+       "k": 14
+      },
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": {
+       "rate": 0.175,
+       "lo": 0.075,
+       "hi": 0.3,
+       "n": 40,
+       "k": 7
+      },
+      "control_recall": {
+       "rate": 0.675,
+       "lo": 0.525,
+       "hi": 0.825,
+       "n": 40,
+       "k": 27
+      },
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": {
+       "rate": 0.9,
+       "lo": 0.75,
+       "hi": 1.0,
+       "n": 20,
+       "k": 18
+      }
+     },
+     "heldout": {
+      "false_memory_all": null,
+      "false_memory_a": null,
+      "false_memory_b": null,
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": null,
+      "control_recall": null,
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": null
+     }
+    },
+    "answer": {
+     "all": {
+      "false_memory_all": {
+       "rate": 0.06666666666666667,
+       "lo": 0.016666666666666666,
+       "hi": 0.13333333333333333,
+       "n": 60,
+       "k": 4
+      },
+      "false_memory_a": null,
+      "false_memory_b": {
+       "rate": 0.1,
+       "lo": 0.0,
+       "hi": 0.25,
+       "n": 20,
+       "k": 2
+      },
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": {
+       "rate": 0.05,
+       "lo": 0.0,
+       "hi": 0.125,
+       "n": 40,
+       "k": 2
+      },
+      "control_recall": {
+       "rate": 0.475,
+       "lo": 0.325,
+       "hi": 0.625,
+       "n": 40,
+       "k": 19
+      },
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": {
+       "rate": 0.5,
+       "lo": 0.3,
+       "hi": 0.7,
+       "n": 20,
+       "k": 10
+      }
+     },
+     "heldout": {
+      "false_memory_all": null,
+      "false_memory_a": null,
+      "false_memory_b": null,
+      "false_memory_c": null,
+      "false_memory_d": null,
+      "false_memory_e": null,
+      "control_recall": null,
+      "abstain_explicit_cd": null,
+      "abstain_lenient_cd": null,
+      "side_recall_abe": null
+     }
+    }
+   }
+  }
+ },
+ "n_scenarios": 100,
+ "n_heldout": 0
+}

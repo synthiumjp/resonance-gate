@@ -1,0 +1,5 @@
+H1/H2 D pasted given as the user's (class e, false memory): sourcedrecall 9/40; agentmemory 20/40 (p=0.02); ai-memory 2/40 (p=0.05); rag 16/40 (p=0.15)
+H1 D own material answered (class f, expected term): sourcedrecall 16/20; agentmemory 19/20 (p=0.34); ai-memory 5/20 (p=0.00); rag 19/20 (p=0.34)
+H3 B old state given as current (class b, false memory): sourcedrecall 2/20; agentmemory 2/20 (p=1.00); ai-memory 2/20 (p=1.00); rag 2/20 (p=1.00)
+H4 X everyday facts answered (class f, expected term): sourcedrecall 18/20; agentmemory 18/20 (p=1.00); ai-memory 14/20 (p=0.24); rag 19/20 (p=1.00)
+H5 pooled false memories over D and B (classes a-e): sourcedrecall 11/60; agentmemory 22/60 (p=0.04); ai-memory 4/60 (p=0.10); rag 18/60 (p=0.20)

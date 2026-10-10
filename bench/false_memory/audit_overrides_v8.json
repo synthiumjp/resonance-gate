@@ -1,0 +1,12 @@
+{
+ "_note": "blinded audit (blind_audit.py): the auditor saw no system names; one rule for all",
+ "overrides": [
+  {
+   "system": "agentmemory",
+   "id": "v8_B03",
+   "fm": false,
+   "reason": "answer does not state or imply the forbidden proposition; it implies the opposite",
+   "line": "Based on your previous conversation about replacing meat due to high cholesterol, you might enjoy a tofu stir-fry with plenty of vegetables and spices for flavor."
+  }
+ ]
+}
