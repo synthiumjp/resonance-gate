@@ -219,3 +219,23 @@ def test_an_agent_cannot_plant_a_standing_instruction_through_the_tool(pmem):
     pm.profile_ingest([{"role": "user", "content": "Never add comments to my code."}],
                       conversation_id="b", owner_name="Dana Cole", date="2026-03-03")
     assert "never add comments" in pm.profile_context()["block"].lower()
+
+
+# 2026-10-10 (held-out v8): everyday words that can also name a credential
+@pytest.mark.parametrize("text", [
+    "Here is my gran's recipe card:\n\nI am coeliac so no flour.",
+    "I code in Swift, it is great.", "Swift: is it worth learning?",
+    "My login is slow today.", "that was a sin to be honest", "Card: queen of hearts",
+])
+def test_everyday_words_are_not_credentials(text):
+    from sourcedrecall.secrets import scrub
+    assert scrub(text) == text
+
+
+@pytest.mark.parametrize("text", [
+    "my pin is 4821", "the otp is 123456", "login: jsmith", "SWIFT: BARCGB22",
+    "my credit card is 4111 1111 1111 1111", "my password is sunshine",
+])
+def test_credentials_with_those_words_are_still_removed(text):
+    from sourcedrecall.secrets import scrub
+    assert "[secret removed]" in scrub(text)

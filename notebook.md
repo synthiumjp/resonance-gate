@@ -15458,3 +15458,19 @@ and how to run everything).
   voice) rather than more phrases. (2) The reader's caution is now the
   largest loss on advice, plans and everyday facts; our own rules line
   "Anything about the user not listed here is UNKNOWN" may be part of it.
+
+## Entry 318 — 2026-10-10 (strict LoCoMo judge; pasted text by shape; v8; secret filter)
+
+- Strict LoCoMo judge (LOCOMO_JUDGE=strict; wrong answers accepted 3% / 20%
+  instead of 10.6% / 68.5%; 120/120 gold accepted): sourcedrecall 49.4%,
+  Mem0 48.5%, plain retrieval 42.5%, notes 50.3 / 53.3 / 55.1%; without the
+  audit's 80 errors 50.9 / 50.4 / 43.9. Same order; ~15 points lower for all.
+- Reader-refusal rules rewording: refuted on 7 dev sets, reverted.
+- Pasted text by shape (f69fc33): dev2 detection 6/40 -> 37/40, end to end
+  33/60 -> 5/60. Held-out v8: 9/40 (v6 82%, v7 32%, v8 22%), target 6 missed,
+  vs plain retrieval 16 (p=0.15) not significant; changes 2/20, everyday 18/20.
+  Left: one-paragraph pastes with a same-line or no introduction (5), marked
+  pasted instructions the reader follows (3), own items marked (2).
+- Secret filter false positives (found via v8): 18 of 7,480 ordinary
+  messages lost text ("recipe card:", "pass it on", "I code in Swift", "my
+  login is slow"); now 0, all secret tests pass.

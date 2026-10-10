@@ -382,6 +382,29 @@ introduction only after the paste, 4), worded in ways the rules do not list.
 4/34. The presentation works; detection by word lists does not generalise
 far enough.
 
+Detection by shape (f69fc33): a short paragraph of the user's and a block
+in another voice (greeting, sign-off, chat log, heading, review, list of
+rules, code comments), the introduction before or after; chat logs anywhere;
+a letter addressed to the user by name; "^ that's from ...". Second
+development set (`cases_dev_pasted2.jsonl`, 60): detection 6/40 -> 37/40,
+end to end false memories 33/60 -> 5/60 questions. Held out (v8,
+`bench/false_memory/results_v8/SUMMARY.md`): 9/40 given as the user's
+(target at most 6, missed; plain retrieval 16, p=0.15). The marker fired on
+24 of 40 and the reader misread 4 of those (3 pasted instructions it
+followed); 5 one-paragraph pastes went undetected (introduction on the same
+line, after the paste, or none); 2 of 20 own items were wrongly marked.
+
+**The secret filter (2026-10-10).** v8 showed a pasted recipe's
+introduction removed as "[secret removed]": "recipe card:" read as a card
+credential, and the next sentence went with it. Ordinary words had been
+taken for credential names: a bare "card", "pass" ("pass it on"), "login",
+"Swift", "sin", "passport", "my social", "bank account". Over 7,480 LoCoMo
+and development messages the old filter removed text from 18 (none a
+secret); the new one from 0. These words now count only with a value that
+looks like one next to them ("my pin is 4821", "login: bob", "my login is
+bob / hunter2"); error names ("JsonWebTokenError:") and file paths of words
+are not tokens. Every earlier secret test still passes.
+
 ## Tried and refuted
 
 **Telling the reader when to refuse (2026-10-10).** Held-out v7's advice,

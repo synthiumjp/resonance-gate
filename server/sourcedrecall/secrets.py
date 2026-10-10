@@ -29,23 +29,39 @@ MARK = "[secret removed]"
 # character, so DB_PASSWORD=hunter2 and STRIPE_SECRET_KEY=... got through;
 # the edges are now "not a letter or digit".
 _KEYWORD = re.compile(
-    r"(?<![A-Za-z0-9])(?:pass(?:word|words|wd|code|codes|phrase|phrases)?|pw|pwd|mdp|"
-    r"pins?|pin codes?|logins?|credentials?|creds|username and password|"
+    r"(?<![A-Za-z0-9])(?:pass(?:word|words|wd|code|codes|phrase|phrases)|pass(?=\s*[:=])|pw|pwd|mdp|"
+    r"pin codes?|credentials?|username and password|"
     r"api[ _-]?keys?|access[ _-]?keys?|secret[ _-]?keys?|private[ _-]?keys?|"
     r"ssh[ _-]?keys?|(?:wifi|wi-fi|product|licen[cs]e|encryption|recovery|"
     r"door|gate|alarm|garage|lock|safe)[ _-]?(?:keys?|codes?|combination)|"
     r"(?:auth|access|bearer|refresh|session|api|github|personal access)"
-    r"[ _-]?tokens?|tokens?\s*[:=]|bearer|authorization|"
-    r"ssn|social security(?: numbers?)?|my social|"
-    r"(?:credit |debit |bank )?card(?: numbers?)?|cvv|cvc|security codes?|"
-    r"(?:bank )?account numbers?|bank account|routing numbers?|sort codes?|"
-    r"iban|swift|bsb|seed phrases?|recovery (?:phrases?|codes?)|"
-    r"backup codes?|2fa codes?|otp|one[- ]time (?:codes?|passwords?)|"
-    r"passport(?: numbers?)?|(?:driver'?s? )?licen[cs]e numbers?|"
-    r"national insurance(?: numbers?)?|ni number|tax file number|tfn|sin|"
+    r"[ _-]?tokens?|tokens?\s*[:=]|"
+    r"ssn|social security(?: numbers?)?|"
+    r"card numbers?|cvv|cvc|security codes?|"
+    r"(?:bank )?account numbers?|routing numbers?|sort codes?|"
+    r"iban|swift(?: codes?|/bic)|bic codes?|bsb(?: numbers?)?|seed phrases?|recovery (?:phrases?|codes?)|"
+    r"backup codes?|2fa codes?|one[- ]time (?:codes?|passwords?)|"
+    r"passport numbers?|(?:driver'?s? )?licen[cs]e numbers?|"
+    r"national insurance(?: numbers?)?|ni number|tax file number|tfn|sin numbers?|"
     r"aadhaar|medicare number|code to the \w+|combination to the \w+|"
     r"key(?=\s+(?:is|was|:|=)\s+\S*\d))(?![A-Za-z0-9])",
     re.I)
+# 2026-10-10 (held-out v8: "recipe card:" removed a pasted recipe's
+# introduction and the sentence after it; "I code in Swift", "My login is
+# slow today", "that was a sin" were removed whole). Everyday words that can
+# also name a credential count only with a value that looks like one: a
+# digit, or "word: value" / "word = value". They never take the next
+# sentence with them.
+_WEAK = re.compile(r"(?<![A-Za-z0-9])(?:pins?|logins?|creds|otp|bearer|authorization|bank accounts?|"
+                   r"(?:credit|debit|bank) cards?|passports?|my social|"
+                   r"(?-i:SIN|BSB|SWIFT))(?![A-Za-z0-9])", re.I)
+_WEAK_WORD = (r"(?<![A-Za-z0-9])(?:pins?|logins?|creds|otp|bank accounts?|(?:credit|debit|bank) cards?|"
+              r"passports?|sin|bsb|swift|my social)")
+_WEAK_VALUE = re.compile(_WEAK_WORD + r"\W{0,3}(?:(?:is|was|are|number|no\.?|code|#)\W{0,3}){0,2}"
+                         r"[A-Za-z]{0,3}[\d][\d\s-]{2,}|" + _WEAK_WORD + r"\s*[:=]\s*\S|"
+                         # "my login is bob / hunter2"
+                         + _WEAK_WORD + r"\W{0,3}(?:is|was|are)\b[^.!?\n]{0,25}?"
+                         r"\b(?=\w*\d)(?=\w*[A-Za-z])\w{4,}", re.I)
 # not credentials, though they share a word
 _HARMLESS = re.compile(
     r"\b(?:password manager|passport photo|pin(?:s)? (?:down|up|it|them|in "
@@ -66,7 +82,7 @@ _FORMATS = [
     # 2026-10-09: an assignment whose name says what it is, as in a pasted
     # .env or config file (DB_PASSWORD=..., client_secret = '...',
     # STRIPE_SECRET_KEY: ...)
-    re.compile(r"(?i)\b[\w.-]*(?:password|passwd|pwd|secret|token|api[_-]?key|"
+    re.compile(r"(?i)\b(?![\w.-]*(?:error|exception|warning)\s*:)[\w.-]*(?:password|passwd|pwd|secret|token|api[_-]?key|"
                r"access[_-]?key|private[_-]?key)[\w.-]*\s*[:=]\s*"
                # a value, not a count ("max_tokens: 512")
                r"(?=['\"]?[^\s'\"]*[A-Za-z]|['\"]?[^\s'\"]{6,})"
@@ -88,6 +104,7 @@ _FORMATS = [
     re.compile(r"\b\d{3}[- ]\d{2}[- ]\d{4}\b"),
     # long random-looking tokens: letters AND digits, 24+ characters
     re.compile(r"\b(?=[A-Za-z0-9_+/-]*\d)(?=[A-Za-z0-9_+/-]*[A-Za-z])"
+               r"(?![A-Za-z0-9_+/-]*[a-z]{3,}_[a-z]{3,})(?![a-z0-9_/-]*/[a-z0-9_-]*\b)"
                r"[A-Za-z0-9_+/-]{24,}={0,2}"),
 ]
 _CARD = re.compile(r"(?<!\d)(?:\d[ -]?){12,18}\d(?!\d)")
@@ -132,12 +149,14 @@ def scrub(text):
     carry = False
     for i, sent in enumerate(parts):
         named = bool(_KEYWORD.search(sent)) and not _HARMLESS.search(sent)
+        weak = (not named and bool(_WEAK.search(sent)) and not _HARMLESS.search(sent)
+                and bool(_WEAK_VALUE.search(sent)))
         if carry and len(sent.split()) <= 8:
             out.append(MARK)
             carry = False
             continue
         carry = False
-        if named and _VALUE_HINT.search(sent):
+        if weak or (named and _VALUE_HINT.search(sent)):
             out.append(MARK)
         else:
             out.append(sent)

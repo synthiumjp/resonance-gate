@@ -123,6 +123,19 @@ advice, plan and everyday parts most misses were the reader saying it did
 not know with the answer in front of it. Everything is in
 `bench/false_memory/results_v7/SUMMARY.md`.
 
+Detection was then changed to read a message's shape (a short line of the
+user's and a block in another voice, the introduction before or after it)
+and tested on a fourth held-out set (v8: 100 scenarios, 2026-10-10). Pasted
+claims or instructions given as the user's: 9 of 40 (22%; plain retrieval
+16, agentmemory 20, ai-memory 2), so across v6, v7 and v8: 82%, 32%, 22%.
+The pre-registered target of at most 6 of 40 was missed, and the difference from plain
+retrieval was not significant (p=0.15) on this set, where pasted text misled
+every system less. The marker fired on 24 of the 40; 4 marked items were
+still given as the user's, 3 of them pasted instructions the reader
+followed. Changes and everyday facts held (old state given as current 2 of
+20, facts answered 18 of 20). Everything is in
+`bench/false_memory/results_v8/SUMMARY.md`.
+
 LoCoMo (conversations 2-9, 1,307 questions), against Mem0, with the same
 local reader and judge:
 
@@ -235,10 +248,10 @@ pasted text but not all; see above).
 - Text you paste in from someone else (an email, a chat, a document) is
   shown to the assistant as theirs, with the writer named, when the
   introduction says where it came from ("this email from my landlord", "my
-  boss sent me this", "translate this"). On the held-out set v7 that worked
-  for 24 of 34 pasted items; the other 10 were not recognised and a pasted
-  claim or instruction was taken for yours (11 of 34 in all, against 24 for
-  plain retrieval).
+  boss sent me this", "translate this") or the pasted text is shaped like
+  someone else's (a letter, a chat log, a review). On the newest held-out
+  set (v8) a pasted claim or instruction was still taken for yours in 9 of
+  40 (plain retrieval 16).
 - Sessions are stored automatically in Claude Code. Hooks for Codex CLI,
   Gemini CLI and Cursor are included but have not yet been tested inside
   those apps. A ChatGPT or Claude.ai data export can be imported.
