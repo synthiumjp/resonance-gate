@@ -236,3 +236,15 @@ def test_impersonal_keeps_facts_and_drops_the_writers_self_and_rules(pasted, kep
     assert kept in out
     if dropped:
         assert dropped not in out and n
+
+
+# 2026-10-11: a long message is cut around the part the question asks about,
+# its opening sentence kept
+def test_long_message_window_keeps_the_part_asked_about():
+    from memory_api import _quote_own
+    filler = "We have refreshed our website and our offices will be refurbished in spring. " * 8
+    text = "Policy summary email from my home insurer, pasting:\n\n" + filler + "Policy renews on 14 November."
+    out = _quote_own(text, "Ana Diaz", "When does the home insurance renew?")
+    assert "14 November" in out and "home insurer" in out
+    assert "14 November" not in _quote_own(text, "Ana Diaz", None)
+

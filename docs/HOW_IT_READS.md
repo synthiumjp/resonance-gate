@@ -419,6 +419,18 @@ Hiding the whole paste unless the source was named was tried first and
 dropped: people paste a schedule or a deadline to ask about it later
 without saying where it came from. Not yet measured on a held-out set.
 
+**Long messages cut around the question (2026-10-11).** A message is quoted
+to about 400 characters and pasted text to about 240, and only their start
+was shown, so a fact at the end of a long email was cut off: with 370
+characters of other text put before the facts in the usefulness set's
+pastes, the answer was in view in 0 of 24 (24 of 24 with it put after). Now a long message keeps its opening sentence (who wrote
+it, what it is) and then the part around the sentence that shares most
+words with the question; names in the question count for less, since they
+say whose text it is. Padded, 24 of 24 answers in view, before or after. Development sets under the v7 protocol, before and after: advice
+20 -> 21 of 24, paraphrase 59/64, changes 3/64 old and 58/64 new,
+decisions 1/14 and 5/10, all unchanged; pasted, preferences and the
+usefulness set as above.
+
 **The secret filter (2026-10-10).** v8 showed a pasted recipe's
 introduction removed as "[secret removed]": "recipe card:" read as a card
 credential, and the next sentence went with it. Ordinary words had been

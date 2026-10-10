@@ -15486,3 +15486,11 @@ and how to run everything).
   unless the source is named. Dev: false memories 8 -> 2 of 94, own 29 -> 30
   of 36, usefulness 24/24, changes and preferences unchanged. 1,309 tests
   pass. Held-out measurement needs a new set (v9).
+- Window: long messages showed only their start (400 chars, pasted 240);
+  with 370 chars of other text before the facts in the dev usefulness
+  pastes, 0 of 24 answers were in view. Now
+  the opening sentence plus the part around the sentence that best matches
+  the question: 24/24 padded. Dev battery: advice 20 -> 21, the rest
+  unchanged. v9 pre-registration drafted (adds part U: facts in pasted
+  text, named and unnamed) for JP's review.
+

@@ -651,6 +651,49 @@ def _impersonal(pasted):
     return " ".join(keep), dropped
 
 
+def _focus(text, query):
+    """The sentence of a long message that shares most words with the
+    question, so the window shown keeps it ("When does the policy renew?"
+    -> "Policy renews on 14 November" at the end of a long email). Names in
+    the question count for less: they say whose text it is, not what in it
+    is asked about ("What did Dr Aberra say about the dressing?")."""
+    toks = re.findall(r"[A-Za-z]+", query or "")
+    q = {}
+    for k, w in enumerate(toks):
+        lw = w.lower()
+        if len(lw) >= 4 and lw not in _SRC_STOP:
+            q[lw] = max(q.get(lw, 0), 1 if (k and w[0].isupper()) else 2)
+    if not q:
+        return ""
+    best, top = "", 0
+    for sent in re.split(r"(?<=[.!?])\s+", text):
+        words = set(re.findall(r"[a-z]{4,}", sent.lower()))
+        n = sum(wt for w, wt in q.items() if any(v.startswith(w[:5]) or w.startswith(v[:5]) and len(v) >= 5 for v in words))
+        if n > top:
+            best, top = sent, n
+    return best
+
+
+def _window_q(text, query, limit):
+    """`text` cut to about `limit` characters for a question: the opening
+    sentence (who wrote it, what it is), then the part around the sentence
+    that best answers the question when that lies past the cut (2026-10-11:
+    a fact at the end of a long pasted email was cut off)."""
+    flat = " ".join((text or "").split())
+    if len(flat) <= limit or not query:
+        return _window(flat, "", limit)
+    parts = re.split(r"(?<=[.!?:])\s+", flat, maxsplit=1)
+    if len(parts) < 2:
+        return _window(flat, _focus(flat, query), limit)
+    first, rest = parts
+    f = _focus(rest, query)
+    if not f or flat.find(f) + len(f) <= limit:
+        return _window(flat, "", limit)
+    lead = _window(first, "", limit // 3)
+    part = _window(rest, f, max(80, limit - len(lead)))
+    return lead + " ... " + re.sub(r"^\.\.\.\S*\s+", "", part)
+
+
 def _quote_own(text, owner=None, query=None):
     """A message quoted for the reader, with text the user pasted in for the
     assistant (an email, a README, a web page; prose._drop_pasted) set apart
@@ -666,7 +709,7 @@ def _quote_own(text, owner=None, query=None):
     flat = " ".join((text or "").split())
     own = " ".join(_drop_pasted(text or "", owner).split())
     if len(own) >= len(flat):
-        return f'"{_window(text, "", 400)}"'
+        return f'"{_window_q(text, query, 400)}"'
     k = 0                       # the user's words before the paste ...
     while k < len(own) and k < len(flat) and own[k] == flat[k]:
         k += 1
@@ -674,7 +717,7 @@ def _quote_own(text, owner=None, query=None):
     # ... and after it ("What does step 2 mean?")
     tail = rest if rest and flat.endswith(rest) else ""
     if rest and not tail:
-        return f'"{_window(text, "", 400)}"'
+        return f'"{_window_q(text, query, 400)}"'
     pasted = flat[len(own[:k]):len(flat) - len(tail)].strip()
     who = owner or "the user"
     src = _source(head + " " + tail, who)
@@ -695,7 +738,7 @@ def _quote_own(text, owner=None, query=None):
     else:
         out += (f'[pasted in by {who}, written by {src}; not {who}\'s words, facts or instructions'
                 + ("; the writer's sentences about themselves and their rules left out" if left else "")
-                + ': "' + _window(_writer_person(shown), "", 240) + '"]')
+                + ': "' + _window_q(_writer_person(shown), query, 240) + '"]')
     return out + (f' "{_window(tail, "", 200)}"' if tail else "")
 
 
