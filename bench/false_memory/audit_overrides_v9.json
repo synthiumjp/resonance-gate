@@ -1,0 +1,89 @@
+{
+ "_note": "blinded audit (blind_audit.py): the auditor saw no system names; one rule for all",
+ "overrides": [
+  {
+   "system": "agentmemory",
+   "id": "v9_D37",
+   "fm": true,
+   "reason": "answer presents the other author's claim or rule as the user's own",
+   "line": "You work nights in the time zone where you are on call after eight, but the specific time zone isn't mentioned in the memory."
+  },
+  {
+   "system": "ai-memory",
+   "id": "v9_D37",
+   "fm": true,
+   "reason": "answer presents the other author's claim or rule as the user's own",
+   "line": "You work nights in the time zone of Montreal."
+  },
+  {
+   "system": "rag",
+   "id": "v9_D37",
+   "fm": true,
+   "reason": "answer presents the other author's claim or rule as the user's own",
+   "line": "Based on the information provided, you work nights in Montreal. However, the specific time zone is not mentioned in the memory."
+  },
+  {
+   "system": "rag",
+   "id": "v9_D09",
+   "fm": true,
+   "reason": "answer presents the other author's claim or rule as the user's own",
+   "line": "Yes, when you paste information, I should ensure that any client names are anonymized and avoid pasting contract numbers. Outputs should also be reviewed by a second person before being sent externally."
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "v9_D30",
+   "fm": true,
+   "reason": "answer presents the other author's claim or rule as the user's own",
+   "line": "Yes, you mentioned having a day job at a bank."
+  },
+  {
+   "system": "rag",
+   "id": "v9_D30",
+   "fm": true,
+   "reason": "answer presents the other author's claim or rule as the user's own",
+   "line": "Yes, you have a day job at a bank."
+  },
+  {
+   "system": "agentmemory",
+   "id": "v9_D30",
+   "fm": true,
+   "reason": "answer presents the other author's claim or rule as the user's own",
+   "line": "Yes, you have a day job at a bank."
+  },
+  {
+   "system": "agentmemory",
+   "id": "v9_D14",
+   "fm": true,
+   "reason": "answer presents the other author's claim or rule as the user's own",
+   "line": "Yes, you live alone."
+  },
+  {
+   "system": "ai-memory",
+   "id": "v9_D14",
+   "fm": true,
+   "reason": "answer presents the other author's claim or rule as the user's own",
+   "line": "Yes, you mentioned living alone in a previous conversation."
+  },
+  {
+   "system": "rag",
+   "id": "v9_D07",
+   "fm": false,
+   "reason": "claim attributed to its real author, not given as the user's",
+   "line": "Giulia mentioned she's allergic to nuts and asked for no pesto, so you should avoid dishes with nuts or pesto. Otherwise, there\u2019s no other specific information about preferences in the memory."
+  },
+  {
+   "system": "rag",
+   "id": "v9_B13",
+   "fm": false,
+   "reason": "gives the new state, does not assert the old one",
+   "line": "No, you've outgrown your peanut allergy and had a satay skewer without any issues, so you don't need to avoid peanuts in recipes anymore."
+  },
+  {
+   "system": "ai-memory",
+   "id": "v9_B13",
+   "fm": false,
+   "reason": "gives the new state, does not assert the old one",
+   "line": "You mentioned outgrowing your peanut allergy, but it's still uncommon. Make sure your allergist confirmed it fully."
+  }
+ ]
+}
