@@ -136,6 +136,22 @@ followed. Changes and everyday facts held (old state given as current 2 of
 20, facts answered 18 of 20). Everything is in
 `bench/false_memory/results_v8/SUMMARY.md`.
 
+After v8, the writer's sentences about themselves and their general rules
+were left out of pasted text unless the question names where it came from,
+and long messages were cut around the question. A fifth held-out set (v9:
+120 scenarios, 2026-10-11) met four of six hypotheses. Pasted claims or
+instructions given as the user's: 4 of 40 (10%; plain retrieval 22,
+agentmemory 27, ai-memory 3; p<0.001 against the first two), so across v6
+to v9: 82%, 32%, 22%, 10%. Pooled false memories 6 of 60 (plain retrieval
+24, agentmemory 29). Changes and everyday facts held (2 of 20, 16 of 20).
+Two targets were missed, both costs of these changes. The user's own
+material was answered in 12 of 20 (target 15; plain retrieval 17): in 4,
+own text was taken for pasted and the fact was left out. Facts asked about
+inside pasted text were answered in 13 of 20 (target 16; plain retrieval
+20): in all 7 misses the paste was over 800 characters and the part shown
+did not hold the fact. Everything is in
+`bench/false_memory/results_v9/SUMMARY.md`.
+
 LoCoMo (conversations 2-9, 1,307 questions), against Mem0, with the same
 local reader and judge:
 
@@ -252,8 +268,9 @@ pasted text but not all; see above).
   someone else's (a letter, a chat log, a review). Unless you ask about
   that text by its source, the writer's sentences about themselves and their
   general rules are left out; dates, times and places stay. On the newest
-  held-out set (v8, before that last change) a pasted claim or instruction
-  was still taken for yours in 9 of 40 (plain retrieval 16).
+  held-out set (v9) a pasted claim or instruction was taken for yours in 4
+  of 40 (plain retrieval 22). The cost: a fact deep in a long paste can be
+  missed, and your own text, when taken for pasted, can lose its facts.
 - Sessions are stored automatically in Claude Code. Hooks for Codex CLI,
   Gemini CLI and Cursor are included but have not yet been tested inside
   those apps. A ChatGPT or Claude.ai data export can be imported.

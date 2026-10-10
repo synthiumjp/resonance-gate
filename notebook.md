@@ -15494,3 +15494,16 @@ and how to run everything).
   unchanged. v9 pre-registration drafted (adds part U: facts in pasted
   text, named and unnamed) for JP's review.
 
+## Entry 320 — 2026-10-11 (held-out v9)
+
+- v9 (120 scenarios, f3a166b, audited 12/240): 4 of 6 met. Pasted claims as
+  the user's 4/40 (rag 22, agentmemory 27, ai-memory 3); pooled 6/60 (24,
+  29, 6); changes 2/20; everyday 16/20. Across v6-v9: 82, 32, 22, 10%.
+- Missed: own material 12/20 (4 = own text marked pasted, fact left out by
+  b76c3f5's filter; 3 reader refusals; 1 plural), pasted facts 13/20 (all 7
+  = long paste, window showed the start; named 5/10 worse than unnamed
+  8/10). The dev usefulness set had only short pastes, and the window was
+  checked only by a unit test, never end to end on long pastes: the lesson
+  is to build the dev case for a change's cost at the size the change is
+  about.
+

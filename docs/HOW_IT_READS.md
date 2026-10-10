@@ -431,6 +431,15 @@ say whose text it is. Padded, 24 of 24 answers in view, before or after. Develop
 decisions 1/14 and 5/10, all unchanged; pasted, preferences and the
 usefulness set as above.
 
+Held out (v9, `bench/false_memory/results_v9/SUMMARY.md`): pasted claims
+given as the user's 4/40 (plain retrieval 22, agentmemory 27). Two costs the
+development sets did not show: facts in pasted text 13/20 (target 16), all
+7 misses long pastes (838 to 1,167 characters) where the window showed the
+paste's start, not the fact; own material 12/20 (target 15), 4 of the 8
+misses own text taken for pasted with the fact left out. The window's focus
+sentence was not the fact's in those 7: to be found on development data
+and measured on a new set.
+
 **The secret filter (2026-10-10).** v8 showed a pasted recipe's
 introduction removed as "[secret removed]": "recipe card:" read as a card
 credential, and the next sentence went with it. Ordinary words had been
