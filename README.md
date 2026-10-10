@@ -143,7 +143,17 @@ single-hop, multi-hop and open-domain questions. An audit of LoCoMo
 1,540 gold answers wrong, 80 of them in these conversations. Without those
 80: sourcedrecall 66.2%, with notes 69.4% (small) / 72.3% (standard) / 74.5%
 (Qwen3-14B), Mem0 66.8%, plain retrieval 58.2% (`LOCOMO_AUDIT` in
-`bench/locomo/score.py`). Mem0 was given its top 10
+`bench/locomo/score.py`). The judge prompt used here and in Mem0's
+published evaluation ("be generous ... as long as it touches on the same
+topic") accepted 68.5% of the audit's deliberately vague wrong answers with
+our judge (`bench/locomo/judge_stress.py`). With a strict prompt (3% and 20%
+of the audit's specific and vague wrong answers accepted, every gold answer
+in a sample of 120 accepted; `LOCOMO_JUDGE=strict`), the same answers score:
+sourcedrecall 49.4%, Mem0 48.5%, plain retrieval 42.5%; with notes 50.3% /
+53.3% / 55.1%. Without the audit's 80 wrong gold answers: 50.9%, 50.4%,
+43.9%; 51.9% / 55.1% / 57.0%. The order is the same under both judges;
+temporal questions favour sourcedrecall (33.8% against Mem0's 23.5%, strict,
+errors removed) and multi-hop questions Mem0 (37.8% against 27.6%). Mem0 was given its top 10
 memories for each speaker and plain retrieval its top 10 messages; Mem0
 used the same local Qwen3-14B for its own calls, with thinking off and its
 JSON response format removed (the local server does not support it). The
