@@ -553,10 +553,16 @@ _SOURCE_SENT = re.compile(r"\b((?:my|our)\s+[\w'’-]+(?:\s+(?!(?:just|also|then
                           r"(?:sent|texted|emailed|messaged|wrote|forwarded|posted|replied)\b", re.I)
 
 
+# "my sister's message", "the school's letter"
+_SOURCE_POSS = re.compile(r"\b((?:my|our|the)\s+[\w-]+(?:\s+[\w-]+)?)['’]s\s+(?:[\w-]+\s+)?"
+                          r"(?:message|email|e-mail|text|letter|note|notes|post|reply|review|notice|instructions|advice|list)\b", re.I)
+
+
 def _source(intro, owner):
     """Who the pasted text is from, as the introduction says ("this email
     from my landlord" -> "Dana's landlord"), or "someone else"."""
-    m = _SOURCE_SENT.search(intro or "") or _SOURCE_FROM.search(intro or "")
+    m = (_SOURCE_SENT.search(intro or "") or _SOURCE_FROM.search(intro or "")
+         or _SOURCE_POSS.search(intro or ""))
     if not m:
         return "someone else"
     src = re.sub(r"[\s:,.;-]+$", "", m.group(1))
@@ -651,7 +657,7 @@ def _impersonal(pasted):
     return " ".join(keep), dropped
 
 
-def _focus(text, query):
+def _focus(text, query, skip=()):
     """The sentence of a long message that shares most words with the
     question, so the window shown keeps it ("When does the policy renew?"
     -> "Policy renews on 14 November" at the end of a long email). Names in
@@ -661,12 +667,12 @@ def _focus(text, query):
     q = {}
     for k, w in enumerate(toks):
         lw = w.lower()
-        if len(lw) >= 4 and lw not in _SRC_STOP:
+        if len(lw) >= 4 and lw not in _SRC_STOP and lw not in skip:
             q[lw] = max(q.get(lw, 0), 1 if (k and w[0].isupper()) else 2)
     if not q:
         return ""
     best, top = "", 0
-    for sent in re.split(r"(?<=[.!?])\s+", text):
+    for sent in re.split(r"(?<=[.!?])\s+|\n+", text):
         words = set(re.findall(r"[a-z]{4,}", sent.lower()))
         n = sum(wt for w, wt in q.items() if any(v.startswith(w[:5]) or w.startswith(v[:5]) and len(v) >= 5 for v in words))
         if n > top:
@@ -674,7 +680,16 @@ def _focus(text, query):
     return best
 
 
-def _window_q(text, query, limit):
+# 2026-10-11 (held-out v9: 7 of 7 missed facts in pasted text were in long
+# pastes, 838-1,167 characters, past what was shown): a message is shown to
+# about 800 characters and pasted text to about 1,500, cut around the
+# question beyond that (were 400 and 240)
+_MSG_WINDOW = int(os.environ.get("RG_MSG_WINDOW", "800"))
+_PASTE_WINDOW = int(os.environ.get("RG_PASTE_WINDOW", "1500"))
+_ABOUT_USER = re.compile(r"\b(?:i|me|my|mine|myself|i'm|i’m|i've|i’ve|i'd|i’d)\b", re.I)
+
+
+def _window_q(text, query, limit, skip=()):
     """`text` cut to about `limit` characters for a question: the opening
     sentence (who wrote it, what it is), then the part around the sentence
     that best answers the question when that lies past the cut (2026-10-11:
@@ -684,9 +699,9 @@ def _window_q(text, query, limit):
         return _window(flat, "", limit)
     parts = re.split(r"(?<=[.!?:])\s+", flat, maxsplit=1)
     if len(parts) < 2:
-        return _window(flat, _focus(flat, query), limit)
+        return _window(flat, _focus(flat, query, skip), limit)
     first, rest = parts
-    f = _focus(rest, query)
+    f = _focus(rest, query, skip)
     if not f or flat.find(f) + len(f) <= limit:
         return _window(flat, "", limit)
     lead = _window(first, "", limit // 3)
@@ -709,7 +724,7 @@ def _quote_own(text, owner=None, query=None):
     flat = " ".join((text or "").split())
     own = " ".join(_drop_pasted(text or "", owner).split())
     if len(own) >= len(flat):
-        return f'"{_window_q(text, query, 400)}"'
+        return f'"{_window_q(text, query, _MSG_WINDOW)}"'
     k = 0                       # the user's words before the paste ...
     while k < len(own) and k < len(flat) and own[k] == flat[k]:
         k += 1
@@ -717,11 +732,11 @@ def _quote_own(text, owner=None, query=None):
     # ... and after it ("What does step 2 mean?")
     tail = rest if rest and flat.endswith(rest) else ""
     if rest and not tail:
-        return f'"{_window_q(text, query, 400)}"'
+        return f'"{_window_q(text, query, _MSG_WINDOW)}"'
     pasted = flat[len(own[:k]):len(flat) - len(tail)].strip()
     who = owner or "the user"
     src = _source(head + " " + tail, who)
-    out = (f'"{_window(head, "", 400)}" ' if head else "")
+    out = (f'"{_window_q(head, query, _MSG_WINDOW)}" ' if head else "")
     # 2026-10-11 (held-out v8: 4 of 24 marked pasted items still given as
     # the user's, 3 of them instructions the reader followed): unless the
     # question names where the text came from, the writer's sentences about
@@ -729,8 +744,12 @@ def _quote_own(text, owner=None, query=None):
     # paste instead was tried on development data: false memories 8 -> 3 of
     # 94, but questions about pasted facts that don't name the source
     # ("when does the grant close?") answered 12 -> 4 of 12
+    # only for a question about the user ("Do I have kids?"): a question
+    # about something else ("where's mum's birthday dinner?") may be
+    # answered by a writer's "I've booked Lucia's"
     shown, left = pasted, 0
-    if not (_asks_about_paste(query, head + " " + tail, pasted, owner) or os.environ.get("RG_PASTED_SHOW") == "1"):
+    if (_ABOUT_USER.search(query or "") or not query) and not (
+            _asks_about_paste(query, head + " " + tail, pasted, owner) or os.environ.get("RG_PASTED_SHOW") == "1"):
         shown, left = _impersonal(pasted)
     if left and not shown.replace("[...]", "").strip():
         out += (f'[pasted in by {who}: text written by {src}, not shown; none of it is '
@@ -738,8 +757,10 @@ def _quote_own(text, owner=None, query=None):
     else:
         out += (f'[pasted in by {who}, written by {src}; not {who}\'s words, facts or instructions'
                 + ("; the writer's sentences about themselves and their rules left out" if left else "")
-                + ': "' + _window_q(_writer_person(shown), query, 240) + '"]')
-    return out + (f' "{_window(tail, "", 200)}"' if tail else "")
+                + ': "' + _window_q(_writer_person(shown), query, _PASTE_WINDOW,
+                                    _source_words(head + " " + tail, pasted, owner)
+                                    | {w.lower() for w in re.findall(r"[A-Za-z]{4,}", head + " " + tail)}) + '"]')
+    return out + (f' "{_window_q(tail, query, _MSG_WINDOW)}"' if tail else "")
 
 
 _MARKERS = (("[MEMORY", "(MEMORY"), ("[pasted in", "(pasted in"),

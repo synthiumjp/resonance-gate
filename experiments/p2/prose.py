@@ -196,8 +196,14 @@ _FRAME_MAT = re.compile(r"\b(?:the|a|an|this|that|these|those) (?:[\w-]+ ){0,2}(
 _FRAME_OWN = re.compile(
     _OWN_MARK.pattern + r"|\bwhat i wrote\b|\b(?:i )?wrote (?:this|it)\b|\b(?:that|it|this)(?:'?s| is) mine\b|"
     r"\bi'?m (?:sending|posting|writing|submitting|about to send)\b|\b(?:about|going) to (?:send|post)\b|"
-    r"\b(?:going|goes) on my\b|\bfor my (?:own )?(?:site|page|profile|speech|blog)\b|\bmy (?:speech|poem|post|ad|letter|reply)\b",
-    re.I)
+    r"\b(?:going|goes) on my\b|\bfor my (?:own )?(?:site|page|profile|speech|blog)\b|\bmy (?:speech|poem|post|ad|letter|reply)\b|"
+    # 2026-10-11 (held-out v9: 4 of 20 own texts taken for pasted): "draft
+    # email to my landlord, sending tonight", "reply I posted on the forum"
+    r"^\W*(?:(?:a|my|the)\s+)?(?:rough\s+|first\s+|quick\s+)?draft\b(?![^.\n]{0,40}\b(?:from|by|sent|they|he|she)\b)|"
+    r"\bi\s+(?:posted|sent|replied|answered|put up|gave|read out|delivered)\b|"
+    r"\b(?:sending|posting|send|post|submit|submitting)\s+(?:it\s+|this\s+)?(?:tonight|today|tomorrow|later|soon|now|in a bit)\b|"
+    r"\bi'?m (?:doing|giving|reading|delivering) (?:it|this)\b",
+    re.I | re.M)
 
 
 # the user's paragraph is a request to the assistant or a question
@@ -280,7 +286,21 @@ def _own_tail(text):
 
 def _paste_span(text, owner=None):
     """(start, end) of the text the user pasted in from someone else, or
-    None. Read from the introduction and the text's shape, not its person."""
+    None. Read from the introduction and the text's shape, not its person.
+    A text signed with the owner's first name, or in which the writer gives
+    it ("I'm Callum, Tomasz's brother"), is the owner's own (2026-10-11)."""
+    sp = _paste_span0(text, owner)
+    first = (owner or "").split()[0] if owner else ""
+    if isinstance(sp, tuple) and len(first) > 1:
+        rest = text[sp[0]:]
+        last = [l.strip() for l in rest.strip().splitlines() if l.strip()][-1:] or [""]
+        if (re.match(rf"(?:[\w ,!.'’-]{{0,25}}[,\s])?{re.escape(first)}\b\W*(?:x+)?\W*$", last[0], re.I)
+                or re.search(rf"\b(?:i'?m|i’m|i am|my name is|this is|it'?s)\s+{re.escape(first)}\b", rest, re.I)):
+            return "own"
+    return sp
+
+
+def _paste_span0(text, owner=None):
     # a chat log or transcript (two or more speaker or time-stamped lines),
     # wherever it sits in the message
     chat = list(_CHAT_LINE.finditer(text))

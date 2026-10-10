@@ -440,6 +440,40 @@ misses own text taken for pasted with the fact left out. The window's focus
 sentence was not the fact's in those 7: to be found on development data
 and measured on a new set.
 
+**After v9 (2026-10-11).** A development set at the size v9 tested
+(`cases_dev_pasted_long.jsonl`, 40, written by an agent without the rules:
+24 pastes of 800-1,300 characters with the fact past character 600, half
+the questions naming the source; 16 of the user's own texts in pasted
+shapes) reproduced both misses: with the v9 code the fact was in view in
+11 of 24 long pastes, and 4 of 16 own texts were taken for pasted. Causes
+and changes:
+- the window was 240 characters for pasted text, the user's words after a
+  paste got 200 with no focus (and detection sometimes ends a paste early,
+  leaving its end there), and the question's words for the source
+  ("landlord", "council") pulled the focus to the paste's opening. Now 1,500
+  for pasted text and 800 for a message, before and after a paste alike,
+  cut around the question beyond that, the source's words not counted;
+- the writer's sentences about themselves are left out only for a question
+  about the user (with I, me or my): "where's mum's birthday dinner?" is
+  answered from a sister's "I've booked Lucia's";
+- own text: an introduction like "draft email to my landlord, sending
+  tonight" or "reply I posted on the forum", a text signed with the owner's
+  first name or in which the writer gives it ("I'm Callum").
+No detection changed on the 5,882 LoCoMo messages or the other development
+sets except one own post now kept. Under the v7 protocol, v9 code -> now:
+
+| | v9 code | now |
+|---|---|---|
+| long pastes, source named (12) | 5 | 10 |
+| long pastes, source not named (12) | 6 | 12 |
+| own texts in pasted shapes (16) | 13 | 16 |
+| pasted claims given as the user's (94) | 2 | 2 |
+| own material, dev pasted sets (36) | 30 | 31 |
+| short pasted facts (24) | 24 | 24 |
+
+Changes, preferences, advice, paraphrase and decisions unchanged. Not yet
+measured on a held-out set.
+
 **The secret filter (2026-10-10).** v8 showed a pasted recipe's
 introduction removed as "[secret removed]": "recipe card:" read as a card
 credential, and the next sentence went with it. Ordinary words had been

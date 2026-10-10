@@ -269,8 +269,9 @@ pasted text but not all; see above).
   that text by its source, the writer's sentences about themselves and their
   general rules are left out; dates, times and places stay. On the newest
   held-out set (v9) a pasted claim or instruction was taken for yours in 4
-  of 40 (plain retrieval 22). The cost: a fact deep in a long paste can be
-  missed, and your own text, when taken for pasted, can lose its facts.
+  of 40 (plain retrieval 22). The costs it showed (a fact deep in a long
+  paste missed; your own text, taken for pasted, losing its facts) have
+  been worked on since, on development data only.
 - Sessions are stored automatically in Claude Code. Hooks for Codex CLI,
   Gemini CLI and Cursor are included but have not yet been tested inside
   those apps. A ChatGPT or Claude.ai data export can be imported.

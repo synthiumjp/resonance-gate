@@ -242,9 +242,32 @@ def test_impersonal_keeps_facts_and_drops_the_writers_self_and_rules(pasted, kep
 # its opening sentence kept
 def test_long_message_window_keeps_the_part_asked_about():
     from memory_api import _quote_own
-    filler = "We have refreshed our website and our offices will be refurbished in spring. " * 8
+    filler = "We have refreshed our website and our offices will be refurbished in spring. " * 25
     text = "Policy summary email from my home insurer, pasting:\n\n" + filler + "Policy renews on 14 November."
     out = _quote_own(text, "Ana Diaz", "When does the home insurance renew?")
     assert "14 November" in out and "home insurer" in out
     assert "14 November" not in _quote_own(text, "Ana Diaz", None)
+
+
+# 2026-10-11 (held-out v9): own text taken for pasted lost its facts
+@pytest.mark.parametrize("text", [
+    "draft email to my landlord, sending tonight if it's fine\n\nHi Mr Visser,\n\nI have lived at flat 4B "
+    "for three years and pay 950 a month.\n\nThanks,\nDennis",
+    "reply I posted on the forum\n\nNot a doctor, but my experience: I'm allergic to penicillin, found out "
+    "at age 9.",
+    "speech for my brother's wedding\n\nGood evening everyone. For those who don't know me, I'm Dennis, "
+    "his younger brother. Our family moved from Gdansk when I was six.",
+])
+def test_own_text_in_pasted_shapes_is_kept(text):
+    from prose import prose_only
+    out = prose_only(text, "Dennis Achterberg")
+    assert "950" in out or "penicillin" in out or "Gdansk" in out
+
+
+def test_writers_details_are_kept_for_a_question_not_about_the_user():
+    from memory_api import _quote_own
+    text = ("My sister's message in the family group, saving it:\n\nHi all! I've booked Lucia's for "
+            "Saturday at 7.30 for mum's birthday. I'm vegetarian so I asked for a set menu.")
+    assert "Lucia's" in _quote_own(text, "Giulia Ferrari", "where's mum's birthday dinner?")
+    assert "vegetarian" not in _quote_own(text, "Giulia Ferrari", "Am I vegetarian?")
 

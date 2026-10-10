@@ -15506,4 +15506,11 @@ and how to run everything).
   checked only by a unit test, never end to end on long pastes: the lesson
   is to build the dev case for a change's cost at the size the change is
   about.
+- After v9: dev set cases_dev_pasted_long (40, agent-written) reproduced
+  both misses (v9 code: long-paste facts 11/24 in view, 24/40 answered).
+  Windows 240/400 -> 1,500/800, head and tail windowed by the question,
+  source words out of the focus; self-sentence filter only for questions
+  about the user; own-text intros and owner-signature check. Dev: long
+  pastes 24 -> 38 of 40, FM 2/94 unchanged, own 30 -> 31 of 36, rest
+  unchanged; 1,314 tests. Held out: needs v10.
 
