@@ -152,6 +152,20 @@ inside pasted text were answered in 13 of 20 (target 16; plain retrieval
 did not hold the fact. Everything is in
 `bench/false_memory/results_v9/SUMMARY.md`.
 
+After v9, pasted text and long messages were shown in longer windows cut
+around the question, the writer's details were left out only for questions
+about you, and your own text was recognised by how you introduce or sign
+it. A sixth held-out set (v10: 120 scenarios, 2026-10-11) met five of six
+hypotheses. Pasted claims or instructions given as the user's: 3 of 40 (8%;
+plain retrieval 23, agentmemory 20, ai-memory 0; p<0.001 against the first
+two). Facts inside pasted text were answered in 17 of 20 (plain retrieval
+20, agentmemory 8), 11 of the 12 long pastes among them. Pooled false
+memories 4 of 60 (plain retrieval 26, agentmemory 20); changes 1 of 20,
+everyday facts 18 of 20. The miss: the user's own material was answered in
+13 of 20 (target 15; plain retrieval 19). In 6 of the 7 misses the fact was
+in what the reader was given and it said it did not know. Everything is in
+`bench/false_memory/results_v10/SUMMARY.md`.
+
 LoCoMo (conversations 2-9, 1,307 questions), against Mem0, with the same
 local reader and judge:
 
@@ -271,10 +285,11 @@ pasted text but not all; see above).
   someone else's (a letter, a chat log, a review). Unless you ask about
   that text by its source, the writer's sentences about themselves and their
   general rules are left out; dates, times and places stay. On the newest
-  held-out set (v9) a pasted claim or instruction was taken for yours in 4
-  of 40 (plain retrieval 22). The costs it showed (a fact deep in a long
-  paste missed; your own text, taken for pasted, losing its facts) have
-  been worked on since, on development data only.
+  held-out set (v10) a pasted claim or instruction was taken for yours in 3
+  of 40 (plain retrieval 23), and facts inside pasted text were answered in
+  17 of 20. Your own pasted-looking material (drafts, letters, diary
+  entries) is answered less often than with plain retrieval (13 of 20
+  against 19).
 - Sessions are stored automatically in Claude Code. Hooks for Codex CLI,
   Gemini CLI and Cursor are included but have not yet been tested inside
   those apps. A ChatGPT or Claude.ai data export can be imported.

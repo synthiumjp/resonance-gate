@@ -15514,3 +15514,25 @@ and how to run everything).
   pastes 24 -> 38 of 40, FM 2/94 unchanged, own 30 -> 31 of 36, rest
   unchanged; 1,314 tests. Held out: needs v10.
 
+## Entry 321 — 2026-10-11 (re-measure 8473783; held-out v10)
+
+- Release re-measure on 8473783: suite 1,314; LoCoMo 64.8 / 67.0 / 70.2
+  (181aff3: 64.6 / 67.7 / 69.9), strict 49.7 / 49.9 / 53.2; LongMemEval and
+  held-out v3/v4/coding/projects identical. Small notes -9: all 16 lost
+  questions have different notes in context (input text changed by the
+  secret-filter fix), none differ only in messages. README numbers now from
+  8473783 (were 1754180).
+- v10 (34cbcf7, audited 6/240): 5 of 6 met. Pasted 3/40 (rag 23,
+  agentmemory 20, ai-memory 0); pasted facts 17/20 (named 9, unnamed 8;
+  long 11/12); changes 1/20; everyday 18/20; pooled 4/60 (26, 20, 7).
+  Across v6-v10: 82, 32, 22, 10, 8%.
+- Missed own material 13/20 (rag 19, p=0.04). Cause shifted: own text
+  marked pasted 4/20 (v9 6), fact left out once (v9 4); 6 of 7 misses are
+  reader refusals with the fact in the block, 5 of them plain user lines.
+  Plain retrieval with the same reader: 19/20. Next: find on dev data why
+  the reader refuses on our block (compare blocks for own-material dev
+  items answered by rag and refused by us), measure on a new set (v11).
+- U misses: 1 long unmarked message cut by the 800 window (fact ~1,500);
+  1 credential removed by the secret filter (by design); 1 strict-match
+  format miss.
+

@@ -471,8 +471,20 @@ sets except one own post now kept. Under the v7 protocol, v9 code -> now:
 | own material, dev pasted sets (36) | 30 | 31 |
 | short pasted facts (24) | 24 | 24 |
 
-Changes, preferences, advice, paraphrase and decisions unchanged. Not yet
-measured on a held-out set.
+Changes, preferences, advice, paraphrase and decisions unchanged.
+
+**Held-out v10 (2026-10-11).** Run once on the frozen code (34cbcf7) and
+audited blind: five of six hypotheses met. Pasted claims given as the
+user's 3 of 40 (plain retrieval 23); facts in pasted text 17 of 20, long
+pastes 11 of 12 (v9: 13 of 20, long pastes 0 of 7); changes 1 of 20;
+everyday 18 of 20; pooled false memories 4 of 60 (plain retrieval 26).
+Missed: own material 13 of 20 (target 15; plain retrieval 19). Own text
+taken for pasted lost its fact once (v9: 4). In 6 of the 7 misses the fact
+was in the block and the reader said it did not know; in 5 of those the
+text was shown plainly as the user's words. Of the 3 pasted-fact misses: a
+long message not marked as pasted, cut by the 800-character window; a
+credential the secret filter removed; a time written differently from the
+expected term. `bench/false_memory/results_v10/SUMMARY.md`.
 
 **The secret filter (2026-10-10).** v8 showed a pasted recipe's
 introduction removed as "[secret removed]": "recipe card:" read as a card
