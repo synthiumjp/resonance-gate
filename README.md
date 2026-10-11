@@ -157,12 +157,12 @@ local reader and judge:
 
 | | sourcedrecall | with the built-in notes model | with notes by Qwen3-14B | Mem0 2.2.1 | plain retrieval |
 |---|---|---|---|---|---|
-| answered correctly | 64.7% | 68.2% (small) / 70.3% (standard) | 73.1% | 64.6% | 56.6% |
-| temporal questions | 53.5% | 58.9% / 57.4% | 57.4% | 37.2% | 49.6% |
-| single-hop | 75.5% | 79.0% / 81.6% | 85.4% | 77.9% | 66.9% |
-| multi-hop | 52.3% | 55.2% / 59.0% | 62.3% | 61.9% | 39.3% |
+| answered correctly | 64.8% | 67.0% (small) / 70.2% (standard) | 73.1% | 64.6% | 56.6% |
+| temporal questions | 53.5% | 53.9% / 56.2% | 57.4% | 37.2% | 49.6% |
+| single-hop | 75.8% | 78.7% / 80.7% | 85.4% | 77.9% | 66.9% |
+| multi-hop | 52.3% | 54.0% / 60.3% | 62.3% | 61.9% | 39.3% |
 | model calls to store the conversations | 0 | 468, in-process | 468, to a local server | 941 (generation and embedding) | 0 (one embedding per message) |
-| context per question (tokens) | 696 | 1,048 / 1,037 | 1,230 | 722 | 356 |
+| context per question (tokens) | 695 | 1,045 / 1,038 | 1,230 | 722 | 356 |
 
 The tie with Mem0 comes from temporal questions, where Mem0 was handicapped:
 it accepts no timestamp, so dates were written into the messages. Without
@@ -170,7 +170,7 @@ them, sourcedrecall answers 67.4% and Mem0 71.3%, and Mem0 leads on
 single-hop, multi-hop and open-domain questions. An audit of LoCoMo
 (Penfield Labs, April 2026, github.com/dial481/locomo-audit) found 99 of its
 1,540 gold answers wrong, 80 of them in these conversations. Without those
-80: sourcedrecall 66.2%, with notes 69.4% (small) / 72.3% (standard) / 74.5%
+80: sourcedrecall 66.3%, with notes 68.5% (small) / 71.7% (standard) / 74.5%
 (Qwen3-14B), Mem0 66.8%, plain retrieval 58.2% (`LOCOMO_AUDIT` in
 `bench/locomo/score.py`). The judge prompt used here and in Mem0's
 published evaluation ("be generous ... as long as it touches on the same
@@ -178,20 +178,23 @@ topic") accepted 68.5% of the audit's deliberately vague wrong answers with
 our judge (`bench/locomo/judge_stress.py`). With a strict prompt (3% and 20%
 of the audit's specific and vague wrong answers accepted, every gold answer
 in a sample of 120 accepted; `LOCOMO_JUDGE=strict`), the same answers score:
-sourcedrecall 49.4%, Mem0 48.5%, plain retrieval 42.5%; with notes 50.3% /
-53.3% / 55.1%. Without the audit's 80 wrong gold answers: 50.9%, 50.4%,
-43.9%; 51.9% / 55.1% / 57.0%. The order is the same under both judges;
-temporal questions favour sourcedrecall (33.8% against Mem0's 23.5%, strict,
-errors removed) and multi-hop questions Mem0 (37.8% against 27.6%). Mem0 was given its top 10
+sourcedrecall 49.7%, Mem0 48.5%, plain retrieval 42.5%; with notes 49.9% /
+53.2% / 55.1%. Without the audit's 80 wrong gold answers: 51.2%, 50.4%,
+43.9%; 51.5% / 54.9% / 57.0%. The order is the same under both judges;
+temporal questions favour sourcedrecall (34.2% against Mem0's 23.5%, strict,
+errors removed) and multi-hop questions Mem0 (37.8% against 28.1%). Mem0 was given its top 10
 memories for each speaker and plain retrieval its top 10 messages; Mem0
 used the same local Qwen3-14B for its own calls, with thinking off and its
 JSON response format removed (the local server does not support it). The
 benchmark runs sourcedrecall without its conflict model (RG_NLI=0), which
 the server loads by default. These conversations were run for every version
 reported here, and chose the design (messages first) and the notes models,
-so they are not held out. Measured in one run on commit 1754180
-(`bench/RELEASE_1754180.log`; 1,176 tests passed); the Qwen3-14B notes
-column is from commit 49561c4.
+so they are not held out. Measured in one run on commit 8473783
+(`bench/RELEASE_8473783.log`; 1,314 tests passed); the Qwen3-14B notes
+column is from commit 49561c4. Between runs the notes change with the text
+they are written from: the small model scored 68.2% on 1754180, 67.7% on
+181aff3 and 67.0% here, and each of the 16 questions it lost since 181aff3
+has different notes in its context.
 
 Notes are optional. A small model writes short notes once per stored
 conversation, labelled as its notes and kept only where most of their words

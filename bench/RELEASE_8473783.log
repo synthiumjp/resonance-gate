@@ -1,0 +1,87 @@
+== release measure 8473783 Sun Oct 11 10:56:41 AEDT 2026
+== 1. full suite
+1314 passed, 5 skipped in 202.08s (0:03:22)
+== 2. LoCoMo test (convs 2-9), default and each notes model
+-- locomo test default
+| 1 multi-hop | 239 | 125/239 = 52.3% | 148/239 = 61.9% | 94/239 = 39.3% |
+| 2 temporal | 258 | 138/258 = 53.5% | 96/258 = 37.2% | 128/258 = 49.6% |
+| 4 single-hop | 727 | 551/727 = 75.8% | 566/727 = 77.9% | 486/727 = 66.9% |
+| overall (1-4) | 1307 | 847/1307 = 64.8% | 844/1307 = 64.6% | 740/1307 = 56.6% |
+| mean context tokens (len/4) | 695 | 722 | 356 |
+-- locomo test small
+| 1 multi-hop | 239 | 129/239 = 54.0% | 148/239 = 61.9% | 94/239 = 39.3% |
+| 2 temporal | 258 | 139/258 = 53.9% | 96/258 = 37.2% | 128/258 = 49.6% |
+| 4 single-hop | 727 | 572/727 = 78.7% | 566/727 = 77.9% | 486/727 = 66.9% |
+| overall (1-4) | 1307 | 876/1307 = 67.0% | 844/1307 = 64.6% | 740/1307 = 56.6% |
+| mean context tokens (len/4) | 1045 | 722 | 356 |
+-- locomo test standard
+| 1 multi-hop | 239 | 144/239 = 60.3% | 148/239 = 61.9% | 94/239 = 39.3% |
+| 2 temporal | 258 | 145/258 = 56.2% | 96/258 = 37.2% | 128/258 = 49.6% |
+| 4 single-hop | 727 | 587/727 = 80.7% | 566/727 = 77.9% | 486/727 = 66.9% |
+| overall (1-4) | 1307 | 917/1307 = 70.2% | 844/1307 = 64.6% | 740/1307 = 56.6% |
+| mean context tokens (len/4) | 1038 | 722 | 356 |
+== 3. LongMemEval-S retrieval (500 q)
+questions run: 500 (non-abstention 470)
+
+SESSION-LEVEL, non-abstention, all types (n=470)
+| system | any@1 | all@1 | any@3 | all@3 | any@5 | all@5 | any@10 | all@10 |
+|---|---|---|---|---|---|---|---|---|
+| ours | 94.9 | 33.0 | 97.2 | 85.7 | 98.7 | 93.4 | 99.1 | 97.4 |
+| bm25 | 80.0 | 27.9 | 90.6 | 72.8 | 93.6 | 78.5 | 96.4 | 87.0 |
+| bge | 88.9 | 30.4 | 95.5 | 81.3 | 97.0 | 90.4 | 98.5 | 96.2 |
+
+SESSION-LEVEL, non-abstention, excluding single-session-assistant (n=414)
+| system | any@1 | all@1 | any@3 | all@3 | any@5 | all@5 | any@10 | all@10 |
+|---|---|---|---|---|---|---|---|---|
+== 4. false memory, held out (counts only)
+v3 release sourcedrecall {'false_memory_all': '0/30', 'false_memory_a': '0/5', 'false_memory_b': '0/8', 'false_memory_c': '0/6', 'false_memory_d': '0/6', 'false_memory_e': '0/5', 'control_recall': '23/23', 'abstain_explicit_cd': '0/12', 'abstain_lenient_cd': '12/12', 'side_recall_abe': '8/8'}
+v3 release mem0 {'false_memory_all': '2/30', 'false_memory_a': '0/5', 'false_memory_b': '1/8', 'false_memory_c': '0/6', 'false_memory_d': '0/6', 'false_memory_e': '1/5', 'control_recall': '23/23', 'abstain_explicit_cd': '0/12', 'abstain_lenient_cd': '12/12', 'side_recall_abe': '8/8'}
+v3 release rag {'false_memory_all': '0/30', 'false_memory_a': '0/5', 'false_memory_b': '0/8', 'false_memory_c': '0/6', 'false_memory_d': '0/6', 'false_memory_e': '0/5', 'control_recall': '23/23', 'abstain_explicit_cd': '0/12', 'abstain_lenient_cd': '12/12', 'side_recall_abe': '8/8'}
+v4 release sourcedrecall {'false_memory_all': '2/44', 'false_memory_b': '2/44', 'control_recall': '16/16', 'side_recall_abe': '41/44'}
+v4 release rag {'false_memory_all': '7/44', 'false_memory_b': '7/44', 'control_recall': '16/16', 'side_recall_abe': '36/44'}
+codebg release sourcedrecall {'false_memory_all': '0/51', 'false_memory_a': '0/10', 'false_memory_b': '0/14', 'false_memory_c': '0/9', 'false_memory_d': '0/9', 'false_memory_e': '0/9', 'control_recall': '9/9', 'abstain_explicit_cd': '0/18', 'abstain_lenient_cd': '18/18', 'side_recall_abe': '14/14'}
+codebg release rag {'false_memory_all': '3/51', 'false_memory_a': '0/10', 'false_memory_b': '3/14', 'false_memory_c': '0/9', 'false_memory_d': '0/9', 'false_memory_e': '0/9', 'control_recall': '9/9', 'abstain_explicit_cd': '0/18', 'abstain_lenient_cd': '18/18', 'side_recall_abe': '11/14'}
+proj release sourcedrecall {'false_memory_all': '0/32', 'false_memory_a': '0/13', 'false_memory_b': '0/7', 'false_memory_c': '0/6', 'false_memory_e': '0/6', 'control_recall': '11/13', 'abstain_explicit_cd': '0/6', 'abstain_lenient_cd': '6/6', 'side_recall_abe': '7/7'}
+proj release rag {'false_memory_all': '3/32', 'false_memory_a': '2/13', 'false_memory_b': '0/7', 'false_memory_c': '0/6', 'false_memory_e': '1/6', 'control_recall': '7/13', 'abstain_explicit_cd': '0/6', 'abstain_lenient_cd': '6/6', 'side_recall_abe': '7/7'}
+== release measure done Sun Oct 11 20:01:39 AEDT 2026
+
+== 5. LoCoMo judged again with the strict prompt (LOCOMO_JUDGE=strict, rejudge.py), same answers; Mem0 and plain retrieval as in strict_release_test_default
+-- strict default
+| category | n | sourcedrecall_strict | mem0_strict | rag_strict |
+| 1 multi-hop | 239 | 64/239 = 26.8% | 88/239 = 36.8% | 56/239 = 23.4% |
+| 2 temporal | 258 | 87/258 = 33.7% | 57/258 = 22.1% | 81/258 = 31.4% |
+| 3 open-domain | 83 | 21/83 = 25.3% | 23/83 = 27.7% | 15/83 = 18.1% |
+| 4 single-hop | 727 | 477/727 = 65.6% | 466/727 = 64.1% | 403/727 = 55.4% |
+| overall (1-4) | 1307 | 649/1307 = 49.7% | 634/1307 = 48.5% | 555/1307 = 42.5% |
+-- strict default, audit errors removed
+| category | n | sourcedrecall_strict | mem0_strict | rag_strict |
+| 1 multi-hop | 217 | 61/217 = 28.1% | 82/217 = 37.8% | 54/217 = 24.9% |
+| 2 temporal | 234 | 80/234 = 34.2% | 55/234 = 23.5% | 76/234 = 32.5% |
+| 3 open-domain | 76 | 21/76 = 27.6% | 22/76 = 28.9% | 15/76 = 19.7% |
+| 4 single-hop | 700 | 466/700 = 66.6% | 460/700 = 65.7% | 394/700 = 56.3% |
+| overall (1-4) | 1227 | 628/1227 = 51.2% | 619/1227 = 50.4% | 539/1227 = 43.9% |
+-- strict small
+| 1 multi-hop | 239 | 65/239 = 27.2% |
+| 2 temporal | 258 | 82/258 = 31.8% |
+| 3 open-domain | 83 | 21/83 = 25.3% |
+| 4 single-hop | 727 | 484/727 = 66.6% |
+| overall (1-4) | 1307 | 652/1307 = 49.9% |
+-- strict small, audit errors removed
+| 1 multi-hop | 217 | 62/217 = 28.6% |
+| 2 temporal | 234 | 76/234 = 32.5% |
+| 3 open-domain | 76 | 21/76 = 27.6% |
+| 4 single-hop | 700 | 473/700 = 67.6% |
+| overall (1-4) | 1227 | 632/1227 = 51.5% |
+-- strict standard
+| 1 multi-hop | 239 | 80/239 = 33.5% |
+| 2 temporal | 258 | 85/258 = 32.9% |
+| 3 open-domain | 83 | 25/83 = 30.1% |
+| 4 single-hop | 727 | 505/727 = 69.5% |
+| overall (1-4) | 1307 | 695/1307 = 53.2% |
+-- strict standard, audit errors removed
+| 1 multi-hop | 217 | 76/217 = 35.0% |
+| 2 temporal | 234 | 78/234 = 33.3% |
+| 3 open-domain | 76 | 24/76 = 31.6% |
+| 4 single-hop | 700 | 496/700 = 70.9% |
+| overall (1-4) | 1227 | 674/1227 = 54.9% |
+== strict done Sun Oct 11 21:56:46 AEDT 2026
