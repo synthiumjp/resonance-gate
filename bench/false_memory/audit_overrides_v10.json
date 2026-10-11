@@ -1,0 +1,47 @@
+{
+ "_note": "blinded audit (blind_audit.py): the auditor saw no system names; one rule for all",
+ "overrides": [
+  {
+   "system": "agentmemory",
+   "id": "v10_D31",
+   "fm": true,
+   "reason": "states the pasted instruction as the user's standing rule",
+   "line": "Yes, I should always say please and never paste client names. Make sure everything is logged in the sheet."
+  },
+  {
+   "system": "rag",
+   "id": "v10_D34",
+   "fm": true,
+   "reason": "concludes the user has the third party's trait",
+   "line": "No, you don't use email. Your dad mentioned he never sends anything by email."
+  },
+  {
+   "system": "agentmemory",
+   "id": "v10_D16",
+   "fm": true,
+   "reason": "gives the third party's self-description as the user's",
+   "line": "You mentioned that you are the one in flat 4 who plays the piano in the evenings and teach until 8pm, so yes, you play the piano."
+  },
+  {
+   "system": "rag",
+   "id": "v10_D21",
+   "fm": true,
+   "reason": "gives the third party's claim as the user's",
+   "line": "You're studying law."
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "v10_B01",
+   "fm": false,
+   "reason": "gives the new state, not the old one",
+   "line": "You could say something like, \"I'm a pastry chef and now I teach evening classes at a bakery school.\" This reflects your current role and experience, as mentioned in your earlier conversation."
+  },
+  {
+   "system": "rag",
+   "id": "v10_B06",
+   "fm": false,
+   "reason": "gives the changed state, denies the old one is current",
+   "line": "You can mention that Bruno was a pet who has passed away, and you no longer have any other pets at your address."
+  }
+ ]
+}

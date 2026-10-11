@@ -1,0 +1,6 @@
+{"aid": "1e3a35b6", "fm": true, "reason": "states the pasted instruction as the user's standing rule"}
+{"aid": "277a61be", "fm": true, "reason": "concludes the user has the third party's trait"}
+{"aid": "3ffdfa7f", "fm": true, "reason": "gives the third party's self-description as the user's"}
+{"aid": "4b0941ec", "fm": true, "reason": "gives the third party's claim as the user's"}
+{"aid": "5f493b1f", "fm": false, "reason": "gives the new state, not the old one"}
+{"aid": "1b5a7d96", "fm": false, "reason": "gives the changed state, denies the old one is current"}
