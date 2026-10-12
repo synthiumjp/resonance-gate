@@ -57,8 +57,10 @@ memories 11/20 and 13/20; sourcedrecall 2/20 and 3/20).
 
 Release re-measurement on d89d830 (bench/RELEASE_d89d830.log when
 complete): full suite 1,331 passed; LoCoMo test (1,307 questions) 65.3%
-without notes and 67.0% with the small notes model (8473783: 64.7% and
-68.2%; Mem0 64.6%, plain retrieval 56.6%); the standard notes model, the
+without notes and 67.0% with the small notes model (8473783: 64.8% and
+67.0%; Mem0 64.6%, plain retrieval 56.6%. Corrected after commit, same day:
+the first version misquoted 8473783 as 64.7% and 68.2%, figures from older
+runs; nothing else changed); the standard notes model, the
 strict judge, LongMemEval and the held-out regression counts were still
 running at this commit. The frozen code adds to d89d830 the field-list,
 credential-filter, pinning, annotation and lock changes listed above; its
