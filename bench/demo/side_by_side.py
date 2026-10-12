@@ -98,10 +98,10 @@ def run_mem0(out_path):
     for date, turns in CONVS:
         m.add([{"role": r, "content": t} for r, t in turns], user_id="dana",
               metadata={"date": date})
-    stored = [x["memory"] for x in m.get_all(user_id="dana")["results"]]
+    stored = [x["memory"] for x in m.get_all(filters={"user_id": "dana"})["results"]]
     out = {"system": "Mem0 2.2.1", "stored": stored, "memory": {}}
     for q in QUESTIONS:
-        hits = m.search(q, user_id="dana", limit=5)["results"]
+        hits = m.search(q, filters={"user_id": "dana"}, top_k=5)["results"]
         out["memory"][q] = "\n".join(f"- {h['memory']}" for h in hits)
     json.dump(out, open(out_path, "w"), indent=1)
     shutil.rmtree(d, ignore_errors=True)
