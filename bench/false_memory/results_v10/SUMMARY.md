@@ -61,3 +61,20 @@ for a different reason: with the fact in front of it, the reader said it did
 not know in 6 of 7 misses, while the same reader given plain retrieval's
 lines answered 19 of 20. Why it refuses on sourcedrecall's block is not yet
 known; any fix is measured on a different set.
+
+## Added 2026-10-12: how often each reader said it did not know
+
+Reported, not a hypothesis (the adversarial review of 2026-10-12, 1.8: a
+refusal is never a false memory, so the false-memory counts reward
+refusing). Counted by a fixed pattern over the answer
+(`v11_tests.py` `_DONT_KNOW`, written for v11 and run here on the
+published answers):
+
+| | sourcedrecall | plain retrieval | agentmemory | ai-memory |
+|---|---|---|---|---|
+| D, pasted claims (40; refusing is right) | 35 | 15 | 17 | 40 |
+| D, own material (20; refusing is wrong) | 7 | 1 | 3 | 17 |
+| U, facts in pasted text (20) | 2 | 0 | 11 | 18 |
+| B, changes (20) | 2 | 3 | 3 | 6 |
+| X, everyday (20) | 1 | 0 | 0 | 3 |
+

@@ -164,8 +164,12 @@ two). Facts inside pasted text were answered in 17 of 20 (plain retrieval
 memories 4 of 60 (plain retrieval 26, agentmemory 20); changes 1 of 20,
 everyday facts 18 of 20. The miss: the user's own material was answered in
 13 of 20 (target 15; plain retrieval 19). In 6 of the 7 misses the fact was
-in what the reader was given and it said it did not know. Everything is in
-`bench/false_memory/results_v10/SUMMARY.md`.
+in what the reader was given and it said it did not know. A refusal is
+never counted as a false memory, so read the false-memory counts with how
+often each reader said it did not know: on the 40 pasted claims (where that
+is the right answer) sourcedrecall 35, plain retrieval 15, agentmemory 17,
+ai-memory 40; on the 20 own items (where it is wrong) 7, 1, 3 and 17.
+Everything is in `bench/false_memory/results_v10/SUMMARY.md`.
 
 LoCoMo (conversations 2-9, 1,307 questions), against Mem0, with the same
 local reader and judge:
