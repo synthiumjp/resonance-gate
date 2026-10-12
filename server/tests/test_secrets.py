@@ -89,7 +89,7 @@ def test_only_the_credential_sentence_goes():
 @pytest.mark.parametrize("text", [
     "a-" * 20000 + "token=abc", "foo.bar." * 5000 + " password: x",
     "a-b-c-d-e-f-g-" * 3000 + "\n", "x" * 40000,
-])
+], ids=["hyphens", "dots", "letters-and-hyphens", "one-long-word"])  # short ids: Windows caps an env var at 32,767
 def test_long_runs_of_word_characters_are_quick(text):
     # review 2026-10-12 (3.16): an 8 KB run of "a-" took 8 s; scrub() runs
     # on every stored turn, and pasted logs and lockfiles are long

@@ -33,7 +33,9 @@ jobs:
             ~/nltk_data
           key: models-${{ runner.os }}-${{ hashFiles('server/sourcedrecall/setup_models.py', 'experiments/p2/ort_models.py') }}
       - run: sourcedrecall-setup
-      - run: python -m pytest -q rgx experiments/p2 tools server
+      # rgx's own tests find the parser through RGX_PARSER_MODELS, which the
+      # server sets for itself
+      - run: RGX_PARSER_MODELS=$HOME/.sourcedrecall/parser-models python -m pytest -q rgx experiments/p2 tools server
         env:
           PYTHONPATH: server
           HF_HUB_OFFLINE: "1"
