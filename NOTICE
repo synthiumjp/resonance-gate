@@ -9,3 +9,31 @@ If you use or adapt this work, please cite:
   retrieval geometry in a vector-symbolic memory. Zenodo.
   https://doi.org/10.5281/zenodo.21446859
 Pre-registration: https://osf.io/95e2q
+
+Third-party materials
+---------------------
+sourcedrecall's code is Apache-2.0. Setup downloads the models below, each
+under its own terms; the parser and notes models are converted or trained
+copies that sourcedrecall publishes on Hugging Face.
+
+- Stanza 1.14.0 (Stanford NLP Group), Apache-2.0. The English tokenizer,
+  multi-word token, part-of-speech, lemma and dependency models and their
+  character language models and word vectors, converted to ONNX by
+  sourcedrecall (sourcedrecall-parser-en). Stanza's English "combined"
+  models are trained on Universal Dependencies treebanks (EWT, GUM,
+  GUMReddit, PUD, Pronouns) whose licences differ (CC BY-SA 3.0 and 4.0,
+  CC BY 4.0, and CC BY-NC-SA for some GUM texts; GUMReddit text is under
+  Reddit's terms). Stanford describes the licensing of models built from
+  UD data as unclear; see https://stanfordnlp.github.io/stanza/ and
+  https://universaldependencies.org.
+- BAAI/bge-small-en-v1.5, MIT License.
+- cross-encoder/ms-marco-MiniLM-L6-v2, Apache-2.0; trained on MS MARCO,
+  which Microsoft provides for non-commercial research.
+- cross-encoder/nli-deberta-v3-xsmall, Apache-2.0; trained on SNLI
+  (CC BY-SA 4.0) and MultiNLI.
+- Qwen3-0.6B and Qwen3-1.7B (Alibaba Cloud), Apache-2.0. Modified by
+  sourcedrecall: fine-tuned to write notes and quantized to int4 ONNX
+  (sourcedrecall-notes-en, optional).
+- WordNet 3.0, Copyright 2006 by Princeton University, under the WordNet
+  License (https://wordnet.princeton.edu/license-and-commercial-use),
+  downloaded by NLTK. Princeton University does not endorse this product.
