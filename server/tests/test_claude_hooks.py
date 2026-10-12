@@ -39,6 +39,18 @@ def _transcript(path):
         _line(type="user", isSidechain=True, message={"role": "user",
               "content": "I live in Mordor."}),
         _line(type="system", content="compact boundary"),
+        # 2026-10-12: user-role lines the person did not type
+        _line(type="user", isCompactSummary=True, isVisibleInTranscriptOnly=True,
+              turnOrigin="human", message={"role": "user", "content":
+              "This session is being continued. The user lives in Gondor."}),
+        _line(type="user", turnOrigin="task_notification", message={
+              "role": "user", "content": "The agent found I live in Rohan."}),
+        _line(type="user", message={"role": "user", "content":
+              "<task-notification>I live in Mirkwood.</task-notification>"}),
+        _line(type="user", turnOrigin="peer", message={"role": "user",
+              "content": "I live in Lothlorien."}),
+        _line(type="user", turnOrigin="human", message={"role": "user",
+              "content": "My sister lives in Bree."}),
     ]
     path.write_text("".join(rows))
     return str(path)
@@ -52,9 +64,11 @@ def test_the_reader_keeps_only_human_speech_and_visible_replies(tmp_path):
          "I live in Fitzroy and I work as a nurse at St Vincent's."},
         {"role": "assistant", "content": "Thanks! Noted."},
         {"role": "user", "content": "I'm allergic to penicillin."},
+        {"role": "user", "content": "My sister lives in Bree."},
     ]
     joined = json.dumps(turns)
-    for leaked in ("Narnia", "Mordor", "Atlantis", "/model", "the user is a nurse"):
+    for leaked in ("Narnia", "Mordor", "Atlantis", "/model", "the user is a nurse",
+                   "Gondor", "Rohan", "Mirkwood", "Lothlorien"):
         assert leaked not in joined, leaked
 
 

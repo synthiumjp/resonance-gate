@@ -43,7 +43,7 @@ import tempfile
 # local command output, the harness's own injected caveats.
 _NOT_SPEECH = re.compile(
     r"^\s*(<command-name>|<command-message>|<command-args>|<local-command-"
-    r"|<bash-input>|<bash-stdout>|<bash-stderr>|Caveat:)", re.S)
+    r"|<bash-input>|<bash-stdout>|<bash-stderr>|<task-notification>|Caveat:)", re.S)
 _INJECTED = re.compile(r"<system-reminder>.*?</system-reminder>", re.S)
 _OWN_SUMMARY = re.compile(r"\[MEMORY[^\]]*\].*?(?:\[MEMORY RULES\][^\n]*|\Z)", re.S)
 
@@ -69,6 +69,12 @@ def read_transcript(path):
             except ValueError:
                 continue
             if o.get("isSidechain") or o.get("isMeta"):
+                continue
+            # 2026-10-12 (review): user-role lines the person did not type --
+            # the summary Claude Code writes after /compact, background-task
+            # and subagent results, messages from other sessions
+            if (o.get("isCompactSummary") or o.get("isVisibleInTranscriptOnly")
+                    or o.get("turnOrigin") not in (None, "human")):
                 continue
             t = o.get("type")
             if t not in ("user", "assistant"):
