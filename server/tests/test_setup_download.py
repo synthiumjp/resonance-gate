@@ -7,6 +7,18 @@ import os
 import tarfile
 import threading
 
+import pytest
+
+
+@pytest.fixture
+def install_archive(monkeypatch):
+    """setup_models turns network access on at import; keep that out of the
+    rest of the test run (as test_setup_notes does)."""
+    for k in ("HF_HUB_OFFLINE", "TRANSFORMERS_OFFLINE"):
+        monkeypatch.setenv(k, os.environ.get(k, "1"))
+    from sourcedrecall.setup_models import install_archive
+    return install_archive
+
 
 def _archive():
     buf = io.BytesIO()
@@ -37,8 +49,7 @@ def _server(blob, seen):
     return httpd
 
 
-def test_a_broken_download_resumes_and_installs(tmp_path, capsys):
-    from sourcedrecall.setup_models import install_archive
+def test_a_broken_download_resumes_and_installs(tmp_path, capsys, install_archive):
     blob = _archive()
     seen = []
     httpd = _server(blob, seen)
@@ -53,9 +64,7 @@ def test_a_broken_download_resumes_and_installs(tmp_path, capsys):
     assert "resuming parser download" in capsys.readouterr().out
 
 
-def test_a_corrupt_partial_is_not_kept(tmp_path):
-    import pytest
-    from sourcedrecall.setup_models import install_archive
+def test_a_corrupt_partial_is_not_kept(tmp_path, install_archive):
     blob = _archive()
     httpd = _server(blob, [])
     dest = str(tmp_path / "parser-models")
