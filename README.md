@@ -370,6 +370,7 @@ treebanks that include some non-commercial text.
 
 ## More
 
+- Questions people ask (is this just RAG? what about Claude Code's memory?): [`docs/FAQ.md`](docs/FAQ.md)
 - Full documentation: [`server/README.md`](server/README.md)
 - What changed in each version: [`docs/CHANGELOG.md`](docs/CHANGELOG.md)
 - Rerunning the benchmarks: [`bench/REPRODUCE.md`](bench/REPRODUCE.md)
