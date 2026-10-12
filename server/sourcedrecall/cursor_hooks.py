@@ -151,11 +151,12 @@ def _store(conversation_id, owner, cwd, delete, sync):
     # predictable /tmp path anyone can read or pre-create as a symlink
     from sourcedrecall.paths import private_dir, state_dir
     log = os.path.join(private_dir(state_dir()), "hook.log")
-    with open(log, "a") as lf:
+    from sourcedrecall.paths import detached
+    with open(log, "a", encoding="utf-8") as lf:
         subprocess.Popen([sys.executable, "-m", "sourcedrecall.claude_hooks",
                           "_worker", job.name],
                          stdin=subprocess.DEVNULL, stdout=lf, stderr=lf,
-                         start_new_session=True)
+                         **detached())
     return {"stored": "pending", "job": job.name, "log": log}
 
 

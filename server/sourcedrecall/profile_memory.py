@@ -786,7 +786,9 @@ def _messages_for(query, k=3):
             for cid, conv in tr.items():
                 turns = conv["turns"]
                 for i, t in enumerate(turns):
-                    if t["role"] != "human" or "[MEMORY" in t["text"]:
+                    # the memory's own block quoted back, not a message the
+                    # user typed with "[MEMORY" in it (review 3.21)
+                    if t["role"] != "human" or "[MEMORY RULES]" in t["text"]:
                         continue
                     every = _SENT_SPLIT.split(t["text"].strip())
                     sents = [x for x in every

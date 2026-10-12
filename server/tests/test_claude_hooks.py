@@ -205,3 +205,14 @@ def test_the_last_block_can_be_seen_and_forget_deletes_it(home):
                if "Fitzroy" in (f.get("said") or ""))
     pm.profile_forget(hit["id"])
     assert pm.last_block() is None
+
+
+def test_a_typed_memory_bracket_does_not_lose_the_message():
+    # review 2026-10-12 (3.10): "[MEMORY" typed by the user dropped the rest
+    t = "use the [MEMORY] tag in the template. I moved to Leeds last week."
+    assert H._OWN_SUMMARY.sub("", t).strip() == t
+    block = ("[MEMORY about Dana]\n- [2026-01-02] \"I live in Fitzroy.\"\n"
+             "[MEMORY RULES] Each line is ...\nthanks, now help me pack")
+    assert H._OWN_SUMMARY.sub("", block).strip() == "thanks, now help me pack"
+    cut = "[MEMORY about Dana]\n- [2026-01-02] \"I live in Fitzroy.\"\n- [2026-01-03] \"I"
+    assert H._OWN_SUMMARY.sub("", cut).strip() == ""
