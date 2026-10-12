@@ -17,6 +17,7 @@ import json
 import os
 import re
 import sys
+import time
 import urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -73,7 +74,16 @@ def _call(prompt):
     req = urllib.request.Request(READER.rstrip("/") + "/chat/completions",
                                  json.dumps(body).encode(),
                                  {"Content-Type": "application/json"})
-    out = json.loads(urllib.request.urlopen(req, timeout=600).read())
+    # 2026-10-12 (review 2.8): one failed call used to end the whole run;
+    # three tries, then the error (an answer is never invented)
+    for attempt in range(3):
+        try:
+            out = json.loads(urllib.request.urlopen(req, timeout=600).read())
+            break
+        except OSError:
+            if attempt == 2:
+                raise
+            time.sleep(5 * (attempt + 1))
     raw = out["choices"][0]["message"]["content"] or ""
     return re.sub(r"<think>.*?</think>", "", raw, flags=re.S).strip()
 
