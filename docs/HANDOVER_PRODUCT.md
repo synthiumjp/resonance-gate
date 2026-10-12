@@ -170,7 +170,7 @@ is stale (f078bf4).
 The WSL box (15 GB) was OOM-killed twice on 2026-10-03. Run heavy work on the
 Mac Studio:
 
-    ssh chrismarmo@100.126.162.38
+    source .hosts.env && ssh $SDR_MAC     # .hosts.env is untracked (host details stay out of the public repo)
     ~/jpwork/sdr          git clone of product-p2 (git pull to update)
     ~/jpwork/sdr-venv     its venv
     ~/jpwork/sdr-dev11    copy at 8473783 + dev sets (dev16 runs)
@@ -198,10 +198,9 @@ Long jobs: `nohup ... > log 2>&1 &` on the Mac; wait with a background
 until-loop that greps the log for its "done" line (foreground sleep is
 blocked in Claude Code).
 
-NAS (cold storage only): reach it via the Mac, `ssh chrismarmo@100.126.162.38
-'ssh chihiro "..."'`; only /volume1/models/jpcoldstorage; never touch
-/volume1/docker/foresight/state (production database); one transfer stream
-at a time.
+NAS (cold storage only): reach it via the Mac, `ssh $SDR_MAC 'ssh $SDR_NAS
+"..."'`; the one folder that may be used, and the one that must never be
+touched, are in .hosts.env; one transfer stream at a time.
 
 ## Releasing
 

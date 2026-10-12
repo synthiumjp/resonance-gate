@@ -1,7 +1,7 @@
 """Teacher notes for distillation: Qwen3-14B (MLX 4-bit) writes notes over
 LongMemEval sessions (MIT) with the product prompt; the product's grounding
 filter keeps only lines whose words the user wrote. Output: teacher.jsonl."""
-import json, random, re, sys, time
+import json, os, random, re, sys, time
 from mlx_lm import load, batch_generate
 from notes_ref import grounded
 
@@ -22,7 +22,7 @@ NAMES = ("Alex Morgan,Priya Shah,Tom Becker,Mei Lin,Jordan Lee,Sam Okafor,Lucia 
 rng = random.Random(7)
 sess = {}
 if SRC == "lme":
-    d = json.load(open("/Users/chrismarmo/jpwork/lme/longmemeval_s_cleaned.json"))
+    d = json.load(open(os.environ.get("LME_DATA") or os.path.expanduser("~/jpwork/lme/longmemeval_s_cleaned.json")))
     for q in d:
         for sid, date, s in zip(q["haystack_session_ids"], q["haystack_dates"], q["haystack_sessions"]):
             sess[sid] = (date, s)

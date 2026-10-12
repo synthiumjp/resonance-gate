@@ -29,3 +29,5 @@ data/
 server/sourcedrecall/_core/
 server/dist/
 bench/locomo/results/locomo_audit_*.json
+.claude/
+.hosts.env

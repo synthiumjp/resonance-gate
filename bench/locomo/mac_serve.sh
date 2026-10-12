@@ -4,7 +4,9 @@
 # to it at 127.0.0.1:18090. Never touches processes it did not start.
 #   bash mac_serve.sh wait-start     # blocks, then starts server + tunnel
 #   bash mac_serve.sh stop           # stops the server and the tunnel we started
-MAC=chrismarmo@100.126.162.38
+# the Mac's user@host: SDR_MAC, or from the untracked .hosts.env at the repo root
+[ -z "${SDR_MAC:-}" ] && [ -f "$(dirname "$0")/../../.hosts.env" ] && . "$(dirname "$0")/../../.hosts.env"
+MAC=${SDR_MAC:?set SDR_MAC=user@host or create .hosts.env}
 SSH="ssh -o BatchMode=yes -o ConnectTimeout=15 -o ServerAliveInterval=30 $MAC"
 PYV='~/jpwork/rg/.venv-judge/bin/python'
 MODEL='~/jpwork/rg_private/models/qwen3-14b-a8cc1361.gguf'
