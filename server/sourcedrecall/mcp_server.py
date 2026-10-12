@@ -46,6 +46,19 @@ if LEGACY_TOOLS:
 mcp = FastMCP("sourcedrecall")
 
 
+# 2026-10-12 (review 3.2): hints the host can act on, so it can ask the user
+# before a call that changes or deletes the memory. Older mcp releases have
+# no annotations; the tool is registered without them there.
+def _tool(read_only, destructive=False, idempotent=False):
+    try:
+        from mcp.types import ToolAnnotations
+        return mcp.tool(annotations=ToolAnnotations(
+            readOnlyHint=read_only, destructiveHint=destructive,
+            idempotentHint=idempotent, openWorldHint=False))
+    except (ImportError, TypeError):
+        return mcp.tool()
+
+
 def _legacy_tool(fn):
     return mcp.tool()(fn) if LEGACY_TOOLS else fn
 
@@ -97,7 +110,7 @@ def forget(subject: str, relation: str = None, object: str = None) -> dict:
     return service.forget(subject, relation, object)
 
 
-@mcp.tool()
+@_tool(read_only=True)
 def profile_dynamics() -> dict:
     """Memory-aging report: how many stored facts are actively reinforced,
     how many have faded (retained, lower weight), total receipts, and the
@@ -106,7 +119,7 @@ def profile_dynamics() -> dict:
     return pmem.profile_dynamics()
 
 
-@mcp.tool()
+@_tool(read_only=True)
 def profile_quarantine() -> dict:
     """Writes blocked at ingest by rules learned from the owner's own
     corrections, each with the rule responsible. Use when the user asks why
@@ -115,7 +128,7 @@ def profile_quarantine() -> dict:
     return pmem.profile_quarantine()
 
 
-@mcp.tool()
+@_tool(read_only=True)
 def profile_conflicts() -> dict:
     """Open memory conflicts: slots where the user's stored values evolved or
     disagree and no correction has resolved them. Each item carries a
@@ -125,7 +138,7 @@ def profile_conflicts() -> dict:
     return pmem.profile_conflicts()
 
 
-@mcp.tool()
+@_tool(read_only=True)
 def profile_recall(query: str, scope: str = None) -> dict:
     """Recall from the p2 world/profile memory (a validated, non-hallucinating
     LIVING memory built by replaying a cached extraction over the user's own
@@ -142,7 +155,7 @@ def profile_recall(query: str, scope: str = None) -> dict:
     return pmem.profile_recall(query, scope)
 
 
-@mcp.tool()
+@_tool(read_only=True)
 def profile_check(claim: str, scope: str = None) -> dict:
     """Did the user say this? Use before relying on something about the user
     -- a tool argument, a detail you are about to act on ("The user lives in
@@ -158,7 +171,7 @@ def profile_check(claim: str, scope: str = None) -> dict:
     return pmem.profile_check(claim, scope)
 
 
-@mcp.tool()
+@_tool(read_only=True)
 def profile_context(query: str = None, max_facts: int = None,
                     scope: str = None) -> dict:
     """The verbatim, receipted text block for prompt injection — every line is
@@ -170,7 +183,7 @@ def profile_context(query: str = None, max_facts: int = None,
     return pmem.profile_context(query, max_facts, scope)
 
 
-@mcp.tool()
+@_tool(read_only=False, destructive=True)
 def profile_correct(action: str, attribute: str, value: str,
                      new_attribute: str = None, exact: bool = False) -> dict:
     """Owner correction over the p2 memory: action is one of deny (the fact is
@@ -184,7 +197,7 @@ def profile_correct(action: str, attribute: str, value: str,
     return pmem.profile_correct(action, attribute, value, new_attribute, exact)
 
 
-@mcp.tool()
+@_tool(read_only=True)
 def profile_status(reload: bool = False) -> dict:
     """Health/shape of the loaded p2 memory: {loaded, asserted, provisional,
     edges, audit_pass, needs_reload, uncached_turns, data_dir}. audit_pass is
@@ -195,7 +208,7 @@ def profile_status(reload: bool = False) -> dict:
     return pmem.profile_status(reload)
 
 
-@mcp.tool()
+@_tool(read_only=True)
 def profile_rehydrate(conversation_id: str, max_turns: int = 40,
                        include_assistant: bool = True) -> dict:
     """Rehydrate a receipt into the verbatim conversation slice it points at
@@ -217,7 +230,7 @@ def profile_rehydrate(conversation_id: str, max_turns: int = 40,
     return pmem.rehydrate(conversation_id, max_turns, include_assistant)
 
 
-@mcp.tool()
+@_tool(read_only=False)
 def profile_ingest(turns: list[dict], conversation_id: str = None,
                     title: str = None, owner_name: str = None,
                     date: str = None, scope: str = None) -> dict:
@@ -307,7 +320,7 @@ def _prewarm():
                          daemon=False).start()
 
 
-@mcp.tool()
+@_tool(read_only=False, destructive=True, idempotent=True)
 def profile_forget(fact_id: str) -> dict:
     """Remove one remembered fact, by the `id` shown in profile_recall results
     and in MEMORY.md. Use when the user says something stored is wrong or
@@ -315,13 +328,13 @@ def profile_forget(fact_id: str) -> dict:
     return pmem.profile_forget(fact_id)
 
 
-@mcp.tool()
+@_tool(read_only=False, idempotent=True)
 def profile_confirm(fact_id: str) -> dict:
     """Mark one remembered fact as confirmed by the user, by its `id`."""
     return pmem.profile_confirm(fact_id)
 
 
-@mcp.tool()
+@_tool(read_only=False, idempotent=True)
 def profile_export() -> dict:
     """Write the whole memory to MEMORY.md and return its path and contents,
     so the user can read everything that is stored."""
