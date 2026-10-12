@@ -401,3 +401,50 @@ def test_the_users_own_writing_brought_to_be_read_over_stays_own(intro):
 def test_someone_elses_writing_brought_to_be_read_over_is_pasted(intro):
     from prose import _paste_span
     assert isinstance(_paste_span(intro + _PIECE, "Camille Dubois"), tuple)
+
+
+# 2026-10-13 (cases_dev_real2): an email pasted on its own, introduced in
+# the user's next message
+_LONE = ("This email will confirm the meeting in Portland for October 3rd.\n"
+         "I would like to start the meeting at 11:00 a.m.\n"
+         "Please let me know immediately if this presents a problem with your schedule.\n"
+         "I have asked everyone to keep the afternoon open for further discussion.\n"
+         "Please feel free to call me if you have any questions.\nThanks.")
+
+
+@pytest.mark.parametrize("after", [
+    "it's from a client. remind me to ask them about parking",
+    "was cc'd on it, nothing to do for me",
+    "found this in my dad's old files",
+    "this is the email my friend Kristina got",
+])
+def test_a_lone_paste_introduced_in_the_next_message_is_pasted(after):
+    from prose import _paste_span
+    assert _paste_span(_LONE, "Evander Kline", after) == (0, len(_LONE))
+
+
+@pytest.mark.parametrize("after", [
+    None,
+    "that was the email I sent to the team, ok?",
+    "thoughts?",
+])
+def test_a_lone_message_without_such_a_next_message_is_not_pasted(after):
+    from prose import _paste_span
+    assert not isinstance(_paste_span(_LONE, "Evander Kline", after), tuple)
+
+
+def test_the_block_names_the_source_from_the_next_message():
+    from memory_api import _quote_own
+    out = _quote_own(_LONE, "Evander Kline", "Where is my meeting?", "it's from a client")
+    assert out.startswith("[pasted in by Evander Kline")
+
+
+def test_the_next_message_reaches_the_block_end_to_end(pm):
+    pm.profile_ingest([{"role": "user", "content": _LONE},
+                       {"role": "assistant", "content": "It confirms a meeting in Portland."},
+                       {"role": "user", "content": "it's from a client, nothing for me"}],
+                      conversation_id="a", owner_name="Evander Kline", date="2026-09-01")
+    assert pm._after_of("a", _LONE) == "it's from a client, nothing for me"
+    lines = [l for l in pm.profile_context("Where is the meeting?")["block"].splitlines()
+             if "Portland" in l]
+    assert lines and all("[pasted in by" in l for l in lines)

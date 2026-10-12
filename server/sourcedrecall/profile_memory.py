@@ -698,6 +698,35 @@ def _message_of(conversation_id, said):
         if sents and len(sents) == len(every):
             return t["text"].strip(), prev     # as written (see _messages_for)
         return " ".join(sents) or None, prev
+
+
+def _after_of(conversation_id, text):
+    """-> the user's next message after `text` in its conversation (the
+    assistant's reply between them skipped), or None.
+
+    2026-10-13 (real-email dev set 2): an email pasted on its own, with
+    where it came from said in the next message ("it's from a client",
+    "was cc'd on it"), was taken for the user's: 9 of 10 misses."""
+    if not conversation_id or not text:
+        return None
+    import re as _re
+    with _lock:
+        try:
+            conv = _ensure_transcripts_locked().get(conversation_id)
+        except (OSError, ValueError):
+            return None
+    if not conv:
+        return None
+    norm = lambda t: _re.sub(r"\W+", " ", t or "").strip().lower()  # noqa: E731
+    key, turns = norm(text), conv["turns"]
+    for i, t in enumerate(turns):
+        if t["role"] != "human" or not key or norm(t["text"]) != key:
+            continue
+        for j in (i + 1, i + 2):
+            if j < len(turns) and turns[j]["role"] == "human":
+                return turns[j]["text"].strip()
+        return None
+    return None
     return None, None
 
 
@@ -832,6 +861,7 @@ def profile_context(query=None, max_facts=None, scope=None):
         _set_scope(mem, scope)
         if os.environ.get("RG_MESSAGE_QUOTES") != "0":
             mem.message_of = _message_of
+            mem.after_of = _after_of
         if os.environ.get("RG_MESSAGE_RECALL", "1") != "0":
             mem.messages_for = _messages_for
         from sourcedrecall import notes as _notes

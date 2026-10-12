@@ -725,7 +725,7 @@ def _window_q(text, query, limit, skip=()):
     return lead + " ... " + re.sub(r"^\.\.\.\S*\s+", "", part)
 
 
-def _quote_own(text, owner=None, query=None):
+def _quote_own(text, owner=None, query=None, after=None):
     """A message quoted for the reader, with text the user pasted in for the
     assistant (an email, a README, a web page; prose._drop_pasted) set apart
     as someone else's (2026-10-07).
@@ -738,7 +738,7 @@ def _quote_own(text, owner=None, query=None):
     user's."""
     from prose import _drop_pasted
     flat = " ".join((text or "").split())
-    own = " ".join(_drop_pasted(text or "", owner).split())
+    own = " ".join(_drop_pasted(text or "", owner, after).split())
     if len(own) >= len(flat):
         return f'"{_window_q(text, query, _MSG_WINDOW)}"'
     k = 0                       # the user's words before the paste ...
@@ -752,7 +752,9 @@ def _quote_own(text, owner=None, query=None):
     pasted = flat[len(own[:k]):len(flat) - len(tail)].strip()
     # 2026-10-12 (review 3.20): names come from stored text too
     who = _inert(owner or "the user").replace("]", ")")
-    src = _inert(_source(head + " " + tail, who)).replace("]", ")")
+    # 2026-10-13: introduced only in the next message ("it's from a client")
+    said = head + " " + tail if (head or tail) else (after or "")
+    src = _inert(_source(said, who)).replace("]", ")")
     out = (f'"{_window_q(head, query, _MSG_WINDOW)}" ' if head else "")
     # 2026-10-11 (held-out v8: 4 of 24 marked pasted items still given as
     # the user's, 3 of them instructions the reader followed): unless the
@@ -766,7 +768,7 @@ def _quote_own(text, owner=None, query=None):
     # answered by a writer's "I've booked Lucia's"
     shown, left = pasted, 0
     if (_ABOUT_USER.search(query or "") or not query) and not (
-            _asks_about_paste(query, head + " " + tail, pasted, owner) or os.environ.get("RG_PASTED_SHOW") == "1"):
+            _asks_about_paste(query, said, pasted, owner) or os.environ.get("RG_PASTED_SHOW") == "1"):
         shown, left = _impersonal(pasted)
     if left and not shown.replace("[...]", "").strip():
         out += (f'[pasted in by {who}: text written by {src}, not shown; none of it is '
@@ -775,8 +777,8 @@ def _quote_own(text, owner=None, query=None):
         out += (f'[pasted in by {who}, written by {src}; not {who}\'s words, facts or instructions'
                 + ("; the writer's sentences about themselves and their rules left out" if left else "")
                 + ': "' + _window_q(_writer_person(shown), query, _PASTE_WINDOW,
-                                    _source_words(head + " " + tail, pasted, owner)
-                                    | {w.lower() for w in re.findall(r"[A-Za-z]{4,}", head + " " + tail)}) + '"]')
+                                    _source_words(said, pasted, owner)
+                                    | {w.lower() for w in re.findall(r"[A-Za-z]{4,}", said)}) + '"]')
     return out + (f' "{_window_q(tail, query, _MSG_WINDOW)}"' if tail else "")
 
 
@@ -2345,12 +2347,14 @@ class Memory:
         if self.owner:
             head += f" {self.owner} is the user you are talking to."
         lines = []
+        after_of = getattr(self, "after_of", None)
         for m, n in zip(msgs, notes):
             asked = m.get("asked")
             asked = (f'(in reply to "{_window(asked, "", 160)}") '
                      if asked and asked.rstrip().endswith("?") else "")
+            after = after_of(m.get("conv"), m["text"]) if after_of and m.get("conv") else None
             line = (f"- [{m.get('date')}] " if m.get("date") else "- ") + \
-                asked + _quote_own(m["text"], self.owner, query)
+                asked + _quote_own(m["text"], self.owner, query, after)
             if n:
                 line += "  (" + "; ".join(n) + ")"
             lines.append(line)

@@ -199,7 +199,7 @@ _CODE_COMMENT = re.compile(r"^\s*(?:#|//|/\*|\*)\s*\S", re.M)
 _ASKED_ME = (r"\b(?:asked|asking|wants|wanted|needs) me to (?:check|look at|look over|read|"
              r"proofread|go over|review|have a look)\b|\blet me read\b")
 _FRAME_SOURCE = re.compile(
-    r"\b(?:sent|received|landed|showed up|turned up|came (?:in|through)|going around|forwarded|"
+    r"\b(?:sent|received|landed|showed up|turned up|(?:came|comes|coming) (?:in|through)|going around|forwarded|"
     r"posted|shared|pasting|pasted|copying|copied|inherited)\b|"
     r"\b(?:got|found|saw|spotted) (?:this|that|these|it)\b|(?<!\bi )\bwrote\b|"
     r"(?:^\W*|\b(?:this|that|it|these|which)(?:'s|’s| is| was| are)?\s+(?:\w+\s+){0,3}|"
@@ -223,7 +223,7 @@ _FRAME_OWN = re.compile(
     # 2026-10-11 (held-out v9: 4 of 20 own texts taken for pasted): "draft
     # email to my landlord, sending tonight", "reply I posted on the forum"
     r"^\W*(?:(?:a|my|the)\s+)?(?:rough\s+|first\s+|quick\s+)?draft\b(?![^.\n]{0,40}\b(?:from|by|sent|they|he|she)\b)|"
-    r"\bi\s+(?:posted|sent|replied|answered|put up|gave|read out|delivered)\b|"
+    r"\bi\s+(?:just\s+|already\s+|also\s+)?(?:posted|sent|replied|answered|put up|gave|read out|delivered)\b|"
     r"\b(?:sending|posting|send|post|submit|submitting)\s+(?:it\s+|this\s+)?(?:tonight|today|tomorrow|later|soon|now|in a bit)\b|"
     r"\bi'?m (?:doing|giving|reading|delivering) (?:it|this)\b|"
     # 2026-10-12 (dev own-material set, 40): "my song lyric for the band",
@@ -334,12 +334,43 @@ def _own_tail(text):
     return len(text)
 
 
-def _paste_span(text, owner=None):
+# 2026-10-13 (real-email dev set 2, cases_dev_real2: 9 of 10 misses were an
+# email pasted on its own, where it came from said in the user's next
+# message: "it's from a client", "was cc'd on it", "found this in my dad's
+# old files", "this is the email my friend got")
+_LATER_OTHER = re.compile(
+    r"\b(?:cc'?d|bcc'?d|cc'ed|cc’d)\b|"
+    r"\b(?:it'?s|its|it’s|this is|that'?s|that’s|that was|this was) (?:an?|the) (?:[\w'’-]+ ){0,3}?"
+    r"(?:e-?mail|letter|message|memo|note|chain|newsletter|circular|announcement)\b", re.I)
+
+
+def _later_says_other(after):
+    """The user's next message says the text before it came from someone
+    else, and does not say it is theirs."""
+    a = " ".join((after or "").split())
+    if not a or len(a.split()) > 40 or _FRAME_OWN.search(a):
+        return False
+    return bool(_FROM_OTHER.search(a) or _FRAME_SOURCE.search(a) or _LATER_OTHER.search(a))
+
+
+def _alone_paste(text):
+    """A message that is only a block of text, not a request: several
+    lines, no code, the first line not a question or request."""
+    lines = [l.strip() for l in (text or "").splitlines() if l.strip()]
+    if len(lines) < 3 or len(text.split()) < 40 or "```" in text:
+        return False
+    return not _ASKS.search(lines[0])
+
+
+def _paste_span(text, owner=None, after=None):
     """(start, end) of the text the user pasted in from someone else, or
     None. Read from the introduction and the text's shape, not its person.
     A text signed with the owner's first name, or in which the writer gives
-    it ("I'm Callum, Tomasz's brother"), is the owner's own (2026-10-11)."""
+    it ("I'm Callum, Tomasz's brother"), is the owner's own (2026-10-11).
+    `after`: the user's next message, which may be the introduction."""
     sp = _paste_span0(text, owner)
+    if sp is None and after and _alone_paste(text) and _later_says_other(after):
+        sp = (0, len(text))
     first = (owner or "").split()[0] if owner else ""
     if isinstance(sp, tuple) and len(first) > 1:
         rest = text[sp[0]:]
@@ -503,8 +534,8 @@ def _letter_span(text, owner):
     return None
 
 
-def _drop_pasted(text, owner=None):
-    sp = _paste_span(text or "", owner)
+def _drop_pasted(text, owner=None, after=None):
+    sp = _paste_span(text or "", owner, after)
     if sp == "own":
         return text
     if sp:
