@@ -29,8 +29,8 @@ right answers there came from the dated messages, not the labels.
 All numbers below were read and judged by local models (Qwen3-14B), so they
 are not comparable with results published with GPT-4-class models. An
 adversarial review on 2026-10-09 (`docs/REVIEW_2026-10-09.md`) found
-problems with the comparisons; they are listed with each table and are
-being fixed before these numbers are used for any claim.
+problems with the comparisons; the tables below were rerun with its fixes
+(`bench/false_memory/FAIR_RERUN.md`).
 
 LongMemEval-S, 500 questions, each with about 50 past chat sessions: is a
 session that holds the answer among the five the memory returns?
@@ -53,7 +53,8 @@ Changes of state and false memories, on sets written for this project
 without a language model and plain retrieval. Every system's memory went to
 the same local reader with the same instruction, the judge saw the question
 with each answer, and every answer was audited blind (the auditor saw no
-system names; `bench/false_memory/FAIR_RERUN.md`):
+system names; `bench/false_memory/FAIR_RERUN.md`; measured at commit
+372c05a, 2026-10-09):
 
 | | sourcedrecall | agentmemory 0.9 | ai-memory 2.5 | plain retrieval |
 |---|---|---|---|---|
