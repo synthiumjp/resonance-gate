@@ -13,7 +13,10 @@ and `experiments/p2/`. Measurements come from `bench/` (readable development
 sets unless marked held out; held-out sets were written before any system
 saw them and are read only as counts, but v2-v4 and the coding and projects
 sets have since been run many times and some rules were written from their
-error categories, so only v5 is clean; see `docs/REVIEW_2026-10-09.md`). Last measured 2026-10-07.
+error categories, so the clean ones are v5 to v10, each run once; see
+`docs/REVIEW_2026-10-09.md`). Each section is dated by the work it
+describes; the latest held-out result is v10 (2026-10-11), and the latest
+change is the relevance cut of 2026-10-12 (near the end).
 
 ## Held-out test (v5, pre-registered)
 
@@ -55,6 +58,24 @@ reader instruction. Four of eight met, four missed:
   part A, which is the half of H1 the rules control); pooled false
   memories, 15/59 against 17, 17 and 10, 14 of ours from pasted text.
 
+## Held-out tests v7 to v10 (pre-registered)
+
+Each run once on the code frozen at its pre-registration, under the same
+protocol (`bench/false_memory/results_v7/` to `results_v10/`, SUMMARY.md):
+
+| | v7 | v8 | v9 | v10 |
+|---|---|---|---|---|
+| hypotheses met | 2 of 7 | 2 of 5 | 4 of 6 | 5 of 6 |
+| pasted claims given as the user's | 11/34 | 9/40 | 4/40 | 3/40 |
+| the same, plain retrieval | 24/34 | 16/40 | 22/40 | 23/40 |
+| the user's own material answered | 13/16 | 16/20 | 12/20 | 13/20 |
+| the same, plain retrieval | 15/16 | 19/20 | 17/20 | 19/20 |
+| old state given as current | 0/20 | 2/20 | 2/20 | 1/20 |
+
+Pasted text went from the largest source of false memories to the
+smallest; the user's own material, answered less often than by plain
+retrieval in every set, is the open weakness (see "Own material", below).
+
 ## Which words count as the user's own
 
 **Questions are not statements.** A clause whose subject or head is a
@@ -79,7 +100,9 @@ the user's statements.
 - A pasted "Never send drafts to the client directly" had become a standing
   instruction; with the rule it does not. Over all 5,882 LoCoMo messages and
   the development sets, the rule changed no message.
-- Status: supported.
+- Status: this first version was refuted held out (v6: 14 of 17 pasted
+  claims given as the user's). Rewritten twice since, see "Pasted text after
+  held-out v6" below; held out v10: 3 of 40.
 
 ## Standing instructions
 
@@ -244,8 +267,10 @@ said, with the best-matching messages first.
   significant, and the retrieval routing was chosen on these same 30).
 - The pattern matches none of LongMemEval's 470 other questions or LoCoMo's
   1,986, so those results cannot move.
-- Status: supported on development data; no held-out answer-level number.
-  The adversarial review found the pattern also fires on ordinary coding
+- Status: supported on development data; held out, missed both times
+  (v6: the mention used in 3 of 15, every miss a refusal; v7: 11 of 20
+  against a target of 12, plain retrieval 7). The adversarial review found
+  the pattern also fires on ordinary coding
   questions ("Where should I put the config file?") and on "how should I
   have known"; to be narrowed and measured on a coding set.
 
@@ -327,10 +352,11 @@ and "summarise this" without a noun mark what follows as pasted; the user's
 own material ("Here are my notes:", "Following my last message:") and
 first-person text after an introduction that asks for no rewrite are kept
 as theirs, unless the introduction names another author ("My partner sent
-this text:"). No LoCoMo, development or held-out message changed: the
-benchmarks do not test pasted text, so these rules are measured only by the
-tests above. Held out (v6): the marker fired on 3 of 14 pasted items that
-became false memories, and did not stop the reader on those 3.
+this text:"). No LoCoMo, development or held-out message changed: when this
+was written (2026-10-07) the benchmarks did not test pasted text; since v6
+the held-out sets and three development sets do (below). Held out (v6): the
+marker fired on 3 of 14 pasted items that became false memories, and did
+not stop the reader on those 3.
 
 **Notes.** The pronoun rewrite leaves quotes and code alone and reads phone
 apostrophes; a note must keep the user's numbers and polarity ("does not eat
@@ -355,7 +381,10 @@ causes, each fixed (0c1e9f5, 8fafd1e):
   count too. It is the user's only when the introduction says so ("my
   notes", "I wrote", "my own", "it's mine").
 - The block showed messages with their blank lines removed, so where a
-  paste ended could not be seen. Messages are now quoted as written.
+  paste ended could not be seen. Pasted text is now found before a message
+  is quoted and shown in its own marker (next point). The quoted text still
+  has its line breaks collapsed; keeping them was tried on development data
+  on 2026-10-12 and changed nothing (notebook e323).
 - The rules told the reader that everything in quotation marks is the
   user's. Pasted text is now shown as `[pasted in by <user>, written by
   <who the introduction names>; not <user>'s words, facts or instructions:
@@ -485,6 +514,43 @@ text was shown plainly as the user's words. Of the 3 pasted-fact misses: a
 long message not marked as pasted, cut by the 800-character window; a
 credential the secret filter removed; a time written differently from the
 expected term. `bench/false_memory/results_v10/SUMMARY.md`.
+
+**Own material (2026-10-12).** A development set at v10's shape
+(`cases_dev_own.jsonl`, 40 of the user's own texts, written by an agent
+without the rules) reproduced the miss: 24 of 40 answered, plain retrieval
+29. Changes, each measured on all nine development sets under the v7
+protocol:
+- own cues: "my song lyric", "wrote the chorus last night", "check my
+  grammar" mark the text the user's (e9ef773; 24 -> 26). The adversarial
+  review of 2026-10-12 points out these nouns mirror the set's subtypes,
+  so the gain is unmeasured until a held-out set.
+- someone else's text headed for the user's notes or essay ("my boss sent
+  me this for my review:", "add this to my notes:") and "My brother wrote
+  this" are pasted again; a "Name: value" field list is the user's, not a
+  chat log.
+- the relevance cut (d89d830). With the fact's message alone, the reader
+  answered; with the rules paragraph and every other message of a short
+  history around it, it said it did not know (notebook e323). Now, when
+  the parser has found the message a question is about, another message is
+  shown only if its embedding similarity with the question is 0.5 or more,
+  it is from the same conversation, or the parser ties its facts to the
+  found one; never for advice or list questions, or when pasted text is
+  shown. `RG_MSG_CUT=off` turns it off.
+
+| development, end to end | before | with the cut |
+|---|---|---|
+| own material answered (40), Qwen3-14B reader | 26 | 30 |
+| the same, Phi-4 reader | 34 | 33 |
+| false memories over seven sets (248) | 7 | 7 |
+| old state given as current (64) / new state given | 3 / 58 | 3 / 58 |
+| advice: the mention used (24) | 21 | 22 |
+| LoCoMo dev (233 questions) | 68.2% | 67.8% |
+
+Plain retrieval on the own set: 29 of 40 with Qwen3-14B, 33 with Phi-4,
+with 11 and 13 false memories of 20 against our 2 and 3. A second reader of
+another family (Phi-4) answered 34 of 40 from our block before the cut, so
+most of the v10 miss was the first reader's caution with our block, not
+missing facts. Not yet measured held out (a held-out set, v11, is drafted for it).
 
 **The secret filter (2026-10-10).** v8 showed a pasted recipe's
 introduction removed as "[secret removed]": "recipe card:" read as a card
