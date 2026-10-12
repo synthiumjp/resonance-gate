@@ -45,7 +45,9 @@ _P2 = _code_roots()[1]
 # .tar.gz; where that archive is published is set here at release time.
 # Until then setup downloads Stanza's own models (and PyTorch runs them), or
 # SOURCEDRECALL_PARSER_ARCHIVE names an archive (path or URL) to install.
-PARSER_ARCHIVE = ("https://huggingface.co/synthiumjp/sourcedrecall-parser-en/resolve/main/"
+# (2026-10-12, review 4.2: at a fixed commit, so a re-upload cannot break installs)
+PARSER_ARCHIVE = ("https://huggingface.co/synthiumjp/sourcedrecall-parser-en/resolve/"
+                  "72e0cffbc85f55d13cf59d8d547d60db82c07b77/"
                   "sourcedrecall-parser-en-stanza1.14.0.tar.gz")
 PARSER_SHA256 = "921281ed755e8a4454cce27df56e18557123920e1df4b02443cade72e0e2f105"
 
@@ -55,7 +57,8 @@ PARSER_SHA256 = "921281ed755e8a4454cce27df56e18557123920e1df4b02443cade72e0e2f10
 # (tools/distil, MODEL_CARD_notes.md). LoCoMo test 68.2% (small) and 70.3%
 # (standard) against 64.7% without notes. SOURCEDRECALL_NOTES_ARCHIVE
 # overrides with a path or URL.
-_HF_NOTES = "https://huggingface.co/synthiumjp/sourcedrecall-notes-en/resolve/main/"
+_HF_NOTES = ("https://huggingface.co/synthiumjp/sourcedrecall-notes-en/resolve/"
+             "dc3e9a93d4fa792cbfe575a0524f82abdb1a3d10/")
 NOTES_MODELS = {
     "small": (_HF_NOTES + "sourcedrecall-notes-en-0.6b.tar.gz",
               "db1b22779c3502665546780c91c5a8f3a1380f6e99570c05d3811e44b0c3d21e",
@@ -84,7 +87,9 @@ def install_archive(src, sha256, dest, marker, what):
     try:
         path = os.path.join(tmp, "models.tar.gz")
         if src.startswith(("http://", "https://")):
-            urllib.request.urlretrieve(src, path)
+            # a timeout, so a stalled connection fails instead of hanging setup
+            with urllib.request.urlopen(src, timeout=60) as r, open(path, "wb") as f:
+                shutil.copyfileobj(r, f, 1 << 20)
         else:
             shutil.copyfile(src, path)
         if sha256:
@@ -227,8 +232,10 @@ def main(argv=None):
     print("[+] WordNet (answer types) -- ~11 MB", flush=True)
     try:
         import nltk
-        nltk.download("wordnet", quiet=True)
-        print("      -> done")
+        if nltk.download("wordnet", quiet=True) is False:
+            print("      -> not downloaded; answer types off")
+        else:
+            print("      -> done")
     except Exception as e:
         print(f"      -> skipped ({e.__class__.__name__}); answer types off")
 

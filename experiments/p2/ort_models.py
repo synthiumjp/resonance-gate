@@ -16,6 +16,7 @@ Same call shapes as before, so callers do not change:
     CrossEncoder(name).predict(pairs) -> np.ndarray (raw logits)
     NLI(name)({"text": a, "text_pair": b}) -> [{"label", "score"}, ...]
 """
+import hashlib
 import json
 import os
 import shutil
@@ -27,6 +28,18 @@ EMBEDDER = "BAAI/bge-small-en-v1.5"
 RERANKER = "cross-encoder/ms-marco-MiniLM-L6-v2"
 CONFLICT = "cross-encoder/nli-deberta-v3-xsmall"
 POOLING = {EMBEDDER: "cls"}
+# 2026-10-12 (review 4.2): fetched at a fixed revision and checked, so an
+# upstream change cannot silently change the results. These are the
+# revisions every install has had: each was last changed before the ONNX
+# models were adopted (2026-10-02). (revision, sha256 of onnx/model.onnx)
+PINNED = {
+    EMBEDDER: ("5c38ec7c405ec4b44b94cc5a9bb96e735b38267a",
+               "828e1496d7fabb79cfa4dcd84fa38625c0d3d21da474a00f08db0f559940cf35"),
+    RERANKER: ("233902d25c440f23af6f7d6e94d2946bac0bee0a",
+               "5d3e70fd0c9ff14b9b5169a51e957b7a9c74897afd0a35ce4bd318150c1d4d4a"),
+    CONFLICT: ("a150876415327c80daeff35ca6f68f5ed8cf5c24",
+               "7105da41f625c42eca24e9465ec99150d02a80e644659d7a1daa93a6357155d4"),
+}
 MAX_LEN = 512
 
 
@@ -53,10 +66,19 @@ def ensure(name):
     from huggingface_hub import hf_hub_download
     os.makedirs(d, exist_ok=True)
     tmp = tempfile.mkdtemp(prefix="sourcedrecall-onnx-")
+    rev, sha = PINNED.get(name, (None, None))
     try:
-        src = hf_hub_download(name, "onnx/model.onnx", local_dir=tmp)
+        src = hf_hub_download(name, "onnx/model.onnx", local_dir=tmp, revision=rev)
+        if sha:
+            h = hashlib.sha256()
+            with open(src, "rb") as fh:
+                for chunk in iter(lambda: fh.read(1 << 20), b""):
+                    h.update(chunk)
+            if h.hexdigest() != sha:
+                raise RuntimeError(f"{name}: the downloaded model is not the pinned one "
+                                   f"(sha256 {h.hexdigest()}, expected {sha})")
         for f in ("tokenizer.json", "config.json"):
-            p = hf_hub_download(name, f, local_dir=tmp)
+            p = hf_hub_download(name, f, local_dir=tmp, revision=rev)
             shutil.copy(p, os.path.join(d, f))
         m = onnx.load(src)
         for init in m.graph.initializer:

@@ -34,6 +34,10 @@ has the details behind each change.
   Lines like "Sam: ..." count as a chat only when a speaker speaks twice,
   one of them is "Me", or the lines have times. Pasted bookings and
   newsletters that hold such lines are now marked pasted as a whole.
+- Every model setup downloads is fetched at a fixed revision and checked
+  against its checksum, so a change upstream cannot change your results or
+  break the install. A stalled download now times out, and a WordNet
+  download that fails is reported.
 - Requests for advice use what you told the assistant: the memory no
   longer reads its "unknown" rule as a reason to give no advice, and puts
   the best-matching messages first. Development advice set: your earlier
