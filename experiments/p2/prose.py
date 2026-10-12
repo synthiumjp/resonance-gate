@@ -417,6 +417,50 @@ def _paste_span0(text, owner=None):
     if len(paras) >= 2 and _EVAL_Q.match(paras[-1].strip()):
         cut = text.rstrip().rfind(paras[-1].strip())
         return 0, cut
+    return _letter_span(text, owner)
+
+
+# 2026-10-13 (real emails, cases_dev_real.jsonl: the rules above found 6 of
+# 30). A real email is seldom set off by a blank line or introduced in the
+# same message; the user says "should I say yes to this?" in the next one,
+# or nothing. What gives it away is that it is written TO someone: several
+# lines that open by addressing a person by name ("Lee,", "Hi, Jan!",
+# "Joao -"), or close with a name ("Bill"), that is not the owner's. A
+# message signed with the owner's name stays theirs (_paste_span). Several
+# lines: a chat turn like "Hey Mel! How are you?" is one line.
+_NOT_ADDRESSEE = {w.lower() for w in """
+    I Hi Hey Hello Dear Morning Evening Afternoon Thanks Thank Cheers Okay Ok OK Yes Yeah Yep No Nope Sure
+    So Well Also Anyway Actually Basically Honestly Seriously Really Sorry Please Hmm Ugh Wow Great Cool
+    Right Alright Fine Good Nice Perfect Awesome Today Tonight Tomorrow Yesterday Now Then Again Here There
+    This That These Those It My Our We You They He She Note Update Context Question Quick Background
+    Summary First Firstly Second Finally Lastly However Btw FYI PS Edit Meanwhile Otherwise Unfortunately
+    Fortunately Luckily Sadly Apparently Obviously Clearly Personally Ideally Agreed Done Noted Correct True
+    Monday Tuesday Wednesday Thursday Friday Saturday Sunday January February March April May June July
+    August September October November December Weekend Update Reminder Attention Team All Everyone Folks
+    Guys Sir Madam Regards Best Love Sincerely Warmly Kind Many Subject From To Sent Date
+    """.split()}
+_ADDRESS = re.compile(r"^\W*(?:(?:hi|hello|hey|dear|good\s+(?:morning|afternoon|evening))[\s,]+)?"
+                      r"((?-i:[A-Z][a-z'’]+)(?:\s+(?-i:[A-Z][a-z'’]+))?)\s*(?:[,!:]|\s-+(?:\s|$)|-+\s*$)", re.I)
+_LETTER_OPEN = re.compile(r"^\W*(?:how are you(?: doing)?\b|i hope (?:you|your|this|all|everyone)\b[^.\n]{0,40}\bwell\b|"
+                          r"hope (?:you(?:'|’)re|you are|all is) (?:well|doing well|good)\b)", re.I)
+_SIGNATURE = re.compile(r"^(?:[-–—]\s*)?((?-i:[A-Z][a-z'’]+)(?:\s+(?-i:[A-Z][a-z'’.]+)){0,2})\W*$")
+
+
+def _letter_span(text, owner):
+    lines = [l.strip() for l in (text or "").strip().splitlines() if l.strip()]
+    if len(lines) < 3:
+        return None
+    first = ((owner or "").split() or [""])[0].lower()
+
+    def other(name):
+        w = name.split()[0].lower()
+        return w not in _NOT_ADDRESSEE and w != first
+
+    a = _ADDRESS.match(lines[0])
+    sig = _SIGNATURE.match(lines[-1])
+    if ((a and other(a.group(1))) or _LETTER_OPEN.match(lines[0])
+            or (sig and other(sig.group(1)) and len(lines[-1]) <= 30)):
+        return 0, len(text)
     return None
 
 
