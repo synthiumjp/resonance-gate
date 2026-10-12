@@ -1,0 +1,63 @@
+=== rag 03:58:24
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights: 100%|██████████| 199/199 [00:00<00:00, 7563.88it/s]
+rp01 rag ok 4.76 s
+rp02 rag ok 0.1 s
+rp03 rag ok 0.05 s
+rp04 rag ok 0.06 s
+rp05 rag ok 0.06 s
+rp06 rag ok 0.06 s
+rp07 rag ok 0.07 s
+rp08 rag ok 0.06 s
+rp09 rag ok 0.06 s
+rp10 rag ok 0.05 s
+rp11 rag ok 0.06 s
+rp12 rag ok 0.05 s
+rp13 rag ok 0.06 s
+rp14 rag ok 0.05 s
+rp15 rag ok 0.05 s
+rp16 rag ok 0.08 s
+rp17 rag ok 0.07 s
+rp18 rag ok 0.06 s
+rp19 rag ok 0.05 s
+rp20 rag ok 0.05 s
+ro01 rag ok 0.08 s
+ro02 rag ok 0.06 s
+ro03 rag ok 0.05 s
+ro04 rag ok 0.07 s
+ro05 rag ok 0.08 s
+ro06 rag ok 0.08 s
+ro07 rag ok 0.07 s
+ro08 rag ok 0.06 s
+ro09 rag ok 0.06 s
+ro10 rag ok 0.05 s
+=== ours 03:58:32
+rp01 sourcedrecall ok 4.38 s
+rp02 sourcedrecall ok 4.57 s
+rp03 sourcedrecall ok 2.44 s
+rp04 sourcedrecall ok 2.22 s
+rp05 sourcedrecall ok 2.09 s
+rp06 sourcedrecall ok 2.62 s
+rp07 sourcedrecall ok 3.12 s
+rp08 sourcedrecall ok 2.56 s
+rp09 sourcedrecall ok 2.46 s
+rp10 sourcedrecall ok 2.63 s
+rp11 sourcedrecall ok 2.85 s
+rp12 sourcedrecall ok 2.22 s
+rp13 sourcedrecall ok 2.16 s
+rp14 sourcedrecall ok 2.05 s
+rp15 sourcedrecall ok 2.81 s
+rp16 sourcedrecall ok 2.98 s
+rp17 sourcedrecall ok 2.46 s
+rp18 sourcedrecall ok 2.55 s
+rp19 sourcedrecall ok 2.53 s
+rp20 sourcedrecall ok 2.33 s
+ro01 sourcedrecall ok 3.13 s
+ro02 sourcedrecall ok 2.79 s
+ro03 sourcedrecall ok 2.59 s
+ro04 sourcedrecall ok 3.38 s
+ro05 sourcedrecall ok 2.98 s
+ro06 sourcedrecall ok 3.26 s
+ro07 sourcedrecall ok 3.19 s
+ro08 sourcedrecall ok 3.12 s
+ro09 sourcedrecall ok 2.95 s
+ro10 sourcedrecall ok 2.86 s
