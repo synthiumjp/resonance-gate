@@ -1,16 +1,23 @@
 # Handover: sourcedrecall (product track)
 
-Last updated 2026-10-12. Branch `product-p2`, pushed to github.com/synthiumjp/resonance-gate (public, research) and as `main` to github.com/synthiumjp/sourcedrecall (PRIVATE until launch; push both: `git push origin product-p2 && git push sr product-p2:main`, tags to both).
-Latest commit: e9ef773. Latest release tag: `sourcedrecall-v0.5.2` (installs
-from resonance-gate); everything since is unreleased (docs/CHANGELOG.md).
-Full suite on the Mac: 1,318 passed, 5 skipped. Notebook up to e322. Rules
+Last updated 2026-10-12 (evening). Branch `product-p2`, pushed to github.com/synthiumjp/resonance-gate (public, research) and as `main` to github.com/synthiumjp/sourcedrecall (PRIVATE until launch; push both: `git push origin product-p2 && git push sr product-p2:main`, tags to both).
+Latest commit: see `git log` (the relevance cut is d89d830). Latest release
+tag: `sourcedrecall-v0.5.2` (installs from resonance-gate); everything since
+is unreleased (docs/CHANGELOG.md). Full suite on the Mac: 1,331 passed, 5
+skipped. Notebook up to e324. Rules
 and their evidence: docs/HOW_IT_READS.md. JP's goal: a usable, credible,
 viable open-source product -- every claim reproducible, local models only.
 
-Read first in a new session: this file, notebook entries 316-322,
-bench/false_memory/results_v10/SUMMARY.md, docs/PREREG_HELDOUT_V10.md (the
-template for the next pre-registration), docs/REVIEW_2026-10-09.md (the
-adversarial review that set the fair protocol).
+JP's aim (2026-10-12): a lightweight, linguistics-first memory that competes
+with heavier systems, LLM-agnostic and freely available. Judge every change
+to what the reader sees on two local readers of different families
+(Qwen3-14B :8090 and Phi-4 :8091 on the Mac) and drop changes that help one
+model only.
+
+Read first in a new session: this file, notebook entries 316-324,
+bench/false_memory/results_v10/SUMMARY.md, docs/PREREG_HELDOUT_V11.md (DRAFT, uncommitted,
+waiting for JP), docs/REVIEW_2026-10-12.md (the second adversarial review;
+items fixed and open are listed below), docs/REVIEW_2026-10-09.md.
 
 ## What it is
 
@@ -72,33 +79,59 @@ retrieval 88, 71, 40, 55, 58). v10: 5 of 6 met; missed own material 13/20
 (plain retrieval 19). Pooled false memories v10: 4/60 vs plain 26, agentmemory
 20, ai-memory 7.
 
-The open weakness: own material. When the user's own draft (a speech, a
-letter, a listing, a checklist) holds the fact, the reader often says "I
-don't know" with the fact in the block. Dev set cases_dev_own (60): on e9ef773
-own 26/40, plain retrieval 29/40, false memories 2/20 (plain 11/20). Tried
-and rejected (notebook e322): a note marking the line as the user's own
-writing (no effect), shorter rules wordings (+3-4 own answers, +3-4 real false
-memories). In flight at handover: rules paragraph moved ABOVE the lines,
-same wording (below).
+Own material (the v10 miss): on dev the reader refused facts in the user's
+own drafts because of the rules paragraph together with the unrelated lines
+around the fact (notebook e323: with the fact's line alone it answered,
+rules and all). Rejected: rules above the lines (dev19), line breaks kept,
+an own-writing note, shorter rules. Adopted (d89d830): the relevance cut in
+memory_api `_messages_block` (`RG_MSG_CUT`, default 0.5; "off" shows every
+line): with a parser-routed message shown, another message stays if its
+bge-small cosine with the question is >= 0.5, it is in the same
+conversation, or the parser ties its facts to the routed one; not for
+advice, list questions or blocks with pasted text. Dev end to end (Qwen):
+own 26 -> 30 of 40, false memories unchanged on all 9 sets (7 of 248),
+stale2 unchanged; Phi-4: own 34 -> 33 (plain retrieval 33), FM unchanged.
+LoCoMo dev 68.2 -> 67.8%. The cross-encoder version of the cut was
+rejected (dropped the messages that changed a fact: stale2 FM 3 -> 7).
 
-## In flight at handover (2026-10-12)
+Second reader finding: with Phi-4 our block already answered own material
+as well as plain retrieval (34 vs 33 of 40) with a quarter of the false
+memories (3 vs 13 of 20). The v10 own gap was mostly Qwen3-14B's caution.
 
-`~/jpwork/dev19.sh` on the Mac (log ~/jpwork/dev19.log, ends "dev19 done"):
-`reblock2.py` moves [MEMORY RULES] from the end of the block to under the
-header line, wording unchanged, on fixed retrieval, for all 9 dev sets (own,
-pasted, pasted2, stale2 from sdr-dev12/results_dev17_*; code, projects,
-decisions, advice, prefs from sdr-dev11/results_dev16_*). Each set prints
-base then `first`. Adopt only if own goes up AND false memories (own,
-pasted, pasted2, stale2, code, projects, decisions), stale "new state" and
-advice/prefs answers do not get worse; then implement in memory_api.py (the
-block is assembled there), rerun the dev battery end to end, the full suite,
-LoCoMo (the block changes for every question, so LoCoMo needs a re-measure),
-then a v11 pre-registration for JP.
+Review 2026-10-12 fixes (5c4e691, 124d29b, 210a2ff): Claude Code capture
+skipped only sidechain/meta lines, so compaction summaries and every
+task notification were stored as the user's words; paste intros naming a
+destination ("add this to my notes") or a source plus an own noun ("my boss
+sent me this for my review") made pasted text own; "X wrote this" was own;
+an unreadable conversations.json was overwritten. Open from the review
+(docs/REVIEW_2026-10-12.md): README stale sentence (1.1) and old
+false-memory table (1.2); release_measure.sh runs held-out regression sets
+under the old protocol (1.2); HOW_IT_READS stale (1.10); no refusal rates
+in tables (1.8); rules ablation on pasted held-out sets never run (2.1);
+equal-budget plain retrieval (2.2); audit of expected-term misses (2.3);
+MCP write tools can speak for the user (3.2); forget leaves titles and an
+unsalted hash (3.4); Windows lock fails open (3.5); secret filter
+quadratic on long hyphenated text (3.16) and gaps (3.17); field lists
+dropped as chat logs (3.18); unpinned bge/MiniLM/NLI downloads (4.2); no
+CI (4.4); personal infrastructure in public docs (4.6).
 
-Ideas not yet tried for own material: show the sentence of a long own
-message that best matches the question as its own line; fewer low-relevance
-lines in short histories (plain retrieval shows 3 lines, we show all);
-keeping line breaks in quoted messages (plain retrieval keeps them).
+## In flight at handover (2026-10-12 evening)
+
+Release re-measurement on d89d830 on the Mac: tree
+~/jpwork/sdr-release-d89d830, log ~/jpwork/release5.log (ends "release
+measure done"), started 16:22, ~9 h. Then the strict rejudge (adapt
+~/jpwork/strict4.sh to the new tree: link ours, keep mem0_strict/rag_strict
+from ~/jpwork/sdr-release/bench/locomo/results/strict_release_test_*), copy
+the log to bench/RELEASE_d89d830.log, update README numbers from that one
+run, fill the release line in docs/PREREG_HELDOUT_V11.md, and give the
+draft to JP. Phi-4 server: ~/jpwork/reader2/server.pid (ours; stop it when
+not needed, `kill $(cat ~/jpwork/reader2/server.pid)`).
+
+Dev trees on the Mac: sdr-dev13 (e9ef773 + score log RG_MSG_LOG, dev20-22,
+dev24), sdr-dev14 (detection fixes + cross-encoder cut, dev23), sdr-dev15
+(cosine cut, dev25), sdr-dev16 (= d89d830's block code, dev26 and
+LoCoMo dev), sdr-head (suite runs; rsync of the working tree). ~/jpwork/sdr
+is stale (f078bf4).
 
 ## The protocol (do not weaken it)
 
@@ -187,9 +220,10 @@ diff for secrets and real-conversation text before every push.
 
 ## Open items, in order (2026-10-12)
 
-1. Own material (above): finish dev19; if rules-first passes, implement,
-   re-measure, then the v11 pre-registration for JP. If it fails, try the
-   ideas listed above on dev before spending v11.
+1. Finish the release re-measure on d89d830, then JP reviews
+   docs/PREREG_HELDOUT_V11.md (+ v11_run.sh, v11_tests.py, uncommitted);
+   commit the reviewed version, then the set, then the run (both readers).
+   The open review items above, in the order of the review's top five.
 2. Launch (JP): a week of real use; plugin install from a tag on a clean
    machine and on Windows; make sourcedrecall public; PyPI; the write-up
    (docs/launch/WRITEUP_DRAFT.md is out of date) and a demo
