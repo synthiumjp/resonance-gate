@@ -15766,3 +15766,12 @@ end to end: pasted claims taken as the user's 18 -> 4 of 30 with Qwen,
 9/10). The nine older dev sets against dev26: identical except own false
 memories 2 -> 1 of 20 (Qwen); Phi-4 on own, pasted, pasted2, stale2
 identical. Suite 1,382 passed. LoCoMo dev next, then merge.
+
+Merged post-v11 into product-p2 (1d92020; LoCoMo dev 67.8% unchanged; CI
+green). Held-out real emails end to end, once, on 1d92020: a real writer's
+claim given as the user's 7/20 (Qwen) and 5/20 (Phi-4), plain retrieval
+15 and 16; own 9/10 against 10/10 (results_realpaste/SUMMARY.md). Dev real
+4/30, so the letter rule is part fitted. Next: a second readable real-email
+dev set (cases_dev_real2, 40 from the 80 unused dev candidates) to widen it
+without touching the held-out set. Draft v12 pre-registration
+(docs/PREREG_HELDOUT_V12_DRAFT.md, uncommitted) for JP.
