@@ -15714,3 +15714,19 @@ Mac 1,368 passed. HaluMem and LongMemEval answer harnesses written
 (eval_sdr.py, lme_answers.py) and queued after v11 with the strict
 re-judge, the fair-protocol regression step, the side-by-side demo and a
 reproduction check of v10.
+
+Addendum (later the same night). A readable development set of real
+emails, `cases_dev_real.jsonl` (40: 30 pasted, 10 own; the 120 unused
+candidates; one real password replaced; on the post-v11 branch), showed
+the same gap: 6 of 30 pasted found. The misses were letters written TO
+someone with nothing around them: "Lee,", "Dear Mr. Lay,", "Hey, AC!",
+"Juan......" openings, signatures that are not the owner's, formal
+sign-offs with the name stripped by the corpus, the user's comment in the
+next message or absent. A rule on that shape (post-v11 branch,
+prose._letter_span; several lines, no code; assistant names excluded; a
+letter signed by the owner stays theirs): dev pasted 6 -> 26 of 30, own 10
+of 10; every other dev set and LoCoMo 3 changes, all right. Held out
+(cases_real_paste, measured once, counts only): pasted 7 -> 12 of 20, own
+10 of 10. The gap between 26/30 and 12/20 is the part fitted to the emails
+read; reported as is, not tuned further against the held-out set. Not yet
+end to end.
