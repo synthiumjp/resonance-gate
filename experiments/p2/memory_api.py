@@ -734,8 +734,9 @@ def _quote_own(text, owner=None, query=None):
     if rest and not tail:
         return f'"{_window_q(text, query, _MSG_WINDOW)}"'
     pasted = flat[len(own[:k]):len(flat) - len(tail)].strip()
-    who = owner or "the user"
-    src = _source(head + " " + tail, who)
+    # 2026-10-12 (review 3.20): names come from stored text too
+    who = _inert(owner or "the user").replace("]", ")")
+    src = _inert(_source(head + " " + tail, who)).replace("]", ")")
     out = (f'"{_window_q(head, query, _MSG_WINDOW)}" ' if head else "")
     # 2026-10-11 (held-out v8: 4 of 24 marked pasted items still given as
     # the user's, 3 of them instructions the reader followed): unless the
@@ -776,7 +777,11 @@ def _inert(text):
     for a, b in _MARKERS:
         if a.lower() in text.lower():
             text = re.sub(re.escape(a), b, text, flags=re.I)
-    return text
+    # 2026-10-12 (review 3.20): "[ MEMORY RULES]" with a space got through,
+    # and a straight double quote in a message could close the quotation
+    # and write its own "(no longer true: ...)" after it
+    text = re.sub(r"\[\s*(memory|pasted\s+in)", r"(\1", text, flags=re.I)
+    return text.replace('"', "\u201d")
 
 
 def _window(text, around, limit):
@@ -2397,7 +2402,7 @@ class Memory:
             for nt in sorted((x for x in nf(query, k=nk * (2 if group else 1))
                               if visible(x)),
                              key=lambda x: str(x.get("date") or "")):
-                t = nt["text"].strip()
+                t = _inert(nt["text"])          # a note is stored text too (review 3.20)
                 if t.lower() in seen:
                     continue
                 seen.add(t.lower())
