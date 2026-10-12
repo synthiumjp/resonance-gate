@@ -440,7 +440,8 @@ _NOT_ADDRESSEE = {w.lower() for w in """
     Monday Tuesday Wednesday Thursday Friday Saturday Sunday January February March April May June July
     August September October November December Weekend Update Reminder Attention Team All Everyone Folks
     Guys Sir Madam Regards Best Love Sincerely Warmly Kind Many Subject From To Sent Date
-    """.split()}
+    Claude ChatGPT GPT Gemini Codex Copilot Cursor Assistant Bard Siri Alexa Bot
+    """.split()}   # the last line: people address the assistant by name too
 _TITLE = r"(?:(?:Mr|Mrs|Ms|Miss|Dr|Prof)\.?\s+)?"
 _NAME = r"(?-i:[A-Z][a-z'’]+)(?:\s+(?-i:[A-Z][a-z'’]+))?"
 # "Lee,", "Hi, Jan!", "Dear Mr. Lay,", "Joao -", "Juan......", "Hey, AC!";

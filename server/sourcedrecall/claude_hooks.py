@@ -362,7 +362,8 @@ def main(argv=None):
         return 0
     try:
         # utf-8 whatever the console's code page (Windows; review 3.10)
-        event = json.loads(sys.stdin.buffer.read().decode("utf-8", "replace"))
+        buf = getattr(sys.stdin, "buffer", None)
+        event = json.loads(buf.read().decode("utf-8", "replace") if buf else sys.stdin.read())
     except ValueError:
         event = {}
     if not isinstance(event, dict):
