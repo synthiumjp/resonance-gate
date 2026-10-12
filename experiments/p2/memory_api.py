@@ -2333,6 +2333,49 @@ class Memory:
             if n:
                 line += "  (" + "; ".join(n) + ")"
             lines.append(line)
+        # 2026-10-12 (dev own-material set, notebook e323-e324): a short
+        # history shows every message, and with the rules paragraph the
+        # reader refused facts in the user's own drafts that sat among
+        # unrelated lines ("I work nights at the Royal Infirmary" with six
+        # other messages; answered with that line alone). When the parser
+        # routed to a message, one the search alone found stays only if the
+        # cross-encoder scores it at least RG_MSG_CUT. Not for advice or list
+        # questions, and not when pasted text is shown (left alone, a marked
+        # paste was read as the user's). A message whose facts the parser
+        # ties to a kept one (the same attribute, or one replaced the other)
+        # stays: cut alone, "Day ten of decaf" left "four strong coffees a
+        # day" as the current state (dev stale2, false memories 3 -> 8).
+        try:
+            cut = float(os.environ.get("RG_MSG_CUT", "off"))
+        except ValueError:
+            cut = None
+        key = lambda m: re.sub(r"\W+", " ", m["text"]).strip().lower()  # noqa: E731
+        routed = {key(m) for m in via if visible(m)}
+        if (cut is not None and routed and not advice and not listy
+                and not any("[pasted in" in l for l in lines)):
+            score = {}
+            for m in hits:
+                score.setdefault(key(m), m.get("score"))
+            per = self._facts_in(msgs)
+            g_nodes, g_prov = self.g.nodes, self.g.provisional
+
+            def links(fs):
+                out = set()
+                for f in fs:
+                    for rid in (f.get("superseded_by"), f.get("maybe_changed_by")):
+                        nd = (g_nodes.get(rid) or g_prov.get(rid)) if rid else None
+                        if nd:
+                            out.add(fact_id(nd))
+                return out
+            kept = [i for i, m in enumerate(msgs) if key(m) in routed]
+            attrs = {f.get("attribute") for i in kept for f in per[i]}
+            ids = {f.get("id") for i in kept for f in per[i]}
+            linked = set().union(*(links(per[i]) for i in kept))
+            tied = lambda j: (any(f.get("attribute") in attrs or f.get("id") in linked  # noqa: E731
+                                  for f in per[j]) or bool(links(per[j]) & ids))
+            lines = [l for j, (m, l) in enumerate(zip(msgs, lines))
+                     if key(m) in routed or score.get(key(m)) is None
+                     or score[key(m)] >= cut or tied(j)]
         # 2026-10-05: notes written by the user's own model (notes.py, opt-in)
         nf = getattr(self, "notes_for", None)
         rules = _RULES_MSG

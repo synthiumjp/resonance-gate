@@ -15588,3 +15588,50 @@ and how to run everything).
   message's cross-encoder score, rank and route) so cut-offs can be tried
   on fixed retrieval.
 - An Opus review of the whole project (JP's request) is running read-only.
+
+## Entry 324 — 2026-10-12 (review; capture and detection fixes; a relevance cut, rule stated first)
+
+- Opus review of the whole project (docs/REVIEW_2026-10-12.md, read-only,
+  Sonnet helpers, held-out text never opened). Checked by hand before
+  acting: the Claude Code hook stored compaction summaries and every
+  background-task notification as the user's words (8 compaction lines and
+  1,385 task-notification lines in local transcripts; fixed 5c4e691);
+  "my boss sent me this for my review:", "add this to my notes:" and
+  "summarise this article for my notes:" made a pasted letter the user's
+  own (fixed 124d29b, plus "My brother wrote this" read as the user
+  writing: `(?:i )?wrote this`); an unreadable conversations.json was
+  overwritten (fixed 124d29b). Detection against e9ef773 on every dev turn
+  and LoCoMo: 2 changes, both pasted controls wrongly own before (dq53
+  "for my essay", dx07 "My brother wrote this").
+- dev20: the 9 dev sets rerun end to end on sdr-dev13 with a score log
+  (RG_MSG_LOG) reproduce the base exactly (0 blocks changed).
+- dev21 on fixed retrieval: search-only lines below a cross-encoder score
+  cut when the parser routed at least one line (devtools/recut.py). Own,
+  via:-9: own 26 -> 33 of 40 (plain retrieval 29), no own item lost; own
+  false memories 2 -> 4: dx13 (a colleague's CV, marked pasted, now the
+  only line) and dx07 (the detection miss above). Hence vianp: no cut when
+  the block shows marked pasted text (dev22).
+- Adoption rule for the cut, written before the other sets' results: own
+  up (McNemar on paired own items reported); summed false memories over
+  own, pasted, pasted2, stale2, code, projects and decisions not higher
+  than base, and no set up by more than 1; stale2 and code/projects/
+  decisions "new state" not lower; advice and prefs not lower by more than
+  1 each. Then end to end with the detection fixes, the full suite and a
+  LoCoMo re-measure (the cut changes LoCoMo blocks too).
+- dev21/dev22 results (fixed retrieval; base -> variant):
+  via:-9: own 26 -> 33 (FM 2 -> 4), pasted ctrl 14 -> 13, pasted2 FM 1 -> 3
+  (ctrl 17 -> 19), stale2 FM 3 -> 8 and new state 58 -> 53, code, projects,
+  decisions unchanged, advice 21 -> 23, prefs 31 -> 30. via:-4 and
+  top1:-8 worse (stale2 FM 13 and 15). vianp:-9 (no cut with pasted text
+  shown): own 33 (FM 3, the one left is dx07, fixed by detection end to
+  end), pasted and pasted2 FM unchanged (pasted2 ctrl 17 -> 19), stale2
+  still 3 -> 8 and 58 -> 53, advice 23, prefs 30. Fails the rule on
+  stale2.
+- Why stale2: the line that replaced an old fact was search-only with a
+  low score and was cut ("Day ten of decaf" dropped, "four strong coffees
+  a day" left with its "may have changed" note); and the reverse ("I
+  report to Fatima" dropped, the later "Fatima is on leave, Mark is
+  covering" kept). The cut now keeps any message whose facts share an
+  attribute with, or replace or are replaced by, a kept message's facts
+  (memory_api RG_MSG_CUT, off by default). dev23: end to end on sdr-dev14
+  (detection fixes + the cut), all 9 sets, cut off and at -9.

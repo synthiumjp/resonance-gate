@@ -326,3 +326,15 @@ def test_a_name_in_a_possessive_or_a_wrong_initial_is_not_the_owner():
     signed = "can you check this?\n\nHi team, the rota is up. I'm vegan and I live in Cork.\n\nRegards,\nThabo K"
     assert isinstance(_paste_span(signed, "Thabo Eze"), tuple)
     assert _paste_span(signed.replace("Thabo K", "Thabo E"), "Thabo Eze") == "own"
+
+
+def test_someone_else_wrote_this_is_not_the_users_writing():
+    # "wrote this" counted as the user's own even with another subject
+    from prose import _paste_span
+    text = ("My sister wrote this note to her landlord and asked me to check it:\n\n"
+            "'Dear Mr Hale, I have lived here six years and I work nights at the depot. "
+            "Please fix the boiler. Regards, Lena'")
+    assert isinstance(_paste_span(text, "Amara Okafor"), tuple)
+    assert _paste_span("wrote this last night, too long?\n\nDear Sam, I am so sorry I missed "
+                       "your party. I was stuck at work until nine.\n\nLove, Amara",
+                       "Amara Okafor") == "own"

@@ -4,6 +4,7 @@ routed to (via) and replacement messages (no score, no route) always stay.
 A message-search-only line stays if its cross-encoder score >= T.
   via:T      cut only when the block has at least one parser-routed line
   top1:T     cut in every block, but the search's best line always stays
+  vianp:T    as via, and not when the block shows text marked as pasted
 Advice questions (their own ranking) and list questions (k=16) are left alone.
 usage: recut.py SRC_RESULTS DST_RESULTS via:-8"""
 import json, sys, os, re, shutil
@@ -32,7 +33,7 @@ with open(os.path.join(dst, "raw_sourcedrecall.jsonl"), "w") as out:
             head, _, lines = body.partition("\n")
             ls = lines.split("\n")
             assert e["q"] == p["q"] and len(ls) == len(e["msgs"]), (r["id"], p["q"], len(ls), len(e["msgs"]))
-            if e.get("advice") or _LIST.search(p["q"]) or _HAS.match(p["q"]) or (mode == "via" and not any(m["via"] is not None for m in e["msgs"])):
+            if e.get("advice") or _LIST.search(p["q"]) or _HAS.match(p["q"]) or (mode in ("via", "vianp") and not any(m["via"] is not None for m in e["msgs"])) or (mode == "vianp" and "[pasted in" in lines):
                 continue
             keep = []
             for l, m in zip(ls, e["msgs"]):

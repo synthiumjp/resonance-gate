@@ -196,7 +196,7 @@ _FRAME_SOURCE = re.compile(
 # loved this article about rowing.\n\nI row every Sunday." is the user's)
 _FRAME_MAT = re.compile(r"\b(?:the|a|an|this|that|these|those) (?:[\w-]+ ){0,2}(?:" + _THEIRS + r")\b", re.I)
 _FRAME_OWN = re.compile(
-    _OWN_MARK.pattern + r"|\bwhat i wrote\b|\b(?:i )?wrote (?:this|it)\b|\b(?:that|it|this)(?:'?s| is) mine\b|"
+    _OWN_MARK.pattern + r"|\bwhat i wrote\b|(?:^\W*|[.!?,;:]\s*|\bi\s+)wrote (?:this|it)\b|\b(?:that|it|this)(?:'?s| is) mine\b|"
     r"\bi'?m (?:sending|posting|writing|submitting|about to send)\b|\b(?:about|going) to (?:send|post)\b|"
     r"\b(?:going|goes) on my\b|\bfor my (?:own )?(?:site|page|profile|speech|blog)\b|\bmy (?:speech|poem|post|ad|letter|reply)\b|"
     # 2026-10-11 (held-out v9: 4 of 20 own texts taken for pasted): "draft

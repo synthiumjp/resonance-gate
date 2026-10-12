@@ -439,3 +439,38 @@ def test_messages_block_reads_wider_for_lists_and_notes_links(monkeypatch):
     block = m.context_block("Where did Sam move from?", max_facts=5)
     line = next(l for l in block.splitlines() if "home country" in l)
     assert "home country: Sweden" in line
+
+
+def test_unrelated_search_lines_leave_when_the_parser_found_the_message(monkeypatch):
+    """2026-10-12 (dev own-material set, notebook e324): with the parser's
+    message shown, a line the search alone found stays only above RG_MSG_CUT;
+    not when pasted text is in the block."""
+    monkeypatch.setenv("RG_EVIDENCE", "messages")
+    monkeypatch.setenv("RG_MSG_CUT", "-9")
+    m = Memory(WireGraph.from_facts([], n_convs=1))
+    m.conflicts = lambda: []
+    draft = ("here's my message to the letting agent: Hi Deji, the boiler is banging. "
+             "I work nights at the Royal Infirmary. Thanks, Amara")
+    monkeypatch.setattr(m, "_recall_for_context", lambda q: {"found": True, "ranked": [
+        {"text": "Amara works nights at the Royal Infirmary",
+         "said": "I work nights at the Royal Infirmary.",
+         "receipts": [{"conversation_id": "c1", "date": "2026-03-07"}]}]})
+    m.message_of = lambda cid, said: (draft, None)
+    hits = [{"text": "worst first job, love it", "date": "2026-04-08", "score": -9.1, "conv": "c2"},
+            {"text": draft, "date": "2026-03-07", "score": -6.6, "conv": "c1"},
+            {"text": "how do I clean a cast iron pan", "date": "2026-05-16", "score": -10.9, "conv": "c3"},
+            {"text": "my work rota changes in May", "date": "2026-05-20", "score": -3.0, "conv": "c4"}]
+    m.messages_for = lambda q, k=3: list(hits)
+    shown = lambda: [l for l in m.context_block("Where do I work?").splitlines()  # noqa: E731
+                     if l.startswith("- ")]
+    lines = shown()
+    assert any("Royal Infirmary" in l for l in lines) and any("rota" in l for l in lines)
+    assert not any("cast iron" in l or "worst first job" in l for l in lines)
+    monkeypatch.setenv("RG_MSG_CUT", "off")
+    assert len(shown()) == 4
+    monkeypatch.setenv("RG_MSG_CUT", "-9")
+    hits.append({"text": "My colleague sent me his CV to tidy:\n\nPastry chef, Hotel de Paris, "
+                 "2018 to now. Run a team of six.\n\nMark", "date": "2026-02-23",
+                 "score": -10.0, "conv": "c5"})
+    lines = shown()
+    assert any("[pasted in" in l for l in lines) and len(lines) == 5
