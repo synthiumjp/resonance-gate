@@ -15754,3 +15754,15 @@ the text as the user's; check the post-v11 letter rule does not add to this
 
 Slip: the developer saw two Qwen overrides' text (one scenario) when
 checking the overrides file; recorded in the summary.
+
+Addendum (dev27, post-v11 fe55586 end to end, v7 protocol). New readable
+set cases_dev_own2 (30 own writing brought to be read over, 10 others' in
+the same shapes; agent-written, v11 not shown to the writer). Frozen code ->
+post-v11, Qwen3-14B: own answered 24 -> 27 of 30, others' claims taken as
+the user's 2 -> 0 of 10 (plain retrieval 28/30 and 8/10); Phi-4 23 -> 26,
+3 -> 0 (plain 27/30, 9/10). Real emails (cases_dev_real), the letter rule
+end to end: pasted claims taken as the user's 18 -> 4 of 30 with Qwen,
+19 -> 6 with Phi-4 (plain retrieval 25 and 25), own 8/10 unchanged (plain
+9/10). The nine older dev sets against dev26: identical except own false
+memories 2 -> 1 of 20 (Qwen); Phi-4 on own, pasted, pasted2, stale2
+identical. Suite 1,382 passed. LoCoMo dev next, then merge.
