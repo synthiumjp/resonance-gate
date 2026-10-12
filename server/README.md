@@ -171,9 +171,10 @@ The browser (also served by the MCP server while it runs) shows the same
 sections as `MEMORY.md`, and a search box that shows what recall returns for
 a question. It listens on 127.0.0.1 only and is read-only.
 
-Agents can do the same with the `profile_forget`, `profile_confirm` and
-`profile_export` tools. Editing `MEMORY.md` by hand does not change the
-memory; it is regenerated.
+Agents can do the same with the `profile_forget` and `profile_confirm`
+tools (and `profile_export`, one of the diagnostic tools shown with
+`SOURCEDRECALL_ALL_TOOLS=1`). Editing `MEMORY.md` by hand does not change
+the memory; it is regenerated.
 
 Passwords, PINs, API keys, tokens, card numbers and similar are replaced by
 `[secret removed]` before anything is written, including the stored

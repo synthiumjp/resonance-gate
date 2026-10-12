@@ -49,7 +49,14 @@ mcp = FastMCP("sourcedrecall")
 # 2026-10-12 (review 3.2): hints the host can act on, so it can ask the user
 # before a call that changes or deletes the memory. Older mcp releases have
 # no annotations; the tool is registered without them there.
-def _tool(read_only, destructive=False, idempotent=False):
+# 2026-10-12 (review 3.11): each tool's description is in every session's
+# context. Diagnostics are hidden unless SOURCEDRECALL_ALL_TOOLS=1.
+ALL_TOOLS = os.environ.get("SOURCEDRECALL_ALL_TOOLS") == "1"
+
+
+def _tool(read_only, destructive=False, idempotent=False, extra=False):
+    if extra and not ALL_TOOLS:
+        return lambda fn: fn
     try:
         from mcp.types import ToolAnnotations
         return mcp.tool(annotations=ToolAnnotations(
@@ -110,123 +117,60 @@ def forget(subject: str, relation: str = None, object: str = None) -> dict:
     return service.forget(subject, relation, object)
 
 
-@_tool(read_only=True)
+@_tool(read_only=True, extra=True)
 def profile_dynamics() -> dict:
-    """Memory-aging report: how many stored facts are actively reinforced,
-    how many have faded (retained, lower weight), total receipts, and the
-    span they cover. Use when the user asks how much the memory holds, how
-    current it is, or what it has stopped hearing about."""
+    """How much the memory holds and how recent it is: facts still being mentioned, facts that have faded, and the span of time covered."""
     return pmem.profile_dynamics()
 
 
-@_tool(read_only=True)
+@_tool(read_only=True, extra=True)
 def profile_quarantine() -> dict:
-    """Writes blocked at ingest by rules learned from the owner's own
-    corrections, each with the rule responsible. Use when the user asks why
-    something is missing from memory, or to review whether a learned rule has
-    aged badly (e.g. they denied a job title once but now hold it)."""
+    """Statements the memory refused to store because of an earlier correction by the user, each with the correction responsible."""
     return pmem.profile_quarantine()
 
 
 @_tool(read_only=True)
 def profile_conflicts() -> dict:
-    """Open memory conflicts: slots where the user's stored values evolved or
-    disagree and no correction has resolved them. Each item carries a
-    ready-to-ask clarifying question -- when one is relevant to the current
-    conversation, ASK it rather than silently picking a value. Resolving a
-    conflict: call profile_correct with the outdated value."""
+    """Facts about the user that changed or disagree with no correction settling them, each with a question to ask. If one matters to the conversation, ask the user rather than picking a value; then record the answer with profile_correct."""
     return pmem.profile_conflicts()
 
 
 @_tool(read_only=True)
 def profile_recall(query: str, scope: str = None) -> dict:
-    """Recall from the p2 world/profile memory (a validated, non-hallucinating
-    LIVING memory built by replaying a cached extraction over the user's own
-    conversation history — cache-only, no LLM call in this request path).
-    Returns Memory.recall()'s dict verbatim: {found, abstain, query,
-    asserted:[...], wired:[...], unconfirmed:[...]} — each fact carries its
-    mention count, receipts (dates + conversation titles + conversation_id),
-    and status (corroborated / unconfirmed-single-mention / owner-confirmed);
-    wired facts also carry the receipted co-occurrence path that connects
-    them. If nothing corroborated matches, abstain=true — an honest "never
-    seen", never a guess. Plus source="rg-p2-memory". Pass a receipt's
-    conversation_id to profile_rehydrate() to pull the verbatim source
-    conversation back into context."""
+    """Find what the user said about something. Returns the matching facts with their dates and the conversations they came from; found=false means nothing stored answers it, so say you don't know. To read the whole conversation behind a fact, pass its conversation_id to profile_rehydrate."""
     return pmem.profile_recall(query, scope)
 
 
 @_tool(read_only=True)
 def profile_check(claim: str, scope: str = None) -> dict:
-    """Did the user say this? Use before relying on something about the user
-    -- a tool argument, a detail you are about to act on ("The user lives in
-    Fitzroy", "The user's API is in Go").
-
-    verdict: "said" (with `since`: "no longer true", "may have changed" when
-    a later message on the topic exists, or "no later change found" -- which
-    is NOT a promise it is still true), "contradicted" (the user said
-    otherwise), "unconfirmed" (only the assistant said it), "unclear" (the
-    topic came up but nothing settles it), or "not_found" (nothing found; a
-    claim in very different words can be missed). `evidence` carries the
-    user's own dated words. Deterministic; no model call."""
+    """Did the user say this? Use before acting on a detail about the user ("The user lives in Fitzroy"). verdict is said (with since: no longer true, may have changed, or no later change found), contradicted, unconfirmed (only the assistant said it), unclear, or not_found; evidence holds the user's own dated words."""
     return pmem.profile_check(claim, scope)
 
 
 @_tool(read_only=True)
 def profile_context(query: str = None, max_facts: int = None,
                     scope: str = None) -> dict:
-    """The verbatim, receipted text block for prompt injection — every line is
-    a stored fact with its mention count, and the block carries the standing
-    instruction that anything about the user NOT listed is unknown and must
-    not be invented. With no query, the top of the corroborated profile;
-    with a query, that recall's neighbourhood (8 lines by default, 15 for
-    the profile). Returns {"block": <str>}."""
+    """The memory for a question, ready to read: the user's own dated messages, oldest first, with labels for what is no longer true and for text pasted from someone else. Without a question, a summary of what is known about the user."""
     return pmem.profile_context(query, max_facts, scope)
 
 
 @_tool(read_only=False, destructive=True)
 def profile_correct(action: str, attribute: str, value: str,
                      new_attribute: str = None, exact: bool = False) -> dict:
-    """Owner correction over the p2 memory: action is one of deny (the fact is
-    wrong — drop it and its edges), confirm (owner-vouched — promote a
-    single-mention fact to asserted), or retype (right fact, wrong attribute —
-    requires new_attribute). Always appended as one line to the data dir's
-    corrections.jsonl (ground truth, never inference). deny/confirm also apply
-    immediately to the live graph (applied="live"); retype needs a fact-level
-    rebuild and only takes effect on the next reload (applied="on-reload",
-    needs_reload=true — see profile_status(reload=True))."""
+    """Record the user's correction of a stored fact: deny (it is wrong, drop it), confirm (the user vouches for it) or retype (right value, wrong kind of fact; needs new_attribute). Use only when the user asks."""
     return pmem.profile_correct(action, attribute, value, new_attribute, exact)
 
 
-@_tool(read_only=True)
+@_tool(read_only=True, extra=True)
 def profile_status(reload: bool = False) -> dict:
-    """Health/shape of the loaded p2 memory: {loaded, asserted, provisional,
-    edges, audit_pass, needs_reload, uncached_turns, data_dir}. audit_pass is
-    the non-hallucination graph audit (every edge = real receipted
-    co-occurrence, nothing more, nothing less); it's O(n^2) so it's computed
-    once and cached, not recomputed per call. Pass reload=True to rebuild from
-    the cache + corrections.jsonl on disk first (picks up a pending retype)."""
+    """Diagnostics: whether the memory is loaded, how many facts it holds, and where it is stored. reload=True rebuilds it from disk."""
     return pmem.profile_status(reload)
 
 
 @_tool(read_only=True)
 def profile_rehydrate(conversation_id: str, max_turns: int = 40,
                        include_assistant: bool = True, scope: str = None) -> dict:
-    """Rehydrate a receipt into the verbatim conversation slice it points at
-    -- the page-fault half of the virtual context window (the p2 fact graph
-    is the page table; conversations.json, the raw export, is the backing
-    store). Intended loop: profile_recall -> take a fact's
-    receipts[].conversation_id -> profile_rehydrate(conversation_id) to pull
-    the exact source turns back into context, verbatim, instead of trusting
-    the compressed fact alone.
-
-    Returns {found, conversation_id, title, date, n_turns_total,
-    turns:[{role, text}], truncated}. turns is capped at max_turns (oldest-
-    first order as stored; truncated=true if the conversation has more);
-    include_assistant=False restricts to the human's own turns; each turn's
-    text is capped at 2000 chars. An unknown conversation_id is NEVER
-    guessed or fuzzy-matched -- returns {found: false, error: "no such
-    conversation in the backing store"}, the same non-hallucination contract
-    as profile_recall's abstain, one layer down."""
+    """The full text of one stored conversation, by the conversation_id that profile_recall gives with each fact. At most max_turns turns (200 at most); include_assistant=False gives only the user's turns."""
     return pmem.rehydrate(conversation_id, max_turns, include_assistant, scope)
 
 
@@ -234,47 +178,7 @@ def profile_rehydrate(conversation_id: str, max_turns: int = 40,
 def profile_ingest(turns: list[dict], conversation_id: str = None,
                     title: str = None, owner_name: str = None,
                     date: str = None, scope: str = None) -> dict:
-    """Turn ONE conversation into new profile-memory facts -- DETERMINISTIC,
-    NO LANGUAGE MODEL: facts are lifted by rgx, a grammar-rule parser over a
-    dependency parse, not sampled or generated by an LLM. A fact is either
-    grounded in the turn's own words or it is not emitted; nothing here can
-    invent content. `turns` is one dialogue: [{"role": "user"|"assistant",
-    "content": str}, ...], oldest first. `conversation_id` groups repeated
-    calls into the same conversation (a fresh uuid4 if omitted); `title`
-    names it; `owner_name` is whose profile this is (falls back to env
-    SOURCEDRECALL_OWNER, then an existing profile's own discovered name, then
-    None).
-
-    Appends the turns to conversations.json, extracts every turn not already
-    in the extraction cache (a turn already seen is skipped, never
-    re-extracted -- ingesting the same conversation twice is a safe no-op the
-    second time), appends the new cache lines, and reloads the live memory
-    so the very next profile_recall/profile_context/profile_status sees the
-    result. Every fact this produces still carries the same receipts
-    (session/turn/role, and once wired, conversation_id + date) as any other
-    fact in this store -- ingestion doesn't relax the provenance contract, it
-    only adds to what's receipted.
-
-    An assistant turn's clause reporting a claim ABOUT the user (e.g. "I
-    remember you mentioning...") is tagged hearsay: receipted, never
-    asserted or volunteered as the user's own fact (see profile_recall's
-    'hearsay' key).
-
-    Returns {conversation_id, turns: <non-empty turns seen>,
-    facts: <new non-hearsay facts>, hearsay: <new hearsay facts>,
-    skipped_cached: <turns already cached, not re-extracted>,
-    model_calls: 0} -- model_calls is always 0, the receipt that no model
-    call happened anywhere in this path.
-
-    `date` (ISO, e.g. "2026-09-25" or "2026-09-25T14:00:00Z") is when the
-    conversation HAPPENED; default now. Pass it when importing older chats:
-    which of two statements is newer decides what is "no longer true".
-
-    Standing instructions are not stored from this tool: an agent that was
-    talked into calling it could otherwise plant one that leads every later
-    session. Sessions captured by the hooks store them as usual. A date in
-    the future is refused (it would make the message newer than everything
-    the user said)."""
+    """Store a conversation the hooks did not capture. turns is [{"role": "user"|"assistant", "content": str}, ...], oldest first; date is when it happened (ISO; not in the future). Nothing is generated: a grammar parser reads the user's own words. Standing instructions are not stored from this tool."""
     from sourcedrecall.paths import current_scope
     pmem._not_future(date)
     return pmem.profile_ingest(turns, conversation_id, title, owner_name,
@@ -325,22 +229,19 @@ def _prewarm():
 
 @_tool(read_only=False, destructive=True, idempotent=True)
 def profile_forget(fact_id: str) -> dict:
-    """Remove one remembered fact, by the `id` shown in profile_recall results
-    and in MEMORY.md. Use when the user says something stored is wrong or
-    should not be kept."""
+    """Forget one stored fact by its id (shown in profile_recall results and MEMORY.md): the sentence it came from is erased. Use when the user asks for something to be forgotten."""
     return pmem.profile_forget(fact_id)
 
 
 @_tool(read_only=False, idempotent=True)
 def profile_confirm(fact_id: str) -> dict:
-    """Mark one remembered fact as confirmed by the user, by its `id`."""
+    """Mark one stored fact as confirmed by the user, by its id."""
     return pmem.profile_confirm(fact_id)
 
 
-@_tool(read_only=False, idempotent=True)
+@_tool(read_only=False, idempotent=True, extra=True)
 def profile_export() -> dict:
-    """Write the whole memory to MEMORY.md and return its path and contents,
-    so the user can read everything that is stored."""
+    """Write everything stored to MEMORY.md and return it, so the user can read it."""
     path = pmem.export_markdown()
     return {"path": path, "markdown": open(path, encoding="utf-8").read()}
 
