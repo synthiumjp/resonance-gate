@@ -11,6 +11,32 @@ in v11_tests.py), 3.1 (5c4e691), 3.3, 3.7/3.17, 3.12, 3.13, 3.16, 3.18, 4.2,
 4.6, MCP annotations (part of 3.2), the Windows lock wait (part of 3.5), CI
 written (4.4, not yet green).
 
+## Proposed revision after the Fable review (2026-10-12, awaiting JP)
+
+The review's point: what blocks a credible launch is a stranger installing
+it on a clean machine and getting something useful in ten minutes without
+it storing anything that is not theirs. Evidence work does not block it.
+JP's concern (unknowns must clearly beat the field) adds one gate: an
+independently checkable win.
+
+Launch gates, not a date:
+1. Installs cleanly from a tag on a clean Mac, Linux and Windows machine,
+   PyPI working the same day (5.2-5.4).
+2. Nothing breakable in the first hour: 2.2 MCP limits (done on post-v11),
+   SECURITY.md (done), the parser licence question settled, first-run
+   messages and `status`/`last` (done on post-v11), download progress and
+   resume (done on post-v11).
+3. One independently checkable win: an external benchmark (3.0: HaluMem,
+   LongMemEval knowledge-update, running overnight), else v11 plus a
+   side-by-side demo (a pasted email given to Mem0 and to sourcedrecall).
+
+Moved earlier: JP's real use (5.1) starts now on the current build, which
+also gives the Codex, Gemini and Cursor hooks their first run in the real
+apps. Deferred to after launch: 3.1 MemPalace, 3.5, 3.6 (except the
+answer.py retry), 3.8, 2.10, 2.11, forget's substring erasure, 2.5 unless
+Cursor survives 5.1. Kept small: 3.4, 30 real-shaped pastes. The coding-task
+test (3.3) after launch, its pre-registration committed before.
+
 ## Phase 0. Running now (no product code may change until the v11 run ends)
 
 | | item | done when |
