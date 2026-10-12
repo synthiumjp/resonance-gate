@@ -386,9 +386,23 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
     # first 60 characters of the first message, before any scrubbing
     title = scrub(title) if title else title
     _fk = _forgotten_keys() if os.environ.get("RG_MEMORY_DIR") else set()
+    before = turns
     turns = [dict(t, content=_strip_forgotten(scrub(t.get("content")), _fk))
              if isinstance(t, dict) and isinstance(t.get("content"), str) else t
              for t in turns]
+    # 2026-10-12 (review 3.4): hooks cut the title from the first message
+    # before the forgotten sentences leave it; a title that is the start of
+    # a message that lost one is made again from what is left
+    if title and _fk:
+        cut = _norm_forget(title.rstrip(".… "))
+        for t0, t1 in zip(before, turns):
+            if (isinstance(t0, dict) and isinstance(t0.get("content"), str)
+                    and t1.get("content") != scrub(t0["content"])
+                    and len(cut) >= 12
+                    and _norm_forget(scrub(t0["content"])).startswith(cut)):
+                rest = " ".join(t1["content"].split())
+                title = (rest[:60] if rest and rest != "[forgotten]" else "(untitled)")
+                break
     if not turns:
         # Safe no-op: nothing to append, nothing to extract, no reload
         # forced, no extractor loaded. conversation_id is echoed back
@@ -1620,10 +1634,52 @@ def _note_id(r):
 _PIECES = re.compile(r"((?<=[.!?])\s+|\n+)")
 
 
+def _norm_forget(text):
+    return re.sub(r"\W+", " ", text or "").strip().lower()
+
+
+# 2026-10-12 (review 3.4): the fingerprint was a plain sha256 of the
+# lower-cased sentence, which a dictionary recovers for short sentences ("i
+# have diabetes"). It is now an HMAC under a random key made once per memory
+# folder (.forget_key, readable by the user only). Fingerprints written
+# before this ("h" lines) are still honoured; they cannot be re-keyed.
+_SECRETS = {}
+
+
+def _forget_secret():
+    d = _data_dir()
+    if d not in _SECRETS:
+        p = os.path.join(d, ".forget_key")
+        try:
+            with open(p, "rb") as fh:
+                k = fh.read()
+        except OSError:
+            k = b""
+        if len(k) < 32:
+            os.makedirs(d, exist_ok=True)
+            k = os.urandom(32)
+            fd = os.open(p, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+            with os.fdopen(fd, "wb") as fh:
+                fh.write(k)
+        _SECRETS[d] = k
+    return _SECRETS[d]
+
+
 def _forget_key(text):
     import hashlib
-    k = re.sub(r"\W+", " ", text or "").strip().lower()
-    return hashlib.sha256(k.encode()).hexdigest() if k else None
+    import hmac
+    k = _norm_forget(text)
+    return hmac.new(_forget_secret(), k.encode(), hashlib.sha256).hexdigest() if k else None
+
+
+def _is_forgotten(text, keys):
+    import hashlib
+    if not keys:
+        return False
+    if _forget_key(text) in keys:
+        return True
+    k = _norm_forget(text)
+    return bool(k) and ("h:" + hashlib.sha256(k.encode()).hexdigest()) in keys
 
 
 def _forgotten_path():
@@ -1631,11 +1687,21 @@ def _forgotten_path():
 
 
 def _forgotten_keys():
+    keys = set()
     try:
         with open(_forgotten_path(), encoding="utf-8") as fh:
-            return {json.loads(l)["h"] for l in fh if l.strip()}
-    except (OSError, ValueError, KeyError):
-        return set()
+            for l in fh:
+                try:
+                    r = json.loads(l)
+                except ValueError:
+                    continue
+                if r.get("m"):
+                    keys.add(r["m"])
+                elif r.get("h"):
+                    keys.add("h:" + r["h"])        # before 2026-10-12, unkeyed
+    except OSError:
+        pass
+    return keys
 
 
 def _strip_forgotten(text, keys):
@@ -1647,7 +1713,7 @@ def _strip_forgotten(text, keys):
     for i in range(0, len(parts), 2):
         piece = parts[i]
         sep = parts[i + 1] if i + 1 < len(parts) else ""
-        if piece.strip() and _forget_key(piece) in keys:
+        if piece.strip() and _is_forgotten(piece, keys):
             dropped = True
             continue
         out.append(piece + sep)
@@ -1658,20 +1724,37 @@ def _strip_forgotten(text, keys):
 
 
 def _erase(said):
-    """Erase a sentence the user asked to forget from everything on disk."""
+    """Erase a sentence the user asked to forget from everything on disk.
+    -> how many stored messages, titles and parsed facts it was taken out
+    of (2026-10-12, review 3.4: success was reported without counting), or
+    None when there was nothing to forget."""
     key = _forget_key(said)
     if not key:
-        return False
+        return None
+    n = 0
     with _lock:
         keys = _forgotten_keys() | {key}
         with open(_forgotten_path(), "a", encoding="utf-8") as fh:
-            fh.write(json.dumps({"h": key}) + "\n")
+            fh.write(json.dumps({"m": key}) + "\n")
         conv_path = _conversations_path()
         convs = _read_conversations(conv_path)
+        said_norm = _norm_forget(said)
         for c in convs:
             for m in c.get("chat_messages") or []:
                 if m.get("text"):
-                    m["text"] = _strip_forgotten(m["text"], keys)
+                    new = _strip_forgotten(m["text"], keys)
+                    n += new != m["text"]
+                    m["text"] = new
+            # 2026-10-12 (review 3.4): the title is the first 60 characters
+            # of the first message, so it can hold the sentence, or the start
+            # of it, after the message itself was erased
+            name = c.get("name")
+            if name:
+                new = _strip_forgotten(name, keys)
+                cut = _norm_forget(name.rstrip(".… "))
+                if new != name or (len(cut) >= 12 and said_norm.startswith(cut)):
+                    c["name"] = "(untitled)"
+                    n += 1
         tmp = conv_path + f".{os.getpid()}.tmp"
         with open(tmp, "w", encoding="utf-8") as fh:
             json.dump(convs, fh)
@@ -1684,8 +1767,10 @@ def _erase(said):
                     r = json.loads(line)
                 except ValueError:
                     continue
+                before = len(r.get("f") or [])
                 r["f"] = [f for f in r.get("f") or []
-                          if _forget_key(f.get("source") or f.get("said") or "") not in keys]
+                          if not _is_forgotten(f.get("source") or f.get("said") or "", keys)]
+                n += before - len(r["f"])
                 lines.append(json.dumps(r))
             tmp = cache + f".{os.getpid()}.tmp"
             with open(tmp, "w", encoding="utf-8") as fh:
@@ -1704,7 +1789,38 @@ def _erase(said):
         _state["msg_index"] = None
         _drop_embeddings()
         _reload_locked()
-    return True
+    _erase_spools(keys)
+    return n
+
+
+def _erase_spools(keys):
+    """The Cursor spool keeps a session's turns until it is stored (up to
+    30 days if it never is): take the forgotten sentences out there too
+    (2026-10-12, review 3.4)."""
+    from sourcedrecall.paths import state_dir
+    d = os.path.join(state_dir(), "cursor-spool")
+    if not os.path.isdir(d):
+        return
+    for name in os.listdir(d):
+        p = os.path.join(d, name)
+        if not name.endswith(".jsonl"):
+            continue
+        try:
+            rows = [json.loads(l) for l in open(p, encoding="utf-8") if l.strip()]
+        except (OSError, ValueError):
+            continue
+        changed = False
+        for r in rows:
+            if isinstance(r.get("content"), str):
+                new = _strip_forgotten(r["content"], keys)
+                changed |= new != r["content"]
+                r["content"] = new
+        if changed:
+            tmp = p + f".{os.getpid()}.tmp"
+            fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+            with os.fdopen(fd, "w", encoding="utf-8") as fh:
+                fh.write("".join(json.dumps(r) + "\n" for r in rows))
+            os.replace(tmp, p)
 
 
 def profile_forget(fact_id):
@@ -1732,11 +1848,11 @@ def profile_forget(fact_id):
         if u is None:
             return {"forgotten": False, "error": f"no fact with id {fact_id}"}
         profile_correct("deny", "said", u["value"], exact=True, said=u["value"])
-        _erase(u["value"])
+        n = _erase(u["value"])
         _export_quietly()
         return {"forgotten": True, "fact": {"id": fact_id, "text": None,
                                             "said": u["value"]},
-                "applied": "live"}
+                "erased_from": n or 0, "applied": "live"}
     out = profile_correct("deny", f["attribute"], f["value"], exact=True,
                           said=f.get("said"))
     # 2026-10-03: forgetting removes what the fact left behind. A rebuild
@@ -1745,12 +1861,15 @@ def profile_forget(fact_id):
     # current again -- and covers the hearsay tier; the names the sentence
     # introduced ("my dog Biscuit") leave the parser's saved world.
     _forget_names(f.get("said"))
-    if not _erase(f.get("said")):
+    n = _erase(f.get("said"))
+    if n is None:
         with _lock:
             _reload_locked()
     _export_quietly()
+    # erased_from: how many stored messages, titles and parsed facts the
+    # sentence was taken out of (2026-10-12, review 3.4)
     return {"forgotten": True, "fact": {k: f[k] for k in ("id", "text", "said")},
-            "applied": out.get("applied")}
+            "erased_from": n or 0, "applied": out.get("applied")}
 
 
 def _notes_done_path():
