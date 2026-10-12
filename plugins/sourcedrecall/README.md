@@ -13,7 +13,7 @@ Install:
 ```
 
 The first session sets up a Python environment and downloads the models in
-the background (about 3 to 5 minutes). Requirements: Python 3.10+ and git.
+the background (a few minutes). Requirements: Python 3.10 to 3.13 and git.
 
 What it adds:
 - an MCP server with `profile_recall`, `profile_context`, `profile_correct`

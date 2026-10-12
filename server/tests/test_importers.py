@@ -320,3 +320,21 @@ def test_an_export_is_stored_once(tmp_path, pm, capsys):
     assert "Perth" in r["ranked"][0]["text"] and "Mars" not in json.dumps(r)
     importers.main(["chatgpt", str(p), "--owner", "Dana Cole"])
     assert "stored 0 new facts" in capsys.readouterr().out
+
+
+def test_an_export_over_the_cap_is_refused_before_it_is_read(tmp_path, monkeypatch):
+    # review 2026-10-12 (3.9): a huge export could exhaust memory
+    import json
+    import zipfile
+    import pytest
+    from sourcedrecall import importers
+    f = tmp_path / "conversations.json"
+    f.write_text(json.dumps([{"id": "x"}] * 2000))
+    z = tmp_path / "export.zip"
+    with zipfile.ZipFile(z, "w") as zz:
+        zz.write(f, "conversations.json")
+    assert importers._export_json(str(z))[0]["id"] == "x"
+    monkeypatch.setattr(importers, "_MAX_EXPORT", 100)
+    for p in (z, f):
+        with pytest.raises(ValueError, match="over 1 GB"):
+            importers._export_json(str(p))

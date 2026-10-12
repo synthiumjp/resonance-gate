@@ -196,6 +196,8 @@ _DOC_HEAD = re.compile(r"^\s*(?:(?-i:[A-Z][A-Z0-9&'’.,-]+(?:\s+[A-Z0-9&'’.,(
 _RULE_LIST = re.compile(r"^\s*(?:\d+[.)]|[-*•])\s+(?:always|never|don'?t|do not|make sure|please|you must|"
                         r"you should|no )\b", re.I | re.M)
 _CODE_COMMENT = re.compile(r"^\s*(?:#|//|/\*|\*)\s*\S", re.M)
+_ASKED_ME = (r"\b(?:asked|asking|wants|wanted|needs) me to (?:check|look at|look over|read|"
+             r"proofread|go over|review|have a look)\b|\blet me read\b")
 _FRAME_SOURCE = re.compile(
     r"\b(?:sent|received|landed|showed up|turned up|came (?:in|through)|going around|forwarded|"
     r"posted|shared|pasting|pasted|copying|copied|inherited)\b|"
@@ -205,6 +207,10 @@ _FRAME_SOURCE = re.compile(
     r"\b(?:written|posted|sent|shared) by (?:a|an|the|my|her|his|their|some)\b|"
     r"\bnot mine\b|^\W*(?:for )?context\b|\bcontext (?:below|above|first)\b|^\s*\^|\(\s*[\w\s'’]+['’]s [\w\s]+\)|"
     r"\b(?:her|his|their|[\w-]+['’]s) (?:" + _MAT2 + r")\b|"
+    # 2026-10-13 (cases_dev_own2): "Tom's toast", "her statement for uni",
+    # "asked me to look at", "let me read her diary page"
+    r"\b(?:her|his|their|[\w-]+['’]s) (?:[\w-]+ )?(?:toast|speech|statement|profile|diary|journal|"
+    r"essay|story|column|application|poem)\b|" + _ASKED_ME + r"|"
     r"\b(?:second|2nd|next|last|final|other) (?:bit|part|half|go|page)\b|\brest of it\b", re.I)
 # naming the material ("the tripadvisor review", "this email"): an
 # introduction only after the block, or before it ending in a colon ("I
@@ -225,9 +231,14 @@ _FRAME_OWN = re.compile(
     # 2026-10-12 (review): not where the text is going ("add this to my
     # notes", "help me quote this in my essay", "sent me this for my review")
     r"(?<!\bto )(?<!\bin )(?<!\binto )(?<!\bfor )(?<!\bon )(?<!\bof )"
-    r"\bmy (?:own )?(?:song|lyrics?|chorus|verse|toast|eulogy|bio|cv|resume|cover letter|essay|story|"
-    r"listing|review|notes?|diary|journal|draft)\b|"
+    # 2026-10-13 (held-out v11: 6 of 30 own texts taken for pasted, the
+    # facts dropped; dev set cases_dev_own2): "my blog post", "my about
+    # section", "column ..., I write it every month"
+    r"\bmy (?:own )?(?:[\w-]+ ){0,2}?(?:song|lyrics?|chorus|verse|toast|eulogy|bio|cv|resume|cover letter|essay|story|"
+    r"listing|review|notes?|diary|journal|draft|post|statement|speech|column|application|ad|profile|"
+    r"section|entry|piece|blurb|newsletter)\b(?!['’])|"
     r"(?:^|[.!?,;:]\s*|\bi\s+)wrote\s+(?:the|a|my)\b|"
+    r"\bi (?:write|draft) (?:it|this|these|them|one)\b|"
     r"\b(?:check|fix|correct|improve|proofread)\s+my\s+(?:grammar|spelling|wording|writing|english|punctuation)\b",
     re.I | re.M)
 
@@ -237,6 +248,7 @@ _FRAME_OWN = re.compile(
 # introduction that says the text came from someone else is not outweighed
 # by an own cue in the same introduction
 _FROM_OTHER = re.compile(
+    _ASKED_ME + r"|"
     r"\b(?:sent|forwarded|passed on|passed along|emailed|texted|messaged)\s+(?:me|us)\b|"
     r"\b(?:forwarded|received)\b|\bwritten by (?!me\b)|\bnot mine\b|"
     r"\b(?:got|found|saw|spotted|came across) (?:this|that|it|these)\b|"
@@ -403,7 +415,9 @@ def _paste_span0(text, owner=None):
         after = text[end:]
         if _REPLYISH.search(after) and not _OWN_MARK.search(after):
             return 0, end
-        return "own" if _OWN_MARK.search(after) else None
+        if _OWN_MARK.search(after):
+            return "own"
+        return _letter_span(text, owner)
     # quoted sentences ("'I always eat breakfast at 6.' what does this mean")
     for q in _QUOTE_SPAN.finditer(text):
         body = q.group(1) or q.group(2)
@@ -417,6 +431,75 @@ def _paste_span0(text, owner=None):
     if len(paras) >= 2 and _EVAL_Q.match(paras[-1].strip()):
         cut = text.rstrip().rfind(paras[-1].strip())
         return 0, cut
+    return _letter_span(text, owner)
+
+
+# 2026-10-13 (real emails, cases_dev_real.jsonl: the rules above found 6 of
+# 30). A real email is seldom set off by a blank line or introduced in the
+# same message; the user says "should I say yes to this?" in the next one,
+# or nothing. What gives it away is that it is written TO someone: several
+# lines that open by addressing a person by name ("Lee,", "Hi, Jan!",
+# "Joao -"), or close with a name ("Bill"), that is not the owner's. A
+# message signed with the owner's name stays theirs (_paste_span). Several
+# lines: a chat turn like "Hey Mel! How are you?" is one line.
+_NOT_ADDRESSEE = {w.lower() for w in """
+    I Hi Hey Hello Dear Morning Evening Afternoon Thanks Thank Cheers Okay Ok OK Yes Yeah Yep No Nope Sure
+    So Well Also Anyway Actually Basically Honestly Seriously Really Sorry Please Hmm Ugh Wow Great Cool
+    Right Alright Fine Good Nice Perfect Awesome Today Tonight Tomorrow Yesterday Now Then Again Here There
+    This That These Those It My Our We You They He She Note Update Context Question Quick Background
+    Summary First Firstly Second Finally Lastly However Btw FYI PS Edit Meanwhile Otherwise Unfortunately
+    Fortunately Luckily Sadly Apparently Obviously Clearly Personally Ideally Agreed Done Noted Correct True
+    Monday Tuesday Wednesday Thursday Friday Saturday Sunday January February March April May June July
+    August September October November December Weekend Update Reminder Attention Team All Everyone Folks
+    Guys Sir Madam Regards Best Love Sincerely Warmly Kind Many Subject From To Sent Date
+    Claude ChatGPT GPT Gemini Codex Copilot Cursor Assistant Bard Siri Alexa Bot
+    """.split()}   # the last line: people address the assistant by name too
+_TITLE = r"(?:(?:Mr|Mrs|Ms|Miss|Dr|Prof)\.?\s+)?"
+_NAME = r"(?-i:[A-Z][a-z'’]+)(?:\s+(?-i:[A-Z][a-z'’]+))?"
+# "Lee,", "Hi, Jan!", "Dear Mr. Lay,", "Joao -", "Juan......", "Hey, AC!";
+# a name and a colon only alone on its line ("Flutter: ..." is a label)
+_ADDRESS = re.compile(r"^\W*(?:(?:(?:hi|hello|hey|dear|good\s+(?:morning|afternoon|evening))[\s,]+)" + _TITLE
+                      + r"(" + _NAME + r"|(?-i:[A-Z]{2,3}))|" + _TITLE + r"(" + _NAME + r"))"
+                      r"\s*(?:[,!]|\s-+(?:\s|$)|-+\s*$|\.{3,}|:\s*$)", re.I)
+_LETTER_OPEN = re.compile(r"^\W*(?:how are you(?: doing)?\b|i hope (?:you|your|this|all|everyone)\b[^.\n]{0,40}\bwell\b|"
+                          r"hope (?:you(?:'|’)re|you are|all is) (?:well|doing well|good)\b)", re.I)
+# a formal sign-off ends a letter (not "thanks": people end requests to an
+# assistant with it), alone or before the name
+_SIGNOFF = (r"(?:(?:with\s+)?(?:best|kind|warm(?:est)?)\s+(?:regards|wishes)|regards|sincerely|respectfully|"
+            r"yours(?:\s+(?:truly|sincerely|faithfully))?|best\s+wishes|all\s+the\s+best|later|love)")
+_SIGNOFF_ALONE = re.compile(r"^" + _SIGNOFF + r"\W*$", re.I)
+_SIGNATURE = re.compile(r"^(?:[-–—]\s*)?(?:" + _SIGNOFF + r"[,!.]?\s+)?"
+                        r"((?-i:[A-Z][a-z'’]+)(?:\s+(?-i:[A-Z][a-z'’.]+)){0,2}|(?-i:[A-Z])\.?)\W*$", re.I)
+
+
+def _letter_span(text, owner):
+    if "```" in (text or "") or re.search(r"`[^`\n]+`", text or ""):
+        return None                      # code: a coding message, not a letter
+    paras = [m for m in re.finditer(r"\S(?:.|\n(?!\s*\n))*", text or "")]
+    if not paras:
+        return None
+    first = ((owner or "").split() or [""])[0].lower()
+
+    def other(name):
+        w = (name or "").split()[0].lower().rstrip(".")
+        return bool(w) and w not in _NOT_ADDRESSEE and w != first
+
+    def addressed(line):
+        a = _ADDRESS.match(line)
+        return bool(a and other(a.group(1) or a.group(2))) or bool(_LETTER_OPEN.match(line))
+
+    lines = [l.strip() for l in text.strip().splitlines() if l.strip()]
+    if len(lines) < 3:
+        return None
+    sig = _SIGNATURE.match(lines[-1])
+    signed = (sig and other(sig.group(1)) and len(lines[-1]) <= 40) or _SIGNOFF_ALONE.match(lines[-1])
+    if addressed(lines[0]) or signed:
+        return 0, len(text)
+    # a short introduction, then the letter ("Is this sensible?\n\nJeff, ...")
+    for m in paras[1:]:
+        body = m.group(0)
+        if addressed(body.splitlines()[0].strip()) and len(body.splitlines()) >= 2:
+            return m.start(), len(text)
     return None
 
 

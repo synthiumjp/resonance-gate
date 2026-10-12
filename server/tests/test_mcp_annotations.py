@@ -7,6 +7,7 @@ import pytest
 
 def test_tools_say_whether_they_change_the_memory(tmp_path, monkeypatch):
     monkeypatch.setenv("RG_MEMORY_DIR", str(tmp_path))
+    monkeypatch.delenv("SOURCEDRECALL_ALL_TOOLS", raising=False)
     pytest.importorskip("mcp.types").ToolAnnotations
     import sourcedrecall.mcp_server as m
     tools = {t.name: t.annotations for t in asyncio.run(m.mcp.list_tools())}

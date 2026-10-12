@@ -114,7 +114,10 @@ def test_a_resumed_session_is_not_stored_twice(home):
 
 
 def test_session_start_briefs_the_agent_once_there_is_memory(home):
-    assert H.session_start({}, owner="Dana Cole") is None   # empty: no noise
+    # empty: the user is told once what happens next; nothing goes to Claude
+    first = H.session_start({}, owner="Dana Cole")
+    assert "hookSpecificOutput" not in first and "memory is empty" in first["systemMessage"]
+    assert H.session_start({}, owner="Dana Cole") is None
     H.session_end({"transcript_path": _transcript(home / "t.jsonl"),
                    "session_id": "abc"}, owner="Dana Cole", sync=True)
     out = H.session_start({"source": "startup"}, owner="Dana Cole")
@@ -185,3 +188,31 @@ def test_sessions_queued_during_the_install_are_stored_afterwards(home):
     import sourcedrecall.profile_memory as pm
     r = pm.profile_recall("Where do I live?")
     assert "Fitzroy" in r["ranked"][0]["text"]
+
+
+def test_the_last_block_can_be_seen_and_forget_deletes_it(home):
+    # what the agent was given (sourcedrecall-memory last)
+    H.session_end({"transcript_path": _transcript(home / "t.jsonl"),
+                   "session_id": "abc"}, owner="Dana Cole", sync=True)
+    import sourcedrecall.profile_memory as pm
+    pm.profile_context("Where do I live?")
+    rec = pm.last_block()
+    assert rec["question"] == "Where do I live?" and "Fitzroy" in rec["block"]
+    assert rec["tokens_about"] == rec["characters"] // 4
+    st = pm.memory_status()
+    assert st["conversations"] == 1 and st["messages"] >= 1
+    hit = next(f for f in pm.profile_recall("Where do I live?")["ranked"]
+               if "Fitzroy" in (f.get("said") or ""))
+    pm.profile_forget(hit["id"])
+    assert pm.last_block() is None
+
+
+def test_a_typed_memory_bracket_does_not_lose_the_message():
+    # review 2026-10-12 (3.10): "[MEMORY" typed by the user dropped the rest
+    t = "use the [MEMORY] tag in the template. I moved to Leeds last week."
+    assert H._OWN_SUMMARY.sub("", t).strip() == t
+    block = ("[MEMORY about Dana]\n- [2026-01-02] \"I live in Fitzroy.\"\n"
+             "[MEMORY RULES] Each line is ...\nthanks, now help me pack")
+    assert H._OWN_SUMMARY.sub("", block).strip() == "thanks, now help me pack"
+    cut = "[MEMORY about Dana]\n- [2026-01-02] \"I live in Fitzroy.\"\n- [2026-01-03] \"I"
+    assert H._OWN_SUMMARY.sub("", cut).strip() == ""

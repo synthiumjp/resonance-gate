@@ -103,3 +103,14 @@ def use_installed_parser():
     if (not os.environ.get("RGX_PARSER_MODELS")
             and os.path.exists(os.path.join(d, "config.json"))):
         os.environ["RGX_PARSER_MODELS"] = d
+
+
+def detached():
+    """Popen arguments for a background worker that outlives the hook.
+    2026-10-12 (review 3.10): start_new_session does nothing on Windows; a
+    detached process there needs its own creation flags."""
+    if os.name == "nt":
+        import subprocess
+        return {"creationflags": subprocess.DETACHED_PROCESS
+                | subprocess.CREATE_NEW_PROCESS_GROUP}
+    return {"start_new_session": True}

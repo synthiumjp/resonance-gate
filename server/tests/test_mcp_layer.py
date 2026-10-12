@@ -5,10 +5,11 @@ round-trips to the substrate."""
 import asyncio
 
 
-PROFILE_TOOLS = {"profile_dynamics", "profile_quarantine", "profile_conflicts",
-        "profile_recall", "profile_context", "profile_correct",
-        "profile_status", "profile_rehydrate", "profile_ingest", "profile_forget", "profile_confirm", "profile_export",
-        "profile_check"}
+# 2026-10-12 (review 3.11): the diagnostics are hidden by default
+EXTRA_TOOLS = {"profile_dynamics", "profile_quarantine", "profile_status", "profile_export"}
+PROFILE_TOOLS = {"profile_conflicts", "profile_recall", "profile_context", "profile_correct",
+                 "profile_rehydrate", "profile_ingest", "profile_forget", "profile_confirm",
+                 "profile_check"}
 
 
 def _server(monkeypatch, tmp_path, legacy):
@@ -17,8 +18,10 @@ def _server(monkeypatch, tmp_path, legacy):
     monkeypatch.setenv("SOURCEDRECALL_BROWSER_PORT", "0")
     if legacy:
         monkeypatch.setenv("SOURCEDRECALL_LEGACY_TOOLS", "1")
+        monkeypatch.setenv("SOURCEDRECALL_ALL_TOOLS", "1")
     else:
         monkeypatch.delenv("SOURCEDRECALL_LEGACY_TOOLS", raising=False)
+        monkeypatch.delenv("SOURCEDRECALL_ALL_TOOLS", raising=False)
     import sourcedrecall.mcp_server as srv
     return importlib.reload(srv)
 
@@ -33,7 +36,7 @@ def test_a_new_user_sees_only_the_profile_tools(tmp_path, monkeypatch):
 def test_all_tools_registered_and_callable(tmp_path, monkeypatch):
     srv = _server(monkeypatch, tmp_path, legacy=True)
     tools = asyncio.run(srv.mcp.list_tools())
-    assert {t.name for t in tools} == {"remember", "recall", "update", "forget"} | PROFILE_TOOLS
+    assert {t.name for t in tools} == {"remember", "recall", "update", "forget"} | PROFILE_TOOLS | EXTRA_TOOLS
 
     # each tool advertises a description (shown to the calling model)
     assert all(t.description for t in tools)
@@ -47,3 +50,9 @@ def test_all_tools_registered_and_callable(tmp_path, monkeypatch):
     # the MCP call path serializes without error and yields content
     called = asyncio.run(srv.mcp.call_tool("recall", {"query": "Ada Byron"}))
     assert called  # non-empty content (list of blocks or (content, structured))
+
+
+def test_tool_descriptions_are_short(tmp_path, monkeypatch):
+    srv = _server(monkeypatch, tmp_path, legacy=False)
+    for t in asyncio.run(srv.mcp.list_tools()):
+        assert len(t.description) < 450, t.name

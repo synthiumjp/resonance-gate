@@ -70,7 +70,9 @@ do_install() {
   # on PATH even when a newer Python is installed.
   for c in python3.13 python3.12 python3.11 python3.10 python3 python; do
     c="$(command -v "$c")" || continue
-    if "$c" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 10) else 1)'; then
+    # 2026-10-12 (review 4.5): 3.14 untested (some dependencies build from
+    # source there)
+    if "$c" -c 'import sys; sys.exit(0 if (3, 10) <= sys.version_info[:2] < (3, 14) else 1)'; then
       py="$c"; break
     fi
   done
@@ -88,7 +90,7 @@ do_install() {
       done
     done
   fi
-  [ -n "$py" ] || { echo "Python 3.10 or newer is required (macOS: brew install python@3.12; Windows: python.org or winget install Python.Python.3.12)"; return 1; }
+  [ -n "$py" ] || { echo "Python 3.10 to 3.13 is required (macOS: brew install python@3.12; Windows: python.org or winget install Python.Python.3.12)"; return 1; }
   echo "using $py"
   if [ -d "$SRC/.git" ]; then
     git -C "$SRC" fetch --depth 1 origin "refs/tags/$REF:refs/tags/$REF" 2>/dev/null ||
@@ -113,6 +115,21 @@ do_notes() {
   echo "$REF $NOTES" > "$DATA/notes-installed"
 }
 
+# 2026-10-12 (review 4.3): the user saw only a failing MCP server; the
+# messages below go to the user (systemMessage), not only to the model
+json_str() { printf '%s' "$1" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g'; }
+
+tell_user() {   # $1 = message for the user, $2 = line for the model (optional)
+  local m c
+  m="$(json_str "$1")"
+  if [ -n "${2:-}" ]; then
+    c="$(json_str "$2")"
+    printf '{"systemMessage":"%s","hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"%s"}}\n' "$m" "$c"
+  else
+    printf '{"systemMessage":"%s"}\n' "$m"
+  fi
+}
+
 start_background_install() {
   mkdir -p "$DATA"
   # a lock left by an install that died (reboot, kill) expires after an hour
@@ -129,13 +146,18 @@ case "${1:-}" in
   install)
     do_install >>"$LOG" 2>&1
     rc=$?
-    [ $rc -eq 0 ] || echo "sourcedrecall: install failed, see $LOG" >&2
+    if [ $rc -eq 0 ]; then
+      rm -f "$DATA/install.failed"
+    else
+      date > "$DATA/install.failed"
+      echo "sourcedrecall: install failed, see $LOG" >&2
+    fi
     exit $rc
     ;;
   mcp)
     if ! installed; then
       echo "sourcedrecall: not installed yet. The first session starts the install" \
-           "(a minute or two); restart Claude Code when $LOG ends with '== done'." >&2
+           "(a few minutes); restart Claude Code when $LOG ends with '== done'." >&2
       exit 1
     fi
     exec "$VBIN/sourcedrecall$EXE"
@@ -143,8 +165,13 @@ case "${1:-}" in
   hook)
     event="${2:-}"
     if ! installed; then
-      if [ "$event" = "session-start" ] && start_background_install; then
-        printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"[sourcedrecall] Installing local memory (first run, a minute or two). This session will be remembered once the install finishes."}}'
+      if [ "$event" = "session-start" ]; then
+        if [ -f "$DATA/install.failed" ] && [ ! -d "$LOCK" ]; then
+          tell_user "sourcedrecall: the install failed. The reason is at the end of $LOG. To try again: $0 install"
+        elif start_background_install || [ -d "$LOCK" ]; then
+          tell_user "sourcedrecall: installing local memory in the background (a few minutes; about 0.9 GB of models). This session will be stored when it ends. Restart Claude Code when $LOG ends with '== done' to use the memory." \
+                    "[sourcedrecall] Installing local memory (first run). This session will be remembered once the install finishes."
+        fi
       fi
       if [ "$event" = "session-end" ]; then
         # 2026-10-04: a session that ends before the install has finished is
@@ -156,6 +183,7 @@ case "${1:-}" in
     fi
     if [ -z "$OWNER" ]; then
       echo "sourcedrecall: set your name with /plugin configure sourcedrecall" >&2
+      [ "$event" = "session-start" ] && tell_user "sourcedrecall needs your name to tell your words from other people's: /plugin configure sourcedrecall. Sessions are kept until then." 
       [ "$event" = "session-end" ] && { tr -d '\n' ; echo; } >> "$DATA/pending.jsonl"
       exit 0
     fi

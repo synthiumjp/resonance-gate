@@ -45,7 +45,11 @@ _NOT_SPEECH = re.compile(
     r"^\s*(<command-name>|<command-message>|<command-args>|<local-command-"
     r"|<bash-input>|<bash-stdout>|<bash-stderr>|<task-notification>|Caveat:)", re.S)
 _INJECTED = re.compile(r"<system-reminder>.*?</system-reminder>", re.S)
-_OWN_SUMMARY = re.compile(r"\[MEMORY[^\]]*\].*?(?:\[MEMORY RULES\][^\n]*|\Z)", re.S)
+# the memory's own block quoted back: its header to its rules line, or, for a
+# block cut short, the header and the "- ..." lines under it. 2026-10-12
+# (review 3.10): it ran to the end of the message, so typing "[MEMORY" in a
+# message lost everything after it.
+_OWN_SUMMARY = re.compile(r"\[MEMORY[^\]]*\](?:.*?\[MEMORY RULES\][^\n]*|(?:\s*\n\s*-[^\n]*)+)", re.S)
 
 
 def _text_items(content):
@@ -171,7 +175,10 @@ def ingest_turns(turns, conversation_id, first_ts=None, owner=None, cwd=None):
         return {"stored": False, "reason": "no user speech in this session"}
     pm = _setup_env(owner)
     title = next(t["content"] for t in turns if t["role"] == "user")
-    title = " ".join(title.split())[:60]
+    # 2026-10-12 (review 3.6): scrubbed before it is cut; cut first, a key
+    # split at character 60 was too short for the filter to recognise
+    from sourcedrecall.secrets import scrub
+    title = " ".join(scrub(title).split())[:60]
     from sourcedrecall.paths import current_scope
     return pm.profile_ingest(turns, conversation_id=conversation_id,
                              title=title,
@@ -204,11 +211,12 @@ def session_end(event, owner=None, sync=False, agent="claude"):
     # predictable /tmp path anyone can read or pre-create as a symlink
     from sourcedrecall.paths import private_dir, state_dir
     log = os.path.join(private_dir(state_dir()), "hook.log")
-    with open(log, "a") as lf:
+    from sourcedrecall.paths import detached
+    with open(log, "a", encoding="utf-8") as lf:
         subprocess.Popen([sys.executable, "-m", "sourcedrecall.claude_hooks",
                           "_worker", job.name],
                          stdin=subprocess.DEVNULL, stdout=lf, stderr=lf,
-                         start_new_session=True)
+                         **detached())
     return {"stored": "pending", "job": job.name, "log": log}
 
 
@@ -234,7 +242,7 @@ def session_start(event, owner=None, max_facts=15, agent="claude",
     pm = _setup_env(owner)
     st = pm.profile_status()
     if not (st.get("asserted") or st.get("provisional")):
-        return None
+        return _welcome(agent) if notice else None
     out = {}
     if briefing:
         from sourcedrecall.paths import current_scope
@@ -247,6 +255,27 @@ def session_start(event, owner=None, max_facts=15, agent="claude",
         if msg:
             out["systemMessage"] = msg
     return out or None
+
+
+def _welcome(agent):
+    """2026-10-12 (launch review: a new user saw nothing at all until a
+    second session). Once, while the memory is empty: what happens next,
+    shown to the user only."""
+    from sourcedrecall.paths import state_dir
+    mark = os.path.join(state_dir(), ".welcomed")
+    if os.path.exists(mark):
+        return None
+    try:
+        os.makedirs(state_dir(), exist_ok=True)
+        open(mark, "w").close()
+    except OSError:
+        return None
+    return {"systemMessage": (
+        "sourcedrecall is installed and your memory is empty. This session is "
+        "stored when it ends, and the next one starts with what was kept. "
+        "To bring in past chats: sourcedrecall-import chatgpt <export.zip> (or "
+        "claude). To see what is stored: sourcedrecall-memory show; what the "
+        "agent was last given: sourcedrecall-memory last.")}
 
 
 def saved_notice(new, memory_file=None, show=3, agent="claude"):
@@ -332,7 +361,9 @@ def main(argv=None):
             os.unlink(a.job)
         return 0
     try:
-        event = json.load(sys.stdin)
+        # utf-8 whatever the console's code page (Windows; review 3.10)
+        buf = getattr(sys.stdin, "buffer", None)
+        event = json.loads(buf.read().decode("utf-8", "replace") if buf else sys.stdin.read())
     except ValueError:
         event = {}
     if not isinstance(event, dict):

@@ -124,3 +124,12 @@ def test_review_2026_10_12_leaks_are_closed(text, secret):
 ])
 def test_review_2026_10_12_ordinary_text_survives(text):
     assert scrub(text) == text
+
+
+def test_a_title_is_scrubbed_before_it_is_cut():
+    # review 2026-10-12 (3.6): the hook cut the title at 60 characters first,
+    # leaving a key too short to recognise
+    from sourcedrecall.importers import _scrubbed
+    text = "please use this key for the staging box sk-proj-abcdefghijklmnopqrstuvwxyz0123456789 thanks"
+    assert "sk-proj" not in _scrubbed(text)[:60]
+    assert "abcdefghij" not in _scrubbed(text)[:60]

@@ -478,3 +478,13 @@ def test_unrelated_search_lines_leave_when_the_parser_found_the_message(monkeypa
                  "score": -10.0, "cos": 0.30, "conv": "c5"})
     lines = shown()
     assert any("[pasted in" in l for l in lines) and len(lines) == 6
+
+
+def test_a_pasted_texts_writer_is_named_from_the_introduction():
+    # 2026-10-12 (the side-by-side demo)
+    from memory_api import _source
+    assert _source("can you help me reply to this one from Marcus?", "Dana Cole") == "Marcus"
+    assert _source("Priya Shah sent this, thoughts?", "Dana Cole") == "Priya Shah"
+    assert _source("this email from my landlord:", "Dana Cole") == "Dana's landlord"
+    assert _source("got this from Monday's meeting", "Dana Cole") == "someone else"
+    assert _source("a note from Dana to herself", "Dana Cole") == "someone else"

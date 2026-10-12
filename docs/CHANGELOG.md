@@ -6,6 +6,31 @@ has the details behind each change.
 
 ## Unreleased
 
+- A new install says what is happening: while the memory installs, if the
+  install failed (with its log and how to try again), when your name is
+  not set, and once, while the memory is empty, what happens next.
+  `sourcedrecall-memory status` shows whether the models are ready and
+  what is stored; `sourcedrecall-memory last` shows the block the agent was
+  last given and its size.
+- The model download shows its progress and continues where it stopped
+  if the connection breaks.
+- Forget also erases the conversation's title and the Cursor spool, keeps
+  a keyed fingerprint instead of a plain hash, and says how many places it
+  erased the sentence from.
+- Through MCP, an agent can no longer store a conversation dated in the
+  future, and reading a whole conversation is limited to 200 turns from
+  the current project. The MCP tools have short plain descriptions; the
+  diagnostic ones are hidden unless `SOURCEDRECALL_ALL_TOOLS=1`.
+- Stored text cannot close its own quotation marks in the block and add a
+  label of its own.
+- Storing a long session no longer makes other sessions wait for its
+  parse.
+- Typing "[MEMORY" in a message no longer drops the rest of it.
+- Titles are checked for credentials before they are cut to length.
+- Imports over 1 GB are refused with a message, and exports are read
+  without holding a second copy in memory.
+- Python 3.14 is not used until it is tested; `sourcedrecall.__version__`
+  matches the package.
 - When the parser has found the message a question is about, other messages
   are shown only if they are close to the question (embedding similarity
   0.5 or more), come from the same conversation, or hold a fact the parser

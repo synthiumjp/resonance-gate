@@ -321,6 +321,20 @@ def _discover_owner_name():
     return None
 
 
+_parse_lock = threading.Lock()
+
+
+def _cached_hashes(cache_path):
+    out = set()
+    if os.path.exists(cache_path):
+        for line in open(cache_path, encoding="utf-8"):
+            try:
+                out.add(json.loads(line)["h"])
+            except Exception:
+                pass
+    return out
+
+
 def _iso_date(date):
     """Normalise a caller's date to the sortable form conversations.json
     uses. Raises ValueError on something that is not a date -- a silently
@@ -336,6 +350,19 @@ def _iso_date(date):
         return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
     except ValueError:
         raise ValueError(f"date must be ISO, e.g. 2026-09-25 -- got {date!r}")
+
+
+def _not_future(date):
+    """2026-10-12 (review 3.2): through MCP, a date in the future would make
+    an agent's message the newest statement of every fact it touches, so it
+    would outrank what the user said. A day of slack for time zones. (Not in
+    _iso_date: imports and the benchmark sets carry their own dates.)"""
+    if date is None:
+        return
+    limit = (datetime.datetime.now(datetime.timezone.utc)
+             + datetime.timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    if _iso_date(date) > limit:
+        raise ValueError(f"date is in the future -- got {date!r}")
 
 
 def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
@@ -373,9 +400,23 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
     # first 60 characters of the first message, before any scrubbing
     title = scrub(title) if title else title
     _fk = _forgotten_keys() if os.environ.get("RG_MEMORY_DIR") else set()
+    before = turns
     turns = [dict(t, content=_strip_forgotten(scrub(t.get("content")), _fk))
              if isinstance(t, dict) and isinstance(t.get("content"), str) else t
              for t in turns]
+    # 2026-10-12 (review 3.4): hooks cut the title from the first message
+    # before the forgotten sentences leave it; a title that is the start of
+    # a message that lost one is made again from what is left
+    if title and _fk:
+        cut = _norm_forget(title.rstrip(".… "))
+        for t0, t1 in zip(before, turns):
+            if (isinstance(t0, dict) and isinstance(t0.get("content"), str)
+                    and t1.get("content") != scrub(t0["content"])
+                    and len(cut) >= 12
+                    and _norm_forget(scrub(t0["content"])).startswith(cut)):
+                rest = " ".join(t1["content"].split())
+                title = (rest[:60] if rest and rest != "[forgotten]" else "(untitled)")
+                break
     if not turns:
         # Safe no-op: nothing to append, nothing to extract, no reload
         # forced, no extractor loaded. conversation_id is echoed back
@@ -437,12 +478,20 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
             json.dump(convs, fh)
         os.replace(_tmp, conv_path)
 
-        # ---- (b) rgx extraction, cache-append, skip-if-already-cached ----
+        # ---- (b) what is new: the saved world and the cached turns ----
+        world_path = os.path.join(_data_dir(), "world.json")
+        cache_path = _cache_path()
+        cached_hashes = _cached_hashes(cache_path)
+
+    # 2026-10-12 (review 3.5): parsing can take minutes for a long session
+    # or an import; it no longer holds the store lock, so the other hooks
+    # and the MCP server are not kept waiting (on Windows they used to give
+    # up). One parse at a time per process: the extractor is not thread-safe.
+    with _parse_lock:
         ex = _get_extractor(owner)
         # 2026-10-02: the entities and names the user has linked to
         # themselves ("my dog Biscuit", "the billing service") survive
         # between sessions; each session-end ingest is a new process.
-        world_path = os.path.join(_data_dir(), "world.json")
         try:
             with open(world_path, encoding="utf-8") as fh:
                 saved = json.load(fh)
@@ -451,17 +500,9 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
                     ex._world.setdefault(k, v)
         except (OSError, ValueError):
             pass
-        cache_path = _cache_path()
-        cached_hashes = set()
-        if os.path.exists(cache_path):
-            for line in open(cache_path):
-                try:
-                    cached_hashes.add(json.loads(line)["h"])
-                except Exception:
-                    pass
 
-        n_turns = n_facts = n_hearsay = n_skipped = 0
-        new_lines = []
+        n_turns = n_skipped = 0
+        parsed = []          # (hash, facts)
         # parse the conversation's new messages in batches first (6x faster
         # for a long conversation or an imported history; same parses)
         todo = []
@@ -472,6 +513,7 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
         if len(todo) > 1 and hasattr(ex, "prefetch"):
             ex.prefetch(todo)
         prev = None     # the assistant message before a user turn (rgx.fragments)
+        seen = set(cached_hashes)
         for ti, t in enumerate(turns):
             role = t.get("role", "user")
             text = str(t.get("content", "")).strip()[:1800]
@@ -480,7 +522,7 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
             before, prev = prev, (text if role == "assistant" else None)
             n_turns += 1
             h = _rgx_facts.turn_hash(text)
-            if h in cached_hashes:
+            if h in seen:
                 n_skipped += 1
                 continue
             ptext = _prose_only(text, owner)
@@ -495,21 +537,41 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
                      # through the MCP tool cannot become a standing
                      # instruction that leads every later session
                      and (instructions or f.get("attribute") != "instruction")]
+            parsed.append((h, facts))
+            seen.add(h)
+        world_now = dict(ex._world)
+
+    with _lock:
+        # another process may have stored the same messages meanwhile
+        cached_hashes = _cached_hashes(cache_path)
+        new_lines = []
+        n_facts = n_hearsay = 0
+        for h, facts in parsed:
+            if h in cached_hashes:
+                n_skipped += 1
+                continue
+            cached_hashes.add(h)
             for f in facts:
                 if f.get("evidential") == "report":
                     n_hearsay += 1
                 else:
                     n_facts += 1
             new_lines.append(json.dumps({"h": h, "f": facts}))
-            cached_hashes.add(h)
-
         if new_lines:
             with open(cache_path, "a", encoding="utf-8") as fh:
                 for line in new_lines:
                     fh.write(line + "\n")
+            try:
+                with open(world_path, encoding="utf-8") as fh:
+                    merged = json.load(fh)
+                if not isinstance(merged, dict):
+                    merged = {}
+            except (OSError, ValueError):
+                merged = {}
+            merged.update(world_now)
             tmp = world_path + f".{os.getpid()}.tmp"
             with open(tmp, "w", encoding="utf-8") as fh:
-                json.dump(ex._world, fh)
+                json.dump(merged, fh)
             os.replace(tmp, world_path)
 
         # ---- (c) reload ----
@@ -724,7 +786,9 @@ def _messages_for(query, k=3):
             for cid, conv in tr.items():
                 turns = conv["turns"]
                 for i, t in enumerate(turns):
-                    if t["role"] != "human" or "[MEMORY" in t["text"]:
+                    # the memory's own block quoted back, not a message the
+                    # user typed with "[MEMORY" in it (review 3.21)
+                    if t["role"] != "human" or "[MEMORY RULES]" in t["text"]:
                         continue
                     every = _SENT_SPLIT.split(t["text"].strip())
                     sents = [x for x in every
@@ -774,7 +838,62 @@ def profile_context(query=None, max_facts=None, scope=None):
         mem.notes_for = _notes_for if _notes.enabled() else None
         mem.links = _links()
         block = mem.context_block(query, max_facts)
+    _remember_block(query, block)
     return {"block": block}
+
+
+def _last_block_path():
+    return os.path.join(_data_dir(), "last_block.json")
+
+
+def _remember_block(query, block):
+    """2026-10-12 (users want to see what memory adds to a request; the
+    review's launch advice): the last block handed to the agent, for
+    `sourcedrecall-memory last`. Readable by the user only; forget deletes it."""
+    try:
+        rec = {"time": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+               "question": query, "characters": len(block),
+               "tokens_about": len(block) // 4, "block": block}
+        p = _last_block_path()
+        tmp = p + f".{os.getpid()}.tmp"
+        fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            json.dump(rec, fh)
+        os.replace(tmp, p)
+    except (OSError, RuntimeError):
+        pass
+
+
+def last_block():
+    try:
+        return json.load(open(_last_block_path(), encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+
+
+def memory_status():
+    """What is installed and stored, without loading the parser
+    (`sourcedrecall-memory status`)."""
+    from sourcedrecall.paths import parser_models_dir, notes_models_dir
+    out = {"memory_folder": _data_dir()}
+    try:
+        import ort_models
+        out["models"] = {n: ort_models.available(n) for n in
+                         (ort_models.EMBEDDER, ort_models.RERANKER, ort_models.CONFLICT)}
+    except ImportError:
+        out["models"] = {}
+    out["parser"] = os.path.exists(os.path.join(parser_models_dir(), "config.json"))
+    out["notes_model"] = os.path.isdir(notes_models_dir())
+    try:
+        convs = _read_conversations(_conversations_path())
+    except RuntimeError as e:
+        out["error"] = str(e)
+        convs = []
+    out["conversations"] = len(convs)
+    out["messages"] = sum(len(c.get("chat_messages") or []) for c in convs)
+    dates = [c.get("created_at") or "" for c in convs]
+    out["last_stored"] = max(dates)[:10] if dates else None
+    return out
 
 
 def profile_correct(action, attribute, value, new_attribute=None, exact=False,
@@ -1368,6 +1487,7 @@ def _build_transcript_index_locked():
                 turns.append({"role": role, "text": txt})
         index[uuid] = {"title": c.get("name", "") or "(untitled)",
                        "date": c.get("created_at", "")[:10],
+                       "scope": c.get("scope"),
                        "turns": turns}
     return index
 
@@ -1378,7 +1498,10 @@ def _ensure_transcripts_locked():
     return _state["transcripts"]
 
 
-def rehydrate(conversation_id, max_turns=40, include_assistant=True):
+_REHYDRATE_MAX = 200
+
+
+def rehydrate(conversation_id, max_turns=40, include_assistant=True, scope=None):
     """The page-fault half of the virtual context window: given a receipt's
     conversation_id (as now returned by every fact's receipts, see
     memory_api.Memory._fact), return the verbatim turns of that conversation
@@ -1393,11 +1516,21 @@ def rehydrate(conversation_id, max_turns=40, include_assistant=True):
     conversation has more); include_assistant=False restricts to the human's
     own turns. Each turn's text is capped at 2000 chars (marked with a
     trailing "..." when cut) so one huge turn can't blow the response.
+
+    2026-10-12 (review 3.2): max_turns is held to 1.._REHYDRATE_MAX, and a
+    conversation stored in another project is not returned in this one (the
+    same rule as recall: facts about a project stay in it).
     """
+    from sourcedrecall.paths import current_scope
+    try:
+        max_turns = max(1, min(int(max_turns), _REHYDRATE_MAX))
+    except (TypeError, ValueError):
+        max_turns = 40
+    here = current_scope(scope)
     with _lock:
         index = _ensure_transcripts_locked()
         conv = index.get(conversation_id)
-        if conv is None:
+        if conv is None or (here and conv.get("scope") not in (None, here)):
             return {"found": False,
                     "error": "no such conversation in the backing store"}
         turns = conv["turns"] if include_assistant else [
@@ -1593,10 +1726,52 @@ def _note_id(r):
 _PIECES = re.compile(r"((?<=[.!?])\s+|\n+)")
 
 
+def _norm_forget(text):
+    return re.sub(r"\W+", " ", text or "").strip().lower()
+
+
+# 2026-10-12 (review 3.4): the fingerprint was a plain sha256 of the
+# lower-cased sentence, which a dictionary recovers for short sentences ("i
+# have diabetes"). It is now an HMAC under a random key made once per memory
+# folder (.forget_key, readable by the user only). Fingerprints written
+# before this ("h" lines) are still honoured; they cannot be re-keyed.
+_SECRETS = {}
+
+
+def _forget_secret():
+    d = _data_dir()
+    if d not in _SECRETS:
+        p = os.path.join(d, ".forget_key")
+        try:
+            with open(p, "rb") as fh:
+                k = fh.read()
+        except OSError:
+            k = b""
+        if len(k) < 32:
+            os.makedirs(d, exist_ok=True)
+            k = os.urandom(32)
+            fd = os.open(p, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+            with os.fdopen(fd, "wb") as fh:
+                fh.write(k)
+        _SECRETS[d] = k
+    return _SECRETS[d]
+
+
 def _forget_key(text):
     import hashlib
-    k = re.sub(r"\W+", " ", text or "").strip().lower()
-    return hashlib.sha256(k.encode()).hexdigest() if k else None
+    import hmac
+    k = _norm_forget(text)
+    return hmac.new(_forget_secret(), k.encode(), hashlib.sha256).hexdigest() if k else None
+
+
+def _is_forgotten(text, keys):
+    import hashlib
+    if not keys:
+        return False
+    if _forget_key(text) in keys:
+        return True
+    k = _norm_forget(text)
+    return bool(k) and ("h:" + hashlib.sha256(k.encode()).hexdigest()) in keys
 
 
 def _forgotten_path():
@@ -1604,11 +1779,21 @@ def _forgotten_path():
 
 
 def _forgotten_keys():
+    keys = set()
     try:
         with open(_forgotten_path(), encoding="utf-8") as fh:
-            return {json.loads(l)["h"] for l in fh if l.strip()}
-    except (OSError, ValueError, KeyError):
-        return set()
+            for l in fh:
+                try:
+                    r = json.loads(l)
+                except ValueError:
+                    continue
+                if r.get("m"):
+                    keys.add(r["m"])
+                elif r.get("h"):
+                    keys.add("h:" + r["h"])        # before 2026-10-12, unkeyed
+    except OSError:
+        pass
+    return keys
 
 
 def _strip_forgotten(text, keys):
@@ -1620,7 +1805,7 @@ def _strip_forgotten(text, keys):
     for i in range(0, len(parts), 2):
         piece = parts[i]
         sep = parts[i + 1] if i + 1 < len(parts) else ""
-        if piece.strip() and _forget_key(piece) in keys:
+        if piece.strip() and _is_forgotten(piece, keys):
             dropped = True
             continue
         out.append(piece + sep)
@@ -1631,20 +1816,37 @@ def _strip_forgotten(text, keys):
 
 
 def _erase(said):
-    """Erase a sentence the user asked to forget from everything on disk."""
+    """Erase a sentence the user asked to forget from everything on disk.
+    -> how many stored messages, titles and parsed facts it was taken out
+    of (2026-10-12, review 3.4: success was reported without counting), or
+    None when there was nothing to forget."""
     key = _forget_key(said)
     if not key:
-        return False
+        return None
+    n = 0
     with _lock:
         keys = _forgotten_keys() | {key}
         with open(_forgotten_path(), "a", encoding="utf-8") as fh:
-            fh.write(json.dumps({"h": key}) + "\n")
+            fh.write(json.dumps({"m": key}) + "\n")
         conv_path = _conversations_path()
         convs = _read_conversations(conv_path)
+        said_norm = _norm_forget(said)
         for c in convs:
             for m in c.get("chat_messages") or []:
                 if m.get("text"):
-                    m["text"] = _strip_forgotten(m["text"], keys)
+                    new = _strip_forgotten(m["text"], keys)
+                    n += new != m["text"]
+                    m["text"] = new
+            # 2026-10-12 (review 3.4): the title is the first 60 characters
+            # of the first message, so it can hold the sentence, or the start
+            # of it, after the message itself was erased
+            name = c.get("name")
+            if name:
+                new = _strip_forgotten(name, keys)
+                cut = _norm_forget(name.rstrip(".… "))
+                if new != name or (len(cut) >= 12 and said_norm.startswith(cut)):
+                    c["name"] = "(untitled)"
+                    n += 1
         tmp = conv_path + f".{os.getpid()}.tmp"
         with open(tmp, "w", encoding="utf-8") as fh:
             json.dump(convs, fh)
@@ -1657,8 +1859,10 @@ def _erase(said):
                     r = json.loads(line)
                 except ValueError:
                     continue
+                before = len(r.get("f") or [])
                 r["f"] = [f for f in r.get("f") or []
-                          if _forget_key(f.get("source") or f.get("said") or "") not in keys]
+                          if not _is_forgotten(f.get("source") or f.get("said") or "", keys)]
+                n += before - len(r["f"])
                 lines.append(json.dumps(r))
             tmp = cache + f".{os.getpid()}.tmp"
             with open(tmp, "w", encoding="utf-8") as fh:
@@ -1676,8 +1880,43 @@ def _erase(said):
         _state["transcripts"] = None
         _state["msg_index"] = None
         _drop_embeddings()
+        try:
+            os.unlink(_last_block_path())      # it may quote the sentence
+        except OSError:
+            pass
         _reload_locked()
-    return True
+    _erase_spools(keys)
+    return n
+
+
+def _erase_spools(keys):
+    """The Cursor spool keeps a session's turns until it is stored (up to
+    30 days if it never is): take the forgotten sentences out there too
+    (2026-10-12, review 3.4)."""
+    from sourcedrecall.paths import state_dir
+    d = os.path.join(state_dir(), "cursor-spool")
+    if not os.path.isdir(d):
+        return
+    for name in os.listdir(d):
+        p = os.path.join(d, name)
+        if not name.endswith(".jsonl"):
+            continue
+        try:
+            rows = [json.loads(l) for l in open(p, encoding="utf-8") if l.strip()]
+        except (OSError, ValueError):
+            continue
+        changed = False
+        for r in rows:
+            if isinstance(r.get("content"), str):
+                new = _strip_forgotten(r["content"], keys)
+                changed |= new != r["content"]
+                r["content"] = new
+        if changed:
+            tmp = p + f".{os.getpid()}.tmp"
+            fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+            with os.fdopen(fd, "w", encoding="utf-8") as fh:
+                fh.write("".join(json.dumps(r) + "\n" for r in rows))
+            os.replace(tmp, p)
 
 
 def profile_forget(fact_id):
@@ -1705,11 +1944,11 @@ def profile_forget(fact_id):
         if u is None:
             return {"forgotten": False, "error": f"no fact with id {fact_id}"}
         profile_correct("deny", "said", u["value"], exact=True, said=u["value"])
-        _erase(u["value"])
+        n = _erase(u["value"])
         _export_quietly()
         return {"forgotten": True, "fact": {"id": fact_id, "text": None,
                                             "said": u["value"]},
-                "applied": "live"}
+                "erased_from": n or 0, "applied": "live"}
     out = profile_correct("deny", f["attribute"], f["value"], exact=True,
                           said=f.get("said"))
     # 2026-10-03: forgetting removes what the fact left behind. A rebuild
@@ -1718,12 +1957,15 @@ def profile_forget(fact_id):
     # current again -- and covers the hearsay tier; the names the sentence
     # introduced ("my dog Biscuit") leave the parser's saved world.
     _forget_names(f.get("said"))
-    if not _erase(f.get("said")):
+    n = _erase(f.get("said"))
+    if n is None:
         with _lock:
             _reload_locked()
     _export_quietly()
+    # erased_from: how many stored messages, titles and parsed facts the
+    # sentence was taken out of (2026-10-12, review 3.4)
     return {"forgotten": True, "fact": {k: f[k] for k in ("id", "text", "said")},
-            "applied": out.get("applied")}
+            "erased_from": n or 0, "applied": out.get("applied")}
 
 
 def _notes_done_path():

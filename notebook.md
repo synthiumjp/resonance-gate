@@ -15715,6 +15715,22 @@ Mac 1,368 passed. HaluMem and LongMemEval answer harnesses written
 re-judge, the fair-protocol regression step, the side-by-side demo and a
 reproduction check of v10.
 
+Addendum (later the same night). A readable development set of real
+emails, `cases_dev_real.jsonl` (40: 30 pasted, 10 own; the 120 unused
+candidates; one real password replaced; on the post-v11 branch), showed
+the same gap: 6 of 30 pasted found. The misses were letters written TO
+someone with nothing around them: "Lee,", "Dear Mr. Lay,", "Hey, AC!",
+"Juan......" openings, signatures that are not the owner's, formal
+sign-offs with the name stripped by the corpus, the user's comment in the
+next message or absent. A rule on that shape (post-v11 branch,
+prose._letter_span; several lines, no code; assistant names excluded; a
+letter signed by the owner stays theirs): dev pasted 6 -> 26 of 30, own 10
+of 10; every other dev set and LoCoMo 3 changes, all right. Held out
+(cases_real_paste, measured once, counts only): pasted 7 -> 12 of 20, own
+10 of 10. The gap between 26/30 and 12/20 is the part fitted to the emails
+read; reported as is, not tuned further against the held-out set. Not yet
+end to end.
+
 ## Entry 326 — 2026-10-13 (held-out v11)
 
 One run on the frozen tree 61e78fd, both readers, blinded audit per reader
@@ -15738,3 +15754,15 @@ the text as the user's; check the post-v11 letter rule does not add to this
 
 Slip: the developer saw two Qwen overrides' text (one scenario) when
 checking the overrides file; recorded in the summary.
+
+Addendum (dev27, post-v11 fe55586 end to end, v7 protocol). New readable
+set cases_dev_own2 (30 own writing brought to be read over, 10 others' in
+the same shapes; agent-written, v11 not shown to the writer). Frozen code ->
+post-v11, Qwen3-14B: own answered 24 -> 27 of 30, others' claims taken as
+the user's 2 -> 0 of 10 (plain retrieval 28/30 and 8/10); Phi-4 23 -> 26,
+3 -> 0 (plain 27/30, 9/10). Real emails (cases_dev_real), the letter rule
+end to end: pasted claims taken as the user's 18 -> 4 of 30 with Qwen,
+19 -> 6 with Phi-4 (plain retrieval 25 and 25), own 8/10 unchanged (plain
+9/10). The nine older dev sets against dev26: identical except own false
+memories 2 -> 1 of 20 (Qwen); Phi-4 on own, pasted, pasted2, stale2
+identical. Suite 1,382 passed. LoCoMo dev next, then merge.
