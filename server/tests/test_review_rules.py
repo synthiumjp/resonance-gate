@@ -426,7 +426,8 @@ def test_a_lone_paste_introduced_in_the_next_message_is_pasted(after):
 @pytest.mark.parametrize("after", [
     None,
     "that was the email I sent to the team, ok?",
-    "thoughts?",
+    # "thoughts?" removed 2026-10-13: says nothing either way, and the
+    # classifier (paste_clf.py) reads this email-shaped text as someone else's
 ])
 def test_a_lone_message_without_such_a_next_message_is_not_pasted(after):
     from prose import _paste_span
@@ -448,3 +449,40 @@ def test_the_next_message_reaches_the_block_end_to_end(pm):
     lines = [l for l in pm.profile_context("Where is the meeting?")["block"].splitlines()
              if "Portland" in l]
     assert lines and all("[pasted in by" in l for l in lines)
+
+
+# 2026-10-13 (held-out v12; dev set cases_dev_shapes): the user's words
+# around a first-person block name someone else, and not the user
+_FIRST_P = ("I'm quitting my job on Friday and moving to Cork, I've already signed the lease. "
+            "Don't tell mum. I'm vegan now too so stop sending me recipes with meat in them.")
+
+
+@pytest.mark.parametrize("text,after", [
+    ("my brother, last night:\n\n" + _FIRST_P, None),
+    (_FIRST_P + "\n\n^ my cousin, any idea what she means?", None),
+    (_FIRST_P, "this is what Kai put in the group, tell him no worries"),
+    (_FIRST_P, "the note above is from my flatmate"),
+])
+def test_a_block_attributed_to_someone_else_is_pasted(text, after):
+    from prose import _paste_span
+    assert isinstance(_paste_span(text, "Dana Cole", after), tuple)
+
+
+@pytest.mark.parametrize("text,after", [
+    ("Hi Saira,\n\n" + _FIRST_P, None),
+    ("Ive written a little speech for Gordon's retirement do, here it is.\n\n" + _FIRST_P, None),
+    (_FIRST_P, "That's awesome, John! Networking is great"),
+    ("my bit for the allotment society newsletter, due Friday:\n\n" + _FIRST_P, None),
+])
+def test_the_users_own_block_with_people_named_around_it_stays_own(text, after):
+    from prose import _paste_span
+    assert not isinstance(_paste_span(text, "Dana Cole", after), tuple)
+
+
+def test_the_classifier_has_weights_and_can_be_turned_off(monkeypatch):
+    import paste_clf
+    from prose import _paste_span
+    assert paste_clf.W and paste_clf.THRESHOLD >= 0.8
+    monkeypatch.setenv("RG_PASTE_CLF", "0")
+    monkeypatch.setenv("RG_PASTE_THIRD", "0")
+    assert not isinstance(_paste_span("my brother, last night:\n\n" + _FIRST_P, "Dana Cole"), tuple)

@@ -8,6 +8,7 @@ clone has no such file, so the server crashed on its first ingest -- the
 new-user install test hit exactly that. run_belief re-exports it, so every
 existing import keeps working.
 """
+import os as _os
 import re
 
 
@@ -236,7 +237,7 @@ _FRAME_OWN = re.compile(
     # section", "column ..., I write it every month"
     r"\bmy (?:own )?(?:[\w-]+ ){0,2}?(?:song|lyrics?|chorus|verse|toast|eulogy|bio|cv|resume|cover letter|essay|story|"
     r"listing|review|notes?|diary|journal|draft|post|statement|speech|column|application|ad|profile|"
-    r"section|entry|piece|blurb|newsletter)\b(?!['’])|"
+    r"section|entry|piece|blurb|newsletter|bit|part|paragraph|attempt|version|take)\b(?!['’])|"
     r"(?:^|[.!?,;:]\s*|\bi\s+)wrote\s+(?:the|a|my)\b|"
     r"\bi (?:write|draft) (?:it|this|these|them|one)\b|"
     r"\b(?:check|fix|correct|improve|proofread)\s+my\s+(?:grammar|spelling|wording|writing|english|punctuation)\b",
@@ -371,6 +372,17 @@ def _paste_span(text, owner=None, after=None):
     sp = _paste_span0(text, owner)
     if sp is None and after and _alone_paste(text) and _later_says_other(after):
         sp = (0, len(text))
+    # 2026-10-13 (held-out v12: a third of the pasted texts in shapes the
+    # rules do not read): what the rules leave unmarked goes to a small
+    # learned model (paste_clf.py); RG_PASTE_CLF=0 turns it off
+    if sp is None and _os.environ.get("RG_PASTE_THIRD", "1") != "0":
+        import paste_clf
+        sp = paste_clf.third_party_span(text, owner, after)
+    if sp is None and _os.environ.get("RG_PASTE_CLF", "1") != "0":
+        import paste_clf
+        b = paste_clf.best_span(text, owner, after)
+        if b:
+            sp = (b[0], b[1])
     first = (owner or "").split()[0] if owner else ""
     if isinstance(sp, tuple) and len(first) > 1:
         rest = text[sp[0]:]
