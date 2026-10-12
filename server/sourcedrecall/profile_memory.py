@@ -321,6 +321,20 @@ def _discover_owner_name():
     return None
 
 
+_parse_lock = threading.Lock()
+
+
+def _cached_hashes(cache_path):
+    out = set()
+    if os.path.exists(cache_path):
+        for line in open(cache_path, encoding="utf-8"):
+            try:
+                out.add(json.loads(line)["h"])
+            except Exception:
+                pass
+    return out
+
+
 def _iso_date(date):
     """Normalise a caller's date to the sortable form conversations.json
     uses. Raises ValueError on something that is not a date -- a silently
@@ -464,12 +478,20 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
             json.dump(convs, fh)
         os.replace(_tmp, conv_path)
 
-        # ---- (b) rgx extraction, cache-append, skip-if-already-cached ----
+        # ---- (b) what is new: the saved world and the cached turns ----
+        world_path = os.path.join(_data_dir(), "world.json")
+        cache_path = _cache_path()
+        cached_hashes = _cached_hashes(cache_path)
+
+    # 2026-10-12 (review 3.5): parsing can take minutes for a long session
+    # or an import; it no longer holds the store lock, so the other hooks
+    # and the MCP server are not kept waiting (on Windows they used to give
+    # up). One parse at a time per process: the extractor is not thread-safe.
+    with _parse_lock:
         ex = _get_extractor(owner)
         # 2026-10-02: the entities and names the user has linked to
         # themselves ("my dog Biscuit", "the billing service") survive
         # between sessions; each session-end ingest is a new process.
-        world_path = os.path.join(_data_dir(), "world.json")
         try:
             with open(world_path, encoding="utf-8") as fh:
                 saved = json.load(fh)
@@ -478,17 +500,9 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
                     ex._world.setdefault(k, v)
         except (OSError, ValueError):
             pass
-        cache_path = _cache_path()
-        cached_hashes = set()
-        if os.path.exists(cache_path):
-            for line in open(cache_path):
-                try:
-                    cached_hashes.add(json.loads(line)["h"])
-                except Exception:
-                    pass
 
-        n_turns = n_facts = n_hearsay = n_skipped = 0
-        new_lines = []
+        n_turns = n_skipped = 0
+        parsed = []          # (hash, facts)
         # parse the conversation's new messages in batches first (6x faster
         # for a long conversation or an imported history; same parses)
         todo = []
@@ -499,6 +513,7 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
         if len(todo) > 1 and hasattr(ex, "prefetch"):
             ex.prefetch(todo)
         prev = None     # the assistant message before a user turn (rgx.fragments)
+        seen = set(cached_hashes)
         for ti, t in enumerate(turns):
             role = t.get("role", "user")
             text = str(t.get("content", "")).strip()[:1800]
@@ -507,7 +522,7 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
             before, prev = prev, (text if role == "assistant" else None)
             n_turns += 1
             h = _rgx_facts.turn_hash(text)
-            if h in cached_hashes:
+            if h in seen:
                 n_skipped += 1
                 continue
             ptext = _prose_only(text, owner)
@@ -522,21 +537,41 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
                      # through the MCP tool cannot become a standing
                      # instruction that leads every later session
                      and (instructions or f.get("attribute") != "instruction")]
+            parsed.append((h, facts))
+            seen.add(h)
+        world_now = dict(ex._world)
+
+    with _lock:
+        # another process may have stored the same messages meanwhile
+        cached_hashes = _cached_hashes(cache_path)
+        new_lines = []
+        n_facts = n_hearsay = 0
+        for h, facts in parsed:
+            if h in cached_hashes:
+                n_skipped += 1
+                continue
+            cached_hashes.add(h)
             for f in facts:
                 if f.get("evidential") == "report":
                     n_hearsay += 1
                 else:
                     n_facts += 1
             new_lines.append(json.dumps({"h": h, "f": facts}))
-            cached_hashes.add(h)
-
         if new_lines:
             with open(cache_path, "a", encoding="utf-8") as fh:
                 for line in new_lines:
                     fh.write(line + "\n")
+            try:
+                with open(world_path, encoding="utf-8") as fh:
+                    merged = json.load(fh)
+                if not isinstance(merged, dict):
+                    merged = {}
+            except (OSError, ValueError):
+                merged = {}
+            merged.update(world_now)
             tmp = world_path + f".{os.getpid()}.tmp"
             with open(tmp, "w", encoding="utf-8") as fh:
-                json.dump(ex._world, fh)
+                json.dump(merged, fh)
             os.replace(tmp, world_path)
 
         # ---- (c) reload ----
