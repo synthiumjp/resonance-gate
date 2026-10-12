@@ -25,8 +25,8 @@ in the README.
 ## Claude Code already has memory. Why add this?
 
 Claude Code's auto memory is notes that Claude writes for itself, kept per
-project, without dates, and only in Claude Code. sourcedrecall keeps what
-you said, with dates, works the same in Claude Code, Codex CLI, Gemini CLI,
+project, and only in Claude Code. sourcedrecall keeps what you said, with
+dates, works the same in Claude Code, Codex CLI, Gemini CLI,
 Cursor and any MCP client, and marks what has gone out of date. We have not
 measured the two side by side.
 
