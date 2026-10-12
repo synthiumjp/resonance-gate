@@ -25,6 +25,10 @@ has the details behind each change.
   is no longer read as you writing it.
 - If the memory file cannot be read, it is copied aside and nothing is
   written, instead of being replaced by the new conversation.
+- The credential filter no longer slows down on long hyphenated or dotted
+  text (8 KB of "a-a-a-..." took 8 seconds, 100 KB would have taken
+  minutes; now under 2 seconds at 100 KB). Its output is unchanged on every
+  benchmark conversation and on the project's own files.
 - Requests for advice use what you told the assistant: the memory no
   longer reads its "unknown" rule as a reason to give no advice, and puts
   the best-matching messages first. Development advice set: your earlier

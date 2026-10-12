@@ -84,3 +84,21 @@ def test_review3_ordinary_sentences_survive(text):
 def test_only_the_credential_sentence_goes():
     assert scrub("I live in Fitzroy. My PIN is 4821. I like jazz.") == \
         "I live in Fitzroy. [secret removed] I like jazz."
+
+
+@pytest.mark.parametrize("text", [
+    "a-" * 20000 + "token=abc", "foo.bar." * 5000 + " password: x",
+    "a-b-c-d-e-f-g-" * 3000 + "\n", "x" * 40000,
+])
+def test_long_runs_of_word_characters_are_quick(text):
+    # review 2026-10-12 (3.16): an 8 KB run of "a-" took 8 s; scrub() runs
+    # on every stored turn, and pasted logs and lockfiles are long
+    import time
+    t = time.time()
+    scrub(text)
+    assert time.time() - t < 3
+
+
+def test_a_long_identifier_before_the_assignment_is_still_caught():
+    out = scrub("x" * 80 + ".DB_PASSWORD=hunter2abc")
+    assert "hunter2" not in out

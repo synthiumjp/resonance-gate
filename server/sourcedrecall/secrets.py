@@ -72,7 +72,8 @@ _HARMLESS = re.compile(
     r"(?:max|num|n|total|input|output|prompt|completion|context)?[_ ]?tokens?"
     r"\s*[:=]\s*\d[\d,_]*(?![\w-])"
     r")\b", re.I)
-_VALUE_HINT = re.compile(r"\d|[:=/]|\b(?:is|was|are|to|as|'s)\b|\w+[@#$%^&*!]")
+# (\w then the symbol: the same matches as \w+, without rescanning a long word)
+_VALUE_HINT = re.compile(r"\d|[:=/]|\b(?:is|was|are|to|as|'s)\b|\w[@#$%^&*!]")
 
 _FORMATS = [
     re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----.*?-----END [A-Z ]*PRIVATE KEY-----",
@@ -81,13 +82,15 @@ _FORMATS = [
     re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----.*", re.S),
     # 2026-10-09: an assignment whose name says what it is, as in a pasted
     # .env or config file (DB_PASSWORD=..., client_secret = '...',
-    # STRIPE_SECRET_KEY: ...)
-    re.compile(r"(?i)\b(?![\w.-]*(?:error|exception|warning)\s*:)[\w.-]*(?:password|passwd|pwd|secret|token|api[_-]?key|"
-               r"access[_-]?key|private[_-]?key)[\w.-]*\s*[:=]\s*"
+    # STRIPE_SECRET_KEY: ...). 2026-10-12 (review 3.16): the runs around the
+    # name are bounded; unbounded, a long run of "a-a-a-..." or dotted names
+    # was rescanned from every word boundary (8 KB took 8 s).
+    re.compile(r"(?i)\b(?![\w.-]{0,60}(?:error|exception|warning)\s*:)[\w.-]{0,60}(?:password|passwd|pwd|secret|token|api[_-]?key|"
+               r"access[_-]?key|private[_-]?key)[\w.-]{0,60}\s*[:=]\s*"
                # a value, not a count ("max_tokens: 512")
                r"(?=['\"]?[^\s'\"]*[A-Za-z]|['\"]?[^\s'\"]{6,})"
                r"(?:'[^'\n]*'|\"[^\"\n]*\"|[^\s,;]+)"),
-    re.compile(r"\b[a-z][a-z0-9+.-]*://[^\s/:@]+:[^\s/@]+@\S+", re.I),
+    re.compile(r"\b[a-z][a-z0-9+.-]{0,30}://[^\s/:@]+:[^\s/@]+@\S+", re.I),
     re.compile(r"\b(?:sk|pk|rk)[-_](?:proj-|live[-_]|test[-_])?[A-Za-z0-9_-]{16,}"),
     re.compile(r"\b(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{20,}\b"),
     re.compile(r"\bgithub_pat_[A-Za-z0-9_]{20,}\b"),
@@ -103,8 +106,9 @@ _FORMATS = [
     re.compile(r"\bBearer\s+[A-Za-z0-9._~+/-]{16,}=*", re.I),
     re.compile(r"\b\d{3}[- ]\d{2}[- ]\d{4}\b"),
     # long random-looking tokens: letters AND digits, 24+ characters
-    re.compile(r"\b(?=[A-Za-z0-9_+/-]*\d)(?=[A-Za-z0-9_+/-]*[A-Za-z])"
-               r"(?![A-Za-z0-9_+/-]*[a-z]{3,}_[a-z]{3,})(?![a-z0-9_/-]*/[a-z0-9_-]*\b)"
+    # (the checks look 300 characters ahead, not to the end of the run)
+    re.compile(r"\b(?=[A-Za-z0-9_+/-]{0,300}\d)(?=[A-Za-z0-9_+/-]{0,300}[A-Za-z])"
+               r"(?![A-Za-z0-9_+/-]{0,300}[a-z]{3,}_[a-z]{3,})(?![a-z0-9_/-]{0,300}/[a-z0-9_-]*\b)"
                r"[A-Za-z0-9_+/-]{24,}={0,2}"),
 ]
 _CARD = re.compile(r"(?<!\d)(?:\d[ -]?){12,18}\d(?!\d)")
