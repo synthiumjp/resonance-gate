@@ -63,26 +63,53 @@ release run in `results/test_050`.
 
 ## False memory and changes of state
 
-`bench/false_memory`. The sets: `cases.jsonl` (v1, read and tuned on),
-`cases_dev_paraphrase.jsonl` and `cases_dev_stale*.jsonl` (development),
-`cases_v2/v3/v4.jsonl` (blind: written before any system was run; the
-developer reads only the counts, and an agent audits flagged answers).
+`bench/false_memory`. The sets:
+
+- development, read and tuned on: `cases.jsonl` (v1) and `cases_dev_*.jsonl`
+  (paraphrase, changes, pasted text, own material, advice, preferences,
+  coding, projects, decisions);
+- `cases_v2/v3/v4.jsonl`, `cases_code_blind.jsonl`,
+  `cases_projects_blind.jsonl`: written before any system was run, but run
+  many times since and some rules were written from their errors, so now
+  regression sets;
+- `cases_v5.jsonl` to `cases_v11.jsonl`: held out. Each was pre-registered
+  (`docs/PREREG_HELDOUT_V*.md`, committed before the set was written),
+  written by an agent barred from the rules and the other sets, run once on
+  the frozen commit, and read by the developer as counts only.
+
+The protocol since 2026-10-10 (`FM_READER_SAME=1 FM_SAME_V7=1 FM_STRICT=1
+FM_JUDGE_QUESTION=1`): every system's returns go to the same local reader
+with the same instruction; the judge sees the question; an expected term
+counts only as a whole word that is not in the question; a blinded audit
+(`blind_audit.py`, an agent that sees no system names) corrects judge
+errors, recorded in `audit_overrides_*.json` and matched by the exact
+answer text.
+
+Reproduce a held-out result from the committed retrievals (what each
+system returned for each probe is in `results_vN/raw_*.jsonl`, so the
+competitors need not be installed). With Qwen3-14B
+(`qwen3-14b-a8cc1361.gguf`, llama_cpp.server) on port 8090:
 
 ```bash
 cd bench/false_memory
-export FM_CASES=cases_v4.jsonl FM_RESULTS=$PWD/results_mine FM_OVERRIDES=audit_overrides_v4.json
-export FM_JUDGE_OPENAI=http://127.0.0.1:8090/v1 FM_JUDGE_MODEL=<model name>
-export OURS_PY=<python with sourcedrecall> MEM0_PY=<python with sentence-transformers (and mem0ai)>
-bash run_all.sh rag ours          # retrieval for each probe
-python answer.py sourcedrecall rag # the reader answers from each system's memory
-python score.py                    # results_mine/results.md
+mkdir -p results_mine && cp results_v10/raw_*.jsonl results_mine/
+export FM_CASES=cases_v10.jsonl FM_RESULTS=$PWD/results_mine FM_OVERRIDES=audit_overrides_v10.json
+export FM_JUDGE_OPENAI=http://127.0.0.1:8090/v1 FM_JUDGE_MODEL=qwen3-14b-a8cc1361.gguf
+export FM_READER_SAME=1 FM_SAME_V7=1 FM_STRICT=1 FM_JUDGE_QUESTION=1
+python answer.py sourcedrecall rag agentmemory ai-memory
+python score.py                       # results_mine/results.md
+python v10_tests.py                   # the pre-registered hypotheses
 ```
+
+The reader and judge run at temperature 0 with a fixed seed, so the counts
+should match `results_v10/SUMMARY.md`; a different build of llama.cpp or a
+different quantisation can move a few answers. A full rerun, retrieval
+included, is `vN_run.sh` (it needs agentmemory and ai-memory installed as in
+`adapters_h2h.py`). The regression sets under the same protocol:
+`fair_run.sh`, or step 4 of `tools/release_measure.sh`.
 
 `score.py` reports, per system and view (`lines`: each returned line judged
 on its own; `answer`: the reader's answer judged), the false-memory rate by
 class, control recall, abstention on things never said, and whether the new
-state was given. `audit_overrides_*.json` holds the judge errors found by the
-audits, matched by the exact flagged text.
-
-Published results: `results_v4_ans_mfg0` (and `_r4b` for the 4B reader),
-`results_v3_ans_mfg0`.
+state was given. `v11_tests.py` also counts how often each answer said the
+memory did not hold it.
