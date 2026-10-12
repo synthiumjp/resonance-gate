@@ -173,6 +173,21 @@ _CHAT_LINE = re.compile(r"^\s*(?:\[?\d{1,2}[:/.]\d{1,2}[^\]\n]{0,25}\]?\s*[-–]
                         r"[A-Z][\w .'’-]{0,30},?\s+\d{1,2}:\d{2}\s?(?:[AaPp][Mm])?\s*$|"
                         r"(?!(?:From|To|Sent|Subject|Cc|Bcc|Date|Re|Fwd|Note|Update|Edit|PS|P\.S)\b)"
                         r"[A-Z][\w'’-]+(?: [A-Z][\w'’-]+)?:\s+\S)", re.M)
+# 2026-10-12 (review 3.18: "Allergies: peanuts\nDiet: vegan\nCity: Leeds", the
+# user's own field list, was dropped as a chat log). A "Name: text" line with
+# no time stamp is a speaker's only when some speaker speaks twice or one is
+# "Me"; field labels are all different. On the dev sets every such list
+# without a repeat was a CV, a booking or a form, never a chat.
+_NAME_LINE = re.compile(r"^\s*([A-Z][\w'’-]+(?: [A-Z][\w'’-]+)?):\s+\S", re.M)
+
+
+def _chat_lines(text):
+    """-> the _CHAT_LINE matches that are a chat's lines (see above)."""
+    ms = list(_CHAT_LINE.finditer(text))
+    names = [n.group(1) for m in ms for n in [_NAME_LINE.match(m.group(0))] if n]
+    if len(names) == len(set(names)) and "Me" not in names:
+        ms = [m for m in ms if not _NAME_LINE.match(m.group(0))]
+    return ms
 _DOC_HEAD = re.compile(r"^\s*(?:(?-i:[A-Z][A-Z0-9&'’.,-]+(?:\s+[A-Z0-9&'’.,()-]+){1,8})\s*(?:[-–:][^\n]*)?$|"
                        r"(?:posted by|u/\w+|[★☆]{3,}|verified (?:purchase|buyer)|\d+ people found)\b[^\n]*$|"
                        r"(?:profile|about me|bio|summary|subject|from|to|section \d+|bylaw|notice|"
@@ -243,7 +258,7 @@ def _other_voice(block):
     if not lines:
         return False
     return bool(_GREETING_LINE.match(lines[0]) or _SIGNOFF_TAIL.search(block)
-                or len(_CHAT_LINE.findall(block)) >= 2 or _DOC_HEAD.search(lines[0])
+                or len(_chat_lines(block)) >= 2 or _DOC_HEAD.search(lines[0])
                 or (len(lines) > 1 and _DOC_HEAD.search(lines[1]))
                 or len(_RULE_LIST.findall(block)) >= 2 or len(_CODE_COMMENT.findall(block)) >= 2)
 
@@ -332,7 +347,7 @@ def _paste_span(text, owner=None):
 def _paste_span0(text, owner=None):
     # a chat log or transcript (two or more speaker or time-stamped lines),
     # wherever it sits in the message
-    chat = list(_CHAT_LINE.finditer(text))
+    chat = _chat_lines(text)
     if len(chat) >= 2:
         start = chat[0].start()
         after = text[chat[-1].start():]

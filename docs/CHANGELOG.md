@@ -29,6 +29,11 @@ has the details behind each change.
   text (8 KB of "a-a-a-..." took 8 seconds, 100 KB would have taken
   minutes; now under 2 seconds at 100 KB). Its output is unchanged on every
   benchmark conversation and on the project's own files.
+- A list of fields in your own message ("Allergies: peanuts", "Diet:
+  vegan") is no longer taken for a chat log and skipped by the parser.
+  Lines like "Sam: ..." count as a chat only when a speaker speaks twice,
+  one of them is "Me", or the lines have times. Pasted bookings and
+  newsletters that hold such lines are now marked pasted as a whole.
 - Requests for advice use what you told the assistant: the memory no
   longer reads its "unknown" rule as a reason to give no advice, and puts
   the best-matching messages first. Development advice set: your earlier

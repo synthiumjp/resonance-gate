@@ -338,3 +338,15 @@ def test_someone_else_wrote_this_is_not_the_users_writing():
     assert _paste_span("wrote this last night, too long?\n\nDear Sam, I am so sorry I missed "
                        "your party. I was stuck at work until nine.\n\nLove, Amara",
                        "Amara Okafor") == "own"
+
+
+def test_a_field_list_is_not_a_chat_log():
+    # review 2026-10-12 (3.18): "Name: text" lines were taken as speakers,
+    # and the user's own field list was dropped before the parser read it
+    from prose import prose_only, _paste_span
+    for text in ("Allergies: peanuts\nDiet: vegan\nCity: Leeds",
+                 "Job: nurse\nHome: Leeds\nI have two kids"):
+        assert prose_only(text) == text
+    # a speaker who speaks twice, or "Me", is still a chat
+    assert isinstance(_paste_span("Sam: are you coming tonight?\nJo: maybe\nSam: ok", "Ana Lee"), tuple)
+    assert isinstance(_paste_span("Mum: are you coming Sunday?\nMe: yes, after work", "Ana Lee"), tuple)
