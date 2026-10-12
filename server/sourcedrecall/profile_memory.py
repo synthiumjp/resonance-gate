@@ -68,6 +68,25 @@ import rgx.facts as _rgx_facts  # noqa: E402 -- same bridge; the rgx package
 _VALID_ACTIONS = ("deny", "confirm", "retype")
 _SOURCE = "rg-p2-memory"
 
+def _win_lock(fh):
+    """2026-10-12 (review 3.5): msvcrt's LK_LOCK gives up after about 10 s,
+    and the error left the store unlocked, while an ingest holds the lock
+    for as long as parsing takes. Wait as flock does: try without blocking
+    and sleep while another process holds it."""
+    import errno
+    import msvcrt
+    import time
+    while True:
+        fh.seek(0)
+        try:
+            msvcrt.locking(fh.fileno(), msvcrt.LK_NBLCK, 1)
+            return
+        except OSError as e:
+            if e.errno not in (errno.EACCES, errno.EDEADLK):
+                raise
+            time.sleep(0.2)
+
+
 class _MemoryLock:
     """2026-10-09 (security review: 4 processes ingesting at once stored 3
     conversations). A thread lock was not enough: the hook worker, the
@@ -93,12 +112,14 @@ class _MemoryLock:
                         import fcntl
                         fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
                     except ImportError:                 # Windows
-                        import msvcrt
-                        fh.seek(0)
-                        msvcrt.locking(fh.fileno(), msvcrt.LK_LOCK, 1)
+                        _win_lock(fh)
                     self._fh = fh
-                except Exception:
+                except Exception as e:
+                    # 2026-10-12 (review 3.5): said nothing before; a store
+                    # written without the lock can lose a conversation
                     self._fh = None
+                    print(f"sourcedrecall: could not lock {d} ({e.__class__.__name__}: {e}); "
+                          "writing without the lock", file=sys.stderr)
         self._depth += 1
         return self
 

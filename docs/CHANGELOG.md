@@ -38,6 +38,12 @@ has the details behind each change.
   against its checksum, so a change upstream cannot change your results or
   break the install. A stalled download now times out, and a WordNet
   download that fails is reported.
+- On Windows, a second process storing a conversation waits for the
+  first instead of giving up after 10 seconds and writing without the
+  lock (not yet run on Windows). If the lock cannot be taken at all, a
+  warning is printed instead of nothing.
+- The MCP tools tell the host which ones only read and which change or
+  delete the memory, so it can ask you before a forget.
 - Requests for advice use what you told the assistant: the memory no
   longer reads its "unknown" rule as a reason to give no advice, and puts
   the best-matching messages first. Development advice set: your earlier
