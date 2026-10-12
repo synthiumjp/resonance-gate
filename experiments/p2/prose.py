@@ -202,7 +202,13 @@ _FRAME_OWN = re.compile(
     r"^\W*(?:(?:a|my|the)\s+)?(?:rough\s+|first\s+|quick\s+)?draft\b(?![^.\n]{0,40}\b(?:from|by|sent|they|he|she)\b)|"
     r"\bi\s+(?:posted|sent|replied|answered|put up|gave|read out|delivered)\b|"
     r"\b(?:sending|posting|send|post|submit|submitting)\s+(?:it\s+|this\s+)?(?:tonight|today|tomorrow|later|soon|now|in a bit)\b|"
-    r"\bi'?m (?:doing|giving|reading|delivering) (?:it|this)\b",
+    r"\bi'?m (?:doing|giving|reading|delivering) (?:it|this)\b|"
+    # 2026-10-12 (dev own-material set, 40): "my song lyric for the band",
+    # "wrote the chorus last night", "pls check my grammar, this is a reply"
+    r"\bmy (?:own )?(?:song|lyrics?|chorus|verse|toast|eulogy|bio|cv|resume|cover letter|essay|story|"
+    r"listing|review|notes?|diary|journal|draft)\b|"
+    r"(?:^|[.!?,;:]\s*|\bi\s+)wrote\s+(?:the|a|my)\b|"
+    r"\b(?:check|fix|correct|improve|proofread)\s+my\s+(?:grammar|spelling|wording|writing|english|punctuation)\b",
     re.I | re.M)
 
 
@@ -294,7 +300,10 @@ def _paste_span(text, owner=None):
     if isinstance(sp, tuple) and len(first) > 1:
         rest = text[sp[0]:]
         last = [l.strip() for l in rest.strip().splitlines() if l.strip()][-1:] or [""]
-        if (re.match(rf"(?:[\w ,!.'’-]{{0,25}}[,\s])?{re.escape(first)}\b\W*(?:x+)?\W*$", last[0], re.I)
+        # the signature may carry the surname ("Yours faithfully, Wanjiru Kamau")
+        sur = "|".join(re.escape(w) for w in (owner or "").split()[1:]) or "(?!)"
+        if (re.match(rf"(?:[\w ,!.'’-]{{0,25}}[,\s])?{re.escape(first)}\b(?:\s+(?:{sur}|[A-Z]\.?))?\W*(?:x+)?\W*$",
+                     last[0], re.I)
                 or re.search(rf"\b(?:i'?m|i’m|i am|my name is|this is|it'?s)\s+{re.escape(first)}\b", rest, re.I)):
             return "own"
     return sp

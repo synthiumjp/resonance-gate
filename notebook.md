@@ -15536,3 +15536,24 @@ and how to run everything).
   1 credential removed by the secret filter (by design); 1 strict-match
   format miss.
 
+
+## Entry 322 — 2026-10-12 (own material on dev)
+
+- New dev set cases_dev_own (60, agent-written: 40 own-material items in
+  three subtypes, 20 pasted controls). 12 of its expected terms were stems
+  or a single spelling that the strict whole-word scorer could not match
+  ("epidemiolog", "6ft 5", "peanut"); widened before any comparison. On
+  the 8473783 code: own 24/40, rag 29/40; FM 2/20, rag 11/20.
+- Of the 6 items rag answers and we miss, 3 are own text marked pasted
+  (signature with the surname; "my song lyric", "check my grammar"
+  intros). Detection fixed for those shapes: own 24 -> 26, FM unchanged on
+  own, pasted, pasted2 and stale2; LoCoMo detection unchanged; 1,318 tests.
+- The rest are reader refusals on inferences from the user's own drafts
+  ("Matteo turned nine" -> "my son"; a firefighter's wedding speech). Not
+  ownership: a note on the line saying it is the user's own writing changed
+  nothing (24 -> 24). Rules rewrites on fixed retrieval: a shorter rules
+  paragraph with an own-writing sentence gives own 30 (29 with the pasted
+  guard kept), but adds 3-4 real false memories across own, pasted,
+  pasted2 and stale2 (a pasted review's "retired firefighter", "mother of
+  three", "lifelong vegetarian"). Rules kept as they are: the product's
+  point is not giving other people's text as the user's.

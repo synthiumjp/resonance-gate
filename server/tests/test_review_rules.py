@@ -257,6 +257,14 @@ def test_long_message_window_keeps_the_part_asked_about():
     "at age 9.",
     "speech for my brother's wedding\n\nGood evening everyone. For those who don't know me, I'm Dennis, "
     "his younger brother. Our family moved from Gdansk when I was six.",
+    # 2026-10-12 (dev own-material set): a signature with the surname, a song
+    # of one's own, a grammar check of one's own reply
+    "can you make this less stiff\n\nDear Hiring Manager,\n\nI am writing to apply for the site engineer "
+    "position. I worked in Gdansk for three years.\n\nYours faithfully,\nDennis Achterberg",
+    "wrote the chorus last night, my song lyric for the band:\n\nForty hours at the wheel, the 950 night bus,\n"
+    "Nobody sees me, I see all of us",
+    "pls check my grammar, this is a reply to a thread about allergies\n\nI travel a lot and I am severely "
+    "allergic to penicillin, so I carry a card.",
 ])
 def test_own_text_in_pasted_shapes_is_kept(text):
     from prose import prose_only
@@ -271,3 +279,9 @@ def test_writers_details_are_kept_for_a_question_not_about_the_user():
     assert "Lucia's" in _quote_own(text, "Giulia Ferrari", "where's mum's birthday dinner?")
     assert "vegetarian" not in _quote_own(text, "Giulia Ferrari", "Am I vegetarian?")
 
+
+def test_a_signature_naming_someone_else_is_not_the_owners():
+    from prose import _paste_span
+    text = ("my landlord sent this\n\nDear tenants,\n\nThe boiler will be serviced on Monday.\n\n"
+            "Regards,\nDennis Visser")
+    assert isinstance(_paste_span(text, "Dennis Achterberg"), tuple)
