@@ -190,6 +190,24 @@ Said it did not know: on the 40 pasted claims sourcedrecall 31, plain
 retrieval 16, agentmemory 14, ai-memory 38; on the 30 own items 6, 0, 0
 and 25. Everything is in `bench/false_memory/results_v11/SUMMARY.md`.
 
+After v11, the user's own writing brought to be read over ("my blog post",
+"I write it every month") was kept as theirs, letter-shaped text was read
+as someone else's, and an email pasted on its own was read with the
+user's next message ("it's from a client"). An eighth held-out set (v12:
+160 scenarios, 2026-10-13), with a new part of 30 real emails from the
+public Enron corpus, met seven of eleven hypotheses with Qwen3-14B.
+Pasted claims or instructions given as the user's: 12 of 40 (target 6;
+plain retrieval 28, agentmemory 35, ai-memory 8; Holm-adjusted p 0.002 and
+below 0.001 against the first two); with Phi-4 13 of 40 (32, 35, 9). Real
+emails: 7 of 20 (target 6; plain retrieval 14, p=0.06); the user's own
+real emails answered 10 of 10. Own material 25 of 30 (target met; 4 behind
+plain retrieval, target at most 3). Facts in pasted text 19 of 20, changes
+1 of 20, everyday 19 of 20. The detection itself did no worse than v11's
+code on this set; a third of the pasted texts came in shapes its rules do
+not read (the source named in other words, after the text, or only in a
+later message), and were taken for the user's. Everything is in
+`bench/false_memory/results_v12/SUMMARY.md`.
+
 LoCoMo (conversations 2-9, 1,307 questions), against Mem0, with the same
 local reader and judge:
 
@@ -314,12 +332,14 @@ pasted text but not all; see above).
   boss sent me this", "translate this") or the pasted text is shaped like
   someone else's (a letter, a chat log, a review). Unless you ask about
   that text by its source, the writer's sentences about themselves and their
-  general rules are left out; dates, times and places stay. On the newest
-  held-out set (v11) a pasted claim or instruction was taken for yours in 5
-  of 40 (plain retrieval 23), with two different reader models, and facts
-  inside pasted text were answered in 20 of 20. Your own pasted-looking
-  material (drafts, speeches, diary entries) is answered less often than
-  with plain retrieval (24 of 30 against 30).
+  general rules are left out; dates, times and places stay. It is not
+  reliable: on the last two held-out sets a pasted claim or instruction was
+  taken for yours in 5 of 40 (v11) and 12 of 40 (v12), against 23 and 28
+  with plain retrieval, and in 7 of 20 real emails (plain retrieval 14).
+  Text whose source is named in words or places the rules do not read
+  passes as yours. Your own pasted-looking material (drafts, speeches,
+  diary entries) is answered a little less often than with plain retrieval
+  (25 of 30 against 29 on v12).
 - Sessions are stored automatically in Claude Code. Hooks for Codex CLI,
   Gemini CLI and Cursor are included but have not yet been tested inside
   those apps. A ChatGPT or Claude.ai data export can be imported.

@@ -3,7 +3,7 @@
 Follows the launch review: lead with what no other memory measures, state
 the costs in the same breath, numbers from one run each. Bracketed items
 are filled from the v11 run and the external benchmarks before it replaces
-the current opening. v11 filled 2026-10-13 (results_v11/SUMMARY.md);
+the current opening. v11 and v12 filled 2026-10-13 (results_v11, results_v12);
 the strict LoCoMo figure is the d89d830 re-judge (night chain).
 
 ---
@@ -28,13 +28,14 @@ $ sourcedrecall-memory context "Where do I live?"
 
 Text you paste in from someone else, such as an email, a review or a chat,
 is shown as theirs. Memory tools that store whatever was said take a
-friend's "I'm allergic to nuts" for yours. On a pre-registered held-out
-set of 40 pasted claims, read by two different local models, plain
-retrieval gave 23 of them back as the user's own, agentmemory 24, and
-sourcedrecall 5 (with the second model: 22, 22 and 5). The cost: on the
-user's own writing pasted in the same way it answered 24 of 30 where plain
-retrieval answered 30, because it took six of the user's own drafts for
-someone else's [after the fix: next held-out set].
+friend's "I'm allergic to nuts" for yours. On the two newest
+pre-registered held-out sets of 40 pasted claims, read by two different
+local models, plain retrieval gave 23 and 28 of them back as the user's
+own, agentmemory 24 and 35, and sourcedrecall 5 and 12; on 20 real pasted
+emails, 14 against 7. It is far from perfect: text whose source is named
+in words or places its rules do not read still passes as yours. The cost:
+on the user's own writing pasted in the same way it answered 25 of 30
+where plain retrieval answered 29.
 
 On LoCoMo, with the same local reader and judge for every system, it is
 level with Mem0 (50.3% against 48.5% with a strict judge; 65.3% against
