@@ -403,7 +403,9 @@ def _paste_span0(text, owner=None):
         after = text[end:]
         if _REPLYISH.search(after) and not _OWN_MARK.search(after):
             return 0, end
-        return "own" if _OWN_MARK.search(after) else None
+        if _OWN_MARK.search(after):
+            return "own"
+        return _letter_span(text, owner)
     # quoted sentences ("'I always eat breakfast at 6.' what does this mean")
     for q in _QUOTE_SPAN.finditer(text):
         body = q.group(1) or q.group(2)
@@ -439,28 +441,52 @@ _NOT_ADDRESSEE = {w.lower() for w in """
     August September October November December Weekend Update Reminder Attention Team All Everyone Folks
     Guys Sir Madam Regards Best Love Sincerely Warmly Kind Many Subject From To Sent Date
     """.split()}
-_ADDRESS = re.compile(r"^\W*(?:(?:hi|hello|hey|dear|good\s+(?:morning|afternoon|evening))[\s,]+)?"
-                      r"((?-i:[A-Z][a-z'’]+)(?:\s+(?-i:[A-Z][a-z'’]+))?)\s*(?:[,!:]|\s-+(?:\s|$)|-+\s*$)", re.I)
+_TITLE = r"(?:(?:Mr|Mrs|Ms|Miss|Dr|Prof)\.?\s+)?"
+_NAME = r"(?-i:[A-Z][a-z'’]+)(?:\s+(?-i:[A-Z][a-z'’]+))?"
+# "Lee,", "Hi, Jan!", "Dear Mr. Lay,", "Joao -", "Juan......", "Hey, AC!";
+# a name and a colon only alone on its line ("Flutter: ..." is a label)
+_ADDRESS = re.compile(r"^\W*(?:(?:(?:hi|hello|hey|dear|good\s+(?:morning|afternoon|evening))[\s,]+)" + _TITLE
+                      + r"(" + _NAME + r"|(?-i:[A-Z]{2,3}))|" + _TITLE + r"(" + _NAME + r"))"
+                      r"\s*(?:[,!]|\s-+(?:\s|$)|-+\s*$|\.{3,}|:\s*$)", re.I)
 _LETTER_OPEN = re.compile(r"^\W*(?:how are you(?: doing)?\b|i hope (?:you|your|this|all|everyone)\b[^.\n]{0,40}\bwell\b|"
                           r"hope (?:you(?:'|’)re|you are|all is) (?:well|doing well|good)\b)", re.I)
-_SIGNATURE = re.compile(r"^(?:[-–—]\s*)?((?-i:[A-Z][a-z'’]+)(?:\s+(?-i:[A-Z][a-z'’.]+)){0,2})\W*$")
+# a formal sign-off ends a letter (not "thanks": people end requests to an
+# assistant with it), alone or before the name
+_SIGNOFF = (r"(?:(?:with\s+)?(?:best|kind|warm(?:est)?)\s+(?:regards|wishes)|regards|sincerely|respectfully|"
+            r"yours(?:\s+(?:truly|sincerely|faithfully))?|best\s+wishes|all\s+the\s+best|later|love)")
+_SIGNOFF_ALONE = re.compile(r"^" + _SIGNOFF + r"\W*$", re.I)
+_SIGNATURE = re.compile(r"^(?:[-–—]\s*)?(?:" + _SIGNOFF + r"[,!.]?\s+)?"
+                        r"((?-i:[A-Z][a-z'’]+)(?:\s+(?-i:[A-Z][a-z'’.]+)){0,2}|(?-i:[A-Z])\.?)\W*$", re.I)
 
 
 def _letter_span(text, owner):
-    lines = [l.strip() for l in (text or "").strip().splitlines() if l.strip()]
-    if len(lines) < 3:
+    if "```" in (text or "") or re.search(r"`[^`\n]+`", text or ""):
+        return None                      # code: a coding message, not a letter
+    paras = [m for m in re.finditer(r"\S(?:.|\n(?!\s*\n))*", text or "")]
+    if not paras:
         return None
     first = ((owner or "").split() or [""])[0].lower()
 
     def other(name):
-        w = name.split()[0].lower()
-        return w not in _NOT_ADDRESSEE and w != first
+        w = (name or "").split()[0].lower().rstrip(".")
+        return bool(w) and w not in _NOT_ADDRESSEE and w != first
 
-    a = _ADDRESS.match(lines[0])
+    def addressed(line):
+        a = _ADDRESS.match(line)
+        return bool(a and other(a.group(1) or a.group(2))) or bool(_LETTER_OPEN.match(line))
+
+    lines = [l.strip() for l in text.strip().splitlines() if l.strip()]
+    if len(lines) < 3:
+        return None
     sig = _SIGNATURE.match(lines[-1])
-    if ((a and other(a.group(1))) or _LETTER_OPEN.match(lines[0])
-            or (sig and other(sig.group(1)) and len(lines[-1]) <= 30)):
+    signed = (sig and other(sig.group(1)) and len(lines[-1]) <= 40) or _SIGNOFF_ALONE.match(lines[-1])
+    if addressed(lines[0]) or signed:
         return 0, len(text)
+    # a short introduction, then the letter ("Is this sensible?\n\nJeff, ...")
+    for m in paras[1:]:
+        body = m.group(0)
+        if addressed(body.splitlines()[0].strip()) and len(body.splitlines()) >= 2:
+            return m.start(), len(text)
     return None
 
 
