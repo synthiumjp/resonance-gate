@@ -71,7 +71,7 @@ apart.
 ## How good is it, honestly?
 
 Level with Mem0 on the LoCoMo benchmark with the same local reader and
-judge (65.3% against 64.6%, 49.7% against 48.5% with a strict judge), with
+judge (65.3% against 64.6%, 50.3% against 48.5% with a strict judge), with
 no model call to store anything; behind Mem0 on questions that combine
 several facts. Far fewer pasted claims taken for yours. The test sets for
 false memories were written by a language model for this project, held out
