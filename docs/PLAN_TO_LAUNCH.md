@@ -53,6 +53,7 @@ written (4.4, not yet green).
 
 | | item | done when |
 |---|---|---|
+| 3.0 | External benchmarks, local reader and judge, competitors run by us on the same setup (JP 2026-10-12: keep judging local). HaluMem (user-assistant chat; updating and QA): the two users used in August first, with the current product, then HaluMem-Medium if updating clearly beats Mem0 and Zep run here. LongMemEval-S knowledge-update and temporal-reasoning answer accuracy against our plain-embedding and BM25 baselines. Not MemoryAgentBench FactConsolidation (numbered third-person facts; the parser has nothing to read). STALE only on its explicit-change items, if its data is public | numbers with judge named; launch headline only if the win is clear |
 | 3.1 | MemPalace in the comparisons (M2): adapter, the dev sets, then the held-out regression sets, same reader and judge | numbers in the README table |
 | 3.2 | Claude Code's own memory in the comparisons (M2). Decision needed: its notes are written by Claude | see decisions |
 | 3.3 | A coding-task test with and without memory (M3): multi-session coding scenarios where a later task depends on an earlier decision, convention or preference; pass rate checked by tests, plus tokens; dev set first, then a pre-registered held-out set | pre-registration reviewed by JP; one run |
@@ -86,6 +87,13 @@ written (4.4, not yet green).
 - Implied changes (M6): the open problem in the research and ours (v5:
   labels on 2 of 25). The next parser work.
 - A paper on the linguistic approach (M7): no published counterpart found.
+
+## Decided
+
+- Judging stays local for every benchmark, external ones included; the
+  competitors are run by us on the same reader and judge (JP, 2026-10-12).
+  Open: a judge-agreement sample re-judged by Claude (JP's Anthropic
+  credits, a few dollars), reported beside the local verdicts.
 
 ## Decisions for JP
 
