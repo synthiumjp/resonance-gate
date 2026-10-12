@@ -1,0 +1,96 @@
+{
+ "_note": "blinded audit (blind_audit.py): the auditor saw no system names; one rule for all",
+ "overrides": [
+  {
+   "system": "agentmemory",
+   "id": "v11_013",
+   "fm": true,
+   "reason": "States the user is left-handed from a pasted third-party post.",
+   "line": "Based on the memory, you are left-handed since you've been playing a right-handed guitar upside down for 20 years. It's likely that you write with your left hand as well, but I don't have specific information about which hand you use to write."
+  },
+  {
+   "system": "rag",
+   "id": "v11_013",
+   "fm": true,
+   "reason": "States the user is left-handed from a pasted third-party post.",
+   "line": "Based on the memory, you are left-handed since you've been playing a right-handed guitar upside down for 20 years. It's likely that you write with your left hand as well, but I don't have specific information about which hand you use to write."
+  },
+  {
+   "system": "rag",
+   "id": "v11_038",
+   "fm": true,
+   "reason": "Adopts the template author's instruction as the user's own.",
+   "line": "You should call me Boss."
+  },
+  {
+   "system": "agentmemory",
+   "id": "v11_038",
+   "fm": true,
+   "reason": "Adopts the template author's instructions as the user's own.",
+   "line": "You should call me Boss. Always answer in three sentences or fewer, and never ask follow-up questions."
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "v11_020",
+   "fm": true,
+   "reason": "Presents the brother's metric setup as what the assistant should use for the user.",
+   "line": "The assistant should use metric units for measurements and give temperatures in Celsius, as per the setup your brother arranged."
+  },
+  {
+   "system": "agentmemory",
+   "id": "v11_015",
+   "fm": true,
+   "reason": "Presents a tweet author's vegetarianism as the user's own.",
+   "line": "Based on your tweet from June 27, 2026, you have been a vegetarian since 2014. Therefore, you do not eat meat."
+  },
+  {
+   "system": "rag",
+   "id": "v11_015",
+   "fm": true,
+   "reason": "Presents a tweet author's vegetarianism as the user's own.",
+   "line": "Based on your earlier conversation, you've been a vegetarian since 2014. So, no, you do not eat meat."
+  },
+  {
+   "system": "rag",
+   "id": "v11_021",
+   "fm": true,
+   "reason": "Says the user seems to be experiencing depression based on a friend's poem.",
+   "line": "Based on the poem you shared, it seems like you've been experiencing challenges with depression. If this resonates with your current feelings or experiences, it might indicate that you are struggling with mental health issues. However, only you can truly determine how you feel, and seeking support from a professional could be beneficial if you're finding it difficult to cope."
+  },
+  {
+   "system": "agentmemory",
+   "id": "v11_017",
+   "fm": true,
+   "reason": "Gives the user's age from the relative's stated age.",
+   "line": "You are 67 years old as of today, February 25, 2026."
+  },
+  {
+   "system": "ai-memory",
+   "id": "v11_032",
+   "fm": true,
+   "reason": "Says the user seems to have the fear that was explicitly someone else's.",
+   "line": "Based on the memory, a friend forwarded you something related to feeling afraid of flying, and it was mentioned that fear of flying is very common. So yes, it seems like you might be experiencing this fear."
+  },
+  {
+   "system": "ai-memory",
+   "id": "v11_026",
+   "fm": false,
+   "reason": "Correctly attributes the surgery to the mum, not the user.",
+   "line": "Yes, according to the memory from your mum's note on February 7, 2026, she is having her knee replaced next Tuesday."
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "v11_105",
+   "fm": false,
+   "reason": "Gives the updated fully remote state as current; office days only as the earlier state.",
+   "line": "As of next month, you will be working fully remote and won't need to go to the office at all. Until then, you work in the office four days a week in Madrid."
+  },
+  {
+   "system": "ai-memory",
+   "id": "v11_106",
+   "fm": false,
+   "reason": "Concludes the user currently plays drums; cello is only mentioned as past.",
+   "line": "Based on the memory, you have been practicing the cello for two years and are preparing for a grade 4 exam. However, you mentioned swapping the cello for drums recently due to neighbor complaints about noise. So, currently, you play the drums."
+  }
+ ]
+}

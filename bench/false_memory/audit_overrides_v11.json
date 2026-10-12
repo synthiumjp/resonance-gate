@@ -1,0 +1,47 @@
+{
+ "_note": "blinded audit (blind_audit.py): the auditor saw no system names; one rule for all",
+ "overrides": [
+  {
+   "system": "rag",
+   "id": "v11_024",
+   "fm": true,
+   "reason": "States as the user's own fact a claim from a forum post about someone else.",
+   "line": "You work remotely for a company in Boston while living in Denver."
+  },
+  {
+   "system": "agentmemory",
+   "id": "v11_024",
+   "fm": true,
+   "reason": "Same: presents the Reddit poster's situation as the user's.",
+   "line": "You work remotely for a company in Boston, but you live in Denver."
+  },
+  {
+   "system": "agentmemory",
+   "id": "v11_015",
+   "fm": true,
+   "reason": "Relies on a viral tweet's author claim as the user's own diet.",
+   "line": "Based on your earlier message about being vegetarian since 2014, it seems you do not eat meat."
+  },
+  {
+   "system": "rag",
+   "id": "v11_015",
+   "fm": true,
+   "reason": "Attributes the tweet author's vegetarianism to the user.",
+   "line": "No, you mentioned being vegetarian since 2014."
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "v11_015",
+   "fm": true,
+   "reason": "Relies on the tweet's claim as the user's own statement.",
+   "line": "Based on your earlier statement, you mentioned being vegetarian since 2014, which suggests that you do not eat meat."
+  },
+  {
+   "system": "agentmemory",
+   "id": "v11_010",
+   "fm": true,
+   "reason": "Gives the manager's no-bullets preference as the user's, though the user rejected it.",
+   "line": "I prefer plain paragraphs."
+  }
+ ]
+}
