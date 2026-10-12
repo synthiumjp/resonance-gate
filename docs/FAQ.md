@@ -15,12 +15,13 @@ shown:
   as theirs, with the writer named, not as something you said.
 
 The last point is where plain retrieval goes wrong most. On a held-out set
-of 40 pasted claims (pre-registered, `bench/false_memory/results_v10/`),
+of 40 pasted claims (pre-registered, `bench/false_memory/results_v11/`),
 plain retrieval over the same messages gave 23 of them back as the user's
-own; sourcedrecall gave 3. Its reader also said "I don't know" more often
-(35 of the 40, where that is the right answer, against 15), and on the
-user's own material answered less often (13 of 20, against 19): both are
-in the README.
+own; sourcedrecall gave 5, and the same with a second reader model. Its
+reader also said "I don't know" more often (31 of the 40, where that is
+the right answer, against 16), and on the user's own writing answered less
+often (24 of 30, against 30), because six of the user's drafts were taken
+for someone else's: both are in the README.
 
 ## Claude Code already has memory. Why add this?
 

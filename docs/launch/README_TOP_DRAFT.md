@@ -3,7 +3,8 @@
 Follows the launch review: lead with what no other memory measures, state
 the costs in the same breath, numbers from one run each. Bracketed items
 are filled from the v11 run and the external benchmarks before it replaces
-the current opening.
+the current opening. v11 filled 2026-10-13 (results_v11/SUMMARY.md);
+the strict LoCoMo figure is the d89d830 re-judge (night chain).
 
 ---
 
@@ -28,14 +29,15 @@ $ sourcedrecall-memory context "Where do I live?"
 Text you paste in from someone else, such as an email, a review or a chat,
 is shown as theirs. Memory tools that store whatever was said take a
 friend's "I'm allergic to nuts" for yours. On a pre-registered held-out
-set, plain retrieval gave 23 of 40 pasted claims back as the user's own,
-agentmemory 20, and sourcedrecall 3 [v11: _ of 40]. The cost: on the
-user's own pasted-shaped material it answered 13 of 20 where plain
-retrieval answered 19 [v11: _ of 30 against _], and its reader more often
-said it did not know.
+set of 40 pasted claims, read by two different local models, plain
+retrieval gave 23 of them back as the user's own, agentmemory 24, and
+sourcedrecall 5 (with the second model: 22, 22 and 5). The cost: on the
+user's own writing pasted in the same way it answered 24 of 30 where plain
+retrieval answered 30, because it took six of the user's own drafts for
+someone else's [after the fix: next held-out set].
 
 On LoCoMo, with the same local reader and judge for every system, it is
-level with Mem0 (49.7% against 48.5% with a strict judge; 65.3% against
+level with Mem0 (50.3% against 48.5% with a strict judge; 65.3% against
 64.6% with the benchmark's usual judge) while making no model call to
 store anything; Mem0 is ahead on questions that combine several facts.
 [External: HaluMem / LongMemEval knowledge-update, if the overnight runs

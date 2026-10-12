@@ -171,6 +171,25 @@ is the right answer) sourcedrecall 35, plain retrieval 15, agentmemory 17,
 ai-memory 40; on the 20 own items (where it is wrong) 7, 1, 3 and 17.
 Everything is in `bench/false_memory/results_v10/SUMMARY.md`.
 
+After v10, other messages were shown beside the one a question is about
+only when they are close to the question, and more introductions were read
+("sent me", "written by", "from my boss"). A seventh held-out set (v11: 130
+scenarios, 2026-10-13) was read by two readers of different model families,
+Qwen3-14B and Phi-4, and met seven of eight hypotheses with the first.
+Pasted claims or instructions given as the user's: 5 of 40 (plain retrieval
+23, agentmemory 24, ai-memory 2; Holm-adjusted p<0.001 against the first
+two); with Phi-4 5 of 40 (22, 22, 3). Facts inside pasted text 20 of 20,
+changes 0 of 20, everyday facts 17 of 20. The user's own material was
+answered in 24 of 30 with both readers (target 23), but 6 behind plain
+retrieval (target: at most 3 behind): in all 6 the user's own writing
+(a diary entry, a speech, a blog draft, two statements and a sale ad) was
+taken for someone else's and its facts left out, in 5 of them although the
+user had called it theirs. Without the rules paragraph the counts were the
+same, so they come from what the memory returns, not from the instruction.
+Said it did not know: on the 40 pasted claims sourcedrecall 31, plain
+retrieval 16, agentmemory 14, ai-memory 38; on the 30 own items 6, 0, 0
+and 25. Everything is in `bench/false_memory/results_v11/SUMMARY.md`.
+
 LoCoMo (conversations 2-9, 1,307 questions), against Mem0, with the same
 local reader and judge:
 
@@ -294,11 +313,11 @@ pasted text but not all; see above).
   someone else's (a letter, a chat log, a review). Unless you ask about
   that text by its source, the writer's sentences about themselves and their
   general rules are left out; dates, times and places stay. On the newest
-  held-out set (v10) a pasted claim or instruction was taken for yours in 3
-  of 40 (plain retrieval 23), and facts inside pasted text were answered in
-  17 of 20. Your own pasted-looking material (drafts, letters, diary
-  entries) is answered less often than with plain retrieval (13 of 20
-  against 19).
+  held-out set (v11) a pasted claim or instruction was taken for yours in 5
+  of 40 (plain retrieval 23), with two different reader models, and facts
+  inside pasted text were answered in 20 of 20. Your own pasted-looking
+  material (drafts, speeches, diary entries) is answered less often than
+  with plain retrieval (24 of 30 against 30).
 - Sessions are stored automatically in Claude Code. Hooks for Codex CLI,
   Gemini CLI and Cursor are included but have not yet been tested inside
   those apps. A ChatGPT or Claude.ai data export can be imported.
