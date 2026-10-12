@@ -190,6 +190,17 @@ HaluMem's scorer holds 8090 for many hours (1,649 accuracy items per user,
 ~13 s each). Parser licence question explained to JP (options: ask
 Stanford, convert on the user's machine, retrain on EWT only, state it).
 
+v12 DONE (09:29; results_v12/SUMMARY.md, 053b07b; README/FAQ eb760d8):
+Qwen 7 of 11 met; pasted 12/40 (plain 28, agentmemory 35), real emails
+7/20 (plain 14), own 25/30 (plain 29); H1, H4, H10, H11 and H9 missed.
+Not a regression (v11 code detects the same on v12); new shapes. Code is
+no longer frozen. Proposed to JP: a small learned "someone else's text?"
+classifier beside the rules (rules do not converge set by set); trim
+HaluMem to the updating and QA parts (accuracy scoring ~13 h per user).
+night2-4 replaced by ~/jpwork/after_chain.sh on 8092 (after.log): v10
+reproduction check, demo, LongMemEval KU + temporal. HaluMem (night.log)
+keeps 8090.
+
 Night chain step 2 ran under zsh, so the competitors' files were not
 copied (word splitting); sourcedrecall's counts are fine: v3 0/30, v4
 3/44, coding 0/51, projects 0/32 (fair protocol).
