@@ -15664,3 +15664,28 @@ and how to run everything).
   3/34 both. The cut helps the cautious reader and leaves Phi-4 where it
   was. memory_api now cuts on the cosine (RG_MSG_CUT, profile_memory passes
   it from retrieve_v3, with_scores="cos"); dev25 runs it end to end.
+- dev25 (end to end, sdr-dev15, cosine cut 0.5, Qwen reader; base dev23
+  cut off): own 26 -> 30 (FM 2 -> 2); pasted FM 1 -> 1 (ctrl 14 -> 14);
+  pasted2 FM 0 -> 0 (ctrl 17 -> 19); stale2 FM 3 -> 3, new state 58 -> 58;
+  code, projects, decisions unchanged; advice 21 -> 22; prefs 31 -> 31.
+  Meets the rule stated above.
+- LoCoMo dev (convs 0-1, 233 q, lenient judge): cut off 68.2%, cut 0.5
+  67.4% (+1 -3; 41 contexts changed; 641 -> 632 tokens). One loss is real:
+  "It was Matt Patterson, he is so talented!" (the answer to "Who performed
+  at the concert at Melanie's daughter's birthday?") is a follow-up turn
+  with nothing in common with the question; the other two lost only
+  unrelated lines (reader variation). Added: messages from a routed
+  message's conversation stay (discourse context). dev26 and LoCoMo dev
+  rerun with it.
+- JP, mid-session: the aim is a lightweight, linguistics-first memory that
+  competes with heavier systems, LLM-agnostic and freely available. Block
+  changes are now judged on two readers (Qwen3-14B and Phi-4).
+- dev26 (end to end, sdr-dev16, the cut with the same-conversation rule):
+  identical to dev25 on all 9 sets (own 26 -> 30, no false memory added,
+  stale2 3/64 and 58/64, pasted2 ctrl 17 -> 19, advice 21 -> 22). Phi-4 on
+  the dev25 blocks: own 34 -> 33, pasted FM 3 -> 3, pasted2 FM 2 -> 2.
+  LoCoMo dev with the rule: 67.8% (cut off 68.2%; +1 -2, the Matt Patterson
+  loss recovered, the two left lost only unrelated lines), 641 -> 633
+  tokens. Adopted: RG_MSG_CUT defaults to 0.5 ("off" shows every line).
+  Suite 1,331 passed, 5 skipped. Release re-measure on this commit next
+  (LoCoMo x3, strict rejudge, LongMemEval, held-out regression counts).

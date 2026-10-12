@@ -460,18 +460,21 @@ def test_unrelated_search_lines_leave_when_the_parser_found_the_message(monkeypa
     hits = [{"text": "worst first job, love it", "date": "2026-04-08", "score": -9.1, "cos": 0.40, "conv": "c2"},
             {"text": draft, "date": "2026-03-07", "score": -6.6, "cos": 0.55, "conv": "c1"},
             {"text": "how do I clean a cast iron pan", "date": "2026-05-16", "score": -10.9, "cos": 0.38, "conv": "c3"},
-            {"text": "my work rota changes in May", "date": "2026-05-20", "score": -3.0, "cos": 0.58, "conv": "c4"}]
+            {"text": "my work rota changes in May", "date": "2026-05-20", "score": -3.0, "cos": 0.58, "conv": "c4"},
+            # a follow-up in the routed message's conversation stays
+            {"text": "yes, the night shift one", "date": "2026-03-07", "score": -11.0, "cos": 0.2, "conv": "c1"}]
     m.messages_for = lambda q, k=3: list(hits)
     shown = lambda: [l for l in m.context_block("Where do I work?").splitlines()  # noqa: E731
                      if l.startswith("- ")]
     lines = shown()
     assert any("Royal Infirmary" in l for l in lines) and any("rota" in l for l in lines)
     assert not any("cast iron" in l or "worst first job" in l for l in lines)
+    assert any("night shift" in l for l in lines)
     monkeypatch.setenv("RG_MSG_CUT", "off")
-    assert len(shown()) == 4
+    assert len(shown()) == 5
     monkeypatch.setenv("RG_MSG_CUT", "0.5")
     hits.append({"text": "My colleague sent me his CV to tidy:\n\nPastry chef, Hotel de Paris, "
                  "2018 to now. Run a team of six.\n\nMark", "date": "2026-02-23",
                  "score": -10.0, "cos": 0.30, "conv": "c5"})
     lines = shown()
-    assert any("[pasted in" in l for l in lines) and len(lines) == 5
+    assert any("[pasted in" in l for l in lines) and len(lines) == 6

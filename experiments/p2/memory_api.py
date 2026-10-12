@@ -2348,7 +2348,7 @@ class Memory:
         # "Am I on any cholesterol medication?" scored -11, the floor): dev
         # stale2 false memories 3 -> 7.
         try:
-            cut = float(os.environ.get("RG_MSG_CUT", "off"))
+            cut = float(os.environ.get("RG_MSG_CUT", "0.5"))   # "off" to show every line
         except ValueError:
             cut = None
         key = lambda m: re.sub(r"\W+", " ", m["text"]).strip().lower()  # noqa: E731
@@ -2370,6 +2370,11 @@ class Memory:
                             out.add(fact_id(nd))
                 return out
             kept = [i for i, m in enumerate(msgs) if key(m) in routed]
+            # the same conversation is the routed message's discourse: a
+            # follow-up turn can hold the answer with nothing in common with
+            # the question ("It was Matt Patterson, he is so talented!" for
+            # "Who performed at the concert?", LoCoMo dev)
+            convs = {msgs[i].get("conv") for i in kept} - {None}
             attrs = {f.get("attribute") for i in kept for f in per[i]}
             ids = {f.get("id") for i in kept for f in per[i]}
             linked = set().union(*(links(per[i]) for i in kept))
@@ -2377,7 +2382,7 @@ class Memory:
                                   for f in per[j]) or bool(links(per[j]) & ids))
             lines = [l for j, (m, l) in enumerate(zip(msgs, lines))
                      if key(m) in routed or score.get(key(m)) is None
-                     or score[key(m)] >= cut or tied(j)]
+                     or score[key(m)] >= cut or m.get("conv") in convs or tied(j)]
         # 2026-10-05: notes written by the user's own model (notes.py, opt-in)
         nf = getattr(self, "notes_for", None)
         rules = _RULES_MSG

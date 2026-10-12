@@ -6,6 +6,25 @@ has the details behind each change.
 
 ## Unreleased
 
+- When the parser has found the message a question is about, other messages
+  are shown only if they are close to the question (embedding similarity
+  0.5 or more), come from the same conversation, or hold a fact the parser
+  ties to it. In a short history every message used to be shown, and a
+  cautious reader said "I don't know" with the fact in front of it.
+  Development own-material set (Qwen3-14B reader): 26 to 30 of 40 answered,
+  false memories unchanged on every development set; with a second reader
+  (Phi-4) about the same as before (34 and 33 of 40). `RG_MSG_CUT=off`
+  shows every line.
+- Claude Code capture no longer stores text you did not type: the summary
+  written after /compact, background-task and subagent results, and
+  messages from other sessions.
+- Pasted text: an introduction that names where the text came from ("my
+  boss sent me this", "forwarded", "written by") now wins over words like
+  "my notes" or "my essay", and "add this to my notes" or "quote this in my
+  essay" no longer make someone else's text yours. "My brother wrote this"
+  is no longer read as you writing it.
+- If the memory file cannot be read, it is copied aside and nothing is
+  written, instead of being replaced by the new conversation.
 - Requests for advice use what you told the assistant: the memory no
   longer reads its "unknown" rule as a reason to give no advice, and puts
   the best-matching messages first. Development advice set: your earlier
