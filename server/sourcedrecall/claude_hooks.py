@@ -237,7 +237,7 @@ def session_start(event, owner=None, max_facts=15, agent="claude",
     pm = _setup_env(owner)
     st = pm.profile_status()
     if not (st.get("asserted") or st.get("provisional")):
-        return None
+        return _welcome(agent) if notice else None
     out = {}
     if briefing:
         from sourcedrecall.paths import current_scope
@@ -250,6 +250,27 @@ def session_start(event, owner=None, max_facts=15, agent="claude",
         if msg:
             out["systemMessage"] = msg
     return out or None
+
+
+def _welcome(agent):
+    """2026-10-12 (launch review: a new user saw nothing at all until a
+    second session). Once, while the memory is empty: what happens next,
+    shown to the user only."""
+    from sourcedrecall.paths import state_dir
+    mark = os.path.join(state_dir(), ".welcomed")
+    if os.path.exists(mark):
+        return None
+    try:
+        os.makedirs(state_dir(), exist_ok=True)
+        open(mark, "w").close()
+    except OSError:
+        return None
+    return {"systemMessage": (
+        "sourcedrecall is installed and your memory is empty. This session is "
+        "stored when it ends, and the next one starts with what was kept. "
+        "To bring in past chats: sourcedrecall-import chatgpt <export.zip> (or "
+        "claude). To see what is stored: sourcedrecall-memory show; what the "
+        "agent was last given: sourcedrecall-memory last.")}
 
 
 def saved_notice(new, memory_file=None, show=3, agent="claude"):

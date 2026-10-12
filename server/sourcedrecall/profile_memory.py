@@ -801,7 +801,62 @@ def profile_context(query=None, max_facts=None, scope=None):
         mem.notes_for = _notes_for if _notes.enabled() else None
         mem.links = _links()
         block = mem.context_block(query, max_facts)
+    _remember_block(query, block)
     return {"block": block}
+
+
+def _last_block_path():
+    return os.path.join(_data_dir(), "last_block.json")
+
+
+def _remember_block(query, block):
+    """2026-10-12 (users want to see what memory adds to a request; the
+    review's launch advice): the last block handed to the agent, for
+    `sourcedrecall-memory last`. Readable by the user only; forget deletes it."""
+    try:
+        rec = {"time": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+               "question": query, "characters": len(block),
+               "tokens_about": len(block) // 4, "block": block}
+        p = _last_block_path()
+        tmp = p + f".{os.getpid()}.tmp"
+        fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            json.dump(rec, fh)
+        os.replace(tmp, p)
+    except (OSError, RuntimeError):
+        pass
+
+
+def last_block():
+    try:
+        return json.load(open(_last_block_path(), encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+
+
+def memory_status():
+    """What is installed and stored, without loading the parser
+    (`sourcedrecall-memory status`)."""
+    from sourcedrecall.paths import parser_models_dir, notes_models_dir
+    out = {"memory_folder": _data_dir()}
+    try:
+        import ort_models
+        out["models"] = {n: ort_models.available(n) for n in
+                         (ort_models.EMBEDDER, ort_models.RERANKER, ort_models.CONFLICT)}
+    except ImportError:
+        out["models"] = {}
+    out["parser"] = os.path.exists(os.path.join(parser_models_dir(), "config.json"))
+    out["notes_model"] = os.path.isdir(notes_models_dir())
+    try:
+        convs = _read_conversations(_conversations_path())
+    except RuntimeError as e:
+        out["error"] = str(e)
+        convs = []
+    out["conversations"] = len(convs)
+    out["messages"] = sum(len(c.get("chat_messages") or []) for c in convs)
+    dates = [c.get("created_at") or "" for c in convs]
+    out["last_stored"] = max(dates)[:10] if dates else None
+    return out
 
 
 def profile_correct(action, attribute, value, new_attribute=None, exact=False,
@@ -1788,6 +1843,10 @@ def _erase(said):
         _state["transcripts"] = None
         _state["msg_index"] = None
         _drop_embeddings()
+        try:
+            os.unlink(_last_block_path())      # it may quote the sentence
+        except OSError:
+            pass
         _reload_locked()
     _erase_spools(keys)
     return n

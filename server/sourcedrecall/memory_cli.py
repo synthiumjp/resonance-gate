@@ -61,7 +61,7 @@ def main(argv=None):
                                  description="Use the memory from a terminal.")
     ap.add_argument("command", choices=["show", "path", "forget", "confirm",
                                         "context", "recall", "check", "ingest", "view",
-                                        "notes-backfill"])
+                                        "notes-backfill", "status", "last"])
     ap.add_argument("arg", nargs="*", help="a fact id, a question, or a file")
     ap.add_argument("--owner", default=os.environ.get("SOURCEDRECALL_OWNER"))
     ap.add_argument("--id", dest="conv_id")
@@ -71,7 +71,7 @@ def main(argv=None):
     ap.add_argument("--port", type=int, default=int(os.environ.get(
         "SOURCEDRECALL_BROWSER_PORT", "7071") or 7071))
     a = ap.parse_args(argv)
-    if a.command in ("show", "path", "forget", "confirm"):
+    if a.command in ("show", "path", "forget", "confirm", "status", "last"):
         os.environ.setdefault("RG_NLI", "0")   # no model needed to list facts
     from sourcedrecall.paths import default_memory_dir
     d = default_memory_dir()
@@ -81,6 +81,33 @@ def main(argv=None):
     if a.command == "path":
         print(d)
         print(os.path.join(d, "MEMORY.md"))
+        return 0
+    if a.command == "status":
+        st = pm.memory_status()
+        if a.json:
+            print(json.dumps(st, indent=2))
+            return 0
+        ok = st["parser"] and all(st["models"].values()) and st["models"]
+        print("models: " + ("ready" if ok else "missing -- run sourcedrecall-setup"))
+        print(f"memory: {st['conversations']} conversations, {st['messages']} messages"
+              + (f", last stored {st['last_stored']}" if st["last_stored"] else ""))
+        print(f"folder: {st['memory_folder']}")
+        print("notes model: " + ("installed" if st["notes_model"] else "not installed (optional)"))
+        if st.get("error"):
+            print("problem: " + st["error"])
+        return 0 if ok and not st.get("error") else 1
+    if a.command == "last":
+        rec = pm.last_block()
+        if not rec:
+            print("Nothing has been handed to an agent yet.")
+            return 0
+        if a.json:
+            print(json.dumps(rec, indent=2))
+            return 0
+        q = rec.get("question") or "(the summary at session start)"
+        print(f"{rec['time']}  {q}  -- {rec['characters']} characters, about "
+              f"{rec['tokens_about']} tokens\n")
+        print(rec["block"])
         return 0
     if a.command == "notes-backfill":
         n = pm.notes_backfill(a.owner)
