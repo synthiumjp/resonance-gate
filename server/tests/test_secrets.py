@@ -102,3 +102,25 @@ def test_long_runs_of_word_characters_are_quick(text):
 def test_a_long_identifier_before_the_assignment_is_still_caught():
     out = scrub("x" * 80 + ".DB_PASSWORD=hunter2abc")
     assert "hunter2" not in out
+
+
+@pytest.mark.parametrize("text, secret", [
+    # review 2026-10-12 (3.17): credentials that got through
+    ("my password is\nhunter2", "hunter2"), ("The password\nhunter2xyz", "hunter2xyz"),
+    ("The password\ncorrect horse battery staple", "battery"),
+    ("my pass is hunter2", "hunter2"), ("Authorization: Basic dXNlcjpwYXNzd29yZA==", "dXNlcjpw"),
+    ("Passwort: geheim123", "geheim123"), ("mot de passe: soleil42", "soleil42"),
+    ("contraseña: sol123", "sol123"), ("key=AbC123dEf456", "AbC123dEf456"),
+    ("-----BEGIN PGP PRIVATE KEY BLOCK-----\nlQOYBF\n-----END PGP PRIVATE KEY BLOCK-----", "lQOYBF"),
+])
+def test_review_2026_10_12_leaks_are_closed(text, secret):
+    assert secret not in scrub(text)
+
+
+@pytest.mark.parametrize("text", [
+    "Never reuse a password\nacross sites.", "pass is ~20 min at n_jobs=8",
+    "my bus pass is valid", "primary key: id", "key=value",
+    "Remember the password\nIt was on a sticky note in the kitchen drawer",
+])
+def test_review_2026_10_12_ordinary_text_survives(text):
+    assert scrub(text) == text

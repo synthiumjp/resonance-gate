@@ -274,13 +274,17 @@ pasted text but not all; see above).
   and re-ranking models, run locally), and shows them oldest first.
 - `MEMORY.md` and a local web page (its address, with a key for this run,
   from `sourcedrecall-memory view`) show everything stored. Forget anything
-  by its id and the sentence it came from is erased from the stored
+  by its id and the sentence it came from is erased from your stored
   messages, the facts and the notes; only a fingerprint of it is kept, so a
-  resumed session that sends it again does not bring it back.
+  resumed session that sends it again does not bring it back. Not yet
+  erased: the same words inside a longer sentence, an assistant reply that
+  quotes them, and the conversation's title.
 - Common secret formats (API keys and tokens, private keys, card numbers,
   "password: ...", `DB_PASSWORD=...` in a pasted config) are removed before
-  anything is stored, from titles too. The memory folder is readable by you
-  only.
+  anything is stored, from titles too. The filter reads English, plus the
+  word for password in a few other languages, and removes the whole sentence
+  that names a credential with its value, so "My password is too short" goes
+  too. The memory folder is readable by you only.
 - Memory about a project stays with that project. Standing instructions
   ("never add comments to my code") lead every session.
 - Text you paste in from someone else (an email, a chat, a document) is

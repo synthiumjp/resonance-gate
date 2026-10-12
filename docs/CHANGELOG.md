@@ -29,6 +29,11 @@ has the details behind each change.
   text (8 KB of "a-a-a-..." took 8 seconds, 100 KB would have taken
   minutes; now under 2 seconds at 100 KB). Its output is unchanged on every
   benchmark conversation and on the project's own files.
+- The credential filter also removes a password given on the line after
+  "my password is", "my pass is hunter2", "Authorization: Basic ...",
+  `key=...` with a token-like value, PGP private key blocks, and
+  "Passwort", "mot de passe", "contraseña", "senha" and "wachtwoord" with a
+  value. No benchmark conversation changed.
 - A list of fields in your own message ("Allergies: peanuts", "Diet:
   vegan") is no longer taken for a chat log and skipped by the parser.
   Lines like "Sam: ..." count as a chat only when a speaker speaks twice,

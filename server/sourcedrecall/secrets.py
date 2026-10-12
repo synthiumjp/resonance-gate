@@ -30,6 +30,9 @@ MARK = "[secret removed]"
 # the edges are now "not a letter or digit".
 _KEYWORD = re.compile(
     r"(?<![A-Za-z0-9])(?:pass(?:word|words|wd|code|codes|phrase|phrases)|pass(?=\s*[:=])|pw|pwd|mdp|"
+    # 2026-10-12 (review 3.17): "my pass is hunter2", and the common words
+    # for a password in other languages (the filter is otherwise English)
+    r"pass(?=\s+(?:is|was)\s+(?=\w*\d)(?=\w*[A-Za-z])\w{4,}\b)|passwort|kennwort|mot de passe|contrase[ñn]a|senha|wachtwoord|"
     r"pin codes?|credentials?|username and password|"
     r"api[ _-]?keys?|access[ _-]?keys?|secret[ _-]?keys?|private[ _-]?keys?|"
     r"ssh[ _-]?keys?|(?:wifi|wi-fi|product|licen[cs]e|encryption|recovery|"
@@ -44,7 +47,8 @@ _KEYWORD = re.compile(
     r"passport numbers?|(?:driver'?s? )?licen[cs]e numbers?|"
     r"national insurance(?: numbers?)?|ni number|tax file number|tfn|sin numbers?|"
     r"aadhaar|medicare number|code to the \w+|combination to the \w+|"
-    r"key(?=\s+(?:is|was|:|=)\s+\S*\d))(?![A-Za-z0-9])",
+    r"key(?=\s+(?:is|was|:|=)\s+\S*\d)|"
+    r"key(?=\s*[:=]\s*['\"]?(?=[^\s'\"]*\d)(?=[^\s'\"]*[A-Za-z])[^\s'\"]{8,}))(?![A-Za-z0-9])",
     re.I)
 # 2026-10-10 (held-out v8: "recipe card:" removed a pasted recipe's
 # introduction and the sentence after it; "I code in Swift", "My login is
@@ -76,10 +80,12 @@ _HARMLESS = re.compile(
 _VALUE_HINT = re.compile(r"\d|[:=/]|\b(?:is|was|are|to|as|'s)\b|\w[@#$%^&*!]")
 
 _FORMATS = [
-    re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----.*?-----END [A-Z ]*PRIVATE KEY-----",
+    re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY(?: BLOCK)?-----.*?-----END [A-Z ]*PRIVATE KEY(?: BLOCK)?-----",
                re.S),
     # a key block cut off before its END line: everything after BEGIN
-    re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----.*", re.S),
+    re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY(?: BLOCK)?-----.*", re.S),
+    # 2026-10-12 (review 3.17): "Authorization: Basic dXNlcjpwYXNz..."
+    re.compile(r"(?i)\bauthorization\s*:\s*(?:basic|bearer|token|digest)?\s*[A-Za-z0-9._~+/=-]{8,}"),
     # 2026-10-09: an assignment whose name says what it is, as in a pasted
     # .env or config file (DB_PASSWORD=..., client_secret = '...',
     # STRIPE_SECRET_KEY: ...). 2026-10-12 (review 3.16): the runs around the
@@ -113,8 +119,14 @@ _FORMATS = [
 ]
 _CARD = re.compile(r"(?<!\d)(?:\d[ -]?){12,18}\d(?!\d)")
 # the credential sentence leaves its value for the next one
-_POINTS_AHEAD = re.compile(r"[?:]\s*$|\b(?:following|below|here it is|"
+_POINTS_AHEAD = re.compile(r"[?:=]\s*$|\b(?:following|below|here it is|"
                            r"here's|this one|as follows)\b", re.I)
+# 2026-10-12 (review 3.17): "my password is" or "The password" ending a line,
+# the value on the next. Wrapped prose ends lines the same way ("Never reuse
+# a password / across sites."), so the next line goes only when it looks
+# like a value: at most four words, no sentence ending.
+_AFTER_NAME = re.compile(r"\s*(?:(?:is|was|are)\s*)?", re.I)
+_LOOKS_LIKE_VALUE = re.compile(r"^\s*\S+(?:[ \t]+\S+){0,3}\s*$(?<![.!?])")
 _SENT = re.compile(r"(?<=[.!?])\s+|\n+")
 
 
@@ -167,6 +179,10 @@ def scrub(text):
         # the value may come in the next sentence: "the wifi password?
         # It's tulip99", "My password is the following. hunter2"
         carry = named and bool(_POINTS_AHEAD.search(sent))
+        if (named and not carry and i + 1 < len(parts) and "\n" in seps[i]
+                and any(_AFTER_NAME.fullmatch(sent[m.end():]) for m in _KEYWORD.finditer(sent))
+                and _LOOKS_LIKE_VALUE.match(parts[i + 1])):
+            carry = True
     rebuilt = ""
     for i, sent in enumerate(out):
         rebuilt += sent + (seps[i] if i < len(seps) else "")
