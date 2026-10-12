@@ -15689,3 +15689,28 @@ and how to run everything).
   tokens. Adopted: RG_MSG_CUT defaults to 0.5 ("off" shows every line).
   Suite 1,331 passed, 5 skipped. Release re-measure on this commit next
   (LoCoMo x3, strict rejudge, LongMemEval, held-out regression counts).
+
+## Entry 325 — 2026-10-12 night (real pasted emails; the overnight queue)
+
+Review 2.4 asked whether pasted-text detection is tuned to one language
+model's way of writing pastes. A set built on real emails (public Enron
+corpus, Yale-LILY/aeslc; bodies verbatim, framing by a sonnet agent),
+`cases_real_paste.jsonl`, held out, counts only: 20 pasted emails with a
+writer's first-person claim, 10 of the user's own. Detection alone
+(prose._paste_span at the post-v11 code, no model): pasted marked as pasted
+7 of 20; own kept as the user's 10 of 10. On the agent-written development
+sets the same detection finds 37 of 40. So the shape rules generalise
+poorly to real email. Not yet run end to end (the reader may still resist
+some). Next: a readable development set of real emails
+(`cases_dev_real.jsonl`, 40, from the 120 unused candidates), detection
+improved on it, the held-out 30 measured once afterwards.
+
+Overnight on the post-v11 branch (not merged; v11 freeze): MCP limits,
+forget (HMAC, titles, spool, count), titles scrubbed before cut, first-run
+message and status/last commands, block quoting, parse outside the lock,
+launcher messages, Python cap, resumable download, import cap, MCP
+descriptions, a pasted text's writer named from a bare name. Suite on the
+Mac 1,368 passed. HaluMem and LongMemEval answer harnesses written
+(eval_sdr.py, lme_answers.py) and queued after v11 with the strict
+re-judge, the fair-protocol regression step, the side-by-side demo and a
+reproduction check of v10.
