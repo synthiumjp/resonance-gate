@@ -131,6 +131,40 @@ titles, substrings, count), the lock held while parsing (3.5), CI (4.4:
 needs the Mac venv's package list), rules ablation (2.1), equal-budget
 plain retrieval (2.2), audit of expected-term misses (2.3).
 
+## Overnight 2026-10-12/13 (JP asleep; read this first)
+
+Queued on the Mac, each waiting for the one before:
+1. release5.log: release re-measure of d89d830 (standard notes, LongMemEval,
+   old-protocol held-out step), ends "release measure done".
+2. v11.log: held-out v11 (v11_chain.sh -> sdr-v11/bench/false_memory/v11_run.sh),
+   ends "v11 done". Then: blinded audit per reader (sonnet agents on the
+   packets audit_results_v11*), v11_tests.py, results_v11/SUMMARY.md.
+3. night.log (night_chain.sh): strict LoCoMo re-judge of the d89d830 answers;
+   the held-out regression step under the fair protocol (W=sdr-release-d89d830);
+   HaluMem users 0-1, sdr and plain, from sdr-halumem (post-v11 code),
+   official evaluation.py with the local judge (logs halumem_*.log).
+4. night2.log (night2_chain.sh): LongMemEval-S knowledge-update then
+   temporal-reasoning answer accuracy, plain and sdr (sdr-lme tree,
+   bench/longmemeval/lme_answers.py), results in ~/jpwork/lme/answers_*.
+
+Branch post-v11 (pushed to origin, not merged; the v11 freeze): MCP limits,
+forget (HMAC, titles, spool, count), titles scrubbed before cut, first-run
+message + `sourcedrecall-memory status|last`, block quoting safety, parse
+outside the store lock, launcher messages and Python cap, resumable download,
+1 GB import cap, MCP descriptions cut and diagnostics hidden, "[MEMORY" typed,
+Windows detach, HaluMem and LongMemEval harnesses. Full suite on the Mac on
+the branch: 1,368 passed. Merge into product-p2 after the v11 run.
+
+Main branch overnight: CI green (ubuntu, macOS, Windows), NOTICE third-party
+section, SECURITY.md, uninstall section, docs/FAQ.md, docs/MARKET_2026-10-12.md,
+docs/PLAN_TO_LAUNCH.md (with the Fable review's advice still to fold in).
+
+For JP in the morning: the parser model licence question (Stanza's English
+models are trained partly on non-commercial GUM/GUMReddit text; NOTICE says
+so; options: ask Stanford, convert Stanza's own download on the user's
+machine instead of redistributing, or accept and state it); the plan
+revision after the Fable review; v11 and the external benchmark results.
+
 ## In flight at handover (2026-10-12 evening)
 
 Release re-measurement on d89d830 on the Mac: tree
