@@ -103,17 +103,33 @@ skipped only sidechain/meta lines, so compaction summaries and every
 task notification were stored as the user's words; paste intros naming a
 destination ("add this to my notes") or a source plus an own noun ("my boss
 sent me this for my review") made pasted text own; "X wrote this" was own;
-an unreadable conversations.json was overwritten. Open from the review
-(docs/REVIEW_2026-10-12.md): README stale sentence (1.1) and old
-false-memory table (1.2); release_measure.sh runs held-out regression sets
-under the old protocol (1.2); HOW_IT_READS stale (1.10); no refusal rates
-in tables (1.8); rules ablation on pasted held-out sets never run (2.1);
-equal-budget plain retrieval (2.2); audit of expected-term misses (2.3);
-MCP write tools can speak for the user (3.2); forget leaves titles and an
-unsalted hash (3.4); Windows lock fails open (3.5); secret filter
-quadratic on long hyphenated text (3.16) and gaps (3.17); field lists
-dropped as chat logs (3.18); unpinned bge/MiniLM/NLI downloads (4.2); no
-CI (4.4); personal infrastructure in public docs (4.6).
+an unreadable conversations.json was overwritten.
+
+Later that evening, from WSL (ssh to the Mac was refused by the
+permission check, so none of these has had the full suite on the Mac yet;
+each was tested locally with what runs without the parser):
+- 999fd4b secret filter no longer quadratic (3.16): 8 KB 8 s -> 0.2 s,
+  output identical on ~50,000 bench strings and 653 repo files;
+- 08aee32 secret filter gaps (3.17): next-line values, "my pass is",
+  Authorization headers, key=, PGP blocks, five languages' "password";
+  no bench text changed;
+- 7abb1c4 field lists are not chat logs (3.18): 8 dev spans change, all
+  better; LoCoMo not yet checked (run devtools/detect_diff.py with the
+  LoCoMo json on the Mac);
+- 97845d8 the three ONNX models and both archives pinned to revisions
+  with checksums (4.2);
+- e45d7e8 release_measure.sh's held-out step under the fair protocol (1.2),
+  README 1.1 sentence, table dated 372c05a; ea6ae08 HOW_IT_READS status
+  pass (1.10); 0596969 v10 "said it did not know" counts in README and
+  SUMMARY (1.8);
+- cd5931e MCP tool annotations (3.2, part); 19e1e13 Windows lock waits
+  (3.5, not run on Windows); 317484e host details to untracked .hosts.env
+  (4.6; old commits on the public remote still hold them).
+Still open: the rest of 3.2 (MCP user turns, future dates, existing
+conversation ids, rehydrate scope: JP to decide), forget (3.4: HMAC,
+titles, substrings, count), the lock held while parsing (3.5), CI (4.4:
+needs the Mac venv's package list), rules ablation (2.1), equal-budget
+plain retrieval (2.2), audit of expected-term misses (2.3).
 
 ## In flight at handover (2026-10-12 evening)
 
@@ -124,7 +140,11 @@ measure done"), started 16:22, ~9 h. Then the strict rejudge (adapt
 from ~/jpwork/sdr-release/bench/locomo/results/strict_release_test_*), copy
 the log to bench/RELEASE_d89d830.log, update README numbers from that one
 run, fill the release line in docs/PREREG_HELDOUT_V11.md, and give the
-draft to JP. Phi-4 server: ~/jpwork/reader2/server.pid (ours; stop it when
+draft to JP. release5 started before e45d7e8, so its held-out step (4) is
+the old protocol: rerun step 4 alone from tools/release_measure.sh with
+W=~/jpwork/sdr-release-d89d830 for the fair-protocol counts. The commits
+after d89d830 (secret filter, field lists, pins, annotations, lock) need
+the full suite on the Mac before v11's freeze. Phi-4 server: ~/jpwork/reader2/server.pid (ours; stop it when
 not needed, `kill $(cat ~/jpwork/reader2/server.pid)`).
 
 Dev trees on the Mac: sdr-dev13 (e9ef773 + score log RG_MSG_LOG, dev20-22,
