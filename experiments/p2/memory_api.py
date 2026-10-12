@@ -558,12 +558,28 @@ _SOURCE_POSS = re.compile(r"\b((?:my|our|the)\s+[\w-]+(?:\s+[\w-]+)?)['’]s\s+(
                           r"(?:message|email|e-mail|text|letter|note|notes|post|reply|review|notice|instructions|advice|list)\b", re.I)
 
 
+# 2026-10-12 (the side-by-side demo: "this one from Marcus" gave "someone
+# else"): a name, capitalised, after "from"/"by" or before "sent"/"wrote"
+_NOT_NAME = (r"(?!(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday|January|February|"
+             r"March|April|May|June|July|August|September|October|November|December|"
+             r"Google|Reddit|Twitter|Facebook|LinkedIn|Wikipedia|ChatGPT|Claude|I|The|This|That)\b)")
+_SOURCE_NAME = re.compile(r"\b(?:[Ff]rom|[Bb]y)\s+(" + _NOT_NAME + r"[A-Z][a-z'’-]+(?:\s+" + _NOT_NAME
+                          + r"[A-Z][a-z'’-]+)?)\b|\b(" + _NOT_NAME + r"[A-Z][a-z'’-]+(?:\s+[A-Z][a-z'’-]+)?)\s+"
+                          r"(?:just\s+)?(?:sent|texted|emailed|messaged|wrote|forwarded|posted)\b")
+
+
 def _source(intro, owner):
     """Who the pasted text is from, as the introduction says ("this email
-    from my landlord" -> "Dana's landlord"), or "someone else"."""
+    from my landlord" -> "Dana's landlord"; "this one from Marcus" ->
+    "Marcus"), or "someone else"."""
     m = (_SOURCE_SENT.search(intro or "") or _SOURCE_FROM.search(intro or "")
          or _SOURCE_POSS.search(intro or ""))
     if not m:
+        n = _SOURCE_NAME.search(intro or "")
+        first = (owner or "").split()[0] if owner else ""
+        name = n and (n.group(1) or n.group(2))
+        if name and name.split()[0] != first:
+            return name
         return "someone else"
     src = re.sub(r"[\s:,.;-]+$", "", m.group(1))
     first = (owner or "the user").split()[0]
