@@ -15561,3 +15561,30 @@ and how to run everything).
   the lines, wording unchanged, all 9 dev sets on fixed retrieval;
   ~/jpwork/dev19.log). Experiment scripts now in bench/false_memory/devtools.
   docs/HANDOVER_PRODUCT.md rewritten for a new session.
+
+## Entry 323 — 2026-10-12 (own material: rules first, line breaks, and what makes the reader refuse)
+
+- dev19 (rules paragraph moved above the lines, wording unchanged, fixed
+  retrieval, 9 dev sets): own 26 -> 25 of 40; false memories own 2 -> 3,
+  pasted2 1 -> 2, stale2 3 -> 5; advice 21 -> 20, prefs 31 -> 30; pasted,
+  code, projects, decisions unchanged (projects controls 7 -> 8). Rejected.
+- Line breaks put back in quoted messages (devtools/breaks.py; 37 of 40 own
+  probes changed; bare as plain retrieval shows them, and indented under the
+  bullet): own 26, 26, 26, the same answers on every miss. Rejected.
+- Ablation on the own items the reader refuses with the fact in the block
+  (devtools/ablate.py; do01, do06, do32 answered by plain retrieval, do27 by
+  neither): with only the line holding the fact, the reader answers all four
+  with our full rules paragraph; with all lines and no rules it answers all
+  four. Removing the header, the "X is the user" sentence or the quote marks
+  changes nothing; plain retrieval's three lines with our rules answer 3 of
+  4. The refusal comes from our rules together with the low-relevance lines
+  around the fact (a short history shows every message; plain retrieval
+  shows its top 3). do04 and do10 are refused in every variant (inferences
+  no system makes); do23 is own notes taken for pasted (intro "turn this
+  into a tidy list I can keep on my phone"; no rule added, the same intro
+  fits someone else's text).
+- Next: a relevance cut on the lines. dev20 reruns the 9 dev sets end to
+  end on sdr-dev13 (e9ef773's code plus a score log, RG_MSG_LOG: each shown
+  message's cross-encoder score, rank and route) so cut-offs can be tried
+  on fixed retrieval.
+- An Opus review of the whole project (JP's request) is running read-only.
