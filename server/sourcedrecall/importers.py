@@ -360,9 +360,19 @@ def codex_turns(path):
     yield from turns
 
 
+# 2026-10-12 (review 3.9): 4 GB was the cap, and the file was read whole
+# and decoded again, so an export near it needed several times its size in
+# memory (an out-of-memory kill is what took down the development machine).
+# Real exports are far smaller; above 1 GB, ask the user to split it.
+_MAX_EXPORT = 1024 ** 3
+
+
 def _export_json(path):
     """conversations.json from an export: the .zip, its folder, or the file."""
+    import io
     import zipfile
+    too_big = ("conversations.json in {} is over 1 GB; import it in parts "
+               "(split the list of conversations into smaller files)")
     if zipfile.is_zipfile(path):
         with zipfile.ZipFile(path) as z:
             name = next((n for n in z.namelist()
@@ -370,12 +380,15 @@ def _export_json(path):
             if name is None:
                 raise ValueError("no conversations.json in " + path)
             # 2026-10-09 (security review): a crafted zip can expand to far
-            # more than it looks; real exports are well under this
-            if z.getinfo(name).file_size > 4 * 1024 ** 3:
-                raise ValueError("conversations.json in " + path + " is over 4 GB")
-            return json.loads(z.read(name).decode("utf-8"))
+            # more than it looks
+            if z.getinfo(name).file_size > _MAX_EXPORT:
+                raise ValueError(too_big.format(path))
+            with z.open(name) as fh:
+                return json.load(io.TextIOWrapper(fh, encoding="utf-8"))
     if os.path.isdir(path):
         path = os.path.join(path, "conversations.json")
+    if os.path.getsize(path) > _MAX_EXPORT:
+        raise ValueError(too_big.format(path))
     with open(path, encoding="utf-8") as f:
         return json.load(f)
 
