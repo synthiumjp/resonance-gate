@@ -169,6 +169,16 @@ dev set cases_dev_own2.jsonl (agent-written, 30 own writing + 10 others'
 writing in the same shapes). The developer saw two Qwen overrides' text by
 mistake (recorded in the summary).
 
+Later (03:00-04:10): the fix (fe55586) and dev27 on both readers: own
+writing 24 -> 27 of 30, real pasted emails taken as the user's 18 -> 4 of
+30, every older dev set unchanged, LoCoMo dev 67.8% unchanged. post-v11
+MERGED into product-p2 (1d92020, suite 1,382 passed), pushed to both
+remotes. README LoCoMo figures now from d89d830 (+ strict re-judge). The
+held-out real-email set end to end, once, on 1d92020: ~/jpwork/realrun.log.
+Night chain step 2 ran under zsh, so the competitors' files were not
+copied (word splitting); sourcedrecall's counts are fine: v3 0/30, v4
+3/44, coding 0/51, projects 0/32 (fair protocol).
+
 For JP in the morning: the parser model licence question (Stanza's English
 models are trained partly on non-commercial GUM/GUMReddit text; NOTICE says
 so; options: ask Stanford, convert Stanza's own download on the user's
