@@ -725,7 +725,7 @@ def _messages_for(query, k=3):
     if cached[1] is None:
         return []
     hits = _RV3.retrieve_facts_v3(cached[1], query, k=60, dense_k=30,
-                                  top_n=k, with_scores=True,
+                                  top_n=k, with_scores="cos",
                                   fuse=(tuple(float(x) for x in os.environ.get(
                                       "RG_FUSE3_W", "0.3/0.3").split("/"))
                                         if os.environ.get("RG_FUSE3") == "1"
@@ -733,7 +733,7 @@ def _messages_for(query, k=3):
                                                             and os.environ.get("RG_ADVICE_ROUTE", "1") != "0")
                                         else None),
                                   colbert=(0.3, 1.0, 0.3) if os.environ.get("RG_COLBERT_DIR") else None)
-    return [dict(h, score=sc) for h, sc in hits]
+    return [dict(h, score=sc, cos=cs) for h, sc, cs in hits]
 
 
 def profile_context(query=None, max_facts=None, scope=None):

@@ -15635,3 +15635,32 @@ and how to run everything).
   attribute with, or replace or are replaced by, a kept message's facts
   (memory_api RG_MSG_CUT, off by default). dev23: end to end on sdr-dev14
   (detection fixes + the cut), all 9 sets, cut off and at -9.
+- dev23 (end to end, sdr-dev14: detection fixes + cross-encoder cut at -9
+  with the tie rule): cut off vs on: own 26 -> 33 (FM 2 -> 2), pasted
+  unchanged, pasted2 FM 0 -> 0 (the detection fix took dq53's false memory:
+  1 -> 0), ctrl 17 -> 19; stale2 FM 3 -> 7 and new state 58 -> 53: fails.
+  The tie rule could not help: the later message that changed a fact is
+  often not tied by the parser ("My doctor took me off statins" to "I take
+  a statin") and the MS MARCO cross-encoder scores short chatty messages at
+  its floor (-11) even when on topic.
+- A second reader (JP's review point 5): Phi-4 14B (microsoft/phi-4-gguf
+  Q4_K, sha256 5652b9be..., port 8091, its own chat template; judge still
+  Qwen3-14B). On the dev own set: plain retrieval 33/40 own, 13/20 false
+  memories; sourcedrecall (cut off) 34/40, 3/20. Pasted FM 3/34, pasted2
+  2/60, stale2 4/64 (new state 60/64). So the own-material gap (Qwen: ours
+  26, plain 29) is the Qwen reader's caution on our block; with Phi-4 our
+  block already answers as much as plain retrieval, with a quarter of the
+  false memories. The cross-encoder cut hurt stale2 under Phi-4 too (FM 4
+  -> 8).
+- densecheck.py: bge-small cosine separates needed search-only lines from
+  filler better than the cross-encoder (stale2 needed lines: cosine
+  0.47-0.72, cross-encoder half below -10). Rule simulation: cosine >= 0.50
+  loses no needed line on stale2 or pasted2 (2 on own) and drops 80% of
+  own's filler.
+- dev24 (fixed retrieval, cosine cut, vianp conditions): cos:.50 and .48
+  both: own 26 -> 30 (FM 2 -> 3, base without the detection fixes),
+  pasted, stale2 (3/64, 58/64), code, projects unchanged; pasted2 ctrl 17
+  -> 19. Phi-4 on the same blocks: own 33 and 34 (cut off: 34), pasted FM
+  3/34 both. The cut helps the cautious reader and leaves Phi-4 where it
+  was. memory_api now cuts on the cosine (RG_MSG_CUT, profile_memory passes
+  it from retrieve_v3, with_scores="cos"); dev25 runs it end to end.

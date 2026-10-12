@@ -5,6 +5,8 @@ A message-search-only line stays if its cross-encoder score >= T.
   via:T      cut only when the block has at least one parser-routed line
   top1:T     cut in every block, but the search's best line always stays
   vianp:T    as via, and not when the block shows text marked as pasted
+  cos:T      as vianp, but a search-only line stays if its bge-small cosine
+             with the question is >= T (needs DENSE=dense/SET.jsonl, densecheck.py)
 Advice questions (their own ranking) and list questions (k=16) are left alone.
 usage: recut.py SRC_RESULTS DST_RESULTS via:-8"""
 import json, sys, os, re, shutil
@@ -21,6 +23,12 @@ for f in ("answers_sourcedrecall.jsonl",):
     if os.path.exists(os.path.join(src, f)):
         shutil.copy(os.path.join(src, f), dst)
 log = [json.loads(l) for l in open(os.path.join(src, "msglog.jsonl"))]
+dense = []
+if mode == "cos":
+    by = {}
+    for d in map(json.loads, open(os.environ["DENSE"])):
+        by.setdefault((d["id"], d["q"]), []).append(d["cos"])
+    dense = by
 i = changed = dropped = 0
 with open(os.path.join(dst, "raw_sourcedrecall.jsonl"), "w") as out:
     for r in map(json.loads, open(os.path.join(src, "raw_sourcedrecall.jsonl"))):
@@ -33,12 +41,16 @@ with open(os.path.join(dst, "raw_sourcedrecall.jsonl"), "w") as out:
             head, _, lines = body.partition("\n")
             ls = lines.split("\n")
             assert e["q"] == p["q"] and len(ls) == len(e["msgs"]), (r["id"], p["q"], len(ls), len(e["msgs"]))
-            if e.get("advice") or _LIST.search(p["q"]) or _HAS.match(p["q"]) or (mode in ("via", "vianp") and not any(m["via"] is not None for m in e["msgs"])) or (mode == "vianp" and "[pasted in" in lines):
+            if e.get("advice") or _LIST.search(p["q"]) or _HAS.match(p["q"]) or (mode in ("via", "vianp", "cos") and not any(m["via"] is not None for m in e["msgs"])) or (mode in ("vianp", "cos") and "[pasted in" in lines):
                 continue
             keep = []
-            for l, m in zip(ls, e["msgs"]):
-                k = (m["via"] is not None or m["score"] is None or m["score"] >= T
-                     or (mode == "top1" and m["rank"] == 0))
+            cs = dense.get((r["id"], p["q"])) if mode == "cos" else None
+            for j, (l, m) in enumerate(zip(ls, e["msgs"])):
+                if mode == "cos":
+                    k = m["via"] is not None or m["score"] is None or cs[j] >= T
+                else:
+                    k = (m["via"] is not None or m["score"] is None or m["score"] >= T
+                         or (mode == "top1" and m["rank"] == 0))
                 if k:
                     keep.append(l)
             if len(keep) < len(ls):

@@ -270,6 +270,11 @@ def retrieve_facts_v3(index, question, k=120, dense_k=20, top_n=None,
     # Default None keeps the banked behaviour byte-identical.
     if min_score is not None:
         order = [i for i in order if float(ces[i]) >= min_score]
+    if with_scores == "cos":
+        # 2026-10-12: also the bi-encoder cosine with the question (the
+        # message block's relevance cut, memory_api RG_MSG_CUT)
+        return [(index.facts[cand[i]], float(ces[i]), float(index.emb[cand[i]] @ qv))
+                for i in order]
     if with_scores:
         return [(index.facts[cand[i]], float(ces[i])) for i in order]
     return [index.facts[cand[i]] for i in order]

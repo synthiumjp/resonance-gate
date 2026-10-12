@@ -2338,13 +2338,15 @@ class Memory:
         # reader refused facts in the user's own drafts that sat among
         # unrelated lines ("I work nights at the Royal Infirmary" with six
         # other messages; answered with that line alone). When the parser
-        # routed to a message, one the search alone found stays only if the
-        # cross-encoder scores it at least RG_MSG_CUT. Not for advice or list
-        # questions, and not when pasted text is shown (left alone, a marked
-        # paste was read as the user's). A message whose facts the parser
-        # ties to a kept one (the same attribute, or one replaced the other)
-        # stays: cut alone, "Day ten of decaf" left "four strong coffees a
-        # day" as the current state (dev stale2, false memories 3 -> 8).
+        # routed to a message, one the search alone found stays only if its
+        # bi-encoder cosine with the question is at least RG_MSG_CUT. Not for
+        # advice or list questions, and not when pasted text is shown (left
+        # alone, a marked paste was read as the user's). A message whose facts
+        # the parser ties to a kept one (the same attribute, or one replaced
+        # the other) stays. A cut on the cross-encoder score dropped the later
+        # message that changed a fact ("My doctor took me off statins" for
+        # "Am I on any cholesterol medication?" scored -11, the floor): dev
+        # stale2 false memories 3 -> 7.
         try:
             cut = float(os.environ.get("RG_MSG_CUT", "off"))
         except ValueError:
@@ -2355,7 +2357,7 @@ class Memory:
                 and not any("[pasted in" in l for l in lines)):
             score = {}
             for m in hits:
-                score.setdefault(key(m), m.get("score"))
+                score.setdefault(key(m), m.get("cos"))
             per = self._facts_in(msgs)
             g_nodes, g_prov = self.g.nodes, self.g.provisional
 
