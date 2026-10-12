@@ -350,3 +350,24 @@ def test_a_field_list_is_not_a_chat_log():
     # a speaker who speaks twice, or "Me", is still a chat
     assert isinstance(_paste_span("Sam: are you coming tonight?\nJo: maybe\nSam: ok", "Ana Lee"), tuple)
     assert isinstance(_paste_span("Mum: are you coming Sunday?\nMe: yes, after work", "Ana Lee"), tuple)
+
+
+def test_a_real_email_without_an_introduction_is_pasted():
+    # 2026-10-13 (real emails, cases_dev_real: the shape rules found 6 of 30)
+    from prose import _paste_span
+    for text in ("Lee,  Here's a revised draft.\nI'll be in on Monday.\nIt is percolating through the system.",
+                 "Dear Mr. Lay,\nI was notified today that I am being terminated.\nMy family is covered.\nSincerely,",
+                 "Hey, AC!\nHow are things going?\nI'm sure missing you on the desk.\nLater,  D",
+                 "How are you doing?\nI hope your day is going well.\nI only got 2 hours of sleep.",
+                 "Is this sensible?\n\nJeff,  We talked about my joining HPL.\nIs it ready?\nI am leaving soon."):
+        assert isinstance(_paste_span(text, "Ellis Ward"), tuple), text[:30]
+
+
+def test_the_users_own_letter_and_ordinary_messages_stay_own():
+    from prose import _paste_span
+    own = "Michelle,\nCan you help us identify the bonus targets?\nWe need them by Friday.\nThanks,\nEllis"
+    assert not isinstance(_paste_span(own, "Ellis Ward"), tuple)
+    for text in ("Flutter: the row overflows\n```dart\nRow(children: [])\n```\nany idea?",
+                 "Yesterday, I moved my desk.\nNow the light is better.\nThanks!",
+                 "Hey Mel! How are you? I painted a lake yesterday."):
+        assert not isinstance(_paste_span(text, "Ellis Ward"), tuple), text[:30]
