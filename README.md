@@ -346,9 +346,27 @@ like any other context. If you point notes at a server of your own
 memory is a folder of plain files (`~/.sourcedrecall`); delete the folder
 and it is gone.
 
+## Uninstall
+
+In Claude Code, `/plugin uninstall sourcedrecall@sourcedrecall`, or
+`pip uninstall sourcedrecall` if you installed it with pip. Then remove
+what setup and the memory left on disk:
+
+```
+rm -rf ~/.sourcedrecall            # your memory, the parser and notes models
+rm -rf ~/.cache/sourcedrecall      # the embedder, re-ranker and conflict models
+```
+
+The plugin keeps its own copy and environment in Claude Code's plugin data
+folder, which Claude Code removes with the plugin (or in
+`~/.sourcedrecall/plugin` when that folder is not set). WordNet is in
+NLTK's data folder (`~/nltk_data`), which other tools may share.
+
 ## Licence
 
-Apache 2.0 (see `LICENSE`).
+Apache 2.0 (see `LICENSE`). The models setup downloads have their own
+licences, listed in `NOTICE`; the parser's English models are trained on
+treebanks that include some non-commercial text.
 
 ## More
 
