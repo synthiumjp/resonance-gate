@@ -196,6 +196,8 @@ _DOC_HEAD = re.compile(r"^\s*(?:(?-i:[A-Z][A-Z0-9&'’.,-]+(?:\s+[A-Z0-9&'’.,(
 _RULE_LIST = re.compile(r"^\s*(?:\d+[.)]|[-*•])\s+(?:always|never|don'?t|do not|make sure|please|you must|"
                         r"you should|no )\b", re.I | re.M)
 _CODE_COMMENT = re.compile(r"^\s*(?:#|//|/\*|\*)\s*\S", re.M)
+_ASKED_ME = (r"\b(?:asked|asking|wants|wanted|needs) me to (?:check|look at|look over|read|"
+             r"proofread|go over|review|have a look)\b|\blet me read\b")
 _FRAME_SOURCE = re.compile(
     r"\b(?:sent|received|landed|showed up|turned up|came (?:in|through)|going around|forwarded|"
     r"posted|shared|pasting|pasted|copying|copied|inherited)\b|"
@@ -205,6 +207,10 @@ _FRAME_SOURCE = re.compile(
     r"\b(?:written|posted|sent|shared) by (?:a|an|the|my|her|his|their|some)\b|"
     r"\bnot mine\b|^\W*(?:for )?context\b|\bcontext (?:below|above|first)\b|^\s*\^|\(\s*[\w\s'’]+['’]s [\w\s]+\)|"
     r"\b(?:her|his|their|[\w-]+['’]s) (?:" + _MAT2 + r")\b|"
+    # 2026-10-13 (cases_dev_own2): "Tom's toast", "her statement for uni",
+    # "asked me to look at", "let me read her diary page"
+    r"\b(?:her|his|their|[\w-]+['’]s) (?:[\w-]+ )?(?:toast|speech|statement|profile|diary|journal|"
+    r"essay|story|column|application|poem)\b|" + _ASKED_ME + r"|"
     r"\b(?:second|2nd|next|last|final|other) (?:bit|part|half|go|page)\b|\brest of it\b", re.I)
 # naming the material ("the tripadvisor review", "this email"): an
 # introduction only after the block, or before it ending in a colon ("I
@@ -225,9 +231,14 @@ _FRAME_OWN = re.compile(
     # 2026-10-12 (review): not where the text is going ("add this to my
     # notes", "help me quote this in my essay", "sent me this for my review")
     r"(?<!\bto )(?<!\bin )(?<!\binto )(?<!\bfor )(?<!\bon )(?<!\bof )"
-    r"\bmy (?:own )?(?:song|lyrics?|chorus|verse|toast|eulogy|bio|cv|resume|cover letter|essay|story|"
-    r"listing|review|notes?|diary|journal|draft)\b|"
+    # 2026-10-13 (held-out v11: 6 of 30 own texts taken for pasted, the
+    # facts dropped; dev set cases_dev_own2): "my blog post", "my about
+    # section", "column ..., I write it every month"
+    r"\bmy (?:own )?(?:[\w-]+ ){0,2}?(?:song|lyrics?|chorus|verse|toast|eulogy|bio|cv|resume|cover letter|essay|story|"
+    r"listing|review|notes?|diary|journal|draft|post|statement|speech|column|application|ad|profile|"
+    r"section|entry|piece|blurb|newsletter)\b(?!['’])|"
     r"(?:^|[.!?,;:]\s*|\bi\s+)wrote\s+(?:the|a|my)\b|"
+    r"\bi (?:write|draft) (?:it|this|these|them|one)\b|"
     r"\b(?:check|fix|correct|improve|proofread)\s+my\s+(?:grammar|spelling|wording|writing|english|punctuation)\b",
     re.I | re.M)
 
@@ -237,6 +248,7 @@ _FRAME_OWN = re.compile(
 # introduction that says the text came from someone else is not outweighed
 # by an own cue in the same introduction
 _FROM_OTHER = re.compile(
+    _ASKED_ME + r"|"
     r"\b(?:sent|forwarded|passed on|passed along|emailed|texted|messaged)\s+(?:me|us)\b|"
     r"\b(?:forwarded|received)\b|\bwritten by (?!me\b)|\bnot mine\b|"
     r"\b(?:got|found|saw|spotted|came across) (?:this|that|it|these)\b|"

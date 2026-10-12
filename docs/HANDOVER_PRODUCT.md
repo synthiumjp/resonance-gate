@@ -159,6 +159,16 @@ Main branch overnight: CI green (ubuntu, macOS, Windows), NOTICE third-party
 section, SECURITY.md, uninstall section, docs/FAQ.md, docs/MARKET_2026-10-12.md,
 docs/PLAN_TO_LAUNCH.md (with the Fable review's advice still to fold in).
 
+Done overnight: 1 (bench/RELEASE_d89d830.log, db5e925) and 2 (v11,
+results_v11/SUMMARY.md, 13841ff): Qwen 7 of 8 met, pasted 5/40 against 23
+and 24; own material 24/30 against plain retrieval 30/30, H4 and so H9
+missed with both readers. The 6 own misses are detection: the user's own
+first-person writing (diary, speech, statements, ad) marked pasted and its
+facts dropped, despite "my draft". Fixing on post-v11 with a new readable
+dev set cases_dev_own2.jsonl (agent-written, 30 own writing + 10 others'
+writing in the same shapes). The developer saw two Qwen overrides' text by
+mistake (recorded in the summary).
+
 For JP in the morning: the parser model licence question (Stanza's English
 models are trained partly on non-commercial GUM/GUMReddit text; NOTICE says
 so; options: ask Stanford, convert Stanza's own download on the user's
