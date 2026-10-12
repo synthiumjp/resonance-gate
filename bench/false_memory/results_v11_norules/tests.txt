@@ -1,0 +1,19 @@
+H1/H2 D pasted given as the user's (class e, false memory): sourcedrecall 4/40; agentmemory 21/40 (p=7.3e-05); ai-memory 2/40 (p=0.68); rag 21/40 (p=7.3e-05)
+H3/H4 D own material answered (class f, expected term): sourcedrecall 24/30; agentmemory 30/30 (p=0.024); ai-memory 5/30 (p=1.5e-06); rag 30/30 (p=0.024)
+H5 U facts in pasted text answered, all (class f, expected term): sourcedrecall 20/20; agentmemory 10/20 (p=0.00044); ai-memory 6/20 (p=3.3e-06); rag 20/20 (p=1)
+H5 U source named in the question: sourcedrecall 10/10; agentmemory 5/10 (p=0.033); ai-memory 4/10 (p=0.011); rag 10/10 (p=1)
+H5 U source not named in the question: sourcedrecall 10/10; agentmemory 5/10 (p=0.033); ai-memory 2/10 (p=0.00071); rag 10/10 (p=1)
+H6 B old state given as current (class b, false memory): sourcedrecall 1/20; agentmemory 2/20 (p=1); ai-memory 0/20 (p=1); rag 1/20 (p=1)
+H7 X everyday facts answered (class f, expected term): sourcedrecall 17/20; agentmemory 15/20 (p=0.69); ai-memory 13/20 (p=0.27); rag 16/20 (p=1)
+H8 pooled false memories over D and B (classes a-e): sourcedrecall 5/60; agentmemory 23/60 (p=0.00017); ai-memory 2/60 (p=0.44); rag 22/60 (p=0.00034)
+Holm over the four Fisher tests of H2 and H8 (adjusted p):
+  H1/H2 vs agentmemory: p=7.3e-05, Holm 0.00029
+  H1/H2 vs rag: p=7.3e-05, Holm 0.00029
+  H8 vs agentmemory: p=0.00017, Holm 0.00033
+  H8 vs rag: p=0.00034, Holm 0.00034
+said it did not know (reported, not tested), per part, all classes:
+  D: sourcedrecall 35/70; agentmemory 14/70; ai-memory 63/70; rag 16/70
+  N: sourcedrecall 0/10; agentmemory 5/10; ai-memory 5/10; rag 0/10
+  M: sourcedrecall 0/10; agentmemory 5/10; ai-memory 6/10; rag 0/10
+  B: sourcedrecall 0/20; agentmemory 0/20; ai-memory 1/20; rag 0/20
+  X: sourcedrecall 2/20; agentmemory 4/20; ai-memory 6/20; rag 3/20

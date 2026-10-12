@@ -15730,3 +15730,27 @@ of 10; every other dev set and LoCoMo 3 changes, all right. Held out
 10 of 10. The gap between 26/30 and 12/20 is the part fitted to the emails
 read; reported as is, not tuned further against the held-out set. Not yet
 end to end.
+
+## Entry 326 — 2026-10-13 (held-out v11)
+
+One run on the frozen tree 61e78fd, both readers, blinded audit per reader
+(Qwen 6 overrides, Phi-4 13). `bench/false_memory/results_v11/SUMMARY.md`.
+Qwen3-14B: 7 of 8 met. Pasted claims given as the user's 5/40 (plain
+retrieval 23, agentmemory 24; Holm p below 1e-4); facts in pasted text
+20/20; old state as current 0/20; everyday 17/20; own material 24/30 (target
+23 met) but 6 behind plain retrieval's 30 (H4, at most 3 behind: missed).
+Phi-4 the same shape: 5/40, own 24/30, H4 missed, so H9 missed.
+Without the rules paragraph: the same counts (4/40, 24/30), so the result
+comes from the returned lines, not the instruction.
+
+The 6 own misses (same items, both readers) are a detection error, not a
+reader one: the user's own first-person writing brought for reading over
+(diary, speech, blog draft, scholarship and volunteer statements, sale ad)
+was marked pasted and the writer's self-statements dropped, in 5 of 6
+despite "my draft / mine / my speech" in the introduction. 9 of 30 own
+items marked pasted (v10 4 of 20). Next: an own-writing introduction keeps
+the text as the user's; check the post-v11 letter rule does not add to this
+(speeches and statements carry sign-offs).
+
+Slip: the developer saw two Qwen overrides' text (one scenario) when
+checking the overrides file; recorded in the summary.
