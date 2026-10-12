@@ -15557,3 +15557,7 @@ and how to run everything).
   pasted2 and stale2 (a pasted review's "retired firefighter", "mother of
   three", "lifelong vegetarian"). Rules kept as they are: the product's
   point is not giving other people's text as the user's.
+- In flight at the end of the session: dev19 (rules paragraph moved above
+  the lines, wording unchanged, all 9 dev sets on fixed retrieval;
+  ~/jpwork/dev19.log). Experiment scripts now in bench/false_memory/devtools.
+  docs/HANDOVER_PRODUCT.md rewritten for a new session.
