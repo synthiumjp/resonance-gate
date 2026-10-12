@@ -87,9 +87,11 @@ def install_archive(src, sha256, dest, marker, what):
     try:
         path = os.path.join(tmp, "models.tar.gz")
         if src.startswith(("http://", "https://")):
-            # a timeout, so a stalled connection fails instead of hanging setup
-            with urllib.request.urlopen(src, timeout=60) as r, open(path, "wb") as f:
-                shutil.copyfileobj(r, f, 1 << 20)
+            # 2026-10-12 (review 4.2, launch review): progress, and a broken
+            # download resumes where it stopped (the partial file is kept
+            # beside the destination until it is complete and checked)
+            path = dest.rstrip("/\\") + ".download"
+            _download(src, path, what)
         else:
             shutil.copyfile(src, path)
         if sha256:
@@ -98,6 +100,8 @@ def install_archive(src, sha256, dest, marker, what):
                 for chunk in iter(lambda: f.read(1 << 20), b""):
                     h.update(chunk)
             if h.hexdigest() != sha256.lower():
+                if path.endswith(".download"):
+                    os.unlink(path)          # a corrupt partial must not be resumed
                 raise RuntimeError(f"{what} model archive: sha256 does not match")
         out = os.path.join(tmp, "out")
         with tarfile.open(path) as t:
@@ -124,9 +128,48 @@ def install_archive(src, sha256, dest, marker, what):
             shutil.rmtree(dest)
         os.makedirs(os.path.dirname(dest), exist_ok=True)
         shutil.move(top, dest)
+        if path.endswith(".download"):
+            os.unlink(path)
         return dest
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
+
+
+def _download(url, path, what):
+    """Fetch url into path, continuing a partial file with an HTTP Range
+    request, printing progress every 10%. A stalled connection fails after
+    60 s; run setup again to continue."""
+    import urllib.error
+    import urllib.request
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+    have = os.path.getsize(path) if os.path.exists(path) else 0
+    req = urllib.request.Request(url, headers={"Range": f"bytes={have}-"} if have else {})
+    try:
+        r = urllib.request.urlopen(req, timeout=60)
+    except urllib.error.HTTPError as e:
+        if e.code == 416 and have:           # already complete
+            return
+        raise
+    with r:
+        if have and r.status != 206:         # the server ignored Range: start over
+            have = 0
+        total = r.headers.get("Content-Length")
+        total = int(total) + have if total and total.isdigit() else None
+        mode = "ab" if have else "wb"
+        step = 10
+        with open(path, mode) as f:
+            got = have
+            if have and total:
+                print(f"      resuming {what} download at {got * 100 // total}%", flush=True)
+            while True:
+                chunk = r.read(1 << 20)
+                if not chunk:
+                    break
+                f.write(chunk)
+                got += len(chunk)
+                if total and got * 100 // total >= step:
+                    print(f"      {what}: {got * 100 // total}% of {total >> 20} MB", flush=True)
+                    step = (got * 100 // total) // 10 * 10 + 10
 
 
 def _du(path):
