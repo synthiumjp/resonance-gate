@@ -175,6 +175,21 @@ writing 24 -> 27 of 30, real pasted emails taken as the user's 18 -> 4 of
 MERGED into product-p2 (1d92020, suite 1,382 passed), pushed to both
 remotes. README LoCoMo figures now from d89d830 (+ strict re-judge). The
 held-out real-email set end to end, once, on 1d92020: ~/jpwork/realrun.log.
+Morning 2026-10-13: held-out real emails end to end once on 1d92020
+(7/20 Qwen, 5/20 Phi-4; plain retrieval 15, 16). 8d100ef: an email pasted
+alone, introduced in the next message, is pasted (cases_dev_real2 9 -> 3
+and 10 -> 3 of 30). JP approved v12; PREREG_HELDOUT_V12.md committed
+(27fd77f), code FROZEN until the v12 run. Set being written by an agent
+(cases_v12.jsonl; pool ~/jpwork/realpaste/v12_pool.jsonl, also in the
+session scratch); validate on the Mac (v12_validate.py output to the agent
+unread), commit the set, run `QWEN_URL=http://127.0.0.1:8092/v1 bash
+v12_run.sh` from a tree of the set's commit, blinded audit per reader,
+v12_tests on both. A second Qwen3-14B server runs on 8092
+(~/jpwork/reader3/server.pid, .venv-judge, same flags as 8090) because
+HaluMem's scorer holds 8090 for many hours (1,649 accuracy items per user,
+~13 s each). Parser licence question explained to JP (options: ask
+Stanford, convert on the user's machine, retrain on EWT only, state it).
+
 Night chain step 2 ran under zsh, so the competitors' files were not
 copied (word splitting); sourcedrecall's counts are fine: v3 0/30, v4
 3/44, coding 0/51, projects 0/32 (fair protocol).
