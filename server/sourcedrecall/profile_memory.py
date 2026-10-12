@@ -338,6 +338,19 @@ def _iso_date(date):
         raise ValueError(f"date must be ISO, e.g. 2026-09-25 -- got {date!r}")
 
 
+def _not_future(date):
+    """2026-10-12 (review 3.2): through MCP, a date in the future would make
+    an agent's message the newest statement of every fact it touches, so it
+    would outrank what the user said. A day of slack for time zones. (Not in
+    _iso_date: imports and the benchmark sets carry their own dates.)"""
+    if date is None:
+        return
+    limit = (datetime.datetime.now(datetime.timezone.utc)
+             + datetime.timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    if _iso_date(date) > limit:
+        raise ValueError(f"date is in the future -- got {date!r}")
+
+
 def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
                    date=None, scope=None, instructions=True):
     """Turn ONE conversation into new profile-memory facts -- the only WRITE
@@ -1368,6 +1381,7 @@ def _build_transcript_index_locked():
                 turns.append({"role": role, "text": txt})
         index[uuid] = {"title": c.get("name", "") or "(untitled)",
                        "date": c.get("created_at", "")[:10],
+                       "scope": c.get("scope"),
                        "turns": turns}
     return index
 
@@ -1378,7 +1392,10 @@ def _ensure_transcripts_locked():
     return _state["transcripts"]
 
 
-def rehydrate(conversation_id, max_turns=40, include_assistant=True):
+_REHYDRATE_MAX = 200
+
+
+def rehydrate(conversation_id, max_turns=40, include_assistant=True, scope=None):
     """The page-fault half of the virtual context window: given a receipt's
     conversation_id (as now returned by every fact's receipts, see
     memory_api.Memory._fact), return the verbatim turns of that conversation
@@ -1393,11 +1410,21 @@ def rehydrate(conversation_id, max_turns=40, include_assistant=True):
     conversation has more); include_assistant=False restricts to the human's
     own turns. Each turn's text is capped at 2000 chars (marked with a
     trailing "..." when cut) so one huge turn can't blow the response.
+
+    2026-10-12 (review 3.2): max_turns is held to 1.._REHYDRATE_MAX, and a
+    conversation stored in another project is not returned in this one (the
+    same rule as recall: facts about a project stay in it).
     """
+    from sourcedrecall.paths import current_scope
+    try:
+        max_turns = max(1, min(int(max_turns), _REHYDRATE_MAX))
+    except (TypeError, ValueError):
+        max_turns = 40
+    here = current_scope(scope)
     with _lock:
         index = _ensure_transcripts_locked()
         conv = index.get(conversation_id)
-        if conv is None:
+        if conv is None or (here and conv.get("scope") not in (None, here)):
             return {"found": False,
                     "error": "no such conversation in the backing store"}
         turns = conv["turns"] if include_assistant else [

@@ -210,7 +210,7 @@ def profile_status(reload: bool = False) -> dict:
 
 @_tool(read_only=True)
 def profile_rehydrate(conversation_id: str, max_turns: int = 40,
-                       include_assistant: bool = True) -> dict:
+                       include_assistant: bool = True, scope: str = None) -> dict:
     """Rehydrate a receipt into the verbatim conversation slice it points at
     -- the page-fault half of the virtual context window (the p2 fact graph
     is the page table; conversations.json, the raw export, is the backing
@@ -227,7 +227,7 @@ def profile_rehydrate(conversation_id: str, max_turns: int = 40,
     guessed or fuzzy-matched -- returns {found: false, error: "no such
     conversation in the backing store"}, the same non-hallucination contract
     as profile_recall's abstain, one layer down."""
-    return pmem.rehydrate(conversation_id, max_turns, include_assistant)
+    return pmem.rehydrate(conversation_id, max_turns, include_assistant, scope)
 
 
 @_tool(read_only=False)
@@ -272,8 +272,11 @@ def profile_ingest(turns: list[dict], conversation_id: str = None,
 
     Standing instructions are not stored from this tool: an agent that was
     talked into calling it could otherwise plant one that leads every later
-    session. Sessions captured by the hooks store them as usual."""
+    session. Sessions captured by the hooks store them as usual. A date in
+    the future is refused (it would make the message newer than everything
+    the user said)."""
     from sourcedrecall.paths import current_scope
+    pmem._not_future(date)
     return pmem.profile_ingest(turns, conversation_id, title, owner_name,
                                date=date, scope=current_scope(scope),
                                instructions=False)
