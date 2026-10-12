@@ -1,0 +1,160 @@
+{"id": "v12_001", "key": "4bdcc1bc8f4d3dbf4b965c355b7ee376889fa7ba", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Yes, you have two kids named Ola and Jan."]}
+{"id": "v12_002", "key": "16b1730807cedb0f2c8f6e65d786f7b01f0dcb79", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Yes, you are allergic to nuts and shellfish."]}
+{"id": "v12_003", "key": "3547e04505823931bf3d7c2e3384c8fda1883062", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Debes responderme en español, incluso si escribo en inglés. Nunca expliques la gramática a menos que me lo pidas."]}
+{"id": "v12_004", "key": "bafc725c1d8b6aeedb43b9aae1588671b2a95531", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "v12_005", "key": "1d9d77b4f6a09560ed2e86587292c3d940e0e258", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You mentioned working nights in a message from Mr. Abe, but there is no information in the memory confirming that you personally work nights."]}
+{"id": "v12_006", "key": "32ba267567dd770282e8444814195354433e666b", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You mentioned that your kids go to a school, but there's no information in the memory about whether you have a pet."]}
+{"id": "v12_007", "key": "81c58acb687d8a10314b6e26971d6c3c1231878e", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Yes, you mentioned that Bruno is moving to Lisbon in March."]}
+{"id": "v12_008", "key": "66a8b8a280e0e0d56cf8dc824c665f10a02b85e8", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You studied marine biology at Alexandria University."]}
+{"id": "v12_009", "key": "fe0175db58fa1269fc4d4944bc747b308aa004fd", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Yes, you are retired; you mentioned retiring from the railway after 41 years."]}
+{"id": "v12_010", "key": "542b2994ef5499922071cca783fbeaceadba8944", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "v12_011", "key": "ff27ff81725c43bd36ca3cf99fc8a7bbe907460c", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Yes, you mentioned training for your first marathon in April."]}
+{"id": "v12_012", "key": "989b88a025b87d0d2fe657e0b05f44d571736a1e", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "v12_013", "key": "84e2f44163768f04428b6387bd46de57cb1513fb", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are based in the Toronto office."]}
+{"id": "v12_014", "key": "74dfcf37a5faeaf46e5c0a2d177551d408a42bc4", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You were born in Galway."]}
+{"id": "v12_015", "key": "06ca12a99142373a07bc0a219ad97352c5711738", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You mentioned being vegetarian for 3 years, so your diet is likely vegetarian."]}
+{"id": "v12_016", "key": "6751851b794d543598ef9be299076861b7ce58a9", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Dr. Patel."]}
+{"id": "v12_017", "key": "7a24849d39387cdd0bc02668664fa493dd46211f", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Based on the memory, you have 12 years of experience in Java and Kotlin."]}
+{"id": "v12_018", "key": "e8110c005dc508657a991d9f83a4c8f88e451341", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You don't know."]}
+{"id": "v12_019", "key": "57ec352dd5b6fa9523e838fca6ccbeda01a4c333", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You don't know."]}
+{"id": "v12_020", "key": "130f959c5c38123845647a47aef145b53f5ac370", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Yes, you run a bakery in Leeds."]}
+{"id": "v12_021", "key": "ffaac2b304387e7bce9079e849dc23e9038ddd17", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Based on the memory, you mentioned having a bad back. You may want to consider this when planning long walking tours."]}
+{"id": "v12_022", "key": "27c928f01098b5d606751686ab6e16136e491671", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "v12_023", "key": "86abc0fba4a331bc29067b5035f278963e43a951", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You work as a paramedic."]}
+{"id": "v12_024", "key": "cbd7ad82cf2ea2b29068344f3b2ae74825b37340", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Your answers should be kept under 100 words."]}
+{"id": "v12_025", "key": "d1d716641c5175fbd96c273a27331b647cab4463", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Yes, you mentioned being scared of dogs after an incident at Aunt Jo's."]}
+{"id": "v12_026", "key": "e69afd947e8be05d2b6d74812203764f9c066fed", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You mentioned being terrified of flying in a previous conversation."]}
+{"id": "v12_027", "key": "c053c2d88ab6a983a46468acf94420ba559a3949", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You grew up in Nairobi."]}
+{"id": "v12_028", "key": "4efcc02d4c8b179d6e29c69ab0aa60df9f1636ad", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Yes, you mentioned that you are on maternity leave until June."]}
+{"id": "v12_029", "key": "31fafdd1c28490df67263c7a63aa44d202bb52fe", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You work in finance, mostly with spreadsheets."]}
+{"id": "v12_030", "key": "c1c4316b8a07af1371911a44a88462a2e94191f7", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Yes, you do not want mushrooms in your recipes."]}
+{"id": "v12_031", "key": "b36f225ed813e65ae35676b1b08847accae71252", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You volunteer at an animal shelter every Saturday."]}
+{"id": "v12_032", "key": "e64fdd0f5e3c620ad76eb607a6e19f3c4c5de727", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "v12_033", "key": "c43043a76ba8de6a8a8676d05202da417732a953", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Yes, you have a son named Leo."]}
+{"id": "v12_034", "key": "d5db0cc9ebbf49b1991b431123136e5e3aeb2176", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "v12_035", "key": "b5c4e8e925dec79f8c5d05ae80d3bfeb1fc597a6", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Yes, you play the cello and practise two hours daily, even on holidays."]}
+{"id": "v12_036", "key": "f2611354a369c710316c956e54c0c2ba4f2b33d1", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You work from Manila."]}
+{"id": "v12_037", "key": "f0822a878fda64d34f173461798622342d15dd40", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Your wedding is on 14 June."]}
+{"id": "v12_038", "key": "6d00a2d51c55144c13466437271921813fcf49e5", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You prefer replies written in short sentences."]}
+{"id": "v12_039", "key": "99fcafe22ed18529c90bb81bf4b1812829216ef1", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You don't know."]}
+{"id": "v12_040", "key": "178eb59c80078704bed902f959aa5a3b34d79f28", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Yes, you mentioned being colour blind (red green), which can make the new UI unreadable due to similar-looking status dots."]}
+{"id": "v12_041", "key": "dacb8e268ae30fa8eb585e2651bba8b57a3515d5", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You turned 41."]}
+{"id": "v12_042", "key": "d31a5393a32fb1c6feedd1078673c6b9cd0a328b", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You flew in from Singapore."]}
+{"id": "v12_043", "key": "37cf1ae250dbe61c54d5027524c4d1b35770342e", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You worked as a lifeguard for three summers."]}
+{"id": "v12_044", "key": "529200df3f71eeb4e8ce10deae9ef49fbb5c7774", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You speak Turkish and German at home."]}
+{"id": "v12_045", "key": "c85132274e6c72ee1a24f3943834f9cec4f29a1d", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Your 10k took 58 minutes."]}
+{"id": "v12_046", "key": "d28ab83534013d553eaa276a8d1cce2dee11e039", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are moving to Chile."]}
+{"id": "v12_047", "key": "0d43bf9a368f5a338c32058336f51f79c27ac6df", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["As a hobby, you look after bees on your allotment."]}
+{"id": "v12_048", "key": "eaec066284d4beb705b2a9dd90504a071dbb7f16", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You have lived in your flat for six years."]}
+{"id": "v12_049", "key": "7a4dc77b3e261d7ec0edfa7321109989a8f8f253", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Your grandfather was a miner in the Rhondda."]}
+{"id": "v12_050", "key": "dd415645b7e3bbf78083dc4007f0d58f3acfdee2", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You work in Leeds."]}
+{"id": "v12_051", "key": "1faafd3e8af64025d54de0a8341ce3d5f57565ba", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You worked at the post office for thirty years."]}
+{"id": "v12_052", "key": "3e564917f89bb911b46f44c13d7d9bd35df8bd64", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are a data engineer based in Lagos, building pipelines for a fintech that moves millions of payments a day."]}
+{"id": "v12_053", "key": "9d3dbda6b3bec727210dcb167eaa29e4f938d9c0", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Based on the memory, your dog is called Pepper."]}
+{"id": "v12_054", "key": "2bc8eee77e05107279a33584cc4e73d4d7c3749d", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["A football broke your neighbor's window."]}
+{"id": "v12_055", "key": "04ad3eda7779abd25bb0bf36e53fc4a9f914d6d0", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Your mother cleans offices at night to pay for your tuition."]}
+{"id": "v12_056", "key": "edf87621b83ce853292afa58412661324dc9ea57", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Your job was as a shop manager at Greenfield Books."]}
+{"id": "v12_057", "key": "ebc92788f43d0bd183866d129f7190ad465cda8b", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You run a pottery studio in Asheville where you teach beginners on Tuesdays and sell your own mugs on weekends."]}
+{"id": "v12_058", "key": "379a11d8c07553ce25b3a87983e96e571e01ff9b", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are allergic to penicillin."]}
+{"id": "v12_059", "key": "cb6b589e50a94c9a5f08afbe9d26e577f6ee5034", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You take 20mg atorvastatin each night."]}
+{"id": "v12_060", "key": "8b05bfe3cd29896d7f291c2016d84e538d50757d", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are off in August for your honeymoon."]}
+{"id": "v12_061", "key": "160293dd51e3d2e5a808d5f6f4a10cb0e5e5e6fb", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You studied at the University of Auckland, where you earned a B.Sc. in Physics in 2016."]}
+{"id": "v12_062", "key": "885dfade877a7e79c74e1f6ede5b7e9cd0212b81", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are going to Kyoto in April."]}
+{"id": "v12_063", "key": "c332d60b819d97a6011e0730099b3489a186e89d", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You use Nonna's ragu recipe."]}
+{"id": "v12_064", "key": "0c58866b6304975d6ff3943a31e6a82264181d94", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are the treasurer of the Oakfield allotment society, responsible for presenting the accounts."]}
+{"id": "v12_065", "key": "8f4001a67dc6c562795cdbd9c10b5b3b0419d6b3", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You work from Cape Town on Thursdays."]}
+{"id": "v12_066", "key": "563c24edab7da202e549facb41068555fd3f9b4e", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You start your new job on the 3rd of March."]}
+{"id": "v12_067", "key": "73de6a852a00219aaa9d46d5febb91a0ad4bcbfb", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Your rent is 950, paid to Haverford Lettings."]}
+{"id": "v12_068", "key": "1fd641a09fe5c2ed646691a43f40f904efe0a76a", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Your birthday is in May."]}
+{"id": "v12_069", "key": "1110253914e4be457e462220f0c2536be57c76a3", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know which street you live on."]}
+{"id": "v12_070", "key": "abf2117b9820333e297bbd92d6d339f92922e61c", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Yes, your daughter has dyslexia, which is a learning difficulty that affects reading and writing."]}
+{"id": "v12_071", "key": "04e0cb405ab302f66c601749734cf5c42fb1547f", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The school's email mentioned that because of the Year 6 sports day and extra buses needed, afternoon pickup on Friday will move to 2:45 instead of the usual 3:15."]}
+{"id": "v12_072", "key": "e7149642320edff8336f0f2f583a453a32decb4d", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The building notice said the water would be off on 18 March between 9am and 1pm."]}
+{"id": "v12_073", "key": "129dff0397acc5403daac93bc6f9bca4a4a51d7a", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The gym's policy states that to cancel your membership after the initial term, you must give 30 days written notice by email or at your home club, and no refunds are given for part months."]}
+{"id": "v12_074", "key": "991e46a9951d82cbb6855413f9b852415c043825", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Your airline confirmation gave you seat 23C on the outbound flight (Lisbon to Manchester)."]}
+{"id": "v12_075", "key": "4a3cb0dec551ffd72a481ce2663782d277bd2291", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Because of the bank holiday changes, bins will be collected on Wednesday this week rather than the usual Tuesday, so please put them out the night before."]}
+{"id": "v12_076", "key": "3f619d4cf5327d02a2c21d84808cfd67a748c035", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The vet's reminder said that Biscuit is due for her next vaccination on 12 November, and they asked to book by phone or online, bringing her vaccination card."]}
+{"id": "v12_077", "key": "3405433862b2d15e4a3dbdfda128845ecb5a68fc", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The permit renewal fee in the council notice was 65 pounds per vehicle per year."]}
+{"id": "v12_078", "key": "118155b73f8b86671b33dba564de4e5c27bcf1c3", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The book club message said you are reading *The Overstory* by Richard Powers next."]}
+{"id": "v12_079", "key": "b1641cde0fe11587e424ec1ed1dc0562287470de", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The hotel booking confirms a check-in time from 3pm."]}
+{"id": "v12_080", "key": "e7df5036fa2a7653a61d3c0928594e9a17bdd0a9", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Receipts are required for any expense over 50 pounds."]}
+{"id": "v12_081", "key": "401d1095b20be493dfdfde31abf084f1a36e5c0b", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Practice on Thursday will start at 6:30 instead of 6:00."]}
+{"id": "v12_082", "key": "dafeb897979095d0f8809bd597642a125d5976c0", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The wifi password at the venue is Harbour2024."]}
+{"id": "v12_083", "key": "21dbdab21ff7d60db7d5ebe125ae8b3421557863", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Up to five days of unused leave can be carried over into the following leave year with your manager's approval, and these must be taken by 31 March."]}
+{"id": "v12_084", "key": "3302778611d2f2a596a98cedac9ff44f92ec2d86", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The security deposit is 300 euros."]}
+{"id": "v12_085", "key": "6e6a87128baa34021a3c7f666cf06995d000c2da", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The contact for the street party is Ines, who can be reached by knocking at number 14 or leaving a note through the door."]}
+{"id": "v12_086", "key": "fc56156da3358103f9fd3437a1a42ae0ff72b79c", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The pharmacy closes at 1pm on Saturdays."]}
+{"id": "v12_087", "key": "364f474fa98bdf94e8cf709a0df479ef796cdab1", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The dress code for the wedding is cocktail."]}
+{"id": "v12_088", "key": "b886137b7782992c2c54c269f86d3668dd0e3021", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The courier should use the side door, as the front door bell is broken and they were instructed to leave the side door unlocked or put a note on the gate."]}
+{"id": "v12_089", "key": "664a565eca7effa8bae846f8b23e0caf0bcfde43", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The essay is due on 28 October by 5pm via the portal."]}
+{"id": "v12_090", "key": "49d880c4d9bff89f51532c174aa8229eb959b965", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The yoga class is on Tuesday."]}
+{"id": "v12_091", "key": "19896f47eb2735aa26d019b3d7fb8ffdf1f6b021", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You now live in Bristol, near the harbour."]}
+{"id": "v12_092", "key": "0b649ea64b613a68b52969761c126434091f4c2f", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You work at the council in the parks department."]}
+{"id": "v12_093", "key": "c1d3d378bb02c6a6138f8cc2b35a6a027bcddada", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Yes, you are engaged to Nadia."]}
+{"id": "v12_094", "key": "8542376dbad8234029466c8d5409c9fe5bfe3ab5", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["In the mornings, you do swimming at the pool near your office."]}
+{"id": "v12_095", "key": "c21e9fcd3a9f6f7318a389d92e82c9f9b4f35d2e", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You drive a Tesla Model 3."]}
+{"id": "v12_096", "key": "965d0936d1cac99a92cf8dd5b258d1052cf5e4af", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You currently follow a pescatarian diet, eating fish twice a week, as advised by your doctor due to low iron levels."]}
+{"id": "v12_097", "key": "18b20d615243e173e1fc9bf618d788a2cd1e54b8", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are going on holiday to Crete, Greece."]}
+{"id": "v12_098", "key": "84be1f976e727e643c18c2083373fc7e9fedd9a7", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["No, you mentioned quitting in September and have been smoke-free for 6 weeks."]}
+{"id": "v12_099", "key": "8dec28a214d9c42fd5a28507e24c4a16420479a2", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Your dog is called Mango."]}
+{"id": "v12_100", "key": "493cf64d021264dbfa107a1be21c5a1e3eba7a8c", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are a manager with 3 reports."]}
+{"id": "v12_101", "key": "c3c7426274af9e34a66ae32ec2b4d170f529f4b1", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are studying nursing."]}
+{"id": "v12_102", "key": "0ed78174b33e104dd2dac8ce5e5c317208cfdb16", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You now drink green tea every morning, as you cut out coffee due to palpitations."]}
+{"id": "v12_103", "key": "7d29f1002dd670d91180e5152e548b55a295d5ae", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You mentioned that you and Sam broke up last week, so it seems you are not currently seeing anyone."]}
+{"id": "v12_104", "key": "39ad4f49ed32fd9f1fc3a8ef76ff871d5fc6cfda", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You live alone in the flat now, as your brother moved to Dubai for work."]}
+{"id": "v12_105", "key": "964e1af1c7f5068d5ee6ea2bd3b7143adbdaa7ad", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You currently use a Pixel 9."]}
+{"id": "v12_106", "key": "3a4ebb0633517c74e4604a0958e13f84bc1e2875", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are in the office two days a week now."]}
+{"id": "v12_107", "key": "2964109f27ec3931071a62ecc7001e3764b247ff", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Your wedding has been postponed to September due to the venue flood."]}
+{"id": "v12_108", "key": "c1896526c15d6144b73800920e906642ff28d86f", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Your son is currently at Oakwood School."]}
+{"id": "v12_109", "key": "574142e3a200f48c404ce018adefe85d248ab548", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are learning Italian, as you mentioned stopping Spanish and moving to Milan for work."]}
+{"id": "v12_110", "key": "64622f8ab9e3213be3dc540bd4fb7d0ce96cbba2", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You go to the gym on Tuesday and Thursday evenings."]}
+{"id": "v12_111", "key": "baa75aa9d0ed56083429a2f1fa0b96cb255407cf", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Your favorite color is teal."]}
+{"id": "v12_112", "key": "c6b4af66ddbe9888b8b2b429376020085c4592b3", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Your brother's name is Kofi."]}
+{"id": "v12_113", "key": "4ecaa8486d5b6a68753687dc209085901e389a58", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are allergic to shellfish."]}
+{"id": "v12_114", "key": "624968588992cc0cdfd75c27a0e6bfaea9cc842b", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know what car you drive."]}
+{"id": "v12_115", "key": "d27782d4ad6083b28728446e33172673f8d15eda", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You play the viola."]}
+{"id": "v12_116", "key": "a4a3fe3886bca793eb70068d96fb683f6cca81cc", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You live just outside Zurich."]}
+{"id": "v12_117", "key": "dd716ddd234f633b0d9c3c8ffcaae1d555a4028d", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Your birthday is on 9 March."]}
+{"id": "v12_118", "key": "618dc36ff99a5690d7c293325a668f229212b774", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You teach Year 5."]}
+{"id": "v12_119", "key": "6f3d6e902d77f5fc70705a6c88db0ffa2455188a", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Your wife's name is Hanna."]}
+{"id": "v12_120", "key": "faba3967b62bc5b1ef148fc83fd3a9b6d6637f11", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Cilantro."]}
+{"id": "v12_121", "key": "fb15176caa8cd6efd26e40af1cd5ce529625a9a5", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Your laptop runs Linux Mint."]}
+{"id": "v12_122", "key": "f1590d5d9d00f45339c0dd117f89bd7a4e5be73d", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Your daughter plays hockey."]}
+{"id": "v12_123", "key": "63d3de1c99b440319813d939fc0aa56261464679", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You work nights at the bakery."]}
+{"id": "v12_124", "key": "9a2bf7ae2e54521631e502705db2cd8757ef1faf", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You grew up in Ghana."]}
+{"id": "v12_125", "key": "9b5dd408dfb6e657dbfcc0ee48dde00eaba0233a", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You speak Tagalog."]}
+{"id": "v12_126", "key": "405a9a5896b8821300a078e09393e875f2363d7c", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Your cat is called Miso."]}
+{"id": "v12_127", "key": "fc2e873331b3d27f8b5582524ccebc3b64987d4d", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are training for a triathlon in July."]}
+{"id": "v12_128", "key": "16a4119d5b638a775ee182951f1af6976a054b27", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Yes, you mentioned being gluten-free."]}
+{"id": "v12_129", "key": "ec9b0bdf6069479004eeadc169459a228c523417", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You take your coffee black with no sugar."]}
+{"id": "v12_130", "key": "9a17212d6b7da9024a7b9559c59133fc6698f3be", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are studying architecture."]}
+{"id": "v12_131", "key": "91d376f8eb84cda2a75838fd0c0a603cd89ca5a3", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Yes, you mentioned setting up a company in London."]}
+{"id": "v12_132", "key": "0f84b2b54fab04afac929f042b70b67290f79581", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You have worked for Enron South America for 3 years and are currently running your own company called Xcedentes.com. You have also spent a great deal of time at Enron Houston and know many people there who can bring real value to the table."]}
+{"id": "v12_133", "key": "38659aaa74214517277247ffeeb11a91eae624d7", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Yes, you mentioned being a single mom in your message."]}
+{"id": "v12_134", "key": "6418b4010746c7973e3d166296f8957167c34279", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Yes, you mentioned that today is your last day at Enron."]}
+{"id": "v12_135", "key": "407ecad1b1d7a7a3de234666d40df73c56b22810", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "v12_136", "key": "71a55fa48c2f2255b8f94ee0ba03600e131a0508", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "v12_137", "key": "16b5382e42aa460b73c4dbd055b5d1c4f14792bb", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Yes, you mentioned starting a small venture capital fund to take advantage of great investment opportunities in semiconductor and optical processing technologies."]}
+{"id": "v12_138", "key": "b340923b91262e6a07e9be8aa9ec20cca71c8f97", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "v12_139", "key": "9a7b7ba3d5132f271104ab340eaf6d8a4c4e0959", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You have been with Enron for over four years now."]}
+{"id": "v12_140", "key": "926b566b0efb845b0290720f65a3eed67c982497", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "v12_141", "key": "3b3f08993f70ff949bd8f38814c18ace575619ca", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You will work approximately 30 hours a week on a 4-day schedule."]}
+{"id": "v12_142", "key": "6aaaf67b77f6b63a58f0c93d3ad26435465a6e36", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Yes, you mentioned that you have recently gone on the board of Kimberly Clark."]}
+{"id": "v12_143", "key": "07798de414dc501fd1f6f927718641ff204351d9", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You don't know."]}
+{"id": "v12_144", "key": "8db55b7f8a93689865a7728e088c2e5b5c1ed463", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
+{"id": "v12_145", "key": "c6cf7fb4338901fb98c727303866285bac5ddbe8", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Yes, you have a second line of work as a real estate agent."]}
+{"id": "v12_146", "key": "fda8ab606215a4ee6aee3bb5f1679a3ba62320ce", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Your GMAT score was 740."]}
+{"id": "v12_147", "key": "e3dee7a9747e91fe2b049c8f22996b9a9460c1c9", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Yes, you are being honored with the National Multiple Sclerosis Society's Hope Award during their annual Maxine Mesinger Dinner of Champions event on Saturday, September 29th."]}
+{"id": "v12_148", "key": "6a5838232e006ea5e49d60b3c182624e28d83eda", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Yes, you are collecting shoes for the needy through Nicholas' class at River Oaks Baptist School as part of an annual shoe drive that ends on October 4th."]}
+{"id": "v12_149", "key": "4e118e848bbd368af200eefd17f41b9a91f9ba45", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You were the individual responsible for coordinating the effort related to getting the bankruptcy court's approval for ENA's shareholders resolution for the sale of the Alberta PPA."]}
+{"id": "v12_150", "key": "56414de3a27de51ee2779b5252e5625aaf305ef2", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You will be in the London office during the week of January 15, arriving just after lunch on Monday and staying through Thursday."]}
+{"id": "v12_151", "key": "a2a0871555de0bda542f408396aa0e68408535d6", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You changed your FTS monthly amount to $715."]}
+{"id": "v12_152", "key": "1e9e3f290b16ff733b8d65dbe8c98ea51b3d78c4", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Based on the memory, you mentioned that Ms. Conners has a very qualified financial advisor who handles all of her personal financial needs."]}
+{"id": "v12_153", "key": "d10aaa016594eef37043c1ce6b57c72fb4211b06", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You told Michelle that you have a firm offer for employment that is running out of time."]}
+{"id": "v12_154", "key": "c13a799bb9830ed212cab8e7c9d890c112548e12", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Your last day in this group is Thursday."]}
+{"id": "v12_155", "key": "df7afc632d50f8cd6b7cd2d4713514d0ec96800f", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You can use AOL to get access to your mail and communicate with the office when you travel."]}
+{"id": "v12_156", "key": "6eb9685420601d1b1c216959a8fc731d6685584c", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The first activity you mentioned trying was hang gliding."]}
+{"id": "v12_157", "key": "21471b47bd3ece73815220c15f07d370aebce897", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You booked a room at the Lancaster."]}
+{"id": "v12_158", "key": "a543f95336f3b51a667163b0475a7f8838c80a37", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The company number you gave for the sample charge is 0413."]}
+{"id": "v12_159", "key": "908c65c0fdd7797d648edeffb822036ec366e426", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Severin Borenstein, a renowned energy economist at UC Berkeley."]}
+{"id": "v12_160", "key": "c796877c8d01970c5826d9763c8cbf60eb8cc33a", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are counting attendees for a wedding."]}

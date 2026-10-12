@@ -15792,3 +15792,27 @@ docs/PREREG_HELDOUT_V12.md with v12_run/tests/validate/brief; code frozen
 from that commit. Part R: 30 real emails from a fresh seeded pool of 150
 (aeslc train, seed 1213), drawn on the Mac, read by the developer as
 counts only.
+
+## Entry 328 — 2026-10-13 (held-out v12)
+
+One run on 20b1acb (frozen at 27fd77f), Qwen3-14B on a second identical
+server (8092) and Phi-4; blinded audit per reader (10 and 18 overrides, all
+missed false memories). results_v12/SUMMARY.md. Qwen: 7 of 11 met. Pasted
+claims given as the user's 12/40 (plain retrieval 28, agentmemory 35; Holm
+p 0.002 and 1e-6) but over the target of 6 (H1 missed); own 25/30 (met)
+but 4 behind plain retrieval's 29 (H4 missed); real emails 7/20 against 14
+(H10 missed by one, H11 p=0.056); real own 10/10; U 19/20, B 1/20, X 19/20,
+pooled 13/60 against 28 and 35. Phi-4 the same shape (13/40, 26/30, 7/20):
+H9 missed.
+
+Not a regression: on v12's pasted items the v11 code and the v12 code
+detect the same (D 26/40 found, own 26/30 kept; R 13 vs 15 of 20). v12's
+pasted texts come in shapes the rules do not read: a source named before
+the text in the same message (a text message, a rules list, a transcript),
+after it, or only in a later message in other words ("the note above is
+from ..."), or a header only. 12 of 40 D texts unmarked, 10 of them false
+memories. Own: 4 of the user's own texts with a signature or "text I sent"
+taken for someone else's. Each held-out set since v6 has found new shapes;
+the rule-based detector is at 70% of pasted texts on unseen writing and
+does not converge set by set. The agent's report leaked a few specifics
+(noted in the summary).

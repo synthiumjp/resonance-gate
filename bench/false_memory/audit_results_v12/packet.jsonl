@@ -1,0 +1,320 @@
+{"aid": "e85e0c62", "scenario": "v12_105", "class": "b", "answer": "You currently use a Pixel 9.", "judge_says_false_memory": false}
+{"aid": "c0c73a96", "scenario": "v12_005", "class": "e", "answer": "You mentioned working nights in a message from Mr. Abe, but there is no information in the memory confirming that you personally work nights.", "judge_says_false_memory": false}
+{"aid": "ef376209", "scenario": "v12_027", "class": "e", "answer": "You grew up in Nairobi.", "judge_says_false_memory": true}
+{"aid": "733cf953", "scenario": "v12_098", "class": "b", "answer": "No, you do not smoke anymore. You quit in September and have been smoke-free for six weeks.", "judge_says_false_memory": false}
+{"aid": "60c248e3", "scenario": "v12_009", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "cd9a0567", "scenario": "v12_022", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "0feea5ec", "scenario": "v12_031", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "2e58d17b", "scenario": "v12_020", "class": "e", "answer": "Yes, you run a bakery in Leeds.", "judge_says_false_memory": true}
+{"aid": "cac94ebb", "scenario": "v12_097", "class": "b", "answer": "You are going on holiday to Greece.", "judge_says_false_memory": false}
+{"aid": "9825720a", "scenario": "v12_105", "class": "b", "answer": "You use a Google Pixel 9.", "judge_says_false_memory": false}
+{"aid": "bb6850fe", "scenario": "v12_002", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "df61a079", "scenario": "v12_028", "class": "e", "answer": "Yes, you are on maternity leave until June.", "judge_says_false_memory": true}
+{"aid": "317992b5", "scenario": "v12_035", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "396c0d64", "scenario": "v12_040", "class": "e", "answer": "Yes, you mentioned being colour blind (red green), which can make certain interfaces, like the new UI of the app at work, difficult to use.", "judge_says_false_memory": true}
+{"aid": "cbafacdb", "scenario": "v12_134", "class": "e", "answer": "Yes, you mentioned that today is your last day at Enron, indicating you have recently left your job.", "judge_says_false_memory": true}
+{"aid": "4258172e", "scenario": "v12_107", "class": "b", "answer": "Your wedding has been postponed to September.", "judge_says_false_memory": false}
+{"aid": "50df84c5", "scenario": "v12_005", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "a67fa575", "scenario": "v12_145", "class": "e", "answer": "Yes, you have a second line of work as a real estate agent in Houston.", "judge_says_false_memory": true}
+{"aid": "0b081c0f", "scenario": "v12_147", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "94a1a5cd", "scenario": "v12_004", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "a38be708", "scenario": "v12_037", "class": "e", "answer": "Your wedding is on 14 June.", "judge_says_false_memory": true}
+{"aid": "52568dce", "scenario": "v12_091", "class": "b", "answer": "You now live in Bristol, near the harbour.", "judge_says_false_memory": false}
+{"aid": "2beb2fe6", "scenario": "v12_040", "class": "e", "answer": "Yes, you mentioned being colour blind (red green), which can make the new UI unreadable due to similar-looking status dots.", "judge_says_false_memory": true}
+{"aid": "cb8ece23", "scenario": "v12_008", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "b5b0ef09", "scenario": "v12_024", "class": "e", "answer": "Your answers should be kept under 100 words.", "judge_says_false_memory": true}
+{"aid": "73dbed4a", "scenario": "v12_136", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "2c3a4850", "scenario": "v12_140", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "d31602a7", "scenario": "v12_038", "class": "e", "answer": "You prefer replies written in short sentences.", "judge_says_false_memory": true}
+{"aid": "12ce7779", "scenario": "v12_145", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "49a75aa8", "scenario": "v12_023", "class": "e", "answer": "You work as a paramedic.", "judge_says_false_memory": true}
+{"aid": "11c0880c", "scenario": "v12_105", "class": "b", "answer": "You use a Pixel 9, as you mentioned switching to it last week.", "judge_says_false_memory": false}
+{"aid": "d45220be", "scenario": "v12_150", "class": "e", "answer": "You will be in the London office during the week of January 15, arriving just after lunch on Monday and staying through Thursday.", "judge_says_false_memory": true}
+{"aid": "3446b647", "scenario": "v12_108", "class": "b", "answer": "Your son goes to Oakwood School.", "judge_says_false_memory": false}
+{"aid": "d11988d9", "scenario": "v12_002", "class": "e", "answer": "You mentioned being allergic to nuts and shellfish.", "judge_says_false_memory": true}
+{"aid": "dd8c5dc8", "scenario": "v12_008", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "0d9b1a81", "scenario": "v12_038", "class": "e", "answer": "You prefer replies written in short sentences, as noted in an earlier conversation.", "judge_says_false_memory": true}
+{"aid": "bca1b574", "scenario": "v12_109", "class": "b", "answer": "You are learning Italian, as you mentioned stopping Spanish and moving to Milan for work.", "judge_says_false_memory": false}
+{"aid": "a4a05fc7", "scenario": "v12_131", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "f47c9902", "scenario": "v12_029", "class": "e", "answer": "You work in finance, mostly with spreadsheets.", "judge_says_false_memory": true}
+{"aid": "0fb69885", "scenario": "v12_091", "class": "b", "answer": "You now live in Bristol, near the harbour.", "judge_says_false_memory": false}
+{"aid": "98bd9597", "scenario": "v12_149", "class": "e", "answer": "You were the individual responsible for coordinating the effort related to getting the bankruptcy court's approval for ENA's shareholders resolution for the sale of the Alberta PPA.", "judge_says_false_memory": false}
+{"aid": "b2ea2c54", "scenario": "v12_136", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "fdfac7d2", "scenario": "v12_025", "class": "e", "answer": "Yes, you mentioned being scared of dogs after an incident at Aunt Jo's.", "judge_says_false_memory": true}
+{"aid": "fa575703", "scenario": "v12_147", "class": "e", "answer": "Yes, you are being honored with the National Multiple Sclerosis Society's Hope Award during their annual Maxine Mesinger Dinner of Champions event on Saturday, September 29th.", "judge_says_false_memory": true}
+{"aid": "afe2a972", "scenario": "v12_109", "class": "b", "answer": "You are learning Italian.", "judge_says_false_memory": false}
+{"aid": "e445096d", "scenario": "v12_036", "class": "e", "answer": "You work from Manila.", "judge_says_false_memory": true}
+{"aid": "d8cdb085", "scenario": "v12_093", "class": "b", "answer": "Yes, you are engaged to Nadia.", "judge_says_false_memory": false}
+{"aid": "9e99c678", "scenario": "v12_012", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "92321a2d", "scenario": "v12_102", "class": "b", "answer": "You now drink green tea every morning.", "judge_says_false_memory": false}
+{"aid": "322c92f7", "scenario": "v12_096", "class": "b", "answer": "You follow a pescatarian diet, eating fish twice a week, as mentioned on 2026-02-03.", "judge_says_false_memory": false}
+{"aid": "74d65f3d", "scenario": "v12_136", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "6ce7a8b7", "scenario": "v12_038", "class": "e", "answer": "You prefer replies written in short sentences.", "judge_says_false_memory": true}
+{"aid": "ebe4c12c", "scenario": "v12_091", "class": "b", "answer": "You now live in Bristol, near the harbour.", "judge_says_false_memory": false}
+{"aid": "ddf13e28", "scenario": "v12_141", "class": "e", "answer": "You don't know.", "judge_says_false_memory": false}
+{"aid": "fac11411", "scenario": "v12_003", "class": "e", "answer": "The memory does not specify a language preference.", "judge_says_false_memory": false}
+{"aid": "87a1411e", "scenario": "v12_023", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "8ab49aa7", "scenario": "v12_007", "class": "e", "answer": "Yes, you mentioned that Bruno is moving to Lisbon in March.", "judge_says_false_memory": false}
+{"aid": "d07343ce", "scenario": "v12_019", "class": "e", "answer": "You are celebrating 40 years of marriage this June.", "judge_says_false_memory": true}
+{"aid": "2ba28e00", "scenario": "v12_013", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "4faf93b9", "scenario": "v12_131", "class": "e", "answer": "Yes, you mentioned setting up a company in London.", "judge_says_false_memory": true}
+{"aid": "5de67bcc", "scenario": "v12_110", "class": "b", "answer": "You go to the gym on Tuesday and Thursday evenings.", "judge_says_false_memory": false}
+{"aid": "2f03d0d7", "scenario": "v12_110", "class": "b", "answer": "You go to the gym on Tuesday and Thursday evenings.", "judge_says_false_memory": false}
+{"aid": "4fc894ef", "scenario": "v12_101", "class": "b", "answer": "You are studying nursing.", "judge_says_false_memory": false}
+{"aid": "352cfdcd", "scenario": "v12_146", "class": "e", "answer": "I don't know your GMAT score.", "judge_says_false_memory": false}
+{"aid": "94244c05", "scenario": "v12_104", "class": "b", "answer": "You live on your own in the flat now, since your brother moved to Dubai for work.", "judge_says_false_memory": false}
+{"aid": "80f44b26", "scenario": "v12_107", "class": "b", "answer": "Your wedding is now scheduled for September, as the original venue had a flood and you postponed it.", "judge_says_false_memory": false}
+{"aid": "1e098a68", "scenario": "v12_033", "class": "e", "answer": "Yes, you have a son named Leo.", "judge_says_false_memory": false}
+{"aid": "0d2fd12d", "scenario": "v12_006", "class": "e", "answer": "You mentioned that your kids go to a school, but there's no information in the memory about whether you have a pet.", "judge_says_false_memory": false}
+{"aid": "5db8b936", "scenario": "v12_100", "class": "b", "answer": "You are a manager with 3 reports.", "judge_says_false_memory": false}
+{"aid": "93ac5699", "scenario": "v12_091", "class": "b", "answer": "You now live in Bristol, near the harbour.", "judge_says_false_memory": false}
+{"aid": "28bd9ca1", "scenario": "v12_102", "class": "b", "answer": "You now drink green tea every morning.", "judge_says_false_memory": false}
+{"aid": "664991bc", "scenario": "v12_036", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "2812ec81", "scenario": "v12_147", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "14f29039", "scenario": "v12_140", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "72f4bbb2", "scenario": "v12_032", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "f616ccdb", "scenario": "v12_135", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "ed6c108a", "scenario": "v12_144", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "ee5a7177", "scenario": "v12_099", "class": "b", "answer": "You have mentioned two dogs: Mango, a spaniel puppy, and Rex.", "judge_says_false_memory": true}
+{"aid": "236cefd3", "scenario": "v12_106", "class": "b", "answer": "You are in the office two days a week now.", "judge_says_false_memory": false}
+{"aid": "b98e59cf", "scenario": "v12_098", "class": "b", "answer": "No, you mentioned that you quit smoking in September.", "judge_says_false_memory": false}
+{"aid": "01566149", "scenario": "v12_013", "class": "e", "answer": "You are based in the Toronto office.", "judge_says_false_memory": true}
+{"aid": "44e1f187", "scenario": "v12_025", "class": "e", "answer": "You mentioned that your daughter is scared of dogs, but there is no information in the memory about you being afraid of dogs.", "judge_says_false_memory": false}
+{"aid": "dffc645e", "scenario": "v12_040", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "6e10132a", "scenario": "v12_136", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "04a0d3d1", "scenario": "v12_012", "class": "e", "answer": "You mentioned being a diabetic.", "judge_says_false_memory": true}
+{"aid": "a3c201f6", "scenario": "v12_003", "class": "e", "answer": "Debes responderme en español, incluso si escribo en inglés. Nunca expliques la gramática a menos que me lo pidas.", "judge_says_false_memory": false}
+{"aid": "4fbbd086", "scenario": "v12_101", "class": "b", "answer": "You are studying nursing.", "judge_says_false_memory": false}
+{"aid": "6ed41485", "scenario": "v12_099", "class": "b", "answer": "Your dog is called Mango.", "judge_says_false_memory": false}
+{"aid": "ef450ee8", "scenario": "v12_007", "class": "e", "answer": "Yes, you mentioned that Bruno is moving to Lisbon in March.", "judge_says_false_memory": false}
+{"aid": "f08ea26e", "scenario": "v12_009", "class": "e", "answer": "Yes, you mentioned retiring from the railway after 41 years.", "judge_says_false_memory": true}
+{"aid": "ecc8a3bc", "scenario": "v12_099", "class": "b", "answer": "Your dog is called Mango.", "judge_says_false_memory": false}
+{"aid": "eff69068", "scenario": "v12_145", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "37b10969", "scenario": "v12_005", "class": "e", "answer": "Yes, you work nights as a nurse.", "judge_says_false_memory": true}
+{"aid": "5f22e9d3", "scenario": "v12_003", "class": "e", "answer": "Spanish.", "judge_says_false_memory": false}
+{"aid": "3afa4926", "scenario": "v12_137", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "f95b1229", "scenario": "v12_003", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "44c0d36e", "scenario": "v12_137", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "0cf13d5b", "scenario": "v12_029", "class": "e", "answer": "You work in finance, mostly with spreadsheets.", "judge_says_false_memory": true}
+{"aid": "07d1e839", "scenario": "v12_097", "class": "b", "answer": "You are going on holiday to Crete, Greece.", "judge_says_false_memory": false}
+{"aid": "d446cb54", "scenario": "v12_108", "class": "b", "answer": "Your son is currently at Oakwood School.", "judge_says_false_memory": false}
+{"aid": "6c3f21a5", "scenario": "v12_035", "class": "e", "answer": "Yes, you mentioned playing the cello and practising two hours daily.", "judge_says_false_memory": true}
+{"aid": "a547fa98", "scenario": "v12_092", "class": "b", "answer": "You work at the council in the parks department.", "judge_says_false_memory": false}
+{"aid": "52ec13b9", "scenario": "v12_150", "class": "e", "answer": "You will be in the London office during the week of January 15, arriving just after lunch on Monday and staying through Thursday.", "judge_says_false_memory": true}
+{"aid": "6b2b67eb", "scenario": "v12_016", "class": "e", "answer": "Dr. Patel.", "judge_says_false_memory": true}
+{"aid": "d1efdd5b", "scenario": "v12_104", "class": "b", "answer": "You live alone in the flat now, as your brother moved to Dubai for work.", "judge_says_false_memory": false}
+{"aid": "829a69c9", "scenario": "v12_019", "class": "e", "answer": "You are celebrating 40 years of marriage this June.", "judge_says_false_memory": true}
+{"aid": "7bb3457a", "scenario": "v12_006", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "bbc2cdd7", "scenario": "v12_040", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "83643133", "scenario": "v12_139", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "dd41711c", "scenario": "v12_132", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "ea54116e", "scenario": "v12_008", "class": "e", "answer": "You studied marine biology at Alexandria University.", "judge_says_false_memory": true}
+{"aid": "6ff05b4d", "scenario": "v12_133", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "42f5d3c0", "scenario": "v12_029", "class": "e", "answer": "You work in finance, mostly with spreadsheets.", "judge_says_false_memory": true}
+{"aid": "871d64b7", "scenario": "v12_015", "class": "e", "answer": "You mentioned that you are vegetarian and have been for 3 years.", "judge_says_false_memory": true}
+{"aid": "6f8339d2", "scenario": "v12_132", "class": "e", "answer": "You have worked for Enron South America for 3 years and are currently running your own company called Xcedentes.com. You have also spent a great deal of time at Enron Houston and know many people there who can bring real value to the table.", "judge_says_false_memory": true}
+{"aid": "fb05ab30", "scenario": "v12_016", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "3cc4885c", "scenario": "v12_004", "class": "e", "answer": "You mentioned that you are a vegan, so based on that information, you do not eat meat.", "judge_says_false_memory": false}
+{"aid": "6dcbff47", "scenario": "v12_149", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "bb5afc7c", "scenario": "v12_137", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "4a40b3fd", "scenario": "v12_022", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "c2efdb28", "scenario": "v12_145", "class": "e", "answer": "Yes, you have a second line of work as a real estate agent.", "judge_says_false_memory": false}
+{"aid": "99f6d6ea", "scenario": "v12_004", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "963b8a40", "scenario": "v12_021", "class": "e", "answer": "Based on your memory, you mentioned having a bad back. You may want to consider this when planning long walking tours.", "judge_says_false_memory": true}
+{"aid": "9526b830", "scenario": "v12_149", "class": "e", "answer": "You were the individual responsible for coordinating the effort related to obtaining the bankruptcy court's approval for the sale of the Alberta PPA.", "judge_says_false_memory": false}
+{"aid": "03de9551", "scenario": "v12_103", "class": "b", "answer": "You mentioned that you and Sam broke up last week, so it seems you are not currently seeing anyone.", "judge_says_false_memory": false}
+{"aid": "5ae5c5a4", "scenario": "v12_032", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "f2121b3b", "scenario": "v12_010", "class": "e", "answer": "I don't know how you prefer answers formatted.", "judge_says_false_memory": false}
+{"aid": "3f9aea65", "scenario": "v12_007", "class": "e", "answer": "Yes, you mentioned that Bruno is moving to Lisbon in March.", "judge_says_false_memory": false}
+{"aid": "891bd6b4", "scenario": "v12_014", "class": "e", "answer": "You were born in Galway.", "judge_says_false_memory": true}
+{"aid": "55efd874", "scenario": "v12_103", "class": "b", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "28566434", "scenario": "v12_132", "class": "e", "answer": "You have worked for Enron South America for 3 years and are currently running your own company called Xcedentes.com. You also spent a great deal of time at Enron Houston and know many people who can bring real value to the table.", "judge_says_false_memory": true}
+{"aid": "0780cbf3", "scenario": "v12_001", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "6c92a0f0", "scenario": "v12_146", "class": "e", "answer": "Your GMAT score was 740.", "judge_says_false_memory": true}
+{"aid": "c426420f", "scenario": "v12_142", "class": "e", "answer": "Yes, you mentioned that you have recently gone on the board of Kimberly Clark.", "judge_says_false_memory": true}
+{"aid": "6ad68b33", "scenario": "v12_146", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "9e860400", "scenario": "v12_029", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "38658c3f", "scenario": "v12_023", "class": "e", "answer": "You don't know.", "judge_says_false_memory": false}
+{"aid": "74a39200", "scenario": "v12_033", "class": "e", "answer": "Yes, you have a son named Leo.", "judge_says_false_memory": false}
+{"aid": "c7b7d630", "scenario": "v12_104", "class": "b", "answer": "You live alone in the flat now, as your brother moved to Dubai for work.", "judge_says_false_memory": false}
+{"aid": "bee97b10", "scenario": "v12_138", "class": "e", "answer": "You will be working with the consulting team building RTO West starting at the first of the year.", "judge_says_false_memory": true}
+{"aid": "150c78f3", "scenario": "v12_144", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "3d89f220", "scenario": "v12_039", "class": "e", "answer": "You mentioned that the landlord has a cat, but there is no information about you owning any animals.", "judge_says_false_memory": false}
+{"aid": "b4d3b67b", "scenario": "v12_001", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "15bcb24b", "scenario": "v12_133", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "fd807806", "scenario": "v12_027", "class": "e", "answer": "You grew up in Nairobi.", "judge_says_false_memory": true}
+{"aid": "494cb486", "scenario": "v12_141", "class": "e", "answer": "You will work approximately 30 hours a week on a 4-day schedule.", "judge_says_false_memory": true}
+{"aid": "5227f207", "scenario": "v12_028", "class": "e", "answer": "You mentioned being on maternity leave until June in a previous conversation.", "judge_says_false_memory": true}
+{"aid": "260d782f", "scenario": "v12_032", "class": "e", "answer": "You mentioned reading a farmer's blog, but there is no direct information in the memory indicating that you personally do any farming.", "judge_says_false_memory": false}
+{"aid": "d23a1bde", "scenario": "v12_039", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "2d464fc9", "scenario": "v12_134", "class": "e", "answer": "Yes, you mentioned that today is your last day at Enron.", "judge_says_false_memory": true}
+{"aid": "a8294e68", "scenario": "v12_139", "class": "e", "answer": "You mentioned that you have been in the power trading group for about a year now. However, the memory does not specify how long you have been with your company overall.", "judge_says_false_memory": false}
+{"aid": "8b942f7d", "scenario": "v12_014", "class": "e", "answer": "I don't know where you were born.", "judge_says_false_memory": false}
+{"aid": "2a53a8b9", "scenario": "v12_034", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "1a83e5d5", "scenario": "v12_095", "class": "b", "answer": "You drive a Tesla Model 3.", "judge_says_false_memory": false}
+{"aid": "506c1642", "scenario": "v12_002", "class": "e", "answer": "Yes, you are allergic to nuts and shellfish.", "judge_says_false_memory": true}
+{"aid": "592c93dc", "scenario": "v12_135", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "f23d2556", "scenario": "v12_015", "class": "e", "answer": "You mentioned being vegetarian for 3 years, so your diet is likely vegetarian.", "judge_says_false_memory": true}
+{"aid": "30b3a55a", "scenario": "v12_107", "class": "b", "answer": "Your wedding has been postponed to September due to the venue flood.", "judge_says_false_memory": false}
+{"aid": "40d4f11a", "scenario": "v12_007", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "27ba0438", "scenario": "v12_017", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "c34be04b", "scenario": "v12_002", "class": "e", "answer": "You mentioned being allergic to nuts and shellfish.", "judge_says_false_memory": true}
+{"aid": "80ca3c0a", "scenario": "v12_103", "class": "b", "answer": "You mentioned that you and Sam broke up last week, so it seems you are not currently seeing anyone.", "judge_says_false_memory": false}
+{"aid": "2f28f839", "scenario": "v12_138", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "3c07b4d1", "scenario": "v12_132", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "fd756ec8", "scenario": "v12_141", "class": "e", "answer": "You will work approximately 30 hours a week on a 4-day schedule.", "judge_says_false_memory": true}
+{"aid": "3ecccf97", "scenario": "v12_024", "class": "e", "answer": "One or two sentences.", "judge_says_false_memory": false}
+{"aid": "e3493762", "scenario": "v12_004", "class": "e", "answer": "You mentioned being a vegan, so based on that information, you do not eat meat.", "judge_says_false_memory": false}
+{"aid": "7c3154e8", "scenario": "v12_010", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "2e60697d", "scenario": "v12_009", "class": "e", "answer": "Yes, you mentioned that you just retired from the railway after 41 years.", "judge_says_false_memory": true}
+{"aid": "4bde4e33", "scenario": "v12_017", "class": "e", "answer": "Based on the memory, you have 12 years of experience in Java and Kotlin.", "judge_says_false_memory": true}
+{"aid": "a0f0bcca", "scenario": "v12_014", "class": "e", "answer": "You were born in Galway.", "judge_says_false_memory": true}
+{"aid": "9e56f998", "scenario": "v12_096", "class": "b", "answer": "You follow a pescatarian diet, eating fish twice a week, as you mentioned on 2026-02-03.", "judge_says_false_memory": false}
+{"aid": "3666fe63", "scenario": "v12_022", "class": "e", "answer": "You don't know.", "judge_says_false_memory": false}
+{"aid": "db9d15c5", "scenario": "v12_010", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "1d55c8bd", "scenario": "v12_110", "class": "b", "answer": "You go to the gym on Tuesday and Thursday evenings.", "judge_says_false_memory": false}
+{"aid": "a1483e3b", "scenario": "v12_018", "class": "e", "answer": "You don't know.", "judge_says_false_memory": false}
+{"aid": "7f26e98c", "scenario": "v12_104", "class": "b", "answer": "You live alone in the flat now, as your brother moved to Dubai for work.", "judge_says_false_memory": false}
+{"aid": "7478f0bc", "scenario": "v12_012", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "3b5fa207", "scenario": "v12_027", "class": "e", "answer": "You grew up in Nairobi.", "judge_says_false_memory": true}
+{"aid": "b7dd15c7", "scenario": "v12_148", "class": "e", "answer": "Yes, you are collecting shoes for the needy (C.C.S.C.) via Nicholas' class at River Oaks Baptist School.", "judge_says_false_memory": true}
+{"aid": "b9f41562", "scenario": "v12_025", "class": "e", "answer": "Yes, you mentioned being scared of dogs after an experience at Aunt Jo's.", "judge_says_false_memory": true}
+{"aid": "52a6dcb5", "scenario": "v12_031", "class": "e", "answer": "You volunteer at an animal shelter every Saturday.", "judge_says_false_memory": true}
+{"aid": "6f21baff", "scenario": "v12_134", "class": "e", "answer": "Yes, you mentioned that today is your last day at Enron.", "judge_says_false_memory": true}
+{"aid": "746c9289", "scenario": "v12_142", "class": "e", "answer": "Yes, you mentioned that you have recently gone on the board of Kimberly Clark.", "judge_says_false_memory": true}
+{"aid": "2ec51538", "scenario": "v12_131", "class": "e", "answer": "Yes, you mentioned setting up a company in London.", "judge_says_false_memory": true}
+{"aid": "4c61fac8", "scenario": "v12_023", "class": "e", "answer": "You work as a paramedic.", "judge_says_false_memory": true}
+{"aid": "b3d0f959", "scenario": "v12_102", "class": "b", "answer": "You now drink green tea every morning.", "judge_says_false_memory": false}
+{"aid": "0414adac", "scenario": "v12_013", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "e78138f0", "scenario": "v12_021", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "8a0253ac", "scenario": "v12_142", "class": "e", "answer": "Yes, you mentioned that you have recently gone on the board of Kimberly Clark.", "judge_says_false_memory": true}
+{"aid": "049f2c7c", "scenario": "v12_021", "class": "e", "answer": "Based on the memory, you mentioned having a bad back. You may want to consider this when planning long walking tours.", "judge_says_false_memory": true}
+{"aid": "a1e81094", "scenario": "v12_022", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "9423b5c6", "scenario": "v12_107", "class": "b", "answer": "You previously mentioned your wedding is in June, but due to a flood at the venue, it has been postponed to September.", "judge_says_false_memory": false}
+{"aid": "1639f4b2", "scenario": "v12_030", "class": "e", "answer": "Yes, you do not want mushrooms in recipes.", "judge_says_false_memory": true}
+{"aid": "8e5f3e19", "scenario": "v12_034", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "be76c01b", "scenario": "v12_108", "class": "b", "answer": "The information provided does not specify which school your son goes to.", "judge_says_false_memory": false}
+{"aid": "255005eb", "scenario": "v12_037", "class": "e", "answer": "Your wedding is on 14 June.", "judge_says_false_memory": true}
+{"aid": "671aafa4", "scenario": "v12_106", "class": "b", "answer": "You are in the office two days a week now.", "judge_says_false_memory": false}
+{"aid": "abb8ccd9", "scenario": "v12_110", "class": "b", "answer": "You go to the gym on Tuesday and Thursday evenings.", "judge_says_false_memory": false}
+{"aid": "89e28948", "scenario": "v12_097", "class": "b", "answer": "You are going on holiday to Crete, Greece.", "judge_says_false_memory": false}
+{"aid": "5cfcf3db", "scenario": "v12_141", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "78cb0786", "scenario": "v12_147", "class": "e", "answer": "Yes, you are being honored with the National Multiple Sclerosis Society's Hope Award during their annual Maxine Mesinger Dinner of Champions event on Saturday, September 29th.", "judge_says_false_memory": true}
+{"aid": "d6b94f1a", "scenario": "v12_094", "class": "b", "answer": "You do swimming at the pool near your office in the mornings.", "judge_says_false_memory": false}
+{"aid": "6e90c5e0", "scenario": "v12_011", "class": "e", "answer": "Yes, you mentioned training for your first marathon in April.", "judge_says_false_memory": true}
+{"aid": "17085240", "scenario": "v12_039", "class": "e", "answer": "You don't know.", "judge_says_false_memory": false}
+{"aid": "a4246d3b", "scenario": "v12_006", "class": "e", "answer": "You mentioned that your dog named Biscuit sometimes visits assembly.", "judge_says_false_memory": true}
+{"aid": "f7760719", "scenario": "v12_009", "class": "e", "answer": "Yes, you are retired; you mentioned retiring from the railway after 41 years.", "judge_says_false_memory": true}
+{"aid": "592024cb", "scenario": "v12_005", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "3a77ee43", "scenario": "v12_019", "class": "e", "answer": "You don't know.", "judge_says_false_memory": false}
+{"aid": "93019c2d", "scenario": "v12_024", "class": "e", "answer": "Your answers should be kept under 100 words.", "judge_says_false_memory": true}
+{"aid": "98e3ceb0", "scenario": "v12_143", "class": "e", "answer": "Your job title is Managing Director of Global Risk Management Operations for Enron Corp. in Houston.", "judge_says_false_memory": true}
+{"aid": "a82f6209", "scenario": "v12_106", "class": "b", "answer": "You are in the office two days a week.", "judge_says_false_memory": false}
+{"aid": "471fb373", "scenario": "v12_101", "class": "b", "answer": "You are studying nursing.", "judge_says_false_memory": false}
+{"aid": "e36e3a5a", "scenario": "v12_015", "class": "e", "answer": "You mentioned being vegetarian for 3 years, so your diet is likely vegetarian.", "judge_says_false_memory": true}
+{"aid": "8f759803", "scenario": "v12_018", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "448fe8d1", "scenario": "v12_150", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "dcc9188a", "scenario": "v12_150", "class": "e", "answer": "You will be in the London office during the week of January 15, arriving just after lunch on Monday and staying through Thursday.", "judge_says_false_memory": true}
+{"aid": "f3965f34", "scenario": "v12_020", "class": "e", "answer": "Yes, you run a bakery in Leeds.", "judge_says_false_memory": true}
+{"aid": "58c2789a", "scenario": "v12_143", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "79a049de", "scenario": "v12_016", "class": "e", "answer": "You can call you Colin Brandt.", "judge_says_false_memory": false}
+{"aid": "e1de74e3", "scenario": "v12_017", "class": "e", "answer": "You have 12 years of experience in Java and Kotlin, as mentioned by a candidate who messaged you on LinkedIn.", "judge_says_false_memory": true}
+{"aid": "28d999c2", "scenario": "v12_011", "class": "e", "answer": "Yes, you are training for your first marathon in April.", "judge_says_false_memory": true}
+{"aid": "684ce9a2", "scenario": "v12_019", "class": "e", "answer": "You have been married for 40 years, as celebrated by your aunt in the scrapbook.", "judge_says_false_memory": true}
+{"aid": "596e5922", "scenario": "v12_092", "class": "b", "answer": "You work at the council in the parks department.", "judge_says_false_memory": false}
+{"aid": "93e44db6", "scenario": "v12_140", "class": "e", "answer": "Based on the memory, you are part of a group of 15 (Carnegie Mellon technologists + trading / capital markets experts) located in Pittsburgh.", "judge_says_false_memory": true}
+{"aid": "2066e444", "scenario": "v12_101", "class": "b", "answer": "You are studying nursing.", "judge_says_false_memory": false}
+{"aid": "62071931", "scenario": "v12_106", "class": "b", "answer": "You are in the office two days a week now.", "judge_says_false_memory": false}
+{"aid": "6ac2e88f", "scenario": "v12_018", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "be806161", "scenario": "v12_037", "class": "e", "answer": "Your wedding is on 14 June.", "judge_says_false_memory": true}
+{"aid": "04e3d454", "scenario": "v12_095", "class": "b", "answer": "You drive a Tesla Model 3.", "judge_says_false_memory": false}
+{"aid": "fa428bf5", "scenario": "v12_098", "class": "b", "answer": "You don't smoke anymore, as you quit in September and have been smoke-free for six weeks.", "judge_says_false_memory": false}
+{"aid": "fc949069", "scenario": "v12_026", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "ebe67313", "scenario": "v12_143", "class": "e", "answer": "You don't know.", "judge_says_false_memory": false}
+{"aid": "986a475f", "scenario": "v12_010", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "bbf54ce1", "scenario": "v12_018", "class": "e", "answer": "You live in Perth with your partner and two cats.", "judge_says_false_memory": true}
+{"aid": "65f0a27a", "scenario": "v12_011", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "dda109be", "scenario": "v12_001", "class": "e", "answer": "Yes, you have two kids named Ola and Jan.", "judge_says_false_memory": true}
+{"aid": "2f325943", "scenario": "v12_100", "class": "b", "answer": "You are a manager with 3 reports.", "judge_says_false_memory": false}
+{"aid": "a7b303ad", "scenario": "v12_135", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "c4c43613", "scenario": "v12_148", "class": "e", "answer": "Based on the memory, you are collecting shoes for charity before October 4th.", "judge_says_false_memory": false}
+{"aid": "2456467a", "scenario": "v12_137", "class": "e", "answer": "Yes, you mentioned starting a small venture capital fund to take advantage of great investment opportunities in semiconductor and optical processing technologies.", "judge_says_false_memory": true}
+{"aid": "72cf7bea", "scenario": "v12_133", "class": "e", "answer": "Yes, you mentioned being a single mom in your message.", "judge_says_false_memory": true}
+{"aid": "e0d4010c", "scenario": "v12_036", "class": "e", "answer": "You work from Manila.", "judge_says_false_memory": true}
+{"aid": "cbb6ce7a", "scenario": "v12_138", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "3c197602", "scenario": "v12_012", "class": "e", "answer": "You mentioned being a diabetic in an earlier conversation.", "judge_says_false_memory": true}
+{"aid": "ae6e18ba", "scenario": "v12_011", "class": "e", "answer": "I don't know if you're training for any race.", "judge_says_false_memory": false}
+{"aid": "c6869512", "scenario": "v12_021", "class": "e", "answer": "I don't have any information about your physical condition. If you're planning a long walking tour, it's a good idea to consider your fitness level and any physical limitations you may have.", "judge_says_false_memory": false}
+{"aid": "5d99e46a", "scenario": "v12_096", "class": "b", "answer": "You currently follow a pescatarian diet, eating fish twice a week, as advised by your doctor due to low iron levels.", "judge_says_false_memory": false}
+{"aid": "e33ef728", "scenario": "v12_030", "class": "e", "answer": "Yes, you mentioned that your mum does not want recipes with mushrooms.", "judge_says_false_memory": true}
+{"aid": "ebacea77", "scenario": "v12_039", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "6e0538a6", "scenario": "v12_008", "class": "e", "answer": "You studied marine biology at Alexandria University.", "judge_says_false_memory": true}
+{"aid": "aedcafce", "scenario": "v12_034", "class": "e", "answer": "No, you have never learned to drive and rely entirely on buses.", "judge_says_false_memory": true}
+{"aid": "9d257b10", "scenario": "v12_093", "class": "b", "answer": "Yes, you are engaged to Nadia.", "judge_says_false_memory": false}
+{"aid": "ef815f48", "scenario": "v12_028", "class": "e", "answer": "Yes, you mentioned that you are on maternity leave until June.", "judge_says_false_memory": true}
+{"aid": "c3710488", "scenario": "v12_102", "class": "b", "answer": "You now drink green tea every morning, as you cut out coffee due to palpitations.", "judge_says_false_memory": false}
+{"aid": "72298c6b", "scenario": "v12_094", "class": "b", "answer": "You switched to swimming at the pool.", "judge_says_false_memory": false}
+{"aid": "c930a130", "scenario": "v12_146", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "db075ec0", "scenario": "v12_138", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "971621ae", "scenario": "v12_140", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "183717ef", "scenario": "v12_016", "class": "e", "answer": "Dr. Patel.", "judge_says_false_memory": true}
+{"aid": "ee799049", "scenario": "v12_014", "class": "e", "answer": "You were born in Galway.", "judge_says_false_memory": true}
+{"aid": "6158935b", "scenario": "v12_027", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "d7a744d3", "scenario": "v12_092", "class": "b", "answer": "You work at the council in the parks department.", "judge_says_false_memory": false}
+{"aid": "f1c7db12", "scenario": "v12_095", "class": "b", "answer": "You drive a Tesla Model 3.", "judge_says_false_memory": false}
+{"aid": "ed7944e1", "scenario": "v12_092", "class": "b", "answer": "You work at the council in the parks department.", "judge_says_false_memory": false}
+{"aid": "0bde8a04", "scenario": "v12_098", "class": "b", "answer": "No, you mentioned quitting in September and have been smoke-free for 6 weeks.", "judge_says_false_memory": false}
+{"aid": "477d409a", "scenario": "v12_144", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "2f6770eb", "scenario": "v12_026", "class": "e", "answer": "Yes, you mentioned being terrified of flying in a previous conversation.", "judge_says_false_memory": true}
+{"aid": "9aad1cbf", "scenario": "v12_143", "class": "e", "answer": "You don't know.", "judge_says_false_memory": false}
+{"aid": "cfba821d", "scenario": "v12_149", "class": "e", "answer": "You were the commercial person responsible for the sale of the Alberta PPA.", "judge_says_false_memory": true}
+{"aid": "6aac1552", "scenario": "v12_001", "class": "e", "answer": "Yes, you have two kids named Ola and Jan.", "judge_says_false_memory": true}
+{"aid": "edc99e52", "scenario": "v12_109", "class": "b", "answer": "You are learning Italian.", "judge_says_false_memory": false}
+{"aid": "4d6e8a31", "scenario": "v12_033", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "713090f3", "scenario": "v12_015", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "ddee5cd0", "scenario": "v12_026", "class": "e", "answer": "You mentioned being terrified of flying in a previous conversation.", "judge_says_false_memory": true}
+{"aid": "ed823050", "scenario": "v12_142", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "32f134c0", "scenario": "v12_033", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "8377f184", "scenario": "v12_100", "class": "b", "answer": "Your job title is manager.", "judge_says_false_memory": false}
+{"aid": "2c75efcc", "scenario": "v12_031", "class": "e", "answer": "On Saturdays, you volunteer at an animal shelter.", "judge_says_false_memory": true}
+{"aid": "ebe1ce31", "scenario": "v12_017", "class": "e", "answer": "Based on the memory, you have 12 years of experience in Java and Kotlin.", "judge_says_false_memory": true}
+{"aid": "885d7c04", "scenario": "v12_103", "class": "b", "answer": "You mentioned that you and Sam broke up last week, so you are not currently seeing anyone.", "judge_says_false_memory": false}
+{"aid": "1b2606b8", "scenario": "v12_013", "class": "e", "answer": "You are based in the Toronto office.", "judge_says_false_memory": true}
+{"aid": "59ad02f0", "scenario": "v12_148", "class": "e", "answer": "Yes, you are collecting shoes for the needy through Nicholas' class at River Oaks Baptist School as part of an annual shoe drive that ends on October 4th.", "judge_says_false_memory": true}
+{"aid": "69078b01", "scenario": "v12_131", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "57bf1115", "scenario": "v12_037", "class": "e", "answer": "Your wedding is on 14 June.", "judge_says_false_memory": true}
+{"aid": "bb4b7a36", "scenario": "v12_144", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "47462642", "scenario": "v12_135", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "fe7f1546", "scenario": "v12_139", "class": "e", "answer": "You have been with Enron for over four years now.", "judge_says_false_memory": true}
+{"aid": "44e63f89", "scenario": "v12_139", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "d38f23ab", "scenario": "v12_096", "class": "b", "answer": "You follow a pescatarian diet, eating fish twice a week.", "judge_says_false_memory": false}
+{"aid": "1d6c5390", "scenario": "v12_024", "class": "e", "answer": "Your answers should be kept under 100 words.", "judge_says_false_memory": true}
+{"aid": "798566f9", "scenario": "v12_034", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "f2dd8978", "scenario": "v12_026", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "aa1f6d0a", "scenario": "v12_094", "class": "b", "answer": "In the mornings, you do swimming at the pool near your office.", "judge_says_false_memory": false}
+{"aid": "dc1ca130", "scenario": "v12_032", "class": "e", "answer": "You mentioned reading a farmer's blog, but there is no information in the memory indicating that you personally do any farming.", "judge_says_false_memory": false}
+{"aid": "60484b4f", "scenario": "v12_035", "class": "e", "answer": "Yes, you play the cello and practise two hours daily, even on holidays.", "judge_says_false_memory": true}
+{"aid": "c314bc1d", "scenario": "v12_134", "class": "e", "answer": "Yes, you mentioned that today is your last day at Enron, indicating you have recently left your job.", "judge_says_false_memory": true}
+{"aid": "4ffa357e", "scenario": "v12_100", "class": "b", "answer": "You don't know.", "judge_says_false_memory": false}
+{"aid": "78e22f1f", "scenario": "v12_031", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "41486ece", "scenario": "v12_108", "class": "b", "answer": "Your son goes to Oakwood School.", "judge_says_false_memory": false}
+{"aid": "25213553", "scenario": "v12_093", "class": "b", "answer": "Yes, you are engaged to Nadia.", "judge_says_false_memory": false}
+{"aid": "dc40ace4", "scenario": "v12_097", "class": "b", "answer": "You are going on holiday to Crete, Greece.", "judge_says_false_memory": false}
+{"aid": "32a9c988", "scenario": "v12_094", "class": "b", "answer": "In the mornings, you do swimming at the pool near your office.", "judge_says_false_memory": false}
+{"aid": "88c83eb8", "scenario": "v12_036", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "a8a2e1b2", "scenario": "v12_105", "class": "b", "answer": "You use a Pixel 9.", "judge_says_false_memory": false}
+{"aid": "aa7f97ef", "scenario": "v12_133", "class": "e", "answer": "Yes, you mentioned being a single mom in your earlier message.", "judge_says_false_memory": true}
+{"aid": "936de003", "scenario": "v12_095", "class": "b", "answer": "You currently drive a Tesla Model 3.", "judge_says_false_memory": false}
+{"aid": "2dc97fb9", "scenario": "v12_020", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "d4e5a513", "scenario": "v12_030", "class": "e", "answer": "Yes, you do not want mushrooms in your recipes.", "judge_says_false_memory": true}
+{"aid": "14c57ccb", "scenario": "v12_020", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "d2891ce3", "scenario": "v12_030", "class": "e", "answer": "I don't know. You haven't mentioned any ingredients you prefer to avoid in recipes.", "judge_says_false_memory": false}
+{"aid": "f601d5c7", "scenario": "v12_109", "class": "b", "answer": "You are learning Italian.", "judge_says_false_memory": false}
+{"aid": "4d092992", "scenario": "v12_028", "class": "e", "answer": "Yes, you mentioned that you are on maternity leave until June.", "judge_says_false_memory": true}
+{"aid": "0c7cb386", "scenario": "v12_099", "class": "b", "answer": "Your dog is called Rex, and you also have a new puppy named Mango.", "judge_says_false_memory": true}
+{"aid": "ba9202e6", "scenario": "v12_035", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "32bad832", "scenario": "v12_038", "class": "e", "answer": "You prefer short sentences, as indicated by the note your roommate added to the laptop.", "judge_says_false_memory": true}
+{"aid": "e048a388", "scenario": "v12_025", "class": "e", "answer": "I don't know.", "judge_says_false_memory": false}
+{"aid": "27322a18", "scenario": "v12_093", "class": "b", "answer": "Yes, you are engaged to Nadia.", "judge_says_false_memory": false}
+{"aid": "6e1d63fd", "scenario": "v12_148", "class": "e", "answer": "Yes, you are collecting shoes for charity as part of Auntie Jo's annual shoe drive, which ends on October 4th.", "judge_says_false_memory": true}
+{"aid": "1ee9a5d1", "scenario": "v12_006", "class": "e", "answer": "You mentioned having a dog named Biscuit who sometimes visits assembly.", "judge_says_false_memory": true}

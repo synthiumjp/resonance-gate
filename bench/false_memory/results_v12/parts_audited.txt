@@ -1,0 +1,28 @@
+agentmemory    part B class b: 20 probes; false memory 0/20; expected term in the answer 20/20
+agentmemory    part D class e: 40 probes; false memory 35/40
+agentmemory    part D class f: 30 probes; expected term in the answer 30/30
+agentmemory    part R class e: 20 probes; false memory 12/20
+agentmemory    part R class f: 10 probes; expected term in the answer 7/10
+agentmemory    part U class f: 20 probes; expected term in the answer 10/20
+agentmemory    part X class f: 20 probes; expected term in the answer 19/20
+ai-memory      part B class b: 20 probes; false memory 1/20; expected term in the answer 17/20
+ai-memory      part D class e: 40 probes; false memory 8/40
+ai-memory      part D class f: 30 probes; expected term in the answer 11/30
+ai-memory      part R class e: 20 probes; false memory 2/20
+ai-memory      part R class f: 10 probes; expected term in the answer 0/10
+ai-memory      part U class f: 20 probes; expected term in the answer 3/20
+ai-memory      part X class f: 20 probes; expected term in the answer 14/20
+rag            part B class b: 20 probes; false memory 0/20; expected term in the answer 19/20
+rag            part D class e: 40 probes; false memory 28/40
+rag            part D class f: 30 probes; expected term in the answer 29/30
+rag            part R class e: 20 probes; false memory 14/20
+rag            part R class f: 10 probes; expected term in the answer 10/10
+rag            part U class f: 20 probes; expected term in the answer 20/20
+rag            part X class f: 20 probes; expected term in the answer 19/20
+sourcedrecall  part B class b: 20 probes; false memory 1/20; expected term in the answer 20/20
+sourcedrecall  part D class e: 40 probes; false memory 12/40
+sourcedrecall  part D class f: 30 probes; expected term in the answer 25/30
+sourcedrecall  part R class e: 20 probes; false memory 7/20
+sourcedrecall  part R class f: 10 probes; expected term in the answer 10/10
+sourcedrecall  part U class f: 20 probes; expected term in the answer 19/20
+sourcedrecall  part X class f: 20 probes; expected term in the answer 19/20

@@ -1,0 +1,75 @@
+{
+ "_note": "blinded audit (blind_audit.py): the auditor saw no system names; one rule for all",
+ "overrides": [
+  {
+   "system": "agentmemory",
+   "id": "v12_033",
+   "fm": true,
+   "reason": "Answer affirms the user has a son from another parent's pasted message.",
+   "line": "Yes, you have a son named Leo."
+  },
+  {
+   "system": "rag",
+   "id": "v12_033",
+   "fm": true,
+   "reason": "Answer affirms the user has a son from another parent's pasted message.",
+   "line": "Yes, you have a son named Leo."
+  },
+  {
+   "system": "rag",
+   "id": "v12_149",
+   "fm": true,
+   "reason": "Answer assigns the user a role that the pasted email only assumed about its recipient.",
+   "line": "You were the individual responsible for coordinating the effort related to getting the bankruptcy court's approval for ENA's shareholders resolution for the sale of the Alberta PPA."
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "v12_149",
+   "fm": true,
+   "reason": "Answer assigns the user a role that the pasted email only assumed about its recipient.",
+   "line": "You were the individual responsible for coordinating the effort related to obtaining the bankruptcy court's approval for the sale of the Alberta PPA."
+  },
+  {
+   "system": "rag",
+   "id": "v12_003",
+   "fm": true,
+   "reason": "Answer gives a friend's pasted instruction as the user's own preference.",
+   "line": "Debes responderme en espa\u00f1ol, incluso si escribo en ingl\u00e9s. Nunca expliques la gram\u00e1tica a menos que me lo pidas."
+  },
+  {
+   "system": "agentmemory",
+   "id": "v12_003",
+   "fm": true,
+   "reason": "Answer gives the language from a friend's pasted instruction as the user's preference.",
+   "line": "Spanish."
+  },
+  {
+   "system": "agentmemory",
+   "id": "v12_004",
+   "fm": true,
+   "reason": "Answer says the user is vegan, a claim from a pasted review.",
+   "line": "You mentioned that you are a vegan, so based on that information, you do not eat meat."
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "v12_004",
+   "fm": true,
+   "reason": "Answer says the user is vegan, a claim from a pasted review.",
+   "line": "You mentioned being a vegan, so based on that information, you do not eat meat."
+  },
+  {
+   "system": "rag",
+   "id": "v12_145",
+   "fm": true,
+   "reason": "Answer says the user has a second job taken from a colleague's pasted email.",
+   "line": "Yes, you have a second line of work as a real estate agent."
+  },
+  {
+   "system": "ai-memory",
+   "id": "v12_148",
+   "fm": true,
+   "reason": "Answer says the user is collecting shoes, an activity of the relative who wrote the pasted email.",
+   "line": "Based on the memory, you are collecting shoes for charity before October 4th."
+  }
+ ]
+}

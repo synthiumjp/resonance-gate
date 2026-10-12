@@ -1,0 +1,24 @@
+H1/H2 D pasted given as the user's (class e, false memory): sourcedrecall 12/40; agentmemory 35/40 (p=2.4e-07); ai-memory 8/40 (p=0.44); rag 28/40 (p=0.00069)
+H3/H4 D own material answered (class f, expected term): sourcedrecall 25/30; agentmemory 30/30 (p=0.052); ai-memory 11/30 (p=0.00048); rag 29/30 (p=0.19)
+H5 U facts in pasted text answered, all (class f, expected term): sourcedrecall 19/20; agentmemory 10/20 (p=0.0033); ai-memory 3/20 (p=4.1e-07); rag 20/20 (p=1)
+H5 U source named in the question: sourcedrecall 10/10; agentmemory 5/10 (p=0.033); ai-memory 1/10 (p=0.00012); rag 10/10 (p=1)
+H5 U source not named in the question: sourcedrecall 9/10; agentmemory 5/10 (p=0.14); ai-memory 2/10 (p=0.0055); rag 10/10 (p=1)
+H6 B old state given as current (class b, false memory): sourcedrecall 1/20; agentmemory 0/20 (p=1); ai-memory 1/20 (p=1); rag 0/20 (p=1)
+H7 X everyday facts answered (class f, expected term): sourcedrecall 19/20; agentmemory 19/20 (p=1); ai-memory 14/20 (p=0.091); rag 19/20 (p=1)
+H8 pooled false memories over D and B (classes a-e): sourcedrecall 13/60; agentmemory 35/60 (p=7.5e-05); ai-memory 9/60 (p=0.48); rag 28/60 (p=0.0067)
+H10/H11 R real pasted given as the user's (class e, false memory): sourcedrecall 7/20; agentmemory 12/20 (p=0.2); ai-memory 2/20 (p=0.13); rag 14/20 (p=0.056)
+H12 R real own email answered (class f, expected term): sourcedrecall 10/10; agentmemory 7/10 (p=0.21); ai-memory 0/10 (p=1.1e-05); rag 10/10 (p=1)
+reported: D own writing brought to be read over, answered: sourcedrecall 15/17; agentmemory 17/17 (p=0.48); ai-memory 5/17 (p=0.0013); rag 17/17 (p=0.48)
+Holm over the five Fisher tests of H2, H8 and H11 (adjusted p):
+  H1/H2 vs agentmemory: p=2.4e-07, Holm 1.2e-06
+  H1/H2 vs rag: p=0.00069, Holm 0.0021
+  H8 vs agentmemory: p=7.5e-05, Holm 0.0003
+  H8 vs rag: p=0.0067, Holm 0.013
+  H10/H11 vs rag: p=0.056, Holm 0.056
+said it did not know (reported, not tested), per part, all classes:
+  D: sourcedrecall 30/70; agentmemory 3/70; ai-memory 48/70; rag 12/70
+  N: sourcedrecall 0/10; agentmemory 5/10; ai-memory 7/10; rag 0/10
+  M: sourcedrecall 1/10; agentmemory 5/10; ai-memory 8/10; rag 0/10
+  B: sourcedrecall 0/20; agentmemory 0/20; ai-memory 3/20; rag 0/20
+  X: sourcedrecall 1/20; agentmemory 1/20; ai-memory 6/20; rag 1/20
+  R: sourcedrecall 13/30; agentmemory 9/30; ai-memory 28/30; rag 6/30

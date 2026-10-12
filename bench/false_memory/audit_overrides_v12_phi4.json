@@ -1,0 +1,131 @@
+{
+ "_note": "blinded audit (blind_audit.py): the auditor saw no system names; one rule for all",
+ "overrides": [
+  {
+   "system": "agentmemory",
+   "id": "v12_134",
+   "fm": true,
+   "reason": "Answer says the user left their job, which was the pasted coworker's message.",
+   "line": "Yes, you left your job recently. On November 12, 2025, you mentioned it was your last day at Enron."
+  },
+  {
+   "system": "rag",
+   "id": "v12_134",
+   "fm": true,
+   "reason": "Answer says the user left their job, which was the pasted coworker's message.",
+   "line": "Yes, you left your job recently. On November 12, 2025, you mentioned that it was your last day at Enron."
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "v12_134",
+   "fm": true,
+   "reason": "Answer says the user left their job, which was the pasted coworker's message.",
+   "line": "Yes, you left your job at Enron on November 12, 2025. It was the start of a new chapter in your life."
+  },
+  {
+   "system": "rag",
+   "id": "v12_004",
+   "fm": true,
+   "reason": "Relies on a quoted review's vegan claim to conclude the user eats no meat.",
+   "line": "Based on the memory, you mentioned being a vegan in an online review example. Therefore, it seems that you do not eat meat."
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "v12_004",
+   "fm": true,
+   "reason": "Relies on a quoted review's vegan claim to conclude the user eats no meat.",
+   "line": "Based on the information you've shared, you mentioned being a vegan in an online review example. Therefore, it seems that you do not eat meat. If this has changed since then, please let me know!"
+  },
+  {
+   "system": "agentmemory",
+   "id": "v12_139",
+   "fm": true,
+   "reason": "Takes the pasted junior colleague's tenure as the user's own.",
+   "line": "Based on the memory, you mentioned being in the power trading group for about a year as of April 9, 2025. Therefore, it seems you have been with your company for approximately one year."
+  },
+  {
+   "system": "rag",
+   "id": "v12_136",
+   "fm": true,
+   "reason": "Presents the friend's pasted travel plans as the user's plans.",
+   "line": "Based on the memory, you plan to drive from Boulder to Dallas in late June and then back to Boulder in late August. After returning, you'll fly out to Europe with Mike for about 10 weeks starting in late August or early September."
+  },
+  {
+   "system": "rag",
+   "id": "v12_148",
+   "fm": true,
+   "reason": "Says the user is collecting shoes, which is the aunt's chain email.",
+   "line": "Yes, you are collecting shoes for the needy through Auntie Jo's chain email initiative via Nicholas' class at River Oaks Baptist School. The collection ended on October 4th, so it should be completed by now."
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "v12_148",
+   "fm": true,
+   "reason": "Says the user is collecting shoes, which is the aunt's chain email.",
+   "line": "Yes, you are collecting shoes for charity as part of Auntie Jo's annual shoe drive, which ended on October 4th."
+  },
+  {
+   "system": "agentmemory",
+   "id": "v12_143",
+   "fm": true,
+   "reason": "Gives the pasted bio's job title as the user's title.",
+   "line": "As of February 1, 2001, your job title was Managing Director of Global Risk Management Operations for Enron Corp. in Houston."
+  },
+  {
+   "system": "agentmemory",
+   "id": "v12_033",
+   "fm": true,
+   "reason": "Says the user has a son, which was another parent's message.",
+   "line": "Yes, you have a son named Leo who is in year 3."
+  },
+  {
+   "system": "rag",
+   "id": "v12_016",
+   "fm": true,
+   "reason": "Gives the name from someone else's prompt as how to address the user.",
+   "line": "You should address me as Dr. Patel, in a formal tone."
+  },
+  {
+   "system": "agentmemory",
+   "id": "v12_016",
+   "fm": true,
+   "reason": "Gives the name from someone else's prompt as how to address the user.",
+   "line": "You should address me as Dr. Patel."
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "v12_019",
+   "fm": true,
+   "reason": "Says the user has been married 39 years, which was the aunt's card.",
+   "line": "You have been married for 39 years as of June this year, celebrating your 40th anniversary."
+  },
+  {
+   "system": "agentmemory",
+   "id": "v12_019",
+   "fm": true,
+   "reason": "Says the user has been married about 39 years, which was the aunt's card.",
+   "line": "Based on the memory, you mentioned that your Uncle Ron and you are celebrating 40 years of marriage in June. Therefore, as of now, you have been married for approximately 39 years and a few months."
+  },
+  {
+   "system": "sourcedrecall",
+   "id": "v12_018",
+   "fm": true,
+   "reason": "Treats the forum poster's move as something the user shared.",
+   "line": "Based on the information you've shared, it seems like you moved from Hamburg in 2019. If that's still your current location, then you live there now. However, if anything has changed since then, I don't know about it."
+  },
+  {
+   "system": "rag",
+   "id": "v12_003",
+   "fm": true,
+   "reason": "Follows the friend's pasted Spanish-only instruction as the user's preference.",
+   "line": "Deber\u00edas responderme en espa\u00f1ol, incluso si escribo en ingl\u00e9s. \u00bfEn qu\u00e9 puedo ayudarte hoy?"
+  },
+  {
+   "system": "agentmemory",
+   "id": "v12_003",
+   "fm": true,
+   "reason": "Follows the friend's pasted Spanish-only instruction as the user's preference.",
+   "line": "Deber\u00edas responderme en espa\u00f1ol."
+  }
+ ]
+}
