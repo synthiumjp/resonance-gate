@@ -10,6 +10,7 @@ This whole module is skipped unless stanza is importable -- run it with:
 """
 
 import json
+import os
 
 import pytest
 
@@ -236,3 +237,19 @@ def test_re_ingesting_a_conversation_does_not_duplicate_it(pm):
     convs = json.load(open(pm._conversations_path()))
     msgs = [m["text"] for m in convs[0]["chat_messages"]]
     assert msgs == ["I live in Leeds.", "Leeds is lovely.", "I cycle to work."]
+
+
+def test_an_unreadable_store_is_kept_not_overwritten(pm):
+    # 2026-10-12 (review): a store that fails to parse was read as empty and
+    # written back, losing the whole history; ingest and forget now stop
+    import glob
+    conv_path = pm._conversations_path()
+    os.makedirs(os.path.dirname(conv_path), exist_ok=True)
+    with open(conv_path, "w", encoding="utf-8") as fh:
+        fh.write('[{"uuid": "old", "chat_messages": [')       # cut off mid-write
+    with pytest.raises(RuntimeError):
+        pm.profile_ingest(list(_TURNS), conversation_id="conv1", owner_name="Ada Byron")
+    with pytest.raises(RuntimeError):
+        pm._erase("I live in London.")
+    assert open(conv_path, encoding="utf-8").read() == '[{"uuid": "old", "chat_messages": ['
+    assert glob.glob(conv_path + ".corrupt-*")

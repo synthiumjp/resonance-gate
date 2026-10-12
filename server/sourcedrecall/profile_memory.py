@@ -148,6 +148,24 @@ def _conversations_path():
     return os.path.join(_data_dir(), "conversations.json")
 
 
+def _read_conversations(path):
+    """The stored conversations for a write: [] when there is no store yet.
+    2026-10-12 (review): an unreadable store used to be read as empty and
+    then written back, replacing the user's whole history; now it is copied
+    aside and the write stops."""
+    if not os.path.exists(path):
+        return []
+    try:
+        with open(path, encoding="utf-8") as fh:
+            return json.load(fh)
+    except ValueError as e:
+        bad = path + ".corrupt-" + datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+        import shutil
+        shutil.copy2(path, bad)
+        raise RuntimeError(f"sourcedrecall: {path} could not be read ({e}); nothing was "
+                           f"written. A copy is at {bad}.") from e
+
+
 def _corrections_path():
     return os.path.join(_data_dir(), "corrections.jsonl")
 
@@ -363,12 +381,7 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
 
         # ---- (a) conversations.json: append or create ----
         conv_path = _conversations_path()
-        convs = []
-        if os.path.exists(conv_path):
-            try:
-                convs = json.load(open(conv_path))
-            except Exception:
-                convs = []
+        convs = _read_conversations(conv_path)
         record = next((c for c in convs if c.get("uuid") == conv_id), None)
         if record is None:
             record = {"uuid": conv_id, "name": title or "(untitled)",
@@ -1606,10 +1619,7 @@ def _erase(said):
         with open(_forgotten_path(), "a", encoding="utf-8") as fh:
             fh.write(json.dumps({"h": key}) + "\n")
         conv_path = _conversations_path()
-        try:
-            convs = json.load(open(conv_path))
-        except (OSError, ValueError):
-            convs = []
+        convs = _read_conversations(conv_path)
         for c in convs:
             for m in c.get("chat_messages") or []:
                 if m.get("text"):

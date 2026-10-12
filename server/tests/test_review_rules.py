@@ -285,3 +285,44 @@ def test_a_signature_naming_someone_else_is_not_the_owners():
     text = ("my landlord sent this\n\nDear tenants,\n\nThe boiler will be serviced on Monday.\n\n"
             "Regards,\nDennis Visser")
     assert isinstance(_paste_span(text, "Dennis Achterberg"), tuple)
+
+
+# 2026-10-12 (review): an introduction naming an outside source, or naming the
+# user's notes or essay as where the text goes, does not make it the user's
+_COUNCIL = ("\n\nDear residents,\n\nThe council will resurface Elm Road on 3 March. I'm a "
+            "vegetarian and I have three kids, so I know how disruptive this is.\n\n"
+            "Regards,\nJane Morris, Highways Officer")
+
+
+@pytest.mark.parametrize("intro", [
+    "my boss sent me this for my review:",
+    "summarise this article for my notes:",
+    "save this in my journal pls:",
+    "help me quote this in my essay:",
+    "found this, keep it for my notes",
+    "my neighbour forwarded this, can you check my spelling in my reply after:",
+])
+def test_someone_elses_text_headed_for_the_users_notes_is_pasted(intro):
+    from prose import _paste_span
+    assert isinstance(_paste_span(intro + _COUNCIL, "Amara Okafor"), tuple)
+
+
+@pytest.mark.parametrize("intro", [
+    "my review for the hotel, does it read ok?",
+    "here's my notes from the meeting:",
+    "my draft reply, ok to send?",
+])
+def test_the_users_own_notes_and_drafts_stay_own(intro):
+    from prose import _paste_span
+    text = intro + "\n\nWe stayed four nights in March. I'm a vegetarian and the breakfast had plenty for me."
+    assert _paste_span(text, "Amara Okafor") == "own"
+
+
+def test_a_name_in_a_possessive_or_a_wrong_initial_is_not_the_owner():
+    from prose import _paste_span
+    email = ("Summarise this email from my boss:\n\nHi all, it's Thabo's turn to cook. I live in Cork "
+             "and I am vegan.\n\nAnna")
+    assert isinstance(_paste_span(email, "Thabo Eze"), tuple)
+    signed = "can you check this?\n\nHi team, the rota is up. I'm vegan and I live in Cork.\n\nRegards,\nThabo K"
+    assert isinstance(_paste_span(signed, "Thabo Eze"), tuple)
+    assert _paste_span(signed.replace("Thabo K", "Thabo E"), "Thabo Eze") == "own"

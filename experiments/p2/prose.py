@@ -103,6 +103,8 @@ _OWN_MARK = re.compile(
     r"\bmy own\b|\bI\s+(?:wrote|have written|'ve written|’ve written|drafted|jotted)\b|"
     r"\bwrote (?:it |this )?myself\b|\bfor myself\b|\bit'?s mine\b|\bit’s mine\b|\bnote to self\b|"
     r"\bit'?s me writing\b|\b(?:about|of) me\b|"
+    # 2026-10-12 (review): not where the text goes ("add this to my notes")
+    r"(?<!\bto )(?<!\bin )(?<!\binto )(?<!\bfor )(?<!\bon )(?<!\bof )"
     r"\bmy\s+(?:(?:last|own|latest|first|previous|earlier|old|new|rough)\s+)?(?:notes?|draft|journal|diary|bio|cv|resume|cover letter|essay|rules|reply|"
     r"answer|summary|post|message|email)\b(?!['’])", re.I)
 # an introduction: someone else sent it, it comes from somewhere, the user
@@ -205,11 +207,26 @@ _FRAME_OWN = re.compile(
     r"\bi'?m (?:doing|giving|reading|delivering) (?:it|this)\b|"
     # 2026-10-12 (dev own-material set, 40): "my song lyric for the band",
     # "wrote the chorus last night", "pls check my grammar, this is a reply"
+    # 2026-10-12 (review): not where the text is going ("add this to my
+    # notes", "help me quote this in my essay", "sent me this for my review")
+    r"(?<!\bto )(?<!\bin )(?<!\binto )(?<!\bfor )(?<!\bon )(?<!\bof )"
     r"\bmy (?:own )?(?:song|lyrics?|chorus|verse|toast|eulogy|bio|cv|resume|cover letter|essay|story|"
     r"listing|review|notes?|diary|journal|draft)\b|"
     r"(?:^|[.!?,;:]\s*|\bi\s+)wrote\s+(?:the|a|my)\b|"
     r"\b(?:check|fix|correct|improve|proofread)\s+my\s+(?:grammar|spelling|wording|writing|english|punctuation)\b",
     re.I | re.M)
+
+
+# 2026-10-12 (review: "my boss sent me this for my review:", "summarise this
+# article for my notes:" made a pasted letter the user's own): an
+# introduction that says the text came from someone else is not outweighed
+# by an own cue in the same introduction
+_FROM_OTHER = re.compile(
+    r"\b(?:sent|forwarded|passed on|passed along|emailed|texted|messaged)\s+(?:me|us)\b|"
+    r"\b(?:forwarded|received)\b|\bwritten by (?!me\b)|\bnot mine\b|"
+    r"\b(?:got|found|saw|spotted|came across) (?:this|that|it|these)\b|"
+    r"\b(?:article|post|email|letter|message|review|thread|comment)\s+(?:from|by)\s+(?!me\b|myself\b)\w|"
+    r"\b(?:this|that|it)(?:'s|’s| is| was)? from (?:my|the|a|an|her|his|their|our)\s+(?!own\b)\w", re.I)
 
 
 # the user's paragraph is a request to the assistant or a question
@@ -264,7 +281,7 @@ def _structure_span(text):
     # a head shaped like the pasted text's own first line (a review's title)
     if head and _DOC_HEAD.search(head.group(0)) and not _FRAME_OWN.search(head.group(0)):
         start, frame = paras[0].start(), (tail.group(0) if tail else "")
-    if _FRAME_OWN.search(_QUOTE_SPAN.sub(" ", frame)):
+    if _FRAME_OWN.search(_QUOTE_SPAN.sub(" ", frame)) and not _FROM_OTHER.search(frame):
         return "own"
     named = ((tail is not None and _FRAME_MAT.search(tail.group(0)))
              or (head is not None and _FRAME_MAT.search(head.group(0))
@@ -302,9 +319,12 @@ def _paste_span(text, owner=None):
         last = [l.strip() for l in rest.strip().splitlines() if l.strip()][-1:] or [""]
         # the signature may carry the surname ("Yours faithfully, Wanjiru Kamau")
         sur = "|".join(re.escape(w) for w in (owner or "").split()[1:]) or "(?!)"
-        if (re.match(rf"(?:[\w ,!.'’-]{{0,25}}[,\s])?{re.escape(first)}\b(?:\s+(?:{sur}|[A-Z]\.?))?\W*(?:x+)?\W*$",
+        # 2026-10-12 (review): the initial is the owner's surname initial,
+        # not any letter; "it's Thabo's turn" does not introduce Thabo
+        ini = "".join(w[0] for w in (owner or "").split()[1:2]) or "(?!)"
+        if (re.match(rf"(?:[\w ,!.'’-]{{0,25}}[,\s])?{re.escape(first)}\b(?:\s+(?:{sur}|(?-i:{re.escape(ini.upper())})\.?))?\W*(?:x+)?\W*$",
                      last[0], re.I)
-                or re.search(rf"\b(?:i'?m|i’m|i am|my name is|this is|it'?s)\s+{re.escape(first)}\b", rest, re.I)):
+                or re.search(rf"\b(?:i'?m|i’m|i am|my name is|this is|it'?s)\s+{re.escape(first)}\b(?!['’]s\b)", rest, re.I)):
             return "own"
     return sp
 
@@ -319,13 +339,13 @@ def _paste_span0(text, owner=None):
         nl = re.search(r"\n\s*\n|\n(?=[^\n]*$)", after)
         end = chat[-1].start() + (nl.start() if nl else len(after))
         intro = text[:start]
-        if _FRAME_OWN.search(_QUOTE_SPAN.sub(" ", intro)):
+        if _FRAME_OWN.search(_QUOTE_SPAN.sub(" ", intro)) and not _FROM_OTHER.search(intro):
             return "own"
         return start, end
     # "^ that's from my landlord": what is above the caret line is pasted
     car = re.search(r"(?m)^\s*[\^↑]+\s*\S", text)
     if car and car.start() > 0:
-        if _FRAME_OWN.search(text[car.start():]):
+        if _FRAME_OWN.search(text[car.start():]) and not _FROM_OTHER.search(text[car.start():]):
             return "own"
         return 0, car.start()
     # a letter addressed to the user by name ("Hi Thabo, Mr Eze here")
