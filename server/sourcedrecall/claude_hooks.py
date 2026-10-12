@@ -171,7 +171,10 @@ def ingest_turns(turns, conversation_id, first_ts=None, owner=None, cwd=None):
         return {"stored": False, "reason": "no user speech in this session"}
     pm = _setup_env(owner)
     title = next(t["content"] for t in turns if t["role"] == "user")
-    title = " ".join(title.split())[:60]
+    # 2026-10-12 (review 3.6): scrubbed before it is cut; cut first, a key
+    # split at character 60 was too short for the filter to recognise
+    from sourcedrecall.secrets import scrub
+    title = " ".join(scrub(title).split())[:60]
     from sourcedrecall.paths import current_scope
     return pm.profile_ingest(turns, conversation_id=conversation_id,
                              title=title,

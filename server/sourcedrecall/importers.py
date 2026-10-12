@@ -88,6 +88,14 @@ import re
 import sys
 
 
+
+
+def _scrubbed(title):
+    # 2026-10-12 (review 3.6): scrub, then cut, so a key across character 60
+    # is still recognised
+    from sourcedrecall.secrets import scrub
+    return scrub(title or "")
+
 def _text_of(content):
     """Text from a Gemini PartListUnion: a string, a part, or a list of them.
     Parts marked as thoughts and non-text parts (calls, responses) are skipped."""
@@ -461,7 +469,7 @@ def _import_export(fmt, path, owner, as_json):
         if not cid or not any(t["role"] == "user" for t in turns):
             continue
         out = pm.profile_ingest(turns, conversation_id=f"{fmt}:{cid}",
-                                title=title[:60] or None, owner_name=owner, date=date)
+                                title=_scrubbed(title)[:60] or None, owner_name=owner, date=date)
         n_conv += 1
         n_turns += out["turns"]
         n_facts += out["facts"]
