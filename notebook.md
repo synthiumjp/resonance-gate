@@ -15775,3 +15775,20 @@ claim given as the user's 7/20 (Qwen) and 5/20 (Phi-4), plain retrieval
 dev set (cases_dev_real2, 40 from the 80 unused dev candidates) to widen it
 without touching the held-out set. Draft v12 pre-registration
 (docs/PREREG_HELDOUT_V12_DRAFT.md, uncommitted) for JP.
+
+## Entry 327 — 2026-10-13 morning (the next-message introduction; v12 pre-registered)
+
+Second readable real-email dev set (cases_dev_real2, 40 unused Enron
+emails): detection 20/30 at 1d92020, 9 of 10 misses one shape, an email
+pasted on its own with the source said in the user's next message ("it's
+from a client", "was cc'd on it"). 8d100ef reads the next message
+(profile_memory._after_of): detection 29/30, own 10/10, nothing else moved;
+end to end 9 -> 3 (Qwen) and 10 -> 3 (Phi-4) of 30 against plain retrieval
+26 and 28. HaluMem's official scorer holds the 8090 server for hours
+(1,649 accuracy items a user at ~13 s); a second identical Qwen3-14B
+llama_cpp.server on 8092 (same GGUF, flags, build) carries the false-memory
+work. JP approved v12 ("process with v12 when ready"):
+docs/PREREG_HELDOUT_V12.md with v12_run/tests/validate/brief; code frozen
+from that commit. Part R: 30 real emails from a fresh seeded pool of 150
+(aeslc train, seed 1213), drawn on the Mac, read by the developer as
+counts only.
