@@ -197,7 +197,13 @@ Not a regression (v11 code detects the same on v12); new shapes. Code is
 no longer frozen. Proposed to JP: a small learned "someone else's text?"
 classifier beside the rules (rules do not converge set by set); trim
 HaluMem to the updating and QA parts (accuracy scoring ~13 h per user).
-night2-4 replaced by ~/jpwork/after_chain.sh on 8092 (after.log): v10
+The Mac rebooted at 11:47 (cause unknown; it had three Qwen3-14B servers
+and Phi-4 up). Restarted with two Qwen servers (8090, 8092) and Phi-4:
+~/jpwork/dev29b.sh (dev29's remaining sets, 8092; dev29.log has shapes and
+own) and ~/jpwork/resume_chain.sh (LongMemEval resuming, then HaluMem
+update + QA, 8090). Uncommitted to the remotes until dev29 is in: fab3896
+(attribution rule + paste classifier), 15d39d7 (notebook e329).
+Earlier: night2-4 replaced by ~/jpwork/after_chain.sh on 8092 (after.log): v10
 reproduction check, demo, LongMemEval KU + temporal. HaluMem (night.log)
 keeps 8090.
 
