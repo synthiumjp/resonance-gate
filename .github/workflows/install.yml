@@ -1,0 +1,30 @@
+name: clean install
+# Launch gate 1 (2026-10-13): a new user installs the Claude Code plugin on a
+# clean machine and gets working memory. Runs tools/clean_install_test.sh on
+# each OS, on demand and for release tags (it downloads ~350 MB of models).
+on:
+  workflow_dispatch:
+  push:
+    tags: ["sourcedrecall-v*"]
+    branches: [product-p2]
+    paths: ["plugins/**", "server/sourcedrecall/setup_models.py", "server/pyproject.toml",
+            "tools/clean_install_test.sh", ".github/workflows/install.yml"]
+jobs:
+  install:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - name: a local ref to install from
+        shell: bash
+        run: git tag -f ci-clean-install HEAD
+      - name: clean install, two sessions, briefing, CLI
+        shell: bash
+        run: bash tools/clean_install_test.sh "$GITHUB_WORKSPACE" ci-clean-install "$RUNNER_TEMP/sdr-clean"
