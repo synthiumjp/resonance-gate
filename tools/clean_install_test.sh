@@ -93,7 +93,11 @@ def reply(i):
         line = p.stdout.readline()
         if not line:
             sys.exit("the server closed: " + p.stderr.read()[-500:])
-        m = json.loads(line)
+        try:
+            m = json.loads(line)
+        except ValueError:
+            # anything but JSON-RPC on stdout breaks the client
+            sys.exit(f"not JSON on the server's stdout: {line[:300]!r}")
         if m.get("id") == i:
             return m
     sys.exit("no reply")

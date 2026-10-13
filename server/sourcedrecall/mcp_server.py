@@ -44,6 +44,13 @@ if LEGACY_TOOLS:
     from sourcedrecall.service import MemoryService
     service = MemoryService(STATE_DIR)
 mcp = FastMCP("sourcedrecall")
+# 2026-10-13 (clean-install test): initialize reported the mcp library's
+# version (1.30.0) as the server's
+try:
+    from sourcedrecall import __version__ as _VERSION
+    mcp._mcp_server.version = _VERSION
+except (ImportError, AttributeError):
+    pass
 
 
 # 2026-10-12 (review 3.2): hints the host can act on, so it can ask the user
