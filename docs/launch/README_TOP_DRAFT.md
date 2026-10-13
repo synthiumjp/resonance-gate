@@ -4,7 +4,8 @@ Follows the launch review: lead with what no other memory measures, state
 the costs in the same breath, numbers from one run each. Bracketed items
 are filled from the v11 run and the external benchmarks before it replaces
 the current opening. v11 and v12 filled 2026-10-13 (results_v11, results_v12);
-the strict LoCoMo figure is the d89d830 re-judge (night chain).
+the strict LoCoMo figure is the d89d830 re-judge (night chain); LongMemEval
+knowledge-update, install size and speed added 2026-10-13 (notebook e331).
 
 ---
 
@@ -41,7 +42,13 @@ On LoCoMo, with the same local reader and judge for every system, it is
 level with Mem0 (50.3% against 48.5% with a strict judge; 65.3% against
 64.6% with the benchmark's usual judge) while making no model call to
 store anything; Mem0 is ahead on questions that combine several facts.
-[External: HaluMem / LongMemEval knowledge-update, if the overnight runs
-show a clear result.]
+On LongMemEval's knowledge-update questions, where a fact changes over a
+long history, it answered 64 of 78 against plain retrieval's 61 with the
+same reader and judge [temporal questions and HaluMem: running].
+
+It installs as a Claude Code plugin in a minute or two (about 1.5 GB of
+disk, no PyTorch, no API key), uses about 400 MB of memory, and answers in
+about 50 ms. It also works with Codex CLI, Gemini CLI, Cursor and any MCP
+client. Your memory is a folder of plain files on your machine.
 
 Everything is in `bench/`, with the commands to rerun it. English only.
