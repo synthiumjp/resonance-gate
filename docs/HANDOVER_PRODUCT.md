@@ -197,6 +197,20 @@ Not a regression (v11 code detects the same on v12); new shapes. Code is
 no longer frozen. Proposed to JP: a small learned "someone else's text?"
 classifier beside the rules (rules do not converge set by set); trim
 HaluMem to the updating and QA parts (accuracy scoring ~13 h per user).
+2026-10-13 afternoon/evening (JP: "make this a real competitor... free and
+great"): launch gate 1 done: tools/clean_install_test.sh + the "clean
+install" workflow pass on Linux, macOS and Windows (install 64-111 s, 950
+MB; warm question 50 ms; peak RSS 1.2 GB, to trim). The test found the
+README example on one line taken as the user's (fixed, 40e9217), unclear
+first-run messages (fixed), silent hook input errors (fixed, cf217aa).
+The Mac panicked THREE times (11:47, 13:40, 15:33; WindowServer/watchdogd
+watchdog) with 3-4 GPU processes or MPS training: no MPS training, at most
+two GPU processes (memory file). Now (19:25): EWT tagger on CPU
+(~/jpwork/ewt_train/train.sh, then depparse), one Qwen server running
+~/jpwork/resume2.sh (LongMemEval temporal resuming at 59/133, then
+HaluMem update + QA). LongMemEval knowledge-update: sdr 64/78, plain
+61/78; temporal plain 64/133.
+
 The Mac rebooted at 11:47 (cause unknown; it had three Qwen3-14B servers
 and Phi-4 up). Restarted with two Qwen servers (8090, 8092) and Phi-4:
 ~/jpwork/dev29b.sh (dev29's remaining sets, 8092; dev29.log has shapes and
