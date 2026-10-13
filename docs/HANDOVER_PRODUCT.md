@@ -197,6 +197,21 @@ Not a regression (v11 code detects the same on v12); new shapes. Code is
 no longer frozen. Proposed to JP: a small learned "someone else's text?"
 classifier beside the rules (rules do not converge set by set); trim
 HaluMem to the updating and QA parts (accuracy scoring ~13 h per user).
+2026-10-14 (JP): README opening approved and in (f9596d8). Fresh, clean
+product repo approved: build it from this one with only the product, docs
+and the benchmark runs the README and bench/REPRODUCE.md cite (bench/ is
+291 MB, 208 MB of it old LoCoMo runs); run the suite and
+tools/clean_install_test.sh against it on the Mac; show JP before any push
+(it will replace synthiumjp/sourcedrecall's history). JP's real use: the
+plugin installs in his WSL Claude Code from this checkout, via
+~/.claude/settings.json env SOURCEDRECALL_REPO_URL=/home/jp/rg,
+SOURCEDRECALL_REF=sourcedrecall-v0.5.2-local (a LOCAL tag, never push it:
+release.yml publishes on sourcedrecall-v* tags); to update his install,
+make a new local tag and change SOURCEDRECALL_REF. Launch (public repo,
+tag, PyPI) when JP says. Mac: EWT tagger training on CPU, then depparse;
+HaluMem update + QA running (~/jpwork/resume2.sh). LongMemEval done: KU
+64/78 vs 61, temporal 73/133 vs 64.
+
 JP 2026-10-13 evening: NO test runs on GitHub; all testing on the Mac.
 tests.yml and install.yml are manual-only; do not start them. Windows
 status from the CI runs before that: install, hooks, briefing and CLI work;
