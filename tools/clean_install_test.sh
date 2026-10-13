@@ -56,7 +56,8 @@ mk "$C/s1.jsonl" 2026-09-25 "I work as a nurse at St Vincent's and I live in Fit
 mk "$C/s2.jsonl" 2026-10-02 "Big news, I moved to Brunswick last weekend." "Congratulations!"
 for s in s1 s2; do
   echo "== 3. session end $s"
-  echo "{\"session_id\":\"$s\",\"hook_event_name\":\"SessionEnd\",\"reason\":\"exit\",\"transcript_path\":\"$C/$s.jsonl\"}" \
+  # JSON-encoded, as Claude Code sends it (a Windows path has backslashes)
+  "$PY" -c "import json, sys; print(json.dumps({'session_id': sys.argv[1], 'hook_event_name': 'SessionEnd', 'reason': 'exit', 'transcript_path': sys.argv[2]}))" "$s" "$C/$s.jsonl" \
     | bash "$R" hook session-end || fail "session end $s"
 done
 echo "== 4. waiting for the background workers (until the briefing has the second session)"
