@@ -220,7 +220,7 @@ def session_end(event, owner=None, sync=False, agent="claude"):
     return {"stored": "pending", "job": job.name, "log": log}
 
 
-def session_start(event, owner=None, max_facts=15, agent="claude",
+def _session_start(event, owner=None, max_facts=15, agent="claude",
                   show_notice=True):
     """-> the JSON Claude Code adds to the session's context, or None when
     there is nothing to say (an empty memory adds no noise). show_notice=False
@@ -255,6 +255,41 @@ def session_start(event, owner=None, max_facts=15, agent="claude",
         if msg:
             out["systemMessage"] = msg
     return out or None
+
+
+def session_start(event, owner=None, max_facts=15, agent="claude",
+                  show_notice=True):
+    out = _session_start(event, owner, max_facts, agent, show_notice)
+    note = _windows_tools_note(agent, owner) if show_notice else None
+    if note:
+        out = dict(out or {})
+        out["systemMessage"] = ((out.get("systemMessage") or "") + "\n\n" + note).strip()
+    return out
+
+
+def _windows_tools_note(agent, owner=None):
+    """2026-10-13 (Claude Code on native Windows, tested): it cannot start
+    the plugin's MCP launcher (an extensionless bash script; `bash` there
+    can be the WSL stub), so the memory tools are missing while the hooks
+    (run through Git Bash) work. Registering the installed server program
+    directly connects. Once, as the plugin, on Windows: the exact command."""
+    if os.name != "nt" or agent != "claude" or not os.environ.get("CLAUDE_PLUGIN_ROOT"):
+        return None
+    from sourcedrecall.paths import state_dir
+    mark = os.path.join(state_dir(), ".windows-tools-told")
+    exe = os.path.join(os.path.dirname(sys.executable), "sourcedrecall.exe")
+    if os.path.exists(mark) or not os.path.exists(exe):
+        return None
+    try:
+        os.makedirs(state_dir(), exist_ok=True)
+        open(mark, "w").close()
+    except OSError:
+        return None
+    who = owner or os.environ.get("SOURCEDRECALL_OWNER") or "Your Name"
+    return ("sourcedrecall on Windows: your sessions are stored and summarised, but Claude Code "
+            "cannot start the plugin's memory tools by itself on Windows. To turn them on, run "
+            f"once in a terminal:\n  claude mcp add sourcedrecall -s user -e SOURCEDRECALL_OWNER=\"{who}\" "
+            f"-- \"{exe}\"\nthen restart Claude Code.")
 
 
 def _welcome(agent):

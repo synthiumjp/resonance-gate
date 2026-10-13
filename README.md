@@ -353,6 +353,12 @@ In Claude Code:
 /plugin install sourcedrecall@sourcedrecall
 ```
 
+On Windows it needs Git for Windows (which Claude Code uses anyway) and
+Python 3.10 to 3.13. Sessions are stored and summarised as on other
+systems, but Claude Code cannot start the plugin's memory tools by itself
+there; the first session after setup shows a one-line `claude mcp add`
+command that turns them on.
+
 Any other MCP client (Claude Desktop, Cursor, Windsurf, Zed, VS Code, ...):
 see [CLIENTS.md](docs/CLIENTS.md). Without MCP, the command line works with any
 model:

@@ -267,3 +267,26 @@ def test_unreadable_hook_input_is_logged_not_ignored(pm, monkeypatch, capsys, tm
     assert "not JSON" in capsys.readouterr().err
     log = tmp_path / "state" / "hook.log"
     assert log.exists() and "not JSON" in log.read_text()
+
+
+def test_windows_plugin_users_are_told_once_how_to_turn_on_the_tools(pm, monkeypatch, tmp_path):
+    # 2026-10-13 (Claude Code on native Windows): the plugin's MCP launcher
+    # does not start there; the installed sourcedrecall.exe does
+    exe_dir = tmp_path / "venv" / "Scripts"
+    exe_dir.mkdir(parents=True)
+    (exe_dir / "sourcedrecall.exe").write_text("")
+    monkeypatch.setattr(sys, "executable", str(exe_dir / "python.exe"))
+    monkeypatch.setattr(os, "name", "nt")
+    monkeypatch.setenv("CLAUDE_PLUGIN_ROOT", str(tmp_path / "plugin"))
+    first = H.session_start({"source": "startup"}, owner="Dana Cole")
+    assert "claude mcp add sourcedrecall" in first["systemMessage"]
+    assert 'SOURCEDRECALL_OWNER="Dana Cole"' in first["systemMessage"]
+    assert str(exe_dir / "sourcedrecall.exe") in first["systemMessage"]
+    again = H.session_start({"source": "startup"}, owner="Dana Cole") or {}
+    assert "claude mcp add" not in (again.get("systemMessage") or "")
+
+
+def test_no_windows_note_elsewhere(pm, monkeypatch, tmp_path):
+    monkeypatch.setenv("CLAUDE_PLUGIN_ROOT", str(tmp_path / "plugin"))
+    out = H.session_start({"source": "startup"}, owner="Dana Cole") or {}
+    assert "claude mcp add" not in (out.get("systemMessage") or "")
