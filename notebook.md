@@ -15816,3 +15816,33 @@ taken for someone else's. Each held-out set since v6 has found new shapes;
 the rule-based detector is at 70% of pasted texts on unseen writing and
 does not converge set by set. The agent's report leaked a few specifics
 (noted in the summary).
+
+## Entry 329 — 2026-10-13 (a learned paste classifier, and the attribution rule it led to)
+
+JP approved: a small learned "someone else's text?" model beside the rules;
+HaluMem trimmed to update + QA (make_eval_uqa.py; the full scorer was ~13 h
+a user). Training data (tools/paste_clf/): 400 others' texts in 25+ genres,
+350 own pieces, 400 + 300 introductions (sonnet agents), 700 hard own
+messages that look like pastes, 1,500 Enron emails unused anywhere, 664
+LoCoMo dev turns. Logistic regression, hashed features, pure Python
+(paste_clf.py + generated paste_clf_weights.py, 420 KB), no model.
+
+- First model: held-back 99% found, 1.3% own marked, but on the dev sets it
+  marked the user's own preferences 34 -> 6 of 36. Hard negatives, a code
+  guard and an "intro:" colon at line end fixed that (prefs 36/36 at 0.8).
+- A new dev set in v12's miss shapes, from categories only
+  (cases_dev_shapes, 50): rules 15/36. The model added 2. It scored "my
+  brother, last night:" + a first-person text 0.00: the word n-grams learned
+  the training texts' style. An abstract-feature model was no better.
+- What generalised was the principle the misses share, as a rule
+  (paste_clf.third_party_span): the user's words around a first-person
+  block, before, after or in a next message that points back at a text,
+  name someone else (kin, role, a named source, a possessive) and the user
+  is not their subject. Shapes 15 -> 21; with the model on top at 0.8, 23
+  of 36; own 11/14 unchanged. Cost on the other dev sets: one own text
+  (dq41, the user's lines after a school agenda swept into the span);
+  pasted_long marks 3 documents that are indeed someone else's; LoCoMo 0
+  turns changed after tightening (greetings, quotations, "Ive", bare
+  capitalised words, "it was an awesome day" no longer count).
+Lesson: synthetic-data learning did not carry over to new shapes; a
+linguistic principle stated once did. dev29 (end to end, both readers) next.
