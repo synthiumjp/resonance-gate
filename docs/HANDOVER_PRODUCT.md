@@ -197,6 +197,18 @@ Not a regression (v11 code detects the same on v12); new shapes. Code is
 no longer frozen. Proposed to JP: a small learned "someone else's text?"
 classifier beside the rules (rules do not converge set by set); trim
 HaluMem to the updating and QA parts (accuracy scoring ~13 h per user).
+JP 2026-10-13 evening: NO test runs on GitHub; all testing on the Mac.
+tests.yml and install.yml are manual-only; do not start them. Windows
+status from the CI runs before that: install, hooks, briefing and CLI work;
+the MCP server answered initialize and tools/list but hung on the first
+profile_context (numpy imported lazily inside the running server). Fix
+b55ed30 (import numpy/onnxruntime in the main thread first) is NOT verified
+on Windows (needs a Windows machine; JP to decide). Also unverified: how
+Claude Code on native Windows starts the plugin's MCP command (an
+extensionless bash script; the docs are silent); fallback for Windows
+users: `claude mcp add` with the venv's sourcedrecall.exe. Memory per
+server 1.2 GB -> 400 MB (a31c0e0).
+
 2026-10-13 afternoon/evening (JP: "make this a real competitor... free and
 great"): launch gate 1 done: tools/clean_install_test.sh + the "clean
 install" workflow pass on Linux, macOS and Windows (install 64-111 s, 950
