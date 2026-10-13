@@ -19,7 +19,12 @@ export HOME="$C/home" USERPROFILE="$C/home"   # Python reads USERPROFILE on Wind
 export CLAUDE_PLUGIN_ROOT="$C/plugin" CLAUDE_PLUGIN_DATA="$HOME/.claude/plugins/data/sourcedrecall"
 export SOURCEDRECALL_REPO_URL="$REPO_URL" SOURCEDRECALL_REF="$REF" SOURCEDRECALL_OWNER="Dana Cole"
 R="$CLAUDE_PLUGIN_ROOT/bin/sourcedrecall-run"
-fail() { echo "FAIL: $*"; exit 1; }
+fail() {
+  echo "FAIL: $*"
+  echo "-- diagnostics"; ls -laR "$HOME/.sourcedrecall" 2>/dev/null | head -40
+  tail -40 "$HOME/.sourcedrecall/hook.log" 2>/dev/null
+  [ -n "${PY:-}" ] && "$(dirname "$PY")/sourcedrecall-memory" status
+  exit 1; }
 t0=$(date +%s)
 
 echo "== 1. first session start, before anything is installed"
@@ -54,10 +59,9 @@ for s in s1 s2; do
   echo "{\"session_id\":\"$s\",\"hook_event_name\":\"SessionEnd\",\"reason\":\"exit\",\"transcript_path\":\"$C/$s.jsonl\"}" \
     | bash "$R" hook session-end || fail "session end $s"
 done
-echo "== 4. waiting for the background workers (until status shows both sessions)"
-for i in $(seq 1 60); do
-  "$(dirname "$PY")/sourcedrecall-memory" status 2>/dev/null | grep -q "2 conversations" && break; sleep 5
-done
+echo "== 4. waiting for the background workers (until the briefing has the second session)"
+brief_now() { echo '{"session_id":"s3","hook_event_name":"SessionStart","source":"startup","transcript_path":null}' | bash "$R" hook session-start; }
+for i in $(seq 1 36); do brief_now | grep -q "Brunswick" && break; sleep 5; done
 echo "waited ~$((i * 5)) s"
 
 echo "== 5. next session start: the briefing"
