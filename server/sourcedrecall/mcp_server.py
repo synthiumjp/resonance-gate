@@ -273,6 +273,15 @@ def main():
     if dump:
         import faulthandler
         faulthandler.dump_traceback_later(float(dump), repeat=True, file=sys.stderr)
+    # 2026-10-13 (clean-install test on Windows): the first profile_context
+    # imported numpy lazily inside the running server and hung there for
+    # good (the CLI, importing at top level, was fine). Import the compiled
+    # libraries in the main thread before serving.
+    for mod in ("numpy", "onnxruntime"):
+        try:
+            __import__(mod)
+        except ImportError:
+            pass
     _default_memory_dir()
     _prewarm()
     if BROWSER_PORT:
