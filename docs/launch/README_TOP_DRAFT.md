@@ -44,7 +44,8 @@ level with Mem0 (50.3% against 48.5% with a strict judge; 65.3% against
 store anything; Mem0 is ahead on questions that combine several facts.
 On LongMemEval's knowledge-update questions, where a fact changes over a
 long history, it answered 64 of 78 against plain retrieval's 61 with the
-same reader and judge [temporal questions and HaluMem: running].
+same reader and judge, and 73 of 133 questions about time and order
+against 64.
 
 It installs as a Claude Code plugin in a minute or two (about 1.5 GB of
 disk, no PyTorch, no API key), uses about 400 MB of memory, and answers in
