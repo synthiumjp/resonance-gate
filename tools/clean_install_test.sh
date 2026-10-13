@@ -80,5 +80,37 @@ ctx=$("$V/sourcedrecall-memory" context "What am I allergic to?") || fail "conte
 echo "$ctx" | grep -q "pasted in by" || fail "Marcus's email is not marked as pasted"
 "$V/sourcedrecall-memory" status || fail "status"
 grep -qi "allergic" "$HOME/.sourcedrecall/MEMORY.md" "$HOME"/.sourcedrecall/*/MEMORY.md 2>/dev/null && fail "MEMORY.md gives the allergy as the user's"
+echo "== 7. MCP server (as Claude Code starts it): initialize, tools/list, profile_context"
+"$PY" - "$R" <<'EOF' || fail "MCP"
+import json, subprocess, sys, time
+p = subprocess.Popen(["bash", sys.argv[1], "mcp"], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                     stderr=subprocess.PIPE, text=True, encoding="utf-8")
+def send(m):
+    p.stdin.write(json.dumps(m) + "\n"); p.stdin.flush()
+def reply(i):
+    t = time.time()
+    while time.time() - t < 180:
+        line = p.stdout.readline()
+        if not line:
+            sys.exit("the server closed: " + p.stderr.read()[-500:])
+        m = json.loads(line)
+        if m.get("id") == i:
+            return m
+    sys.exit("no reply")
+send({"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {
+    "protocolVersion": "2025-06-18", "capabilities": {}, "clientInfo": {"name": "clean-install-test", "version": "0"}}})
+print("server:", reply(1)["result"]["serverInfo"])
+send({"jsonrpc": "2.0", "method": "notifications/initialized"})
+send({"jsonrpc": "2.0", "id": 2, "method": "tools/list"})
+tools = [t["name"] for t in reply(2)["result"]["tools"]]
+print("tools:", tools)
+assert "profile_context" in tools and "profile_ingest" in tools, tools
+send({"jsonrpc": "2.0", "id": 3, "method": "tools/call",
+      "params": {"name": "profile_context", "arguments": {"query": "Where do I live?"}}})
+text = json.dumps(reply(3)["result"])
+assert "Brunswick" in text and "no longer true" in text, text[:800]
+print("profile_context: Brunswick, Fitzroy out of date")
+p.stdin.close(); p.terminate()
+EOF
 HOME=$REAL_HOME
 echo "== passed after $(( $(date +%s) - t0 )) s"
