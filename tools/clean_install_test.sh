@@ -80,43 +80,54 @@ ctx=$("$V/sourcedrecall-memory" context "What am I allergic to?") || fail "conte
 echo "$ctx" | grep -q "pasted in by" || fail "Marcus's email is not marked as pasted"
 "$V/sourcedrecall-memory" status || fail "status"
 grep -qi "allergic" "$HOME/.sourcedrecall/MEMORY.md" "$HOME"/.sourcedrecall/*/MEMORY.md 2>/dev/null && fail "MEMORY.md gives the allergy as the user's"
-echo "== 7. MCP server (as Claude Code starts it): initialize, tools/list, profile_context"
-BASH_EXE=$(command -v cygpath >/dev/null 2>&1 && cygpath -w "$BASH" || echo "$BASH")
-"$PY" - "$R" "$BASH_EXE" <<'EOF' || fail "MCP"
-import json, subprocess, sys, time
-# the bash running this test (on Windows, plain "bash" can be the WSL launcher)
-p = subprocess.Popen([sys.argv[2], sys.argv[1], "mcp"], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                     stderr=subprocess.PIPE, text=True, encoding="utf-8")
+echo "== 7. MCP server: initialize, tools/list, profile_context"
+cat > "$C/mcp_check.py" <<'EOF'
+"""Talk to an MCP stdio server: initialize, tools/list, profile_context.
+usage: mcp_check.py LABEL COMMAND [ARGS...]"""
+import json, queue, subprocess, sys, threading
+label, cmd = sys.argv[1], sys.argv[2:]
+p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+q = queue.Queue()
+threading.Thread(target=lambda: [q.put(l) for l in iter(p.stdout.readline, b"")] + [q.put(None)], daemon=True).start()
+def stop(why):
+    p.kill()
+    sys.exit(f"{label}: {why}; stderr: {p.stderr.read().decode('utf-8', 'replace')[-600:]!r}")
 def send(m):
-    p.stdin.write(json.dumps(m) + "\n"); p.stdin.flush()
-def reply(i):
-    t = time.time()
-    while time.time() - t < 180:
-        line = p.stdout.readline()
-        if not line:
-            sys.exit("the server closed: " + p.stderr.read()[-500:])
+    p.stdin.write((json.dumps(m) + "\n").encode()); p.stdin.flush()
+def reply(i, wait=120):
+    while True:
+        try:
+            line = q.get(timeout=wait)
+        except queue.Empty:
+            stop(f"no reply to request {i} in {wait} s")
+        if line is None:
+            stop("the server closed")
         try:
             m = json.loads(line)
         except ValueError:
-            # anything but JSON-RPC on stdout breaks the client
-            sys.exit(f"not JSON on the server's stdout: {line[:300]!r}")
+            stop(f"not JSON on stdout: {line[:200]!r}")
         if m.get("id") == i:
             return m
-    sys.exit("no reply")
 send({"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {
     "protocolVersion": "2025-06-18", "capabilities": {}, "clientInfo": {"name": "clean-install-test", "version": "0"}}})
-print("server:", reply(1)["result"]["serverInfo"])
+print(label, "server:", reply(1)["result"]["serverInfo"])
 send({"jsonrpc": "2.0", "method": "notifications/initialized"})
 send({"jsonrpc": "2.0", "id": 2, "method": "tools/list"})
 tools = [t["name"] for t in reply(2)["result"]["tools"]]
-print("tools:", tools)
 assert "profile_context" in tools and "profile_ingest" in tools, tools
 send({"jsonrpc": "2.0", "id": 3, "method": "tools/call",
       "params": {"name": "profile_context", "arguments": {"query": "Where do I live?"}}})
 text = json.dumps(reply(3)["result"])
 assert "Brunswick" in text and "no longer true" in text, text[:800]
-print("profile_context: Brunswick, Fitzroy out of date")
-p.stdin.close(); p.terminate()
+print(label, "ok:", len(tools), "tools; profile_context gives Brunswick, Fitzroy out of date")
+p.kill()
 EOF
+SERVER=$(ls "$(dirname "$PY")"/sourcedrecall.exe "$(dirname "$PY")"/sourcedrecall 2>/dev/null | head -1)
+"$PY" "$C/mcp_check.py" "direct" "$SERVER" || fail "MCP server started directly"
+# through the plugin launcher, with the bash running this test (on Windows,
+# plain "bash" can be the WSL launcher); how Claude Code itself starts it on
+# native Windows is not documented
+BASH_EXE=$(command -v cygpath >/dev/null 2>&1 && cygpath -w "$BASH" || echo "$BASH")
+"$PY" "$C/mcp_check.py" "launcher" "$BASH_EXE" "$R" mcp || fail "MCP server through the launcher"
 HOME=$REAL_HOME
 echo "== passed after $(( $(date +%s) - t0 )) s"
