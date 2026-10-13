@@ -81,9 +81,11 @@ echo "$ctx" | grep -q "pasted in by" || fail "Marcus's email is not marked as pa
 "$V/sourcedrecall-memory" status || fail "status"
 grep -qi "allergic" "$HOME/.sourcedrecall/MEMORY.md" "$HOME"/.sourcedrecall/*/MEMORY.md 2>/dev/null && fail "MEMORY.md gives the allergy as the user's"
 echo "== 7. MCP server (as Claude Code starts it): initialize, tools/list, profile_context"
-"$PY" - "$R" <<'EOF' || fail "MCP"
+BASH_EXE=$(command -v cygpath >/dev/null 2>&1 && cygpath -w "$BASH" || echo "$BASH")
+"$PY" - "$R" "$BASH_EXE" <<'EOF' || fail "MCP"
 import json, subprocess, sys, time
-p = subprocess.Popen(["bash", sys.argv[1], "mcp"], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+# the bash running this test (on Windows, plain "bash" can be the WSL launcher)
+p = subprocess.Popen([sys.argv[2], sys.argv[1], "mcp"], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                      stderr=subprocess.PIPE, text=True, encoding="utf-8")
 def send(m):
     p.stdin.write(json.dumps(m) + "\n"); p.stdin.flush()
