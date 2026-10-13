@@ -15846,3 +15846,20 @@ LoCoMo dev turns. Logistic regression, hashed features, pure Python
   capitalised words, "it was an awesome day" no longer count).
 Lesson: synthetic-data learning did not carry over to new shapes; a
 linguistic principle stated once did. dev29 (end to end, both readers) next.
+
+## Entry 330 — 2026-10-13 (the parser licence: EWT + GloVe)
+
+JP chose "retrain on EWT only". Stanza publishes EWT-only English models,
+but their POS and depparse use the CoNLL 2017 word vectors, CC BY-NC-SA
+4.0 (LINDAT 11234/1-1989; confirmed on the EUDAT mirror), and the
+character LMs trained on the One Billion Word Benchmark (no licence
+stated). The current parser archive includes those vectors
+(pretrain_emb.npy): it is non-commercial as shipped; NOTICE now says so.
+Plan: tokenizer, mwt and lemma from Stanza's EWT models (trained on EWT,
+no vectors, no charlm); POS and depparse trained by us on UD English-EWT
+(CC BY-SA 4.0) with Stanford's GloVe (PDDL), no charlm, the depparse data
+retagged by our own tagger (~/jpwork/ewt_train/train.sh, MPS, caps 20k /
+30k steps). convert.py and stanza_ort now carry models with their own
+character model (CharRep / CharModel); package choice in pkgs.py.
+Checked on Stanza's ewt_nocharlm models: parity with Stanza 400/400 texts,
+12,232 words identical in every field. Suite 1,399 passed.
