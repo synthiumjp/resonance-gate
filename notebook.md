@@ -15863,3 +15863,27 @@ retagged by our own tagger (~/jpwork/ewt_train/train.sh, MPS, caps 20k /
 character model (CharRep / CharModel); package choice in pkgs.py.
 Checked on Stanza's ewt_nocharlm models: parity with Stanza 400/400 texts,
 12,232 words identical in every field. Suite 1,399 passed.
+
+## Entry 331 — 2026-10-13 (launch gate 1: a clean install, and what it found)
+
+JP: "make this a real competitor... free and great". First: a stranger's
+first ten minutes. tools/clean_install_test.sh (new user, empty home, the
+plugin launcher, a mirror via SOURCEDRECALL_REPO_URL, two sessions through
+the real hooks, briefing + CLI checked) and the "clean install" workflow
+(Linux, macOS, Windows). Mac: install 64-76 s, 950 MB (346 models + 604
+venv); session end <1 s; briefing instant; CLI question 2-3 s (process
+start). In one process: briefing 0.03 s, first question 0.4 s, warm median
+50 ms (max 1.5 s, a model's first load), peak RSS 1.2 GB (to trim: load the
+parser and NLI only when needed). GitHub: Linux and macOS passed; Windows
+installed (111 s) but the test's HOME did not reach Python (USERPROFILE).
+
+Found: the README's own example on one line ("can you help me reply to this
+one from Marcus? Hi Dana, ... I'm allergic to nuts ... Best, Marcus") was
+not marked pasted, and the session briefing and MEMORY.md said "Dana Cole
+is allergic to nuts". Fixed (a greeting after the user's sentence starts
+the paste; same-line "X - " / "X: " introductions; a block greeting the
+owner by name). The demo had passed only because its text had line breaks:
+test the product the way a user types, not the way a set is written.
+Also: the Mac panicked twice (WindowServer watchdog) with 3-4 GPU
+processes; at most two from now. The EWT tagger restarted from scratch
+(Stanza skipped training when it found the partial model; --force).
