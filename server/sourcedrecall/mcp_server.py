@@ -23,6 +23,7 @@ Env:
 """
 
 import os
+import sys
 
 from sourcedrecall import substrate_path  # noqa: F401 — sys.path + offline env
 from mcp.server.fastmcp import FastMCP
@@ -266,6 +267,12 @@ def _quiet_logs():
 
 def main():
     _quiet_logs()
+    # 2026-10-13: SOURCEDRECALL_STACK_DUMP=<seconds> writes every thread's
+    # stack to stderr at that interval, to see where a server is stuck
+    dump = os.environ.get("SOURCEDRECALL_STACK_DUMP")
+    if dump:
+        import faulthandler
+        faulthandler.dump_traceback_later(float(dump), repeat=True, file=sys.stderr)
     _default_memory_dir()
     _prewarm()
     if BROWSER_PORT:

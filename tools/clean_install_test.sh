@@ -91,10 +91,10 @@ q = queue.Queue()
 threading.Thread(target=lambda: [q.put(l) for l in iter(p.stdout.readline, b"")] + [q.put(None)], daemon=True).start()
 def stop(why):
     p.kill()
-    sys.exit(f"{label}: {why}; stderr: {p.stderr.read().decode('utf-8', 'replace')[-600:]!r}")
+    sys.exit(f"{label}: {why}\n-- server stderr (last 4000 characters):\n" + p.stderr.read().decode('utf-8', 'replace')[-4000:])
 def send(m):
     p.stdin.write((json.dumps(m) + "\n").encode()); p.stdin.flush()
-def reply(i, wait=600):
+def reply(i, wait=240):
     while True:
         try:
             line = q.get(timeout=wait)
@@ -123,7 +123,7 @@ print(label, "ok:", len(tools), "tools; profile_context gives Brunswick, Fitzroy
 p.kill()
 EOF
 SERVER=$(ls "$(dirname "$PY")"/sourcedrecall.exe "$(dirname "$PY")"/sourcedrecall 2>/dev/null | head -1)
-RG_PREWARM=0 "$PY" "$C/mcp_check.py" "direct, no prewarm" "$SERVER" || fail "MCP server started directly, no prewarm"
+SOURCEDRECALL_STACK_DUMP=90 RG_PREWARM=0 "$PY" "$C/mcp_check.py" "direct, no prewarm" "$SERVER" || fail "MCP server started directly, no prewarm"
 "$PY" "$C/mcp_check.py" "direct" "$SERVER" || fail "MCP server started directly"
 # through the plugin launcher, with the bash running this test (on Windows,
 # plain "bash" can be the WSL launcher); how Claude Code itself starts it on
