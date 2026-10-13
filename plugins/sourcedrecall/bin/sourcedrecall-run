@@ -156,8 +156,8 @@ case "${1:-}" in
     ;;
   mcp)
     if ! installed; then
-      echo "sourcedrecall: not installed yet. The first session starts the install" \
-           "(a few minutes); restart Claude Code when $LOG ends with '== done'." >&2
+      echo "sourcedrecall: still setting up (a few minutes, the first time only). The memory" \
+           "tools are available from your next Claude Code session. Progress: $LOG" >&2
       exit 1
     fi
     exec "$VBIN/sourcedrecall$EXE"
@@ -169,7 +169,7 @@ case "${1:-}" in
         if [ -f "$DATA/install.failed" ] && [ ! -d "$LOCK" ]; then
           tell_user "sourcedrecall: the install failed. The reason is at the end of $LOG. To try again: $0 install"
         elif start_background_install || [ -d "$LOCK" ]; then
-          tell_user "sourcedrecall: installing local memory in the background (a few minutes; about 0.9 GB of models). This session will be stored when it ends. Restart Claude Code when $LOG ends with '== done' to use the memory." \
+          tell_user "sourcedrecall: setting up local memory in the background (about 0.9 GB of models, a few minutes, the first time only). This session will still be remembered; memory starts working from your next session." \
                     "[sourcedrecall] Installing local memory (first run). This session will be remembered once the install finishes."
         fi
       fi

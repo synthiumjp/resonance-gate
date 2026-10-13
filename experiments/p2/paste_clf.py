@@ -173,10 +173,13 @@ def p_other(block, frame="", after="", owner=""):
 _PARA = re.compile(r"\S(?:.*?\S)?(?=\n[ \t]*\n|\s*\Z)", re.S)
 
 
-def candidates(text):
+def candidates(text, inline=False):
     """-> [(start, end, frame)]: the whole message; it without a short first
     and/or last paragraph (the user's words around a paste); a short
-    "intro:" line before the rest."""
+    "intro:" line before the rest. inline: also a short introduction ending
+    in ": " or " - " on the same line ("got this from my boss - I'm moving
+    ..."), for the attribution rule only (the learned model was trained
+    without them)."""
     paras = list(_PARA.finditer(text or ""))
     out = []
     if not paras:
@@ -189,10 +192,21 @@ def candidates(text):
         out.append((paras[0].start(), paras[-2].end(), paras[-1].group(0)))
     if len(paras) >= 3 and short(paras[0]) and short(paras[-1]):
         out.append((paras[1].start(), paras[-2].end(), paras[0].group(0) + "\n" + paras[-1].group(0)))
+    # 2026-10-13 (clean-install test, the README's own example on one line):
+    # "can you help me reply to this one from Marcus? Hi Dana, Thanks ...
+    # Best, Marcus": a greeting after the user's sentence starts the paste
+    g = re.search(r"(?<=[?.!:])\s+(?=(?:hi|hey|hello|dear|good (?:morning|afternoon|evening))\s+"
+                  r"(?-i:[A-Z])[\w.'-]*(?:\s+(?-i:[A-Z])[\w.'-]*)?\s*[,!:-])", text or "", re.I)
+    if g and g.start() > 0 and len(text[:g.start()].split()) <= 30:
+        out.append((g.end(), paras[-1].end(), text[:g.start()]))
     # an "intro:" line: the colon ends the line ("Rails 7: `error`" is not one)
     m = re.match(r"([^\n:]{3,120}):[ \t]*\n(?=\s*\S)", text)
     if m and len(m.group(1).split()) <= 15:
         out.append((m.end(), paras[-1].end(), m.group(1)))
+    if inline:
+        i = re.match(r"([^\n:]{3,90}?)(?::|\s[-–—])\s+(?=\S)", text or "")
+        if i and len(i.group(1).split()) <= 12:
+            out.append((i.end(), paras[-1].end(), i.group(1)))
     return out
 
 
@@ -215,18 +229,25 @@ def _attributes(ctx):
     return bool((_THIRD.search(c) or _NAMED.search(c)) and not _USER_I.search(c))
 
 
-def third_party_span(text, owner=None, after=None, min_words=15):
+def third_party_span(text, owner=None, after=None, min_words=10):
     """2026-10-13 (dev set cases_dev_shapes): a block in the first person
     whose surrounding words, before, after or in the next message, name
     someone else and not the user -> (start, end), else None."""
     if "```" in (text or "") or (text or "").count("`") >= 2:
         return None
-    for s, e, frame in candidates(text):
+    first = (owner or "").split()[0] if owner else ""
+    for s, e, frame in candidates(text, inline=True):
         block = text[s:e]
         words = [w for w in _toks(block, 400) if w[0].isalpha()]
         if len(words) < min_words or not any(w in _FIRST for w in words):
             continue
         if frame and _attributes(frame):
+            return s, e
+        # written TO the user: the block greets the owner by name ("Hey
+        # Dana!", "Hi Dana,") after the user's own words
+        if (frame and len(first) > 1 and re.match(
+                r"\W*(?:hi|hey|hello|dear|good (?:morning|afternoon|evening))\s+" + re.escape(first) + r"\b",
+                block, re.I)):
             return s, e
         if (not frame and after and len(words) >= 20 and _attributes(after)
                 and _DEICTIC.search(" ".join(after.split()))):

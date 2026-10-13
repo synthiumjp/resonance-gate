@@ -486,3 +486,40 @@ def test_the_classifier_has_weights_and_can_be_turned_off(monkeypatch):
     monkeypatch.setenv("RG_PASTE_CLF", "0")
     monkeypatch.setenv("RG_PASTE_THIRD", "0")
     assert not isinstance(_paste_span("my brother, last night:\n\n" + _FIRST_P, "Dana Cole"), tuple)
+
+
+# 2026-10-13 (clean-install test): the README's own example, on one line,
+# put "Dana Cole is allergic to nuts" in the session briefing and MEMORY.md
+_MARCUS = ("can you help me reply to this one from Marcus? Hi Dana, Thanks for the invite to "
+           "Saturday's dinner, count me in. Just so you know, I'm allergic to nuts and I don't "
+           "drink alcohol. Best, Marcus")
+
+
+def test_a_one_line_paste_after_a_greeting_is_pasted():
+    from prose import _paste_span
+    sp = _paste_span(_MARCUS, "Dana Cole")
+    assert isinstance(sp, tuple) and _MARCUS[sp[0]:].startswith("Hi Dana")
+
+
+def test_a_pasted_claim_is_not_in_the_briefing_or_the_block(pm):
+    pm.profile_ingest([{"role": "user", "content": "I work as a nurse and I live in Fitzroy."},
+                       {"role": "assistant", "content": "Got it."},
+                       {"role": "user", "content": _MARCUS},
+                       {"role": "assistant", "content": "Here's a draft."}],
+                      conversation_id="a", owner_name="Dana Cole", date="2026-09-25")
+    brief = pm.profile_context()["block"]
+    assert "allergic" not in brief.lower() and "alcohol" not in brief.lower(), brief
+    block = pm.profile_context("What am I allergic to?")["block"]
+    assert "[pasted in by Dana Cole" in block, block
+
+
+@pytest.mark.parametrize("text,pasted", [
+    ("got this from my boss - I'm moving to Leeds next month and I'll need you to cover my clients.", True),
+    ("Reply to this for me: Hey Dana! I've been made redundant and I'm moving back to Cork, "
+     "any chance we can meet before I go? Cheers, Aoife", True),
+    ("update - I'm moving to Leeds next month and I'll need a new GP there, any tips?", False),
+    ("quick one: I'm allergic to penicillin, remember that", False),
+])
+def test_one_line_introductions(text, pasted):
+    from prose import _paste_span
+    assert isinstance(_paste_span(text, "Dana Cole"), tuple) == pasted
