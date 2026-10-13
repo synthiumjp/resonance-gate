@@ -201,8 +201,14 @@ The Mac rebooted at 11:47 (cause unknown; it had three Qwen3-14B servers
 and Phi-4 up). Restarted with two Qwen servers (8090, 8092) and Phi-4:
 ~/jpwork/dev29b.sh (dev29's remaining sets, 8092; dev29.log has shapes and
 own) and ~/jpwork/resume_chain.sh (LongMemEval resuming, then HaluMem
-update + QA, 8090). Uncommitted to the remotes until dev29 is in: fab3896
-(attribution rule + paste classifier), 15d39d7 (notebook e329).
+update + QA, 8090). dev29 done and pushed (610b435 attribution rule +
+paste classifier; f071173 parser runtime without a charlm; 8aad8b9 NOTICE:
+the current parser archive is non-commercial, CoNLL 2017 vectors).
+LongMemEval knowledge-update: sdr 64/78, plain 61/78 (temporal running).
+Parser retrain (JP, 2026-10-13): ~/jpwork/ewt_train/train.sh (POS then
+depparse on EWT + GloVe, no charlm, MPS); then STANZA_PACKAGES=ours
+convert.py -> parity -> parse accuracy and the dev sets / LoCoMo dev with
+RGX_PARSER_MODELS pointing at the new archive; publish only if it holds.
 Earlier: night2-4 replaced by ~/jpwork/after_chain.sh on 8092 (after.log): v10
 reproduction check, demo, LongMemEval KU + temporal. HaluMem (night.log)
 keeps 8090.
