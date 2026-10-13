@@ -265,6 +265,9 @@ def main(argv=None):
     for i, (what, name) in enumerate(HF_MODELS, start=2):
         print(f"[{i}/{1 + len(HF_MODELS)}] {what}: {name}", flush=True)
         ort_models.ensure(name)
+        # 2026-10-13: the fp32 copy each session loads from disk (ort_models._fp32_path;
+        # converting at every start kept ~800 MB resident)
+        ort_models._fp32_path(ort_models.model_dir(name))
     # Size of THESE models only
     ours = sum(_du(ort_models.model_dir(name)) for _w, name in HF_MODELS)
     root = os.path.dirname(ort_models.model_dir(HF_MODELS[0][1]))

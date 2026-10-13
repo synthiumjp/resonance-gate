@@ -364,7 +364,7 @@ sourcedrecall-memory ingest chat.jsonl
 sourcedrecall-memory context "Where do I live?"
 ```
 
-Needs Python 3.10 to 3.13. The install is about 0.9 GB with its models and takes a few minutes; no PyTorch.
+Needs Python 3.10 to 3.13. The install takes a minute or two and about 1.5 GB of disk (0.85 GB of it models); no PyTorch. A running memory server uses about 400 MB of RAM and answers a question in about 50 ms once loaded.
 After setup it runs offline.
 
 Notes, optional:

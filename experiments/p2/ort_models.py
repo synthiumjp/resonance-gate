@@ -51,8 +51,9 @@ def model_dir(name):
 
 def available(name):
     d = model_dir(name)
-    return all(os.path.exists(os.path.join(d, f))
-               for f in ("model_fp16.onnx", "tokenizer.json"))
+    # the fp32 copy replaces the fp16 file once written (_fp32_path)
+    return os.path.exists(os.path.join(d, "tokenizer.json")) and any(
+        os.path.exists(os.path.join(d, f)) for f in ("model_fp32.onnx", "model_fp16.onnx"))
 
 
 def ensure(name):
@@ -94,21 +95,38 @@ def ensure(name):
     return d
 
 
-def _session(name):
+def _fp32_path(d):
+    """The fp32 copy of a model, written once beside its fp16 file.
+
+    2026-10-13 (memory, launch work): converting the fp16 weights in Python
+    at every start (onnx.load, fp32 initializers, SerializeToString, then the
+    session) left ~800 MB resident for the 33M-parameter embedder, ~1.2 GB in
+    all. Loading a file from disk leaves only the session."""
+    fp32 = os.path.join(d, "model_fp32.onnx")
+    if os.path.exists(fp32):
+        return fp32
     import onnx
-    import onnxruntime as ort
     from onnx import numpy_helper
-    d = model_dir(name)
     m = onnx.load(os.path.join(d, "model_fp16.onnx"))
     # fp16 storage, fp32 arithmetic: exactly what the PyTorch model computed
     for init in m.graph.initializer:
         a = numpy_helper.to_array(init)
         if a.dtype == np.float16:
             init.CopyFrom(numpy_helper.from_array(a.astype(np.float32), init.name))
+    tmp = fp32 + f".{os.getpid()}.tmp"
+    onnx.save(m, tmp)
+    os.replace(tmp, fp32)
+    # the same weights (fp16-rounded, as measured), stored once
+    os.remove(os.path.join(d, "model_fp16.onnx"))
+    return fp32
+
+
+def _session(name):
+    import onnxruntime as ort
+    path = _fp32_path(model_dir(name))
     opts = ort.SessionOptions()
     opts.log_severity_level = 3
-    return ort.InferenceSession(m.SerializeToString(), opts,
-                                providers=["CPUExecutionProvider"])
+    return ort.InferenceSession(path, opts, providers=["CPUExecutionProvider"])
 
 
 class _Base:
