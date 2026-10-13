@@ -257,3 +257,13 @@ def test_cursor_command_reads_stdin_and_prints_json(pm, monkeypatch, capsys):
     monkeypatch.setattr(sys, "stdin", io.StringIO("not json"))
     assert H.main(["cursor"]) == 0
     assert json.loads(capsys.readouterr().out) == {}
+
+
+def test_unreadable_hook_input_is_logged_not_ignored(pm, monkeypatch, capsys, tmp_path):
+    # 2026-10-13 (clean-install test on Windows): a transcript path with
+    # backslashes in hand-written JSON was skipped without a trace
+    monkeypatch.setattr(sys, "stdin", io.StringIO('{"session_id": "x", "transcript_path": "D:\\a\\_temp"}'))
+    assert H.main(["session-end", "--owner", "Dana"]) == 0
+    assert "not JSON" in capsys.readouterr().err
+    log = tmp_path / "state" / "hook.log"
+    assert log.exists() and "not JSON" in log.read_text()

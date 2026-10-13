@@ -363,8 +363,19 @@ def main(argv=None):
     try:
         # utf-8 whatever the console's code page (Windows; review 3.10)
         buf = getattr(sys.stdin, "buffer", None)
-        event = json.loads(buf.read().decode("utf-8", "replace") if buf else sys.stdin.read())
-    except ValueError:
+        raw = buf.read().decode("utf-8", "replace") if buf else sys.stdin.read()
+        event = json.loads(raw)
+    except ValueError as e:
+        # 2026-10-13 (clean-install test on Windows): unreadable input was
+        # skipped without a trace; say so where a user can find it
+        msg = f"sourcedrecall: {a.event}: the hook input is not JSON ({e}); nothing stored"
+        print(msg, file=sys.stderr)
+        try:
+            from sourcedrecall.paths import private_dir, state_dir
+            with open(os.path.join(private_dir(state_dir()), "hook.log"), "a", encoding="utf-8") as lf:
+                lf.write(msg + "\n")
+        except OSError:
+            pass
         event = {}
     if not isinstance(event, dict):
         event = {}
