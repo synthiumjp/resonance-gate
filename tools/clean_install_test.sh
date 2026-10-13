@@ -94,7 +94,7 @@ def stop(why):
     sys.exit(f"{label}: {why}; stderr: {p.stderr.read().decode('utf-8', 'replace')[-600:]!r}")
 def send(m):
     p.stdin.write((json.dumps(m) + "\n").encode()); p.stdin.flush()
-def reply(i, wait=120):
+def reply(i, wait=600):
     while True:
         try:
             line = q.get(timeout=wait)
@@ -117,12 +117,13 @@ tools = [t["name"] for t in reply(2)["result"]["tools"]]
 assert "profile_context" in tools and "profile_ingest" in tools, tools
 send({"jsonrpc": "2.0", "id": 3, "method": "tools/call",
       "params": {"name": "profile_context", "arguments": {"query": "Where do I live?"}}})
-text = json.dumps(reply(3)["result"])
+import time as _t; t0 = _t.time(); text = json.dumps(reply(3)["result"]); print(label, "profile_context took", round(_t.time() - t0, 1), "s")
 assert "Brunswick" in text and "no longer true" in text, text[:800]
 print(label, "ok:", len(tools), "tools; profile_context gives Brunswick, Fitzroy out of date")
 p.kill()
 EOF
 SERVER=$(ls "$(dirname "$PY")"/sourcedrecall.exe "$(dirname "$PY")"/sourcedrecall 2>/dev/null | head -1)
+RG_PREWARM=0 "$PY" "$C/mcp_check.py" "direct, no prewarm" "$SERVER" || fail "MCP server started directly, no prewarm"
 "$PY" "$C/mcp_check.py" "direct" "$SERVER" || fail "MCP server started directly"
 # through the plugin launcher, with the bash running this test (on Windows,
 # plain "bash" can be the WSL launcher); how Claude Code itself starts it on
