@@ -202,11 +202,11 @@ tests.yml and install.yml are manual-only; do not start them. Windows
 status from the CI runs before that: install, hooks, briefing and CLI work;
 the MCP server answered initialize and tools/list but hung on the first
 profile_context (numpy imported lazily inside the running server). Fix
-b55ed30 (import numpy/onnxruntime in the main thread first) is NOT verified
-on Windows (needs a Windows machine; JP to decide). Also unverified: how
+b55ed30 (import numpy/onnxruntime in the main thread first) VERIFIED on
+JP's PC (JP approved a Windows test; test folder C:\\Users\\JP\\AppData\\Local\\Temp\\sdr-wintest, run.cmd). Tested too: how
 Claude Code on native Windows starts the plugin's MCP command (an
-extensionless bash script; the docs are silent); fallback for Windows
-users: `claude mcp add` with the venv's sourcedrecall.exe. Memory per
+extensionless bash script): it cannot; the session-start hook now shows Windows
+users the `claude mcp add ... sourcedrecall.exe` command once (14e9da1). Memory per
 server 1.2 GB -> 400 MB (a31c0e0).
 
 2026-10-13 afternoon/evening (JP: "make this a real competitor... free and
