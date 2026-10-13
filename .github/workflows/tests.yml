@@ -5,10 +5,9 @@
 # lock, the credential filter, the MCP tool list). Actions are pinned to
 # commits.
 name: tests
+# JP 2026-10-13: no test runs on GitHub; everything is tested locally (the
+# Mac). Manual only, and not to be started without JP.
 on:
-  push:
-    branches: [product-p2, main]
-  pull_request:
   workflow_dispatch:
 permissions:
   contents: read

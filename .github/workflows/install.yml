@@ -2,13 +2,10 @@ name: clean install
 # Launch gate 1 (2026-10-13): a new user installs the Claude Code plugin on a
 # clean machine and gets working memory. Runs tools/clean_install_test.sh on
 # each OS, on demand and for release tags (it downloads ~350 MB of models).
+# JP 2026-10-13: no test runs on GitHub; everything is tested locally (the
+# Mac). Manual only, and not to be started without JP.
 on:
   workflow_dispatch:
-  push:
-    tags: ["sourcedrecall-v*"]
-    branches: [product-p2]
-    paths: ["plugins/**", "server/sourcedrecall/setup_models.py", "server/pyproject.toml",
-            "tools/clean_install_test.sh", ".github/workflows/install.yml"]
 jobs:
   install:
     strategy:
