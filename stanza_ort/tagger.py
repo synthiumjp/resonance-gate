@@ -94,6 +94,40 @@ class CharLM:
         return res
 
 
+class CharModel:
+    """A tagger's or parser's own character model, for models trained without
+    a character LM (2026-10-13, the EWT + GloVe models): one vector per word
+    from its characters (stanza CharacterModel, attention pooling; the
+    parser's ROOT is the single character ROOT_ID)."""
+
+    def __init__(self, session, vocab_cfg, root=False):
+        self.sess = session
+        self.vocab = BaseVocab(vocab_cfg)
+        self.root = root
+
+    def build_many(self, sentences):
+        """sentences: list of list of str -> list of [n (+1 with ROOT), H] float32"""
+        words, spans = [], []
+        for ws in sentences:
+            a = len(words)
+            if self.root:
+                words.append([ROOT_ID])
+            words.extend(self.vocab.map(list(w)) for w in ws)
+            spans.append((a, len(words)))
+        reps = [None] * len(words)
+        for grp in _groups([len(w) for w in words], CHAR_BUDGET, 512):
+            L = len(words[grp[0]])
+            ids = np.zeros((len(grp), L), np.int64)
+            lens = np.zeros(len(grp), np.int32)
+            for r, i in enumerate(grp):
+                ids[r, :len(words[i])] = words[i]
+                lens[r] = len(words[i])
+            out = self.sess.run(None, {'chars': ids, 'lens': lens})[0]
+            for r, i in enumerate(grp):
+                reps[i] = out[r]
+        return [np.stack(reps[a:b]) if b > a else np.zeros((0, 1), np.float32) for a, b in spans]
+
+
 class Pretrain:
     def __init__(self, vocab_cfg, emb_path):
         self.vocab = PretrainedWordVocab(vocab_cfg)
@@ -107,7 +141,9 @@ class Pretrain:
 class Tagger:
     def __init__(self, cfg, sess_pos, charlms, pretrain):
         self.sess = sess_pos
-        self.fwd, self.bwd = charlms
+        # a pair of character LMs, or the model's own CharModel
+        self.chars = charlms if isinstance(charlms, CharModel) else None
+        self.fwd, self.bwd = (None, None) if self.chars else charlms
         self.pre = pretrain
         self.word = BaseVocab(cfg["word"])
         self.upos = BaseVocab(cfg["upos"])
@@ -117,25 +153,36 @@ class Tagger:
     def tag_many(self, sentences):
         """sentences: list of list of str -> list (per sentence) of list of (upos, xpos, feats)"""
         sentences = [[simplify_punct_word(w) for w in ws] for ws in sentences]
-        fcs = self.fwd.build_many(sentences)
-        bcs = self.bwd.build_many(sentences)
+        if self.chars:
+            chs = self.chars.build_many(sentences)
+        else:
+            fcs = self.fwd.build_many(sentences)
+            bcs = self.bwd.build_many(sentences)
         res = [None] * len(sentences)
         for grp in _groups([len(s) for s in sentences], TOKEN_BUDGET, MAX_ROWS):
             T = len(sentences[grp[0]])
             B = len(grp)
             wid = np.zeros((B, T), np.int64)
             pre = np.zeros((B, T, self.pre.emb.shape[1]), np.float32)
-            fc = np.zeros((B, T, fcs[grp[0]].shape[1]), np.float32)
-            bc = np.zeros((B, T, bcs[grp[0]].shape[1]), np.float32)
+            if self.chars:
+                ch = np.zeros((B, T, chs[grp[0]].shape[1]), np.float32)
+            else:
+                fc = np.zeros((B, T, fcs[grp[0]].shape[1]), np.float32)
+                bc = np.zeros((B, T, bcs[grp[0]].shape[1]), np.float32)
             lens = np.zeros(B, np.int32)
             for r, i in enumerate(grp):
                 n = len(sentences[i])
                 wid[r, :n] = self.word.map(sentences[i])
                 pre[r, :n] = self.pre.emb[self.pre.map(sentences[i])]
-                fc[r, :n] = fcs[i]
-                bc[r, :n] = bcs[i]
+                if self.chars:
+                    ch[r, :n] = chs[i]
+                else:
+                    fc[r, :n] = fcs[i]
+                    bc[r, :n] = bcs[i]
                 lens[r] = n
-            u, x, f = self.sess.run(None, {'word': wid, 'pre': pre, 'fc': fc, 'bc': bc, 'lens': lens})
+            feed = {'word': wid, 'pre': pre, 'lens': lens}
+            feed.update({'ch': ch} if self.chars else {'fc': fc, 'bc': bc})
+            u, x, f = self.sess.run(None, feed)
             for r, i in enumerate(grp):
                 n = len(sentences[i])
                 up = self.upos.unmap(u[r, :n].tolist())
@@ -148,7 +195,9 @@ class Tagger:
 class Parser:
     def __init__(self, cfg, num_relations, sess_dep, charlms, pretrain, resolve_head_constraints=True):
         self.sess = sess_dep
-        self.fwd, self.bwd = charlms
+        # a pair of character LMs, or the model's own CharModel (ROOT first)
+        self.chars = charlms if isinstance(charlms, CharModel) else None
+        self.fwd, self.bwd = (None, None) if self.chars else charlms
         self.pre = pretrain
         self.word = BaseVocab(cfg["word"])
         self.lemma = BaseVocab(cfg["lemma"])
@@ -162,9 +211,12 @@ class Parser:
         """sentences: list of (words, upos, xpos, lemmas) -> list of list of (head, deprel)"""
         fix = lambda xs: ['_' if x is None else x for x in xs]
         sents = [([simplify_punct_word(w) for w in ws], fix(up), fix(xp), fix(lm)) for ws, up, xp, lm in sentences]
-        ct = [["\n"] + s[0] for s in sents]
-        fcs = self.fwd.build_many(ct)
-        bcs = self.bwd.build_many(ct)
+        if self.chars:
+            chs = self.chars.build_many([s[0] for s in sents])
+        else:
+            ct = [["\n"] + s[0] for s in sents]
+            fcs = self.fwd.build_many(ct)
+            bcs = self.bwd.build_many(ct)
         res = [None] * len(sents)
         for grp in _groups([len(s[0]) + 1 for s in sents], TOKEN_BUDGET, MAX_ROWS):
             T = len(sents[grp[0]][0]) + 1
@@ -172,8 +224,11 @@ class Parser:
             wid = np.zeros((B, T), np.int64); lid = np.zeros((B, T), np.int64)
             uid = np.zeros((B, T), np.int64); xid = np.zeros((B, T), np.int64)
             pre = np.zeros((B, T, self.pre.emb.shape[1]), np.float32)
-            fc = np.zeros((B, T, fcs[grp[0]].shape[1]), np.float32)
-            bc = np.zeros((B, T, bcs[grp[0]].shape[1]), np.float32)
+            if self.chars:
+                ch = np.zeros((B, T, chs[grp[0]].shape[1]), np.float32)
+            else:
+                fc = np.zeros((B, T, fcs[grp[0]].shape[1]), np.float32)
+                bc = np.zeros((B, T, bcs[grp[0]].shape[1]), np.float32)
             lens = np.zeros(B, np.int32)
             for r, i in enumerate(grp):
                 ws, up, xp, lm = sents[i]
@@ -183,11 +238,15 @@ class Parser:
                 uid[r, :n] = [ROOT_ID] + self.upos.map(up)
                 xid[r, :n] = [ROOT_ID] + self.xpos.map(xp)
                 pre[r, :n] = self.pre.emb[[ROOT_ID] + self.pre.map(ws)]
-                fc[r, :n] = fcs[i]
-                bc[r, :n] = bcs[i]
+                if self.chars:
+                    ch[r, :n] = chs[i]
+                else:
+                    fc[r, :n] = fcs[i]
+                    bc[r, :n] = bcs[i]
                 lens[r] = n
-            unl, dr = self.sess.run(None, {'word': wid, 'lemma': lid, 'upos': uid, 'xpos': xid,
-                                           'pre': pre, 'fc': fc, 'bc': bc, 'lens': lens})
+            feed = {'word': wid, 'lemma': lid, 'upos': uid, 'xpos': xid, 'pre': pre, 'lens': lens}
+            feed.update({'ch': ch} if self.chars else {'fc': fc, 'bc': bc})
+            unl, dr = self.sess.run(None, feed)
             for r, i in enumerate(grp):
                 l = len(sents[i][0]) + 1
                 scores = _log_softmax(unl[r, :l, :l], 1)

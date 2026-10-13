@@ -167,7 +167,8 @@ def run(which, mode, limit):
         os.environ.setdefault("STANZA_RESOURCES_DIR", os.path.join(HOME, "jpwork/stanza_resources_114"))
         import torch, stanza
         torch.set_num_threads(4)
-        nlp = stanza.Pipeline("en", dir=os.environ["STANZA_RESOURCES_DIR"], processors="tokenize,pos,lemma,depparse",
+        from pkgs import pipeline_kwargs   # 2026-10-13: which models (STANZA_PACKAGES)
+        nlp = stanza.Pipeline("en", dir=os.environ["STANZA_RESOURCES_DIR"], **pipeline_kwargs(),
                               use_gpu=False, logging_level="ERROR", download_method=stanza.DownloadMethod.REUSE_RESOURCES)
         Doc = stanza.Document
         call, bulk = nlp, nlp.bulk_process

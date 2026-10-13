@@ -22,7 +22,10 @@ os.makedirs(OUT, exist_ok=True)
 RES = os.environ.get("STANZA_RESOURCES_DIR", os.path.expanduser("~/stanza_resources"))
 torch.set_num_threads(4)
 
-nlp = stanza.Pipeline("en", dir=RES, processors="tokenize,pos,lemma,depparse",
+# 2026-10-13 (JP: the parser licence): which models, pkgs.py (STANZA_PACKAGES)
+sys.path.insert(0, HERE)
+from pkgs import pipeline_kwargs  # noqa: E402
+nlp = stanza.Pipeline("en", dir=RES, **pipeline_kwargs(),
                       download_method=None, use_gpu=False, logging_level="WARN")
 P = nlp.processors
 assert stanza.__version__ == "1.14.0", stanza.__version__
@@ -70,6 +73,35 @@ class CharLM(nn.Module):
         o, _ = s.m.charlstm.lstm(e, (h0, c0))
         return o
 
+class CharRep(nn.Module):
+    """2026-10-13: a tagger or parser trained without a character LM has its
+    own character model (stanza CharacterModel, attention pooling): one
+    vector per word from its characters. chars [N, L], lens wired in."""
+    def __init__(s, m): super().__init__(); s.m = m
+    def forward(s, chars):
+        m = s.m
+        e = m.char_emb(chars)
+        n = m.num_dir * m.args['char_num_layers']
+        h0 = m.charlstm_h_init.expand(n, chars.shape[0], -1).contiguous()
+        c0 = m.charlstm_c_init.expand(n, chars.shape[0], -1).contiguous()
+        o, _ = m.charlstm.lstm(e, (h0, c0))
+        w = torch.sigmoid(m.char_attn(o))
+        return (o * w).sum(1)
+
+class PosCoreChar(nn.Module):
+    def __init__(s, m): super().__init__(); s.m = m
+    def forward(s, word, pre, ch):
+        m = s.m
+        x = torch.cat([m.word_emb(word), m.trans_pretrained(pre), m.trans_char(ch)], 2)
+        h = hlstm(m.taggerlstm, x, m.taggerlstm_h_init, m.taggerlstm_c_init)
+        uh = F.relu(m.upos_hid(h)); up = m.upos_clf(uh)
+        ua = up.argmax(2)
+        xh = F.relu(m.xpos_hid(h)); fh = F.relu(m.ufeats_hid(h))
+        ue = m.upos_emb(ua)
+        xp = bil(m.xpos_clf, xh, ue).argmax(2)
+        fs = torch.stack([bil(c, fh, ue).argmax(2) for c in m.ufeats_clf], 2)
+        return ua, xp, fs
+
 class PosCore(nn.Module):
     def __init__(s, m): super().__init__(); s.m = m
     def forward(s, word, pre, fc, bc):   # 'lens' is wired into the LSTM nodes by add_sequence_lens()
@@ -90,6 +122,10 @@ class DepCore(nn.Module):
         m = s.m
         pe = m.upos_emb(upos) + m.xpos_emb(xpos)
         x = torch.cat([m.trans_pretrained(pre), m.word_emb(word), m.lemma_emb(lemma), pe, pe, fc, bc], 2)
+        return s.scores(x, word)
+
+    def scores(s, x, word):
+        m = s.m
         h = hlstm(m.parserlstm, x, m.parserlstm_h_init, m.parserlstm_c_init)
         un = m.unlabeled(h, h).squeeze(3); dr = m.deprel(h, h)
         T = word.shape[1]
@@ -103,6 +139,14 @@ class DepCore(nn.Module):
         diag = (ar.view(1, -1, 1) == ar.view(1, 1, -1))
         un = un.masked_fill(diag, -float('inf'))
         return un, dr          # raw scores; log_softmax over the real columns is done in numpy
+
+class DepCoreChar(nn.Module):
+    def __init__(s, m): super().__init__(); s.m = m; s.core = DepCore(m)
+    def forward(s, word, lemma, upos, xpos, pre, ch):
+        m = s.m
+        pe = m.upos_emb(upos) + m.xpos_emb(xpos)
+        x = torch.cat([m.trans_pretrained(pre), m.word_emb(word), m.lemma_emb(lemma), pe, pe, m.trans_char(ch)], 2)
+        return s.core.scores(x, word)
 
 class TokCore(nn.Module):
     def __init__(s, m): super().__init__(); s.m = m
@@ -155,25 +199,45 @@ assert lem_tr.args['beam_size'] == 1 and lem_tr.args['ensemble_dict'] and not le
 assert lem_tr.args['edit'] and lem_tr.args['copy'] and lem_tr.args['pos'] and lem_tr.args['attn_type'] == 'soft'
 
 T = 7
-fl = posm.charmodel_forward; bl = posm.charmodel_backward
-for nm, m in [('charlm_fwd', fl), ('charlm_bwd', bl)]:
-    export(CharLM(m).eval(), (torch.randint(0, 50, (2, 30)),), ['chars'], ['out'],
-           {'chars': {0: 'B', 1: 'L'}, 'out': {0: 'B', 1: 'L'}}, nm)
 D = posm.pretrained_emb.weight.shape[1]
 B = 2
-export(PosCore(posm).eval(), (torch.randint(0, 50, (B, T)), torch.randn(B, T, D), torch.randn(B, T, 1024), torch.randn(B, T, 1024)),
-       ['word', 'pre', 'fc', 'bc'], ['upos', 'xpos', 'feats'],
-       {**{k: {0: 'B', 1: 'T'} for k in ['word', 'pre', 'fc', 'bc', 'upos', 'xpos', 'feats']}}, 'pos', lens=True)
-export(DepCore(depm).eval(), (torch.randint(0, 50, (B, T)), torch.randint(0, 50, (B, T)), torch.randint(0, 15, (B, T)),
-                              torch.randint(0, 5, (B, T)), torch.randn(B, T, D), torch.randn(B, T, 1024), torch.randn(B, T, 1024)),
-       ['word', 'lemma', 'upos', 'xpos', 'pre', 'fc', 'bc'], ['unl', 'dr'],
-       {**{k: {0: 'B', 1: 'T'} for k in ['word', 'lemma', 'upos', 'xpos', 'pre', 'fc', 'bc']},
-        'unl': {0: 'B', 1: 'T', 2: 'T'}, 'dr': {0: 'B', 1: 'T', 2: 'T'}}, 'dep', lens=True)
+# 2026-10-13: with a character LM (Stanza's default models) or with each
+# model's own character model (models trained without one, e.g. on EWT with
+# GloVe for the licence)
+NOCHARLM = not posm.args.get('charlm')
+assert NOCHARLM == (not depm.args.get('charlm'))
+if NOCHARLM:
+    for nm, m in [('pos_char', posm.charmodel), ('dep_char', depm.charmodel)]:
+        assert m.attn and m.num_dir == 1 and m.args['char_num_layers'] == 1 and not m.args.get('char_rec_dropout')
+        export(CharRep(m).eval(), (torch.randint(2, 50, (3, 9)),), ['chars'], ['rep'],
+               {'chars': {0: 'N', 1: 'L'}, 'rep': {0: 'N'}}, nm, lens=True)
+    HP, HD = posm.args['char_hidden_dim'], depm.args['char_hidden_dim']
+    export(PosCoreChar(posm).eval(), (torch.randint(0, 50, (B, T)), torch.randn(B, T, D), torch.randn(B, T, HP)),
+           ['word', 'pre', 'ch'], ['upos', 'xpos', 'feats'],
+           {**{k: {0: 'B', 1: 'T'} for k in ['word', 'pre', 'ch', 'upos', 'xpos', 'feats']}}, 'pos', lens=True)
+    export(DepCoreChar(depm).eval(), (torch.randint(0, 50, (B, T)), torch.randint(0, 50, (B, T)), torch.randint(0, 15, (B, T)),
+                                      torch.randint(0, 5, (B, T)), torch.randn(B, T, D), torch.randn(B, T, HD)),
+           ['word', 'lemma', 'upos', 'xpos', 'pre', 'ch'], ['unl', 'dr'],
+           {**{k: {0: 'B', 1: 'T'} for k in ['word', 'lemma', 'upos', 'xpos', 'pre', 'ch']},
+            'unl': {0: 'B', 1: 'T', 2: 'T'}, 'dr': {0: 'B', 1: 'T', 2: 'T'}}, 'dep', lens=True)
+else:
+    fl = posm.charmodel_forward; bl = posm.charmodel_backward
+    for nm, m in [('charlm_fwd', fl), ('charlm_bwd', bl)]:
+        export(CharLM(m).eval(), (torch.randint(0, 50, (2, 30)),), ['chars'], ['out'],
+               {'chars': {0: 'B', 1: 'L'}, 'out': {0: 'B', 1: 'L'}}, nm)
+    export(PosCore(posm).eval(), (torch.randint(0, 50, (B, T)), torch.randn(B, T, D), torch.randn(B, T, 1024), torch.randn(B, T, 1024)),
+           ['word', 'pre', 'fc', 'bc'], ['upos', 'xpos', 'feats'],
+           {**{k: {0: 'B', 1: 'T'} for k in ['word', 'pre', 'fc', 'bc', 'upos', 'xpos', 'feats']}}, 'pos', lens=True)
+    export(DepCore(depm).eval(), (torch.randint(0, 50, (B, T)), torch.randint(0, 50, (B, T)), torch.randint(0, 15, (B, T)),
+                                  torch.randint(0, 5, (B, T)), torch.randn(B, T, D), torch.randn(B, T, 1024), torch.randn(B, T, 1024)),
+           ['word', 'lemma', 'upos', 'xpos', 'pre', 'fc', 'bc'], ['unl', 'dr'],
+           {**{k: {0: 'B', 1: 'T'} for k in ['word', 'lemma', 'upos', 'xpos', 'pre', 'fc', 'bc']},
+            'unl': {0: 'B', 1: 'T', 2: 'T'}, 'dr': {0: 'B', 1: 'T', 2: 'T'}}, 'dep', lens=True)
 export(TokCore(tokm).eval(), (torch.randint(0, 50, (1, 40)), torch.randn(1, 40, tokm.args['feat_dim'])),
        ['x', 'feats'], ['pred'], {'x': {1: 'L'}, 'feats': {1: 'L'}, 'pred': {1: 'L'}}, 'tok')
 
 # charlm weights for the numpy implementation (stanza_ort/charlm.py)
-for nm, m in [('charlm_fwd', fl), ('charlm_bwd', bl)]:
+for nm, m in ([] if NOCHARLM else [('charlm_fwd', fl), ('charlm_bwd', bl)]):
     lstm = m.charlstm.lstm
     assert lstm.num_layers == 1 and not lstm.bidirectional and lstm.batch_first
     np.savez(os.path.join(OUT, nm + ".npz"),
@@ -221,10 +285,13 @@ cfg = {
         "shorthand": tok_tr.args["shorthand"],
         "feat_dim": int(tokm.args["feat_dim"]),
     },
-    "charlm": {
+    "charlm": None if NOCHARLM else {
         "start": cm.CHARLM_START, "end": cm.CHARLM_END,
         "fwd": vocab_json(fl.char_vocab()), "bwd": vocab_json(bl.char_vocab()),
     },
+    # 2026-10-13: each model's own character vocabulary (no character LM)
+    "charmodel": {"pos": vocab_json(P["pos"].vocab["char"]), "dep": vocab_json(P["depparse"].vocab["char"])}
+                 if NOCHARLM else None,
     "pretrain": vocab_json(pre.vocab),
     "pos": {k: vocab_json(P["pos"].vocab[k]) for k in ["word", "upos", "xpos", "feats"]},
     "dep": {k: vocab_json(P["depparse"].vocab[k]) for k in ["word", "lemma", "upos", "xpos", "deprel"]},

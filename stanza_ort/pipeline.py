@@ -9,7 +9,7 @@ import onnxruntime as ort
 from .doc import Document
 from .tokenizer import Tokenizer
 from .seq2seq import MWTExpander, Lemmatizer
-from .tagger import CharLM, Pretrain, Tagger, Parser
+from .tagger import CharLM, CharModel, Pretrain, Tagger, Parser
 from .charlm import NumpyCharLSTM
 
 
@@ -41,11 +41,19 @@ class Pipeline:
         self.cfg = cfg
         S = lambda n: _session(os.path.join(d, n + ".onnx"), threads)
         self.tokenizer = Tokenizer(cfg["tokenize"], S("tok"))
-        cl = cfg["charlm"]
-        mr = int(os.environ.get("STANZA_ORT_NUMPY_CHARLM_MIN_ROWS", "16"))
-        npl = lambda n: (NumpyCharLSTM(os.path.join(d, n + ".npz")) if mr > 0 and os.path.exists(os.path.join(d, n + ".npz")) else None)
-        charlms = (CharLM(S("charlm_fwd"), cl["fwd"], True, cl["start"], cl["end"], npl("charlm_fwd"), mr),
-                   CharLM(S("charlm_bwd"), cl["bwd"], False, cl["start"], cl["end"], npl("charlm_bwd"), mr))
+        cl = cfg.get("charlm")
+        if cl:
+            mr = int(os.environ.get("STANZA_ORT_NUMPY_CHARLM_MIN_ROWS", "16"))
+            npl = lambda n: (NumpyCharLSTM(os.path.join(d, n + ".npz")) if mr > 0 and os.path.exists(os.path.join(d, n + ".npz")) else None)
+            charlms = (CharLM(S("charlm_fwd"), cl["fwd"], True, cl["start"], cl["end"], npl("charlm_fwd"), mr),
+                       CharLM(S("charlm_bwd"), cl["bwd"], False, cl["start"], cl["end"], npl("charlm_bwd"), mr))
+            pos_chars = dep_chars = charlms
+        else:
+            # 2026-10-13: models trained without a character LM, each with its
+            # own character model (convert.py CharRep)
+            cm = cfg["charmodel"]
+            pos_chars = CharModel(S("pos_char"), cm["pos"])
+            dep_chars = CharModel(S("dep_char"), cm["dep"], root=True)
         pre = Pretrain(cfg["pretrain"], os.path.join(d, "pretrain_emb.npy"))
         with np.load(os.path.join(d, "mwt.npz")) as z:
             mwt_w = {k: z[k] for k in z.files}
@@ -53,8 +61,8 @@ class Pipeline:
             lem_w = {k: z[k] for k in z.files}
         self.mwt = MWTExpander(cfg["mwt"], mwt_w)
         self.lemmatizer = Lemmatizer(cfg["lemma"], lem_w)
-        self.tagger = Tagger(cfg["pos"], S("pos"), charlms, pre)
-        self.parser = Parser(cfg["dep"], cfg["dep_num_relations"], S("dep"), charlms, pre,
+        self.tagger = Tagger(cfg["pos"], S("pos"), pos_chars, pre)
+        self.parser = Parser(cfg["dep"], cfg["dep_num_relations"], S("dep"), dep_chars, pre,
                              resolve_head_constraints=resolve_head_constraints)
 
     # ------------------------------------------------------------------ steps
