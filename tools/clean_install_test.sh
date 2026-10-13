@@ -15,7 +15,7 @@ rm -rf "$C"; mkdir -p "$C/home"
 git clone -q "$REPO_URL" "$C/checkout" && git -C "$C/checkout" checkout -q "$REF" || exit 1
 cp -R "$C/checkout/plugins/sourcedrecall" "$C/plugin"
 REAL_HOME=$HOME
-export HOME="$C/home"
+export HOME="$C/home" USERPROFILE="$C/home"   # Python reads USERPROFILE on Windows
 export CLAUDE_PLUGIN_ROOT="$C/plugin" CLAUDE_PLUGIN_DATA="$HOME/.claude/plugins/data/sourcedrecall"
 export SOURCEDRECALL_REPO_URL="$REPO_URL" SOURCEDRECALL_REF="$REF" SOURCEDRECALL_OWNER="Dana Cole"
 R="$CLAUDE_PLUGIN_ROOT/bin/sourcedrecall-run"
@@ -54,11 +54,11 @@ for s in s1 s2; do
   echo "{\"session_id\":\"$s\",\"hook_event_name\":\"SessionEnd\",\"reason\":\"exit\",\"transcript_path\":\"$C/$s.jsonl\"}" \
     | bash "$R" hook session-end || fail "session end $s"
 done
-echo "== 4. waiting for the background workers"
+echo "== 4. waiting for the background workers (until status shows both sessions)"
 for i in $(seq 1 60); do
-  [ -z "$(ls "$HOME"/.sourcedrecall/*/spool/*.json 2>/dev/null)" ] && break; sleep 5
+  "$(dirname "$PY")/sourcedrecall-memory" status 2>/dev/null | grep -q "2 conversations" && break; sleep 5
 done
-sleep 5
+echo "waited ~$((i * 5)) s"
 
 echo "== 5. next session start: the briefing"
 brief=$(echo '{"session_id":"s3","hook_event_name":"SessionStart","source":"startup","transcript_path":null}' | bash "$R" hook session-start)
