@@ -19,6 +19,36 @@ bench/false_memory/results_v10/SUMMARY.md, docs/PREREG_HELDOUT_V11.md (DRAFT, un
 waiting for JP), docs/REVIEW_2026-10-12.md (the second adversarial review;
 items fixed and open are listed below), docs/REVIEW_2026-10-09.md.
 
+## 2026-10-14 afternoon (read this first)
+
+- First-session fix: the plugin's MCP server is a stand-in
+  (plugins/sourcedrecall/bin/setup_server.py) while the install runs, then
+  hands over and sends tools/list_changed (b6f3cd1). JP's session had no
+  memory tools all day: he restarted during the install, the launcher
+  exited, Claude Code cached the failure. clean_install_test.sh now checks
+  the handover during a real install.
+- HaluMem update + QA (first two users, d6613e0): updates 156/304 against
+  plain 96, QA 185/352 against 162; in README and bench/halumem (scores
+  only).
+- README evidence: the LoCoMo release dirs now hold the d89d830 run the
+  README quotes (they had 8473783's); LongMemEval answers in
+  bench/longmemeval/answers_75487ec; judge gold check 120/120
+  (bench/locomo/JUDGE_STRESS.md).
+- Legacy triple tools, service.py and substrate_path.py removed (3d1bd84);
+  test_zero_network now guards the profile path.
+- Clean product repo: `tools/export_product.py SRC tools/export_keep.txt
+  DEST` (run on the Mac on a `git archive`; the keep list came from a
+  manifest of what the docs cite). Memory modules
+  go to core/, the HaluMem harness to bench/halumem/harness, machine paths
+  scrubbed. The export (~/jpwork/sdr-export, a copy at
+  ~/sourcedrecall-export on WSL) passes the suite (1,183) and the clean
+  install test. NOT pushed: it replaces synthiumjp/sourcedrecall's history
+  and waits for JP.
+- Parser retrain (licence): depparse restarted on CPU 15:16
+  (~/jpwork/ewt_train/dep_only.sh; the 10-13 checkpoint with another tag
+  vocabulary had crashed it, moved to stale/). Then convert
+  (STANZA_PACKAGES=ours), parity, benchmark, publish, NOTICE.
+
 ## What it is
 
 A local memory for AI agents that never calls a language model to store

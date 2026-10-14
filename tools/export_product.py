@@ -6,7 +6,7 @@ their tests, the product docs and the benchmark files the docs cite. This
 writes that tree from a checkout of this repository, so development stays
 here and the export is rerun for each release.
 
-    python tools/export_product.py SRC KEEP_LIST DEST
+    python tools/export_product.py SRC tools/export_keep.txt DEST
 
 SRC is a checkout (or `git archive` of one), KEEP_LIST a file of further
 paths to keep (bench/, docs/, tools/; one per line), DEST an empty or
@@ -37,6 +37,7 @@ TOP_FILES = ["README.md", "NOTICE", "LICENSE", "SECURITY.md", "CITATION.cff", ".
 TOP_DIRS = [".claude-plugin", "plugins", "server", "rgx", "stanza_ort", ".github"]
 # research tools whose tests `pytest tools` would otherwise collect
 DROP = {"tools/check_judged.py", "tools/test_check_judged.py", "tools/export_product.py",
+        "tools/export_keep.txt",
         "tools/stanza_ort/PROGRESS.md", "tools/distil/deixis_parse.py", "tools/distil/tsent.py",
         "server/sourcedrecall/_core"}
 
