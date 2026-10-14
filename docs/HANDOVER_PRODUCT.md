@@ -33,7 +33,19 @@ items fixed and open are listed below), docs/REVIEW_2026-10-09.md.
   archive needs no change.
 - Running: ~/jpwork/locodev_parser.sh (LoCoMo dev convs 0-1, shipped vs
   ours, tree ~/jpwork/sdr-ours = 0e575db, Qwen 8090; log locodev_parser.log).
-  Publish only if ours holds.
+  Publish only if ours holds. Result: shipped 160/233 (68.7%), ours
+  155/233 (66.5%); paired 11 vs 6 discordant, exact McNemar p=0.33; 153 of
+  233 contexts differ, no pattern in the discordant questions. Too small to
+  decide, so ~/jpwork/parser_ab.sh (log parser_ab.log, started 09:24): both
+  arms on false-memory v11, v12, real paste (held out, counts only), dev
+  pasted/own, then LoCoMo test convs 2-9; sourcedrecall only, no audit
+  overrides, Qwen 8090.
+- Wheel dry run (the commit after "PyPI page"): builds, twine
+  check passes (description now server/README.md), installs into an empty
+  venv (255 MB), sourcedrecall-setup 46 s, store + answer work, 0 model
+  calls. JP set up the PyPI trusted publisher (2026-10-15). Before launch:
+  pick the version (0.5.2 was a research-repo tag; the product changed a
+  lot since), add `pip install sourcedrecall` to the READMEs.
 - Export reviewed (e7767f6): product CITATION.cff, rgx/README ledger link
   and CI judge-cache deps cut, REVIEW_2026-09-05 dropped, user's name out of
   an rgx comment. Re-export at Mac ~/jpwork/sdr-export2 passes 1,183
