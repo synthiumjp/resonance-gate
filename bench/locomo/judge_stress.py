@@ -5,7 +5,13 @@ found gpt-4o-mini with this prompt accepted 10.6% and 62.8%. Judged here with
 our judge (C.JUDGE, LOCOMO_LLM_BASE / LOCOMO_LLM_MODEL) on the test
 conversations (2-9), categories 1-4. Resumable.
 
-    python judge_stress.py [--n 0] [--out results/judge_stress.jsonl]"""
+    python judge_stress.py [--n 0] [--out results/judge_stress.jsonl]
+
+--gold N (2026-10-14) checks the other side: N gold answers, a random
+sample, each given as the answer to judge; a usable judge accepts all of
+them (LOCOMO_JUDGE=strict for the strict prompt).
+
+    LOCOMO_JUDGE=strict python judge_stress.py --gold 120 --out results/judge_gold_strict.jsonl"""
 import argparse
 import json
 import os
@@ -31,12 +37,26 @@ def wrong_answers(v):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--n", type=int, default=0, help="a random sample of this many questions (0 = all)")
+    ap.add_argument("--gold", type=int, default=0, help="judge this many gold answers against themselves instead")
     ap.add_argument("--out", default=os.path.join(C.RESULTS, "judge_stress.jsonl"))
     a = ap.parse_args()
     # gold answers from our own data, the same rows the systems were judged on
     rows = {(int(r["qid"].split(":")[0]), r["question"].strip()): r
             for r in C.jsonl_read(os.path.join(C.RESULTS, "test", "ctx_rag.jsonl"))}
     done = {(r["v"], r["qid"]) for r in C.jsonl_read(a.out)}
+    if a.gold:
+        keys = random.Random(20261014).sample(sorted(rows), min(a.gold, len(rows)))
+        for k in keys:
+            r = rows[k]
+            if ("gold", r["qid"]) in done:
+                continue
+            j = C.llm(C.judge_prompt().format(question=r["question"], gold=r["answer"], pred=r["answer"]), max_tokens=120)
+            C.jsonl_append(a.out, {"v": "gold", "qid": r["qid"], "category": r["category"],
+                                   "label": C.judge_label(j), "judge_text": j})
+        rs = [r for r in C.jsonl_read(a.out) if r["v"] == "gold"]
+        k = sum(r["label"] == "CORRECT" for r in rs)
+        print(f"gold answers judged CORRECT {k}/{len(rs)}; rejected: {[r['qid'] for r in rs if r['label'] != 'CORRECT']}")
+        return
     for v in ("v1", "v2"):
         wa = wrong_answers(v)
         keys = sorted(k for k in rows if k in wa)
