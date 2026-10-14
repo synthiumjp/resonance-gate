@@ -19,7 +19,28 @@ bench/false_memory/results_v10/SUMMARY.md, docs/PREREG_HELDOUT_V11.md (DRAFT, un
 waiting for JP), docs/REVIEW_2026-10-12.md (the second adversarial review;
 items fixed and open are listed below), docs/REVIEW_2026-10-09.md.
 
-## 2026-10-14 afternoon (read this first)
+## 2026-10-15 morning (read this first)
+
+- Parser retrain done (EWT + GloVe only): UD EWT test, gold words, LAS
+  88.83 (ours, head repair on) / 88.77 (Stanza ewt_nocharlm) / 90.04
+  (shipped combined); UPOS 96.41 / 96.68 / 96.77 (~/jpwork/ud_cmp.py).
+  Converted to ~/jpwork/parser_models/ours (no charlm, 40 MB vectors).
+  Parity: our training saved `resolve_head_constraints: False` in the
+  model config, so Stanza on PyTorch skipped the head repair the pipeline
+  does for its own models (key absent = on); stanza_ort always repairs.
+  With the key removed (~/jpwork/ewt_train/en_ewt_glove_nocharlm_parser_rhc.pt,
+  the file to keep and cite) all 7,755 parity texts are identical. The ONNX
+  archive needs no change.
+- Running: ~/jpwork/locodev_parser.sh (LoCoMo dev convs 0-1, shipped vs
+  ours, tree ~/jpwork/sdr-ours = 0e575db, Qwen 8090; log locodev_parser.log).
+  Publish only if ours holds.
+- Export reviewed (e7767f6): product CITATION.cff, rgx/README ledger link
+  and CI judge-cache deps cut, REVIEW_2026-09-05 dropped, user's name out of
+  an rgx comment. Re-export at Mac ~/jpwork/sdr-export2 passes 1,183
+  (delete its COMMIT_SRC before committing). Packed size 14 MB. Push waits
+  for JP.
+
+## 2026-10-14 afternoon
 
 - First-session fix: the plugin's MCP server is a stand-in
   (plugins/sourcedrecall/bin/setup_server.py) while the install runs, then
