@@ -30,11 +30,47 @@ t0=$(date +%s)
 echo "== 1. first session start, before anything is installed"
 out=$(echo '{"session_id":"s0","hook_event_name":"SessionStart","source":"startup","transcript_path":null}' | bash "$R" hook session-start)
 echo "$out" | grep -q "setting up local memory" || fail "no first-run message: $out"
+# the first session's MCP server, started while the install runs: a stand-in
+# answers at once and hands over to the real server when the install is done
+cat > "$C/handover_check.py" <<'EOF'
+import json, queue, subprocess, sys, threading, time
+p = subprocess.Popen(sys.argv[1:], stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
+q = queue.Queue()
+threading.Thread(target=lambda: [q.put(json.loads(l)) for l in p.stdout] + [q.put(None)], daemon=True).start()
+def send(m): p.stdin.write(json.dumps(m) + "\n"); p.stdin.flush()
+def wait(pred, secs):
+    end = time.time() + secs
+    while True:
+        m = q.get(timeout=max(1, end - time.time()))
+        if m is None: sys.exit("handover: the server closed")
+        if pred(m): return m
+t0 = time.time()
+send({"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2025-06-18",
+      "capabilities": {}, "clientInfo": {"name": "clean-install-test", "version": "0"}}})
+wait(lambda m: m.get("id") == 1, 30)
+print("handover: first-session server answered in %.1f s" % (time.time() - t0))
+send({"jsonrpc": "2.0", "method": "notifications/initialized"})
+send({"jsonrpc": "2.0", "id": 2, "method": "tools/list"})
+tools = [t["name"] for t in wait(lambda m: m.get("id") == 2, 30)["result"]["tools"]]
+assert tools == ["memory_setup_status"], tools
+wait(lambda m: m.get("method") == "notifications/tools/list_changed", 1800)
+print("handover: tools changed after %.0f s" % (time.time() - t0))
+send({"jsonrpc": "2.0", "id": 3, "method": "tools/list"})
+tools = [t["name"] for t in wait(lambda m: m.get("id") == 3, 240)["result"]["tools"]]
+assert "profile_context" in tools, tools
+print("handover: ok,", len(tools), "memory tools in the same session")
+p.kill()
+EOF
+SYSPY=$(command -v python3 || command -v python)
+"$SYSPY" "$C/handover_check.py" bash "$R" mcp > "$C/handover.out" 2>&1 &
+HANDOVER=$!
 for i in $(seq 1 120); do [ -d "$CLAUDE_PLUGIN_DATA/install.lock" ] || break; sleep 5; done   # the background install
 
 echo "== 2. install"
 bash "$R" install || { tail -20 "$CLAUDE_PLUGIN_DATA/install.log"; fail "install"; }
 echo "install done after $(( $(date +%s) - t0 )) s"
+wait $HANDOVER || { cat "$C/handover.out"; fail "the first session's MCP server did not hand over"; }
+cat "$C/handover.out"
 du -sh "$HOME/.sourcedrecall" "$CLAUDE_PLUGIN_DATA" 2>/dev/null
 
 PY=$(ls "$CLAUDE_PLUGIN_DATA"/venv/bin/python* "$CLAUDE_PLUGIN_DATA"/venv/Scripts/python.exe 2>/dev/null | head -1)

@@ -11,7 +11,8 @@
 # (${CLAUDE_PLUGIN_DATA}, which survives plugin updates): a shallow clone of
 # the source at a pinned tag, a venv, the server
 # package, and the models (sourcedrecall-setup). The first session starts the
-# install in the background and memory is available from the next session.
+# install in the background; until it is done the MCP server is a stand-in
+# (bin/setup_server.py) that hands over to the real one when it is ready.
 # An install is redone when the plugin version changes.
 set -u
 
@@ -55,15 +56,7 @@ notes_ready() {
   [ "$NOTES" = off ] || [ "$(cat "$DATA/notes-installed" 2>/dev/null)" = "$REF $NOTES" ]
 }
 
-do_install() {
-  mkdir -p "$DATA"
-  echo "== sourcedrecall install $REF $(date)"
-  if installed; then          # only the notes model is missing
-    do_notes || return 1
-    echo "== done $(date)"
-    return 0
-  fi
-  command -v git >/dev/null || { echo "git is required"; return 1; }
+find_python() {   # prints a Python 3.10-3.13, or fails
   local py="" c v
   # PATH first, then where Homebrew and python.org put Python: an app started
   # from the macOS desktop (or a non-login shell) often has only Apple's 3.9
@@ -90,7 +83,20 @@ do_install() {
       done
     done
   fi
-  [ -n "$py" ] || { echo "Python 3.10 to 3.13 is required (macOS: brew install python@3.12; Windows: python.org or winget install Python.Python.3.12)"; return 1; }
+  [ -n "$py" ] && printf '%s\n' "$py"
+}
+
+do_install() {
+  mkdir -p "$DATA"
+  echo "== sourcedrecall install $REF $(date)"
+  if installed; then          # only the notes model is missing
+    do_notes || return 1
+    echo "== done $(date)"
+    return 0
+  fi
+  command -v git >/dev/null || { echo "git is required"; return 1; }
+  local py
+  py="$(find_python)" || { echo "Python 3.10 to 3.13 is required (macOS: brew install python@3.12; Windows: python.org or winget install Python.Python.3.12)"; return 1; }
   echo "using $py"
   if [ -d "$SRC/.git" ]; then
     git -C "$SRC" fetch --depth 1 origin "refs/tags/$REF:refs/tags/$REF" 2>/dev/null ||
@@ -156,6 +162,14 @@ case "${1:-}" in
     ;;
   mcp)
     if ! installed; then
+      # 2026-10-14: a stand-in server answers until the install is done, then
+      # hands over, so the tools appear in this session; exiting here made
+      # Claude Code cache the failure for the whole session
+      [ -f "$DATA/install.failed" ] || start_background_install
+      if py="$(find_python)"; then
+        exec "$py" "$ROOT/bin/setup_server.py" "$VBIN/sourcedrecall$EXE" "$STAMP" "$REF" \
+          "$LOG" "$DATA/install.failed" "$LOCK"
+      fi
       echo "sourcedrecall: still setting up (a few minutes, the first time only). The memory" \
            "tools are available from your next Claude Code session. Progress: $LOG" >&2
       exit 1
@@ -169,7 +183,7 @@ case "${1:-}" in
         if [ -f "$DATA/install.failed" ] && [ ! -d "$LOCK" ]; then
           tell_user "sourcedrecall: the install failed. The reason is at the end of $LOG. To try again: $0 install"
         elif start_background_install || [ -d "$LOCK" ]; then
-          tell_user "sourcedrecall: setting up local memory in the background (about 0.9 GB of models, a few minutes, the first time only). This session will still be remembered; memory starts working from your next session." \
+          tell_user "sourcedrecall: setting up local memory in the background (about 0.9 GB of models, a few minutes, the first time only). The memory tools appear in this session when it is done, and this session will be remembered." \
                     "[sourcedrecall] Installing local memory (first run). This session will be remembered once the install finishes."
         fi
       fi
