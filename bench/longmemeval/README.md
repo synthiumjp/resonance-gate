@@ -65,3 +65,12 @@ the user would prefer. With the advice handling (commit 632d83a) 16/30,
 without it 13/30 (+5/-2, sign test p~0.45, not significant):
 `pref_answers_on.jsonl`, `pref_answers_off.jsonl`. The retrieval routing for
 these questions was chosen on the same 30, so this is not held out.
+
+## Knowledge-update and temporal questions, answer level (2026-10-13)
+
+`lme_answers.py` (its docstring has the method): every haystack session
+stored with its date and the real parser, LongMemEval's own answer and
+judge prompts, the local Qwen3-14B as reader and judge. On commit 75487ec:
+knowledge-update 64/78 (plain retrieval 61/78), temporal-reasoning 73/133
+(plain retrieval 64/133). One line per question, with the answer and the
+verdict: `answers_75487ec/`.
