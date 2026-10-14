@@ -1,5 +1,7 @@
 """Parser and label counterexamples from the adversarial review of
 2026-10-09 (docs/REVIEW_2026-10-09.md, section C). Each must stay fixed."""
+import os
+
 import pytest
 
 
@@ -523,3 +525,28 @@ def test_a_pasted_claim_is_not_in_the_briefing_or_the_block(pm):
 def test_one_line_introductions(text, pasted):
     from prose import _paste_span
     assert isinstance(_paste_span(text, "Dana Cole"), tuple) == pasted
+
+
+def test_message_of_a_sentence_in_no_message_is_a_pair(pm):
+    # 2026-10-14: _message_of fell through to None (a function inserted above
+    # its last line), and a question touching such a fact crashed
+    pm.profile_ingest([{"role": "user", "content": "I live in Fitzroy."}],
+                      conversation_id="a", owner_name="Dana Cole", date="2026-09-01")
+    assert pm._message_of("a", "a sentence never said") == (None, None)
+    assert pm._message_of("no-such-conversation", "x") == (None, None)
+
+
+def test_rebuild_reads_stored_conversations_with_the_current_rules(pm, monkeypatch):
+    # 2026-10-14: summaries stored before a parser change kept its mistakes
+    monkeypatch.setenv("RGX_WORK_FILTERS", "0")
+    pm.profile_ingest([{"role": "user", "content": "I live in Fitzroy. I'm going to bed now."}],
+                      conversation_id="a", owner_name="Dana Cole", date="2026-09-01")
+    pm.profile_status(reload=True)
+    before = open(pm.memory_file()).read()
+    assert "going to bed" in before
+    monkeypatch.setenv("RGX_WORK_FILTERS", "1")
+    out = pm.profile_rebuild("Dana Cole")
+    assert out["conversations"] == 1 and out["backup"] and os.path.exists(out["backup"])
+    pm.profile_status(reload=True)
+    after = open(pm.memory_file()).read()
+    assert "Fitzroy" in after and "going to bed" not in after

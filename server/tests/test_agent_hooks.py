@@ -290,3 +290,13 @@ def test_no_windows_note_elsewhere(pm, monkeypatch, tmp_path):
     monkeypatch.setenv("CLAUDE_PLUGIN_ROOT", str(tmp_path / "plugin"))
     out = H.session_start({"source": "startup"}, owner="Dana Cole") or {}
     assert "claude mcp add" not in (out.get("systemMessage") or "")
+
+
+def test_the_first_message_says_a_session_is_being_stored(pm, monkeypatch, tmp_path):
+    # 2026-10-14: "your memory is empty" while the last session was still stored
+    import tempfile
+    monkeypatch.setattr(tempfile, "gettempdir", lambda: str(tmp_path))
+    (tmp_path / "sourcedrecall-job-x.json").write_text("{}")
+    out = H._welcome("claude")
+    assert "being stored now" in out["systemMessage"]
+    assert not (tmp_path / "state" / ".welcomed").exists()   # the welcome can still come later

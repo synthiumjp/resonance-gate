@@ -496,6 +496,8 @@ def _import_export(fmt, path, owner, as_json):
 
 
 def main(argv=None):
+    # 2026-10-14: conversations with an assistant (rgx RGX_ASSISTANT_CHAT)
+    os.environ.setdefault("RGX_ASSISTANT_CHAT", "1")
     ap = argparse.ArgumentParser(
         prog="sourcedrecall-import",
         description="Store a Gemini or Codex CLI session, or a ChatGPT or "

@@ -267,6 +267,8 @@ def _quiet_logs():
 
 def main():
     _quiet_logs()
+    # 2026-10-14: conversations with an assistant (rgx RGX_ASSISTANT_CHAT)
+    os.environ.setdefault("RGX_ASSISTANT_CHAT", "1")
     # 2026-10-13: SOURCEDRECALL_STACK_DUMP=<seconds> writes every thread's
     # stack to stderr at that interval, to see where a server is stuck
     dump = os.environ.get("SOURCEDRECALL_STACK_DUMP")

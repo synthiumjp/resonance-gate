@@ -43,8 +43,14 @@ import tempfile
 # local command output, the harness's own injected caveats.
 _NOT_SPEECH = re.compile(
     r"^\s*(<command-name>|<command-message>|<command-args>|<local-command-"
-    r"|<bash-input>|<bash-stdout>|<bash-stderr>|<task-notification>|Caveat:)", re.S)
+    r"|<bash-input>|<bash-stdout>|<bash-stderr>|<task-notification>|Caveat:"
+    # 2026-10-14 (JP's first real session): the summary Claude Code writes
+    # when a session continues after its context ran out
+    r"|This session is being continued from a previous conversation)", re.S)
 _INJECTED = re.compile(r"<system-reminder>.*?</system-reminder>", re.S)
+# 2026-10-14 (JP's first real session: '</pasted_content id="a090">' stored in
+# a fact): the tags Claude Code wraps around pasted text; the text stays
+_PASTE_TAGS = re.compile(r"</?pasted_content\b[^>]*>")
 # the memory's own block quoted back: its header to its rules line, or, for a
 # block cut short, the header and the "- ..." lines under it. 2026-10-12
 # (review 3.10): it ran to the end of the message, so typing "[MEMORY" in a
@@ -92,6 +98,7 @@ def read_transcript(path):
                     continue                      # tool output, not the human
                 text = "\n".join(_text_items(content))
                 text = _INJECTED.sub("", text).strip()
+                text = _PASTE_TAGS.sub("\n\n", text).strip()
                 # our own summary, if it is ever recorded as user text, must
                 # not be stored again -- a memory that re-reads what it
                 # recalled grows copies of its own output (a Mem0 audit,
@@ -300,6 +307,18 @@ def _welcome(agent):
     mark = os.path.join(state_dir(), ".welcomed")
     if os.path.exists(mark):
         return None
+    # 2026-10-14 (JP's first session): "your memory is empty" while the
+    # session that had just ended was still being stored. A job file is
+    # removed by its worker when done (one older than 30 minutes is a leftover)
+    import glob
+    import time
+    pending = [p for p in glob.glob(os.path.join(tempfile.gettempdir(), "sourcedrecall-job-*.json"))
+               if time.time() - os.path.getmtime(p) < 1800]
+    if pending:
+        return {"systemMessage": (
+            "sourcedrecall is installed. Your last session is being stored now; the "
+            "next session starts with what was kept. To see what is stored: "
+            "sourcedrecall-memory show.")}
     try:
         os.makedirs(state_dir(), exist_ok=True)
         open(mark, "w").close()
@@ -348,6 +367,8 @@ def saved_notice(new, memory_file=None, show=3, agent="claude"):
 
 
 def main(argv=None):
+    # 2026-10-14: conversations with an assistant (rgx RGX_ASSISTANT_CHAT)
+    os.environ.setdefault("RGX_ASSISTANT_CHAT", "1")
     ap = argparse.ArgumentParser(prog="sourcedrecall-hook")
     ap.add_argument("event", choices=["session-end", "session-start", "cursor",
                                       "_worker", "_pending"])

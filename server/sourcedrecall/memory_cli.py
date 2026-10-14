@@ -57,11 +57,13 @@ def _line(f):
 
 
 def main(argv=None):
+    # 2026-10-14: conversations with an assistant (rgx RGX_ASSISTANT_CHAT)
+    os.environ.setdefault("RGX_ASSISTANT_CHAT", "1")
     ap = argparse.ArgumentParser(prog="sourcedrecall-memory",
                                  description="Use the memory from a terminal.")
     ap.add_argument("command", choices=["show", "path", "forget", "confirm",
                                         "context", "recall", "check", "ingest", "view",
-                                        "notes-backfill", "status", "last"])
+                                        "notes-backfill", "status", "last", "rebuild"])
     ap.add_argument("arg", nargs="*", help="a fact id, a question, or a file")
     ap.add_argument("--owner", default=os.environ.get("SOURCEDRECALL_OWNER"))
     ap.add_argument("--id", dest="conv_id")
@@ -108,6 +110,13 @@ def main(argv=None):
         print(f"{rec['time']}  {q}  -- {rec['characters']} characters, about "
               f"{rec['tokens_about']} tokens\n")
         print(rec["block"])
+        return 0
+    if a.command == "rebuild":
+        # 2026-10-14: the stored conversations read again with the current
+        # parser (after an update that changes what it takes from a message)
+        out = pm.profile_rebuild(a.owner)
+        print(f"read {out['conversations']} conversations again; the old summaries are in "
+              f"{out['backup'] or '(none)'}")
         return 0
     if a.command == "notes-backfill":
         n = pm.notes_backfill(a.owner)

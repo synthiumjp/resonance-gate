@@ -127,6 +127,133 @@ def _drop_framed(records):
     return keep
 
 
+# 2026-10-14 (JP's first real Claude Code session; dev set
+# cases_dev_worksession): a work chat is full of sentences that are not facts
+# about the person. The summary said "Jon-Paul dies quickly" ("if we don't
+# have it perfect we die quickly"), "Jon-Paul is competing against ..." ("we",
+# the team), "Jon-Paul is going to bed", "Jon-Paul needs you to keep
+# progressing overnight", and "the reader often says Jon-Paul does not know"
+# (an "I" inside a quotation).
+_QUOTED = re.compile(r"[\"“]([^\"”]{2,300})[\"”]")
+_Q_FIRST = re.compile(r"\b(?:i|i'm|i’m|i've|i'd|i'll|me|my|mine|we|we're|our|us)\b", re.I)
+_CONDITIONAL = re.compile(
+    r"\b(?:if|unless|in case|what if|whether|otherwise|maybe|perhaps|should i|"
+    # a worry only with what it is about ("concerned if we ...", "afraid
+    # that ..."); "I was very anxious during college" is a fact
+    r"(?:concerned|worried|afraid|scared|nervous|anxious)\s+(?:that|if|about|we|i)\b)", re.I)
+_I_FORMS = re.compile(r"\b(?:i|i'm|i’m|i've|i’ve|i'd|i’d|i'll|i’ll|me|my|mine|myself)\b", re.I)
+_WE_FORMS = re.compile(r"\b(?:we|we're|we’re|we've|we’ve|we'd|we'll|us|our|ours)\b", re.I)
+# what "we" shares with a partner or family: where they live, moving,
+# marriage, children, pets, a home
+_HOUSEHOLD = re.compile(
+    r"\b(?:live[sd]?|living|move[sd]?|moving|relocat\w*|married|marry|marries|engaged|divorc\w*|"
+    r"wedding|kids?|children|child|baby|babies|son|daughter|twins|dog|cat|pets?|puppy|kitten|"
+    r"house|flat|apartment|home|bought|buy|rent\w*|mortgage|garden)\b", re.I)
+# ... or something "we" did, in the past: a family's picnic, a trip
+# ("we had a picnic last week", "we both helped with the painting"); a work
+# chat's "we" is mostly present or future ("we need", "we are competing")
+_WE_EVENT = re.compile(
+    r"\bwe\s+(?:\w+ly\s+|both\s+|all\s+|even\s+|just\s+|finally\s+)?(?:went|had|visited|took|made|saw|did|"
+    r"got|found|helped|painted|bought|watched|played|tried|started|finished|celebrated|spent|ate|"
+    r"cooked|baked|walked|hiked|drove|flew|met|stayed|camped|danced|sang|built|planted|adopted|"
+    r"travell?ed)\b|\b(?:last (?:week|weekend|month|year|night)|yesterday|ago)\b", re.I)
+# ... or a family's plans and outings (LoCoMo dev: "we're thinking about
+# going camping next month" was dropped and its question lost); rare in a
+# work chat
+_LEISURE = re.compile(
+    r"\b(?:camping|camp|trip|holiday|vacation|beach|hike|hiking|picnic|concert|party|birthday|"
+    r"wedding|anniversary|museum|park|zoo|restaurant|dinner|lunch|brunch|festival|road trip|"
+    r"cruise|movie|cinema|game night|barbecue|bbq|christmas|thanksgiving|easter)\b", re.I)
+# a fact with a time is an event, even when it is told to "you" ("I wanted
+# to tell you about my school event last week")
+_WHEN = re.compile(r"\b(?:last (?:week|weekend|month|year|night|time)|yesterday|today|tonight|"
+                   r"tomorrow|this (?:week|weekend|month|morning|evening)|next (?:week|weekend|month|year)|"
+                   r"ago|on (?:monday|tuesday|wednesday|thursday|friday|saturday|sunday))\b", re.I)
+# credit, not a request ("taking your advice, I'm sprucing up my biz plan")
+_CREDIT = re.compile(r"\b(?:taking|thanks to|with|after|following|because of)\s+your\s+"
+                     r"(?:advice|help|support|tips?|suggestions?|ideas?|encouragement)\b", re.I)
+_MOMENT = re.compile(
+    r"\b(?:going to (?:bed|sleep)|go to (?:bed|sleep)|off to bed|heading (?:off|out|to bed)|"
+    r"signing off|logging off|back now|i'?m back|i am back|be right back|brb|afk|"
+    r"tired|exhausted|sleepy|knackered|ran out of (?:usage|tokens|credits|context|time)|"
+    r"on my phone|hold(?:s|ing)? off|for now|stepping out|step out|for lunch|back in \d+|"
+    r"battery|check back)\b", re.I)
+
+
+_STOP = {"the", "a", "an", "and", "or", "to", "of", "in", "on", "at", "for", "is", "are", "was",
+         "be", "it", "this", "that", "with", "s", "has", "have", "had", "will", "would"}
+
+
+def _content(words_text, owner):
+    o = {w.lower() for w in re.findall(r"[A-Za-z]+", owner or "")}
+    return [w for w in re.findall(r"[a-z0-9]+", (words_text or "").lower())
+            if w not in _STOP and w not in o and len(w) > 2]
+
+
+def _after_marker(src, text, owner, rx):
+    """Most of the fact's own words come after a condition or worry marker
+    and few before it: the fact sits inside that clause."""
+    m = rx.search(src)
+    if not m:
+        return False
+    words = _content(text, owner)
+    if not words:
+        return False
+    before, after = src[:m.start()].lower(), src[m.end():].lower()
+    # a condition opening the sentence ends at its comma: "Even if it is
+    # raining, I always go for a run" asserts the run
+    if not re.sub(r"\W|even", "", before) and "," in after:
+        cut = after.index(",")
+        before, after = before + after[cut:], after[:cut]
+    n_after = sum(1 for w in words if re.search(rf"\b{re.escape(w)}", after))
+    n_before = sum(1 for w in words if re.search(rf"\b{re.escape(w)}", before))
+    return n_after >= max(1, (len(words) + 1) // 2) and n_after > n_before
+
+
+def _work_filters(records, role, owner=None):
+    """Records a user's turn should not yield (see the comment above).
+    RGX_WORK_FILTERS=0 turns them off."""
+    if os.environ.get("RGX_WORK_FILTERS") == "0" or role != "user":
+        return records
+    # "you" is the assistant and "we" mostly the user's team only in a chat
+    # WITH an assistant; between two people (LoCoMo) "you" is the friend and
+    # "we" often the family (LoCoMo dev: 160 -> 156 of 233 with these rules
+    # on). The product's entry points set RGX_ASSISTANT_CHAT=1.
+    assistant_chat = os.environ.get("RGX_ASSISTANT_CHAT") == "1"
+    keep = []
+    for r in records:
+        src = r.source or ""
+        text = r.text or ""
+        val = (r.value or "").lower()
+        # a moment, not a lasting fact, an instruction included ("on my
+        # phone so keep it short")
+        if _MOMENT.search(src):
+            continue
+        if r.predicate != "instruction":
+            # still addressed to the assistant: a request, not a fact
+            if (assistant_chat and re.search(r"\byou(?:r|rs|rself)?\b", _CREDIT.sub("", text), re.I)
+                    and not _WHEN.search(text)):
+                continue
+            # an "I" or "we" inside a quotation is the quoted speaker's
+            if any(_Q_FIRST.search(q) and (not val or val in q.lower())
+                   for q in _QUOTED.findall(src)):
+                continue
+            # inside a condition, a musing or a worry
+            if _after_marker(src, text, owner, _CONDITIONAL):
+                continue
+            # "we" with no "I": the team, unless it is a household fact
+            if (assistant_chat and _WE_FORMS.search(src) and not _I_FORMS.search(src)
+                    and not _HOUSEHOLD.search(text)
+                    and not _WE_EVENT.search(src) and not _LEISURE.search(src)):
+                continue
+            # the introduction to a paste ("my friend sent me this")
+            if re.search(r"\b(?:sent|forwarded|shared|pasted|got|wrote)\b.*\b(?:this|that|these|the following)\W*$",
+                         text, re.I):
+                continue
+        keep.append(r)
+    return keep
+
+
 @dataclass
 class Extractor:
     """Deterministic extractor. Loads a parser once and reuses it.
@@ -221,6 +348,13 @@ class Extractor:
         from . import check as C
         from . import parse as G
         from . import fragments as F
+        # 2026-10-14: the tags a client wraps around pasted text are not words
+        text = re.sub(r"</?pasted_content\b[^>]*>", "\n\n", text or "").strip()
+        # a bulleted list is one item per line, not one sentence ("- Keep the
+        # handover current\n- Commit at stage boundaries" was one instruction)
+        if re.search(r"^[ \t]*[-*•][ \t]+", text, flags=re.M):
+            text = re.sub(r"(?<=[A-Za-z0-9)\"”])[ \t]*\n(?=\s*\S)", ".\n", text)
+            text = re.sub(r"^[ \t]*[-*•][ \t]+", "", text, flags=re.M)
         orig = {}
         out = []
         if role == "user":
@@ -263,7 +397,7 @@ class Extractor:
                               turn=turn, role=role, predicate=pred, value=val,
                               evidential=evi, source=orig.get(src, src),
                               quality=C.quality(prop, text, self.owner_name)))
-        return _drop_framed(out)
+        return _work_filters(_drop_framed(out), role, self.owner_name)
 
     def reset_world(self):
         """Forget the accumulated world (e269). Call between owners."""

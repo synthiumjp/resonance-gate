@@ -1434,3 +1434,9 @@ def test_an_accepted_proposal_is_a_decision(ex, user, assistant, want):
 def test_a_declined_or_deferred_proposal_is_not(ex, user, assistant):
     out = [r.text for r in ex.extract_turn(user, prev=assistant)]
     assert not any("decided with the assistant" in t for t in out), out
+
+
+def test_a_bulleted_list_is_one_item_per_line(ex):
+    # 2026-10-14 (JP's first session): two pasted rules became one instruction
+    out = texts(ex, "- always keep the handover current\n- always commit at stage boundaries")
+    assert not any("current" in p and "commit" in p.lower() for p in out), out

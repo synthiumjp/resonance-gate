@@ -1,0 +1,120 @@
+{"id": "ws001", "kind": "conditional", "message": "I'm concerned if we don't have it perfect we die quickly", "should": [], "should_not": ["The user dies quickly if things are not perfect", "The user is worried about dying"]}
+{"id": "ws002", "kind": "conditional", "message": "if I move to Berlin next year I'd need a new visa", "should": [], "should_not": ["The user lives in Berlin", "The user is moving to Berlin next year", "The user needs a new visa"]}
+{"id": "ws003", "kind": "conditional", "message": "what if we just ship it and fix the docs later", "should": [], "should_not": ["The user ships things without docs", "The user is going to ship it"]}
+{"id": "ws004", "kind": "conditional", "message": "if the eval comes back under 60 i might just scrap the whole retrieval idea", "should": [], "should_not": ["The user is scrapping the retrieval idea", "The user scraps ideas when eval is low"]}
+{"id": "ws005", "kind": "conditional", "message": "worried that if the index gets corrupted I lose a week of work", "should": [], "should_not": ["The user lost a week of work", "The user has a corrupted index"]}
+{"id": "ws006", "kind": "conditional", "message": "suppose i had a 4090 instead, would batch size 64 fit", "should": [], "should_not": ["The user has a 4090", "The user owns an RTX 4090"]}
+{"id": "ws007", "kind": "conditional", "message": "if this fails again im going to be so annoyed", "should": [], "should_not": ["The user is annoyed", "The user is easily annoyed"]}
+{"id": "ws008", "kind": "conditional", "message": "maybe i should quit my job and do this full time if the pilot goes well", "should": [], "should_not": ["The user quit their job", "The user works on this full time", "The user is quitting their job"]}
+{"id": "ws009", "kind": "conditional", "message": "i fear we run out of runway before the paper is out", "should": [], "should_not": ["The user is running out of runway", "The user is afraid", "The user is writing a paper"]}
+{"id": "ws010", "kind": "conditional", "message": "if i were you i'd drop the cache layer entirely", "should": [], "should_not": ["The user is the assistant", "The user would drop the cache layer"]}
+{"id": "ws011", "kind": "conditional", "message": "unless the deadline moves i wont have time to sleep this week", "should": [], "should_not": ["The user does not sleep", "The user has no time to sleep"]}
+{"id": "ws012", "kind": "conditional", "message": "what happens if i delete the lockfile and rerun", "should": [], "should_not": ["The user deleted the lockfile"]}
+{"id": "ws013", "kind": "conditional", "message": "im nervous that if the judge model is biased the whole benchmark is useless", "should": [], "should_not": ["The user is nervous", "The user's benchmark is useless"]}
+{"id": "ws014", "kind": "conditional", "message": "if we get 100 users by june i'll hire someone", "should": [], "should_not": ["The user will hire someone", "The user has 100 users"]}
+{"id": "ws015", "kind": "conditional", "message": "could be a disaster if the mac goes to sleep mid run", "should": [], "should_not": ["The user is in a disaster", "The user's Mac goes to sleep"]}
+{"id": "ws016", "kind": "we_team", "message": "we are competing against Mem0 and Zep on this", "should": [], "should_not": ["The user is competing against Mem0", "The user is a competitor of Zep"]}
+{"id": "ws017", "kind": "we_team", "message": "we need to plan and address all of these before friday", "should": [], "should_not": ["The user needs to plan and address all of these", "The user has a Friday deadline"]}
+{"id": "ws018", "kind": "we_team", "message": "we die quickly if the launch slips", "should": [], "should_not": ["The user dies quickly", "The user's launch is slipping"]}
+{"id": "ws019", "kind": "we_team", "message": "we have 3 failing tests in the parser", "should": [], "should_not": ["The user has 3 failing tests"]}
+{"id": "ws020", "kind": "we_team", "message": "we dont have a GPU on the CI box so skip those", "should": [], "should_not": ["The user does not have a GPU"]}
+{"id": "ws021", "kind": "we_team", "message": "we are unknowns in this space, nobody trusts a new memory tool", "should": [], "should_not": ["The user is unknown", "The user is untrusted"]}
+{"id": "ws022", "kind": "we_team", "message": "we shipped v0.3 last tuesday but the installer is broken on windows", "should": [], "should_not": ["The user shipped v0.3 personally", "The user's installer is broken"]}
+{"id": "ws023", "kind": "we_team", "message": "we are using sqlite for storage and numpy for the vectors", "should": [], "should_not": ["The user uses sqlite", "The user uses numpy personally"]}
+{"id": "ws024", "kind": "we_team", "message": "we're behind on the roadmap, 2 milestones late", "should": [], "should_not": ["The user is behind schedule", "The user is two milestones late"]}
+{"id": "ws025", "kind": "we_team", "message": "we only have a week left before the demo", "should": [], "should_not": ["The user has a demo next week"]}
+{"id": "ws026", "kind": "we_team", "message": "we moved to Brunswick last month and the commute is way better", "should": ["The user moved to Brunswick last month"], "should_not": ["The user is a company that moved"]}
+{"id": "ws027", "kind": "we_team", "message": "we have two kids so mornings are chaos, i start work around 10", "should": ["The user has two kids"], "should_not": ["The user's team has two kids"]}
+{"id": "ws028", "kind": "we_team", "message": "my wife and i are expecting in march so i'll be offline a bit then", "should": ["The user is married", "The user and their wife are expecting a baby in March"], "should_not": ["The user is offline"]}
+{"id": "ws029", "kind": "we_team", "message": "we got a dog last week, a greyhound called Pickle", "should": ["The user has a dog, a greyhound called Pickle"], "should_not": ["The user's team got a dog"]}
+{"id": "ws030", "kind": "we_team", "message": "we dont really have a moat yet tbh", "should": [], "should_not": ["The user has no moat"]}
+{"id": "ws031", "kind": "the_user", "message": "the user often says they dont know, so the prompt should handle that", "should": [], "should_not": ["The user often says they don't know"]}
+{"id": "ws032", "kind": "the_user", "message": "make sure the user sees the warning before the install finishes", "should": [], "should_not": ["The user sees warnings", "The user is installing something"]}
+{"id": "ws033", "kind": "the_user", "message": "the user lives in Leeds in this test case", "should": [], "should_not": ["The user lives in Leeds"]}
+{"id": "ws034", "kind": "the_user", "message": "in the fixture the user is a nurse who moved to Perth", "should": [], "should_not": ["The user is a nurse", "The user moved to Perth"]}
+{"id": "ws035", "kind": "the_user", "message": "when the user says they hate mornings we should store that as a preference", "should": [], "should_not": ["The user hates mornings"]}
+{"id": "ws036", "kind": "the_user", "message": "the end user probably wont read the readme", "should": [], "should_not": ["The user does not read readmes"]}
+{"id": "ws037", "kind": "the_user", "message": "what does the user see when the hook fails", "should": [], "should_not": ["The user sees a failing hook"]}
+{"id": "ws038", "kind": "the_user", "message": "test case 14: the user is vegetarian and allergic to nuts", "should": [], "should_not": ["The user is vegetarian", "The user is allergic to nuts"]}
+{"id": "ws039", "kind": "the_user", "message": "the user in this transcript keeps switching between french and english", "should": [], "should_not": ["The user speaks French", "The user switches between French and English"]}
+{"id": "ws040", "kind": "the_user", "message": "users who work night shifts will get the briefing at the wrong time", "should": [], "should_not": ["The user works night shifts"]}
+{"id": "ws041", "kind": "the_user", "message": "the user should be able to delete any fact with one command", "should": [], "should_not": ["The user deletes facts with one command"]}
+{"id": "ws042", "kind": "the_user", "message": "persona b: the user is 62, retired, lives in Cork", "should": [], "should_not": ["The user is 62", "The user is retired", "The user lives in Cork"]}
+{"id": "ws043", "kind": "the_user", "message": "if the user asks what they told us last week, answer from the log", "should": [], "should_not": ["The user told us something last week"]}
+{"id": "ws044", "kind": "the_user", "message": "the user never reads the status line so dont rely on it", "should": [], "should_not": ["The user never reads the status line"]}
+{"id": "ws045", "kind": "the_user", "message": "our user is a solo dev on windows with no admin rights", "should": [], "should_not": ["The user is a solo dev on Windows", "The user has no admin rights"]}
+{"id": "ws046", "kind": "request", "message": "I need you to keep progressing overnight", "should": [], "should_not": ["The user needs you to keep progressing overnight", "The user works overnight"]}
+{"id": "ws047", "kind": "request", "message": "can you keep the notebook current", "should": [], "should_not": ["The user keeps a notebook", "The user needs the notebook current"]}
+{"id": "ws048", "kind": "request", "message": "run the tests on the mac", "should": [], "should_not": ["The user is the Mac", "The user runs tests on the Mac"]}
+{"id": "ws049", "kind": "request", "message": "dont do anything on the local machine", "should": [], "should_not": ["The user is the local machine", "The user has a local machine"]}
+{"id": "ws050", "kind": "request", "message": "always run tests on the mac, never on wsl", "should": ["The user wants tests run on the Mac, not WSL"], "should_not": ["The user is the Mac"]}
+{"id": "ws051", "kind": "request", "message": "pls look at the failing job and tell me why", "should": [], "should_not": ["The user has a failing job"]}
+{"id": "ws052", "kind": "request", "message": "rewrite that function so it doesnt mutate the input", "should": [], "should_not": ["The user dislikes mutation"]}
+{"id": "ws053", "kind": "request", "message": "i want you to commit after every stage, always", "should": ["The user wants commits made after every stage"], "should_not": ["The user wants to commit"]}
+{"id": "ws054", "kind": "request", "message": "give me the diff not the whole file", "should": [], "should_not": ["The user is the diff"]}
+{"id": "ws055", "kind": "request", "message": "summarise the last three runs in a table", "should": [], "should_not": ["The user ran three runs"]}
+{"id": "ws056", "kind": "request", "message": "check the logs and wake me if anything looks off", "should": [], "should_not": ["The user is asleep", "The user wants to be woken"]}
+{"id": "ws057", "kind": "request", "message": "use two different models for judging, never the same one twice", "should": [], "should_not": ["The user is a judge"]}
+{"id": "ws058", "kind": "request", "message": "please dont touch the frozen branch", "should": [], "should_not": ["The user is frozen", "The user owns a frozen branch"]}
+{"id": "ws059", "kind": "request", "message": "I need the README in a plain voice, no marketing tone", "should": [], "should_not": ["The user needs a README", "The user dislikes marketing"]}
+{"id": "ws060", "kind": "request", "message": "keep going, I'll check back in the morning", "should": [], "should_not": ["The user will check back in the morning", "The user is going away"]}
+{"id": "ws061", "kind": "moment", "message": "I'm going to bed", "should": [], "should_not": ["The user goes to bed early", "The user is in bed"]}
+{"id": "ws062", "kind": "moment", "message": "ran out of usage, continue", "should": [], "should_not": ["The user ran out of usage", "The user has limited usage"]}
+{"id": "ws063", "kind": "moment", "message": "back now", "should": [], "should_not": ["The user is back"]}
+{"id": "ws064", "kind": "moment", "message": "on my phone so keep it short", "should": [], "should_not": ["The user is on their phone", "The user uses a phone"]}
+{"id": "ws065", "kind": "moment", "message": "I'm tired today", "should": [], "should_not": ["The user is tired", "The user is often tired"]}
+{"id": "ws066", "kind": "moment", "message": "hold off for now", "should": [], "should_not": ["The user is holding off"]}
+{"id": "ws067", "kind": "moment", "message": "brb coffee", "should": [], "should_not": ["The user drinks coffee", "The user is getting coffee"]}
+{"id": "ws068", "kind": "moment", "message": "wifi is flaky at the cafe right now", "should": [], "should_not": ["The user is at a cafe", "The user has flaky wifi"]}
+{"id": "ws069", "kind": "moment", "message": "ok its 2am and my eyes are closing, stop here", "should": [], "should_not": ["The user is awake at 2am", "The user is sleepy"]}
+{"id": "ws070", "kind": "moment", "message": "stepping out for lunch, back in 30", "should": [], "should_not": ["The user is at lunch"]}
+{"id": "ws071", "kind": "moment", "message": "my laptop is at 4% battery", "should": [], "should_not": ["The user has a laptop at 4% battery"]}
+{"id": "ws072", "kind": "moment", "message": "sorry the baby just woke up, one sec", "should": [], "should_not": ["The user has a baby that woke up"]}
+{"id": "ws073", "kind": "moment", "message": "im frustrated with this, give me a minute", "should": [], "should_not": ["The user is frustrated", "The user gets frustrated easily"]}
+{"id": "ws074", "kind": "moment", "message": "just got home, reading it now", "should": [], "should_not": ["The user is at home"]}
+{"id": "ws075", "kind": "moment", "message": "pausing here, got a meeting", "should": [], "should_not": ["The user is in a meeting"]}
+{"id": "ws076", "kind": "discourse", "message": "Like we are unknowns - why would anyone try us", "should": [], "should_not": ["The user is unknown", "The user likes unknowns"]}
+{"id": "ws077", "kind": "discourse", "message": "ok so what to do now", "should": [], "should_not": ["The user does not know what to do"]}
+{"id": "ws078", "kind": "discourse", "message": "hmm yeah", "should": [], "should_not": ["The user agrees"]}
+{"id": "ws079", "kind": "discourse", "message": "lol that's wild", "should": [], "should_not": ["The user finds it wild", "The user laughs a lot"]}
+{"id": "ws080", "kind": "discourse", "message": "the parser abd the loader both need it", "should": [], "should_not": ["The user is named Abd"]}
+{"id": "ws081", "kind": "discourse", "message": "idk man", "should": [], "should_not": ["The user doesn't know"]}
+{"id": "ws082", "kind": "discourse", "message": "right right, makes sense", "should": [], "should_not": ["The user is right"]}
+{"id": "ws083", "kind": "discourse", "message": "so basically its a mess", "should": [], "should_not": ["The user is a mess"]}
+{"id": "ws084", "kind": "discourse", "message": "yes", "should": [], "should_not": ["The user says yes often"]}
+{"id": "ws085", "kind": "discourse", "message": "hm. not sure that tracks. like at all", "should": [], "should_not": ["The user is unsure"]}
+{"id": "ws086", "kind": "discourse", "message": "nah the other one", "should": [], "should_not": ["The user prefers the other one"]}
+{"id": "ws087", "kind": "discourse", "message": "wait what", "should": [], "should_not": ["The user is confused"]}
+{"id": "ws088", "kind": "discourse", "message": "ugh. fine. whatever works", "should": [], "should_not": ["The user is annoyed", "The user is indifferent"]}
+{"id": "ws089", "kind": "discourse", "message": "thsi is the thing i ment, the second one", "should": [], "should_not": ["The user is named Thsi"]}
+{"id": "ws090", "kind": "discourse", "message": "ha ok good point", "should": [], "should_not": ["The user is good"]}
+{"id": "ws091", "kind": "real_fact", "message": "btw I live in Melbourne so I'm ahead of you on time", "should": ["The user lives in Melbourne"], "should_not": ["The user is ahead of the assistant"]}
+{"id": "ws092", "kind": "real_fact", "message": "I'm a psychologist by training, so the measurement side is familiar", "should": ["The user is a psychologist by training"], "should_not": []}
+{"id": "ws093", "kind": "real_fact", "message": "my partner's name is Sam, she thinks this is a mad project", "should": ["The user's partner is named Sam"], "should_not": []}
+{"id": "ws094", "kind": "real_fact", "message": "ive been coding in python for 10 years but never touched rust", "should": ["The user has been coding in Python for 10 years", "The user has not used Rust"], "should_not": []}
+{"id": "ws095", "kind": "real_fact", "message": "I prefer British spelling in docs", "should": ["The user prefers British spelling in docs"], "should_not": []}
+{"id": "ws096", "kind": "real_fact", "message": "fwiw i'm vegetarian so no steakhouse jokes in the demo script", "should": ["The user is vegetarian"], "should_not": []}
+{"id": "ws097", "kind": "real_fact", "message": "i work as a data engineer at a bank, so no cloud tools allowed there", "should": ["The user works as a data engineer at a bank"], "should_not": []}
+{"id": "ws098", "kind": "real_fact", "message": "english is my second language, german is my first", "should": ["The user's first language is German", "The user's second language is English"], "should_not": []}
+{"id": "ws099", "kind": "real_fact", "message": "i'm left handed which is why my keyboard layout is weird", "should": ["The user is left-handed"], "should_not": []}
+{"id": "ws100", "kind": "real_fact", "message": "I did my PhD in linguistics at Edinburgh", "should": ["The user did a PhD in linguistics at Edinburgh"], "should_not": []}
+{"id": "ws101", "kind": "real_fact", "message": "my daughter is 7 and she keeps trying to type on this keyboard", "should": ["The user has a 7-year-old daughter"], "should_not": []}
+{"id": "ws102", "kind": "real_fact", "message": "i use vim, been on it since uni, dont try to change my mind", "should": ["The user uses vim"], "should_not": []}
+{"id": "ws103", "kind": "real_fact", "message": "im colour blind (red green) so pick different palette please", "should": ["The user is red-green colour blind"], "should_not": []}
+{"id": "ws104", "kind": "real_fact", "message": "i grew up in Cape Town, moved to london in 2015", "should": ["The user grew up in Cape Town", "The user moved to London in 2015"], "should_not": []}
+{"id": "ws105", "kind": "real_fact", "message": "im allergic to cats so the meetup at the cat cafe is a no", "should": ["The user is allergic to cats"], "should_not": []}
+{"id": "ws106", "kind": "pasted_wrapper", "message": "<pasted_content id=\"a090\">\n- Keep the handover current\n- Commit at stage boundaries\n</pasted_content> do these", "should": [], "should_not": ["The user pasted content", "The user said pasted_content id a090", "The user keeps the handover current"]}
+{"id": "ws107", "kind": "pasted_wrapper", "message": "<system-reminder>\nThe task tools haven't been used recently. Consider using them.\n</system-reminder>\nok carry on with the parser", "should": [], "should_not": ["The user has not used task tools recently", "The user says system-reminder"]}
+{"id": "ws108", "kind": "pasted_wrapper", "message": "<pasted_content id=\"b114\">\nTraceback (most recent call last):\n  File \"run.py\", line 42, in <module>\n    main()\nKeyError: 'user_id'\n</pasted_content> why is this happening", "should": [], "should_not": ["The user has a KeyError", "The user pasted a traceback", "The user has a user_id"]}
+{"id": "ws109", "kind": "pasted_wrapper", "message": "<pasted_content id=\"c007\">\nName: Alex Rivera\nCity: Toronto\nRole: Product manager\n</pasted_content> use this as the sample record in the tests", "should": [], "should_not": ["The user is Alex Rivera", "The user lives in Toronto", "The user is a product manager"]}
+{"id": "ws110", "kind": "pasted_wrapper", "message": "<system-reminder>\nAs you answer the user's questions, you can use the following context: the user prefers tabs over spaces\n</system-reminder>\nformat the file pls", "should": [], "should_not": ["The user prefers tabs over spaces", "The user's questions use context"]}
+{"id": "ws111", "kind": "pasted_wrapper", "message": "<pasted_content id=\"d221\">\nTODO\n1. fix flaky test\n2. bump version to 0.4\n3. email the reviewers\n</pasted_content>", "should": [], "should_not": ["The user has a TODO list", "The user must email the reviewers"]}
+{"id": "ws112", "kind": "pasted_wrapper", "message": "here's what the other model said:\n<pasted_content id=\"e330\">\nI think you should consider moving to a monorepo. As a senior engineer I have seen this work well.\n</pasted_content>\nthoughts?", "should": [], "should_not": ["The user is a senior engineer", "The user should move to a monorepo"]}
+{"id": "ws113", "kind": "pasted_wrapper", "message": "<system-reminder>\nToday's date is 2026-10-14.\n</system-reminder>\nwhat changed since yesterday", "should": [], "should_not": ["The user's date is 2026-10-14"]}
+{"id": "ws114", "kind": "pasted_wrapper", "message": "<pasted_content id=\"f402\">\nsudo apt install build-essential\npip install -e .\n</pasted_content> is this the right install order", "should": [], "should_not": ["The user uses apt", "The user runs sudo"]}
+{"id": "ws115", "kind": "pasted_wrapper", "message": "<pasted_content id=\"g519\">\nI live in Oslo and I love hiking. My dog is named Fjord.\n</pasted_content> this is the test input for the extractor, dont save it", "should": [], "should_not": ["The user lives in Oslo", "The user loves hiking", "The user has a dog named Fjord"]}
+{"id": "ws116", "kind": "pasted_wrapper", "message": "<system-reminder>\nPlan mode is active. You MUST NOT make any edits.\n</system-reminder>", "should": [], "should_not": ["The user is in plan mode", "The user does not want edits"]}
+{"id": "ws117", "kind": "pasted_wrapper", "message": "<pasted_content id=\"h648\">\nWe are a small team of 4 based in Austin and we raised a seed round.\n</pasted_content> use this wording for the about page", "should": [], "should_not": ["The user is based in Austin", "The user raised a seed round", "The user is on a team of 4"]}
+{"id": "ws118", "kind": "pasted_wrapper", "message": "<pasted_content id=\"i705\">\nERROR 2026-10-13 23:14 disk full on /dev/sda1\n</pasted_content>\nthat's the mac, fix it", "should": [], "should_not": ["The user has a full disk", "The user is the Mac"]}
+{"id": "ws119", "kind": "pasted_wrapper", "message": "<system-reminder>\nCodebase and user instructions are shown below. Be sure to adhere to these instructions.\n# userEmail\nThe user's email address is x@example.com\n</system-reminder>\nnext step please", "should": [], "should_not": ["The user's email address is x@example.com", "The user wants to adhere to instructions"]}
+{"id": "ws120", "kind": "pasted_wrapper", "message": "<pasted_content id=\"j812\">\n- Always use british spelling\n- No bold-led bullets\n</pasted_content> add these to the style guide section", "should": [], "should_not": ["The user always uses British spelling", "The user pasted content", "The user dislikes bold-led bullets"]}
