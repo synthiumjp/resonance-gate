@@ -129,10 +129,10 @@ def _drop_framed(records):
 
 # 2026-10-14 (JP's first real Claude Code session; dev set
 # cases_dev_worksession): a work chat is full of sentences that are not facts
-# about the person. The summary said "Jon-Paul dies quickly" ("if we don't
-# have it perfect we die quickly"), "Jon-Paul is competing against ..." ("we",
-# the team), "Jon-Paul is going to bed", "Jon-Paul needs you to keep
-# progressing overnight", and "the reader often says Jon-Paul does not know"
+# about the person. The summary said "<user> dies quickly" ("if we don't
+# have it perfect we die quickly"), "<user> is competing against ..." ("we",
+# the team), "<user> is going to bed", "<user> needs you to keep
+# progressing overnight", and "the reader often says <user> does not know"
 # (an "I" inside a quotation).
 _QUOTED = re.compile(r"[\"“]([^\"”]{2,300})[\"”]")
 _Q_FIRST = re.compile(r"\b(?:i|i'm|i’m|i've|i'd|i'll|me|my|mine|we|we're|our|us)\b", re.I)

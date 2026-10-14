@@ -129,7 +129,40 @@ CUT_LINES = [
 CUT_TEXT = [
     (" The research notebook (`notebook.md`)\nhas the details behind each change.", ""),
     (" (notebook e323)", ""),
+    (" \u2014 see `docs/EXPERIMENT_LEDGER.md` for what failed as well as what worked, including "
+     "seven instrument defects found along the way (six flattered the results, one under-read "
+     "them).", "."),
+    (" requests openai tenacity python-dotenv   # the judge-cache tests (a research tool, "
+     "halumem_official/llms.py)", ""),
 ]
+# the research repository's CITATION.cff cites the Resonance Gate study; the
+# product's cites the product (and the study it grew out of)
+CITATION = """cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "sourcedrecall: local memory for AI agents, written by a grammar parser"
+authors:
+  - family-names: Cacioli
+    given-names: Jon-Paul
+    orcid: "https://orcid.org/0009-0000-7054-2014"
+repository-code: "https://github.com/synthiumjp/sourcedrecall"
+license: Apache-2.0
+keywords:
+  - agent memory
+  - dependency parsing
+  - mcp
+  - claude code
+references:
+  - type: article
+    title: "The Resonance Gate: endogenous confidence from retrieval geometry in a vector-symbolic memory"
+    authors:
+      - family-names: Cacioli
+        given-names: Jon-Paul
+        orcid: "https://orcid.org/0009-0000-7054-2014"
+    doi: "10.5281/zenodo.21446859"
+    year: 2026
+    publisher:
+      name: Zenodo
+"""
 # files moved one directory up (experiments/p2 -> core): their own path to
 # the repository root is one dirname shorter
 UP_ONE = [("os.path.dirname(os.path.dirname(_HERE))", "os.path.dirname(_HERE)")]
@@ -188,6 +221,7 @@ def main():
             continue
         copy(rel)
         n += 1
+    open(os.path.join(DEST, "CITATION.cff"), "w").write(CITATION)
     # a conftest for the product tests only (the research one adds the
     # substrate directories)
     open(os.path.join(DEST, "conftest.py"), "w").write(

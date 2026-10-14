@@ -852,7 +852,6 @@ docs/PREREG_HELDOUT_V6.md
 docs/PREREG_HELDOUT_V7.md
 docs/PREREG_HELDOUT_V8.md
 docs/PREREG_HELDOUT_V9.md
-docs/REVIEW_2026-09-05.md
 docs/REVIEW_2026-10-09.md
 experiments/p2/halumem_official/PATCHES.md
 experiments/p2/halumem_official/eval_sdr.py

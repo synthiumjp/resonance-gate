@@ -5,10 +5,9 @@ description = "Memory for AI agents that never calls a language model to store a
 requires-python = ">=3.10,<3.14"   # 3.14 untested (review 4.5)
 license = "Apache-2.0"
 authors = [{ name = "Jon-Paul Cacioli" }]
-# The rg substrate itself is numpy-only and is loaded from the repo checkout
-# at runtime (RG_ROOT); these are the server + registry-encoder deps. There is
-# NO generative model dependency — sentence-transformers is the registry's
-# non-generative string->vector encoder.
+# The memory code is loaded from the repo checkout (RG_ROOT) or carried in
+# the wheel (sourcedrecall/_core). There is NO generative model dependency:
+# the embedder, re-ranker and conflict checker are small ONNX models.
 # 2026-10-02 (new-user install test): stanza was missing -- profile_ingest
 # needs it for the deterministic parser -- and mcp was unpinned, so pip took
 # mcp 2.x, which no longer has mcp.server.fastmcp, and the server would not
