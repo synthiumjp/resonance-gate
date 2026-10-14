@@ -44,3 +44,12 @@ copies that sourcedrecall publishes on Hugging Face.
 - WordNet 3.0, Copyright 2006 by Princeton University, under the WordNet
   License (https://wordnet.princeton.edu/license-and-commercial-use),
   downloaded by NLTK. Princeton University does not endorse this product.
+
+Benchmark files in bench/ (not part of the software; not installed):
+- bench/locomo/results hold questions, answers and retrieved passages from
+  LoCoMo (snap-research/locomo), CC BY-NC 4.0: non-commercial use.
+- bench/longmemeval holds question ids and the answers the reader gave on
+  LongMemEval (xiaowu0162/LongMemEval), MIT License.
+- Some cases in bench/false_memory quote messages from the Enron email
+  corpus, made public by the US Federal Energy Regulatory Commission.
+- bench/halumem holds only scores from HaluMem (MemTensor/HaluMem).
