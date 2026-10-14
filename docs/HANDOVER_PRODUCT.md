@@ -1,6 +1,6 @@
 # Handover: sourcedrecall (product track)
 
-Last updated 2026-10-12 (evening). Branch `product-p2`, pushed to github.com/synthiumjp/resonance-gate (public, research) and as `main` to github.com/synthiumjp/sourcedrecall (PRIVATE until launch; push both: `git push origin product-p2 && git push sr product-p2:main`, tags to both).
+Last updated 2026-10-12 (evening). Branch `product-p2`, pushed to github.com/synthiumjp/resonance-gate (public, research). github.com/synthiumjp/sourcedrecall (PRIVATE until launch) takes only the clean export since 2026-10-15 -- see the 2026-10-15 section; never push product-p2 there.
 Latest commit: see `git log` (the relevance cut is d89d830). Latest release
 tag: `sourcedrecall-v0.5.2` (installs from resonance-gate); everything since
 is unreleased (docs/CHANGELOG.md). Full suite on the Mac: 1,331 passed, 5
@@ -37,8 +37,19 @@ items fixed and open are listed below), docs/REVIEW_2026-10-09.md.
 - Export reviewed (e7767f6): product CITATION.cff, rgx/README ledger link
   and CI judge-cache deps cut, REVIEW_2026-09-05 dropped, user's name out of
   an rgx comment. Re-export at Mac ~/jpwork/sdr-export2 passes 1,183
-  (delete its COMMIT_SRC before committing). Packed size 14 MB. Push waits
-  for JP.
+  Packed size 14 MB.
+- PUSHED (JP ran the force-push, 2026-10-15): synthiumjp/sourcedrecall main
+  is now one commit, cec48f3 (the export of e7767f6, author
+  synthiumjp@users.noreply.github.com); its 22 old tags deleted (all are on
+  origin with the same commits). Still private. From now on push product-p2
+  to origin ONLY; `sr`'s push URL is disabled on purpose. Product updates:
+  rerun the export on the Mac, copy the tree over a clone of the product
+  repo (~/sourcedrecall-push on WSL), commit as JP's no-reply address, push.
+  JP's plugin install still uses SOURCEDRECALL_REPO_URL=/home/jp/rg.
+- PyPI: the name is free; JP has an account and is to add a pending trusted
+  publisher (owner synthiumjp, repo sourcedrecall, release.yml, environment
+  pypi). A `sourcedrecall-v*` tag on the product repo publishes; the plugin
+  installs from that tag, so launch = tag = PyPI. Only when JP says.
 
 ## 2026-10-14 afternoon
 
