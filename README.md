@@ -273,6 +273,13 @@ scored 68.2% on 1754180, 67.7% on 181aff3 and 67.0% on 8473783 and here,
 and each of the 16 questions it lost since 181aff3 has different notes in
 its context.
 
+HaluMem (HaluMem-Medium, its first two users), scored with the benchmark's
+own code for memory updates and questions and the same local judge for both
+systems: after a fact changed, the new value was given in 156 of 304 updates
+(plain retrieval 96), and 185 of 352 questions were answered correctly
+(plain retrieval 162), with fewer wrong answers among those the judge could
+score (19% against 27%). Measured on commit d6613e0 (`bench/halumem/`).
+
 Notes are optional. A small model writes short notes once per stored
 conversation, labelled as its notes and kept only where most of their words
 are in what you wrote. The built-in models run inside sourcedrecall on the

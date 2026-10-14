@@ -1,0 +1,50 @@
+{
+ "sourcedrecall": {
+  "memory_update": {
+   "correct_update_memory_ratio(all)": 0.5131578947368421,
+   "correct_update_memory_ratio(valid)": 0.5165562913907285,
+   "hallucination_update_memory_ratio(all)": 0.019736842105263157,
+   "hallucination_update_memory_ratio(valid)": 0.019867549668874173,
+   "omission_update_memory_ratio(all)": 0.4605263157894737,
+   "omission_update_memory_ratio(valid)": 0.46357615894039733,
+   "other_update_memory_ratio(all)": 0.0,
+   "other_update_memory_ratio(valid)": 0.0,
+   "update_memory_valid_num": 302,
+   "update_memory_num": 304
+  },
+  "question_answering": {
+   "correct_qa_ratio(all)": 0.5255681818181818,
+   "correct_qa_ratio(valid)": 0.6954887218045113,
+   "hallucination_qa_ratio(all)": 0.14488636363636365,
+   "hallucination_qa_ratio(valid)": 0.19172932330827067,
+   "omission_qa_ratio(all)": 0.08522727272727272,
+   "omission_qa_ratio(valid)": 0.11278195488721804,
+   "qa_valid_num": 266,
+   "qa_num": 352
+  }
+ },
+ "plain retrieval": {
+  "memory_update": {
+   "correct_update_memory_ratio(all)": 0.3157894736842105,
+   "correct_update_memory_ratio(valid)": 0.3210702341137124,
+   "hallucination_update_memory_ratio(all)": 0.03289473684210526,
+   "hallucination_update_memory_ratio(valid)": 0.033444816053511704,
+   "omission_update_memory_ratio(all)": 0.6348684210526315,
+   "omission_update_memory_ratio(valid)": 0.6454849498327759,
+   "other_update_memory_ratio(all)": 0.0,
+   "other_update_memory_ratio(valid)": 0.0,
+   "update_memory_valid_num": 299,
+   "update_memory_num": 304
+  },
+  "question_answering": {
+   "correct_qa_ratio(all)": 0.4602272727272727,
+   "correct_qa_ratio(valid)": 0.6,
+   "hallucination_qa_ratio(all)": 0.20454545454545456,
+   "hallucination_qa_ratio(valid)": 0.26666666666666666,
+   "omission_qa_ratio(all)": 0.10227272727272728,
+   "omission_qa_ratio(valid)": 0.13333333333333333,
+   "qa_valid_num": 270,
+   "qa_num": 352
+  }
+ }
+}
