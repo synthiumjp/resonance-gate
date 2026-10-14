@@ -1,6 +1,5 @@
-"""The MCP wiring: the four substrate tools plus the nine profile_* (p2
-memory bridge) tools registered, and a call through the registered tool
-round-trips to the substrate."""
+"""The MCP wiring: the nine profile_* tools registered, the diagnostics only
+when asked for."""
 
 import asyncio
 
@@ -12,47 +11,32 @@ PROFILE_TOOLS = {"profile_conflicts", "profile_recall", "profile_context", "prof
                  "profile_check"}
 
 
-def _server(monkeypatch, tmp_path, legacy):
+def _server(monkeypatch, tmp_path, all_tools=False):
     import importlib
     monkeypatch.setenv("SOURCEDRECALL_STATE", str(tmp_path / "state"))
     monkeypatch.setenv("SOURCEDRECALL_BROWSER_PORT", "0")
-    if legacy:
-        monkeypatch.setenv("SOURCEDRECALL_LEGACY_TOOLS", "1")
+    if all_tools:
         monkeypatch.setenv("SOURCEDRECALL_ALL_TOOLS", "1")
     else:
-        monkeypatch.delenv("SOURCEDRECALL_LEGACY_TOOLS", raising=False)
         monkeypatch.delenv("SOURCEDRECALL_ALL_TOOLS", raising=False)
     import sourcedrecall.mcp_server as srv
     return importlib.reload(srv)
 
 
 def test_a_new_user_sees_only_the_profile_tools(tmp_path, monkeypatch):
-    srv = _server(monkeypatch, tmp_path, legacy=False)
+    srv = _server(monkeypatch, tmp_path)
     tools = asyncio.run(srv.mcp.list_tools())
     assert {t.name for t in tools} == PROFILE_TOOLS
-    assert srv.service is None
 
 
-def test_all_tools_registered_and_callable(tmp_path, monkeypatch):
-    srv = _server(monkeypatch, tmp_path, legacy=True)
+def test_the_diagnostics_only_when_asked_for(tmp_path, monkeypatch):
+    srv = _server(monkeypatch, tmp_path, all_tools=True)
     tools = asyncio.run(srv.mcp.list_tools())
-    assert {t.name for t in tools} == {"remember", "recall", "update", "forget"} | PROFILE_TOOLS | EXTRA_TOOLS
-
-    # each tool advertises a description (shown to the calling model)
+    assert {t.name for t in tools} == PROFILE_TOOLS | EXTRA_TOOLS
     assert all(t.description for t in tools)
-
-    # the decorated tool functions are the real implementations
-    r = srv.remember("Ada Byron", "works at", "Analytical Engine Co")
-    assert r["stored"] is True
-    out = srv.recall("Ada Byron")
-    assert out["facts"][0]["object"] == "Analytical Engine Co"
-
-    # the MCP call path serializes without error and yields content
-    called = asyncio.run(srv.mcp.call_tool("recall", {"query": "Ada Byron"}))
-    assert called  # non-empty content (list of blocks or (content, structured))
 
 
 def test_tool_descriptions_are_short(tmp_path, monkeypatch):
-    srv = _server(monkeypatch, tmp_path, legacy=False)
+    srv = _server(monkeypatch, tmp_path)
     for t in asyncio.run(srv.mcp.list_tools()):
         assert len(t.description) < 450, t.name

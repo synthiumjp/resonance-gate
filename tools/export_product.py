@@ -68,12 +68,16 @@ def product_modules():
     return seen, set(local)
 
 
+# tests of the research harness that import it at run time
+RESEARCH_TESTS = {"test_judge_cache.py", "test_hearsay_qa.py"}
+
+
 def product_tests(mods, local):
     research_dirs = {"substrate", "gate", "encoder", "mouth", "coref", "e5", "instruments",
                      "halumem_official", "llms"}
     keep = []
     for f in sorted(os.listdir(P2)):
-        if f.startswith("test_") and f.endswith(".py"):
+        if f.startswith("test_") and f.endswith(".py") and f not in RESEARCH_TESTS:
             im = imports(os.path.join(P2, f))
             if (im & local) <= mods and not (im & research_dirs):
                 keep.append(f)

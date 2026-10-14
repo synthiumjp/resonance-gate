@@ -424,112 +424,15 @@ too, through `stanza_ort`.
 |---|---|---|
 | `bge-small` + `ms-marco-MiniLM` cross-encoder | `profile_recall`, `profile_context` | ranks stored facts against a question |
 | `nli-deberta-v3-xsmall` | `profile_conflicts`, `profile_context` | decides whether two stored values contradict |
-| MiniLM sentence encoder | the explicit-triples tools below | string -> vector |
 
 `RG_PROFILE_V3=0` drops the retrieval pair (falls back to token overlap);
 `RG_NLI=0` drops the NLI model; `RG_PREWARM=0` stops the server loading them
 in the background at startup.
 
-Built on the Resonance Gate research substrate, a pre-registered study:
+It grew out of the Resonance Gate research project, a pre-registered study:
 [OSF 95e2q](https://osf.io/95e2q/).
 
 ---
-
-## Advanced: explicit triples (four more tools)
-
-Separately from conversation memory, the server can store facts you hand it
-already structured, as `(subject, relation, object)` triples. These four
-tools do not read conversations and do not share storage with the
-`profile_*` tools (they live in `SOURCEDRECALL_STATE`, default
-`~/.sourcedrecall`). They are off by default; set
-`SOURCEDRECALL_LEGACY_TOOLS=1` in the server's environment to turn them on.
-
-### The four triple tools
-
-### `remember(subject, relation, object, source="caller-stated")`
-
-Store one explicit structured triple. There is no extraction — the caller
-passes the already-structured fact. The write is echo-checked (read back
-through the gate before being accepted); a bad write is rejected, not
-silently kept.
-
-`source` is provenance, one of `caller-stated` (default), `user-stated`,
-`agent-inferred`, `tool-derived`.
-
-Returns:
-
-```json
-{"stored": true, "record_id": "r0", "echo_ok": true}
-```
-
-### `recall(query, top_k=10)`
-
-Look up stored facts about `query`, resolved as a subject/entity.
-
-Returns:
-
-```json
-{
-  "resolved": true,
-  "facts": [
-    {"subject": "...", "relation": "...", "object": "...",
-     "source": "...", "record_id": "r0",
-     "confidence": {"b": 0.9, "d": 0.0, "u": 0.1}}
-  ],
-  "conflict": false
-}
-```
-
-If nothing matches, the response is empty:
-`{"resolved": false, "facts": [], "conflict": false}` — never a fabricated
-guess. If contradictory facts are stored under synonymous relation keys
-(e.g. "lives in" vs "resides in"), `conflict: true` and both facts are
-returned, plus an advisory `resolution_hint`. The server does not choose
-between them.
-
-### `update(subject, relation, object, source="caller-stated")`
-
-Explicitly correct a fact. Writes the new triple and supersedes prior
-active records for the subject under the same or a synonymous relation
-(tombstoned via the supersedes-chain; the audit trail is retained, not
-erased). This is the only path that resolves a conflict by picking a
-side — because the caller explicitly asked it to. A passive collision
-surfaced by `recall` is never resolved this way on its own.
-
-Returns:
-
-```json
-{"updated": true, "new_record_id": "r2", "superseded": ["r0", "r1"]}
-```
-
-### `forget(subject, relation=None, object=None)`
-
-Delete stored facts, subtract-and-tombstone (stays deleted).
-
-- `subject` only: forget everything about the subject.
-- `subject` + `relation`: forget that relation class (and its synonyms).
-- `subject` + `relation` + `object`: forget that exact record.
-
-Returns:
-
-```json
-{"forgotten": ["r0"]}
-```
-
-### Confidence `{b, d, u}`
-
-Every fact in `recall` carries the gate's opinion: `b` = belief, `d` =
-disbelief/ambiguity, `u` = uncertainty/ignorance — they sum to 1. High `d`
-signals a conflict; high `u` signals "not resolved".
-
-### Memory browser for triples (read-only)
-
-A read-only page at http://127.0.0.1:7071 lists every stored record —
-subject, relation, object, source, confidence — with active conflicts
-highlighted. Port is `SOURCEDRECALL_BROWSER_PORT` (`0` disables it); it binds
-loopback only. Writes never happen from the browser — they only ever go
-through the four triple tools, so provenance stays clean. (It shows the
-triple store; conversation memory is read with `profile_context`.)
 
 ## How `profile_ingest` reads a conversation
 
@@ -554,101 +457,15 @@ rules over a dependency parse.
 
 Conversation memory lives in `~/.sourcedrecall/conversations`
 (`conversations.json` plus an extraction cache; override with
-`RG_MEMORY_DIR`). The triple store is a snapshot (`arrays.npz` +
-`state.json`) in `SOURCEDRECALL_STATE` (default `~/.sourcedrecall`). A
-restart recovers both from disk.
+`RG_MEMORY_DIR`). A restart
+recovers it from disk.
 
 The server makes no network calls and needs no API keys. It sets
 `HF_HUB_OFFLINE=1` and `TRANSFORMERS_OFFLINE=1`, so models are read from the
 local cache that `sourcedrecall-setup` filled.
 
-### Example calls (explicit triples)
-
-**1. `remember` a fact**
-
-```json
-// call
-{"subject": "Maria Garcia", "relation": "works at", "object": "Acme Labs",
- "source": "user-stated"}
-// result
-{"stored": true, "record_id": "r0", "echo_ok": true}
-```
-
-**2. `recall` — a hit**
-
-```json
-// call
-{"query": "Maria Garcia"}
-// result
-{"resolved": true,
- "facts": [{"subject": "Maria Garcia", "relation": "works at",
-            "object": "Acme Labs", "source": "user-stated",
-            "record_id": "r0", "confidence": {"b": 0.92, "d": 0.0, "u": 0.08}}],
- "conflict": false}
-```
-
-**3. `recall` — a miss**
-
-```json
-// call
-{"query": "Someone Nobody Ever Mentioned"}
-// result
-{"resolved": false, "facts": [], "conflict": false}
-```
-
-**4. A near-synonym collision**
-
-```json
-// remember("Maria Garcia", "lives in", "Lisbon")   -> record r1
-// remember("Maria Garcia", "resides in", "Boston")  -> record r2
-// call
-{"query": "Maria Garcia"}
-// result
-{"resolved": true,
- "facts": [
-   {"subject": "Maria Garcia", "relation": "lives in", "object": "Lisbon",
-    "source": "caller-stated", "record_id": "r1",
-    "confidence": {"b": 0.4, "d": 0.5, "u": 0.1}},
-   {"subject": "Maria Garcia", "relation": "resides in", "object": "Boston",
-    "source": "caller-stated", "record_id": "r2",
-    "confidence": {"b": 0.4, "d": 0.5, "u": 0.1}}
- ],
- "conflict": true,
- "resolution_hint": {"by_recency": "r2", "by_resolution": "r1"}}
-```
-
-`"lives in"` and `"resides in"` are in the same relation-synonym class, so
-this is caught even though the phrasing differs. `resolution_hint` is
-advisory: `by_recency` points at the most-recently-written record,
-`by_resolution` at the one the gate leans toward — the server surfaces
-both and picks neither; only an explicit `update` picks.
-
-**5. `update` — explicit correction (supersede)**
-
-```json
-// call
-{"subject": "Maria Garcia", "relation": "lives in", "object": "Boston",
- "source": "user-stated"}
-// result
-{"updated": true, "new_record_id": "r3", "superseded": ["r1", "r2"]}
-```
-
-Both prior records (the `lives in`/Lisbon and the synonymous `resides
-in`/Boston one) are tombstoned; a fresh `recall("Maria Garcia")` now
-resolves cleanly to Boston with `conflict: false`.
-
-**6. `forget`**
-
-```json
-// call
-{"subject": "Tom Baker"}
-// result
-{"forgotten": ["r4", "r5"]}
-```
-
 ## Limitations
 
-Conversation memory:
 - English only. A fragment with no subject is read as being about you only
   when it opens your message and has a familiar shape ("Still nursing at St
   Vincent's though", "Vegetarian now"); others, such as "Married, two kids",
@@ -665,15 +482,6 @@ Conversation memory:
 - A question asked in the first few seconds after the server starts can
   take about 4 s while models load. After that, queries take tens of
   milliseconds.
-
-Explicit triples:
-- Fixed relation-synonym table with two classes: `works at` /
-  `is employed by` and `lives in` / `resides in`. Other relations are
-  treated as distinct keys.
-- Near-duplicate subject forms are not detected ("Maria" vs "Maria's"); see
-  `docs/COLLISION_FIX.md`.
-- Collision detection is validated on synthetic pairs only.
-- Not a standalone wheel yet. Install editable from the checkout.
 
 ## License
 
