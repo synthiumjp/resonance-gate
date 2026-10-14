@@ -601,6 +601,31 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
 
 # --------------------------------------------------------------- the tools
 
+def profile_rebuild(owner_name=None):
+    """Read every stored conversation again with the current parser
+    (2026-10-14: after the parser changes from JP's first real sessions, the
+    summaries already stored kept the old rules' mistakes). The old fact
+    cache is kept beside the new one (profile_cache*.jsonl.before-rebuild-
+    <time>); the conversations, what the user asked to forget and the saved
+    world are unchanged. -> {"conversations", "backup"}."""
+    import time
+    with _lock:
+        convs = _read_conversations(_conversations_path())
+        cache = _cache_path()
+        backup = None
+        if os.path.exists(cache):
+            backup = cache + time.strftime(".before-rebuild-%Y%m%d-%H%M%S")
+            os.replace(cache, backup)
+    n = 0
+    for c in convs:
+        turns = [{"role": "user" if m.get("sender") == "human" else "assistant",
+                  "content": m.get("text") or ""} for m in c.get("chat_messages") or []]
+        if turns:
+            profile_ingest(turns, conversation_id=c.get("uuid"), owner_name=owner_name)
+            n += 1
+    return {"conversations": n, "backup": backup}
+
+
 def _set_scope(mem, scope):
     from sourcedrecall.paths import current_scope
     mem.scope = current_scope(scope)
@@ -698,6 +723,7 @@ def _message_of(conversation_id, said):
         if sents and len(sents) == len(every):
             return t["text"].strip(), prev     # as written (see _messages_for)
         return " ".join(sents) or None, prev
+    return None, None
 
 
 def _after_of(conversation_id, text):
@@ -727,7 +753,6 @@ def _after_of(conversation_id, text):
                 return turns[j]["text"].strip()
         return None
     return None
-    return None, None
 
 
 # 2026-10-05 (multi-project coding set): a message with a pasted code block
