@@ -550,3 +550,15 @@ def test_rebuild_reads_stored_conversations_with_the_current_rules(pm, monkeypat
     pm.profile_status(reload=True)
     after = open(pm.memory_file()).read()
     assert "Fitzroy" in after and "going to bed" not in after
+
+
+def test_a_message_cut_at_the_limit_is_read_to_its_last_whole_sentence(pm):
+    # 2026-10-14: "Pre-registrations need my review befo" from a cut message
+    long = "I live in Fitzroy. " + "This is filler about the project plan. " * 45 + \
+           "Pre-registrations need my review before commit."
+    assert len(long) > 1800
+    pm.profile_ingest([{"role": "user", "content": long}], conversation_id="a",
+                      owner_name="Dana Cole", date="2026-09-01")
+    pm.profile_status(reload=True)
+    md = open(pm.memory_file()).read()
+    assert "Fitzroy" in md and not any(w in md for w in (" befo ", "befo\"", "befo."))

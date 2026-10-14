@@ -235,7 +235,10 @@ def _work_filters(records, role, owner=None):
                     and not _WHEN.search(text)):
                 continue
             # an "I" or "we" inside a quotation is the quoted speaker's
-            if any(_Q_FIRST.search(q) and (not val or val in q.lower())
+            # (the quote's own words in the fact: "the reader often says "I
+            # don't know"" stored "the reader often says <owner> does not know")
+            if any(_Q_FIRST.search(q) and ((val and val in q.lower())
+                                           or set(_content(q, owner)) & set(_content(text, owner)))
                    for q in _QUOTED.findall(src)):
                 continue
             # inside a condition, a musing or a worry

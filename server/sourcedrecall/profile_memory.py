@@ -365,6 +365,18 @@ def _not_future(date):
         raise ValueError(f"date is in the future -- got {date!r}")
 
 
+def _whole(text, turn):
+    """What the parser reads of a message cut at 1,800 characters: up to the
+    last sentence that ends before the cut (2026-10-14: "Pre-registrations
+    need my review befo" was stored from a message cut mid-word). The cut
+    text itself stays the cache key (run_wire.build_facts looks it up)."""
+    if len(str(turn.get("content", "")).strip()) <= len(text):
+        return text
+    import re as _re
+    ends = [m.end() for m in _re.finditer(r"[.!?](?=\s)|\n", text)]
+    return text[:ends[-1]].rstrip() if ends else text
+
+
 def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
                    date=None, scope=None, instructions=True):
     """Turn ONE conversation into new profile-memory facts -- the only WRITE
@@ -509,7 +521,7 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
         for t in turns:
             text = str(t.get("content", "")).strip()[:1800]
             if text and _rgx_facts.turn_hash(text) not in cached_hashes:
-                todo.append(_prose_only(text, owner))
+                todo.append(_prose_only(_whole(text, t), owner))
         if len(todo) > 1 and hasattr(ex, "prefetch"):
             ex.prefetch(todo)
         prev = None     # the assistant message before a user turn (rgx.fragments)
@@ -525,7 +537,7 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
             if h in seen:
                 n_skipped += 1
                 continue
-            ptext = _prose_only(text, owner)
+            ptext = _prose_only(_whole(text, t), owner)
             if not ptext:
                 continue
             recs = ex.extract_turn(ptext, role=role, session=0, turn=ti,

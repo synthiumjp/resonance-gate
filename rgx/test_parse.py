@@ -1440,3 +1440,11 @@ def test_a_bulleted_list_is_one_item_per_line(ex):
     # 2026-10-14 (JP's first session): two pasted rules became one instruction
     out = texts(ex, "- always keep the handover current\n- always commit at stage boundaries")
     assert not any("current" in p and "commit" in p.lower() for p in out), out
+
+
+def test_an_i_inside_a_quotation_is_the_quoted_speakers(ex):
+    # 2026-10-14 (JP's first session): stored "the reader often says
+    # <owner> does not know"
+    out = texts(ex, 'When the fact is in the draft, the reader often says "I don\'t know" '
+                    'with the fact in the block.')
+    assert not any("know" in p for p in out), out
