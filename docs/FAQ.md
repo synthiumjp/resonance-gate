@@ -33,8 +33,8 @@ measured the two side by side.
 
 ## Does it use a language model?
 
-Not to store anything. A grammar parser (Stanza's English models, run on
-ONNX Runtime) reads your messages; small embedding and ranking models find
+Not to store anything. A grammar parser (Stanza's architecture, trained on
+the UD English-EWT treebank, run on ONNX Runtime) reads your messages; small embedding and ranking models find
 the relevant ones. Optional notes can be written by a small local model
 that runs in the process, or by your own model server.
 

@@ -7,8 +7,10 @@ refute. For each: what it says, where the idea comes from, examples both
 ways, and what was measured. Rules that were tried and failed are listed at
 the end with their numbers.
 
-The parser is Stanza 1.14.0's English pipeline (Universal Dependencies
-parses), run without PyTorch through `stanza_ort`; the rules are in `rgx/`
+The parser is a Stanza 1.14.0 English pipeline trained on UD English-EWT
+(Universal Dependencies parses), run without PyTorch through `stanza_ort`;
+`rgx/normalize.py` rewrites the few constructions parsers disagree on into
+one reading before the rules see them; the rules are in `rgx/`
 and `experiments/p2/`. Measurements come from `bench/` (readable development
 sets unless marked held out; held-out sets were written before any system
 saw them and are read only as counts, but v2-v4 and the coding and projects

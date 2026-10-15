@@ -48,18 +48,20 @@ Then download the models, once:
 sourcedrecall-setup
 ```
 
-This downloads the English parser's models (~335 MB, into
+This downloads the English parser's models (~160 MB, into
 `~/.sourcedrecall/parser-models`) and three small models (~250 MB, in
 `~/.cache/sourcedrecall/onnx`), and takes about a minute. The install is
 about 1.5 GB in total (0.85 GB of it models). This is the only step that uses the network; the
 server runs offline.
 
-The parser is Stanza 1.14.0's English pipeline. Its models run on ONNX
-Runtime through `stanza_ort` (in this repository), converted once from
-Stanza's own and published at
+The parser is a Stanza 1.14.0 English pipeline whose tagger and
+dependency parser were trained for sourcedrecall on UD English-EWT alone
+(`tools/stanza_ort/train_ewt.sh`). Its models run on ONNX Runtime through
+`stanza_ort` (in this repository) and are published at
 [huggingface.co/synthiumjp/sourcedrecall-parser-en](https://huggingface.co/synthiumjp/sourcedrecall-parser-en);
-they give the same parses as Stanza on PyTorch (checked on 7,755 texts,
-every field of every word). To run Stanza itself instead, install
+they give the same parses as Stanza on PyTorch with the same models
+(checked on 7,755 texts, every field of every word). To run Stanza itself
+instead (with Stanza's own default English models), install
 `pip install -e './server[stanza]'` (on Linux, first `pip install torch
 --index-url https://download.pytorch.org/whl/cpu`) and set
 `RGX_PARSER=stanza`.

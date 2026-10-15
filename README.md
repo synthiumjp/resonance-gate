@@ -438,8 +438,9 @@ NLTK's data folder (`~/nltk_data`), which other tools may share.
 ## Licence
 
 Apache 2.0 (see `LICENSE`). The models setup downloads have their own
-licences, listed in `NOTICE`; the parser's English models are trained on
-treebanks that include some non-commercial text.
+licences, listed in `NOTICE`. The parser's models are trained on UD
+English-EWT (CC BY-SA 4.0) alone; the re-ranking model is trained on MS
+MARCO, which Microsoft provides for non-commercial research.
 
 ## More
 
