@@ -1430,6 +1430,22 @@ PERIPHERY_MARK_LEMMAS = {"because", "since", "although", "though", "while",
                           "whereas", "so", "unless", "despite", "due"}
 
 
+# 2026-10-15: what a person is made ("They made me a senior designer",
+# "... team lead", "... a partner"): a role noun, by list or by suffix
+ROLE_NOUNS = frozenset("""lead head manager partner director chair captain member
+fellow intern associate officer chief principal supervisor boss vp ceo cto cfo coo
+editor president deputy trustee""".split())
+_NOT_ROLE = frozenset("""offer dinner order paper cover burger sticker letter number
+poster folder drawer flyer copy""".split())
+
+
+def _role_noun(w):
+    lem = (w.lemma or w.text).lower()
+    if w.upos != "NOUN" or lem in _NOT_ROLE:
+        return False
+    return lem in ROLE_NOUNS or lem.endswith(("er", "or", "ist", "ian"))
+
+
 def _life_event(s, head):
     lem = (head.lemma or "").lower()
     if lem in LIFE_EVENTS:
@@ -1911,11 +1927,19 @@ def extract_keyed(text, nlp, owner=None, role="user",
                 made_x = ((head.lemma or "").lower() == "make"
                           and any(c.upos == "NOUN"
                                   for c in s.children(head, ("xcomp",))))
+                # 2026-10-15 (the EWT-only parser): the same sentence read
+                # as a double object, "me" iobj and "designer" obj; only a
+                # role noun makes it the employer ("made me a sandwich" no)
+                made_io = ((head.lemma or "").lower() == "make"
+                           and not s.children(head, ("xcomp",))
+                           and any(_role_noun(c)
+                                   for c in s.children(head, ("obj",))))
                 owner_obj = (role == "user" and subj.upos == "PRON"
                              and subj.text.lower() == "they" and not hedged
                              and ((head.lemma or "").lower() in AGENTLESS_EMPLOY
-                                  or made_x)
-                             and next((c for c in s.children(head, ("obj",))
+                                  or made_x or made_io)
+                             and next((c for c in s.children(
+                                           head, ("iobj",) if made_io else ("obj",))
                                        if c.text.lower() in allow), None))
                 if sp is None and not is_self and owner_obj and not neg:
                     # 2026-10-02 (false-memory bench): "They promoted me to

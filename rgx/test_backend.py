@@ -26,9 +26,23 @@ def _sig(doc):
              for w in s.words] for s in doc.sentences]
 
 
+def _reference():
+    """Stanza with the models the archive was converted from:
+    tools/stanza_ort/pkgs.py (STANZA_PACKAGES; 2026-10-15, the EWT-only
+    parser needs its own POS and depparse .pt files)."""
+    import sys
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(
+        os.path.abspath(__file__))), "tools", "stanza_ort"))
+    from pkgs import pipeline_kwargs
+    kw = {}
+    if os.environ.get("STANZA_REF_RESOURCES_DIR"):      # where those models are
+        kw["dir"] = os.environ["STANZA_REF_RESOURCES_DIR"]
+    return stanza.Pipeline("en", **kw, **pipeline_kwargs(), use_gpu=False, verbose=False,
+                           download_method=None)
+
+
 def test_the_same_parse_one_at_a_time_and_in_bulk():
-    ref = stanza.Pipeline("en", processors="tokenize,pos,lemma,depparse",
-                          use_gpu=False, verbose=False, download_method=None)
+    ref = _reference()
     ort = stanza_ort.Pipeline(MODELS)
     for t in TEXTS:
         assert _sig(ort(t)) == _sig(ref(t)), t

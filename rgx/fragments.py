@@ -163,7 +163,16 @@ def _accept(head, nlp):
     tail = _tail_ids(orig, oroot)
     orig = [w for w in orig if w.id not in tail]
     getpass = shape == "past" and _get_passive(orig, oroot)
-    if shape == "past" and not getpass and (oroot is None or oroot.xpos != "VBD"):
+    # 2026-10-15 (the EWT-only parser): with no subject it can read the
+    # past-tense verb as a modifier ("Rewatched Alien last night": VBN
+    # amod of "Alien"); the verb need not be the root then, only a past
+    # verb at the start -- the subject and finite-verb checks below and the
+    # parse of the rewritten sentence still decide
+    first = next((w for w in orig if w.upos not in ("ADV", "PUNCT")), None)
+    past_first = (first is not None and first.upos == "VERB"
+                  and first.xpos in ("VBD", "VBN"))
+    if shape == "past" and not getpass and not past_first and (
+            oroot is None or oroot.xpos != "VBD"):
         return None
     if shape == "been":
         # "Been rehearsing hard", "Been promoted to team lead", "Been vegan
@@ -339,6 +348,20 @@ def rewrite(text, nlp, prev=None):
         if about_user and not _DENIAL.match(nxt):
             pre = _presupposed(sent)
             new = None if pre else _accept(sent, nlp)
+            if new is None and not pre and "," in sent:
+                # 2026-10-15 (the EWT-only parser): "Rewatched Alien last
+                # night, best sci-fi ever made imo" parses with "made" as
+                # the root; the comma-spliced remark is its own clause, so
+                # the fragment is judged without it -- unless the remark
+                # names a person ("Nursing at St Vincent's, my sister.")
+                head, rest = sent.split(",", 1)
+                head = head.rstrip()
+                lead = None if (re.search(r"\b[A-Z][a-z]", rest) or any(
+                    w in _PERSONS for w in re.findall(r"[a-z]+", rest.lower()))) \
+                    else _accept(head + ".", nlp)
+                if lead:
+                    lead = lead[:len(lead) - len(head) - 1]
+                    new = lead + sent[0].lower() + sent[1:]
         if pre:
             # the presupposed state, then the sentence as said
             orig[pre] = sent

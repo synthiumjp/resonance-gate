@@ -1250,8 +1250,11 @@ def test_a_name_introduced_with_a_relation_is_kept_later():
     e.extract_turn("My dog Biscuit needs a walk twice a day.", role="user")
     out = [r.text for r in e.extract_turn("Biscuit died on Tuesday.", role="user")]
     assert "Biscuit died on Tuesday" in out
-    e.reset_world()
-    assert e.extract_turn("Biscuit died on Tuesday.", role="user") == []
+    # 2026-10-15: without the introduction this used to give nothing only
+    # because Stanza's combined models tagged "Biscuit" a common noun; the
+    # EWT-only parser tags it PROPN, and a named subject is stored on its
+    # own (_propn_subject, e243 rule 3), so that half no longer tests the
+    # world link
 
 
 def test_or_meaning_otherwise_still_asserts_the_first_clause(ex):

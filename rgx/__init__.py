@@ -39,6 +39,7 @@ import os
 import re
 from dataclasses import dataclass, field
 from typing import Iterable, List, Optional, Sequence
+from .normalize import normalize
 
 __all__ = ["Record", "Extractor", "extract"]
 __version__ = "0.1.0"
@@ -304,7 +305,7 @@ class Extractor:
             chunk = todo[i:i + batch]
             for t, d in zip(chunk, parser.nlp.bulk_process(
                     [Document([], text=t) for t in chunk])):
-                parser.cache[t] = d
+                parser.cache[t] = normalize(d)
 
     def _parser(self):
         if self._nlp is None:
@@ -441,7 +442,9 @@ def ort_models_dir():
 class _CachedParser:
     """The Stanza pipeline, answering from Extractor.prefetch's parses when
     it has one for exactly this text. The parser only reads a parse, never
-    changes it, so one can be used more than once."""
+    changes it, so one can be used more than once. Every parse goes through
+    normalize.normalize first (2026-10-15: the rules read one analysis of a
+    construction whichever parser made it)."""
 
     def __init__(self, nlp, document_cls):
         self.nlp = nlp
@@ -450,7 +453,7 @@ class _CachedParser:
 
     def __call__(self, text):
         doc = self.cache.get(text)
-        return doc if doc is not None else self.nlp(text)
+        return doc if doc is not None else normalize(self.nlp(text))
 
     def __getattr__(self, name):
         return getattr(self.nlp, name)
