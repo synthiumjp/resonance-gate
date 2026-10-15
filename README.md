@@ -36,7 +36,7 @@ long history, it answered 64 of 78 against plain retrieval's 61 with the
 same reader and judge, and 73 of 133 questions about time and order
 against 64.
 
-It installs as a Claude Code plugin in a minute or two (about 1.5 GB of
+It installs as a Claude Code plugin in a minute or two (about 1.3 GB of
 disk, no PyTorch, no API key), uses about 400 MB of memory, and answers in
 about 50 ms. It also works with Codex CLI, Gemini CLI, Cursor and any MCP
 client. Your memory is a folder of plain files on your machine.
@@ -396,7 +396,7 @@ sourcedrecall-memory ingest chat.jsonl
 sourcedrecall-memory context "Where do I live?"
 ```
 
-Needs Python 3.10 to 3.13. The install takes a minute or two and about 1.5 GB of disk (0.85 GB of it models); no PyTorch. A running memory server uses about 400 MB of RAM and answers a question in about 50 ms once loaded.
+Needs Python 3.10 to 3.13. The install takes a minute or two and about 1.3 GB of disk (0.7 GB of it models); no PyTorch. A running memory server uses about 400 MB of RAM and answers a question in about 50 ms once loaded.
 After setup it runs offline.
 
 Notes, optional:

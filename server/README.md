@@ -20,7 +20,7 @@ machine.
 
 Claude Code asks for your name (the person the memory is about). The first
 session installs the Python side in the background (a minute or two,
-about 1.5 GB including models; needs Python 3.10+ and git) and the memory
+about 1.3 GB including models; needs Python 3.10+ and git) and the memory
 tools appear in that session when it is done. After that, each session is stored when it
 ends and the next one starts with the summary. Change the name later, or
 turn the summary off and keep only the tools, with
@@ -51,7 +51,7 @@ sourcedrecall-setup
 This downloads the English parser's models (~160 MB, into
 `~/.sourcedrecall/parser-models`) and three small models (~250 MB, in
 `~/.cache/sourcedrecall/onnx`), and takes about a minute. The install is
-about 1.5 GB in total (0.85 GB of it models). This is the only step that uses the network; the
+about 1.3 GB in total (0.7 GB of it models). This is the only step that uses the network; the
 server runs offline.
 
 The parser is a Stanza 1.14.0 English pipeline whose tagger and
