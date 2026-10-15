@@ -880,6 +880,8 @@ tools/stanza_ort/canon.py
 tools/stanza_ort/convert.py
 tools/stanza_ort/parity.py
 tools/stanza_ort/pkgs.py
+tools/stanza_ort/pack.py
+tools/stanza_ort/train_ewt.sh
 tools/test_check_judged.py
 tools/test_dogfood.py
 tools/worksession_eval.py
