@@ -19,7 +19,50 @@ bench/false_memory/results_v10/SUMMARY.md, docs/PREREG_HELDOUT_V11.md (DRAFT, un
 waiting for JP), docs/REVIEW_2026-10-12.md (the second adversarial review;
 items fixed and open are listed below), docs/REVIEW_2026-10-09.md.
 
-## 2026-10-15 morning (read this first)
+## 2026-10-15 afternoon (read this first)
+
+- The EWT-only parser is now the product's parser. A/B on one tree
+  (~/jpwork/parser_ab.sh, sourcedrecall only, Qwen, no audit overrides):
+  LoCoMo test convs 2-9 854/1307 both (44 vs 44 discordant); false memory
+  v11, v12, real paste (held out, counts only) and dev pasted identical in
+  every part; dev own 29/40 vs 30/40. With the combined parser this tree
+  reproduces the README's 65.3%.
+- 14 rule tests failed with it; rgx/normalize.py (every parse, in
+  _CachedParser) rewrites the readings the parsers disagree on (get-passive,
+  neither/nor, do-not-<phrase>-<verb>, a subject pronoun read as object,
+  "tea, never coffee", "I'm married" as a state, verb lemmas), plus
+  made-me-a-<role> as a double object and two fragment changes (898657b).
+  Suite 1,411 passed (EWT parser), 1,409 (combined). Dev rerun with the
+  final rules (~/jpwork/parser_norm.sh): unchanged for both parsers.
+- Published (JP approved): huggingface.co/synthiumjp/sourcedrecall-parser-en
+  commit 980effa: sourcedrecall-parser-en-ewt.tar.gz (159 MB, sha256
+  3cde3a9b..., tools/stanza_ort/pack.py, reproducible), pytorch/ (the .pt
+  files; the parser one with resolve_head_constraints removed), model card,
+  LICENSE (weights CC BY-SA 4.0), NOTICE. The old archive stays at 72e0cff.
+  setup_models points at the new one; parity single and bulk 7,755/7,755.
+  Clean-install test from the HF archive passed (70 s); install ~1.3 GB
+  (0.7 GB models). NOTICE/README/server README/FAQ/HOW_IT_READS updated.
+  The MS MARCO re-ranker is still trained on non-commercial data (README
+  Licence section says so).
+- To run the suite against the EWT parser: RGX_PARSER_MODELS=
+  ~/jpwork/parser_models/ours, and for test_backend STANZA_PACKAGES=ours
+  STANZA_REF_RESOURCES_DIR=~/jpwork/stanza_resources_ewt STANZA_POS_MODEL=
+  ~/jpwork/ewt_train/saved_models/pos/en_ewt_glove_nocharlm_tagger.pt
+  STANZA_DEP_MODEL=~/jpwork/ewt_train/en_ewt_glove_nocharlm_parser_rhc.pt
+  STANZA_PRETRAIN=~/jpwork/stanza_resources_ewt/en/pretrain/glove.pt
+  (scratchpad suites.sh did both arms). Without RGX_PARSER_MODELS the suite
+  runs Stanza's combined models on PyTorch, still passing.
+- Product repo synthiumjp/sourcedrecall: abe387a + 17f00a3 on top of
+  cec48f3 (export of 2852880, suite 1,199 passed with the EWT parser),
+  pushed as JP's no-reply address from ~/sourcedrecall-push.
+- JP's own install moved to 2852880 (tag sourcedrecall-v0.5.2-local) and
+  setup rerun: it has the EWT parser. His session needs /mcp reconnect.
+- Before launch: the README's false-memory and HaluMem figures come from
+  earlier commits; re-measure them on the release commit (real paste was
+  1/20 here unaudited against the README's 7/20 audited). Pick the version
+  number, add `pip install sourcedrecall` to the READMEs.
+
+## 2026-10-15 morning
 
 - Parser retrain done (EWT + GloVe only): UD EWT test, gold words, LAS
   88.83 (ours, head repair on) / 88.77 (Stanza ewt_nocharlm) / 90.04
