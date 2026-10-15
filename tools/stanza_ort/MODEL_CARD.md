@@ -87,7 +87,7 @@ makes Stanza's pipeline skip the head repair it does for its own models.
 | `config.json` | vocabularies, model settings and the lemma dictionaries |
 | `NOTICE` | where each part comes from and its licence |
 
-sha256 of the archive: `SHA256_HERE`
+sha256 of the archive: `3cde3a9b29b6da81e72ad3208874fcdbb1961df82130829d3b8f7dd01ef362b1`
 
 ## How they were made
 

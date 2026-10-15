@@ -36,16 +36,16 @@ from sourcedrecall._bridge import code_roots as _code_roots
 _P2 = _code_roots()[1]
 
 
-# 2026-10-05: the PyTorch-free parser. Its models are Stanza 1.14.0's English
-# models converted once by tools/stanza_ort/convert.py and packed as a
-# .tar.gz; where that archive is published is set here at release time.
-# Until then setup downloads Stanza's own models (and PyTorch runs them), or
-# SOURCEDRECALL_PARSER_ARCHIVE names an archive (path or URL) to install.
+# 2026-10-05: the PyTorch-free parser, converted by tools/stanza_ort/convert.py
+# and packed as a .tar.gz (tools/stanza_ort/pack.py).
+# SOURCEDRECALL_PARSER_ARCHIVE names another archive (path or URL) to install.
 # (2026-10-12, review 4.2: at a fixed commit, so a re-upload cannot break installs)
+# 2026-10-15: the EWT-only parser (tools/stanza_ort/train_ewt.sh; trained on
+# UD English-EWT alone, CC BY-SA 4.0), replacing Stanza's combined models
 PARSER_ARCHIVE = ("https://huggingface.co/synthiumjp/sourcedrecall-parser-en/resolve/"
-                  "72e0cffbc85f55d13cf59d8d547d60db82c07b77/"
-                  "sourcedrecall-parser-en-stanza1.14.0.tar.gz")
-PARSER_SHA256 = "921281ed755e8a4454cce27df56e18557123920e1df4b02443cade72e0e2f105"
+                  "980effa58361092956077e88c9f1a9ceeddde482/"
+                  "sourcedrecall-parser-en-ewt.tar.gz")
+PARSER_SHA256 = "3cde3a9b29b6da81e72ad3208874fcdbb1961df82130829d3b8f7dd01ef362b1"
 
 
 # 2026-10-07: the optional in-process notes models (notes.py), Qwen3 trained
@@ -226,8 +226,8 @@ def main(argv=None):
     archive = os.environ.get("SOURCEDRECALL_PARSER_ARCHIVE") or PARSER_ARCHIVE
     done = False
     if archive and os.environ.get("RGX_PARSER", "").lower() != "stanza":
-        print(f"[1/{1 + len(HF_MODELS)}] English parser (Stanza's models on ONNX "
-              "Runtime, no PyTorch) -- ~335 MB, the slowest step", flush=True)
+        print(f"[1/{1 + len(HF_MODELS)}] English parser (trained on UD English-EWT, "
+              "on ONNX Runtime, no PyTorch) -- ~160 MB, the slowest step", flush=True)
         try:
             sha = (os.environ.get("SOURCEDRECALL_PARSER_SHA256")
                    or (PARSER_SHA256 if archive == PARSER_ARCHIVE else None))
