@@ -19,7 +19,26 @@ bench/false_memory/results_v10/SUMMARY.md, docs/PREREG_HELDOUT_V11.md (DRAFT, un
 waiting for JP), docs/REVIEW_2026-10-12.md (the second adversarial review;
 items fixed and open are listed below), docs/REVIEW_2026-10-09.md.
 
-## 2026-10-15 afternoon (read this first)
+## 2026-10-16 (read this first)
+
+- Release re-measurement running on the Mac: tools/release_measure2.sh on
+  tree ~/jpwork/sdr-release-53e0d9c with the EWT parser (log
+  ~/jpwork/release6.log; started 10:14; ~12-14 h). Then update README
+  figures from it.
+- Claude column (JP agreed 2026-10-16; his $100/month API credit): key on
+  JP's PC only (WSL ~/.anthropic_key, mode 600; ~/.anthropic_workspace holds
+  the Default workspace id, the key is org-wide). Batches are sent from WSL
+  (~/claude-venv, anthropic 1.15): `bash bench/claude_runs.sh 53e0d9c` after
+  the re-measurement -- LoCoMo with Claude Sonnet 5.5 reader+judge, the
+  pasted-text held-out sets with a Claude reader (judge Qwen on the Mac).
+  Smoke batch OK (2 requests). Expected < $10.
+- Launch plan discussed with JP: no friends for a soft launch, so container
+  install tests (Linux distros, Python 3.10-3.13) on the Mac, a fresh-eyes
+  README agent test, one native-Windows install with JP, then a small
+  "testers wanted" post (r/ClaudeAI or r/LocalLLaMA), Show HN 1-2 weeks
+  later; version 0.6.0 or 1.0.0 still to pick.
+
+## 2026-10-15 afternoon
 
 - The EWT-only parser is now the product's parser. A/B on one tree
   (~/jpwork/parser_ab.sh, sourcedrecall only, Qwen, no audit overrides):
