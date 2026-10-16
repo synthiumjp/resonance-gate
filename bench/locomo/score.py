@@ -52,8 +52,11 @@ for s in systems:
     if s == "mem0":   # per-session log: exact even though the run was resumed (a restart repeated some store lines)
         rows = C.jsonl_read(os.path.join(d, "mem0_progress.jsonl"))
     ing[s] = (sum(r["messages"] for r in rows), sum(r["model_calls"] for r in rows), sum(r["seconds"] for r in rows))
-w("| ingest messages | " + " | ".join(str(ing[s][0]) for s in systems) + " |")
-w("| ingest model calls | " + " | ".join(str(ing[s][1]) for s in systems) + " |")
-w("| ingest seconds | " + " | ".join(f"{ing[s][2]:.0f}" for s in systems) + " |")
-w("| reader+judge s per question | " + " | ".join(f"{sum(ans[s][q]['reader_s'] + ans[s][q]['judge_s'] for q in common) / max(1, len(common)):.1f}" for s in systems) + " |")
+if any(ing[s][0] for s in systems):   # absent from a Claude run's folder (answers only)
+  w("| ingest messages | " + " | ".join(str(ing[s][0]) for s in systems) + " |")
+  w("| ingest model calls | " + " | ".join(str(ing[s][1]) for s in systems) + " |")
+  w("| ingest seconds | " + " | ".join(f"{ing[s][2]:.0f}" for s in systems) + " |")
+# a Claude run (answer_claude.py, Batch API) has no per-question timings
+if all("reader_s" in ans[s][q] for s in systems for q in common):
+    w("| reader+judge s per question | " + " | ".join(f"{sum(ans[s][q]['reader_s'] + ans[s][q]['judge_s'] for q in common) / max(1, len(common)):.1f}" for s in systems) + " |")
 print("\n".join(out))
