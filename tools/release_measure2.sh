@@ -84,9 +84,10 @@ for t in knowledge-update temporal-reasoning; do
 done
 
 echo "== 4. HaluMem users 0-1, update and QA"
+# both steps run from the harness's eval/ folder: its llms.py reads the .env there
+cd $HOME/jpwork/rg_private/halumem/official/HaluMem/eval
 HALUMEM_SCRATCH=$HOME/jpwork/halumem_scratch_release2 $P $W/experiments/p2/halumem_official/eval_sdr.py \
   --system sdr --version sdr-$C --users 0,1 > $HOME/jpwork/halumem_release2_store.log 2>&1 || echo "halumem store failed"
-cd $HOME/jpwork/rg_private/halumem/official/HaluMem/eval
 $P evaluation_uqa.py --frame rgp2 --version sdr-$C --user_num 2 > $HOME/jpwork/halumem_release2_uqa.log 2>&1 || echo "uqa failed"
 /usr/bin/python3 -c "
 import json; r=json.load(open('results/rgp2-sdr-$C/rgp2_eval_stat_result_uqa.json'))['overall_score']
