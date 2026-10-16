@@ -88,52 +88,89 @@ def _call(prompt):
     return re.sub(r"<think>.*?</think>", "", raw, flags=re.S).strip()
 
 
+# 2026-10-16: FM_READER_CLAUDE=<model> reads with Claude through the Batch
+# API instead (../claude_batch.py; an extra, labelled reader beside the
+# local ones): every prompt of every system goes in one batch
+CLAUDE = os.environ.get("FM_READER_CLAUDE")
+
+
 def main(systems):
+    if CLAUDE:
+        return main_claude(systems)
     if not READER or not MODEL:
         sys.exit("set FM_READER_OPENAI and FM_READER_MODEL (or the FM_JUDGE_ ones)")
+    for s in systems:
+        _answer_system(s, _call)
+
+
+def _prompts(s, cases, rules):
+    """-> [(scenario id, [prompt per probe])] for system s."""
+    out = []
+    for r in (json.loads(l) for l in open(os.path.join(RESULTS, f"raw_{s}.jsonl"))):
+        c = cases[r["id"]]
+        today = max(cv["date"] for cv in c["conversations"])
+        prompts = []
+        for p in r.get("probes") or []:
+            lines = (p.get("views") or {}).get("context") if s == "sourcedrecall" \
+                else p.get("lines")
+            mem = "\n".join(f"- {l}" for l in (lines or [])) or "(nothing)"
+            if p.get("block"):
+                # the exact block an agent receives (header and rules)
+                block = p["block"] if OURS_RULES else _strip_rules(p["block"])
+                prompts.append(PROMPT.format(today=today, q=p["q"], memory=block,
+                                             rules=SAME_RULES if SAME else ""))
+                continue
+            if SAME:
+                r_ = (rules if (s == "sourcedrecall" and OURS_RULES) else "") + SAME_RULES
+            else:
+                r_ = rules if s == "sourcedrecall" else ""
+            prompts.append(PROMPT.format(today=today, q=p["q"], memory=mem, rules=r_))
+        out.append((r["id"], prompts))
+    return out
+
+
+def main_claude(systems):
+    sys.path.insert(0, os.path.dirname(HERE))
+    from claude_batch import run
     cases = {c["id"]: c for c in map(json.loads, open(CASES))}
     rules = _rules()
-    for s in systems:
-        out_path = os.path.join(RESULTS, f"answers_{s}.jsonl")
-        done = {}
-        if os.path.exists(out_path):
-            for l in open(out_path):
-                r = json.loads(l)
-                done[r["id"]] = r
-        raw = [json.loads(l) for l in open(os.path.join(RESULTS, f"raw_{s}.jsonl"))]
-        fresh = {}
-        for r in raw:
-            c = cases[r["id"]]
-            today = max(cv["date"] for cv in c["conversations"])
-            prompts = []
-            for p in r.get("probes") or []:
-                lines = (p.get("views") or {}).get("context") if s == "sourcedrecall" \
-                    else p.get("lines")
-                mem = "\n".join(f"- {l}" for l in (lines or [])) or "(nothing)"
-                if p.get("block"):
-                    # the exact block an agent receives (header and rules)
-                    block = p["block"] if OURS_RULES else _strip_rules(p["block"])
-                    prompts.append(PROMPT.format(today=today, q=p["q"], memory=block,
-                                                 rules=SAME_RULES if SAME else ""))
-                    continue
-                if SAME:
-                    r_ = (rules if (s == "sourcedrecall" and OURS_RULES) else "") + SAME_RULES
-                else:
-                    r_ = rules if s == "sourcedrecall" else ""
-                prompts.append(PROMPT.format(today=today, q=p["q"], memory=mem, rules=r_))
-            key = hashlib.sha1(json.dumps([MODEL, prompts]).encode()).hexdigest()
-            if r["id"] in done and done[r["id"]].get("key") == key:
-                fresh[r["id"]] = done[r["id"]]
-                continue
-            fresh[r["id"]] = {"id": r["id"], "key": key, "model": MODEL,
-                              "answers": [_call(pr) for pr in prompts]}
-            print(s, r["id"], "answered", flush=True)
-            with open(out_path, "w") as f:
-                for v in fresh.values():
-                    f.write(json.dumps(v, ensure_ascii=False) + "\n")
+    todo = {s: _prompts(s, cases, rules) for s in systems}
+    flat = {f"{si}-{ri}-{pi}": pr.replace(" /no_think", "")
+            for si, s in enumerate(systems) for ri, (_, prs) in enumerate(todo[s])
+            for pi, pr in enumerate(prs)}
+    got = run(flat, CLAUDE, 300, os.path.join(RESULTS, "claude_reader_batch.json"))
+    for si, s in enumerate(systems):
+        with open(os.path.join(RESULTS, f"answers_{s}.jsonl"), "w") as f:
+            for ri, (rid, prs) in enumerate(todo[s]):
+                f.write(json.dumps({"id": rid, "key": "claude", "model": CLAUDE,
+                                    "answers": [got[f"{si}-{ri}-{pi}"].strip()
+                                                for pi in range(len(prs))]},
+                                   ensure_ascii=False) + "\n")
+
+
+def _answer_system(s, call):
+    cases = {c["id"]: c for c in map(json.loads, open(CASES))}
+    out_path = os.path.join(RESULTS, f"answers_{s}.jsonl")
+    done = {}
+    if os.path.exists(out_path):
+        for l in open(out_path):
+            r = json.loads(l)
+            done[r["id"]] = r
+    fresh = {}
+    for rid, prompts in _prompts(s, cases, _rules()):
+        key = hashlib.sha1(json.dumps([MODEL, prompts]).encode()).hexdigest()
+        if rid in done and done[rid].get("key") == key:
+            fresh[rid] = done[rid]
+            continue
+        fresh[rid] = {"id": rid, "key": key, "model": MODEL,
+                      "answers": [call(pr) for pr in prompts]}
+        print(s, rid, "answered", flush=True)
         with open(out_path, "w") as f:
             for v in fresh.values():
                 f.write(json.dumps(v, ensure_ascii=False) + "\n")
+    with open(out_path, "w") as f:
+        for v in fresh.values():
+            f.write(json.dumps(v, ensure_ascii=False) + "\n")
 
 
 if __name__ == "__main__":
