@@ -80,6 +80,27 @@ _LIST_Q = re.compile(
     r"had|are|were|is)\b|^\W*what\s+are\s+.*\b[a-z]{3,}(?<!ss)s\W*$|"
     r"\b(?:list|name)\s+(?:all|the|some|every)\b", re.I)
 
+# 2026-10-17 (LoCoMo dev, multi-hop: _LIST_Q caught 11 of 43): set questions
+# it missed, "What types of pottery have ...", "What musical artists/bands has
+# ...", "What transgender-specific events has ...", "What are some changes
+# ...", "What does Melanie do to destress?", "What do her kids like?", and two
+# people at once ("both", "in common"). Not "What kind of coffee do I drink
+# these days?" or "What do I do for a living?": one current answer, where
+# more old messages bring back old values. RG_LIST_WIDE=1 (experiment)
+_LIST_WIDE = re.compile(
+    r"^\W*(?:what|which)\s+(?:kinds|types|sorts)\s+of\b|"
+    r"^\W*(?:what|which)\s+(?:[\w'-]+\s+){0,2}?[a-z][\w-]*s(?:/[\w-]+)?\s+(?:do|does|did|has|have|had|are|were)\b|"
+    r"^\W*what\s+are\s+some\b|"
+    r"^\W*what\s+(?:do|does|did)\s+.+?\s+(?:do\s+to\s+\w+|like|enjoy|love)\b|"
+    r"\bboth\b|\bin\s+common\b", re.I)
+
+
+def _listy(query):
+    """A question asking for a set of things, read across more messages."""
+    q = query or ""
+    return bool(_LIST_Q.search(q) or re.match(r"^\W*what\s+(?:has|have)\s", q, re.I)
+                or (os.environ.get("RG_LIST_WIDE") == "1" and _LIST_WIDE.search(q)))
+
 
 # 2026-10-05 (cases_dev_prefs): a sentence about the PERSON rather than the
 # project in front of them -- first person, a preference or habit marker,
@@ -725,7 +746,37 @@ def _window_q(text, query, limit, skip=()):
     return lead + " ... " + re.sub(r"^\.\.\.\S*\s+", "", part)
 
 
-def _quote_own(text, owner=None, query=None, after=None):
+_TRIM_STOP = frozenset("""what which when where does have kind kinds type types sort sorts
+some things thing both common ever like their they them with from about been were""".split())
+
+
+def _trim_q(text, query, limit):
+    """2026-10-17 (RG_LIST_TRIM=1, experiment): for a list question, a
+    message cut to its sentences that share a word with the question, so
+    more messages fit in the same space (Mem0 shows short extracted facts;
+    our messages carry greetings and replies around the one sentence that
+    counts). Names in the question are not counted (they say whose text it
+    is). No sentence shares a word: the message's opening, about 240
+    characters, since the search found it for a reason the words don't show."""
+    flat = " ".join((text or "").split())
+    toks = re.findall(r"[A-Za-z]+", query or "")
+    q = {w.lower() for k, w in enumerate(toks)
+         if len(w) >= 4 and not (k and w[0].isupper()) and w.lower() not in _TRIM_STOP}
+    sents = [x for x in _SENT_SPLIT.split(flat) if x.strip()]
+    if not q or len(sents) < 2:
+        return _window(flat, "", limit)
+
+    def hit(sent):
+        words = set(re.findall(r"[a-z]{4,}", sent.lower()))
+        return any(v.startswith(w[:5]) or (w.startswith(v[:5]) and len(v) >= 5)
+                   for w in q for v in words)
+    keep = [x for x in sents if hit(x)]
+    if not keep:
+        return _window(flat, "", 240)
+    return _window(" ... ".join(keep), "", limit)
+
+
+def _quote_own(text, owner=None, query=None, after=None, trim=False):
     """A message quoted for the reader, with text the user pasted in for the
     assistant (an email, a README, a web page; prose._drop_pasted) set apart
     as someone else's (2026-10-07).
@@ -740,6 +791,8 @@ def _quote_own(text, owner=None, query=None, after=None):
     flat = " ".join((text or "").split())
     own = " ".join(_drop_pasted(text or "", owner, after).split())
     if len(own) >= len(flat):
+        if trim:
+            return f'"{_trim_q(text, query, _MSG_WINDOW)}"'
         return f'"{_window_q(text, query, _MSG_WINDOW)}"'
     k = 0                       # the user's words before the paste ...
     while k < len(own) and k < len(flat) and own[k] == flat[k]:
@@ -2249,9 +2302,13 @@ class Memory:
         # 2026-10-05 (LoCoMo dev): reading 16 for a list question (or "what
         # has X ...", everything so far) answered 3 more multi-hop questions
         # than 10 and lost none; 727 -> 780 tokens on average
-        listy = (_LIST_Q.search(query or "")
-                 or re.match(r"^\W*what\s+(?:has|have)\s", query or "", re.I))
-        k = (max(max_facts * 2, int(os.environ.get("RG_LIST_K", "16"))) if listy
+        # 2026-10-17: RG_LIST_TRIM=1 (experiment) cuts each message of a list
+        # question to its sentences that bear on it, and reads RG_LIST_K_TRIM
+        # (24) in the space 16 took
+        listy = _listy(query)
+        trim = bool(listy) and os.environ.get("RG_LIST_TRIM") == "1"
+        k = (max(max_facts * 2, int(os.environ.get("RG_LIST_K_TRIM" if trim else "RG_LIST_K",
+                                                   "24" if trim else "16"))) if listy
              else max_facts)
         hits = []
         for m in self.messages_for(query, k=k):
@@ -2354,7 +2411,7 @@ class Memory:
                      if asked and asked.rstrip().endswith("?") else "")
             after = after_of(m.get("conv"), m["text"]) if after_of and m.get("conv") else None
             line = (f"- [{m.get('date')}] " if m.get("date") else "- ") + \
-                asked + _quote_own(m["text"], self.owner, query, after)
+                asked + _quote_own(m["text"], self.owner, query, after, trim=trim)
             if n:
                 line += "  (" + "; ".join(n) + ")"
             lines.append(line)
