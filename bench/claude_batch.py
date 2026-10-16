@@ -32,7 +32,12 @@ THINKING_OFF = {
 
 def client():
     path = os.path.expanduser(os.environ.get("CLAUDE_KEY_FILE", "~/.anthropic_key"))
-    return anthropic.Anthropic(api_key=open(path).read().strip())
+    # a key not scoped to a workspace needs the workspace named on each
+    # request: ~/.anthropic_workspace holds its id (wrkspc_..., not secret)
+    ws = os.path.expanduser(os.environ.get("CLAUDE_WORKSPACE_FILE", "~/.anthropic_workspace"))
+    headers = ({"anthropic-workspace-id": open(ws).read().strip()}
+               if os.path.exists(ws) else None)
+    return anthropic.Anthropic(api_key=open(path).read().strip(), default_headers=headers)
 
 
 def run(prompts, model, max_tokens, state_path, poll=60):
