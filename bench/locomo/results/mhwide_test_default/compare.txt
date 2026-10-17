@@ -1,0 +1,10 @@
+questions 1307; context changed 31; unchanged 1276, same answer and verdict 1276 (100.0%)
+multi-hop: gained 1, lost 1, net +0
+temporal: gained 0, lost 0, net +0
+open-domain: gained 0, lost 0, net +0
+single-hop: gained 2, lost 1, net +1
+overall: gained 3, lost 2, net +1
+H1 multi-hop net >= +3: missed
+H2 no other category below -2: met
+H3 overall net >= +2: missed
+H4 unchanged contexts, >= 99% same answers: met

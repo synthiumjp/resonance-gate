@@ -592,6 +592,17 @@ evidence.
   conversations, Mem0 61.9%).
 - **Sentence-level indexing** of messages: no gain on multi-hop, worse on
   single-hop. Refuted.
+- **A wider list detector** (2026-10-17, `RG_LIST_WIDE`, off): set questions
+  the list rule missed ("What types of pottery have ...", "What musical
+  artists/bands has ...", "What does Melanie do to destress?", "both", "in
+  common") read 16 messages per person instead of 5. Development
+  conversations: multi-hop 22 -> 27 of 43, nothing lost. Pre-registered test
+  (`docs/PREREG_MULTIHOP_WIDE.md`): it changed 31 of 1,307 contexts, 14 of
+  them multi-hop; multi-hop gained 1 and lost 1, overall +1 (targets +3 and
+  +2 missed). Refuted. **Trimming each message of a list question to its
+  sentences that share a word with it** (`RG_LIST_TRIM`, off), so 24 fit
+  where 16 did: development multi-hop 22 -> 18. Refuted: the sentences
+  around the matching one carried what the reader needed.
 - **Stripping greetings, compliments and questions** before ranking: worse
   on single-hop (92 -> 87 of 120). Refuted.
 - **WordNet hyponyms of the question's head noun as query expansion**

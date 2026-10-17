@@ -65,3 +65,28 @@ figures come from this run (with the strict judge as well), and the
 changed questions are read again by Claude Sonnet 5.5 for that column
 (about 60 requests). Otherwise it stays off and the result is written up
 in `docs/HOW_IT_READS.md` with the other refuted ideas.
+
+## Result (run once, 2026-10-17 22:34 to 2026-10-18 02:56)
+
+`~/jpwork/sdr-mhtest/bench/locomo/results/mhwide_test_default`
+(in the repo: `bench/locomo/results/mhwide_test_default`, `compare.txt`).
+
+| | gained | lost | net |
+|---|---|---|---|
+| multi-hop | 1 | 1 | 0 |
+| temporal | 0 | 0 | 0 |
+| open-domain | 0 | 0 | 0 |
+| single-hop | 2 | 1 | +1 |
+| overall | 3 | 2 | +1 |
+
+Contexts changed: 31 of 1,307. Of the 1,276 unchanged, all 1,276 got the
+same answer and verdict.
+
+- H1 (multi-hop net at least +3): missed.
+- H2 (no other category below -2): met.
+- H3 (overall net at least +2): missed.
+- H4 (unchanged contexts, at least 99% the same): met.
+
+Decision, as registered: the detector stays off and is listed with the
+refuted ideas in `docs/HOW_IT_READS.md`. The development gain (5 of 10
+newly caught questions) did not carry over to the 14 the test caught.
