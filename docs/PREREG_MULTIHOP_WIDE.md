@@ -1,6 +1,7 @@
 # Pre-registration: the wider list detector on LoCoMo test (2026-10-17)
 
-Draft for JP's review. Nothing below has been run on the test conversations.
+Approved by JP on 2026-10-17 ("ok go"), before any test-conversation run.
+Frozen at this commit; the run uses the release tree with 057e9c1's memory_api.py.
 
 ## The change
 
