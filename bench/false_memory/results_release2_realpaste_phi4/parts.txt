@@ -1,0 +1,4 @@
+rag            part R class e: 20 probes; false memory 17/20
+rag            part R class f: 10 probes; expected term in the answer 10/10
+sourcedrecall  part R class e: 20 probes; false memory 1/20
+sourcedrecall  part R class f: 10 probes; expected term in the answer 9/10

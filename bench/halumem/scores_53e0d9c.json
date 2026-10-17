@@ -1,0 +1,51 @@
+{
+ "sourcedrecall": {
+  "memory_update": {
+   "correct_update_memory_ratio(all)": 0.506578947368421,
+   "correct_update_memory_ratio(valid)": 0.506578947368421,
+   "hallucination_update_memory_ratio(all)": 0.019736842105263157,
+   "hallucination_update_memory_ratio(valid)": 0.019736842105263157,
+   "omission_update_memory_ratio(all)": 0.47368421052631576,
+   "omission_update_memory_ratio(valid)": 0.47368421052631576,
+   "other_update_memory_ratio(all)": 0.0,
+   "other_update_memory_ratio(valid)": 0.0,
+   "update_memory_valid_num": 304,
+   "update_memory_num": 304
+  },
+  "question_answering": {
+   "correct_qa_ratio(all)": 0.5227272727272727,
+   "correct_qa_ratio(valid)": 0.6891385767790262,
+   "hallucination_qa_ratio(all)": 0.15625,
+   "hallucination_qa_ratio(valid)": 0.20599250936329588,
+   "omission_qa_ratio(all)": 0.07954545454545454,
+   "omission_qa_ratio(valid)": 0.10486891385767791,
+   "qa_valid_num": 267,
+   "qa_num": 352
+  }
+ },
+ "plain retrieval": {
+  "memory_update": {
+   "correct_update_memory_ratio(all)": 0.3157894736842105,
+   "correct_update_memory_ratio(valid)": 0.3210702341137124,
+   "hallucination_update_memory_ratio(all)": 0.03289473684210526,
+   "hallucination_update_memory_ratio(valid)": 0.033444816053511704,
+   "omission_update_memory_ratio(all)": 0.6348684210526315,
+   "omission_update_memory_ratio(valid)": 0.6454849498327759,
+   "other_update_memory_ratio(all)": 0.0,
+   "other_update_memory_ratio(valid)": 0.0,
+   "update_memory_valid_num": 299,
+   "update_memory_num": 304
+  },
+  "question_answering": {
+   "correct_qa_ratio(all)": 0.4602272727272727,
+   "correct_qa_ratio(valid)": 0.6,
+   "hallucination_qa_ratio(all)": 0.20454545454545456,
+   "hallucination_qa_ratio(valid)": 0.26666666666666666,
+   "omission_qa_ratio(all)": 0.10227272727272728,
+   "omission_qa_ratio(valid)": 0.13333333333333333,
+   "qa_valid_num": 270,
+   "qa_num": 352
+  }
+ },
+ "_note": "sourcedrecall on commit 53e0d9c (2026-10-16/17); plain retrieval's scores are from d6613e0 (its answers do not depend on our commit)"
+}

@@ -1,0 +1,20 @@
+agentmemory    part B class b: 20 probes; false memory 2/20; expected term in the answer 18/20
+agentmemory    part D class e: 40 probes; false memory 22/40
+agentmemory    part D class f: 30 probes; expected term in the answer 30/30
+agentmemory    part U class f: 20 probes; expected term in the answer 10/20
+agentmemory    part X class f: 20 probes; expected term in the answer 19/20
+ai-memory      part B class b: 20 probes; false memory 1/20; expected term in the answer 19/20
+ai-memory      part D class e: 40 probes; false memory 3/40
+ai-memory      part D class f: 30 probes; expected term in the answer 7/30
+ai-memory      part U class f: 20 probes; expected term in the answer 6/20
+ai-memory      part X class f: 20 probes; expected term in the answer 19/20
+rag            part B class b: 20 probes; false memory 0/20; expected term in the answer 19/20
+rag            part D class e: 40 probes; false memory 22/40
+rag            part D class f: 30 probes; expected term in the answer 30/30
+rag            part U class f: 20 probes; expected term in the answer 19/20
+rag            part X class f: 20 probes; expected term in the answer 19/20
+sourcedrecall  part B class b: 20 probes; false memory 0/20; expected term in the answer 19/20
+sourcedrecall  part D class e: 40 probes; false memory 3/40
+sourcedrecall  part D class f: 30 probes; expected term in the answer 25/30
+sourcedrecall  part U class f: 20 probes; expected term in the answer 19/20
+sourcedrecall  part X class f: 20 probes; expected term in the answer 19/20

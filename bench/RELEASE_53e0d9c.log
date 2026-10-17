@@ -1,0 +1,189 @@
+== release measure 2 53e0d9c Fri Oct 16 10:14:33 AEDT 2026, parser /Users/chrismarmo/jpwork/parser_models/ours
+parser /Users/chrismarmo/jpwork/parser_models/ours
+== 0. notes models (Hugging Face, the archives setup installs)
+== 1. release_measure.sh
+== release measure 53e0d9c Fri Oct 16 10:14:33 AEDT 2026
+== 1. full suite
+FAILED rgx/test_backend.py::test_the_same_parse_one_at_a_time_and_in_bulk - A...
+1 failed, 1424 passed, 3 skipped in 34.74s
+== 2. LoCoMo test (convs 2-9), default and each notes model
+-- locomo test default
+| 1 multi-hop | 239 | 129/239 = 54.0% | 148/239 = 61.9% | 94/239 = 39.3% |
+| 2 temporal | 258 | 147/258 = 57.0% | 96/258 = 37.2% | 128/258 = 49.6% |
+| 4 single-hop | 727 | 549/727 = 75.5% | 566/727 = 77.9% | 486/727 = 66.9% |
+| overall (1-4) | 1307 | 855/1307 = 65.4% | 844/1307 = 64.6% | 740/1307 = 56.6% |
+| mean context tokens (len/4) | 682 | 722 | 356 |
+-- locomo test small
+| 1 multi-hop | 239 | 133/239 = 55.6% | 148/239 = 61.9% | 94/239 = 39.3% |
+| 2 temporal | 258 | 142/258 = 55.0% | 96/258 = 37.2% | 128/258 = 49.6% |
+| 4 single-hop | 727 | 577/727 = 79.4% | 566/727 = 77.9% | 486/727 = 66.9% |
+| overall (1-4) | 1307 | 886/1307 = 67.8% | 844/1307 = 64.6% | 740/1307 = 56.6% |
+| mean context tokens (len/4) | 1032 | 722 | 356 |
+-- locomo test standard
+| 1 multi-hop | 239 | 140/239 = 58.6% | 148/239 = 61.9% | 94/239 = 39.3% |
+| 2 temporal | 258 | 154/258 = 59.7% | 96/258 = 37.2% | 128/258 = 49.6% |
+| 4 single-hop | 727 | 589/727 = 81.0% | 566/727 = 77.9% | 486/727 = 66.9% |
+| overall (1-4) | 1307 | 923/1307 = 70.6% | 844/1307 = 64.6% | 740/1307 = 56.6% |
+| mean context tokens (len/4) | 1025 | 722 | 356 |
+== 3. LongMemEval-S retrieval (500 q)
+questions run: 500 (non-abstention 470)
+
+SESSION-LEVEL, non-abstention, all types (n=470)
+| system | any@1 | all@1 | any@3 | all@3 | any@5 | all@5 | any@10 | all@10 |
+|---|---|---|---|---|---|---|---|---|
+| ours | 94.9 | 33.0 | 97.2 | 85.7 | 98.7 | 93.4 | 99.1 | 97.4 |
+| bm25 | 80.0 | 27.9 | 90.6 | 72.8 | 93.6 | 78.5 | 96.4 | 87.0 |
+| bge | 88.9 | 30.4 | 95.5 | 81.3 | 97.0 | 90.4 | 98.5 | 96.2 |
+
+SESSION-LEVEL, non-abstention, excluding single-session-assistant (n=414)
+| system | any@1 | all@1 | any@3 | all@3 | any@5 | all@5 | any@10 | all@10 |
+|---|---|---|---|---|---|---|---|---|
+== 4. false memory, held out (counts only), the fair protocol (v7)
+v3 release sourcedrecall {'false_memory_all': '0/30', 'false_memory_a': '0/5', 'false_memory_b': '0/8', 'false_memory_c': '0/6', 'false_memory_d': '0/6', 'false_memory_e': '0/5', 'control_recall': '23/23', 'abstain_explicit_cd': '0/12', 'abstain_lenient_cd': '12/12', 'side_recall_abe': '8/8'}
+v3 release mem0 {'false_memory_all': '2/30', 'false_memory_a': '0/5', 'false_memory_b': '1/8', 'false_memory_c': '0/6', 'false_memory_d': '0/6', 'false_memory_e': '1/5', 'control_recall': '23/23', 'abstain_explicit_cd': '0/12', 'abstain_lenient_cd': '12/12', 'side_recall_abe': '8/8'}
+v3 release rag {'false_memory_all': '0/30', 'false_memory_a': '0/5', 'false_memory_b': '0/8', 'false_memory_c': '0/6', 'false_memory_d': '0/6', 'false_memory_e': '0/5', 'control_recall': '23/23', 'abstain_explicit_cd': '0/12', 'abstain_lenient_cd': '12/12', 'side_recall_abe': '8/8'}
+v4 release sourcedrecall {'false_memory_all': '3/44', 'false_memory_b': '3/44', 'control_recall': '15/16', 'side_recall_abe': '42/44'}
+v4 release rag {'false_memory_all': '7/44', 'false_memory_b': '7/44', 'control_recall': '15/16', 'side_recall_abe': '36/44'}
+v4 release agentmemory {'false_memory_all': '4/44', 'false_memory_b': '4/44', 'control_recall': '15/16', 'side_recall_abe': '37/44'}
+v4 release ai-memory {'false_memory_all': '7/44', 'false_memory_b': '7/44', 'control_recall': '15/16', 'side_recall_abe': '33/44'}
+codebg release sourcedrecall {'false_memory_all': '0/51', 'false_memory_a': '0/10', 'false_memory_b': '0/14', 'false_memory_c': '0/9', 'false_memory_d': '0/9', 'false_memory_e': '0/9', 'control_recall': '9/9', 'abstain_explicit_cd': '0/18', 'abstain_lenient_cd': '18/18', 'side_recall_abe': '14/14'}
+codebg release rag {'false_memory_all': '3/51', 'false_memory_a': '0/10', 'false_memory_b': '3/14', 'false_memory_c': '0/9', 'false_memory_d': '0/9', 'false_memory_e': '0/9', 'control_recall': '9/9', 'abstain_explicit_cd': '0/18', 'abstain_lenient_cd': '18/18', 'side_recall_abe': '11/14'}
+codebg release agentmemory {'false_memory_all': '2/51', 'false_memory_a': '0/10', 'false_memory_b': '2/14', 'false_memory_c': '0/9', 'false_memory_d': '0/9', 'false_memory_e': '0/9', 'control_recall': '9/9', 'abstain_explicit_cd': '0/18', 'abstain_lenient_cd': '18/18', 'side_recall_abe': '12/14'}
+codebg release ai-memory {'false_memory_all': '5/51', 'false_memory_a': '0/10', 'false_memory_b': '2/14', 'false_memory_c': '0/9', 'false_memory_d': '0/9', 'false_memory_e': '3/9', 'control_recall': '9/9', 'abstain_explicit_cd': '0/18', 'abstain_lenient_cd': '18/18', 'side_recall_abe': '11/14'}
+proj release sourcedrecall {'false_memory_all': '0/32', 'false_memory_a': '0/13', 'false_memory_b': '0/7', 'false_memory_c': '0/6', 'false_memory_e': '0/6', 'control_recall': '11/13', 'abstain_explicit_cd': '0/6', 'abstain_lenient_cd': '6/6', 'side_recall_abe': '7/7'}
+proj release rag {'false_memory_all': '3/32', 'false_memory_a': '2/13', 'false_memory_b': '0/7', 'false_memory_c': '0/6', 'false_memory_e': '1/6', 'control_recall': '6/13', 'abstain_explicit_cd': '0/6', 'abstain_lenient_cd': '6/6', 'side_recall_abe': '7/7'}
+proj release agentmemory {'false_memory_all': '9/32', 'false_memory_a': '9/13', 'false_memory_b': '0/7', 'false_memory_c': '0/6', 'false_memory_e': '0/6', 'control_recall': '11/13', 'abstain_explicit_cd': '0/6', 'abstain_lenient_cd': '6/6', 'side_recall_abe': '7/7'}
+proj release ai-memory {'false_memory_all': '4/32', 'false_memory_a': '0/13', 'false_memory_b': '0/7', 'false_memory_c': '0/6', 'false_memory_e': '4/6', 'control_recall': '6/13', 'abstain_explicit_cd': '0/6', 'abstain_lenient_cd': '6/6', 'side_recall_abe': '7/7'}
+== release measure done Fri Oct 16 19:29:36 AEDT 2026
+== 2. pasted text, held out (counts only), both readers
+  v11: 0 of      130 scenarios with errors
+-- v11 qwen (overrides audit_overrides_v11.json)
+agentmemory    part B class b: 20 probes; false memory 2/20; expected term in the answer 18/20
+agentmemory    part D class e: 40 probes; false memory 24/40
+agentmemory    part D class f: 30 probes; expected term in the answer 30/30
+agentmemory    part U class f: 20 probes; expected term in the answer 10/20
+agentmemory    part X class f: 20 probes; expected term in the answer 15/20
+ai-memory      part B class b: 20 probes; false memory 0/20; expected term in the answer 18/20
+ai-memory      part D class e: 40 probes; false memory 2/40
+ai-memory      part D class f: 30 probes; expected term in the answer 5/30
+ai-memory      part U class f: 20 probes; expected term in the answer 6/20
+ai-memory      part X class f: 20 probes; expected term in the answer 13/20
+rag            part B class b: 20 probes; false memory 1/20; expected term in the answer 19/20
+rag            part D class e: 40 probes; false memory 23/40
+rag            part D class f: 30 probes; expected term in the answer 30/30
+rag            part U class f: 20 probes; expected term in the answer 20/20
+rag            part X class f: 20 probes; expected term in the answer 16/20
+sourcedrecall  part B class b: 20 probes; false memory 0/20; expected term in the answer 19/20
+sourcedrecall  part D class e: 40 probes; false memory 3/40
+sourcedrecall  part D class f: 30 probes; expected term in the answer 25/30
+sourcedrecall  part U class f: 20 probes; expected term in the answer 20/20
+sourcedrecall  part X class f: 20 probes; expected term in the answer 17/20
+-- v11 phi4 (overrides audit_overrides_v11_phi4.json)
+agentmemory    part B class b: 20 probes; false memory 2/20; expected term in the answer 18/20
+agentmemory    part D class e: 40 probes; false memory 22/40
+agentmemory    part D class f: 30 probes; expected term in the answer 30/30
+agentmemory    part U class f: 20 probes; expected term in the answer 10/20
+agentmemory    part X class f: 20 probes; expected term in the answer 19/20
+ai-memory      part B class b: 20 probes; false memory 1/20; expected term in the answer 19/20
+ai-memory      part D class e: 40 probes; false memory 3/40
+ai-memory      part D class f: 30 probes; expected term in the answer 7/30
+ai-memory      part U class f: 20 probes; expected term in the answer 6/20
+ai-memory      part X class f: 20 probes; expected term in the answer 19/20
+rag            part B class b: 20 probes; false memory 0/20; expected term in the answer 19/20
+rag            part D class e: 40 probes; false memory 22/40
+rag            part D class f: 30 probes; expected term in the answer 30/30
+rag            part U class f: 20 probes; expected term in the answer 19/20
+rag            part X class f: 20 probes; expected term in the answer 19/20
+sourcedrecall  part B class b: 20 probes; false memory 0/20; expected term in the answer 19/20
+sourcedrecall  part D class e: 40 probes; false memory 3/40
+sourcedrecall  part D class f: 30 probes; expected term in the answer 25/30
+sourcedrecall  part U class f: 20 probes; expected term in the answer 19/20
+sourcedrecall  part X class f: 20 probes; expected term in the answer 19/20
+  v12: 0 of      160 scenarios with errors
+-- v12 qwen (overrides audit_overrides_v12.json)
+agentmemory    part B class b: 20 probes; false memory 0/20; expected term in the answer 20/20
+agentmemory    part D class e: 40 probes; false memory 35/40
+agentmemory    part D class f: 30 probes; expected term in the answer 30/30
+agentmemory    part R class e: 20 probes; false memory 12/20
+agentmemory    part R class f: 10 probes; expected term in the answer 7/10
+agentmemory    part U class f: 20 probes; expected term in the answer 10/20
+agentmemory    part X class f: 20 probes; expected term in the answer 19/20
+ai-memory      part B class b: 20 probes; false memory 1/20; expected term in the answer 17/20
+ai-memory      part D class e: 40 probes; false memory 8/40
+ai-memory      part D class f: 30 probes; expected term in the answer 11/30
+ai-memory      part R class e: 20 probes; false memory 2/20
+ai-memory      part R class f: 10 probes; expected term in the answer 0/10
+ai-memory      part U class f: 20 probes; expected term in the answer 3/20
+ai-memory      part X class f: 20 probes; expected term in the answer 14/20
+rag            part B class b: 20 probes; false memory 0/20; expected term in the answer 19/20
+rag            part D class e: 40 probes; false memory 28/40
+rag            part D class f: 30 probes; expected term in the answer 29/30
+rag            part R class e: 20 probes; false memory 14/20
+rag            part R class f: 10 probes; expected term in the answer 10/10
+rag            part U class f: 20 probes; expected term in the answer 20/20
+rag            part X class f: 20 probes; expected term in the answer 19/20
+sourcedrecall  part B class b: 20 probes; false memory 1/20; expected term in the answer 20/20
+sourcedrecall  part D class e: 40 probes; false memory 8/40
+sourcedrecall  part D class f: 30 probes; expected term in the answer 25/30
+sourcedrecall  part R class e: 20 probes; false memory 5/20
+sourcedrecall  part R class f: 10 probes; expected term in the answer 10/10
+sourcedrecall  part U class f: 20 probes; expected term in the answer 19/20
+sourcedrecall  part X class f: 20 probes; expected term in the answer 19/20
+-- v12 phi4 (overrides audit_overrides_v12_phi4.json)
+agentmemory    part B class b: 20 probes; false memory 0/20; expected term in the answer 20/20
+agentmemory    part D class e: 40 probes; false memory 35/40
+agentmemory    part D class f: 30 probes; expected term in the answer 30/30
+agentmemory    part R class e: 20 probes; false memory 11/20
+agentmemory    part R class f: 10 probes; expected term in the answer 7/10
+agentmemory    part U class f: 20 probes; expected term in the answer 10/20
+agentmemory    part X class f: 20 probes; expected term in the answer 19/20
+ai-memory      part B class b: 20 probes; false memory 0/20; expected term in the answer 20/20
+ai-memory      part D class e: 40 probes; false memory 9/40
+ai-memory      part D class f: 30 probes; expected term in the answer 18/30
+ai-memory      part R class e: 20 probes; false memory 3/20
+ai-memory      part R class f: 10 probes; expected term in the answer 0/10
+ai-memory      part U class f: 20 probes; expected term in the answer 3/20
+ai-memory      part X class f: 20 probes; expected term in the answer 19/20
+rag            part B class b: 20 probes; false memory 0/20; expected term in the answer 20/20
+rag            part D class e: 40 probes; false memory 32/40
+rag            part D class f: 30 probes; expected term in the answer 30/30
+rag            part R class e: 20 probes; false memory 14/20
+rag            part R class f: 10 probes; expected term in the answer 10/10
+rag            part U class f: 20 probes; expected term in the answer 20/20
+rag            part X class f: 20 probes; expected term in the answer 19/20
+sourcedrecall  part B class b: 20 probes; false memory 1/20; expected term in the answer 20/20
+sourcedrecall  part D class e: 40 probes; false memory 10/40
+sourcedrecall  part D class f: 30 probes; expected term in the answer 26/30
+sourcedrecall  part R class e: 20 probes; false memory 4/20
+sourcedrecall  part R class f: 10 probes; expected term in the answer 10/10
+sourcedrecall  part U class f: 20 probes; expected term in the answer 19/20
+sourcedrecall  part X class f: 20 probes; expected term in the answer 19/20
+  realpaste: 0 of       30 scenarios with errors
+-- realpaste qwen (overrides no_overrides_release.json)
+rag            part R class e: 20 probes; false memory 16/20
+rag            part R class f: 10 probes; expected term in the answer 10/10
+sourcedrecall  part R class e: 20 probes; false memory 1/20
+sourcedrecall  part R class f: 10 probes; expected term in the answer 9/10
+-- realpaste phi4 (overrides no_overrides_release.json)
+rag            part R class e: 20 probes; false memory 17/20
+rag            part R class f: 10 probes; expected term in the answer 10/10
+sourcedrecall  part R class e: 20 probes; false memory 1/20
+sourcedrecall  part R class f: 10 probes; expected term in the answer 9/10
+  Phi-4 stopped
+== 3. LongMemEval-S knowledge-update and temporal answers
+tools/release_measure2.sh: line 79: 43682 Terminated: 15          nohup $J -m llama_cpp.server --model $HOME/jpwork/models2/phi-4-Q4_K.gguf --n_gpu_layers -1 --n_ctx 16384 --port 8091 --host 127.0.0.1 > $HOME/jpwork/srv_8091.log 2>&1  (wd: ~/jpwork/sdr-release-53e0d9c/bench/false_memory)
+-- sdr knowledge-update: 64/78
+-- sdr temporal-reasoning: 72/133
+== 4. HaluMem users 0-1, update and QA
+halumem store failed
+uqa failed
+Traceback (most recent call last):
+  File "<string>", line 2, in <module>
+FileNotFoundError: [Errno 2] No such file or directory: 'results/rgp2-sdr-53e0d9c/rgp2_eval_stat_result_uqa.json'
+== release measure 2 done Fri Oct 16 22:43:27 AEDT 2026
+
+== step 4 rerun (2026-10-17): the first attempt ran HaluMem's store step outside the harness's eval/ folder (fixed in 2ebc33e)
+== 4. HaluMem users 0-1, update and QA
+memory_update {"correct_update_memory_ratio(all)": 0.506578947368421, "correct_update_memory_ratio(valid)": 0.506578947368421, "hallucination_update_memory_ratio(all)": 0.019736842105263157, "hallucination_update_memory_ratio(valid)": 0.019736842105263157, "omission_update_memory_ratio(all)": 0.47368421052631576, "omission_update_memory_ratio(valid)": 0.47368421052631576, "other_update_memory_ratio(all)": 0.0, "other_update_memory_ratio(valid)": 0.0, "update_memory_valid_num": 304, "update_memory_num": 304}
+question_answering {"correct_qa_ratio(all)": 0.5227272727272727, "correct_qa_ratio(valid)": 0.6891385767790262, "hallucination_qa_ratio(all)": 0.15625, "hallucination_qa_ratio(valid)": 0.20599250936329588, "omission_qa_ratio(all)": 0.07954545454545454, "omission_qa_ratio(valid)": 0.10486891385767791, "qa_valid_num": 267, "qa_num": 352}
+== release measure 2 done Sat Oct 17 16:18:59 AEDT 2026

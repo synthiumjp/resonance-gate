@@ -33,9 +33,12 @@ done
 
 echo "== 3. LongMemEval-S retrieval (500 q)"
 cd $W/bench/longmemeval
+# 2026-10-17: a results file per commit (run.py resumes, so the committed
+# release_results.jsonl made the 53e0d9c run skip every question)
+LR=release_results_$(cat $W/COMMIT 2>/dev/null || echo run).jsonl; rm -f $LR
 LME_DATA=$HOME/jpwork/lme/longmemeval_s_cleaned.json LME_SCRATCH=$HOME/jpwork/lme/scratch_release RG_REPO=$W \
-  SOURCEDRECALL_NOTES=off $P run.py release_results.jsonl > release_run.log 2>&1
-$P report.py release_results.jsonl | head -12
+  SOURCEDRECALL_NOTES=off $P run.py $LR > release_run.log 2>&1
+$P report.py $LR | head -30
 
 echo "== 4. false memory, held out (counts only), the fair protocol (v7)"
 # 2026-10-12 (review 1.2): this step used the old protocol (no reader-same,
