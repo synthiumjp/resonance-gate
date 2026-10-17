@@ -71,9 +71,12 @@ apart.
 ## How good is it, honestly?
 
 Level with Mem0 on the LoCoMo benchmark with the same local reader and
-judge (65.3% against 64.6%, 50.3% against 48.5% with a strict judge), with
-no model call to store anything; behind Mem0 on questions that combine
-several facts. Far fewer pasted claims taken for yours. The test sets for
+judge (65.4% against 64.6%, 50.9% against 48.5% with a strict judge), and
+ahead with Claude Sonnet 5.5 reading and judging (77.0% against 72.1%),
+with no model call to store anything; behind Mem0 on questions that combine
+several facts. With a local model as the reader, far fewer pasted claims
+taken for yours; a strong hosted reader such as Claude mostly tells pasted
+text apart by itself. The test sets for
 false memories were written by a language model for this project, held out
 and pre-registered; they are not a public benchmark. Everything is in
 `bench/`.

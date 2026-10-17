@@ -22,19 +22,25 @@ friend's "I'm allergic to nuts" for yours. On the two newest
 pre-registered held-out sets of 40 pasted claims, read by two different
 local models, plain retrieval gave 23 and 28 of them back as the user's
 own, agentmemory 24 and 35, and sourcedrecall 5 and 12; on 20 real pasted
-emails, 14 against 7. It is far from perfect: text whose source is named
-in words or places its rules do not read still passes as yours. The cost:
-on the user's own writing pasted in the same way it answered 25 of 30
-where plain retrieval answered 29.
+emails, 14 against 7. Rules added since, from the kinds of text v12
+missed, bring sourcedrecall's counts to 3, 8 and 1 on the release commit,
+but those sets are no longer unseen. It is far from perfect: text whose
+source is named in words or places its rules do not read still passes as
+yours. The cost: on the user's own writing pasted in the same way it
+answered 25 of 30 where plain retrieval answered 29. This matters most
+with smaller local models: with Claude Sonnet 5.5 as the reader, every
+system gave back 4 or fewer of the 40 (sourcedrecall none), and on the
+real emails plain retrieval 5 of 20 and sourcedrecall none.
 
 On LoCoMo, with the same local reader and judge for every system, it is
-level with Mem0 (50.3% against 48.5% with a strict judge; 65.3% against
+level with Mem0 (50.9% against 48.5% with a strict judge; 65.4% against
 64.6% with the benchmark's usual judge) while making no model call to
-store anything; Mem0 is ahead on questions that combine several facts.
-On LongMemEval's knowledge-update questions, where a fact changes over a
-long history, it answered 64 of 78 against plain retrieval's 61 with the
-same reader and judge, and 73 of 133 questions about time and order
-against 64.
+store anything. With Claude Sonnet 5.5 reading and judging the same
+retrieved context, it answered 77.0% against Mem0's 72.1%. Mem0 is ahead
+on questions that combine several facts. On LongMemEval's
+knowledge-update questions, where a fact changes over a long history, it
+answered 64 of 78 against plain retrieval's 61 with the same reader and
+judge, and 72 of 133 questions about time and order against 64.
 
 It installs as a Claude Code plugin in a minute or two (about 1.3 GB of
 disk, no PyTorch, no API key), uses about 400 MB of memory, and answers in
@@ -45,8 +51,14 @@ Everything is in `bench/`, with the commands to rerun it. English only.
 
 ## How it compares
 
-All numbers below were read and judged by local models (Qwen3-14B), so they
-are not comparable with results published with GPT-4-class models. An
+The numbers below were read and judged by local models (Qwen3-14B, and
+Phi-4 as a second reader), so they are not comparable with results
+published with GPT-4-class models, except where Claude Sonnet 5.5 is named
+as the reader: those runs give the same retrieved context to a hosted model
+(through Anthropic's Batch API; `bench/claude_runs.sh`). Every figure was
+LongMemEval, LoCoMo, HaluMem and the first false-memory table were measured
+on commit 53e0d9c (2026-10-16/17, `bench/RELEASE_53e0d9c.log`); each
+held-out set's paragraph reports its run when the set was new. An
 adversarial review on 2026-10-09 (`docs/REVIEW_2026-10-09.md`) found
 problems with the comparisons; the tables below were rerun with its fixes
 (`bench/false_memory/FAIR_RERUN.md`).
@@ -58,7 +70,7 @@ session that holds the answer among the five the memory returns?
 |---|---|
 | sourcedrecall | 98.8% |
 | plain embeddings (bge-small), same messages | 96.8% |
-| plain keyword search (BM25), same messages | 93.4% |
+| plain keyword search (BM25), same messages | 93.6% |
 | MemPalace (as published) | 96.6% |
 | agentmemory (as published) | 95.2% |
 
@@ -71,24 +83,26 @@ Changes of state and false memories, on sets written for this project
 (synthetic, 32-60 scenarios each), against two other memory tools that store
 without a language model and plain retrieval. Every system's memory went to
 the same local reader with the same instruction, the judge saw the question
-with each answer, and every answer was audited blind (the auditor saw no
-system names; `bench/false_memory/FAIR_RERUN.md`; measured at commit
-372c05a, 2026-10-09):
+with each answer, and the answers were audited blind (the auditor saw no
+system names; `bench/false_memory/FAIR_RERUN.md`). Measured on commit
+53e0d9c, where every system's saved memories were read again; an answer the
+2026-10-09 audit saw keeps its audited verdict, a new one the judge's:
 
 | | sourcedrecall | agentmemory 0.9 | ai-memory 2.5 | plain retrieval |
 |---|---|---|---|---|
-| old state given as current, of 44 changes | 2 | 4 | 8 | 5 |
-| new state given, of 44 | 42 | 38 | 33 | 36 |
+| old state given as current, of 44 changes | 3 | 4 | 7 | 7 |
+| new state given, of 44 | 42 | 37 | 33 | 36 |
 | coding sessions behind 120 others: false memories, of 51 | 0 | 2 | 5 | 3 |
-| several projects: false memories, of 32 | 0 | 8 | 4 | 3 |
+| several projects: false memories, of 32 | 0 | 9 | 4 | 3 |
 | several projects: unchanged facts answered, of 13 | 11 | 11 | 6 | 6 |
-| the three sets together: false memories, of 127 | 2 | 14 (p=0.003) | 17 (p=0.0005) | 11 (p=0.02) |
+| the three sets together: false memories, of 127 | 3 | 15 (p=0.006) | 16 (p=0.003) | 13 (p=0.02) |
 
 p is a two-sided Fisher exact test against sourcedrecall. Set by set, only
-the projects false memories against agentmemory (p=0.005) and the new state
-against ai-memory (p=0.01) are clear differences; together, all are. The
-counts were the same with and without sourcedrecall's own instructions to
-the reader, so the difference is in what the memories returned. These sets
+the projects false memories against agentmemory (p=0.002) and the new state
+against ai-memory (p=0.01) are clear differences; together, all are. At
+commit 372c05a (2026-10-09) the counts were the same with and without
+sourcedrecall's own instructions to the reader, so the difference is in
+what the memories returned. These sets
 have been run many times during development and some rules were written
 from their errors, so they are not held out (that is v5, below). The
 projects rows are a trade-off: sourcedrecall keeps a project's facts in that
@@ -227,25 +241,60 @@ not read (the source named in other words, after the text, or only in a
 later message), and were taken for the user's. Everything is in
 `bench/false_memory/results_v12/SUMMARY.md`.
 
+After v12, a third person named around a first-person block ("my brother,
+last night:") marks it as theirs, and a small learned model judges what the
+rules leave unmarked. Both were developed on a new set written from the
+kinds of text v12 missed (categories only, not its items), so v11, v12 and
+the real emails are no longer unseen for this code. Run again on the
+release commit (53e0d9c), counts only: pasted claims or instructions given
+as the user's 3 of 40 on v11 and 8 of 40 on v12 with Qwen3-14B (plain
+retrieval 23 and 28, agentmemory 24 and 35, ai-memory 2 and 8), 3 and 10
+with Phi-4; real emails 1 of 20 with both readers (plain retrieval 16 and
+17). Own material 25 of 30 on both sets with Qwen3-14B (plain retrieval 30
+and 29). With Claude Sonnet 5.5 reading the same returns (judged by
+Qwen3-14B, no audit): pasted claims given as the user's 0 of 40 on both
+sets (plain retrieval 0 and 2, agentmemory 1 and 3, ai-memory 1 and 4), real
+emails 0 of 20 (plain retrieval 5), own material 25 and 26 of 30 (plain
+retrieval 30 and 30). A strong reader mostly tells pasted text from the
+user's own on its own; what sourcedrecall marks matters most with smaller
+models. A new held-out set is the next test (`bench/false_memory/results_release2_*`,
+`results_claude_*`).
+
 LoCoMo (conversations 2-9, 1,307 questions), against Mem0, with the same
 local reader and judge:
 
 | | sourcedrecall | with the built-in notes model | with notes by Qwen3-14B | Mem0 2.2.1 | plain retrieval |
 |---|---|---|---|---|---|
-| answered correctly | 65.3% | 67.0% (small) / 70.2% (standard) | 73.1% | 64.6% | 56.6% |
-| temporal questions | 55.4% | 53.5% / 56.6% | 57.4% | 37.2% | 49.6% |
-| single-hop | 76.1% | 78.8% / 80.7% | 85.4% | 77.9% | 66.9% |
-| multi-hop | 52.3% | 54.4% / 60.7% | 62.3% | 61.9% | 39.3% |
+| answered correctly | 65.4% | 67.8% (small) / 70.6% (standard) | 73.1% | 64.6% | 56.6% |
+| temporal questions | 57.0% | 55.0% / 59.7% | 57.4% | 37.2% | 49.6% |
+| single-hop | 75.5% | 79.4% / 81.0% | 85.4% | 77.9% | 66.9% |
+| multi-hop | 54.0% | 55.6% / 58.6% | 62.3% | 61.9% | 39.3% |
 | model calls to store the conversations | 0 | 468, in-process | 468, to a local server | 941 (generation and embedding) | 0 (one embedding per message) |
-| context per question (tokens) | 687 | 1,036 / 1,030 | 1,230 | 722 | 356 |
+| context per question (tokens) | 682 | 1,032 / 1,025 | 1,230 | 722 | 356 |
+
+With Claude Sonnet 5.5 as reader and judge (the same retrieved context and
+prompts, Anthropic's Batch API, `bench/locomo/answer_claude.py`), closer to
+how published results are measured:
+
+| | sourcedrecall | Mem0 2.2.1 | plain retrieval |
+|---|---|---|---|
+| answered correctly | 77.0% | 72.1% | 69.2% |
+| temporal questions | 74.8% | 33.7% | 66.3% |
+| single-hop | 82.5% | 86.8% | 76.5% |
+| multi-hop | 68.2% | 71.1% | 53.6% |
+| open-domain | 61.4% | 65.1% | 59.0% |
+
+Without the audit's 80 wrong gold answers (below): 79.1%, 74.5%, 71.5%. On
+multi-hop questions the two split 23 to 30, not a clear difference
+(McNemar p=0.41); with the local reader they split 31 to 50 (p=0.045).
 
 The tie with Mem0 comes from temporal questions, where Mem0 was handicapped:
 it accepts no timestamp, so dates were written into the messages. Without
-them, sourcedrecall answers 67.4% and Mem0 71.3%, and Mem0 leads on
+them (an earlier run), sourcedrecall answers 67.4% and Mem0 71.3%, and Mem0 leads on
 single-hop, multi-hop and open-domain questions. An audit of LoCoMo
 (Penfield Labs, April 2026, github.com/dial481/locomo-audit) found 99 of its
 1,540 gold answers wrong, 80 of them in these conversations. Without those
-80: sourcedrecall 66.7%, with notes 68.5% (small) / 71.9% (standard) / 74.5%
+80: sourcedrecall 66.9%, with notes 69.8% (small) / 72.6% (standard) / 74.5%
 (Qwen3-14B), Mem0 66.8%, plain retrieval 58.2% (`LOCOMO_AUDIT` in
 `bench/locomo/score.py`). The judge prompt used here and in Mem0's
 published evaluation ("be generous ... as long as it touches on the same
@@ -253,11 +302,11 @@ topic") accepted 68.5% of the audit's deliberately vague wrong answers with
 our judge (`bench/locomo/judge_stress.py`). With a strict prompt (3% and 20%
 of the audit's specific and vague wrong answers accepted, every gold answer
 in a sample of 120 accepted; `LOCOMO_JUDGE=strict`), the same answers score:
-sourcedrecall 50.3%, Mem0 48.5%, plain retrieval 42.5%; with notes 50.0% /
-52.9% / 55.1%. Without the audit's 80 wrong gold answers: 51.7%, 50.4%,
-43.9%; 51.6% / 54.8% / 57.0%. The order is the same under both judges;
-temporal questions favour sourcedrecall (35.9% against Mem0's 23.5%, strict,
-errors removed) and multi-hop questions Mem0 (37.8% against 27.2%). Mem0
+sourcedrecall 50.9%, Mem0 48.5%, plain retrieval 42.5%; with notes 50.9% /
+54.2% / 55.1%. Without the audit's 80 wrong gold answers: 52.6%, 50.4%,
+43.9%; 52.6% / 56.2% / 57.0%. The order is the same under both judges;
+temporal questions favour sourcedrecall (38.9% against Mem0's 23.5%, strict,
+errors removed) and multi-hop questions Mem0 (37.8% against 30.0%). Mem0
 was given its top 10 memories for each speaker and plain retrieval its top
 10 messages; Mem0
 used the same local Qwen3-14B for its own calls, with thinking off and its
@@ -265,20 +314,21 @@ JSON response format removed (the local server does not support it). The
 benchmark runs sourcedrecall without its conflict model (RG_NLI=0), which
 the server loads by default. These conversations were run for every version
 reported here, and chose the design (messages first) and the notes models,
-so they are not held out. Measured in one run on commit d89d830
-(`bench/RELEASE_d89d830.log`; 1,331 tests passed; the strict judge in a
-second pass); the Qwen3-14B notes column is from commit 49561c4. Between
-runs the notes change with the text they are written from: the small model
-scored 68.2% on 1754180, 67.7% on 181aff3 and 67.0% on 8473783 and here,
-and each of the 16 questions it lost since 181aff3 has different notes in
-its context.
+so they are not held out. Measured in one run on commit 53e0d9c
+(`bench/RELEASE_53e0d9c.log`; 1,424 tests passed, and one parser test
+failed only because the run compared against the wrong reference parser:
+with the right one it passes; the strict judge in a second pass); the
+Qwen3-14B notes column is from commit 49561c4. Between runs the notes change
+with the text they are written from: the small model scored 68.2% on
+1754180, 67.7% on 181aff3, 67.0% on 8473783 and d89d830, and 67.8% here.
 
 HaluMem (HaluMem-Medium, its first two users), scored with the benchmark's
 own code for memory updates and questions and the same local judge for both
-systems: after a fact changed, the new value was given in 156 of 304 updates
-(plain retrieval 96), and 185 of 352 questions were answered correctly
+systems: after a fact changed, the new value was given in 154 of 304 updates
+(plain retrieval 96), and 184 of 352 questions were answered correctly
 (plain retrieval 162), with fewer wrong answers among those the judge could
-score (19% against 27%). Measured on commit d6613e0 (`bench/halumem/`).
+score (21% against 27%). Plain retrieval's run is from commit d6613e0
+(`bench/halumem/`).
 
 Notes are optional. A small model writes short notes once per stored
 conversation, labelled as its notes and kept only where most of their words
@@ -297,8 +347,9 @@ made: [the model card](https://huggingface.co/synthiumjp/sourcedrecall-notes-en)
 and `tools/distil`.
 
 Where it is weaker: questions that need several facts from different
-conversations put together (LoCoMo multi-hop, 52.3% against Mem0's 61.9%);
-notes by Qwen3-14B close that gap (62.3%), the built-in models narrow it.
+conversations put together (LoCoMo multi-hop, 54.0% against Mem0's 61.9%
+with the local reader; 68.2% against 71.1% with Claude Sonnet 5.5); notes
+by Qwen3-14B close that gap (62.3%), the built-in models narrow it.
 Better retrieval alone did not help: three rankers that found more of the
 right messages answered no better. Only your own messages are searched, so
 something only the assistant said is not found by itself.
@@ -361,7 +412,10 @@ pasted text but not all; see above).
   general rules are left out; dates, times and places stay. It is not
   reliable: on the last two held-out sets a pasted claim or instruction was
   taken for yours in 5 of 40 (v11) and 12 of 40 (v12), against 23 and 28
-  with plain retrieval, and in 7 of 20 real emails (plain retrieval 14).
+  with plain retrieval, and in 7 of 20 real emails (plain retrieval 14);
+  on the release commit, after rules made from v12's misses, 3, 8 and 1.
+  With a strong reader such as Claude Sonnet the other systems' counts fall
+  to a few of 40 too, so this matters most with smaller local models.
   Text whose source is named in words or places the rules do not read
   passes as yours. Your own pasted-looking material (drafts, speeches,
   diary entries) is answered a little less often than with plain retrieval
