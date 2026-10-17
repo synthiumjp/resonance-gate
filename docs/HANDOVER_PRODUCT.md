@@ -19,7 +19,43 @@ bench/false_memory/results_v10/SUMMARY.md, docs/PREREG_HELDOUT_V11.md (DRAFT, un
 waiting for JP), docs/REVIEW_2026-10-12.md (the second adversarial review;
 items fixed and open are listed below), docs/REVIEW_2026-10-09.md.
 
-## 2026-10-16 (read this first)
+## 2026-10-18 (read this first)
+
+- Release re-measurement on 53e0d9c done; README, FAQ, bench READMEs carry
+  it (9345fcc), exported and pushed to synthiumjp/sourcedrecall (4922c14).
+  LoCoMo 65.4% (Mem0 64.6, plain 56.6), notes small 67.8 / standard 70.6;
+  strict judge 50.9 / 48.5 / 42.5, notes 50.9 / 54.2. LongMemEval any@5
+  98.8% (500 q). HaluMem updates 154/304, QA 184/352. Pasted text (v11, v12,
+  real emails; NO LONGER UNSEEN: 610b435 was built from v12's miss shapes):
+  3, 8, 1 with Qwen. A v13 held-out set is the honest next test.
+- Claude column (JP's API credit, Batch API, sent from WSL): LoCoMo Claude
+  Sonnet 5.5 reader+judge 77.0% (Mem0 72.1, plain 69.2); multi-hop 68.2 vs
+  71.1 (p=0.41). Pasted text with Claude as reader: every system 0-4 of 40,
+  real emails ours 0, plain 5. So the pasted-text lead is a small-reader
+  effect; README says so. ~7.4M input / 0.38M output tokens in all.
+- Multi-hop: RG_LIST_WIDE (wider list detector) dev 22 -> 27 of 43, test
+  (pre-registered, PREREG_MULTIHOP_WIDE.md, JP approved) net 0 on multi-hop:
+  refuted, off. RG_LIST_TRIM refuted on dev. Both written up in
+  HOW_IT_READS. Diagnosis: 20 of 22 dev multi-hop misses lacked evidence in
+  the context; Mem0's extracted facts pack more per token; notes close it.
+- BUG FIXED (0848387): a message with a greeting after its first line
+  ("Ok, let's start.\n\nHello :)") crashed storing (prose._SIGNOFF shadowed
+  by a string, e200531), so the whole session was not stored. JP's hook.log
+  shows no such crash. JP's install moved to cc637d5 (local tag, not pushed;
+  /mcp reconnect).
+- release_measure.sh bugs found: LongMemEval reused the committed results
+  file (fixed: per-commit file); HaluMem store step ran from the wrong folder
+  (fixed in release_measure2.sh); strict judge was never rerun by the script
+  (done by hand, ~/jpwork/mh/strict_release.sh); the parser parity test
+  needs STANZA_PACKAGES=ours and the reference model paths (see suites.sh).
+- Mac ~/jpwork tidied: 35 GB to chihiro:/volume1/models/jpcoldstorage/
+  sourcedrecall-archive-2026-10-16 (checksummed, originals deleted with
+  JP's OK); loose scripts/logs in ~/jpwork/attic/loose. Old tree paths in
+  this file now live on the NAS.
+- Next: v13 held-out pasted-text set; launch plan (container install tests,
+  fresh-eyes README test, version number, pip install line, demo at top).
+
+## 2026-10-16
 
 - Release re-measurement running on the Mac: tools/release_measure2.sh on
   tree ~/jpwork/sdr-release-53e0d9c with the EWT parser (log
