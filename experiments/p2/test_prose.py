@@ -40,3 +40,12 @@ def test_pasted_material_without_a_noun_or_quoted_is_not_the_users(text, gone):
 ])
 def test_the_users_own_words_after_an_introduction_are_kept(text, kept):
     assert kept in prose_only(text)
+
+
+def test_a_greeting_after_the_first_line_does_not_crash():
+    # 2026-10-17 (LongMemEval): a second _SIGNOFF, a plain string, replaced
+    # the compiled pattern and storing this message raised AttributeError
+    text = "Ok, Let's start. \n\nHello :) \nWhat's your name and how old are you?"
+    assert "What's your name" in prose_only(text, None)
+    letter = "Can you check this?\nHi Sam,\nThe meeting moved to 3pm.\nRegards,\nAlex"
+    assert prose_only(letter, None) is not None

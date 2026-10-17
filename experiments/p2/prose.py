@@ -508,10 +508,13 @@ _LETTER_OPEN = re.compile(r"^\W*(?:how are you(?: doing)?\b|i hope (?:you|your|t
                           r"hope (?:you(?:'|’)re|you are|all is) (?:well|doing well|good)\b)", re.I)
 # a formal sign-off ends a letter (not "thanks": people end requests to an
 # assistant with it), alone or before the name
-_SIGNOFF = (r"(?:(?:with\s+)?(?:best|kind|warm(?:est)?)\s+(?:regards|wishes)|regards|sincerely|respectfully|"
-            r"yours(?:\s+(?:truly|sincerely|faithfully))?|best\s+wishes|all\s+the\s+best|later|love)")
-_SIGNOFF_ALONE = re.compile(r"^" + _SIGNOFF + r"\W*$", re.I)
-_SIGNATURE = re.compile(r"^(?:[-–—]\s*)?(?:" + _SIGNOFF + r"[,!.]?\s+)?"
+# (2026-10-17: this was also named _SIGNOFF and replaced the compiled
+# pattern above, so _drop_pasted_old crashed on any message with a greeting
+# line after its first; LongMemEval found it)
+_SIGNOFF_WORDS = (r"(?:(?:with\s+)?(?:best|kind|warm(?:est)?)\s+(?:regards|wishes)|regards|sincerely|respectfully|"
+                  r"yours(?:\s+(?:truly|sincerely|faithfully))?|best\s+wishes|all\s+the\s+best|later|love)")
+_SIGNOFF_ALONE = re.compile(r"^" + _SIGNOFF_WORDS + r"\W*$", re.I)
+_SIGNATURE = re.compile(r"^(?:[-–—]\s*)?(?:" + _SIGNOFF_WORDS + r"[,!.]?\s+)?"
                         r"((?-i:[A-Z][a-z'’]+)(?:\s+(?-i:[A-Z][a-z'’.]+)){0,2}|(?-i:[A-Z])\.?)\W*$", re.I)
 
 
