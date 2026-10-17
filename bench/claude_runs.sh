@@ -1,11 +1,11 @@
 #!/bin/bash
 # The Claude column (2026-10-16): the release re-measurement's stored
-# retrievals read by Claude (Batch API, JP's API credit), beside the local
-# readers. Runs on WSL, because the API key stays on JP's PC
-# (~/.anthropic_key, and ~/.anthropic_workspace for a key not scoped to a
-# workspace): it fetches the inputs from the Mac's release tree, sends the
-# batches from here, and puts the answers back on the Mac, where scoring
-# runs as for every other run.
+# retrievals read by Claude (Batch API), beside the local readers. Runs on
+# the machine that holds the API key (~/.anthropic_key, and
+# ~/.anthropic_workspace for a key not scoped to a workspace): it fetches the
+# inputs from the benchmark machine ($SDR_MAC, the release tree), sends the
+# batches from here, and puts the answers back there, where scoring runs as
+# for every other run.
 #   bash bench/claude_runs.sh <release commit>
 # LoCoMo: Claude Sonnet 5.5 reads and judges sourcedrecall's, Mem0's and
 # plain retrieval's contexts (answer.py's prompts). Pasted-text held-out
