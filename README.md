@@ -419,9 +419,10 @@ pasted text but not all; see above).
   Claude Code) show everything stored. Forget anything
   by its id and the sentence it came from is erased from your stored
   messages, the facts and the notes; only a fingerprint of it is kept, so a
-  resumed session that sends it again does not bring it back. Not yet
-  erased: the same words inside a longer sentence, an assistant reply that
-  quotes them, and the conversation's title.
+  resumed session that sends it again does not bring it back. The same
+  words inside a longer message, or quoted in an assistant reply, are taken
+  out too (for sentences of three words or more), and so are the copies
+  kept beside the memory. Not erased: the same thing said in other words.
 - Common secret formats (API keys and tokens, private keys, card numbers,
   "password: ...", `DB_PASSWORD=...` in a pasted config) are removed before
   anything is stored, from titles too. The filter reads English, plus the

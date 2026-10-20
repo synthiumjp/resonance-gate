@@ -72,7 +72,14 @@ items fixed and open are listed below), docs/REVIEW_2026-10-09.md.
   Still open from area 1-2: equal-budget plain retrieval run, Mem0 with
   dates as metadata, rules ablation on v10/v12, audit asymmetry, ai-memory
   full-text run, stale strict file in strict_release_test_default.
-  Next: items 3 (forget) and 4 (extraction).
+- Review item 3 FIXED (forget): _store_stamp() reload on file change
+  (_ensure_loaded, profile_status; own correction writes restamp);
+  _strip_forgotten joins up to 4 pieces; _erase removes the words anywhere
+  (3+ words), rekeys cache lines to the new message hash (the other facts of
+  the message used to drop out), cleans profile_cache*.jsonl* backups,
+  .corrupt-* copies and world.json names; deny line kept while a copy
+  survives; ingest rereads forgotten keys under both locks. Suite 1,447.
+  Next: item 4 (extraction).
 - Next: the review's ranked items, v13 held-out pasted-text set, launch
   plan (container install tests should include a killed-worker check and
   an old Claude Code version).

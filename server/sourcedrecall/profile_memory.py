@@ -252,9 +252,28 @@ def _build():
     return mem, n_uncached
 
 
+def _store_stamp():
+    """When each file the memory is built from was last written. 2026-10-21
+    (review): a running MCP server loaded the memory once, so a forget, or
+    a session stored by another process, was not seen until it restarted;
+    and its next write rewrote MEMORY.md from the stale copy, putting a
+    forgotten sentence back on disk."""
+    out = []
+    for p in (_conversations_path(), _cache_path(), _corrections_path(),
+              _forgotten_path(), _notes_path()):
+        try:
+            st = os.stat(p)
+            out.append((st.st_mtime_ns, st.st_size))
+        except OSError:
+            out.append(None)
+    return tuple(out)
+
+
 def _reload_locked():
+    stamp = _store_stamp()          # before the build: a write during it reloads again
     mem, n_uncached = _build()
     _state["mem"] = mem
+    _state["stamp"] = stamp
     _state["uncached_turns"] = n_uncached
     _state["audit_pass"] = None      # stale after a rebuild; recompute lazily
     _state["needs_reload"] = False
@@ -272,7 +291,7 @@ def reload():
 
 def _ensure_loaded():
     with _lock:
-        if _state["mem"] is None:
+        if _state["mem"] is None or _state.get("stamp") != _store_stamp():
             _reload_locked()
         return _state["mem"]
 
@@ -438,6 +457,15 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
     with _lock:
         data_dir = _data_dir()
         os.makedirs(data_dir, exist_ok=True)
+        # 2026-10-21 (review): a forget between the read above and this lock
+        # was undone by this ingest; the keys are read again under the lock
+        if os.environ.get("RG_MEMORY_DIR"):
+            fk_now = _forgotten_keys()
+            if fk_now - _fk:
+                turns = [dict(t, content=_strip_forgotten(t["content"], fk_now))
+                         if isinstance(t, dict) and isinstance(t.get("content"), str) else t
+                         for t in turns]
+                _fk = fk_now
 
         # 2026-10-21 (review): a name of only spaces raised in prose.py
         owner = ((owner_name or "").strip() or (os.environ.get("SOURCEDRECALL_OWNER") or "").strip()
@@ -516,6 +544,7 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
 
         n_turns = n_skipped = 0
         parsed = []          # (hash, facts)
+        texts = {}           # hash -> the text parsed
         # parse the conversation's new messages in batches first (6x faster
         # for a long conversation or an imported history; same parses)
         # 2026-10-21 (review): one message the parser cannot read used to
@@ -573,10 +602,27 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
                      # instruction that leads every later session
                      and (instructions or f.get("attribute") != "instruction")]
             parsed.append((h, facts))
+            texts[h] = text
             seen.add(h)
         world_now = dict(ex._world)
 
     with _lock:
+        # 2026-10-21 (review): a forget while this session was being parsed
+        # erased the sentence from the store, but its facts were then added
+        # here; they are dropped, and the message's line takes the hash of
+        # the text the forget left
+        if os.environ.get("RG_MEMORY_DIR"):
+            fk_now = _forgotten_keys()
+            if fk_now - _fk:
+                fixed = []
+                for h, facts in parsed:
+                    txt = texts.get(h) or ""
+                    new = _strip_forgotten(txt, fk_now)
+                    facts = [f for f in facts
+                             if not _is_forgotten(f.get("source") or f.get("said") or "", fk_now)]
+                    fixed.append((_rgx_facts.turn_hash(new.strip()[:1800]) if new != txt else h,
+                                  facts))
+                parsed = fixed
         # another process may have stored the same messages meanwhile
         cached_hashes = _cached_hashes(cache_path)
         new_lines = []
@@ -1021,18 +1067,21 @@ def profile_correct(action, attribute, value, new_attribute=None, exact=False,
         data_dir = _data_dir()
         os.makedirs(data_dir, exist_ok=True)
         path = _corrections_path()
+        mem = _ensure_loaded()          # current before this write
         with open(path, "a") as f:
             f.write(json.dumps(correction) + "\n")
         if action == "deny":
             _drop_embeddings()
             _drop_notes(said or (value if attribute == "said" else None))
+        # this process's own write: the memory is brought up to date below
+        # (deny, live) or flagged (retype), so it is not rebuilt for it
+        _state["stamp"] = _store_stamp()
 
         if action == "retype":
             _state["needs_reload"] = True
             return {"written": correction, "applied": "on-reload",
                     "needs_reload": True}
 
-        mem = _ensure_loaded()
         log = mem.apply_corrections([correction])
         _state["audit_pass"] = None   # graph just changed; recompute lazily
     _export_quietly()
@@ -1532,7 +1581,7 @@ def profile_conflicts():
 
 def profile_status(reload=False):
     with _lock:
-        if reload or _state["mem"] is None:
+        if reload or _state["mem"] is None or _state.get("stamp") != _store_stamp():
             _reload_locked()
         mem = _state["mem"]
         if _state["audit_pass"] is None:
@@ -1895,22 +1944,56 @@ def _forgotten_keys():
 
 
 def _strip_forgotten(text, keys):
-    """The text without the sentences whose key is forgotten."""
+    """The text without the sentences whose key is forgotten. 2026-10-21
+    (review): pieces are cut at ". ", so "I saw Dr. Smith about my diabetes"
+    is two pieces and never matched its fingerprint; up to four neighbouring
+    pieces are now tried together."""
     if not keys or not text:
         return text
     parts = _PIECES.split(str(text))
-    out, dropped = [], False
-    for i in range(0, len(parts), 2):
-        piece = parts[i]
-        sep = parts[i + 1] if i + 1 < len(parts) else ""
-        if piece.strip() and _is_forgotten(piece, keys):
+    pieces = [(parts[i], parts[i + 1] if i + 1 < len(parts) else "")
+              for i in range(0, len(parts), 2)]
+    out, dropped, i = [], False, 0
+    while i < len(pieces):
+        hit = 0
+        for w in range(1, min(4, len(pieces) - i) + 1):
+            span = "".join(p + sep for p, sep in pieces[i:i + w - 1]) + pieces[i + w - 1][0]
+            if span.strip() and _is_forgotten(span, keys):
+                hit = w
+                break
+        if hit:
             dropped = True
-            continue
-        out.append(piece + sep)
+            i += hit
+        else:
+            out.append(pieces[i][0] + pieces[i][1])
+            i += 1
     if not dropped:
         return text
     rest = "".join(out).strip()
     return rest or "[forgotten]"
+
+
+def _remove_words(text, said):
+    """`said` taken out of `text` wherever its words appear in order, inside
+    a longer sentence too (2026-10-21, review: only a whole sentence matching
+    the fingerprint was erased). Case and punctuation between the words are
+    ignored. -> the text (unchanged if the words are not there)."""
+    words = re.findall(r"\w+", said or "")
+    if len(words) < 3 or not text:
+        return text             # "Yes." would go from every message
+    pat = re.compile(r"(?<!\w)" + r"\W+".join(map(re.escape, words)) + r"(?!\w)[^\w\n]*",
+                     re.I)
+    new = pat.sub("", str(text))
+    if new == text:
+        return text
+    new = re.sub(r"[ \t]{2,}", " ", new).strip()
+    return new or "[forgotten]"
+
+
+def _words_left(text, said):
+    words = re.findall(r"\w+", said or "")
+    return bool(len(words) >= 3 and text and re.search(
+        r"(?<!\w)" + r"\W+".join(map(re.escape, words)) + r"(?!\w)", str(text), re.I))
 
 
 def _erase(said):
@@ -1929,11 +2012,20 @@ def _erase(said):
         conv_path = _conversations_path()
         convs = _read_conversations(conv_path)
         said_norm = _norm_forget(said)
+        # 2026-10-21 (review): the cache is keyed by a hash of the whole
+        # message, so a message that lost a sentence lost every other fact
+        # in it too (no cache line matched its new text) until it was stored
+        # again, and its old line kept a hash of the original. Its line now
+        # moves to the new text's hash.
+        rekey = {}
         for c in convs:
             for m in c.get("chat_messages") or []:
                 if m.get("text"):
-                    new = _strip_forgotten(m["text"], keys)
-                    n += new != m["text"]
+                    new = _remove_words(_strip_forgotten(m["text"], keys), said)
+                    if new != m["text"]:
+                        n += 1
+                        rekey[_rgx_facts.turn_hash(m["text"].strip()[:1800])] = \
+                            _rgx_facts.turn_hash(new.strip()[:1800])
                     m["text"] = new
             # 2026-10-12 (review 3.4): the title is the first 60 characters
             # of the first message, so it can hold the sentence, or the start
@@ -1949,26 +2041,84 @@ def _erase(said):
         with open(tmp, "w", encoding="utf-8") as fh:
             json.dump(convs, fh)
         os.replace(tmp, conv_path)
+        # 2026-10-21 (review): the parser's saved names ("bee": "bees") kept
+        # words of the sentence; an entry goes when its words came from it
+        # and appear in no message that is left
+        wpath = os.path.join(_data_dir(), "world.json")
+        try:
+            with open(wpath, encoding="utf-8") as fh:
+                world = json.load(fh)
+        except (OSError, ValueError):
+            world = None
+        if isinstance(world, dict) and world:
+            sw = set(said_norm.split())
+            rest = set(" ".join(_norm_forget(m.get("text")) for c in convs
+                                for m in c.get("chat_messages") or []).split())
+            def _tied(k, v):
+                ws = set(_norm_forget(k).split()) | set(_norm_forget(str(v)).split())
+                return bool(ws & sw) and not (ws & rest)
+            kept = {k: v for k, v in world.items() if not _tied(k, v)}
+            if len(kept) != len(world):
+                tmp = wpath + f".{os.getpid()}.tmp"
+                with open(tmp, "w", encoding="utf-8") as fh:
+                    json.dump(kept, fh)
+                os.replace(tmp, wpath)
+                ex = _ingest_state.get("extractor")
+                if ex is not None:
+                    for k in set(world) - set(kept):
+                        ex._world.pop(k, None)
+        import glob as _glob
         cache = _cache_path()
-        if os.path.exists(cache):
-            lines = []
-            for line in open(cache, encoding="utf-8"):
+        # 2026-10-21 (review): the caches kept beside it by a rebuild
+        # (.before-rebuild-*) and other cache versions held the sentence too
+        caches = [cache] + sorted(p for p in _glob.glob(os.path.join(_data_dir(), "profile_cache*.jsonl*"))
+                                  if p != cache and not p.endswith(".tmp"))
+        left = False
+        for cp in caches:
+            if not os.path.exists(cp):
+                continue
+            lines, seen_h = [], set()
+            for line in open(cp, encoding="utf-8"):
                 try:
                     r = json.loads(line)
                 except ValueError:
                     continue
                 before = len(r.get("f") or [])
                 r["f"] = [f for f in r.get("f") or []
-                          if not _is_forgotten(f.get("source") or f.get("said") or "", keys)]
-                n += before - len(r["f"])
+                          if not (_is_forgotten(f.get("source") or f.get("said") or "", keys)
+                                  or _words_left(f.get("source") or f.get("said") or "", said))]
+                if cp == cache:
+                    n += before - len(r["f"])
+                    r["h"] = rekey.get(r.get("h"), r.get("h"))
+                    if r["h"] in seen_h:
+                        continue
+                    seen_h.add(r["h"])
+                elif r.get("h") in rekey:
+                    r["h"] = rekey[r["h"]]
                 lines.append(json.dumps(r))
-            tmp = cache + f".{os.getpid()}.tmp"
+            tmp = cp + f".{os.getpid()}.tmp"
             with open(tmp, "w", encoding="utf-8") as fh:
                 fh.write("".join(l + "\n" for l in lines))
-            os.replace(tmp, cache)
-        # the deny line kept the sentence in clear; nothing is left to hide
+            os.replace(tmp, cp)
+        # copies of an unreadable store kept aside (_read_conversations):
+        # not JSON that can be read, so the words are taken out of the text
+        for cp in _glob.glob(conv_path + ".corrupt-*"):
+            try:
+                with open(cp, encoding="utf-8", errors="replace") as fh:
+                    raw = fh.read()
+                new = _remove_words(raw, said)
+                if new != raw:
+                    with open(cp, "w", encoding="utf-8") as fh:
+                        fh.write(new)
+                left = left or _words_left(new, said)
+            except OSError:
+                left = True
+        left = left or any(_words_left(m.get("text"), said)
+                           for c in convs for m in c.get("chat_messages") or [])
+        # the deny line kept the sentence in clear; nothing is left to hide,
+        # unless a copy could not be cleaned (then it still hides it)
         cpath = _corrections_path()
-        if os.path.exists(cpath):
+        if os.path.exists(cpath) and not left:
             kept = [l for l in open(cpath, encoding="utf-8")
                     if not (l.strip() and _forget_key(json.loads(l).get("said") or "") == key)]
             tmp = cpath + f".{os.getpid()}.tmp"

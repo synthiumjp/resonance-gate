@@ -27,6 +27,15 @@ has the details behind each change.
   install into a different folder). On Debian and Ubuntu without
   python3-venv the install says what to install instead of failing on the
   next try. `memory status` gives when the memory was last written.
+- Forget is reliable while a session is open: the memory server sees
+  changes made by other processes (a forget from the command line, a
+  session stored by another window) and no longer writes a forgotten
+  sentence back into `MEMORY.md`. Forgetting one sentence keeps the other
+  facts of the same message. A sentence cut at an abbreviation ("Dr.
+  Smith") is matched; the same words inside a longer message or quoted in
+  an assistant reply are taken out; the copies kept beside the memory and
+  the parser's saved names are cleaned; a forget made while a session is
+  being stored is no longer undone by it.
 
 - A new install says what is happening: while the memory installs, if the
   install failed (with its log and how to try again), when your name is

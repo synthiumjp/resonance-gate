@@ -293,3 +293,65 @@ def test_everyday_words_are_not_credentials(text):
 def test_credentials_with_those_words_are_still_removed(text):
     from sourcedrecall.secrets import scrub
     assert "[secret removed]" in scrub(text)
+
+
+# 2026-10-21 (review): forget with an open session, sentences cut at an
+# abbreviation, the other facts of the same message, backups, and the words
+# inside a longer sentence.
+
+def test_forget_keeps_the_other_facts_of_the_same_message(pmem, tmp_path):
+    pm = pmem
+    pm.profile_ingest([{"role": "user", "content": "I live in Fitzroy and my dog is called Biscuit. "
+                                                   "I work at Acme."}],
+                      conversation_id="a", owner_name="Dana Cole", date="2026-03-02")
+    hit = next(f for f in pm.profile_recall("Where do I live?")["ranked"]
+               if "Fitzroy" in (f.get("said") or ""))
+    pm.profile_forget(hit["id"])
+    facts = pm._all_facts(pm._ensure_loaded())
+    assert any("Acme" in (f.get("said") or "") for f in facts)
+    assert pm.profile_status()["uncached_turns"] == 0
+    assert "Acme" in open(tmp_path / "MEMORY.md").read()
+
+
+def test_an_open_memory_sees_a_forget_made_by_another_process(pmem, tmp_path):
+    pm = pmem
+    pm.profile_ingest([{"role": "user", "content": "I live in Fitzroy. I work at Acme."}],
+                      conversation_id="a", owner_name="Dana Cole", date="2026-03-02")
+    first = pm._ensure_loaded()
+    hit = next(f for f in pm._all_facts(first) if "Fitzroy" in (f.get("said") or ""))
+    # another process (the command line) forgets it: simulated by forgetting
+    # through a second copy of the module state
+    saved = dict(pm._state)
+    pm._erase(hit["said"])
+    pm._state.update(saved)                 # this process still holds the old memory
+    assert pm._ensure_loaded() is not first
+    assert not any("Fitzroy" in (f.get("said") or "") for f in pm._all_facts(pm._ensure_loaded()))
+    pm.export_markdown()
+    assert "Fitzroy" not in open(tmp_path / "MEMORY.md").read()
+
+
+def test_a_sentence_cut_at_an_abbreviation_is_still_forgotten(pmem):
+    pm = pmem
+    said = "I saw Dr. Smith about my diabetes yesterday."
+    keys = {pm._forget_key(said)}
+    out = pm._strip_forgotten("Morning. I saw Dr. Smith about my diabetes yesterday. I live in Leeds.", keys)
+    assert "diabetes" not in out and "Leeds" in out and "Morning" in out
+
+
+def test_forget_takes_the_words_out_of_a_longer_sentence_and_the_backups(pmem, tmp_path):
+    import shutil
+    pm = pmem
+    pm.profile_ingest([{"role": "user", "content": "I keep bees on the roof."},
+                       {"role": "assistant", "content": 'You said "I keep bees on the roof", nice.'}],
+                      conversation_id="a", owner_name="Dana Cole", date="2026-03-02")
+    cache = pm._cache_path()
+    shutil.copy(cache, cache + ".before-rebuild-20260301-000000")
+    hit = next(f for f in pm._all_facts(pm._ensure_loaded()) if "bees" in (f.get("said") or ""))
+    pm.profile_forget(hit["id"])
+    assert "bees" not in _all_files_text(tmp_path)
+    assert "bees" not in open(cache + ".before-rebuild-20260301-000000").read()
+
+
+def test_a_short_sentence_is_not_taken_out_of_every_message(pmem):
+    pm = pmem
+    assert pm._remove_words("Yes, I live in Leeds. Yes.", "Yes.") == "Yes, I live in Leeds. Yes."
