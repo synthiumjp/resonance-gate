@@ -19,7 +19,23 @@ bench/false_memory/results_v10/SUMMARY.md, docs/PREREG_HELDOUT_V11.md (DRAFT, un
 waiting for JP), docs/REVIEW_2026-10-12.md (the second adversarial review;
 items fixed and open are listed below), docs/REVIEW_2026-10-09.md.
 
-## 2026-10-20 (read this first)
+## 2026-10-21 IN FLIGHT (read this first)
+
+- Release re-measurement of the launch candidate 012fcca running on the Mac
+  since 09:16 AEDT: tree ~/jpwork/sdr-release-012fcca, log
+  ~/jpwork/release7.log, RGX_PARSER_MODELS=~/jpwork/parser_models/ours (the
+  Mac has no ~/.sourcedrecall/parser-models; 53e0d9c used the same path).
+  Sentinel: `python3 tools/release_sentinel.py --tree ... --log ...` on the
+  Mac (exit 0 done, 1 anomaly, 2 running), polled from WSL every 10 min.
+  Step 5 (strict judge) is new. When done: copy the result dirs back
+  (bench/locomo/results/release_test_*, bench/false_memory/results_release2_*,
+  HaluMem and LongMemEval numbers from the log), update README/FAQ figures
+  where they moved, then export, choose the version, tag, make the repo public.
+- All five ranked items of docs/REVIEW_2026-10-21.md fixed (see the
+  2026-10-20 section and git log 0f9c774..012fcca), except in-session
+  supersession (known limit, written in README and CHANGELOG).
+
+## 2026-10-20
 
 - Checked the logs. Mac: nothing of ours running but Qwen :8090, no panics,
   every log since 10-16 ended normally. ~/jpwork/sdr (the git clone) is
