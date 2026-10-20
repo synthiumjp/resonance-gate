@@ -1,9 +1,11 @@
 # sourcedrecall
 
-Local memory for AI agents that keeps your own words. A grammar parser, not
-a language model, decides what is stored, whose words they are, and what
-has gone out of date. It runs on your CPU, works with any model your agent
-uses, and needs no API key.
+Local memory for AI agents that keeps your own words. A grammar parser
+decides what is stored and what has gone out of date, and its rules with a
+small classifier decide whose words they are. No language model writes or
+reads the memory: the small models it uses (the parser's, a search embedder
+and re-ranker, a contradiction check and the pasted-text classifier) run on
+your CPU. It works with any model your agent uses and needs no API key.
 
 When you tell your agent something, sourcedrecall keeps the message as you
 wrote it, with its date. When a question comes up, it hands the agent the
@@ -22,7 +24,9 @@ friend's "I'm allergic to nuts" for yours. On the two newest
 pre-registered held-out sets of 40 pasted claims, read by two different
 local models, plain retrieval gave 23 and 28 of them back as the user's
 own, agentmemory 24 and 35, and sourcedrecall 5 and 12; on 20 real pasted
-emails, 14 against 7. Rules added since, from the kinds of text v12
+emails, 14 against 7 (p=0.06). Part of the difference is that
+sourcedrecall's reader more often says it does not know (on v11, 31 of the
+40 pasted claims against 16 with plain retrieval). Rules added since, from the kinds of text v12
 missed, bring sourcedrecall's counts to 3, 8 and 1 on the release commit,
 but those sets are no longer unseen. It is far from perfect: text whose
 source is named in words or places its rules do not read still passes as
@@ -32,20 +36,26 @@ with smaller local models: with Claude Sonnet 5.5 as the reader, every
 system gave back 4 or fewer of the 40 (sourcedrecall none), and on the
 real emails plain retrieval 5 of 20 and sourcedrecall none.
 
-On LoCoMo, with the same local reader and judge for every system, it is
-level with Mem0 (50.9% against 48.5% with a strict judge; 65.4% against
-64.6% with the benchmark's usual judge) while making no model call to
+On LoCoMo, with the same local reader and judge for every system, it
+answers about as many questions as Mem0 (65.4% against 64.6%, p=0.61; with
+a strict judge 50.9% against 48.5%, p=0.13) while making no model call to
 store anything. With Claude Sonnet 5.5 reading and judging the same
-retrieved context, it answered 77.0% against Mem0's 72.1%. Mem0 is ahead
-on questions that combine several facts. On LongMemEval's
-knowledge-update questions, where a fact changes over a long history, it
-answered 64 of 78 against plain retrieval's 61 with the same reader and
-judge, and 72 of 133 questions about time and order against 64.
+retrieved context, 77.0% against 72.1% (p<0.001). Both leads come from
+questions about dates and time, where Mem0 was at a disadvantage: it takes
+no timestamp, so the dates were written into the messages, and it answers
+fewer of them than plain retrieval does. On the other questions Mem0 is
+ahead: 71.3% against 67.5% with the local reader (p=0.02), 81.5% against
+77.6% with Claude (p=0.006). With its optional notes model sourcedrecall is
+level with Mem0 there too (73.3%, p=0.23). On LongMemEval the session that
+holds the answer is among the five it returns for 98.8% of 500 questions;
+its answers to questions about changed facts and about time are not
+clearly better than plain retrieval's.
 
-It installs as a Claude Code plugin in a minute or two (about 1.3 GB of
-disk, no PyTorch, no API key), uses about 400 MB of memory, and answers in
-about 50 ms. It also works with Codex CLI, Gemini CLI, Cursor and any MCP
-client. Your memory is a folder of plain files on your machine.
+It installs as a Claude Code plugin in a few minutes (about 1.3 GB of disk,
+no PyTorch, no API key). Sessions are stored automatically in Claude Code;
+its memory tools work in any MCP client, and hooks for Codex CLI, Gemini
+CLI and Cursor are included but not yet tested in those apps. Your memory
+is a folder of plain files on your machine.
 
 Everything is in `bench/`, with the commands to rerun it. English only.
 
@@ -55,9 +65,11 @@ The numbers below were read and judged by local models (Qwen3-14B, and
 Phi-4 as a second reader), so they are not comparable with results
 published with GPT-4-class models, except where Claude Sonnet 5.5 is named
 as the reader: those runs give the same retrieved context to a hosted model
-(through Anthropic's Batch API; `bench/claude_runs.sh`). Every figure was
-LongMemEval, LoCoMo, HaluMem and the first false-memory table were measured
-on commit 53e0d9c (2026-10-16/17, `bench/RELEASE_53e0d9c.log`); each
+(through Anthropic's Batch API; `bench/claude_runs.sh`). LongMemEval,
+LoCoMo, HaluMem and the first false-memory table were measured on commit
+53e0d9c (2026-10-16/17, `bench/RELEASE_53e0d9c.log`); for LoCoMo only
+sourcedrecall was rerun there, and Mem0's and plain retrieval's answers are
+from the 2026-10-03 run with the same questions, reader and judge. Each
 held-out set's paragraph reports its run when the set was new. An
 adversarial review on 2026-10-09 (`docs/REVIEW_2026-10-09.md`) found
 problems with the comparisons; the tables below were rerun with its fixes
@@ -177,7 +189,7 @@ and long messages were cut around the question. A fifth held-out set (v9:
 instructions given as the user's: 4 of 40 (10%; plain retrieval 22,
 agentmemory 27, ai-memory 3; p<0.001 against the first two), so across v6
 to v9: 82%, 32%, 22%, 10%. Pooled false memories 6 of 60 (plain retrieval
-24, agentmemory 29). Changes and everyday facts held (2 of 20, 16 of 20).
+24, agentmemory 29, ai-memory 6). Changes and everyday facts held (2 of 20, 16 of 20).
 Two targets were missed, both costs of these changes. The user's own
 material was answered in 12 of 20 (target 15; plain retrieval 17): in 4,
 own text was taken for pasted and the fact was left out. Facts asked about
@@ -194,7 +206,7 @@ hypotheses. Pasted claims or instructions given as the user's: 3 of 40 (8%;
 plain retrieval 23, agentmemory 20, ai-memory 0; p<0.001 against the first
 two). Facts inside pasted text were answered in 17 of 20 (plain retrieval
 20, agentmemory 8), 11 of the 12 long pastes among them. Pooled false
-memories 4 of 60 (plain retrieval 26, agentmemory 20); changes 1 of 20,
+memories 4 of 60 (plain retrieval 26, agentmemory 20, ai-memory 7); changes 1 of 20,
 everyday facts 18 of 20. The miss: the user's own material was answered in
 13 of 20 (target 15; plain retrieval 19). In 6 of the 7 misses the fact was
 in what the reader was given and it said it did not know. A refusal is
@@ -263,14 +275,24 @@ models. A new held-out set is the next test (`bench/false_memory/results_release
 LoCoMo (conversations 2-9, 1,307 questions), against Mem0, with the same
 local reader and judge:
 
-| | sourcedrecall | with the built-in notes model | with notes by Qwen3-14B | Mem0 2.2.1 | plain retrieval |
-|---|---|---|---|---|---|
-| answered correctly | 65.4% | 67.8% (small) / 70.6% (standard) | 73.1% | 64.6% | 56.6% |
-| temporal questions | 57.0% | 55.0% / 59.7% | 57.4% | 37.2% | 49.6% |
-| single-hop | 75.5% | 79.4% / 81.0% | 85.4% | 77.9% | 66.9% |
-| multi-hop | 54.0% | 55.6% / 58.6% | 62.3% | 61.9% | 39.3% |
-| model calls to store the conversations | 0 | 468, in-process | 468, to a local server | 941 (generation and embedding) | 0 (one embedding per message) |
-| context per question (tokens) | 682 | 1,032 / 1,025 | 1,230 | 722 | 356 |
+| | sourcedrecall | with the built-in notes model | Mem0 2.2.1 | plain retrieval |
+|---|---|---|---|---|
+| answered correctly | 65.4% | 67.8% (small) / 70.6% (standard) | 64.6% | 56.6% |
+| temporal questions | 57.0% | 55.0% / 59.7% | 37.2% | 49.6% |
+| single-hop | 75.5% | 79.4% / 81.0% | 77.9% | 66.9% |
+| multi-hop | 54.0% | 55.6% / 58.6% | 61.9% | 39.3% |
+| open-domain | 36.1% | 41.0% / 48.2% | 41.0% | 38.6% |
+| without temporal questions | 67.5% | 70.9% / 73.3% | 71.3% | 58.3% |
+| model calls to store the conversations | 0 | 468, in-process | 941 (generation and embedding) | 0 (one embedding per message) |
+| what the reader is given | about 13 messages (4 to 34) | the same, and notes | 20 memories (10 per speaker) | 10 messages |
+| context per question (tokens) | 682 | 1,032 / 1,025 | 722 | 356 |
+
+Paired tests (McNemar) against Mem0: overall p=0.61; without temporal
+questions p=0.02, Mem0 ahead; with the standard notes model p<0.001 and,
+without temporal questions, p=0.23. Plain retrieval gets half the context
+of the others, so part of its gap is budget. Notes written by Qwen3-14B
+running as a local server (a model call per message, commit 49561c4) gave
+73.1%.
 
 With Claude Sonnet 5.5 as reader and judge (the same retrieved context and
 prompts, Anthropic's Batch API, `bench/locomo/answer_claude.py`), closer to
@@ -283,15 +305,19 @@ how published results are measured:
 | single-hop | 82.5% | 86.8% | 76.5% |
 | multi-hop | 68.2% | 71.1% | 53.6% |
 | open-domain | 61.4% | 65.1% | 59.0% |
+| without temporal questions | 77.6% | 81.5% | 69.9% |
 
 Without the audit's 80 wrong gold answers (below): 79.1%, 74.5%, 71.5%. On
 multi-hop questions the two split 23 to 30, not a clear difference
 (McNemar p=0.41); with the local reader they split 31 to 50 (p=0.045).
 
-The tie with Mem0 comes from temporal questions, where Mem0 was handicapped:
-it accepts no timestamp, so dates were written into the messages. Without
-them (an earlier run), sourcedrecall answers 67.4% and Mem0 71.3%, and Mem0 leads on
-single-hop, multi-hop and open-domain questions. An audit of LoCoMo
+The lead over Mem0 with both readers comes from temporal questions, where
+Mem0 was at a disadvantage: it accepts no timestamp, so dates were written
+into the messages, and it answers fewer temporal questions than plain
+retrieval. Without them Mem0 is ahead with both readers (p=0.02 with the
+local reader, p=0.006 with Claude), on single-hop, multi-hop and
+open-domain questions. Giving Mem0 the dates another way (its metadata
+field) has not been tried. An audit of LoCoMo
 (Penfield Labs, April 2026, github.com/dial481/locomo-audit) found 99 of its
 1,540 gold answers wrong, 80 of them in these conversations. Without those
 80: sourcedrecall 66.9%, with notes 69.8% (small) / 72.6% (standard) / 74.5%
@@ -465,7 +491,7 @@ sourcedrecall-memory ingest chat.jsonl
 sourcedrecall-memory context "Where do I live?"
 ```
 
-Needs Python 3.10 to 3.13. The install takes a minute or two and about 1.3 GB of disk (0.7 GB of it models); no PyTorch. A running memory server uses about 400 MB of RAM and answers a question in about 50 ms once loaded.
+Needs Python 3.10 to 3.13. The install takes a few minutes and about 1.3 GB of disk (0.7 GB of it models); no PyTorch.
 After setup it runs offline.
 
 Notes, optional:
@@ -481,8 +507,8 @@ sourcedrecall-setup --notes standard   # 1.4 GB
 ## Privacy
 
 sourcedrecall sends nothing anywhere: the models run on your machine, and
-the only network use is the one-time model download in
-`sourcedrecall-setup`. What it hands your agent goes to the agent's model
+the only network use is the one-time install (the Python packages, and the
+models in `sourcedrecall-setup`). What it hands your agent goes to the agent's model
 like any other context. If you point notes at a server of your own
 (`SOURCEDRECALL_NOTES_URL`), conversations are sent to that server. The
 memory is a folder of plain files (`~/.sourcedrecall`); delete the folder

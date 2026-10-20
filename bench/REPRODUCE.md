@@ -45,10 +45,13 @@ conversations 0-1 for development and 2-9 as the test set; categories 1-4
 cd bench/locomo
 export LOCOMO_DATA=/path/to/locomo10.json
 export LOCOMO_LLM_BASE=http://127.0.0.1:8090/v1 LOCOMO_LLM_MODEL=<model name the server reports>
-export LOCOMO_TOP_K=5          # sourcedrecall lines per speaker (each speaker has a store)
+# LOCOMO_TOP_K applies to every system; the README's table used the default
+# 10 for plain retrieval (10 messages) and Mem0 (10 memories per speaker,
+# 20 in all) and 5 for sourcedrecall (5 lines per speaker's store, about 13
+# messages a question after merging)
 python retrieve.py rag --convs 2-9 --out results/mine
-python retrieve.py sourcedrecall --convs 2-9 --out results/mine
 python retrieve.py mem0 --convs 2-9 --out results/mine     # in a venv with mem0ai 2.2.1
+LOCOMO_TOP_K=5 python retrieve.py sourcedrecall --convs 2-9 --out results/mine
 python answer.py rag sourcedrecall mem0 --out results/mine
 python score.py results/mine
 ```
@@ -58,8 +61,12 @@ minutes for conversations 2-9 (two stores per conversation), Mem0 ingest about
 six hours (941 model calls), answering and judging about 5 seconds per
 question per system.
 
-Published results: `results/test_mf` (messages-first at 01a88f5), and the
-release run in `results/test_050`.
+The README's figures: `results/release_test_default` (sourcedrecall on the
+release commit 53e0d9c; Mem0's and plain retrieval's answers from
+`results/test`, the 2026-10-03 run with the same reader and judge),
+`results/release_test_small` and `_standard` (with the notes models),
+`results/claude_test_default` (Claude Sonnet 5.5 as reader and judge,
+`bench/claude_runs.sh`). Older runs are kept beside them.
 
 ## False memory and changes of state
 
@@ -72,10 +79,14 @@ release run in `results/test_050`.
   `cases_projects_blind.jsonl`: written before any system was run, but run
   many times since and some rules were written from their errors, so now
   regression sets;
-- `cases_v5.jsonl` to `cases_v11.jsonl`: held out. Each was pre-registered
-  (`docs/PREREG_HELDOUT_V*.md`, committed before the set was written),
-  written by an agent barred from the rules and the other sets, run once on
-  the frozen commit, and read by the developer as counts only.
+- `cases_v5.jsonl` to `cases_v12.jsonl` and `cases_real_paste.jsonl`: held
+  out when new. Each was pre-registered (`docs/PREREG_HELDOUT_V*.md`,
+  committed before the set was written), written by an agent barred from
+  the rules and the other sets, run once on the frozen commit, and read by
+  the developer as counts only. Rules made after v12 (from a set written
+  from v12's kinds of misses) mean v11, v12 and the real emails are no
+  longer unseen for later code; and with this repository public, none of
+  these sets is unseen for anyone else.
 
 The protocol since 2026-10-10 (`FM_READER_SAME=1 FM_SAME_V7=1 FM_STRICT=1
 FM_JUDGE_QUESTION=1`): every system's returns go to the same local reader

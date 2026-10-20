@@ -46,7 +46,7 @@ are in what the user wrote, and shown labelled as written by a model.
 
 ## Measured (local Qwen3-14B reader and judge for every system)
 
-LoCoMo, conversations 2-9 (1,307 questions; used to choose between models, so not held out):
+LoCoMo, conversations 2-9 (1,307 questions; used to choose between models, so not held out). Measured on commit 1754180; on the release commit 53e0d9c the first three rows are 65.4%, 67.8% and 70.6% (`bench/locomo/results/release_test_*`):
 
 | | overall | multi-hop | temporal | single-hop |
 |---|---|---|---|---|

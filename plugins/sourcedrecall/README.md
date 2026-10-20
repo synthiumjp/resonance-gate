@@ -3,7 +3,8 @@
 Local memory for Claude Code. When a session ends, the facts you stated about
 yourself are stored with the sentence and date they came from. When the next
 session starts, Claude gets a short summary. A grammar parser extracts the
-facts; no language model writes the memory, and nothing leaves your machine.
+facts; no language model writes the memory, and the memory stays on your
+machine (the summary Claude is given goes to Claude like any other context).
 
 Install:
 

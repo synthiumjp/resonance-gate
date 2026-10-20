@@ -1,5 +1,12 @@
 # False-memory benchmark
 
+This page describes the first version of the benchmark (2026-09, 72
+scenarios, three systems). The current comparison is in
+[FAIR_RERUN.md](FAIR_RERUN.md), the held-out sets v5 to v12 in
+`results_v5/` to `results_v12/` (each with a `SUMMARY.md`), and the figures
+the main README quotes in its "How it compares" section. The numbers below
+are kept as the record of that first run.
+
 One question: **how often does an agent memory hold or return something the user did not say (or that is no longer true)?**
 
 Three systems, 72 synthetic scenarios, local models only, no network calls at run time.
@@ -49,7 +56,7 @@ See `results/results.md` (both tables, all scenarios and held-out) and `results/
 ```
 cd bench/false_memory
 MEM0_PY=<venv with mem0ai ollama sentence-transformers faiss-cpu spacy fastembed> \
-OURS_PY=~/rg_private/halumem/official/.venv/bin/python \
+OURS_PY=$RG_PRIVATE/halumem/official/.venv/bin/python \
 bash run_all.sh                 # cases rag ours mem0 validate score
 ```
 
@@ -61,7 +68,7 @@ Steps are resumable; delete `results/raw_*.jsonl` for a clean run. Needs Ollama 
 * **Two changes to how Mem0 runs, both needed to work at all**: (1) `num_ctx` 12288, because Mem0's extraction system prompt is about 8k tokens and Ollama's default 4096 context silently truncates it; (2) `think=False` passed to every Ollama chat call by wrapping `llm.client.chat` in the adapter, because Mem0 does not pass it and qwen3 would otherwise reason for minutes before the JSON. No Mem0 prompt was edited or replaced (`/no_think` was not needed). Mem0 2.x OSS rejects the `timestamp` argument, so the conversation dates reach Mem0 only through the text; its memories show it substituting the run date for relative times.
 * Mem0 2.2.1 `add` is additive (extraction only; it does not update or delete older memories), which is why stale facts survive in it.
 * RAG: `sentence-transformers 6.1.0`, `BAAI/bge-small-en-v1.5` with its query instruction.
-* sourcedrecall: stanza 1.14.0, torch 2.13.0, python from `~/rg_private/halumem/official/.venv`; `RG_MEMORY_DIR` fresh per scenario; owner name `Jordan Pike` for all scenarios.
+* sourcedrecall: stanza 1.14.0, torch 2.13.0, python from `$RG_PRIVATE/halumem/official/.venv`; `RG_MEMORY_DIR` fresh per scenario; owner name `Jordan Pike` for all scenarios.
 * Judge: Ollama 0.15.2, `qwen3:14b` (id `bdbd181c33f2`), temperature 0, seed 0, `num_predict 4`.
 * Hardware: CPU only. The Ollama service on this machine has no working GPU backend (WSL, no ROCm/Vulkan build), so all LLM calls ran on a Ryzen 5 7600.
 

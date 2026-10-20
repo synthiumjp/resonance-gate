@@ -59,7 +59,20 @@ items fixed and open are listed below), docs/REVIEW_2026-10-09.md.
   Code's shell); paths.command() names the right command in messages,
   MEMORY.md and the browser; install.failed names its REF and expires after
   an hour; pip-less venv rebuilt; README name + check steps; tests in
-  server/tests/test_launcher.py. Suite 1,442 passed. Next: item 1 (claims).
+  server/tests/test_launcher.py. Suite 1,442 passed.
+- Review item 1 FIXED (claims): README opening says both Mem0 leads come
+  from temporal questions and Mem0 leads without them (p=0.02 local, 0.006
+  Claude; recomputed on the Mac from the per-question files), p-values on
+  every LoCoMo gap, open-domain and without-temporal rows, what each reader
+  gets, Qwen-notes column out of the table; LongMemEval answer claims out
+  of the opening; no-LM and privacy wording (README, FAQ, plugin.json,
+  plugin README, HOW_IT_READS); 50 ms / 400 MB dropped (never measured in
+  the repo); REPRODUCE k per system; HOW_IT_READS v11/v12/classifier;
+  CHANGELOG and model card figures; ai-memory in v9/v10 pooled lines.
+  Still open from area 1-2: equal-budget plain retrieval run, Mem0 with
+  dates as metadata, rules ablation on v10/v12, audit asymmetry, ai-memory
+  full-text run, stale strict file in strict_release_test_default.
+  Next: items 3 (forget) and 4 (extraction).
 - Next: the review's ranked items, v13 held-out pasted-text set, launch
   plan (container install tests should include a killed-worker check and
   an old Claude Code version).

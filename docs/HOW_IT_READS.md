@@ -1,7 +1,9 @@
 # How sourcedrecall reads a conversation
 
 sourcedrecall decides what to store, and what has gone out of date, with a
-grammar parser and rules taken from linguistics, not with a language model.
+grammar parser and rules taken from linguistics; no language model writes
+or reads the memory. Since v12 a small learned classifier also helps decide
+whether pasted text is someone else's (below).
 Each rule below is a claim about English that the benchmarks can support or
 refute. For each: what it says, where the idea comes from, examples both
 ways, and what was measured. Rules that were tried and failed are listed at
@@ -15,10 +17,10 @@ and `experiments/p2/`. Measurements come from `bench/` (readable development
 sets unless marked held out; held-out sets were written before any system
 saw them and are read only as counts, but v2-v4 and the coding and projects
 sets have since been run many times and some rules were written from their
-error categories, so the clean ones are v5 to v10, each run once; see
-`docs/REVIEW_2026-10-09.md`). Each section is dated by the work it
-describes; the latest held-out result is v10 (2026-10-11), and the latest
-change is the relevance cut of 2026-10-12 (near the end).
+error categories, so the clean ones are v5 to v12, each run once when new;
+v11, v12 and the real emails have since been used to make rules and are no
+longer unseen; see `docs/REVIEW_2026-10-09.md`). Each section is dated by
+the work it describes; the latest held-out result is v12 (2026-10-13).
 
 ## Held-out test (v5, pre-registered)
 
@@ -552,7 +554,31 @@ Plain retrieval on the own set: 29 of 40 with Qwen3-14B, 33 with Phi-4,
 with 11 and 13 false memories of 20 against our 2 and 3. A second reader of
 another family (Phi-4) answered 34 of 40 from our block before the cut, so
 most of the v10 miss was the first reader's caution with our block, not
-missing facts. Not yet measured held out (a held-out set, v11, is drafted for it).
+missing facts. Measured held out on v11 (below).
+
+**Held-out v11 and v12 (2026-10-13).** v11 (130 scenarios, two readers of
+different families): pasted claims or instructions given as the user's 5
+of 40 with Qwen3-14B and with Phi-4 (plain retrieval 23 and 22); the
+user's own material answered 24 of 30, 6 behind plain retrieval, all six
+the user's own writing taken for someone else's. Without the rules
+paragraph the counts were the same. v12 (160 scenarios, with 30 real
+Enron emails): 12 of 40 with Qwen3-14B and 13 with Phi-4 (plain retrieval
+28 and 32); real emails 7 of 20 (plain retrieval 14, p=0.06). A third of
+v12's pasted texts named their source in ways the rules do not read (other
+words, after the text, or only in a later message).
+`bench/false_memory/results_v11/SUMMARY.md`, `results_v12/SUMMARY.md`.
+
+**A third person around a first-person block, and a classifier (after
+v12).** "my brother, last night:" before a block written as "I ..." marks
+the block as the brother's (`RG_PASTE_THIRD`). What the rules leave
+unmarked goes to a small learned classifier (`tools/paste_clf/`, trained on
+development data only: LoCoMo conversations 0-1 and an Enron split with the
+test emails left out; `RG_PASTE_CLF`). Both were developed on a set written
+from the kinds of text v12 missed (categories only, not its items). On the
+release commit, counts only: 3 of 40 on v11, 8 of 40 on v12, 1 of 20 real
+emails; these sets are no longer unseen, so a new held-out set is the
+real test. With Claude Sonnet 5.5 as the reader every system gave back 4
+or fewer of the 40, so the rules matter most with smaller readers.
 
 **The secret filter (2026-10-10).** v8 showed a pasted recipe's
 introduction removed as "[secret removed]": "recipe card:" read as a card
