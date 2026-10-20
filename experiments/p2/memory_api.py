@@ -597,13 +597,13 @@ def _source(intro, owner):
          or _SOURCE_POSS.search(intro or ""))
     if not m:
         n = _SOURCE_NAME.search(intro or "")
-        first = (owner or "").split()[0] if owner else ""
+        first = ((owner or "").split() or [""])[0]
         name = n and (n.group(1) or n.group(2))
         if name and name.split()[0] != first:
             return name
         return "someone else"
     src = re.sub(r"[\s:,.;-]+$", "", m.group(1))
-    first = (owner or "the user").split()[0]
+    first = ((owner or "").split() or ["the user"])[0]
     return re.sub(r"^(?:my|our)\b", f"{first}'s", src, flags=re.I)
 
 

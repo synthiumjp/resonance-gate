@@ -49,6 +49,11 @@ items fixed and open are listed below), docs/REVIEW_2026-10-09.md.
   the user's pasted message was already cut; quoted as typed.
 - Adversarial review 2026-10-21 (five Sonnet agents): docs/REVIEW_2026-10-21.md,
   five ranked items first. Fix those before launch.
+- Review item 5 FIXED (see git log): per-message guard in ingest
+  ("unreadable" count), blank owner, worker keeps a failed job, rerun
+  hardening (lock held, 2 per start, non-object jobs, cleanup), interrupt
+  markers, non-UTF-8 transcripts, unknown turnOrigin counted. Suites on the
+  Mac: 1,438 (ours) and 1,436 (shipped) passed. Next: items 2 and 1.
 - Next: the review's ranked items, v13 held-out pasted-text set, launch
   plan (container install tests should include a killed-worker check and
   an old Claude Code version).

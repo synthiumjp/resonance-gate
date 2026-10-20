@@ -367,3 +367,67 @@ def test_a_job_that_keeps_dying_is_given_up_and_logged(pm, monkeypatch, tmp_path
     assert os.path.exists(job[:-len(".json")] + ".failed")
     log = open(tmp_path / "state" / "hook.log").read()
     assert '"gave_up": true' in log
+
+
+# 2026-10-21 (review of the above)
+
+def test_a_worker_that_fails_keeps_its_job_for_a_later_try(pm, tmp_path, monkeypatch):
+    t = _write(tmp_path / "t.jsonl", [{"type": "user", "timestamp": "2026-09-20T09:00:05Z",
+                                       "message": {"role": "user", "content": "I live in Fitzroy."}}])
+    job = _old_job({"transcript_path": t, "session_id": "abc"})
+
+    def boom(turns, **kw):
+        raise OSError("disk full")
+    monkeypatch.setattr(pm, "profile_ingest", boom)
+    with pytest.raises(OSError):
+        H.main(["_worker", job])
+    assert os.path.exists(job)
+
+
+def test_a_job_that_is_not_an_object_is_given_up_without_breaking_session_start(pm, monkeypatch):
+    launched = []
+    monkeypatch.setattr(H.subprocess, "Popen", lambda cmd, **kw: launched.append(cmd))
+    job = _old_job(["not", "a", "job"])
+    H.session_start({"source": "startup"}, owner="Dana Cole")
+    assert not launched and os.path.exists(job[:-len(".json")] + ".failed")
+
+
+def test_at_most_two_workers_start_at_once(pm, monkeypatch):
+    import time
+    from sourcedrecall.paths import jobs_dir
+    launched = []
+    monkeypatch.setattr(H.subprocess, "Popen", lambda cmd, **kw: launched.append(cmd))
+    for i in range(4):
+        p = os.path.join(jobs_dir(), f"sourcedrecall-job-{i}.json")
+        with open(p, "w") as f:
+            json.dump({"transcript_path": "/x.jsonl", "session_id": str(i)}, f)
+        os.utime(p, (time.time() - 120, time.time() - 120))
+    H._rerun_orphans()
+    assert len(launched) == 2
+
+
+def test_old_failed_jobs_are_cleared(pm):
+    import time
+    from sourcedrecall.paths import jobs_dir
+    old = os.path.join(jobs_dir(), "sourcedrecall-job-old.failed")
+    new = os.path.join(jobs_dir(), "sourcedrecall-job-new.failed")
+    for p in (old, new):
+        open(p, "w").close()
+    os.utime(old, (time.time() - 40 * 86400,) * 2)
+    H._rerun_orphans()
+    assert not os.path.exists(old) and os.path.exists(new)
+
+
+def test_interruptions_and_unknown_origins(pm, tmp_path):
+    t = tmp_path / "t.jsonl"
+    lines = [
+        {"type": "user", "timestamp": "2026-09-20T09:00:05Z",
+         "message": {"role": "user", "content": "I live in Fitzroy."}},
+        {"type": "user", "message": {"role": "user", "content": "[Request interrupted by user]"}},
+        {"type": "user", "turnOrigin": "voice", "message": {"role": "user", "content": "I keep bees."}},
+    ]
+    t.write_bytes(("\n".join(json.dumps(r) for r in lines) + "\n").encode() + b"\xff\xfe not utf-8\n")
+    out = H.ingest_session(str(t), "abc")
+    texts = [x["content"] for x in pm.ingested[0]["turns"]]
+    assert texts == ["I live in Fitzroy."]
+    assert out["skipped_unknown_origin"] == {"voice": 1}

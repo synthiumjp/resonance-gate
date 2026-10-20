@@ -383,7 +383,7 @@ def _paste_span(text, owner=None, after=None):
         b = paste_clf.best_span(text, owner, after)
         if b:
             sp = (b[0], b[1])
-    first = (owner or "").split()[0] if owner else ""
+    first = ((owner or "").split() or [""])[0]
     if isinstance(sp, tuple) and len(first) > 1:
         rest = text[sp[0]:]
         last = [l.strip() for l in rest.strip().splitlines() if l.strip()][-1:] or [""]
@@ -419,7 +419,7 @@ def _paste_span0(text, owner=None):
             return "own"
         return 0, car.start()
     # a letter addressed to the user by name ("Hi Thabo, Mr Eze here")
-    first = (owner or "").split()[0] if owner else ""
+    first = ((owner or "").split() or [""])[0]
     if first and re.match(rf"\s*(?:hi|hello|hey|dear|morning|evening)\s+{re.escape(first)}\b", text, re.I):
         st = _structure_span(text)
         return st if isinstance(st, tuple) else (0, len(text))
@@ -527,7 +527,7 @@ def _letter_span(text, owner):
     first = ((owner or "").split() or [""])[0].lower()
 
     def other(name):
-        w = (name or "").split()[0].lower().rstrip(".")
+        w = ((name or "").split() or [""])[0].lower().rstrip(".")
         return bool(w) and w not in _NOT_ADDRESSEE and w != first
 
     def addressed(line):

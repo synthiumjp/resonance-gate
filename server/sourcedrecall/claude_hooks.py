@@ -46,7 +46,9 @@ _NOT_SPEECH = re.compile(
     r"|<bash-input>|<bash-stdout>|<bash-stderr>|<task-notification>|Caveat:"
     # 2026-10-14 (JP's first real session): the summary Claude Code writes
     # when a session continues after its context ran out
-    r"|This session is being continued from a previous conversation)", re.S)
+    r"|This session is being continued from a previous conversation"
+    # 2026-10-21 (review): written by Claude Code when the user presses Esc
+    r"|\[Request interrupted by user)", re.S)
 _INJECTED = re.compile(r"<system-reminder>.*?</system-reminder>", re.S)
 # 2026-10-14 (JP's first real session: '</pasted_content id="a090">' stored in
 # a fact): the tags Claude Code wraps around pasted text; the text stays
@@ -68,11 +70,18 @@ def _text_items(content):
     return out
 
 
+# user-role lines skipped for a turnOrigin value not known here, by value,
+# from the last read_transcript call (reported in hook.log by ingest_session)
+_unknown_origins = {}
+
+
 def read_transcript(path):
     """-> (turns, first_timestamp). turns: [{"role", "content"}], oldest
     first, consecutive assistant chunks merged into one turn."""
     turns, first_ts = [], None
-    with open(path, encoding="utf-8") as fh:
+    _unknown_origins.clear()
+    # 2026-10-21 (review): one line that is not UTF-8 ended the whole read
+    with open(path, encoding="utf-8", errors="replace") as fh:
         for line in fh:
             try:
                 o = json.loads(line)
@@ -83,8 +92,16 @@ def read_transcript(path):
             # 2026-10-12 (review): user-role lines the person did not type --
             # the summary Claude Code writes after /compact, background-task
             # and subagent results, messages from other sessions
-            if (o.get("isCompactSummary") or o.get("isVisibleInTranscriptOnly")
-                    or o.get("turnOrigin") not in (None, "human")):
+            origin = o.get("turnOrigin")
+            if o.get("isCompactSummary") or o.get("isVisibleInTranscriptOnly"):
+                continue
+            if origin not in (None, "human"):
+                # 2026-10-21 (review): only "task_notification" and "peer" are
+                # seen in real transcripts; a new value is counted, so a
+                # Claude Code change that marks typed prompts differently
+                # shows in hook.log instead of silently storing nothing
+                if origin not in ("task_notification", "peer") and o.get("type") == "user":
+                    _unknown_origins[str(origin)] = _unknown_origins.get(str(origin), 0) + 1
                 continue
             t = o.get("type")
             if t not in ("user", "assistant"):
@@ -132,7 +149,7 @@ def _setup_env(owner):
 
 def _cwd_of(transcript_path):
     try:
-        with open(transcript_path, encoding="utf-8") as fh:
+        with open(transcript_path, encoding="utf-8", errors="replace") as fh:
             for line in fh:
                 try:
                     o = json.loads(line)
@@ -198,8 +215,12 @@ def ingest_session(transcript_path, session_id, owner=None, cwd=None,
     """The worker: store one session. Safe to repeat -- a resumed session
     re-sends its whole transcript and only new turns are added."""
     turns, first_ts, conv_id = read_session(agent, transcript_path, session_id)
-    return ingest_turns(turns, conv_id, first_ts, owner,
-                        cwd or _cwd_of(transcript_path))
+    unknown = dict(_unknown_origins) if agent == "claude" else {}
+    out = ingest_turns(turns, conv_id, first_ts, owner,
+                       cwd or _cwd_of(transcript_path))
+    if unknown:
+        out = dict(out, skipped_unknown_origin=unknown)
+    return out
 
 
 def session_end(event, owner=None, sync=False, agent="claude"):
@@ -264,45 +285,76 @@ def _try_lock(fh):
         return False
 
 
-def _rerun_orphans(min_age=60, max_tries=3):
+def _rerun_orphans(min_age=60, max_tries=3, max_spawn=2, keep_days=30):
     """At session start: a job file older than a minute that no worker holds
-    was left by a worker that died. Start it again, at most max_tries times;
-    after that it is renamed .failed and the log says so. Storing a session
-    twice is harmless (turns already parsed come from the cache)."""
+    was left by a worker that died or failed. Start it again, at most
+    max_tries times; after that it is renamed .failed and the log says so.
+    Storing a session twice is harmless (turns already parsed come from the
+    cache). 2026-10-21 (review): at most max_spawn workers per session start
+    (each loads a 0.5 GB parser; a week of orphans used to start at once);
+    the lock is held until the job is rewritten, and its age checked again
+    under the lock, so two session starts cannot both count a try; a job
+    that is not a JSON object is given up at once; .failed files older than
+    keep_days and stray .tmp files are removed."""
     import glob
     import time
     from sourcedrecall.paths import jobs_dir
-    for p in sorted(glob.glob(os.path.join(jobs_dir(), "sourcedrecall-job-*.json"))):
+    jd = jobs_dir()
+    now = time.time()
+    for p in glob.glob(os.path.join(jd, "sourcedrecall-job-*.failed")) + \
+            glob.glob(os.path.join(jd, "sourcedrecall-job-*.tmp")):
+        try:
+            age = now - os.path.getmtime(p)
+            if age > (keep_days * 86400 if p.endswith(".failed") else 3600):
+                os.unlink(p)
+        except OSError:
+            pass
+    spawned = 0
+    for p in sorted(glob.glob(os.path.join(jd, "sourcedrecall-job-*.json"))):
+        if spawned >= max_spawn:
+            break
         try:
             if time.time() - os.path.getmtime(p) < min_age:
                 continue
             fh = open(p, encoding="utf-8")
         except OSError:
             continue
+        log = _hook_log()
         with fh:
             if not _try_lock(fh):
                 continue
             try:
+                if time.time() - os.path.getmtime(p) < min_age:
+                    continue        # another session start has just taken it
+            except OSError:
+                continue            # gone: its worker finished meanwhile
+            try:
                 job = json.load(fh)
             except ValueError:
                 job = None
-        log = _hook_log()
-        sid = (job or {}).get("session_id") or (job or {}).get("conversation_id")
-        tries = (job or {}).get("tries", 0) if isinstance(job, dict) else max_tries
-        if tries >= max_tries:
-            os.replace(p, p[:-len(".json")] + ".failed")
-            with open(log, "a", encoding="utf-8") as lf:
-                lf.write(json.dumps({"session": sid, "gave_up": True, "tries": tries,
-                                     "job": p[:-len(".json")] + ".failed"}) + "\n")
-            continue
-        job["tries"] = tries + 1
-        tmp = p + ".tmp"
-        with open(tmp, "w", encoding="utf-8") as out:
-            json.dump(job, out)
-        os.replace(tmp, p)          # also renews its age: not rerun again at once
+            ok = isinstance(job, dict)
+            sid = (job.get("session_id") or job.get("conversation_id")) if ok else None
+            tries = job.get("tries", 0) if ok and isinstance(job.get("tries", 0), int) else max_tries
+            if tries >= max_tries:
+                failed = p[:-len(".json")] + ".failed"
+                if os.name == "nt":
+                    fh.close()      # Windows cannot rename an open file
+                os.replace(p, failed)
+                with open(log, "a", encoding="utf-8") as lf:
+                    lf.write(json.dumps({"session": sid, "gave_up": True, "tries": tries,
+                                         "job": failed}) + "\n")
+                continue
+            job["tries"] = tries + 1
+            tmp = p + ".tmp"
+            with open(tmp, "w", encoding="utf-8") as out:
+                json.dump(job, out)
+            if os.name == "nt":
+                fh.close()
+            os.replace(tmp, p)      # also renews its age: not rerun again at once
         with open(log, "a", encoding="utf-8") as lf:
             lf.write(json.dumps({"session": sid, "rerun": job["tries"]}) + "\n")
         _spawn_worker(p, log)
+        spawned += 1
 
 
 def _session_start(event, owner=None, max_facts=15, agent="claude",
@@ -346,8 +398,9 @@ def session_start(event, owner=None, max_facts=15, agent="claude",
                   show_notice=True):
     try:
         _rerun_orphans()
-    except OSError:
-        pass                        # never stop a session starting
+    except Exception as e:          # never stop a session starting
+        print(f"sourcedrecall: could not check for unfinished sessions: {e!r}",
+              file=sys.stderr)
     out = _session_start(event, owner, max_facts, agent, show_notice)
     note = _windows_tools_note(agent, owner) if show_notice else None
     if note:
@@ -478,7 +531,14 @@ def main(argv=None):
             path, sid = ev.get("transcript_path"), ev.get("session_id")
             if not path or not sid or not os.path.exists(path):
                 continue
-            out = ingest_session(path, sid, a.owner, ev.get("cwd"))
+            # 2026-10-21 (review): one session that fails no longer stops
+            # the ones queued after it
+            try:
+                out = ingest_session(path, sid, a.owner, ev.get("cwd"))
+            except Exception as e:
+                print(json.dumps({"session": sid, "queued": True,
+                                  "error": f"{type(e).__name__}: {e}"}), flush=True)
+                continue
             print(json.dumps({"session": sid, "queued": True, **out}), flush=True)
         os.unlink(a.job)
         return 0
@@ -487,7 +547,15 @@ def main(argv=None):
             fh = open(a.job, encoding="utf-8")
         except OSError:
             return 0                # already stored by another worker
-        job = json.load(fh)
+        try:
+            job = json.load(fh)
+        except ValueError:
+            job = None
+        if not isinstance(job, dict):
+            fh.close()              # left for the next session start to give up on
+            print(json.dumps({"job": a.job, "error": "the job file is not a JSON object"}),
+                  flush=True)
+            return 1
         if not _try_lock(fh):
             fh.close()
             return 0                # another worker is storing it
@@ -509,13 +577,22 @@ def main(argv=None):
                                      job.get("agent", "claude"))
             print(json.dumps({"session": job.get("session_id")
                               or job.get("conversation_id"), **out}), flush=True)
-        finally:
-            # Windows cannot remove an open file; elsewhere the lock is kept
-            # until the file is gone, so a session start cannot rerun it
-            if os.name == "nt":
-                fh.close()
-            os.unlink(a.job)
+        except BaseException:
+            # 2026-10-21 (review): the job used to be removed on an error too,
+            # so a session that failed to store was lost with only a
+            # traceback in the log. It now stays for the next session start
+            # (at most three tries, then .failed and a log line).
             fh.close()
+            raise
+        # Windows cannot remove an open file; elsewhere the lock is kept
+        # until the file is gone, so a session start cannot rerun it
+        if os.name == "nt":
+            fh.close()
+        try:
+            os.unlink(a.job)
+        except OSError:
+            pass
+        fh.close()
         return 0
     try:
         # utf-8 whatever the console's code page (Windows; review 3.10)

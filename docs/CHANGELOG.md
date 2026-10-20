@@ -10,7 +10,13 @@ has the details behind each change.
   Linux side stopped after the terminal closed) is stored at the next
   session start, up to three tries. Before, its conversation was kept but
   its facts were not, and nothing said so. `hook.log` now has a line when
-  storing starts as well as when it ends.
+  storing starts as well as when it ends. A session that fails to store
+  with an error is kept and tried again the same way; after three tries it
+  is set aside and the log says so.
+- One message the parser cannot read no longer loses the whole session's
+  facts: it is skipped, counted in `hook.log`, and tried again next time.
+  A name of only spaces no longer makes storing fail on pasted text.
+- "[Request interrupted by user]" is no longer stored as something you said.
 
 - A new install says what is happening: while the memory installs, if the
   install failed (with its log and how to try again), when your name is

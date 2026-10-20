@@ -218,7 +218,7 @@ def write_notes(owner, date, turns):
         ln = re.sub(r"^\s*(?:[-*•]|\d+[.)])\s*", "", ln).strip()
         if not ln or ln.upper().startswith("NONE"):
             continue
-        if not re.search(r"\b" + re.escape(owner.split()[0]) + r"\b", ln, re.I):
+        if not re.search(r"\b" + re.escape((owner.split() or [owner])[0]) + r"\b", ln, re.I):
             continue          # a note must be about the owner
         if not grounded(ln, said, owner) or not faithful(ln, said, owner):
             continue          # what the other side said is not a note

@@ -439,8 +439,9 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
         data_dir = _data_dir()
         os.makedirs(data_dir, exist_ok=True)
 
-        owner = (owner_name or os.environ.get("SOURCEDRECALL_OWNER")
-                  or _discover_owner_name())
+        # 2026-10-21 (review): a name of only spaces raised in prose.py
+        owner = ((owner_name or "").strip() or (os.environ.get("SOURCEDRECALL_OWNER") or "").strip()
+                 or _discover_owner_name())
 
         conv_id = conversation_id or str(_uuidlib.uuid4())
         # 2026-10-02: when the conversation HAPPENED, if the caller knows.
@@ -517,13 +518,31 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
         parsed = []          # (hash, facts)
         # parse the conversation's new messages in batches first (6x faster
         # for a long conversation or an imported history; same parses)
+        # 2026-10-21 (review): one message the parser cannot read used to
+        # raise out of this loop, so no fact of the whole session was kept
+        # (0848387 was one such crash). It is now skipped and counted; it is
+        # not cached, so a later store of the conversation tries it again.
+        n_errors = 0
+
+        def _skip(e):
+            nonlocal n_errors
+            n_errors += 1
+            print(f"sourcedrecall: skipped a message that could not be read "
+                  f"({type(e).__name__}: {e})", file=sys.stderr, flush=True)
+
         todo = []
         for t in turns:
             text = str(t.get("content", "")).strip()[:1800]
             if text and _rgx_facts.turn_hash(text) not in cached_hashes:
-                todo.append(_prose_only(_whole(text, t), owner))
+                try:
+                    todo.append(_prose_only(_whole(text, t), owner))
+                except Exception:
+                    pass                # reported when the turn is parsed below
         if len(todo) > 1 and hasattr(ex, "prefetch"):
-            ex.prefetch(todo)
+            try:
+                ex.prefetch(todo)
+            except Exception as e:
+                _skip(e)                # the turns are parsed one by one below
         prev = None     # the assistant message before a user turn (rgx.fragments)
         seen = set(cached_hashes)
         for ti, t in enumerate(turns):
@@ -537,11 +556,15 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
             if h in seen:
                 n_skipped += 1
                 continue
-            ptext = _prose_only(_whole(text, t), owner)
-            if not ptext:
+            try:
+                ptext = _prose_only(_whole(text, t), owner)
+                if not ptext:
+                    continue
+                recs = ex.extract_turn(ptext, role=role, session=0, turn=ti,
+                                       prev=before if role == "user" else None)
+            except Exception as e:
+                _skip(e)
                 continue
-            recs = ex.extract_turn(ptext, role=role, session=0, turn=ti,
-                                   prev=before if role == "user" else None)
             facts = [f for f in (_rgx_facts.to_fact(r) for r in recs)
                      if f is not None and MARK not in str(f.get("value"))
                      and MARK not in str(f.get("text"))
@@ -608,7 +631,8 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
     # ---- (d) receipts ----
     return {"conversation_id": conv_id, "turns": n_turns, "facts": n_facts,
             "hearsay": n_hearsay, "skipped_cached": n_skipped,
-            "model_calls": model_calls}
+            "model_calls": model_calls,
+            **({"unreadable": n_errors} if n_errors else {})}
 
 
 # --------------------------------------------------------------- the tools

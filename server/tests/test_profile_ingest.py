@@ -253,3 +253,33 @@ def test_an_unreadable_store_is_kept_not_overwritten(pm):
         pm._erase("I live in London.")
     assert open(conv_path, encoding="utf-8").read() == '[{"uuid": "old", "chat_messages": ['
     assert glob.glob(conv_path + ".corrupt-*")
+
+
+# 2026-10-21 (review): one message the parser could not read raised out of
+# the loop and the whole session's facts were lost (0848387 was one such
+# crash); a name of only spaces raised in prose.py on any pasted text.
+
+def test_one_unreadable_message_does_not_lose_the_others(pm, monkeypatch):
+    real = pm._prose_only
+
+    def flaky(text, owner):
+        if "boxing" in text:
+            raise IndexError("a parser bug")
+        return real(text, owner)
+    monkeypatch.setattr(pm, "_prose_only", flaky)
+    res = pm.profile_ingest(list(_TURNS), conversation_id="conv1",
+                             owner_name="Ada Byron")
+    assert res["unreadable"] == 1
+    assert res["facts"] >= 2                      # London, the employer
+    monkeypatch.setattr(pm, "_prose_only", real)
+    again = pm.profile_ingest(list(_TURNS), conversation_id="conv1",
+                               owner_name="Ada Byron")
+    assert again["skipped_cached"] == 2 and "unreadable" not in again   # retried
+
+
+def test_a_name_of_only_spaces_does_not_crash_on_pasted_text(pm, monkeypatch):
+    monkeypatch.setenv("SOURCEDRECALL_OWNER", "Ada Byron")
+    res = pm.profile_ingest([{"role": "user", "content":
+                              "Summarise this email:\n\nI am vegan. I live in Cork."}],
+                             conversation_id="c2", owner_name="   ")
+    assert "unreadable" not in res and res["turns"] == 1

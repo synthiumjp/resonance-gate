@@ -117,7 +117,8 @@ def _gemini_messages(path):
     """Message records in order, after applying $rewindTo and $patch removals.
     Accepts the older single-JSON file ({"messages": [...]}) and the JSONL
     form (header line, message lines, $set / $rewindTo / $patch lines)."""
-    with open(path, encoding="utf-8") as f:
+    # 2026-10-21 (review): a stray byte that is not UTF-8 lost the session
+    with open(path, encoding="utf-8", errors="replace") as f:
         raw = f.read()
     try:
         whole = json.loads(raw)
@@ -249,11 +250,11 @@ def _codex_message_text(role, content):
 def _codex_open(path):
     path = str(path)
     if not path.endswith(".zst"):
-        return open(path, encoding="utf-8")
+        return open(path, encoding="utf-8", errors="replace")
     import io
     try:
         from compression import zstd              # Python 3.14+
-        return io.TextIOWrapper(zstd.open(path, "rb"), encoding="utf-8")
+        return io.TextIOWrapper(zstd.open(path, "rb"), encoding="utf-8", errors="replace")
     except ImportError:
         pass
     try:
@@ -264,7 +265,7 @@ def _codex_open(path):
             "sessions). Decompress it first (`zstd -d`), or use Python 3.14 "
             "or install the `zstandard` package.")
     return io.TextIOWrapper(zstandard.ZstdDecompressor().stream_reader(
-        open(path, "rb")), encoding="utf-8")
+        open(path, "rb")), encoding="utf-8", errors="replace")
 
 
 def _codex_read(path):
