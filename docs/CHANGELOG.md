@@ -36,6 +36,22 @@ has the details behind each change.
   an assistant reply are taken out; the copies kept beside the memory and
   the parser's saved names are cleaned; a forget made while a session is
   being stored is no longer undone by it.
+- What is stored and shown as yours: rules inside a document you show
+  ("look at what the docs say:", "is this right?") no longer become
+  standing instructions; "Hey Claude," is no longer taken for a pasted
+  letter (your own lines after it were dropped), nor is your next line after
+  a sign-off; an email you were sent to reply to stays someone else's when
+  it is signed with your first name; "battery", "tired of", "for now" and
+  "I'm back at" no longer drop lasting facts; a paste whose source you give
+  in your next message is stored as someone else's, as it was shown.
+- The session-start summary: among equally supported facts the newest lead
+  (it kept the oldest); at most ten standing instructions; a long block is
+  cut by whole lines and keeps its rules. "About you" in `MEMORY.md` no
+  longer takes "Annabel" for "Anna". Quoted sentences cannot close their
+  own quotation marks.
+- Known limit: a change said in the same session as the old fact ("I use
+  Postgres" ... "we switched to SQLite") does not yet mark the old one as no
+  longer true; across sessions it does.
 
 - A new install says what is happening: while the memory installs, if the
   install failed (with its log and how to try again), when your name is

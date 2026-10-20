@@ -173,12 +173,18 @@ _WHEN = re.compile(r"\b(?:last (?:week|weekend|month|year|night|time)|yesterday|
 # credit, not a request ("taking your advice, I'm sprucing up my biz plan")
 _CREDIT = re.compile(r"\b(?:taking|thanks to|with|after|following|because of)\s+your\s+"
                      r"(?:advice|help|support|tips?|suggestions?|ideas?|encouragement)\b", re.I)
+# 2026-10-21 (review): "battery", "tired", "for now" and "I'm back" anywhere
+# dropped lasting facts ("I work at a battery factory", "I'm back at
+# Barclays as an analyst", "I'm tired of Python so I use Go", "I live in
+# Leeds for now"); they now match only as the passing remarks they were for
 _MOMENT = re.compile(
     r"\b(?:going to (?:bed|sleep)|go to (?:bed|sleep)|off to bed|heading (?:off|out|to bed)|"
-    r"signing off|logging off|back now|i'?m back|i am back|be right back|brb|afk|"
-    r"tired|exhausted|sleepy|knackered|ran out of (?:usage|tokens|credits|context|time)|"
-    r"on my phone|hold(?:s|ing)? off|for now|stepping out|step out|for lunch|back in \d+|"
-    r"battery|check back)\b", re.I)
+    r"signing off|logging off|back now|(?:i'?m|i am) back(?: now| again)?(?=\s*(?:[.!,]|$))|"
+    r"be right back|brb|afk|"
+    r"(?:tired|exhausted)(?! of)|sleepy|knackered|ran out of (?:usage|tokens|credits|context|time)|"
+    r"on my phone|hold(?:s|ing)? off|(?:that'?s (?:it|all)|stop(?:ping)?|leave it|pause|done) for now|"
+    r"stepping out|step out|for lunch|back in \d+|"
+    r"(?:low|dying|flat) battery|battery (?:is )?(?:low|dying|flat|at \d+)|check back)\b", re.I)
 
 
 _STOP = {"the", "a", "an", "and", "or", "to", "of", "in", "on", "at", "for", "is", "are", "was",

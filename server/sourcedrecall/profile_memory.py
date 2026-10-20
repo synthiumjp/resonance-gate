@@ -252,6 +252,29 @@ def _build():
     return mem, n_uncached
 
 
+# 2026-10-21 (review): rules inside a pasted document became the user's
+# standing instructions, which lead every later session ("look at what the
+# docs say:\nAlways use the staging key."). An opening line that asks about
+# the text, or names a document or a review, presents material; the user's
+# own "Some rules for this project:" does not.
+_MATERIAL_INTRO = re.compile(
+    r"(?i)\b(?:docs?|documentation|readme|policy|policies|guidelines?|style guide|"
+    r"handbook|manual|says|said|wrote|written by|from (?:the|my|our|a|an|his|her|their)|"
+    r"look at|check|review|proofread|is this|are these|does this|do these|"
+    r"what do you think|thoughts on|translate|summari[sz]e|explain)\b")
+
+
+def _shown_material(text, fact):
+    lines = [l.strip() for l in str(text or "").splitlines() if l.strip()]
+    if len(lines) < 2 or not lines[0].endswith((":", "?")):
+        return False
+    intro = lines[0]
+    if not (intro.endswith("?") or _MATERIAL_INTRO.search(intro)):
+        return False
+    src = (fact.get("source") or "").strip()
+    return not (src and src in intro)
+
+
 def _store_stamp():
     """When each file the memory is built from was last written. 2026-10-21
     (review): a running MCP server loaded the memory once, so a forget, or
@@ -559,12 +582,20 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
             print(f"sourcedrecall: skipped a message that could not be read "
                   f"({type(e).__name__}: {e})", file=sys.stderr, flush=True)
 
+        # 2026-10-21 (review): a paste whose source is given in the user's
+        # next message ("it's from a client") was shown as someone else's
+        # but stored as the user's: the parse now reads that message too
+        nxt, last_user = {}, None
+        for ti in range(len(turns) - 1, -1, -1):
+            nxt[ti] = last_user if turns[ti].get("role", "user") == "user" else None
+            if turns[ti].get("role", "user") == "user":
+                last_user = str(turns[ti].get("content", "")).strip()[:1800] or None
         todo = []
-        for t in turns:
+        for ti, t in enumerate(turns):
             text = str(t.get("content", "")).strip()[:1800]
             if text and _rgx_facts.turn_hash(text) not in cached_hashes:
                 try:
-                    todo.append(_prose_only(_whole(text, t), owner))
+                    todo.append(_prose_only(_whole(text, t), owner, nxt.get(ti)))
                 except Exception:
                     pass                # reported when the turn is parsed below
         if len(todo) > 1 and hasattr(ex, "prefetch"):
@@ -586,7 +617,7 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
                 n_skipped += 1
                 continue
             try:
-                ptext = _prose_only(_whole(text, t), owner)
+                ptext = _prose_only(_whole(text, t), owner, nxt.get(ti))
                 if not ptext:
                     continue
                 recs = ex.extract_turn(ptext, role=role, session=0, turn=ti,
@@ -597,10 +628,13 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
             facts = [f for f in (_rgx_facts.to_fact(r) for r in recs)
                      if f is not None and MARK not in str(f.get("value"))
                      and MARK not in str(f.get("text"))
+                     and MARK not in str(f.get("source") or "")
                      # 2026-10-09 (security review): what an agent stores
                      # through the MCP tool cannot become a standing
                      # instruction that leads every later session
-                     and (instructions or f.get("attribute") != "instruction")]
+                     and (instructions or f.get("attribute") != "instruction")
+                     and not (f.get("attribute") == "instruction"
+                              and _shown_material(ptext, f))]
             parsed.append((h, facts))
             texts[h] = text
             seen.add(h)
@@ -842,9 +876,9 @@ def _after_of(conversation_id, text):
 # spaces, in any code you write for me." ran into the C++ that followed and
 # nothing was stored. The parser reads the prose only; the stored message
 # keeps the code for quoting.
-def _prose_only(text, owner=None):
+def _prose_only(text, owner=None, after=None):
     from prose import prose_only
-    return prose_only(text, owner)
+    return prose_only(text, owner, after) if after else prose_only(text, owner)
 
 
 def _denied_lists():
@@ -1704,8 +1738,10 @@ def rehydrate(conversation_id, max_turns=40, include_assistant=True, scope=None)
 # data, and any fact can be forgotten or confirmed by its short id.
 
 def _owner_subject(text, owner):
+    # 2026-10-21 (review): a prefix match put "Annabel's flat" under "About
+    # you" for the owner Anna; the name must end at a word boundary
     t = (text or "").strip()
-    return bool(owner) and (t.startswith(owner) or t.startswith(owner + "'s"))
+    return bool(owner) and bool(re.match(re.escape(owner) + r"(?![\w])", t))
 
 
 def _all_facts(mem):

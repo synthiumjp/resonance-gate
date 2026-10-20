@@ -234,6 +234,21 @@ def session_end(event, owner=None, sync=False, agent="claude"):
                           "owner": owner, "cwd": cwd, "agent": agent})
 
 
+def _fit_block(block, limit=9500):
+    """The block within Claude Code's limit, cut by whole lines from the end
+    of the list. 2026-10-21 (review): it was cut at 9,500 characters, and
+    [MEMORY RULES] comes last, so a long memory lost the rules first."""
+    if len(block) <= limit:
+        return block
+    i = block.rfind("[MEMORY RULES]")
+    body, rules = (block[:i], block[i:]) if i > 0 else (block, "")
+    rules = rules[:limit // 2]
+    lines = body.rstrip("\n").split("\n")
+    while len(lines) > 1 and len("\n".join(lines)) + 1 + len(rules) > limit:
+        lines.pop()
+    return ("\n".join(lines) + "\n" + rules)[:limit]
+
+
 def _hook_log():
     # 2026-10-09 (security review): in the private state dir, not a
     # predictable /tmp path anyone can read or pre-create as a symlink
@@ -386,7 +401,7 @@ def _session_start(event, owner=None, max_facts=15, agent="claude",
         block = pm.profile_context(None, max_facts,
                                    scope=current_scope(event.get("cwd")))["block"]
         out["hookSpecificOutput"] = {"hookEventName": "SessionStart",
-                                     "additionalContext": block[:9500]}
+                                     "additionalContext": _fit_block(block)}
     if notice:
         msg = saved_notice(pm.profile_news(), pm.memory_file(), agent=agent)
         if msg:

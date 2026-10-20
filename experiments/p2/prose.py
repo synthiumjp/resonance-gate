@@ -22,7 +22,7 @@ _CODE_LINE = re.compile(r"^\s*(?:Traceback \(most recent|File \"[^\"]+\", line \
                         r"[{}\[\]();]+\s*$|(?: {4}|\t)\S)")
 
 
-def prose_only(text, owner=None):
+def prose_only(text, owner=None, after=None):
     """The turn without fenced code blocks and code / stack-trace lines
     (2026-10-05): a developer's message is often a sentence of prose and a
     pasted snippet, and the prose can carry a preference ("I always use
@@ -30,7 +30,7 @@ def prose_only(text, owner=None):
     else goes too (see _drop_pasted)."""
     t = _FENCE.sub("\n", text or "")
     keep = [ln for ln in t.splitlines() if not _CODE_LINE.match(ln)]
-    t = _drop_pasted("\n".join(keep), owner)
+    t = _drop_pasted("\n".join(keep), owner, after)
     return re.sub(r"[ \t]+", " ", t).strip()
 
 
@@ -54,6 +54,9 @@ _PASTE_INTRO = re.compile(
     r"our|some|this))\b[^.?!\n]{0,40}?\b(?:" + _MATERIAL + r")\b", re.I)
 _GREETING = re.compile(r"^(?:hi|hello|hey|dear|good (?:morning|afternoon))\b"
                        r"[^.!?]{0,40},?\s*$", re.I)
+_TO_ASSISTANT = re.compile(r"^(?:hi|hello|hey|dear|good (?:morning|afternoon))\s+"
+                           r"(?:claude|chatgpt|gpt|gemini|copilot|cursor|codex|assistant|bot)\b",
+                           re.I)
 _SIGNOFF = re.compile(r"^(?:thanks|thank you|many thanks|regards|best|cheers|"
                       r"sincerely|kind regards|best regards|warm regards)\b"
                       r"[^.!?]{0,40}$", re.I)
@@ -384,7 +387,10 @@ def _paste_span(text, owner=None, after=None):
         if b:
             sp = (b[0], b[1])
     first = ((owner or "").split() or [""])[0]
-    if isinstance(sp, tuple) and len(first) > 1:
+    # 2026-10-21 (review): "Reply to this please:" ... "Thanks\nAmara" was
+    # taken for the owner Amara's own text; an intro that says the text came
+    # to the user (to reply to, sent, from someone) keeps it someone else's
+    if isinstance(sp, tuple) and len(first) > 1 and not _INCOMING.search(text[:sp[0]]):
         rest = text[sp[0]:]
         last = [l.strip() for l in rest.strip().splitlines() if l.strip()][-1:] or [""]
         # the signature may carry the surname ("Yours faithfully, Wanjiru Kamau")
@@ -397,6 +403,10 @@ def _paste_span(text, owner=None, after=None):
                 or re.search(rf"\b(?:i'?m|i’m|i am|my name is|this is|it'?s)\s+{re.escape(first)}\b(?!['’]s\b)", rest, re.I)):
             return "own"
     return sp
+
+
+_INCOMING = re.compile(r"(?i)\b(?:reply(?:ing)? to|respond(?:ing)? to|answer(?:ing)? this|"
+                       r"sent (?:me|us|this)|forwarded|received|got this|from (?:my|our|the|a|an|his|her|their)\b)")
 
 
 def _paste_span0(text, owner=None):
@@ -570,12 +580,17 @@ def _drop_pasted_old(text):
         lines = lines[:hdr]
     # an email-shaped block (greeting line ... sign-off line) after the
     # message's first line: a letter the user pasted, not one to the assistant
+    # 2026-10-21 (review): "Hey Claude," to the assistant is not a letter
+    # (the user's own lines after it were dropped), and the line after the
+    # sign-off goes only when it is the signature, not the user's next line
     for i, ln in enumerate(lines):
-        if i and _GREETING.match(ln.strip()):
+        if i and _GREETING.match(ln.strip()) and not _TO_ASSISTANT.match(ln.strip()):
             end = next((j for j in range(i + 1, len(lines))
                         if _SIGNOFF.match(lines[j].strip())), None)
             if end is not None:
-                lines[i:end + 2] = [""]
+                sig = (end + 1 < len(lines) and not _SIGNATURE.match(lines[end].strip())
+                       and _SIGNATURE.match(lines[end + 1].strip()))
+                lines[i:end + (2 if sig else 1)] = [""]
                 break
     text = "\n".join(lines)
     # an introduction ("this email", "here's the README", "from a webpage")

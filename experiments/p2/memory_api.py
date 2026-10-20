@@ -484,6 +484,18 @@ def _f_date(f):
     return str((f.get("receipts") or [{}])[0].get("date") or "")[:10]
 
 
+def _newest_first(pairs):
+    """(node, fact) pairs: current before no-longer-true, most mentions
+    first, and, 2026-10-21 (review), newest first among equals; ties kept
+    insertion order (oldest conversation first), so past max_facts the
+    session-start summary dropped what the user said most recently."""
+    pairs.sort(key=lambda p: max((str(r.get("date") or "")[:10]
+                                  for r in p[1].get("receipts") or []), default=""),
+               reverse=True)
+    pairs.sort(key=lambda p: (p[0].get("current") is False, -p[0]["n_mentions"]))
+    return pairs
+
+
 
 
 def _mark_later_changes(facts, owner=None):
@@ -902,8 +914,12 @@ def _render_fact(f, max_quote=200):
         # 2026-10-04: the whole message the sentence came from, cut to a
         # window around that sentence when it is long
         said = _window(f["message"], said, max_quote * 2)
-    elif said and len(said) > max_quote:
-        said = said[:max_quote - 3].rstrip() + "..."
+    else:
+        # 2026-10-21 (review): the message path is made inert by _window; a
+        # bare sentence was quoted raw, so a '"' in it could close the quote
+        said = _inert(said)
+        if said and len(said) > max_quote:
+            said = said[:max_quote - 3].rstrip() + "..."
     if said and os.environ.get("RG_CONTEXT_QUOTES") != "0":
         ev.append(f'"{said}"')
     if (f.get("mentions") or 0) > 1:
@@ -1993,10 +2009,9 @@ class Memory:
         # review 2026-09-05 A4: this sorted by mentions alone, so a fact the
         # user had since replaced rendered FIRST, as current. Superseded facts
         # now sort last (and render "(no longer true)").
-        nodes = sorted((d for d in self.g.nodes.values() if self._visible(d)),
-                       key=lambda d: (d.get("current") is False,
-                                      -d["n_mentions"]))
-        return [self._fact(nd) for nd in nodes[:top]]
+        pairs = _newest_first([(d, self._fact(d)) for d in self.g.nodes.values()
+                               if self._visible(d)])
+        return [f for _, f in pairs[:top]]
 
     def conflicts(self):
         """Open slot conflicts (the acquisition frame's clarification hook,
@@ -2549,8 +2564,13 @@ class Memory:
             instr.sort(key=_f_date)
             ids = {f.get("id") for f in instr}
             keep = [f for f in keep if f.get("id") not in ids]
-            for f in instr:
+            # 2026-10-21 (review): no cap, so many instructions pushed out
+            # the facts and the rules; the ten most recent lead
+            for f in instr[-10:]:
                 lines.append(f"- (standing instruction) {_render_fact(f)}")
+            if len(instr) > 10:
+                lines.append(f"- ({len(instr) - 10} older standing instructions are "
+                             "in the user's memory file, not shown here)")
             for f in keep:
                 lines.append(f"- {_render_fact(f)}")
             head = "[MEMORY: what the user has told you]"
@@ -2665,8 +2685,6 @@ class Memory:
         profile must keep getting exactly that."""
         if top <= 0:
             return []
-        nodes = sorted((d for d in self.g.provisional.values()
-                        if self._visible(d)),
-                       key=lambda d: (d.get("current") is False,
-                                      -d["n_mentions"]))
-        return [self._fact(nd, provisional=True) for nd in nodes[:top]]
+        pairs = _newest_first([(d, self._fact(d, provisional=True))
+                               for d in self.g.provisional.values() if self._visible(d)])
+        return [f for _, f in pairs[:top]]

@@ -79,7 +79,15 @@ items fixed and open are listed below), docs/REVIEW_2026-10-09.md.
   the message used to drop out), cleans profile_cache*.jsonl* backups,
   .corrupt-* copies and world.json names; deny line kept while a copy
   survives; ingest rereads forgotten keys under both locks. Suite 1,447.
-  Next: item 4 (extraction).
+- Review item 4 FIXED except in-session supersession (needs turn order
+  through run_wire/currency; would move the benchmark numbers; known limit in
+  CHANGELOG and README): _shown_material drops instructions from shown
+  documents; prose _TO_ASSISTANT, signature-line check, _INCOMING; rgx
+  _MOMENT narrowed; ingest passes the next user message as `after`;
+  _newest_first; instructions capped at 10; claude_hooks._fit_block;
+  _owner_subject word boundary; bare said made _inert; MARK on source.
+  Suite 1,458. THE CODE NOW DIFFERS FROM 53e0d9c IN WHAT IS STORED: rerun
+  tools/release_measure2.sh on the release candidate before tagging.
 - Next: the review's ranked items, v13 held-out pasted-text set, launch
   plan (container install tests should include a killed-worker check and
   an old Claude Code version).

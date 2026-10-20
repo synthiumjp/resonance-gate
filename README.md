@@ -429,6 +429,8 @@ pasted text but not all; see above).
   word for password in a few other languages, and removes the whole sentence
   that names a credential with its value, so "My password is too short" goes
   too. The memory folder is readable by you only.
+- A change said in the same session as the old fact ("I use Postgres" ...
+  "we switched to SQLite") is not yet marked; across sessions it is.
 - Memory about a project stays with that project. Standing instructions
   ("never add comments to my code") lead every session.
 - Text you paste in from someone else (an email, a chat, a document) is

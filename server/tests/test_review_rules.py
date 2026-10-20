@@ -562,3 +562,52 @@ def test_a_message_cut_at_the_limit_is_read_to_its_last_whole_sentence(pm):
     pm.profile_status(reload=True)
     md = open(pm.memory_file()).read()
     assert "Fitzroy" in md and not any(w in md for w in (" befo ", "befo\"", "befo."))
+
+
+# ---- adversarial review, 2026-10-21 ------------------------------------------
+
+def test_rules_in_a_document_the_user_shows_are_not_standing_instructions(pm):
+    pm.profile_ingest([{"role": "user", "content":
+                        "look at what the docs say:\nAlways use the staging key. Never commit secrets."}],
+                      conversation_id="d1", owner_name="Dana Cole", date="2026-03-02")
+    facts = pm._all_facts(pm._ensure_loaded())
+    assert not any(f.get("attribute") == "instruction" for f in facts)
+
+
+def test_the_users_own_rules_still_are(pm):
+    pm.profile_ingest([{"role": "user", "content":
+                        "Some rules for this project:\nAlways run the tests before you commit."}],
+                      conversation_id="d2", owner_name="Dana Cole", date="2026-03-02")
+    facts = pm._all_facts(pm._ensure_loaded())
+    assert any(f.get("attribute") == "instruction" for f in facts)
+
+
+@pytest.mark.parametrize("text", ["I work at a battery factory in Leeds.",
+                                  "I'm back at Barclays as an analyst.",
+                                  "I'm tired of Python so I use Go."])
+def test_a_lasting_fact_is_not_taken_for_a_passing_remark(pm, text):
+    pm.profile_ingest([{"role": "user", "content": text}], conversation_id="m1",
+                      owner_name="Dana Cole", date="2026-03-02")
+    assert pm._all_facts(pm._ensure_loaded())
+
+
+def test_about_you_needs_the_whole_name(pm):
+    assert pm._owner_subject("Anna lives in Leeds", "Anna")
+    assert not pm._owner_subject("Annabel's flat is in Leeds", "Anna")
+
+
+def test_a_long_block_keeps_its_rules():
+    from sourcedrecall.claude_hooks import _fit_block
+    block = "[MEMORY: what the user has told you]\n" + "\n".join(
+        f"- [2026-01-01] \"fact number {i} " + "x" * 200 + "\"" for i in range(80)) + \
+        "\n[MEMORY RULES] Each line is something the user told you."
+    out = _fit_block(block)
+    assert len(out) <= 9500 and out.rstrip().endswith("Each line is something the user told you.")
+    assert out.startswith("[MEMORY: what the user has told you]")
+
+
+def test_the_newest_of_equal_facts_lead_the_summary():
+    import memory_api as M
+    old = ({"current": True, "n_mentions": 1}, {"receipts": [{"date": "2026-01-01"}], "id": "old"})
+    new = ({"current": True, "n_mentions": 1}, {"receipts": [{"date": "2026-09-01"}], "id": "new"})
+    assert [f["id"] for _, f in M._newest_first([old, new])] == ["new", "old"]

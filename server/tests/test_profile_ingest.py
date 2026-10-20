@@ -262,10 +262,10 @@ def test_an_unreadable_store_is_kept_not_overwritten(pm):
 def test_one_unreadable_message_does_not_lose_the_others(pm, monkeypatch):
     real = pm._prose_only
 
-    def flaky(text, owner):
+    def flaky(text, owner, after=None):
         if "boxing" in text:
             raise IndexError("a parser bug")
-        return real(text, owner)
+        return real(text, owner, after)
     monkeypatch.setattr(pm, "_prose_only", flaky)
     res = pm.profile_ingest(list(_TURNS), conversation_id="conv1",
                              owner_name="Ada Byron")

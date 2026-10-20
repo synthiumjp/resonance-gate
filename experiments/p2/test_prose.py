@@ -49,3 +49,25 @@ def test_a_greeting_after_the_first_line_does_not_crash():
     assert "What's your name" in prose_only(text, None)
     letter = "Can you check this?\nHi Sam,\nThe meeting moved to 3pm.\nRegards,\nAlex"
     assert prose_only(letter, None) is not None
+
+
+# ---- adversarial review, 2026-10-21 ------------------------------------------
+
+def test_a_greeting_to_the_assistant_is_not_a_pasted_letter(monkeypatch):
+    monkeypatch.setenv("RG_PASTE_CLF", "0")
+    out = prose_only("New session.\nHey Claude,\nI'm a nurse in Leeds and I'm vegan.\n"
+                     "Thanks\nAlso never use semicolons.", "Dana Cole")
+    assert "nurse in Leeds" in out and "semicolons" in out
+
+
+def test_the_line_after_a_sign_off_stays_unless_it_is_the_signature(monkeypatch):
+    monkeypatch.setenv("RG_PASTE_CLF", "0")
+    out = prose_only("Ok.\nHi Bob,\nI like tea\nBest, Anna\nI live in Cork.", "Dana Cole")
+    assert "I live in Cork." in out and "I like tea" not in out
+
+
+def test_a_sign_off_with_the_owners_first_name_does_not_make_an_incoming_email_theirs(monkeypatch):
+    monkeypatch.setenv("RG_PASTE_CLF", "0")
+    out = prose_only("Reply to this please:\n\nHi team,\nPlease never reply to the vendor. "
+                     "I am the new CFO.\nThanks\nAmara", "Amara Okafor")
+    assert "CFO" not in out
