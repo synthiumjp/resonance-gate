@@ -19,7 +19,39 @@ bench/false_memory/results_v10/SUMMARY.md, docs/PREREG_HELDOUT_V11.md (DRAFT, un
 waiting for JP), docs/REVIEW_2026-10-12.md (the second adversarial review;
 items fixed and open are listed below), docs/REVIEW_2026-10-09.md.
 
-## 2026-10-18 (read this first)
+## 2026-10-20 (read this first)
+
+- Checked the logs. Mac: nothing of ours running but Qwen :8090, no panics,
+  every log since 10-16 ended normally. ~/jpwork/sdr (the git clone) is
+  stale at f078bf4; tonight's tests ran in a scratch tree
+  ~/jpwork/sdr-hooktest (git archive of HEAD + the changed files; delete
+  when done).
+- Found on JP's install: the 10-19 06:47 session end saved c1066df4's turns
+  but none of its facts, and wrote nothing to hook.log. Most likely the
+  worker was killed (WSL stops soon after the last terminal closes; storing
+  needs ~10 s to load the parser); not proven. Re-stored by hand with
+  `session-end --sync`: 102 turns, 45 facts, 11 s, 0.5 GB (so not memory).
+  Backup of the store before that: ~/.sourcedrecall/conversations.backup-20261020.
+- FIX (0f9c774): jobs wait in ~/.sourcedrecall/jobs, the worker locks its job
+  and logs a "started" line, and session start reruns a job older than a
+  minute that no worker holds (3 tries, then .failed + log line). Cursor
+  shares the launcher. Server tests on the Mac 402 passed; kill-and-rerun
+  checked end to end with the real parser. JP's install moved to 0f9c774
+  (plugin data src checkout).
+- Not a bug: two sessions at 20:54 logged "invalid manifest: Unrecognized
+  key userConfig". They ran Claude Code 2.1.44 before it auto-updated to
+  2.1.304; userConfig arrived in 2.1.83. READMEs now say 2.1.83 or later.
+- Extraction quality seen in the re-store (to look at, not fixed): many
+  cache records come from ASSISTANT turns and are written about the user
+  (a greeting turned into an attribute; a remark about a folder turned into
+  one about the user). Check whether role=assistant facts reach the block
+  or recall; recall tonight showed only user facts. A fact cut off mid-word
+  is NOT a bug: the user's pasted message was already cut; quoted as typed.
+- Next: the extraction items above, v13 held-out pasted-text set, launch
+  plan (container install tests should include a killed-worker check and
+  an old Claude Code version).
+
+## 2026-10-18
 
 - Release re-measurement on 53e0d9c done; README, FAQ, bench READMEs carry
   it (9345fcc), exported and pushed to synthiumjp/sourcedrecall (4922c14).

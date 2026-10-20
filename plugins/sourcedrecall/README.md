@@ -13,7 +13,7 @@ Install:
 ```
 
 The first session sets up a Python environment and downloads the models in
-the background (a few minutes). Requirements: Python 3.10 to 3.13 and git.
+the background (a few minutes). Requirements: Claude Code 2.1.83 or later, Python 3.10 to 3.13 and git.
 
 What it adds:
 - an MCP server with `profile_recall`, `profile_context`, `profile_correct`

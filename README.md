@@ -426,7 +426,7 @@ pasted text but not all; see above).
 
 ## Install
 
-In Claude Code:
+In Claude Code (version 2.1.83 or later; `claude --version`):
 
 ```
 /plugin marketplace add synthiumjp/sourcedrecall
