@@ -92,4 +92,23 @@ $P evaluation_uqa.py --frame rgp2 --version sdr-$C --user_num 2 > $HOME/jpwork/h
 /usr/bin/python3 -c "
 import json; r=json.load(open('results/rgp2-sdr-$C/rgp2_eval_stat_result_uqa.json'))['overall_score']
 for k in ('memory_update', 'question_answering'): print(k, json.dumps(r[k]))"
+echo "== 5. LoCoMo strict judge on sourcedrecall's answers"
+# 2026-10-21: done by hand for 53e0d9c (~/jpwork/mh/strict_release.sh); Mem0's
+# and plain retrieval's strict verdicts do not change and are copied
+cd $W/bench/locomo
+for x in default small standard; do
+  D=results/release_test_$x
+  [ -d $D ] || continue
+  LOCOMO_LLM_BASE=$Q LOCOMO_LLM_MODEL=qwen3-14b-a8cc1361.gguf LOCOMO_JUDGE=strict \
+    /usr/bin/python3 rejudge.py $D sourcedrecall > $D/rejudge_strict.log 2>&1 || { echo "strict rejudge $x failed"; continue; }
+  for s in mem0 rag; do
+    cp results/strict_release_test_default/ans_${s}_strict.jsonl $D/
+    [ -e $D/ctx_${s}_strict.jsonl ] || ln -s ctx_$s.jsonl $D/ctx_${s}_strict.jsonl
+  done
+  for au in "" $W/bench/locomo/results/locomo_audit_errors.json; do
+    echo "-- strict $x ${au:+without the audit wrong gold answers}"
+    LOCOMO_AUDIT=$au LOCOMO_JUDGE= /usr/bin/python3 score.py $D sourcedrecall_strict mem0_strict rag_strict | grep -E "^\| (overall|1 multi|2 temporal|3 open|4 single)"
+  done
+done
+
 echo "== release measure 2 done $(date)"

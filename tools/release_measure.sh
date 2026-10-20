@@ -14,7 +14,14 @@ NOTES=${NOTES_MODELS:-}          # e.g. "small:$HOME/jpwork/distil/ort_r6"
 echo "== release measure $(cat $W/COMMIT 2>/dev/null) $(date)"
 
 echo "== 1. full suite"
-(cd $W && PYTHONPATH=$W/server $P -m pytest -q rgx experiments/p2 tools server 2>&1 | grep -E "^FAILED|passed|failed" | head -8)
+# 2026-10-21: the parser comparison test needs the reference models
+# (~/jpwork/suites.sh); without them it failed every release run
+J=$HOME/jpwork
+(cd $W && env PYTHONPATH=$W/server:$W STANZA_PACKAGES=ours STANZA_REF_RESOURCES_DIR=$J/stanza_resources_ewt \
+   STANZA_POS_MODEL=$J/ewt_train/saved_models/pos/en_ewt_glove_nocharlm_tagger.pt \
+   STANZA_DEP_MODEL=$J/ewt_train/en_ewt_glove_nocharlm_parser_rhc.pt \
+   STANZA_PRETRAIN=$J/stanza_resources_ewt/en/pretrain/glove.pt \
+   $P -m pytest -q -p no:cacheprovider rgx experiments/p2 tools server 2>&1 | grep -E "^FAILED|passed|failed" | head -8)
 
 echo "== 2. LoCoMo test (convs 2-9), default and each notes model"
 cd $W/bench/locomo
