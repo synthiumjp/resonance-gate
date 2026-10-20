@@ -41,12 +41,12 @@ items fixed and open are listed below), docs/REVIEW_2026-10-09.md.
 - Not a bug: two sessions at 20:54 logged "invalid manifest: Unrecognized
   key userConfig". They ran Claude Code 2.1.44 before it auto-updated to
   2.1.304; userConfig arrived in 2.1.83. READMEs now say 2.1.83 or later.
-- Extraction quality seen in the re-store (to look at, not fixed): many
-  cache records come from ASSISTANT turns and are written about the user
-  (a greeting turned into an attribute; a remark about a folder turned into
-  one about the user). Check whether role=assistant facts reach the block
-  or recall; recall tonight showed only user facts. A fact cut off mid-word
-  is NOT a bug: the user's pasted message was already cut; quoted as typed.
+- Checked, not a bug: the cache holds records parsed from ASSISTANT turns
+  written about the user (JP's cache: 207 assistant, 34 user). None load:
+  a copy of the memory loaded with the installed code has 3 asserted, 25
+  provisional, 0 hearsay, all from the user's own words, and MEMORY.md has
+  none. Only cost: parse time. A fact cut off mid-word is not a bug either:
+  the user's pasted message was already cut; quoted as typed.
 - Next: the extraction items above, v13 held-out pasted-text set, launch
   plan (container install tests should include a killed-worker check and
   an old Claude Code version).
