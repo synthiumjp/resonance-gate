@@ -42,12 +42,14 @@ items fixed and open are listed below), docs/REVIEW_2026-10-09.md.
   key userConfig". They ran Claude Code 2.1.44 before it auto-updated to
   2.1.304; userConfig arrived in 2.1.83. READMEs now say 2.1.83 or later.
 - Checked, not a bug: the cache holds records parsed from ASSISTANT turns
-  written about the user (JP's cache: 207 assistant, 34 user). None load:
-  a copy of the memory loaded with the installed code has 3 asserted, 25
-  provisional, 0 hearsay, all from the user's own words, and MEMORY.md has
-  none. Only cost: parse time. A fact cut off mid-word is not a bug either:
+  written about the user (JP's cache: 207 assistant, 34 user). Only
+  "report" clauses load, as labelled hearsay (run_wire.py:222-247); JP's
+  store has none, so his loaded memory (3 asserted, 25 provisional) is all
+  his own words. Only cost: parse time. A fact cut off mid-word is not a bug either:
   the user's pasted message was already cut; quoted as typed.
-- Next: the extraction items above, v13 held-out pasted-text set, launch
+- Adversarial review 2026-10-21 (five Sonnet agents): docs/REVIEW_2026-10-21.md,
+  five ranked items first. Fix those before launch.
+- Next: the review's ranked items, v13 held-out pasted-text set, launch
   plan (container install tests should include a killed-worker check and
   an old Claude Code version).
 
