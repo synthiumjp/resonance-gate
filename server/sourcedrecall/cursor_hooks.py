@@ -42,9 +42,7 @@ import sourcedrecall.paths  # noqa: F401  (offline mode first)
 import json
 import os
 import re
-import subprocess
 import sys
-import tempfile
 import time
 from datetime import datetime, timezone
 
@@ -142,22 +140,9 @@ def _store(conversation_id, owner, cwd, delete, sync):
         return ingest_spool(path, conversation_id, owner, cwd, delete)
     # Loading the parser takes seconds; hand the work to a detached process
     # and return at once, as the Claude Code session-end hook does.
-    job = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False,
-                                      prefix="sourcedrecall-job-")
-    json.dump({"spool": path, "conversation_id": conversation_id, "owner": owner,
-               "cwd": cwd, "delete": delete}, job)
-    job.close()
-    # 2026-10-09 (security review): in the private state dir, not a
-    # predictable /tmp path anyone can read or pre-create as a symlink
-    from sourcedrecall.paths import private_dir, state_dir
-    log = os.path.join(private_dir(state_dir()), "hook.log")
-    from sourcedrecall.paths import detached
-    with open(log, "a", encoding="utf-8") as lf:
-        subprocess.Popen([sys.executable, "-m", "sourcedrecall.claude_hooks",
-                          "_worker", job.name],
-                         stdin=subprocess.DEVNULL, stdout=lf, stderr=lf,
-                         **detached())
-    return {"stored": "pending", "job": job.name, "log": log}
+    from sourcedrecall import claude_hooks
+    return claude_hooks.launch_worker({"spool": path, "conversation_id": conversation_id,
+                                       "owner": owner, "cwd": cwd, "delete": delete})
 
 
 def _reply(name):

@@ -37,6 +37,13 @@ def state_dir():
                           os.path.expanduser("~/.sourcedrecall"))
 
 
+def jobs_dir():
+    """Where a session waiting to be stored is kept until its worker is done.
+    2026-10-20 (JP's install): these were in the temp folder, so a worker
+    killed partway left nothing a later session could find."""
+    return private_dir(os.path.join(state_dir(), "jobs"))
+
+
 def default_memory_dir():
     """2026-10-02, from the new-user install test: RG_MEMORY_DIR was required
     and documented only in a docstring, so the first profile_* call failed.

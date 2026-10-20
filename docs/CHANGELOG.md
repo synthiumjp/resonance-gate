@@ -6,6 +6,12 @@ has the details behind each change.
 
 ## Unreleased
 
+- A session whose storing was cut off (the computer slept, or on WSL the
+  Linux side stopped after the terminal closed) is stored at the next
+  session start, up to three tries. Before, its conversation was kept but
+  its facts were not, and nothing said so. `hook.log` now has a line when
+  storing starts as well as when it ends.
+
 - A new install says what is happening: while the memory installs, if the
   install failed (with its log and how to try again), when your name is
   not set, and once, while the memory is empty, what happens next.

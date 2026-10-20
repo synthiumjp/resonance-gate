@@ -209,22 +209,100 @@ def session_end(event, owner=None, sync=False, agent="claude"):
     cwd = event.get("cwd")
     if sync:
         return ingest_session(path, sid, owner, cwd, agent)
-    job = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False,
-                                      prefix="sourcedrecall-job-")
-    json.dump({"transcript_path": path, "session_id": sid, "owner": owner,
-               "cwd": cwd, "agent": agent}, job)
-    job.close()
+    return launch_worker({"transcript_path": path, "session_id": sid,
+                          "owner": owner, "cwd": cwd, "agent": agent})
+
+
+def _hook_log():
     # 2026-10-09 (security review): in the private state dir, not a
     # predictable /tmp path anyone can read or pre-create as a symlink
     from sourcedrecall.paths import private_dir, state_dir
-    log = os.path.join(private_dir(state_dir()), "hook.log")
+    return os.path.join(private_dir(state_dir()), "hook.log")
+
+
+def launch_worker(payload):
+    """Store a session in a detached process (loading the parser takes
+    seconds) and return at once. The job file stays in the state dir until
+    its worker is done.
+    2026-10-20 (JP's install): a worker was killed partway (the session's
+    turns were saved, its facts never were) and nothing said so; on WSL the
+    Linux side stops soon after the last terminal closes. The worker now
+    logs when it starts, and the next session start reruns a job whose
+    worker is gone (_rerun_orphans)."""
+    from sourcedrecall.paths import jobs_dir
+    job = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False,
+                                      prefix="sourcedrecall-job-", dir=jobs_dir())
+    json.dump(payload, job)
+    job.close()
+    log = _hook_log()
+    _spawn_worker(job.name, log)
+    return {"stored": "pending", "job": job.name, "log": log}
+
+
+def _spawn_worker(job, log):
     from sourcedrecall.paths import detached
     with open(log, "a", encoding="utf-8") as lf:
         subprocess.Popen([sys.executable, "-m", "sourcedrecall.claude_hooks",
-                          "_worker", job.name],
+                          "_worker", job],
                          stdin=subprocess.DEVNULL, stdout=lf, stderr=lf,
                          **detached())
-    return {"stored": "pending", "job": job.name, "log": log}
+
+
+def _try_lock(fh):
+    """-> True when this process now holds the job's lock: no worker is
+    running it. The lock goes when the file is closed or the process dies."""
+    try:
+        if os.name == "nt":
+            import msvcrt
+            fh.seek(0)
+            msvcrt.locking(fh.fileno(), msvcrt.LK_NBLCK, 1)
+        else:
+            import fcntl
+            fcntl.flock(fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        return True
+    except OSError:
+        return False
+
+
+def _rerun_orphans(min_age=60, max_tries=3):
+    """At session start: a job file older than a minute that no worker holds
+    was left by a worker that died. Start it again, at most max_tries times;
+    after that it is renamed .failed and the log says so. Storing a session
+    twice is harmless (turns already parsed come from the cache)."""
+    import glob
+    import time
+    from sourcedrecall.paths import jobs_dir
+    for p in sorted(glob.glob(os.path.join(jobs_dir(), "sourcedrecall-job-*.json"))):
+        try:
+            if time.time() - os.path.getmtime(p) < min_age:
+                continue
+            fh = open(p, encoding="utf-8")
+        except OSError:
+            continue
+        with fh:
+            if not _try_lock(fh):
+                continue
+            try:
+                job = json.load(fh)
+            except ValueError:
+                job = None
+        log = _hook_log()
+        sid = (job or {}).get("session_id") or (job or {}).get("conversation_id")
+        tries = (job or {}).get("tries", 0) if isinstance(job, dict) else max_tries
+        if tries >= max_tries:
+            os.replace(p, p[:-len(".json")] + ".failed")
+            with open(log, "a", encoding="utf-8") as lf:
+                lf.write(json.dumps({"session": sid, "gave_up": True, "tries": tries,
+                                     "job": p[:-len(".json")] + ".failed"}) + "\n")
+            continue
+        job["tries"] = tries + 1
+        tmp = p + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as out:
+            json.dump(job, out)
+        os.replace(tmp, p)          # also renews its age: not rerun again at once
+        with open(log, "a", encoding="utf-8") as lf:
+            lf.write(json.dumps({"session": sid, "rerun": job["tries"]}) + "\n")
+        _spawn_worker(p, log)
 
 
 def _session_start(event, owner=None, max_facts=15, agent="claude",
@@ -266,6 +344,10 @@ def _session_start(event, owner=None, max_facts=15, agent="claude",
 
 def session_start(event, owner=None, max_facts=15, agent="claude",
                   show_notice=True):
+    try:
+        _rerun_orphans()
+    except OSError:
+        pass                        # never stop a session starting
     out = _session_start(event, owner, max_facts, agent, show_notice)
     note = _windows_tools_note(agent, owner) if show_notice else None
     if note:
@@ -312,7 +394,8 @@ def _welcome(agent):
     # removed by its worker when done (one older than 30 minutes is a leftover)
     import glob
     import time
-    pending = [p for p in glob.glob(os.path.join(tempfile.gettempdir(), "sourcedrecall-job-*.json"))
+    from sourcedrecall.paths import jobs_dir
+    pending = [p for p in glob.glob(os.path.join(jobs_dir(), "sourcedrecall-job-*.json"))
                if time.time() - os.path.getmtime(p) < 1800]
     if pending:
         return {"systemMessage": (
@@ -400,7 +483,20 @@ def main(argv=None):
         os.unlink(a.job)
         return 0
     if a.event == "_worker":
-        job = json.load(open(a.job))
+        try:
+            fh = open(a.job, encoding="utf-8")
+        except OSError:
+            return 0                # already stored by another worker
+        job = json.load(fh)
+        if not _try_lock(fh):
+            fh.close()
+            return 0                # another worker is storing it
+        # a "started" line without a result after it: the worker was killed
+        from datetime import datetime, timezone
+        print(json.dumps({"session": job.get("session_id") or job.get("conversation_id"),
+                          "started": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                          **({"rerun": job["tries"]} if job.get("tries") else {})}),
+              flush=True)
         try:
             if job.get("spool"):
                 from sourcedrecall import cursor_hooks
@@ -414,7 +510,12 @@ def main(argv=None):
             print(json.dumps({"session": job.get("session_id")
                               or job.get("conversation_id"), **out}), flush=True)
         finally:
+            # Windows cannot remove an open file; elsewhere the lock is kept
+            # until the file is gone, so a session start cannot rerun it
+            if os.name == "nt":
+                fh.close()
             os.unlink(a.job)
+            fh.close()
         return 0
     try:
         # utf-8 whatever the console's code page (Windows; review 3.10)

@@ -108,7 +108,6 @@ def test_codex_session_end_with_a_null_transcript_does_nothing(pm):
 def test_session_end_hands_the_agent_to_the_worker(pm, tmp_path, monkeypatch):
     launched = []
     monkeypatch.setattr(H.subprocess, "Popen", lambda cmd, **kw: launched.append(cmd))
-    monkeypatch.setattr(H.tempfile, "gettempdir", lambda: str(tmp_path))
     path = _codex_rollout(tmp_path)
     out = H.session_end({"session_id": UUID, "transcript_path": path, "cwd": "/work"},
                         agent="codex")
@@ -216,8 +215,7 @@ def test_cursor_stop_without_anything_recorded_does_nothing(pm):
 
 def test_cursor_stop_starts_a_background_worker(pm, tmp_path, monkeypatch):
     launched = []
-    monkeypatch.setattr(C.subprocess, "Popen", lambda cmd, **kw: launched.append(cmd))
-    monkeypatch.setattr(C.tempfile, "gettempdir", lambda: str(tmp_path))
+    monkeypatch.setattr(H.subprocess, "Popen", lambda cmd, **kw: launched.append(cmd))
     C.handle(_ev("beforeSubmitPrompt", prompt="I keep bees."), "Dana")
     C.handle(_ev("stop", status="completed"), "Dana")
     job_file = launched[0][-1]
@@ -294,9 +292,78 @@ def test_no_windows_note_elsewhere(pm, monkeypatch, tmp_path):
 
 def test_the_first_message_says_a_session_is_being_stored(pm, monkeypatch, tmp_path):
     # 2026-10-14: "your memory is empty" while the last session was still stored
-    import tempfile
-    monkeypatch.setattr(tempfile, "gettempdir", lambda: str(tmp_path))
-    (tmp_path / "sourcedrecall-job-x.json").write_text("{}")
+    from sourcedrecall.paths import jobs_dir
+    with open(os.path.join(jobs_dir(), "sourcedrecall-job-x.json"), "w") as f:
+        f.write("{}")
     out = H._welcome("claude")
     assert "being stored now" in out["systemMessage"]
     assert not (tmp_path / "state" / ".welcomed").exists()   # the welcome can still come later
+
+
+# 2026-10-20 (JP's install): a worker killed partway left no trace and its
+# session's facts were never stored. Jobs now wait in the state dir and the
+# next session start reruns one whose worker is gone.
+
+def _old_job(payload, age=120):
+    import time
+    from sourcedrecall.paths import jobs_dir
+    p = os.path.join(jobs_dir(), "sourcedrecall-job-old.json")
+    with open(p, "w") as f:
+        json.dump(payload, f)
+    os.utime(p, (time.time() - age, time.time() - age))
+    return p
+
+
+def test_the_worker_logs_that_it_started_before_storing(pm, tmp_path, capsys):
+    t = _write(tmp_path / "t.jsonl", [{"type": "user", "timestamp": "2026-09-20T09:00:05Z",
+                                       "message": {"role": "user", "content": "I live in Fitzroy."}}])
+    job = _old_job({"transcript_path": t, "session_id": "abc"})
+    assert H.main(["_worker", job]) == 0
+    lines = [json.loads(l) for l in capsys.readouterr().out.splitlines()]
+    assert lines[0]["session"] == "abc" and "started" in lines[0]
+    assert lines[1]["conversation_id"] == "claude-code:abc"
+    assert not os.path.exists(job)
+
+
+def test_a_job_left_by_a_dead_worker_is_rerun_at_session_start(pm, monkeypatch):
+    launched = []
+    monkeypatch.setattr(H.subprocess, "Popen", lambda cmd, **kw: launched.append(cmd))
+    job = _old_job({"transcript_path": "/x.jsonl", "session_id": "abc"})
+    H.session_start({"source": "startup"}, owner="Dana Cole")
+    assert launched and launched[0][-2:] == ["_worker", job]
+    assert json.load(open(job))["tries"] == 1
+    launched.clear()
+    H.session_start({"source": "startup"}, owner="Dana Cole")   # its age was renewed
+    assert not launched
+
+
+def test_a_new_job_or_one_still_being_stored_is_left_alone(pm, monkeypatch):
+    launched = []
+    monkeypatch.setattr(H.subprocess, "Popen", lambda cmd, **kw: launched.append(cmd))
+    _old_job({"session_id": "new"}, age=5)
+    H._rerun_orphans()
+    assert not launched
+    job = _old_job({"session_id": "busy"})
+    with open(job) as held:
+        assert H._try_lock(held)                 # a running worker holds it
+        H._rerun_orphans()
+    assert not launched and json.load(open(job)).get("tries") is None
+
+
+def test_a_worker_finds_its_job_already_taken(pm, capsys):
+    job = _old_job({"transcript_path": "/x.jsonl", "session_id": "abc"})
+    with open(job) as held:
+        assert H._try_lock(held)
+        assert H.main(["_worker", job]) == 0
+    assert capsys.readouterr().out == "" and os.path.exists(job) and not pm.ingested
+
+
+def test_a_job_that_keeps_dying_is_given_up_and_logged(pm, monkeypatch, tmp_path):
+    launched = []
+    monkeypatch.setattr(H.subprocess, "Popen", lambda cmd, **kw: launched.append(cmd))
+    job = _old_job({"transcript_path": "/x.jsonl", "session_id": "abc", "tries": 3})
+    H._rerun_orphans()
+    assert not launched and not os.path.exists(job)
+    assert os.path.exists(job[:-len(".json")] + ".failed")
+    log = open(tmp_path / "state" / "hook.log").read()
+    assert '"gave_up": true' in log
