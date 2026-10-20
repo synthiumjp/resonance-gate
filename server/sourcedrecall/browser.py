@@ -99,7 +99,7 @@ MEM_PAGE = """<!doctype html><html><head><meta charset="utf-8">
 <button>Recall</button></form>{result}</header>
 <main>{body}</main>
 <footer>Each line is a short summary, then your exact words and the date. To remove one:
-<code>sourcedrecall-memory forget &lt;id&gt;</code>, or ask your assistant to forget it.</footer>
+<code>{forget}</code>, or ask your assistant to forget it.</footer>
 </body></html>"""
 
 
@@ -154,7 +154,9 @@ def _render_memory(owner, groups, q="", rec=None):
         else:
             result = "<div class='result sub'>Nothing stored about this.</div>"
     title = f"Memory: {e(owner)}" if owner else "Memory"
-    return MEM_PAGE.format(title=title, n=n, q=e(q), result=result, body=body)
+    from sourcedrecall.paths import command
+    return MEM_PAGE.format(title=title, n=n, q=e(q), result=result, body=body,
+                           forget=e(command("memory forget <id>")))
 
 
 # 2026-10-09 (security review): the browser answered any Host header (a web
@@ -213,7 +215,8 @@ def make_handler(service, token=None):
             u = urlparse(self.path)
             ok, cookie = self._allowed(parse_qs(u.query))
             if not ok:
-                self._send("Open the address printed by `sourcedrecall-memory view` "
+                from sourcedrecall.paths import command
+                self._send(f"Open the address printed by `{command('memory view')}` "
                            "(it carries this run's key).", "text/plain; charset=utf-8", 403)
                 return
             if cookie:

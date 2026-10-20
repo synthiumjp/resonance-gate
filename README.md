@@ -389,7 +389,8 @@ pasted text but not all; see above).
   facts and through a search over the messages themselves (small embedding
   and re-ranking models, run locally), and shows them oldest first.
 - `MEMORY.md` and a local web page (its address, with a key for this run,
-  from `sourcedrecall-memory view`) show everything stored. Forget anything
+  from `sourcedrecall-memory view`, or `! sourcedrecall-run memory view` in
+  Claude Code) show everything stored. Forget anything
   by its id and the sentence it came from is erased from your stored
   messages, the facts and the notes; only a fingerprint of it is kept, so a
   resumed session that sends it again does not bring it back. Not yet
@@ -432,6 +433,20 @@ In Claude Code (version 2.1.83 or later; `claude --version`):
 /plugin marketplace add synthiumjp/sourcedrecall
 /plugin install sourcedrecall@sourcedrecall
 ```
+
+It asks for your name: facts are written about that name, and your words
+are told from other people's by it (change it with `/plugin configure
+sourcedrecall`). The first session then sets it up in the background, a
+few minutes the first time. To check that it works, start a new session
+and type:
+
+```
+! sourcedrecall-run memory status
+```
+
+`sourcedrecall-run memory ...` and `sourcedrecall-run import ...` run the
+`sourcedrecall-memory` and `sourcedrecall-import` commands below from the
+plugin's own environment; in Claude Code, start the line with `!`.
 
 On Windows it needs Git for Windows (which Claude Code uses anyway) and
 Python 3.10 to 3.13. Sessions are stored and summarised as on other
@@ -482,6 +497,12 @@ what setup and the memory left on disk:
 ```
 rm -rf ~/.sourcedrecall            # your memory, the parser and notes models
 rm -rf ~/.cache/sourcedrecall      # the embedder, re-ranker and conflict models
+```
+
+On Windows, in PowerShell:
+
+```
+Remove-Item -Recurse -Force ~\.sourcedrecall, ~\.cache\sourcedrecall
 ```
 
 The plugin keeps its own copy and environment in Claude Code's plugin data

@@ -37,6 +37,16 @@ def state_dir():
                           os.path.expanduser("~/.sourcedrecall"))
 
 
+def command(sub):
+    """How the user runs `sourcedrecall-<sub>` here. 2026-10-21 (review): the
+    plugin's commands live in its own environment, not on the user's PATH,
+    so a plugin user was told to type commands that did not exist. In
+    Claude Code the plugin's launcher is on the PATH of `!` commands."""
+    if os.environ.get("CLAUDE_PLUGIN_ROOT"):
+        return f"! sourcedrecall-run {sub}"
+    return f"sourcedrecall-{sub}"
+
+
 def jobs_dir():
     """Where a session waiting to be stored is kept until its worker is done.
     2026-10-20 (JP's install): these were in the temp folder, so a worker

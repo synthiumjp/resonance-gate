@@ -447,14 +447,14 @@ def _welcome(agent):
     # removed by its worker when done (one older than 30 minutes is a leftover)
     import glob
     import time
-    from sourcedrecall.paths import jobs_dir
+    from sourcedrecall.paths import command, jobs_dir
     pending = [p for p in glob.glob(os.path.join(jobs_dir(), "sourcedrecall-job-*.json"))
                if time.time() - os.path.getmtime(p) < 1800]
     if pending:
         return {"systemMessage": (
             "sourcedrecall is installed. Your last session is being stored now; the "
             "next session starts with what was kept. To see what is stored: "
-            "sourcedrecall-memory show.")}
+            f"{command('memory show')}")}
     try:
         os.makedirs(state_dir(), exist_ok=True)
         open(mark, "w").close()
@@ -463,9 +463,9 @@ def _welcome(agent):
     return {"systemMessage": (
         "sourcedrecall is installed and your memory is empty. This session is "
         "stored when it ends, and the next one starts with what was kept. "
-        "To bring in past chats: sourcedrecall-import chatgpt <export.zip> (or "
-        "claude). To see what is stored: sourcedrecall-memory show; what the "
-        "agent was last given: sourcedrecall-memory last.")}
+        f"To bring in past chats: {command('import chatgpt <export.zip>')} (or "
+        f"claude). To see what is stored: {command('memory show')} ; what the "
+        f"agent was last given: {command('memory last')}")}
 
 
 def saved_notice(new, memory_file=None, show=3, agent="claude"):

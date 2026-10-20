@@ -12,8 +12,12 @@ Install:
 /plugin install sourcedrecall@sourcedrecall
 ```
 
-The first session sets up a Python environment and downloads the models in
-the background (a few minutes). Requirements: Claude Code 2.1.83 or later, Python 3.10 to 3.13 and git.
+It asks for your name (facts are written about it). The first session sets
+up a Python environment and downloads about 0.7 GB of models in the
+background (a few minutes). Requirements: Claude Code 2.1.83 or later,
+Python 3.10 to 3.13 and git. To check that it works, start a new session
+and type `! sourcedrecall-run memory status`; `! sourcedrecall-run memory
+show` prints what is stored.
 
 What it adds:
 - an MCP server with `profile_recall`, `profile_context`, `profile_correct`

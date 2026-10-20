@@ -5,6 +5,10 @@
 #   sourcedrecall-run hook session-start   SessionStart hook
 #   sourcedrecall-run hook session-end     SessionEnd hook
 #   sourcedrecall-run install              install or update now (foreground)
+#   sourcedrecall-run memory|import|setup  the sourcedrecall-memory, -import and
+#                                          -setup commands from the plugin's own
+#                                          environment (in Claude Code:
+#                                          `! sourcedrecall-run memory show`)
 #
 # Claude Code installs only Node dependencies for plugins, so this script
 # installs the Python side itself, into the plugin's data directory
@@ -18,7 +22,21 @@ set -u
 
 REPO_URL="${SOURCEDRECALL_REPO_URL:-https://github.com/synthiumjp/sourcedrecall.git}"   # a fork or mirror
 ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
-DATA="${CLAUDE_PLUGIN_DATA:-$HOME/.sourcedrecall/plugin}"
+STATE="${SOURCEDRECALL_STATE:-$HOME/.sourcedrecall}"
+# 2026-10-21 (review): Claude Code sets CLAUDE_PLUGIN_DATA for hooks and the
+# MCP server but not in its shell, so `sourcedrecall-run memory ...` (and the
+# `install` retry the failure message suggests) used another folder. Each
+# hook run records the folder; a run without the variable reads it back.
+if [ -n "${CLAUDE_PLUGIN_DATA:-}" ]; then
+  DATA="$CLAUDE_PLUGIN_DATA"
+  if [ "$(cat "$STATE/plugin-data" 2>/dev/null)" != "$DATA" ]; then
+    mkdir -p "$STATE" 2>/dev/null && chmod 700 "$STATE" 2>/dev/null
+    printf '%s\n' "$DATA" > "$STATE/plugin-data" 2>/dev/null
+  fi
+else
+  DATA="$(cat "$STATE/plugin-data" 2>/dev/null)"
+  [ -n "$DATA" ] && [ -d "$DATA" ] || DATA="$HOME/.sourcedrecall/plugin"
+fi
 VERSION="$(sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' "$ROOT/.claude-plugin/plugin.json" | head -1)"
 REF="${SOURCEDRECALL_REF:-sourcedrecall-v$VERSION}"
 SRC="$DATA/src"
@@ -47,6 +65,14 @@ esac
 # Before anything redirects into it: `install` on a fresh machine failed
 # here because the log's directory did not exist yet.
 mkdir -p "$DATA" || { echo "sourcedrecall: cannot create $DATA" >&2; exit 1; }
+
+# 2026-10-21 (review): a failed install stayed failed: nothing retried it,
+# not even a plugin update. The mark now names the version it was for and
+# lasts an hour; after that, or for another version, the install runs again.
+if [ -f "$DATA/install.failed" ] && { [ "$(head -1 "$DATA/install.failed")" != "$REF" ] ||
+     [ -n "$(find "$DATA/install.failed" -mmin +60 2>/dev/null)" ]; }; then
+  rm -f "$DATA/install.failed"
+fi
 
 installed() {
   [ -x "$VBIN/sourcedrecall$EXE" ] && [ -f "$STAMP" ] && [ "$(cat "$STAMP")" = "$REF" ]
@@ -105,7 +131,19 @@ do_install() {
   else
     git clone -q --depth 1 --branch "$REF" "$REPO_URL" "$SRC" || return 1
   fi
-  [ -x "$VBIN/python$EXE" ] || "$py" -m venv "$VENV" || return 1
+  # 2026-10-21 (review): Debian and Ubuntu leave a venv without pip when
+  # python3-venv is missing, and the next try then skipped making it
+  if [ -x "$VBIN/python$EXE" ] && ! "$VBIN/python$EXE" -m pip --version >/dev/null 2>&1; then
+    rm -rf "$VENV"
+  fi
+  if [ ! -x "$VBIN/python$EXE" ]; then
+    "$py" -m venv "$VENV" && "$VBIN/python$EXE" -m pip --version >/dev/null 2>&1 || {
+      rm -rf "$VENV"
+      echo "could not make a Python environment with $py."
+      echo "On Debian or Ubuntu: sudo apt install python3-venv (or python3.X-venv for your version)"
+      return 1
+    }
+  fi
   "$VBIN/python$EXE" -m pip install -q --upgrade pip || return 1
   "$VBIN/python$EXE" -m pip install -q -e "$SRC/server" || return 1
   "$VBIN/sourcedrecall-setup$EXE" || return 1
@@ -155,7 +193,7 @@ case "${1:-}" in
     if [ $rc -eq 0 ]; then
       rm -f "$DATA/install.failed"
     else
-      date > "$DATA/install.failed"
+      { echo "$REF"; date; } > "$DATA/install.failed"
       echo "sourcedrecall: install failed, see $LOG" >&2
     fi
     exit $rc
@@ -181,9 +219,9 @@ case "${1:-}" in
     if ! installed; then
       if [ "$event" = "session-start" ]; then
         if [ -f "$DATA/install.failed" ] && [ ! -d "$LOCK" ]; then
-          tell_user "sourcedrecall: the install failed. The reason is at the end of $LOG. To try again: $0 install"
+          tell_user "sourcedrecall: the install failed. The reason is at the end of $LOG. It is tried again in an hour, or now with: ! sourcedrecall-run install"
         elif start_background_install || [ -d "$LOCK" ]; then
-          tell_user "sourcedrecall: setting up local memory in the background (about 0.9 GB of models, a few minutes, the first time only). The memory tools appear in this session when it is done, and this session will be remembered." \
+          tell_user "sourcedrecall: setting up local memory in the background (about 0.7 GB of models, a few minutes, the first time only). The memory tools appear in this session when it is done, and this session will be remembered." \
                     "[sourcedrecall] Installing local memory (first run). This session will be remembered once the install finishes."
         fi
       fi
@@ -214,8 +252,16 @@ case "${1:-}" in
     fi
     exec "$VBIN/sourcedrecall-hook$EXE" "$event" --owner "$OWNER"
     ;;
+  memory|import|setup)
+    if [ ! -x "$VBIN/sourcedrecall-$1$EXE" ]; then
+      echo "sourcedrecall is not installed yet (it installs in the background in your first Claude Code session). Progress: $LOG" >&2
+      exit 1
+    fi
+    cmd="$1"; shift
+    exec "$VBIN/sourcedrecall-$cmd$EXE" "$@"
+    ;;
   *)
-    echo "usage: sourcedrecall-run install | mcp | hook session-start|session-end" >&2
+    echo "usage: sourcedrecall-run memory|import|setup ... | install | mcp | hook session-start|session-end" >&2
     exit 2
     ;;
 esac

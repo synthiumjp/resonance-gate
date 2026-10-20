@@ -17,6 +17,16 @@ has the details behind each change.
   facts: it is skipped, counted in `hook.log`, and tried again next time.
   A name of only spaces no longer makes storing fail on pasted text.
 - "[Request interrupted by user]" is no longer stored as something you said.
+- In Claude Code, `! sourcedrecall-run memory ...` and `! sourcedrecall-run
+  import ...` run the memory and import commands from the plugin's own
+  environment; messages and pages name the command that works where you
+  are (the plugin's commands are not on your PATH). The README says the
+  plugin asks for your name and how to check that it works.
+- A failed install is tried again after an hour or when the plugin is
+  updated, and `! sourcedrecall-run install` retries it at once (it used to
+  install into a different folder). On Debian and Ubuntu without
+  python3-venv the install says what to install instead of failing on the
+  next try. `memory status` gives when the memory was last written.
 
 - A new install says what is happening: while the memory installs, if the
   install failed (with its log and how to try again), when your name is
