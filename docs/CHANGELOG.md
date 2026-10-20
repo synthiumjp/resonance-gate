@@ -49,6 +49,10 @@ has the details behind each change.
   cut by whole lines and keeps its rules. "About you" in `MEMORY.md` no
   longer takes "Annabel" for "Anna". Quoted sentences cannot close their
   own quotation marks.
+- Storing a long pasted text with many private-key header lines no longer
+  takes quadratic time (336 KB took 11 s per message).
+- Dependencies are capped at their next major version, so a new release
+  cannot break a fresh install; the wheel includes LICENSE and NOTICE.
 - Known limit: a change said in the same session as the old fact ("I use
   Postgres" ... "we switched to SQLite") does not yet mark the old one as no
   longer true; across sessions it does.

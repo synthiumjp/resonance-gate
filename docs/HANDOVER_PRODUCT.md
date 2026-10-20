@@ -88,6 +88,15 @@ items fixed and open are listed below), docs/REVIEW_2026-10-09.md.
   _owner_subject word boundary; bare said made _inert; MARK on source.
   Suite 1,458. THE CODE NOW DIFFERS FROM 53e0d9c IN WHAT IS STORED: rerun
   tools/release_measure2.sh on the release candidate before tagging.
+- Also done 2026-10-21: secrets key blocks found in one pass (linear);
+  dependency major-version caps in server/pyproject.toml; wheel carries
+  LICENSE/NOTICE (checked by a build on the Mac); export leak check widened
+  (Tailscale, .ts.net, surname, C:\\Users, every .hosts.env value via
+  SDR_HOSTS_ENV, a copy at ~/jpwork/.hosts.env.export on the Mac); it found
+  Chris's full name in experiments/p2/llm_profile.py (replaced). Trial export
+  ~/jpwork/sdr-export5 clean. NOTE: experiments/p2/probe_small_results.json
+  (research repo, public, not exported) has the Mac's user name and a line
+  about Chris.
 - Next: the review's ranked items, v13 held-out pasted-text set, launch
   plan (container install tests should include a killed-worker check and
   an old Claude Code version).

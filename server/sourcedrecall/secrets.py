@@ -79,11 +79,29 @@ _HARMLESS = re.compile(
 # (\w then the symbol: the same matches as \w+, without rescanning a long word)
 _VALUE_HINT = re.compile(r"\d|[:=/]|\b(?:is|was|are|to|as|'s)\b|\w[@#$%^&*!]")
 
+# 2026-10-21 (review): the key-block patterns were ".*?" to the END line,
+# so text with many BEGIN lines and no END took quadratic time (336 KB: 11 s,
+# on every stored message). Key blocks are now found in one pass (_keys).
+_KEY_BEGIN = re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY(?: BLOCK)?-----")
+_KEY_END = re.compile(r"-----END [A-Z ]*PRIVATE KEY(?: BLOCK)?-----")
+
+
+def _keys(s):
+    out, pos = [], 0
+    while True:
+        b = _KEY_BEGIN.search(s, pos)
+        if not b:
+            out.append(s[pos:])
+            return "".join(out)
+        out.append(s[pos:b.start()])
+        e = _KEY_END.search(s, b.end())
+        out.append(MARK)
+        if not e:               # a block cut off before its END line
+            return "".join(out)
+        pos = e.end()
+
+
 _FORMATS = [
-    re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY(?: BLOCK)?-----.*?-----END [A-Z ]*PRIVATE KEY(?: BLOCK)?-----",
-               re.S),
-    # a key block cut off before its END line: everything after BEGIN
-    re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY(?: BLOCK)?-----.*", re.S),
     # 2026-10-12 (review 3.17): "Authorization: Basic dXNlcjpwYXNz..."
     re.compile(r"(?i)\bauthorization\s*:\s*(?:basic|bearer|token|digest)?\s*[A-Za-z0-9._~+/=-]{8,}"),
     # 2026-10-09: an assignment whose name says what it is, as in a pasted
@@ -144,6 +162,7 @@ def _luhn(digits):
 
 
 def _formats(s):
+    s = _keys(s)
     for rx in _FORMATS:
         s = rx.sub(MARK, s)
 

@@ -105,7 +105,7 @@ URLs, or code (e.g. ssh alice@host22) are NOT personal facts about the user.
 
 # v3 (entry 78): the WORLD reframe -- the memory holds the user's world, not
 # only the user. Facts get a SUBJECT: "self", a relationship role ("wife"),
-# a named person ("chris marmo"), an org, or a project. Third-party facts are
+# a named person ("dana cole"), an org, or a project. Third-party facts are
 # no longer rejected -- they are ATTRIBUTED. Terminal/technical identifiers
 # are facts about no one. OPT-IN via RG_EXTRACT_V3 (own cache/report).
 SYSTEM_V3 = """Extract STABLE facts about the user's WORLD from one message: \

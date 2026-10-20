@@ -15,14 +15,18 @@ urls = { Homepage = "https://github.com/synthiumjp/sourcedrecall", Issues = "htt
 # mcp 2.x, which no longer has mcp.server.fastmcp, and the server would not
 # start. Install CPU torch first (see README) or pip pulls ~4 GB of CUDA
 # wheels this server never uses.
+# 2026-10-21 (review): upper bounds at the next major version, so a release
+# on launch day cannot break every fresh install; tested with numpy 2.5,
+# onnxruntime 1.30-1.31, onnx 1.23, tokenizers 0.23, huggingface_hub 1.33 and
+# 2.2, nltk 3.10, mcp 1.30 (Python 3.12, macOS and Linux)
 dependencies = [
     "mcp>=1.0,<2",
-    "numpy",
-    "onnxruntime>=1.17",    # embedder, re-ranker, conflict checker
-    "onnx>=1.15",
-    "tokenizers>=0.15",
-    "huggingface_hub",
-    "nltk>=3.8",
+    "numpy>=1.24,<3",
+    "onnxruntime>=1.17,<2",    # embedder, re-ranker, conflict checker
+    "onnx>=1.15,<2",
+    "tokenizers>=0.15,<1",
+    "huggingface_hub<3",
+    "nltk>=3.8,<4",
 ]
 
 [project.optional-dependencies]
@@ -35,7 +39,7 @@ stanza = [
 
 # 2026-10-06: the optional in-process notes model (sourcedrecall-setup --notes)
 notes = [
-    "onnxruntime-genai>=0.17",
+    "onnxruntime-genai>=0.17,<1",
 ]
 
 [project.scripts]

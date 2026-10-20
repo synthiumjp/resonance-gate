@@ -239,7 +239,25 @@ def main():
                 extra = HARNESS_FIX
             rewrite(path, extra)
     left = []
-    rx = re.compile(r"experiments/p2|experiments\", \"p2|/Users/|/home/jp|hotmail|chrismarmo")
+    # 2026-10-21 (review): the check matched five strings; it now also looks
+    # for Tailscale addresses and names, the Mac user's surname, Windows
+    # user folders, and every host and user in .hosts.env (read here, so
+    # they never have to be written into this script)
+    pats = [r"experiments/p2", r"experiments\", \"p2", r"/Users/", r"/home/jp", r"hotmail",
+            r"chrismarmo", r"(?i:\bmarmo\b)", r"\.ts\.net\b", r"(?i:C:\\Users\\)",
+            r"\b100\.(?:6[4-9]|[7-9]\d|1[01]\d|12[0-7])\.\d{1,3}\.\d{1,3}\b"]
+    hosts = [p for p in (os.environ.get("SDR_HOSTS_ENV"), os.path.join(SRC, ".hosts.env"),
+                         os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                                      ".hosts.env")) if p and os.path.exists(p)]
+    for hp in hosts[:1]:
+        for line in open(hp, encoding="utf-8"):
+            if "=" in line and not line.lstrip().startswith("#"):
+                for part in re.split(r"[@\s]+", line.split("=", 1)[1].strip().strip("'\"")):
+                    if len(part) >= 4:
+                        pats.append(re.escape(part))
+    if not hosts:
+        print("note: no .hosts.env found (set SDR_HOSTS_ENV); host names were not checked")
+    rx = re.compile("|".join(pats))
     for dp, _, fns in os.walk(DEST):
         for f in fns:
             path = os.path.join(dp, f)

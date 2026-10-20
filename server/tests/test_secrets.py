@@ -133,3 +133,17 @@ def test_a_title_is_scrubbed_before_it_is_cut():
     text = "please use this key for the staging box sk-proj-abcdefghijklmnopqrstuvwxyz0123456789 thanks"
     assert "sk-proj" not in _scrubbed(text)[:60]
     assert "abcdefghij" not in _scrubbed(text)[:60]
+
+
+def test_many_key_headers_without_an_end_are_fast_and_removed():
+    # 2026-10-21 (review): quadratic before (336 KB took 11 s)
+    import time
+    text = "-----BEGIN PRIVATE KEY-----\n" * 12000
+    t0 = time.time()
+    out = scrub("my notes\n" + text)
+    assert time.time() - t0 < 2 and "BEGIN" not in out and out.startswith("my notes")
+
+
+def test_a_key_block_between_text_is_removed_and_the_text_kept():
+    out = scrub("before\n-----BEGIN RSA PRIVATE KEY-----\nMIIEow\n-----END RSA PRIVATE KEY-----\nafter")
+    assert "MIIEow" not in out and "before" in out and "after" in out

@@ -60,12 +60,22 @@ def main():
     shutil.copytree(os.path.join(ROOT, "stanza_ort"), os.path.join(CORE, "stanza_ort"),
                     ignore=shutil.ignore_patterns("__pycache__"))
     print(f"_core: {len(mods)} modules from experiments/p2 + rgx + stanza_ort")
+    # 2026-10-21 (review): the wheel had no LICENSE or NOTICE (the model
+    # licences); hatchling includes them when they sit beside pyproject.toml
+    legal = [f for f in ("LICENSE", "NOTICE") if os.path.exists(os.path.join(ROOT, f))]
+    for f in legal:
+        shutil.copy2(os.path.join(ROOT, f), os.path.join(ROOT, "server", f))
     try:
         subprocess.run([sys.executable, "-m", "build", "--wheel", "--outdir",
                         os.path.join(ROOT, "server", "dist"),
                         os.path.join(ROOT, "server")], check=True)
     finally:
         shutil.rmtree(CORE, ignore_errors=True)
+        for f in legal:
+            try:
+                os.unlink(os.path.join(ROOT, "server", f))
+            except OSError:
+                pass
 
 
 if __name__ == "__main__":
