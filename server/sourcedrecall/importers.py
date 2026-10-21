@@ -496,21 +496,72 @@ def _import_export(fmt, path, owner, as_json):
     return 0 if n_conv else 1
 
 
+def claude_code_sessions(root=None, since_days=None):
+    """-> [transcript path] of Claude Code's own sessions (one .jsonl per
+    session under ~/.claude/projects/<project>/; subagent transcripts, one
+    level further down, are not sessions), oldest first."""
+    import glob
+    import time
+    root = os.path.expanduser(root or os.path.join(
+        os.environ.get("CLAUDE_CONFIG_DIR") or "~/.claude", "projects"))
+    paths = glob.glob(os.path.join(root, "*", "*.jsonl"))
+    if since_days:
+        cut = time.time() - float(since_days) * 86400
+        paths = [p for p in paths if os.path.getmtime(p) >= cut]
+    return sorted(paths, key=os.path.getmtime)
+
+
+def _import_claude_code(root, owner, since_days, as_json):
+    """2026-10-22 (docs/PLAN_GAPS_2026-10-22.md G4): store past Claude Code
+    sessions the way the session-end hook does, so a new install starts
+    with the history it would have kept. Safe to repeat: a session already
+    stored adds only what is new."""
+    from sourcedrecall import claude_hooks as H
+    paths = claude_code_sessions(root, since_days)
+    n = facts = records = failed = 0
+    for i, p in enumerate(paths, 1):
+        sid = os.path.splitext(os.path.basename(p))[0]
+        try:
+            out = H.ingest_session(p, sid, owner)
+        except Exception as e:      # noqa: BLE001 -- one bad file does not stop the rest
+            failed += 1
+            print(f"skipped {os.path.basename(p)}: {type(e).__name__}: {e}", file=sys.stderr)
+            continue
+        n += 1
+        facts += out.get("facts") or 0
+        records += out.get("coding_records") or 0
+        if not as_json and (i % 10 == 0 or i == len(paths)):
+            print(f"{i} of {len(paths)} sessions...", file=sys.stderr, flush=True)
+    res = {"sessions": n, "facts": facts, "coding_records": records, "failed": failed}
+    print(json.dumps(res, indent=2) if as_json else
+          f"stored {n} sessions: {facts} new facts and {records} coding records"
+          + (f" ({failed} could not be read)" if failed else ""))
+    return 0 if n or not paths else 1
+
+
 def main(argv=None):
     # 2026-10-14: conversations with an assistant (rgx RGX_ASSISTANT_CHAT)
     os.environ.setdefault("RGX_ASSISTANT_CHAT", "1")
     ap = argparse.ArgumentParser(
         prog="sourcedrecall-import",
-        description="Store a Gemini or Codex CLI session, or a ChatGPT or "
-                    "Claude.ai data export, in the memory.")
-    ap.add_argument("format", choices=["codex", "gemini", "chatgpt", "claude"])
-    ap.add_argument("file")
+        description="Store a Gemini or Codex CLI session, a ChatGPT or "
+                    "Claude.ai data export, or your past Claude Code sessions "
+                    "(claude-code; reads ~/.claude/projects unless a folder is given), "
+                    "in the memory.")
+    ap.add_argument("format", choices=["codex", "gemini", "chatgpt", "claude", "claude-code"])
+    ap.add_argument("file", nargs="?")
+    ap.add_argument("--since-days", type=float,
+                    help="claude-code: only sessions changed in the last N days")
     ap.add_argument("--owner", default=os.environ.get("SOURCEDRECALL_OWNER"))
     ap.add_argument("--id", dest="conv_id")
     ap.add_argument("--date")
     ap.add_argument("--scope")
     ap.add_argument("--json", action="store_true")
     a = ap.parse_args(argv)
+    if a.format == "claude-code":
+        return _import_claude_code(a.file, a.owner, a.since_days, a.json)
+    if not a.file:
+        ap.error(f"{a.format} needs a file")
     if a.format in ("chatgpt", "claude"):
         return _import_export(a.format, a.file, a.owner, a.json)
     try:

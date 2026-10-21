@@ -186,3 +186,20 @@ def test_the_session_start_shows_the_projects_history(home):
     assert "history_search" in head
     other = H.session_start({"cwd": str(home / "elsewhere")}, owner="Dana Cole", show_notice=False)
     assert "PROJECT HISTORY" not in json.dumps(other)
+
+
+def test_past_claude_code_sessions_are_imported_once(home, capsys):
+    pytest.importorskip("stanza", reason="ingest needs the rgx parser (stanza)")
+    from sourcedrecall import importers as I
+    root = home / "projects"
+    (root / "-w-proj" / "s1" / "subagents").mkdir(parents=True)
+    _transcript(root / "-w-proj" / "s1.jsonl")
+    _transcript(root / "-w-proj" / "s1" / "subagents" / "agent-a.jsonl")   # not a session
+    assert [p.split("/")[-1] for p in I.claude_code_sessions(str(root))] == ["s1.jsonl"]
+    assert I.main(["claude-code", str(root), "--owner", "Dana Cole", "--json"]) == 0
+    first = json.loads(capsys.readouterr().out)
+    assert first["sessions"] == 1 and first["coding_records"] >= 5
+    import sourcedrecall.profile_memory as pm
+    n = len(pm._load_episodes())
+    assert I.main(["claude-code", str(root), "--owner", "Dana Cole", "--json"]) == 0
+    assert len(pm._load_episodes()) == n                     # again: nothing doubled

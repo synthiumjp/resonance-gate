@@ -507,6 +507,7 @@ def _welcome(agent):
     return {"systemMessage": (
         "sourcedrecall is installed and your memory is empty. This session is "
         "stored when it ends, and the next one starts with what was kept. "
+        f"To store your past Claude Code sessions too: {command('import claude-code')} . "
         f"To bring in past chats: {command('import chatgpt <export.zip>')} (or "
         f"claude). To see what is stored: {command('memory show')} ; what the "
         f"agent was last given: {command('memory last')}")}
