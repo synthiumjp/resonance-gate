@@ -21,6 +21,11 @@ items fixed and open are listed below), docs/REVIEW_2026-10-09.md.
 
 ## 2026-10-21 IN FLIGHT (read this first)
 
+- 13:30: version 0.6.0 committed (358e282; JP: "do them all"), NOT tagged.
+  Testers post drafted in docs/LAUNCH_POST.md (not exported; check its
+  LoCoMo figures against this run). JP's install src moved to f5dc9df.
+  Run at 13:20: suite 1,460 passed; LoCoMo default done, sourcedrecall
+  65.6 (README 65.4), Mem0 64.6; small notes 1,194/1,307.
 - Release re-measurement of the launch candidate 012fcca running on the Mac
   since 09:16 AEDT: tree ~/jpwork/sdr-release-012fcca, log
   ~/jpwork/release7.log, RGX_PARSER_MODELS=~/jpwork/parser_models/ours (the
