@@ -1,0 +1,40 @@
+{
+ "dataset": "SALT-NLP/SWE-chat",
+ "revision": "df393df57195593d4227aefc31f691f01d4b81a5",
+ "rule": "Claude Code sessions, not delta-only, >=10 tool calls; repos with >=20 such sessions, permissive licence, not entireio/cli; sorted by sha256(coding-v1:repo_id); first 10 dev, next 20 held out",
+ "eligible_repos": 89,
+ "dev": [
+  "oddessentials/ado-git-repo-insights",
+  "marin-community/marin",
+  "PackmindHub/context-evaluator",
+  "hutusi/amytis",
+  "BIDEquity/outbid-dirigent",
+  "135yshr/documents",
+  "thedannywahl/pantoken",
+  "thieso2/Sandcastle",
+  "cyyeh/duckdb-data-agent",
+  "minixrs/minixrs"
+ ],
+ "held_out": [
+  "johyunduk/ddong-avoid-game",
+  "ababushkin/agent-skills-shaper",
+  "TheurgicDuke771/DataQ",
+  "lightfastai/lightfast",
+  "ababushkin/pde-skills",
+  "tpmjs/tpmjs",
+  "alexey1312/reachy-mini-swift",
+  "FSM1/cipher-box",
+  "amjadsaadeh/doorbell-detector",
+  "135yshr/meow",
+  "feltroidprime/s2morrow",
+  "NyanNyanGringo/luna-the-pet",
+  "samratjp/moltis",
+  "KuzniAI/inception-engine",
+  "HackatonWinnners/content-factory",
+  "wanshicheng/duckdb-data-agent",
+  "baotoq/micro-commerce",
+  "jdsingh122918/forge",
+  "JustinBeaudry/agent-sync",
+  "ElixirTrials/medgemma-hackathon"
+ ]
+}
