@@ -2464,6 +2464,43 @@ def _episodes_for(query, k=6, scope=None, kinds=None):
     return [dict(h, score=sc) for h, sc in hits]
 
 
+def project_brief(scope, max_chars=1800):
+    """The session-start lines for a project (2026-10-22): its last session,
+    what was still failing at its end, and recent decisions and commits.
+    None when the project has no coding records."""
+    keys = _forgotten_keys()
+    rows = [r for r in _load_episodes() if r.get("scope") == scope
+            and not _is_forgotten(r.get("text", ""), keys)]
+    if not rows:
+        return None
+    convs = []
+    for r in sorted(rows, key=lambda r: r.get("date") or ""):
+        if r["conv"] not in convs:
+            convs.append(r["conv"])
+    convs.reverse()                     # newest first
+    name = os.path.basename(str(scope).rstrip("/")) if scope else "this project"
+    out = [f"[PROJECT HISTORY: {name}] from past coding sessions here (sourcedrecall; "
+           "the commands and errors are from tool output, the rest as said):"]
+    last = [r for r in rows if r["conv"] == convs[0]]
+    sess = next((r for r in last if r["kind"] == "session"), None)
+    if sess:
+        out.append(f"- last session ({sess.get('date')}): {sess['text'].removeprefix('session: ')}")
+    recent = set(convs[:3])
+    for kind, label, n in (("unresolved", "still failing when a session ended", 3),
+                           ("decision", "decided", 4), ("commit", "", 4)):
+        picked = [r for r in sorted(rows, key=lambda r: r.get("date") or "", reverse=True)
+                  if r["kind"] == kind and r["conv"] in recent][:n]
+        for r in picked:
+            out.append(f"- [{r.get('date')}] " + (f"{label}: " if label else "") + r["text"])
+    out.append("Older sessions: history_search (\"how did we fix ...\", \"why did we ...\").")
+    text = ""
+    for line in out:
+        if len(text) + len(line) + 1 > max_chars:
+            break
+        text += line + "\n"
+    return text.rstrip()
+
+
 def profile_history(query, scope=None, k=8, all_projects=False):
     """Search past coding sessions: what failed and what fixed it, commands
     that worked, commits, decisions, each with its date, project and

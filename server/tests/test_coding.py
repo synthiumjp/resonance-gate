@@ -170,3 +170,19 @@ def test_stored_at_session_end_searchable_in_its_project_and_forgettable(home):
     assert pm.profile_forget(top["id"])["forgotten"]
     assert all(x["id"] != top["id"] for x in
                pm.profile_history("KeyError", all_projects=True)["results"])
+
+
+def test_the_session_start_shows_the_projects_history(home):
+    pytest.importorskip("stanza", reason="ingest needs the rgx parser (stanza)")
+    t = _transcript(home / "t.jsonl")
+    H.session_end({"transcript_path": t, "session_id": "s1", "cwd": str(home)},
+                  owner="Dana Cole", sync=True)
+    out = H.session_start({"cwd": str(home)}, owner="Dana Cole", show_notice=False)
+    ctx = out["hookSpecificOutput"]["additionalContext"]
+    head = ctx.split("\n\n")[0]
+    assert head.startswith("[PROJECT HISTORY:")
+    assert "No module named 'httpx'" in head            # still failing at the end
+    assert "committed: Parser: return None on empty input" in head
+    assert "history_search" in head
+    other = H.session_start({"cwd": str(home / "elsewhere")}, owner="Dana Cole", show_notice=False)
+    assert "PROJECT HISTORY" not in json.dumps(other)

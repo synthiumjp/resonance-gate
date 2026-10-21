@@ -412,13 +412,23 @@ def _session_start(event, owner=None, max_facts=15, agent="claude",
     os.environ.setdefault("RG_NLI", "0")
     pm = _setup_env(owner)
     st = pm.profile_status()
-    if not (st.get("asserted") or st.get("provisional")):
+    from sourcedrecall.paths import current_scope
+    scope = current_scope(event.get("cwd"))
+    # 2026-10-22: the project's coding history, first (the block is cut from
+    # the end, so a long profile loses its own lines before these)
+    brief = None
+    if briefing and os.environ.get("SOURCEDRECALL_CODING", "1") != "0":
+        try:
+            brief = pm.project_brief(scope)
+        except Exception as e:      # noqa: BLE001 -- never stop a session starting
+            print(f"sourcedrecall: project history unavailable: {e!r}", file=sys.stderr)
+    if not (st.get("asserted") or st.get("provisional") or brief):
         return _welcome(agent) if notice else None
     out = {}
     if briefing:
-        from sourcedrecall.paths import current_scope
-        block = pm.profile_context(None, max_facts,
-                                   scope=current_scope(event.get("cwd")))["block"]
+        block = pm.profile_context(None, max_facts, scope=scope)["block"] \
+            if (st.get("asserted") or st.get("provisional")) else ""
+        block = (brief + "\n\n" + block).strip() if brief else block
         out["hookSpecificOutput"] = {"hookEventName": "SessionStart",
                                      "additionalContext": _fit_block(block)}
     if notice:

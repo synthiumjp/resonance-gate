@@ -37,7 +37,6 @@ from concurrent.futures import ThreadPoolExecutor
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(HERE, "locomo"))
-from claude_batch import client  # noqa: E402
 
 SYSTEM_ID = "claude-memory"
 MODEL = os.environ.get("CLAUDE_MEMORY_MODEL", "claude-sonnet-5-5")
@@ -193,6 +192,7 @@ def _pool(jobs, workers=8):
 # ------------------------------------------------------------- LoCoMo
 def locomo(out, convs="2-9"):
     import common as C
+    from claude_batch import client
     os.makedirs(os.path.join(out, "state"), exist_ok=True)
     c = client()
     data = C.load(C.parse_convs(convs))
@@ -235,6 +235,7 @@ def locomo(out, convs="2-9"):
 
 # ------------------------------------------------- pasted-text sets
 def fm(cases_path, out):
+    from claude_batch import client
     os.makedirs(os.path.join(out, "state"), exist_ok=True)
     c = client()
     cases = [json.loads(l) for l in open(cases_path) if l.strip()]
