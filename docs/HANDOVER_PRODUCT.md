@@ -21,6 +21,18 @@ items fixed and open are listed below), docs/REVIEW_2026-10-09.md.
 
 ## 2026-10-21 IN FLIGHT (read this first)
 
+- 2026-10-22 03:50: release run at step 5 (strict judge, small and standard
+  left). Step 5's "without the audit wrong gold answers" line failed for
+  default: the tree had no results/locomo_audit_errors.json (gitignored;
+  copied in from ~/jpwork/attic/loose/, 156 entries). Default strict, by hand:
+  ours 664/1307 = 50.8%, Mem0 48.5%, rag 42.5%; without wrong golds 645/1227 =
+  52.6%, Mem0 50.4%, rag 43.9%. HaluMem 012fcca: update correct 0.510,
+  hallucination 0.020, omission 0.470; QA correct 0.528 (valid 0.689),
+  hallucination 0.156. Poll loop from WSL (not the sentinel, which would stop
+  on the old traceback). Post-launch ideas from ontogr/agentic-graphrag: a
+  "not stored" list the user can see (what was skipped and why), and name
+  merges that can be undone.
+
 - 17:50: Claude Code's own memory, simulated (bench/claude_memory.py: Claude
   Sonnet 5.5 updates a memory folder after each session following Claude
   Code's memory guidance; the reader gets every file, so it is generous).
