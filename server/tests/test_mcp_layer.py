@@ -1,4 +1,4 @@
-"""The MCP wiring: the nine profile_* tools registered, the diagnostics only
+"""The MCP wiring: the nine profile_* tools and history_search registered, the diagnostics only
 when asked for."""
 
 import asyncio
@@ -8,7 +8,7 @@ import asyncio
 EXTRA_TOOLS = {"profile_dynamics", "profile_quarantine", "profile_status", "profile_export"}
 PROFILE_TOOLS = {"profile_conflicts", "profile_recall", "profile_context", "profile_correct",
                  "profile_rehydrate", "profile_ingest", "profile_forget", "profile_confirm",
-                 "profile_check"}
+                 "profile_check", "history_search"}
 
 
 def _server(monkeypatch, tmp_path, all_tools=False):

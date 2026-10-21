@@ -75,6 +75,51 @@ def _text_items(content):
 _unknown_origins = {}
 
 
+def _classify(o):
+    """One transcript line -> ("user", text) for what the person typed,
+    ("assistant", text) for the assistant's visible text, else None. Shared
+    with sourcedrecall.coding (2026-10-22), so both read speech the same way."""
+    if o.get("isSidechain") or o.get("isMeta"):
+        return None
+    # 2026-10-12 (review): user-role lines the person did not type --
+    # the summary Claude Code writes after /compact, background-task
+    # and subagent results, messages from other sessions
+    origin = o.get("turnOrigin")
+    if o.get("isCompactSummary") or o.get("isVisibleInTranscriptOnly"):
+        return None
+    if origin not in (None, "human"):
+        # 2026-10-21 (review): only "task_notification" and "peer" are
+        # seen in real transcripts; a new value is counted, so a
+        # Claude Code change that marks typed prompts differently
+        # shows in hook.log instead of silently storing nothing
+        if origin not in ("task_notification", "peer") and o.get("type") == "user":
+            _unknown_origins[str(origin)] = _unknown_origins.get(str(origin), 0) + 1
+        return None
+    t = o.get("type")
+    if t not in ("user", "assistant"):
+        return None
+    msg = o.get("message") or {}
+    content = msg.get("content")
+    if t == "user":
+        if isinstance(content, list) and any(
+                isinstance(it, dict) and it.get("type") == "tool_result"
+                for it in content):
+            return None                           # tool output, not the human
+        text = "\n".join(_text_items(content))
+        text = _INJECTED.sub("", text).strip()
+        text = _PASTE_TAGS.sub("\n\n", text).strip()
+        # our own summary, if it is ever recorded as user text, must
+        # not be stored again -- a memory that re-reads what it
+        # recalled grows copies of its own output (a Mem0 audit,
+        # issue #4573, found 668 copies of one hallucination)
+        text = _OWN_SUMMARY.sub("", text).strip()
+        if not text or _NOT_SPEECH.match(text):
+            return None
+        return ("user", text)
+    text = "\n".join(_text_items(content)).strip()
+    return ("assistant", text) if text else None   # thinking / tool_use only
+
+
 def read_transcript(path):
     """-> (turns, first_timestamp). turns: [{"role", "content"}], oldest
     first, consecutive assistant chunks merged into one turn."""
@@ -87,48 +132,10 @@ def read_transcript(path):
                 o = json.loads(line)
             except ValueError:
                 continue
-            if o.get("isSidechain") or o.get("isMeta"):
+            said = _classify(o)
+            if said is None:
                 continue
-            # 2026-10-12 (review): user-role lines the person did not type --
-            # the summary Claude Code writes after /compact, background-task
-            # and subagent results, messages from other sessions
-            origin = o.get("turnOrigin")
-            if o.get("isCompactSummary") or o.get("isVisibleInTranscriptOnly"):
-                continue
-            if origin not in (None, "human"):
-                # 2026-10-21 (review): only "task_notification" and "peer" are
-                # seen in real transcripts; a new value is counted, so a
-                # Claude Code change that marks typed prompts differently
-                # shows in hook.log instead of silently storing nothing
-                if origin not in ("task_notification", "peer") and o.get("type") == "user":
-                    _unknown_origins[str(origin)] = _unknown_origins.get(str(origin), 0) + 1
-                continue
-            t = o.get("type")
-            if t not in ("user", "assistant"):
-                continue
-            msg = o.get("message") or {}
-            content = msg.get("content")
-            if t == "user":
-                if isinstance(content, list) and any(
-                        isinstance(it, dict) and it.get("type") == "tool_result"
-                        for it in content):
-                    continue                      # tool output, not the human
-                text = "\n".join(_text_items(content))
-                text = _INJECTED.sub("", text).strip()
-                text = _PASTE_TAGS.sub("\n\n", text).strip()
-                # our own summary, if it is ever recorded as user text, must
-                # not be stored again -- a memory that re-reads what it
-                # recalled grows copies of its own output (a Mem0 audit,
-                # issue #4573, found 668 copies of one hallucination)
-                text = _OWN_SUMMARY.sub("", text).strip()
-                if not text or _NOT_SPEECH.match(text):
-                    continue
-                role = "user"
-            else:
-                text = "\n".join(_text_items(content)).strip()
-                if not text:
-                    continue                      # thinking / tool_use only
-                role = "assistant"
+            role, text = said
             if first_ts is None and o.get("timestamp"):
                 first_ts = o["timestamp"]
             if role == "assistant" and turns and turns[-1]["role"] == "assistant":
@@ -216,10 +223,22 @@ def ingest_session(transcript_path, session_id, owner=None, cwd=None,
     re-sends its whole transcript and only new turns are added."""
     turns, first_ts, conv_id = read_session(agent, transcript_path, session_id)
     unknown = dict(_unknown_origins) if agent == "claude" else {}
-    out = ingest_turns(turns, conv_id, first_ts, owner,
-                       cwd or _cwd_of(transcript_path))
+    cwd = cwd or _cwd_of(transcript_path)
+    out = ingest_turns(turns, conv_id, first_ts, owner, cwd)
     if unknown:
         out = dict(out, skipped_unknown_origin=unknown)
+    if agent == "claude" and os.environ.get("SOURCEDRECALL_CODING", "1") != "0":
+        # 2026-10-22: the session's coding record (sourcedrecall.coding);
+        # a failure here never costs the session its messages
+        try:
+            from sourcedrecall import coding
+            from sourcedrecall.paths import current_scope
+            pm = _setup_env(owner)
+            recs = coding.session_records(transcript_path, _classify, cwd)
+            out = dict(out, coding_records=pm.save_episodes(
+                conv_id, first_ts, current_scope(cwd), recs))
+        except Exception as e:      # noqa: BLE001 -- logged, never fatal
+            out = dict(out, coding_error=f"{type(e).__name__}: {e}")
     return out
 
 

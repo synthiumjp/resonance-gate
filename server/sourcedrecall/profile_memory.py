@@ -2208,6 +2208,15 @@ def profile_forget(fact_id):
     A quoted sentence ("their words", ids starting with "u") can be
     forgotten the same way, and so can a note written by the user's model
     (ids starting with "n")."""
+    if str(fact_id).startswith("c"):
+        with _lock:
+            rows = _load_episodes()
+            gone = [r for r in rows if _episode_id(r) == fact_id]
+            if gone:
+                _write_episodes_file([r for r in rows if _episode_id(r) != fact_id])
+        if gone:
+            return {"forgotten": True, "fact": {"id": fact_id, "text": gone[0]["text"],
+                                                "said": None}, "applied": "live"}
     if str(fact_id).startswith("n"):
         with _lock:
             rows = _load_notes()
@@ -2371,6 +2380,103 @@ def _drop_notes(said):
     kept = [r for r in rows if r.get("conv") not in hit]
     if len(kept) != len(rows):
         _write_notes_file(kept)
+    # 2026-10-22: a coding record can quote the sentence too (a decision, the
+    # session's first request), so the sessions it was in lose theirs
+    rows = _load_episodes()
+    kept = [r for r in rows if r.get("conv") not in hit
+            and key not in re.sub(r"\W+", " ", r.get("text", "")).lower()]
+    if len(kept) != len(rows):
+        _write_episodes_file(kept)
+
+
+# ------------------------------------------------------- coding history
+# 2026-10-22 (docs/PLAN_GAPS_2026-10-22.md G1): what each coding session did,
+# from its tool calls (sourcedrecall.coding): failures and what fixed them,
+# commands that worked, commits, decisions. One line per record in
+# episodes.jsonl, replaced whole when a session is stored again (a resumed
+# session re-sends its transcript), searched like the notes, in the project
+# it was recorded in.
+
+def _episodes_path():
+    return os.path.join(_data_dir(), "episodes.jsonl")
+
+
+def _load_episodes():
+    try:
+        with open(_episodes_path(), encoding="utf-8") as fh:
+            return [json.loads(l) for l in fh if l.strip()]
+    except (OSError, ValueError):
+        return []
+
+
+def _write_episodes_file(rows):
+    os.makedirs(_data_dir(), exist_ok=True)
+    tmp = _episodes_path() + f".{os.getpid()}.tmp"
+    with open(tmp, "w", encoding="utf-8") as fh:
+        for r in rows:
+            fh.write(json.dumps(r, ensure_ascii=False) + "\n")
+    os.replace(tmp, _episodes_path())
+    _state["episodes_index"] = None
+
+
+def _episode_id(r):
+    import hashlib
+    return "c" + hashlib.sha1(f"{r.get('conv')}\x00{r['text']}".encode()).hexdigest()[:6]
+
+
+def save_episodes(conv_id, date, scope, recs):
+    """A session's coding records replace its earlier ones. Text whose
+    sentence was forgotten is not stored again."""
+    keys = _forgotten_keys()
+    new = []
+    for r in recs:
+        text = _strip_forgotten(r["text"], keys).strip()
+        if text:
+            new.append({"conv": conv_id, "date": (date or "")[:10] or None,
+                        "scope": scope, "kind": r["kind"], "text": text})
+    with _lock:
+        rows = [r for r in _load_episodes() if r.get("conv") != conv_id]
+        if new or len(rows) != len(_load_episodes()):
+            _write_episodes_file(rows + new)
+    return len(new)
+
+
+def _episodes_for(query, k=6, scope=None, kinds=None):
+    """The coding records that match the question best, in `scope` (a
+    project path; None: every project)."""
+    import retrieve_v3 as _RV3
+    with _lock:
+        cached = _state.get("episodes_index")
+        if cached is None:
+            rows = _load_episodes()
+            docs = [{"attr": "", "value": r["text"], "text": r["text"],
+                     "date": r.get("date"), "conv": r.get("conv"),
+                     "scope": r.get("scope"), "kind": r.get("kind"),
+                     "id": _episode_id(r)} for r in rows]
+            cached = docs
+            _state["episodes_index"] = cached
+    docs = [d for d in cached if (scope is None or d["scope"] == scope)
+            and (not kinds or d["kind"] in kinds)]
+    if not docs or not (query or "").strip():
+        return sorted(docs, key=lambda d: d.get("date") or "", reverse=True)[:k]
+    hits = _RV3.retrieve_facts_v3(_RV3.IndexV3(None, facts=docs), query, k=60,
+                                  dense_k=30, top_n=k, with_scores=True)
+    return [dict(h, score=sc) for h, sc in hits]
+
+
+def profile_history(query, scope=None, k=8, all_projects=False):
+    """Search past coding sessions: what failed and what fixed it, commands
+    that worked, commits, decisions, each with its date, project and
+    session. `scope` defaults to the project Claude Code is running in;
+    all_projects=True searches every project."""
+    from sourcedrecall.paths import current_scope
+    sc = None if all_projects else current_scope(scope)
+    hits = _episodes_for(query, k=k, scope=sc)
+    return {"query": query, "project": sc or "all",
+            "results": [{"id": h["id"], "kind": h["kind"], "text": h["text"],
+                         "date": h.get("date"), "project": h.get("scope"),
+                         "session": h.get("conv")} for h in hits],
+            "source": _SOURCE}
 
 
 def _drop_embeddings():
