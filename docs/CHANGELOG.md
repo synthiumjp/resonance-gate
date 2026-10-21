@@ -4,7 +4,7 @@ Numbers are from the benchmarks in `bench/` (same local reader and judge for
 every system; see `bench/REPRODUCE.md`). The research notebook (`notebook.md`)
 has the details behind each change.
 
-## Unreleased
+## 0.6.0
 
 - A session whose storing was cut off (the computer slept, or on WSL the
   Linux side stopped after the terminal closed) is stored at the next
