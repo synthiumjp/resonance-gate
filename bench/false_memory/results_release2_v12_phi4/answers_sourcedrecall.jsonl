@@ -91,7 +91,7 @@
 {"id": "v12_091", "key": "0ada47e9f63e2ce67de213d8c2c72c5e3097d5ed", "model": "phi-4", "answers": ["You live in Bristol, near the harbour. You mentioned moving there last month."]}
 {"id": "v12_092", "key": "3d2c5f1942501acf0296a323baa205f0e4d74938", "model": "phi-4", "answers": ["You work at the council in the parks department."]}
 {"id": "v12_093", "key": "8f2801052111d50e7b27435c79823f395ec26a51", "model": "phi-4", "answers": ["Yes, you are in a relationship. You proposed to Nadia on New Year's Eve and she said yes; you're now engaged."]}
-{"id": "v12_094", "key": "00068af1e37575c459d509a6cc0cdda0e9adfc68", "model": "phi-4", "answers": ["As of today, you swim in the mornings at the pool near your office."]}
+{"id": "v12_094", "key": "8cc4bcb6f9142904a152c51f52f16003a5ef2136", "model": "phi-4", "answers": ["As of today, you swim in the mornings at the pool near your office."]}
 {"id": "v12_095", "key": "1d0a715c2502e473f42534b656754047b7a4a837", "model": "phi-4", "answers": ["As of December 1, 2025, you are driving a Tesla Model 3."]}
 {"id": "v12_096", "key": "b14b2920e006ff143f1e99c51b11b8d38f2740d0", "model": "phi-4", "answers": ["As of today, February 3, 2026, you are following a pescatarian diet and eating fish twice a week to address low iron levels."]}
 {"id": "v12_097", "key": "29a0f4a2a4312a0e24bc812121a69453b5852f63", "model": "phi-4", "answers": ["You are going on holiday to Crete, Greece in August."]}
@@ -155,6 +155,6 @@
 {"id": "v12_155", "key": "39c08bc09f4d53038f65d85980aba55d2cfda2e9", "model": "phi-4", "answers": ["When you travel, you use AOL to access your mail and communicate with the office. If you need further assistance or recommendations for tools that might help, feel free to ask!"]}
 {"id": "v12_156", "key": "bebf2f7fb387330ab99d18692d5c32622010b948", "model": "phi-4", "answers": ["You mentioned that you plan to try hang gliding first, specifically the weekend of March 1st."]}
 {"id": "v12_157", "key": "c16db6aa680db83ad429c17c92655f3a1e4164f3", "model": "phi-4", "answers": ["You booked a room at the Lancaster."]}
-{"id": "v12_158", "key": "b9fe0b9564af994a10049671b6ebed4eca770242", "model": "phi-4", "answers": ["You gave the company number 0413 for the sample charge."]}
+{"id": "v12_158", "key": "54fdfba188203f4b1bca4a6ad84c9517dc7f90e7", "model": "phi-4", "answers": ["I don't know the company number you gave for the sample charge, as it wasn't mentioned in our previous conversations."]}
 {"id": "v12_159", "key": "8c96ad6bdc6174e9d9ffb9ab8df254478ac90bca", "model": "phi-4", "answers": ["You offered Severin Borenstein as a contact. He is an energy economist at UC Berkeley and is involved with California's electricity restructuring."]}
 {"id": "v12_160", "key": "b7530f944d5dd6e12b7139b92655e943c483c578", "model": "phi-4", "answers": ["You are counting attendees for your wedding."]}

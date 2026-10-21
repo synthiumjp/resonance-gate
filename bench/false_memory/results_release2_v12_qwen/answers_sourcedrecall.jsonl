@@ -91,7 +91,7 @@
 {"id": "v12_091", "key": "b8e4c8bbcd8e022c25f153499b979d4eed472179", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You now live in Bristol, near the harbour."]}
 {"id": "v12_092", "key": "d0a876b9335233cc69fb39a9107d25fcd25dbdd6", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You work at the council in the parks department."]}
 {"id": "v12_093", "key": "de6d4c1a440f9022e9ee91a416135583e15b2304", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Yes, you are engaged to Nadia."]}
-{"id": "v12_094", "key": "a329f1260a85a3d12d620ee9fce0b5318c48dc40", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You do swimming at the pool near your office in the mornings."]}
+{"id": "v12_094", "key": "71cd528d197127cb6cdb6b6d9ec761f9bbe8021b", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You do swimming at the pool near your office in the mornings."]}
 {"id": "v12_095", "key": "df43480f49a7b870eca86e8f0eefc1335d394c70", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You currently drive a Tesla Model 3."]}
 {"id": "v12_096", "key": "caf45a9a3cf1724055de38c7cfea5348730fbbdc", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You follow a pescatarian diet, eating fish twice a week, as you mentioned on 2026-02-03."]}
 {"id": "v12_097", "key": "9b540f480f581eacccd4824f1b9a821c99df5dac", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are going on holiday to Crete, Greece."]}
@@ -155,6 +155,6 @@
 {"id": "v12_155", "key": "87b0bb287bf0fba4c88ed51012ec830d45a2483a", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["When you travel, you can use AOL to get access to your mail and communicate with the office."]}
 {"id": "v12_156", "key": "a14aee744b9ba3ac3cdd029d937877954acd85cc", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The first activity you mentioned trying was Hang Gliding the first weekend in March."]}
 {"id": "v12_157", "key": "686a3dd7dfe8cf49f39b496a2e74279b553d0551", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You booked a room at the Lancaster."]}
-{"id": "v12_158", "key": "1900bfe5afcf18f1bf8eff6e3f4c39bfd6c4627e", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The company number you gave for the sample charge is Co# 0413."]}
+{"id": "v12_158", "key": "17370b445d44850cc10bc95e0c006641097ff414", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
 {"id": "v12_159", "key": "3decfe67deecc09181542c6c4ccdec3179bd12c8", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Severin Borenstein, a renowned energy economist at UC Berkeley."]}
 {"id": "v12_160", "key": "5c0c816d30056bfb2718383bed8359c7349b6733", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are counting attendees for a wedding."]}

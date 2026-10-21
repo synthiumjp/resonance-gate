@@ -7,9 +7,9 @@
    "ingest_cost": {
     "messages": 1053,
     "model_calls": 0,
-    "seconds": 31.3,
+    "seconds": 28.9,
     "calls_per_message": 0.0,
-    "seconds_per_message": 0.03,
+    "seconds_per_message": 0.027,
     "scenarios_with_error": 0
    },
    "views": {
@@ -40,11 +40,11 @@
        "k": 11
       },
       "control_recall": {
-       "rate": 0.675,
-       "lo": 0.575,
-       "hi": 0.775,
+       "rate": 0.6625,
+       "lo": 0.5625,
+       "hi": 0.7625,
        "n": 80,
-       "k": 54
+       "k": 53
       },
       "abstain_explicit_cd": null,
       "abstain_lenient_cd": null,
@@ -96,11 +96,11 @@
        "k": 6
       },
       "control_recall": {
-       "rate": 0.95,
-       "lo": 0.9,
+       "rate": 0.9375,
+       "lo": 0.8875,
        "hi": 0.9875,
        "n": 80,
-       "k": 76
+       "k": 75
       },
       "abstain_explicit_cd": null,
       "abstain_lenient_cd": null,
@@ -152,11 +152,11 @@
        "k": 11
       },
       "control_recall": {
-       "rate": 0.925,
-       "lo": 0.8625,
-       "hi": 0.975,
+       "rate": 0.9125,
+       "lo": 0.85,
+       "hi": 0.9625,
        "n": 80,
-       "k": 74
+       "k": 73
       },
       "abstain_explicit_cd": null,
       "abstain_lenient_cd": null,
@@ -210,11 +210,11 @@
        "k": 11
       },
       "control_recall": {
-       "rate": 0.675,
-       "lo": 0.575,
-       "hi": 0.775,
+       "rate": 0.6625,
+       "lo": 0.5625,
+       "hi": 0.7625,
        "n": 80,
-       "k": 54
+       "k": 53
       },
       "abstain_explicit_cd": null,
       "abstain_lenient_cd": null,
@@ -266,11 +266,11 @@
        "k": 6
       },
       "control_recall": {
-       "rate": 0.95,
-       "lo": 0.9,
+       "rate": 0.9375,
+       "lo": 0.8875,
        "hi": 0.9875,
        "n": 80,
-       "k": 76
+       "k": 75
       },
       "abstain_explicit_cd": null,
       "abstain_lenient_cd": null,
@@ -322,11 +322,11 @@
        "k": 14
       },
       "control_recall": {
-       "rate": 0.925,
-       "lo": 0.8625,
-       "hi": 0.975,
+       "rate": 0.9125,
+       "lo": 0.85,
+       "hi": 0.9625,
        "n": 80,
-       "k": 74
+       "k": 73
       },
       "abstain_explicit_cd": null,
       "abstain_lenient_cd": null,

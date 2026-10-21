@@ -7,31 +7,31 @@
    "ingest_cost": {
     "messages": 262,
     "model_calls": 0,
-    "seconds": 9.7,
+    "seconds": 7.3,
     "calls_per_message": 0.0,
-    "seconds_per_message": 0.037,
+    "seconds_per_message": 0.028,
     "scenarios_with_error": 0
    },
    "views": {
     "lines": {
      "all": {
       "false_memory_all": {
-       "rate": 0.25,
+       "rate": 0.2,
        "lo": 0.05,
-       "hi": 0.45,
+       "hi": 0.4,
        "n": 20,
-       "k": 5
+       "k": 4
       },
       "false_memory_a": null,
       "false_memory_b": null,
       "false_memory_c": null,
       "false_memory_d": null,
       "false_memory_e": {
-       "rate": 0.25,
+       "rate": 0.2,
        "lo": 0.05,
-       "hi": 0.45,
+       "hi": 0.4,
        "n": 20,
-       "k": 5
+       "k": 4
       },
       "control_recall": {
        "rate": 0.5,
@@ -60,22 +60,22 @@
     "context": {
      "all": {
       "false_memory_all": {
-       "rate": 0.2,
-       "lo": 0.05,
-       "hi": 0.4,
+       "rate": 0.15,
+       "lo": 0.0,
+       "hi": 0.3,
        "n": 20,
-       "k": 4
+       "k": 3
       },
       "false_memory_a": null,
       "false_memory_b": null,
       "false_memory_c": null,
       "false_memory_d": null,
       "false_memory_e": {
-       "rate": 0.2,
-       "lo": 0.05,
-       "hi": 0.4,
+       "rate": 0.15,
+       "lo": 0.0,
+       "hi": 0.3,
        "n": 20,
-       "k": 4
+       "k": 3
       },
       "control_recall": {
        "rate": 0.9,
@@ -150,22 +150,22 @@
     "lines": {
      "all": {
       "false_memory_all": {
-       "rate": 0.25,
+       "rate": 0.2,
        "lo": 0.05,
-       "hi": 0.45,
+       "hi": 0.4,
        "n": 20,
-       "k": 5
+       "k": 4
       },
       "false_memory_a": null,
       "false_memory_b": null,
       "false_memory_c": null,
       "false_memory_d": null,
       "false_memory_e": {
-       "rate": 0.25,
+       "rate": 0.2,
        "lo": 0.05,
-       "hi": 0.45,
+       "hi": 0.4,
        "n": 20,
-       "k": 5
+       "k": 4
       },
       "control_recall": {
        "rate": 0.5,
@@ -194,22 +194,22 @@
     "context": {
      "all": {
       "false_memory_all": {
-       "rate": 0.2,
-       "lo": 0.05,
-       "hi": 0.4,
+       "rate": 0.15,
+       "lo": 0.0,
+       "hi": 0.3,
        "n": 20,
-       "k": 4
+       "k": 3
       },
       "false_memory_a": null,
       "false_memory_b": null,
       "false_memory_c": null,
       "false_memory_d": null,
       "false_memory_e": {
-       "rate": 0.2,
-       "lo": 0.05,
-       "hi": 0.4,
+       "rate": 0.15,
+       "lo": 0.0,
+       "hi": 0.3,
        "n": 20,
-       "k": 4
+       "k": 3
       },
       "control_recall": {
        "rate": 0.9,

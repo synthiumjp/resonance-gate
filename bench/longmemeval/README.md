@@ -7,8 +7,8 @@ the sessions that hold the evidence. No language model is involved here:
 this measures retrieval only, the number other memory tools publish for
 this benchmark.
 
-Run at commit 53e0d9c (2026-10-17, the release run, with 0848387's fix for a crash on a
-greeting after a message's first line; earlier runs 1754180, 98.8%, and e8b8c0f, 98.4%) on a Mac, `longmemeval_s_cleaned.json`
+Run at commit 012fcca (2026-10-21, the release run; earlier runs 53e0d9c and
+1754180, 98.8%, and e8b8c0f, 98.4%) on a Mac, `longmemeval_s_cleaned.json`
 from huggingface.co/datasets/xiaowu0162/longmemeval-cleaned.
 
 ## Result
@@ -26,7 +26,8 @@ questions, the set and metric agentmemory and MemPalace report:
 
 Without the 30 abstention questions (the official retrieval set, n=470):
 any@5 98.7%, all@5 93.6%. Per question type, k=1 to 10, and turn-level
-figures are in `release_report_53e0d9c.md` (1754180: `release_report.md`;
+figures are in `release_report_012fcca.md` (53e0d9c: `release_report_53e0d9c.md`;
+1754180: `release_report.md`;
 first run: `report.md`).
 Single-session-preference, the weakest type in the first run (any@5 90.0%,
 plain embeddings 96.7%), is 96.7% since requests for advice are ranked by

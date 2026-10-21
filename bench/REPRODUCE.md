@@ -62,7 +62,7 @@ six hours (941 model calls), answering and judging about 5 seconds per
 question per system.
 
 The README's figures: `results/release_test_default` (sourcedrecall on the
-release commit 53e0d9c; Mem0's and plain retrieval's answers from
+release commit 012fcca; Mem0's and plain retrieval's answers from
 `results/test`, the 2026-10-03 run with the same reader and judge),
 `results/release_test_small` and `_standard` (with the notes models),
 `results/claude_test_default` (Claude Sonnet 5.5 as reader and judge,

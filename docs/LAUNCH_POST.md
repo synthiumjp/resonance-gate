@@ -1,7 +1,7 @@
 # Testers-wanted post (draft, 2026-10-21)
 
-Not exported to the product repo. LoCoMo figures are from the README as of
-358e282; check them against the 012fcca release run before posting.
+Not exported to the product repo. LoCoMo figures checked against the
+012fcca release run (2026-10-22).
 
 ## Long version (Reddit, forums)
 
@@ -29,7 +29,7 @@ What's different about it:
   correct it and forget single sentences.
 
 How it measures: on LoCoMo, with the same local reader and judge for
-every system, it answers about as many questions as Mem0 (65.4% against
+every system, it answers about as many questions as Mem0 (65.6% against
 64.6%) without any model call to store anything; with Claude Sonnet 5.5
 reading, 77.0% against 72.1%. Its lead comes from questions about dates
 and time; on the other questions Mem0 is ahead. Everything, including

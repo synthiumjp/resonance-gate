@@ -7,7 +7,7 @@ H6 B old state given as current (class b, false memory): sourcedrecall 1/20; age
 H7 X everyday facts answered (class f, expected term): sourcedrecall 19/20; agentmemory 19/20 (p=1); ai-memory 14/20 (p=0.091); rag 19/20 (p=1)
 H8 pooled false memories over D and B (classes a-e): sourcedrecall 9/60; agentmemory 35/60 (p=1.3e-06); ai-memory 9/60 (p=1); rag 28/60 (p=0.0003)
 H10/H11 R real pasted given as the user's (class e, false memory): sourcedrecall 5/20; agentmemory 12/20 (p=0.054); ai-memory 2/20 (p=0.41); rag 14/20 (p=0.01)
-H12 R real own email answered (class f, expected term): sourcedrecall 10/10; agentmemory 7/10 (p=0.21); ai-memory 0/10 (p=1.1e-05); rag 10/10 (p=1)
+H12 R real own email answered (class f, expected term): sourcedrecall 9/10; agentmemory 7/10 (p=0.58); ai-memory 0/10 (p=0.00012); rag 10/10 (p=1)
 reported: D own writing brought to be read over, answered: sourcedrecall 15/17; agentmemory 17/17 (p=0.48); ai-memory 5/17 (p=0.0013); rag 17/17 (p=0.48)
 Holm over the five Fisher tests of H2, H8 and H11 (adjusted p):
   H1/H2 vs agentmemory: p=1.2e-09, Holm 6.1e-09
@@ -21,4 +21,4 @@ said it did not know (reported, not tested), per part, all classes:
   M: sourcedrecall 1/10; agentmemory 5/10; ai-memory 8/10; rag 0/10
   B: sourcedrecall 0/20; agentmemory 0/20; ai-memory 3/20; rag 0/20
   X: sourcedrecall 1/20; agentmemory 1/20; ai-memory 6/20; rag 1/20
-  R: sourcedrecall 15/30; agentmemory 9/30; ai-memory 28/30; rag 6/30
+  R: sourcedrecall 16/30; agentmemory 9/30; ai-memory 28/30; rag 6/30

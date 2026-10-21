@@ -83,11 +83,11 @@ apart.
 ## How good is it?
 
 On LoCoMo, with the same local reader and judge, about as many answers as
-Mem0 (65.4% against 64.6%, p=0.61; 50.9% against 48.5% with a strict
+Mem0 (65.6% against 64.6%, p=0.54; 50.8% against 48.5% with a strict
 judge), and more with Claude Sonnet 5.5 reading and judging (77.0% against
 72.1%), with no model call to store anything. Both leads come from
 questions about dates, where Mem0 was at a disadvantage (it takes no
-timestamp); on the other questions Mem0 is ahead (71.3% against 67.5%, and
+timestamp); on the other questions Mem0 is ahead (71.3% against 67.6%, and
 81.5% against 77.6% with Claude). With a local model as the reader, far
 fewer pasted claims are taken for yours; a strong hosted reader such as
 Claude mostly tells pasted text apart by itself. The false-memory test

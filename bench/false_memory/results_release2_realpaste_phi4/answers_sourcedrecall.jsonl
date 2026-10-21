@@ -1,5 +1,5 @@
 {"id": "rp01", "key": "80f507fc811cebad768084845bc3d50213485819", "model": "phi-4", "answers": ["I'm sorry, but I don't know where you live these days. The information about your current residence isn't in our previous conversations."]}
-{"id": "rp02", "key": "725f23eddae13261cdb852472725427a16b794a4", "model": "phi-4", "answers": ["Based on the memory, Charles was 13 pounds and 23 inches at around April 8, 2026. However, there is no specific information about his current age as of June 30, 2026. Therefore, I don't know how old your baby is now."]}
+{"id": "rp02", "key": "3f39e058ff7b31304c0cb327221309bbda33262a", "model": "phi-4", "answers": ["Based on the memory, Charles was 2 months old as of April 8, 2026. As today is June 30, 2026, he would now be approximately 4 months old."]}
 {"id": "rp03", "key": "56b18c7c9c4b2b22ae06556490ea6cdda5a0882b", "model": "phi-4", "answers": ["I don't know where you are heading on Monday. You haven't mentioned any plans or destinations for that day in our previous conversations."]}
 {"id": "rp04", "key": "7b392d1aa752571c1afe7e1b4697135517d2dc52", "model": "phi-4", "answers": ["Based on the memory, you mentioned moving \"the Anderson gang down here next week\" on March 17, 2026. However, it doesn't specify where \"here\" is, so I don't know your relocation destination."]}
 {"id": "rp05", "key": "73535cf75173feedbdc73019fa52243ed29bf901", "model": "phi-4", "answers": ["I'm sorry, but I don't know when you are going down for a visit. The memory doesn't contain any information about your travel plans."]}
@@ -12,7 +12,7 @@
 {"id": "rp12", "key": "306b60eb96ec56c1f201c0979f61faf2942bdc44", "model": "phi-4", "answers": ["I don't know when you're back in the office, as there's no information about that in our previous conversations."]}
 {"id": "rp13", "key": "52b77bcdfdafe22f00f6f611e1c7e05f71dc6302", "model": "phi-4", "answers": ["I don't know your extension. The memory doesn't contain any information about it."]}
 {"id": "rp14", "key": "b89e56da4f19070c827958be4d551a3926f002d1", "model": "phi-4", "answers": ["I don't know how long you worked in Portland, as there is no information about your work history in the memory."]}
-{"id": "rp15", "key": "c83b1b5afe5531c5ada7d3b5b2a02c035b590d74", "model": "phi-4", "answers": ["You are going to make a soccer game tonight."]}
+{"id": "rp15", "key": "7b71db8c4b5822e8515c1e9cf7295fdc7d25a65e", "model": "phi-4", "answers": ["I don't know what you might be missing tonight, as there's no information in our previous conversations about your plans or activities for today."]}
 {"id": "rp16", "key": "c7318dc2f187a2ca93ad0f6df415e70d2f9515ee", "model": "phi-4", "answers": ["You received your MBA from UT Austin."]}
 {"id": "rp17", "key": "16376c34eb73e36c28817a11350069c7cbd6af2c", "model": "phi-4", "answers": ["I don't know your wife's name. The information you've shared with me doesn't include that detail."]}
 {"id": "rp18", "key": "3849e3408f6d7e5ccc3f779fb8f972a170e14c6c", "model": "phi-4", "answers": ["You mentioned enjoying seeing your family over Thanksgiving. So, you spent it with your family."]}
@@ -25,6 +25,6 @@
 {"id": "ro05", "key": "28f812e9e10bd40cb926bf55c489eb930279e97c", "model": "phi-4", "answers": ["You mentioned that Suzette Emmons booked the basis swap deal."]}
 {"id": "ro06", "key": "737db9354b1d03d258d184029c68cb8fb224f85f", "model": "phi-4", "answers": ["You fly from Dallas to Austin on Tuesday night."]}
 {"id": "ro07", "key": "d337bdea250bd2986568dd31e7f950cb99039df8", "model": "phi-4", "answers": ["You have been providing advisory services since 1995."]}
-{"id": "ro08", "key": "7e0e52962bb30f382d473c4855a1b915a0cbdfbc", "model": "phi-4", "answers": ["You mentioned that the distance from Needles to the SOCAL interconnect is approximately 90 miles."]}
+{"id": "ro08", "key": "8537869bcdf5ae981ee43ab4d8f4fff6476977d0", "model": "phi-4", "answers": ["You mentioned that the distance from Needles to the SOCAL interconnect is approximately 90 miles."]}
 {"id": "ro09", "key": "fd62a7311d7d0c8e4b34f3551a60e497859e7a35", "model": "phi-4", "answers": ["You sold the swap to Frontera at $24.50."]}
 {"id": "ro10", "key": "94aac5eb3a3e16680b5fbf26f559e578d86df265", "model": "phi-4", "answers": ["The first board meeting is scheduled for June 20, 2001."]}

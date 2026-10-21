@@ -37,14 +37,14 @@ system gave back 4 or fewer of the 40 (sourcedrecall none), and on the
 real emails plain retrieval 5 of 20 and sourcedrecall none.
 
 On LoCoMo, with the same local reader and judge for every system, it
-answers about as many questions as Mem0 (65.4% against 64.6%, p=0.61; with
-a strict judge 50.9% against 48.5%, p=0.13) while making no model call to
+answers about as many questions as Mem0 (65.6% against 64.6%, p=0.54; with
+a strict judge 50.8% against 48.5%, p=0.14) while making no model call to
 store anything. With Claude Sonnet 5.5 reading and judging the same
 retrieved context, 77.0% against 72.1% (p<0.001). Both leads come from
 questions about dates and time, where Mem0 was at a disadvantage: it takes
 no timestamp, so the dates were written into the messages, and it answers
 fewer of them than plain retrieval does. On the other questions Mem0 is
-ahead: 71.3% against 67.5% with the local reader (p=0.02), 81.5% against
+ahead: 71.3% against 67.6% with the local reader (p=0.02), 81.5% against
 77.6% with Claude (p=0.006). With its optional notes model sourcedrecall is
 level with Mem0 there too (73.3%, p=0.23). On LongMemEval the session that
 holds the answer is among the five it returns for 98.8% of 500 questions;
@@ -67,7 +67,7 @@ published with GPT-4-class models, except where Claude Sonnet 5.5 is named
 as the reader: those runs give the same retrieved context to a hosted model
 (through Anthropic's Batch API; `bench/claude_runs.sh`). LongMemEval,
 LoCoMo, HaluMem and the first false-memory table were measured on commit
-53e0d9c (2026-10-16/17, `bench/RELEASE_53e0d9c.log`); for LoCoMo only
+012fcca (2026-10-21/22, `bench/RELEASE_012fcca.log`); for LoCoMo only
 sourcedrecall was rerun there, and Mem0's and plain retrieval's answers are
 from the 2026-10-03 run with the same questions, reader and judge. Each
 held-out set's paragraph reports its run when the set was new. An
@@ -97,7 +97,7 @@ without a language model and plain retrieval. Every system's memory went to
 the same local reader with the same instruction, the judge saw the question
 with each answer, and the answers were audited blind (the auditor saw no
 system names; `bench/false_memory/FAIR_RERUN.md`). Measured on commit
-53e0d9c, where every system's saved memories were read again; an answer the
+012fcca, where every system's saved memories were read again; an answer the
 2026-10-09 audit saw keeps its audited verdict, a new one the judge's:
 
 | | sourcedrecall | agentmemory 0.9 | ai-memory 2.5 | plain retrieval |
@@ -258,12 +258,12 @@ last night:") marks it as theirs, and a small learned model judges what the
 rules leave unmarked. Both were developed on a new set written from the
 kinds of text v12 missed (categories only, not its items), so v11, v12 and
 the real emails are no longer unseen for this code. Run again on the
-release commit (53e0d9c), counts only: pasted claims or instructions given
+release commit (012fcca), counts only: pasted claims or instructions given
 as the user's 3 of 40 on v11 and 8 of 40 on v12 with Qwen3-14B (plain
 retrieval 23 and 28, agentmemory 24 and 35, ai-memory 2 and 8), 3 and 10
 with Phi-4; real emails 1 of 20 with both readers (plain retrieval 16 and
 17). Own material 25 of 30 on both sets with Qwen3-14B (plain retrieval 30
-and 29). With Claude Sonnet 5.5 reading the same returns (judged by
+and 29). With Claude Sonnet 5.5 reading the returns of 53e0d9c (judged by
 Qwen3-14B, no audit): pasted claims given as the user's 0 of 40 on both
 sets (plain retrieval 0 and 2, agentmemory 1 and 3, ai-memory 1 and 4), real
 emails 0 of 20 (plain retrieval 5), own material 25 and 26 of 30 (plain
@@ -277,25 +277,25 @@ local reader and judge:
 
 | | sourcedrecall | with the built-in notes model | Mem0 2.2.1 | plain retrieval |
 |---|---|---|---|---|
-| answered correctly | 65.4% | 67.8% (small) / 70.6% (standard) | 64.6% | 56.6% |
-| temporal questions | 57.0% | 55.0% / 59.7% | 37.2% | 49.6% |
-| single-hop | 75.5% | 79.4% / 81.0% | 77.9% | 66.9% |
-| multi-hop | 54.0% | 55.6% / 58.6% | 61.9% | 39.3% |
+| answered correctly | 65.6% | 67.8% (small) / 70.5% (standard) | 64.6% | 56.6% |
+| temporal questions | 57.4% | 55.4% / 59.3% | 37.2% | 49.6% |
+| single-hop | 75.7% | 79.4% / 81.0% | 77.9% | 66.9% |
+| multi-hop | 54.0% | 55.2% / 58.6% | 61.9% | 39.3% |
 | open-domain | 36.1% | 41.0% / 48.2% | 41.0% | 38.6% |
-| without temporal questions | 67.5% | 70.9% / 73.3% | 71.3% | 58.3% |
+| without temporal questions | 67.6% | 70.8% / 73.3% | 71.3% | 58.3% |
 | model calls to store the conversations | 0 | 468, in-process | 941 (generation and embedding) | 0 (one embedding per message) |
 | what the reader is given | about 13 messages (4 to 34) | the same, and notes | 20 memories (10 per speaker) | 10 messages |
-| context per question (tokens) | 682 | 1,032 / 1,025 | 722 | 356 |
+| context per question (tokens) | 683 | 1,032 / 1,025 | 722 | 356 |
 
-Paired tests (McNemar) against Mem0: overall p=0.61; without temporal
+Paired tests (McNemar) against Mem0: overall p=0.54; without temporal
 questions p=0.02, Mem0 ahead; with the standard notes model p<0.001 and,
 without temporal questions, p=0.23. Plain retrieval gets half the context
 of the others, so part of its gap is budget. Notes written by Qwen3-14B
 running as a local server (a model call per message, commit 49561c4) gave
 73.1%.
 
-With Claude Sonnet 5.5 as reader and judge (the same retrieved context and
-prompts, Anthropic's Batch API, `bench/locomo/answer_claude.py`), closer to
+With Claude Sonnet 5.5 as reader and judge (the context retrieved on
+53e0d9c and the same prompts, Anthropic's Batch API, `bench/locomo/answer_claude.py`), closer to
 how published results are measured:
 
 | | sourcedrecall | Mem0 2.2.1 | plain retrieval |
@@ -320,7 +320,7 @@ open-domain questions. Giving Mem0 the dates another way (its metadata
 field) has not been tried. An audit of LoCoMo
 (Penfield Labs, April 2026, github.com/dial481/locomo-audit) found 99 of its
 1,540 gold answers wrong, 80 of them in these conversations. Without those
-80: sourcedrecall 66.9%, with notes 69.8% (small) / 72.6% (standard) / 74.5%
+80: sourcedrecall 67.1%, with notes 69.8% (small) / 72.5% (standard) / 74.5%
 (Qwen3-14B), Mem0 66.8%, plain retrieval 58.2% (`LOCOMO_AUDIT` in
 `bench/locomo/score.py`). The judge prompt used here and in Mem0's
 published evaluation ("be generous ... as long as it touches on the same
@@ -328,10 +328,10 @@ topic") accepted 68.5% of the audit's deliberately vague wrong answers with
 our judge (`bench/locomo/judge_stress.py`). With a strict prompt (3% and 20%
 of the audit's specific and vague wrong answers accepted, every gold answer
 in a sample of 120 accepted; `LOCOMO_JUDGE=strict`), the same answers score:
-sourcedrecall 50.9%, Mem0 48.5%, plain retrieval 42.5%; with notes 50.9% /
-54.2% / 55.1%. Without the audit's 80 wrong gold answers: 52.6%, 50.4%,
+sourcedrecall 50.8%, Mem0 48.5%, plain retrieval 42.5%; with notes 50.9% /
+54.1% / 55.1%. Without the audit's 80 wrong gold answers: 52.6%, 50.4%,
 43.9%; 52.6% / 56.2% / 57.0%. The order is the same under both judges;
-temporal questions favour sourcedrecall (38.9% against Mem0's 23.5%, strict,
+temporal questions favour sourcedrecall (38.5% against Mem0's 23.5%, strict,
 errors removed) and multi-hop questions Mem0 (37.8% against 30.0%). Mem0
 was given its top 10 memories for each speaker and plain retrieval its top
 10 messages; Mem0
@@ -340,20 +340,18 @@ JSON response format removed (the local server does not support it). The
 benchmark runs sourcedrecall without its conflict model (RG_NLI=0), which
 the server loads by default. These conversations were run for every version
 reported here, and chose the design (messages first) and the notes models,
-so they are not held out. Measured in one run on commit 53e0d9c
-(`bench/RELEASE_53e0d9c.log`; 1,424 tests passed, and one parser test
-failed only because the run compared against the wrong reference parser:
-with the right one it passes; the strict judge in a second pass); the
+so they are not held out. Measured in one run on commit 012fcca
+(`bench/RELEASE_012fcca.log`; 1,460 tests passed); the
 Qwen3-14B notes column is from commit 49561c4. Between runs the notes change
 with the text they are written from: the small model scored 68.2% on
-1754180, 67.7% on 181aff3, 67.0% on 8473783 and d89d830, and 67.8% here.
+1754180, 67.7% on 181aff3, 67.0% on 8473783 and d89d830, 67.8% on 53e0d9c and again here.
 
 HaluMem (HaluMem-Medium, its first two users), scored with the benchmark's
 own code for memory updates and questions and the same local judge for both
-systems: after a fact changed, the new value was given in 154 of 304 updates
-(plain retrieval 96), and 184 of 352 questions were answered correctly
+systems: after a fact changed, the new value was given in 155 of 304 updates
+(plain retrieval 96), and 186 of 352 questions were answered correctly
 (plain retrieval 162), with fewer wrong answers among those the judge could
-score (21% against 27%). Plain retrieval's run is from commit d6613e0
+score (20% against 27%). Plain retrieval's run is from commit d6613e0
 (`bench/halumem/`).
 
 Notes are optional. A small model writes short notes once per stored

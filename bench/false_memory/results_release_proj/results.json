@@ -7,9 +7,9 @@
    "ingest_cost": {
     "messages": 188,
     "model_calls": 0,
-    "seconds": 98.6,
+    "seconds": 7.9,
     "calls_per_message": 0.0,
-    "seconds_per_message": 0.524,
+    "seconds_per_message": 0.042,
     "scenarios_with_error": 0
    },
    "views": {
@@ -73,11 +73,11 @@
        "k": 6
       },
       "side_recall_abe": {
-       "rate": 0.8571428571428571,
-       "lo": 0.5714285714285714,
+       "rate": 1.0,
+       "lo": 1.0,
        "hi": 1.0,
        "n": 7,
-       "k": 6
+       "k": 7
       }
      },
      "heldout": {
@@ -139,11 +139,11 @@
        "k": 6
       },
       "side_recall_abe": {
-       "rate": 0.8571428571428571,
-       "lo": 0.5714285714285714,
+       "rate": 1.0,
+       "lo": 1.0,
        "hi": 1.0,
        "n": 7,
-       "k": 6
+       "k": 7
       }
      }
     },
@@ -477,11 +477,11 @@
        "k": 6
       },
       "side_recall_abe": {
-       "rate": 0.8571428571428571,
-       "lo": 0.5714285714285714,
+       "rate": 1.0,
+       "lo": 1.0,
        "hi": 1.0,
        "n": 7,
-       "k": 6
+       "k": 7
       }
      },
      "heldout": {
@@ -543,11 +543,11 @@
        "k": 6
       },
       "side_recall_abe": {
-       "rate": 0.8571428571428571,
-       "lo": 0.5714285714285714,
+       "rate": 1.0,
+       "lo": 1.0,
        "hi": 1.0,
        "n": 7,
-       "k": 6
+       "k": 7
       }
      }
     },
@@ -870,11 +870,11 @@
        "k": 1
       },
       "control_recall": {
-       "rate": 0.6153846153846154,
-       "lo": 0.38461538461538464,
-       "hi": 0.8461538461538461,
+       "rate": 0.46153846153846156,
+       "lo": 0.23076923076923078,
+       "hi": 0.6923076923076923,
        "n": 13,
-       "k": 8
+       "k": 6
       },
       "abstain_explicit_cd": {
        "rate": 0.0,
@@ -936,11 +936,11 @@
        "k": 1
       },
       "control_recall": {
-       "rate": 0.6153846153846154,
-       "lo": 0.38461538461538464,
-       "hi": 0.8461538461538461,
+       "rate": 0.46153846153846156,
+       "lo": 0.23076923076923078,
+       "hi": 0.6923076923076923,
        "n": 13,
-       "k": 8
+       "k": 6
       },
       "abstain_explicit_cd": {
        "rate": 0.0,
@@ -1004,11 +1004,11 @@
        "k": 1
       },
       "control_recall": {
-       "rate": 0.5384615384615384,
-       "lo": 0.3076923076923077,
-       "hi": 0.7692307692307693,
+       "rate": 0.46153846153846156,
+       "lo": 0.23076923076923078,
+       "hi": 0.6923076923076923,
        "n": 13,
-       "k": 7
+       "k": 6
       },
       "abstain_explicit_cd": {
        "rate": 0.0,
@@ -1070,11 +1070,11 @@
        "k": 1
       },
       "control_recall": {
-       "rate": 0.5384615384615384,
-       "lo": 0.3076923076923077,
-       "hi": 0.7692307692307693,
+       "rate": 0.46153846153846156,
+       "lo": 0.23076923076923078,
+       "hi": 0.6923076923076923,
        "n": 13,
-       "k": 7
+       "k": 6
       },
       "abstain_explicit_cd": {
        "rate": 0.0,
@@ -1140,11 +1140,11 @@
        "k": 1
       },
       "control_recall": {
-       "rate": 0.6153846153846154,
-       "lo": 0.38461538461538464,
-       "hi": 0.8461538461538461,
+       "rate": 0.46153846153846156,
+       "lo": 0.23076923076923078,
+       "hi": 0.6923076923076923,
        "n": 13,
-       "k": 8
+       "k": 6
       },
       "abstain_explicit_cd": {
        "rate": 0.0,
@@ -1206,11 +1206,11 @@
        "k": 1
       },
       "control_recall": {
-       "rate": 0.6153846153846154,
-       "lo": 0.38461538461538464,
-       "hi": 0.8461538461538461,
+       "rate": 0.46153846153846156,
+       "lo": 0.23076923076923078,
+       "hi": 0.6923076923076923,
        "n": 13,
-       "k": 8
+       "k": 6
       },
       "abstain_explicit_cd": {
        "rate": 0.0,
@@ -1274,11 +1274,11 @@
        "k": 1
       },
       "control_recall": {
-       "rate": 0.5384615384615384,
-       "lo": 0.3076923076923077,
-       "hi": 0.7692307692307693,
+       "rate": 0.46153846153846156,
+       "lo": 0.23076923076923078,
+       "hi": 0.6923076923076923,
        "n": 13,
-       "k": 7
+       "k": 6
       },
       "abstain_explicit_cd": {
        "rate": 0.0,
@@ -1340,11 +1340,1111 @@
        "k": 1
       },
       "control_recall": {
-       "rate": 0.5384615384615384,
-       "lo": 0.3076923076923077,
+       "rate": 0.46153846153846156,
+       "lo": 0.23076923076923078,
+       "hi": 0.6923076923076923,
+       "n": 13,
+       "k": 6
+      },
+      "abstain_explicit_cd": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "abstain_lenient_cd": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 6,
+       "k": 6
+      },
+      "side_recall_abe": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 7,
+       "k": 7
+      }
+     }
+    }
+   }
+  },
+  "agentmemory": {
+   "ingest_cost": {
+    "messages": 188,
+    "model_calls": 0,
+    "seconds": 60.6,
+    "calls_per_message": 0.0,
+    "seconds_per_message": 0.322,
+    "scenarios_with_error": 0
+   },
+   "views": {
+    "lines": {
+     "all": {
+      "false_memory_all": {
+       "rate": 0.59375,
+       "lo": 0.4375,
+       "hi": 0.75,
+       "n": 32,
+       "k": 19
+      },
+      "false_memory_a": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 13,
+       "k": 13
+      },
+      "false_memory_b": {
+       "rate": 0.8571428571428571,
+       "lo": 0.5714285714285714,
+       "hi": 1.0,
+       "n": 7,
+       "k": 6
+      },
+      "false_memory_c": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "false_memory_d": null,
+      "false_memory_e": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "control_recall": {
+       "rate": 0.9230769230769231,
+       "lo": 0.7692307692307693,
+       "hi": 1.0,
+       "n": 13,
+       "k": 12
+      },
+      "abstain_explicit_cd": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "abstain_lenient_cd": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 6,
+       "k": 6
+      },
+      "side_recall_abe": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 7,
+       "k": 7
+      }
+     },
+     "heldout": {
+      "false_memory_all": {
+       "rate": 0.59375,
+       "lo": 0.4375,
+       "hi": 0.75,
+       "n": 32,
+       "k": 19
+      },
+      "false_memory_a": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 13,
+       "k": 13
+      },
+      "false_memory_b": {
+       "rate": 0.8571428571428571,
+       "lo": 0.5714285714285714,
+       "hi": 1.0,
+       "n": 7,
+       "k": 6
+      },
+      "false_memory_c": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "false_memory_d": null,
+      "false_memory_e": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "control_recall": {
+       "rate": 0.9230769230769231,
+       "lo": 0.7692307692307693,
+       "hi": 1.0,
+       "n": 13,
+       "k": 12
+      },
+      "abstain_explicit_cd": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "abstain_lenient_cd": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 6,
+       "k": 6
+      },
+      "side_recall_abe": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 7,
+       "k": 7
+      }
+     }
+    },
+    "answer": {
+     "all": {
+      "false_memory_all": {
+       "rate": 0.28125,
+       "lo": 0.125,
+       "hi": 0.4375,
+       "n": 32,
+       "k": 9
+      },
+      "false_memory_a": {
+       "rate": 0.6923076923076923,
+       "lo": 0.46153846153846156,
+       "hi": 0.9230769230769231,
+       "n": 13,
+       "k": 9
+      },
+      "false_memory_b": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 7,
+       "k": 0
+      },
+      "false_memory_c": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "false_memory_d": null,
+      "false_memory_e": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "control_recall": {
+       "rate": 0.8461538461538461,
+       "lo": 0.6153846153846154,
+       "hi": 1.0,
+       "n": 13,
+       "k": 11
+      },
+      "abstain_explicit_cd": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "abstain_lenient_cd": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 6,
+       "k": 6
+      },
+      "side_recall_abe": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 7,
+       "k": 7
+      }
+     },
+     "heldout": {
+      "false_memory_all": {
+       "rate": 0.28125,
+       "lo": 0.125,
+       "hi": 0.4375,
+       "n": 32,
+       "k": 9
+      },
+      "false_memory_a": {
+       "rate": 0.6923076923076923,
+       "lo": 0.46153846153846156,
+       "hi": 0.9230769230769231,
+       "n": 13,
+       "k": 9
+      },
+      "false_memory_b": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 7,
+       "k": 0
+      },
+      "false_memory_c": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "false_memory_d": null,
+      "false_memory_e": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "control_recall": {
+       "rate": 0.8461538461538461,
+       "lo": 0.6153846153846154,
+       "hi": 1.0,
+       "n": 13,
+       "k": 11
+      },
+      "abstain_explicit_cd": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "abstain_lenient_cd": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 6,
+       "k": 6
+      },
+      "side_recall_abe": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 7,
+       "k": 7
+      }
+     }
+    }
+   },
+   "views_audited": {
+    "lines": {
+     "all": {
+      "false_memory_all": {
+       "rate": 0.59375,
+       "lo": 0.4375,
+       "hi": 0.75,
+       "n": 32,
+       "k": 19
+      },
+      "false_memory_a": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 13,
+       "k": 13
+      },
+      "false_memory_b": {
+       "rate": 0.8571428571428571,
+       "lo": 0.5714285714285714,
+       "hi": 1.0,
+       "n": 7,
+       "k": 6
+      },
+      "false_memory_c": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "false_memory_d": null,
+      "false_memory_e": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "control_recall": {
+       "rate": 0.9230769230769231,
+       "lo": 0.7692307692307693,
+       "hi": 1.0,
+       "n": 13,
+       "k": 12
+      },
+      "abstain_explicit_cd": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "abstain_lenient_cd": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 6,
+       "k": 6
+      },
+      "side_recall_abe": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 7,
+       "k": 7
+      }
+     },
+     "heldout": {
+      "false_memory_all": {
+       "rate": 0.59375,
+       "lo": 0.4375,
+       "hi": 0.75,
+       "n": 32,
+       "k": 19
+      },
+      "false_memory_a": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 13,
+       "k": 13
+      },
+      "false_memory_b": {
+       "rate": 0.8571428571428571,
+       "lo": 0.5714285714285714,
+       "hi": 1.0,
+       "n": 7,
+       "k": 6
+      },
+      "false_memory_c": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "false_memory_d": null,
+      "false_memory_e": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "control_recall": {
+       "rate": 0.9230769230769231,
+       "lo": 0.7692307692307693,
+       "hi": 1.0,
+       "n": 13,
+       "k": 12
+      },
+      "abstain_explicit_cd": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "abstain_lenient_cd": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 6,
+       "k": 6
+      },
+      "side_recall_abe": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 7,
+       "k": 7
+      }
+     }
+    },
+    "answer": {
+     "all": {
+      "false_memory_all": {
+       "rate": 0.28125,
+       "lo": 0.125,
+       "hi": 0.4375,
+       "n": 32,
+       "k": 9
+      },
+      "false_memory_a": {
+       "rate": 0.6923076923076923,
+       "lo": 0.46153846153846156,
+       "hi": 0.9230769230769231,
+       "n": 13,
+       "k": 9
+      },
+      "false_memory_b": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 7,
+       "k": 0
+      },
+      "false_memory_c": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "false_memory_d": null,
+      "false_memory_e": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "control_recall": {
+       "rate": 0.8461538461538461,
+       "lo": 0.6153846153846154,
+       "hi": 1.0,
+       "n": 13,
+       "k": 11
+      },
+      "abstain_explicit_cd": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "abstain_lenient_cd": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 6,
+       "k": 6
+      },
+      "side_recall_abe": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 7,
+       "k": 7
+      }
+     },
+     "heldout": {
+      "false_memory_all": {
+       "rate": 0.28125,
+       "lo": 0.125,
+       "hi": 0.4375,
+       "n": 32,
+       "k": 9
+      },
+      "false_memory_a": {
+       "rate": 0.6923076923076923,
+       "lo": 0.46153846153846156,
+       "hi": 0.9230769230769231,
+       "n": 13,
+       "k": 9
+      },
+      "false_memory_b": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 7,
+       "k": 0
+      },
+      "false_memory_c": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "false_memory_d": null,
+      "false_memory_e": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "control_recall": {
+       "rate": 0.8461538461538461,
+       "lo": 0.6153846153846154,
+       "hi": 1.0,
+       "n": 13,
+       "k": 11
+      },
+      "abstain_explicit_cd": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "abstain_lenient_cd": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 6,
+       "k": 6
+      },
+      "side_recall_abe": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 7,
+       "k": 7
+      }
+     }
+    }
+   }
+  },
+  "ai-memory": {
+   "ingest_cost": {
+    "messages": 188,
+    "model_calls": 0,
+    "seconds": 190.5,
+    "calls_per_message": 0.0,
+    "seconds_per_message": 1.013,
+    "scenarios_with_error": 0
+   },
+   "views": {
+    "lines": {
+     "all": {
+      "false_memory_all": {
+       "rate": 0.21875,
+       "lo": 0.09375,
+       "hi": 0.375,
+       "n": 32,
+       "k": 7
+      },
+      "false_memory_a": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 13,
+       "k": 0
+      },
+      "false_memory_b": {
+       "rate": 0.8571428571428571,
+       "lo": 0.5714285714285714,
+       "hi": 1.0,
+       "n": 7,
+       "k": 6
+      },
+      "false_memory_c": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "false_memory_d": null,
+      "false_memory_e": {
+       "rate": 0.16666666666666666,
+       "lo": 0.0,
+       "hi": 0.5,
+       "n": 6,
+       "k": 1
+      },
+      "control_recall": {
+       "rate": 0.46153846153846156,
+       "lo": 0.23076923076923078,
        "hi": 0.7692307692307693,
        "n": 13,
+       "k": 6
+      },
+      "abstain_explicit_cd": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "abstain_lenient_cd": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 6,
+       "k": 6
+      },
+      "side_recall_abe": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 7,
        "k": 7
+      }
+     },
+     "heldout": {
+      "false_memory_all": {
+       "rate": 0.21875,
+       "lo": 0.09375,
+       "hi": 0.375,
+       "n": 32,
+       "k": 7
+      },
+      "false_memory_a": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 13,
+       "k": 0
+      },
+      "false_memory_b": {
+       "rate": 0.8571428571428571,
+       "lo": 0.5714285714285714,
+       "hi": 1.0,
+       "n": 7,
+       "k": 6
+      },
+      "false_memory_c": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "false_memory_d": null,
+      "false_memory_e": {
+       "rate": 0.16666666666666666,
+       "lo": 0.0,
+       "hi": 0.5,
+       "n": 6,
+       "k": 1
+      },
+      "control_recall": {
+       "rate": 0.46153846153846156,
+       "lo": 0.23076923076923078,
+       "hi": 0.7692307692307693,
+       "n": 13,
+       "k": 6
+      },
+      "abstain_explicit_cd": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "abstain_lenient_cd": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 6,
+       "k": 6
+      },
+      "side_recall_abe": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 7,
+       "k": 7
+      }
+     }
+    },
+    "answer": {
+     "all": {
+      "false_memory_all": {
+       "rate": 0.125,
+       "lo": 0.03125,
+       "hi": 0.25,
+       "n": 32,
+       "k": 4
+      },
+      "false_memory_a": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 13,
+       "k": 0
+      },
+      "false_memory_b": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 7,
+       "k": 0
+      },
+      "false_memory_c": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "false_memory_d": null,
+      "false_memory_e": {
+       "rate": 0.6666666666666666,
+       "lo": 0.3333333333333333,
+       "hi": 1.0,
+       "n": 6,
+       "k": 4
+      },
+      "control_recall": {
+       "rate": 0.46153846153846156,
+       "lo": 0.23076923076923078,
+       "hi": 0.7692307692307693,
+       "n": 13,
+       "k": 6
+      },
+      "abstain_explicit_cd": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "abstain_lenient_cd": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 6,
+       "k": 6
+      },
+      "side_recall_abe": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 7,
+       "k": 7
+      }
+     },
+     "heldout": {
+      "false_memory_all": {
+       "rate": 0.125,
+       "lo": 0.03125,
+       "hi": 0.25,
+       "n": 32,
+       "k": 4
+      },
+      "false_memory_a": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 13,
+       "k": 0
+      },
+      "false_memory_b": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 7,
+       "k": 0
+      },
+      "false_memory_c": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "false_memory_d": null,
+      "false_memory_e": {
+       "rate": 0.6666666666666666,
+       "lo": 0.3333333333333333,
+       "hi": 1.0,
+       "n": 6,
+       "k": 4
+      },
+      "control_recall": {
+       "rate": 0.46153846153846156,
+       "lo": 0.23076923076923078,
+       "hi": 0.7692307692307693,
+       "n": 13,
+       "k": 6
+      },
+      "abstain_explicit_cd": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "abstain_lenient_cd": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 6,
+       "k": 6
+      },
+      "side_recall_abe": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 7,
+       "k": 7
+      }
+     }
+    }
+   },
+   "views_audited": {
+    "lines": {
+     "all": {
+      "false_memory_all": {
+       "rate": 0.21875,
+       "lo": 0.09375,
+       "hi": 0.375,
+       "n": 32,
+       "k": 7
+      },
+      "false_memory_a": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 13,
+       "k": 0
+      },
+      "false_memory_b": {
+       "rate": 0.8571428571428571,
+       "lo": 0.5714285714285714,
+       "hi": 1.0,
+       "n": 7,
+       "k": 6
+      },
+      "false_memory_c": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "false_memory_d": null,
+      "false_memory_e": {
+       "rate": 0.16666666666666666,
+       "lo": 0.0,
+       "hi": 0.5,
+       "n": 6,
+       "k": 1
+      },
+      "control_recall": {
+       "rate": 0.46153846153846156,
+       "lo": 0.23076923076923078,
+       "hi": 0.7692307692307693,
+       "n": 13,
+       "k": 6
+      },
+      "abstain_explicit_cd": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "abstain_lenient_cd": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 6,
+       "k": 6
+      },
+      "side_recall_abe": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 7,
+       "k": 7
+      }
+     },
+     "heldout": {
+      "false_memory_all": {
+       "rate": 0.21875,
+       "lo": 0.09375,
+       "hi": 0.375,
+       "n": 32,
+       "k": 7
+      },
+      "false_memory_a": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 13,
+       "k": 0
+      },
+      "false_memory_b": {
+       "rate": 0.8571428571428571,
+       "lo": 0.5714285714285714,
+       "hi": 1.0,
+       "n": 7,
+       "k": 6
+      },
+      "false_memory_c": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "false_memory_d": null,
+      "false_memory_e": {
+       "rate": 0.16666666666666666,
+       "lo": 0.0,
+       "hi": 0.5,
+       "n": 6,
+       "k": 1
+      },
+      "control_recall": {
+       "rate": 0.46153846153846156,
+       "lo": 0.23076923076923078,
+       "hi": 0.7692307692307693,
+       "n": 13,
+       "k": 6
+      },
+      "abstain_explicit_cd": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "abstain_lenient_cd": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 6,
+       "k": 6
+      },
+      "side_recall_abe": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 7,
+       "k": 7
+      }
+     }
+    },
+    "answer": {
+     "all": {
+      "false_memory_all": {
+       "rate": 0.125,
+       "lo": 0.03125,
+       "hi": 0.25,
+       "n": 32,
+       "k": 4
+      },
+      "false_memory_a": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 13,
+       "k": 0
+      },
+      "false_memory_b": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 7,
+       "k": 0
+      },
+      "false_memory_c": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "false_memory_d": null,
+      "false_memory_e": {
+       "rate": 0.6666666666666666,
+       "lo": 0.3333333333333333,
+       "hi": 1.0,
+       "n": 6,
+       "k": 4
+      },
+      "control_recall": {
+       "rate": 0.46153846153846156,
+       "lo": 0.23076923076923078,
+       "hi": 0.7692307692307693,
+       "n": 13,
+       "k": 6
+      },
+      "abstain_explicit_cd": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "abstain_lenient_cd": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 6,
+       "k": 6
+      },
+      "side_recall_abe": {
+       "rate": 1.0,
+       "lo": 1.0,
+       "hi": 1.0,
+       "n": 7,
+       "k": 7
+      }
+     },
+     "heldout": {
+      "false_memory_all": {
+       "rate": 0.125,
+       "lo": 0.03125,
+       "hi": 0.25,
+       "n": 32,
+       "k": 4
+      },
+      "false_memory_a": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 13,
+       "k": 0
+      },
+      "false_memory_b": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 7,
+       "k": 0
+      },
+      "false_memory_c": {
+       "rate": 0.0,
+       "lo": 0.0,
+       "hi": 0.0,
+       "n": 6,
+       "k": 0
+      },
+      "false_memory_d": null,
+      "false_memory_e": {
+       "rate": 0.6666666666666666,
+       "lo": 0.3333333333333333,
+       "hi": 1.0,
+       "n": 6,
+       "k": 4
+      },
+      "control_recall": {
+       "rate": 0.46153846153846156,
+       "lo": 0.23076923076923078,
+       "hi": 0.7692307692307693,
+       "n": 13,
+       "k": 6
       },
       "abstain_explicit_cd": {
        "rate": 0.0,
