@@ -39,7 +39,8 @@ CASES = os.environ.get("FM_CASES") or os.path.join(HERE, "cases.jsonl")
 OVERRIDES = os.environ.get("FM_OVERRIDES") or os.path.join(HERE, "audit_overrides.json")
 SEED = 20261002
 REPS = 10000
-SYSTEMS = ["sourcedrecall", "mem0", "rag", "agentmemory", "ai-memory"]
+SYSTEMS = ["sourcedrecall", "mem0", "rag", "agentmemory", "ai-memory",
+           "claude-memory"]   # 2026-10-21: Claude Code's memory, simulated (bench/claude_memory.py)
 PREFILTER_CLASSES = {"a", "b", "e"}
 CLASSES = "abcdef"
 NAMES = {"a": "a negation/hedge/question", "b": "b stale", "c": "c invention",
