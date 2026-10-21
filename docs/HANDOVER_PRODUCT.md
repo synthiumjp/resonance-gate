@@ -21,6 +21,28 @@ items fixed and open are listed below), docs/REVIEW_2026-10-09.md.
 
 ## 2026-10-21 IN FLIGHT (read this first)
 
+- 17:50: Claude Code's own memory, simulated (bench/claude_memory.py: Claude
+  Sonnet 5.5 updates a memory folder after each session following Claude
+  Code's memory guidance; the reader gets every file, so it is generous).
+  Writer outputs on the PC in ~/claude_runs/claude_memory (fm_<set>/raw_,
+  locomo/ctx_, locomo/claude_reader/ans_ with the Claude reader's answers).
+  Mac: ~/jpwork/sdr-cm (git archive of bench + cm_*.sh). The API credit ran
+  out at about $36 spent: the LoCoMo Claude judge batch was cancelled (Qwen
+  judges instead, cm_locomo.sh) and the real-email Claude reader failed.
+  Pasted text, Qwen reader (others' returns from 53e0d9c, audited; ours
+  unaudited): pasted claims as the user's v11 5/40 (ours 3, rag 23,
+  agentmemory 24), v12 11/40 (ours 8, rag 28, agentmemory 35), real emails
+  1/20 (ours 1, rag 16); facts about others (part U) 15/20 and 11/20 (ours
+  20, 19); own sent emails (real R f) 3/10 (ours 9); own pasted writing (D f)
+  27/30, 29/30 (ours 25, 25). Claude reader: pasted claims 0/40, 1/40 (ours
+  0, 0); U 15, 11 (ours 20, 19). One Qwen-reader false memory checked by hand
+  was the reader's (the note said the cousin has kids). So against Claude
+  Code's memory our edge is not pasted text; it is keeping more, no model
+  calls, local. README/post must not imply safer than Claude Code's memory.
+  Queued on the Mac after the release run: ~/jpwork/cm_locomo.sh (log
+  ~/jpwork/cm_locomo.log): Qwen reads claude-memory LoCoMo (cm_test), and
+  Qwen judges the Claude-read answers of all four (cm_claude_reader, *_qj).
+  Context: claude-memory ~10.8k tokens per question against ours ~0.7k.
 - 13:30: version 0.6.0 committed (358e282; JP: "do them all"), NOT tagged.
   Testers post drafted in docs/LAUNCH_POST.md (not exported; check its
   LoCoMo figures against this run). JP's install src moved to f5dc9df.
