@@ -106,6 +106,17 @@ def test_the_session_is_kept_as_excerpts_without_tool_output(tmp_path):
     assert "sk-abcdef" not in text
 
 
+def test_a_failed_lint_keeps_the_lines_that_name_the_problem():
+    out = ("articles/a.md\n  153:4074  error  Line 153 sentence length(188) exceeds the maximum"
+           " sentence length of 100  ja-technical-writing/sentence-length\n"
+           "  160:2  warning  Unused import 'os'\n\n0 warnings fixed\n\u2716 2 problems (1 error, 1 warning)\n"
+           "Exit code 1")
+    t = C.failure_lines(out)
+    assert "sentence length(188) exceeds" in t and "Unused import" in t
+    assert "0 warnings fixed" not in t and "Exit code" not in t and len(t) <= 300
+    assert C.failure_lines("") is None
+
+
 def test_a_secret_in_a_command_is_removed():
     assert C._clean_command("curl -H 'Authorization: Bearer abc.def' https://x") == \
         "curl -H 'Authorization: [removed]' https://x"

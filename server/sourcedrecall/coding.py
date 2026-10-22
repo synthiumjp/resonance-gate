@@ -19,10 +19,10 @@ From a Claude Code transcript it keeps, per session:
     "why did we ..." is usually in the assistant's own explanation): the
     session as short searchable passages, what the user and the assistant
     said and each tool call by its command or file, a failed command with
-    its error line only.
+    up to three lines of its output that name the problem (300 characters).
 
 Tool output is untrusted text: only the command (written by the assistant),
-its status and one error line (cut short, secrets scrubbed) are kept, never
+its status and a few error lines (cut short, secrets scrubbed) are kept, never
 whole outputs, and none of it becomes a fact about the user. Each record is
 one line of text with its kind, date, project and session id.
 """
@@ -321,6 +321,33 @@ def error_line(output):
     return line if len(line) <= _MAX_ERR else line[:_MAX_ERR - 3] + "..."
 
 
+_PROBLEM = re.compile(
+    r"(?i)\b(error|errors|warning|warn|failed|failure|exceeds|expected|cannot|"
+    r"can't|unable|missing|undefined|not found|unexpected|invalid)\b")
+_NO_PROBLEM = re.compile(r"(?i)\b(0|no) (errors?|warnings?|failures?|problems?)\b")
+_FAIL_LINES, _FAIL_CHARS = 3, 300
+
+
+def failure_lines(output):
+    """What a failed command's output says went wrong, for excerpts: the
+    error line, then up to two more lines that name a problem (a linter's
+    "file:line error ..." lines, a type checker's), at most 300 characters."""
+    first = error_line(output)
+    if not first:
+        return None
+    seen, out = {first}, [first]
+    for l in _ANSI.sub("", str(output or "")).splitlines():
+        l = scrub(" ".join(l.split()))
+        if len(out) >= _FAIL_LINES:
+            break
+        if l and l not in seen and _PROBLEM.search(l) and not _NO_PROBLEM.search(l) \
+                and not _EXIT.fullmatch(l):
+            seen.add(l)
+            out.append(l if len(l) <= _MAX_ERR else l[:_MAX_ERR - 3] + "...")
+    t = " | ".join(out)
+    return t if len(t) <= _FAIL_CHARS else t[:_FAIL_CHARS - 3] + "..."
+
+
 def _rel(path, cwd):
     p = str(path or "")
     if cwd and p.startswith(cwd.rstrip("/") + "/"):
@@ -545,7 +572,7 @@ _OUTPUT_CHARS = int(os.environ.get("SOURCEDRECALL_EXCERPT_OUTPUT", "0") or 0)
 def excerpts(evs, cwd=None, size=_EXCERPT_CHARS):
     """-> [{"kind": "excerpt", "text"}]: the session in passages of about
     `size` characters, one line per thing said or done. Tool output is not
-    kept, except a failed command's error line."""
+    kept, except what a failed command's output says went wrong."""
     lines = []
     for e in evs:
         if e.get("cancelled"):
@@ -567,7 +594,7 @@ def excerpts(evs, cwd=None, size=_EXCERPT_CHARS):
             continue
         line = f"TOOL {e['tool']}: {what}"
         if e["error"]:
-            line += f" -> failed: {error_line(e['output']) or 'no error line'}"
+            line += f" -> failed: {failure_lines(e['output']) or 'no error line'}"
         elif _OUTPUT_CHARS and e["tool"] == "Bash" and e["output"]:
             o = " ".join(scrub(_ANSI.sub("", e["output"])).split())
             line += " -> " + (o if len(o) <= _OUTPUT_CHARS else o[:_OUTPUT_CHARS - 3] + "...")

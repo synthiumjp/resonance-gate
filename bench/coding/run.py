@@ -68,7 +68,7 @@ def ours(split, out):
 def _variant(system):
     """"sourcedrecall-e8r4m2": 8 excerpts, 4 records, 2 of the user's
     messages (dev tuning); plain "sourcedrecall" is the default."""
-    m = re.fullmatch(r"sourcedrecall-e(\d+)r(\d+)m(\d+)", system)
+    m = re.fullmatch(r"sourcedrecall-e(\d+)r(\d+)m(\d+)(?:-\w+)?", system)
     return tuple(int(x) for x in m.groups()) if m else (K_EXCERPTS, K_RECORDS, K_MESSAGES)
 
 
