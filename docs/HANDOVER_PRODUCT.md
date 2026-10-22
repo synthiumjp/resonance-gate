@@ -42,6 +42,19 @@ project history at session start, `import claude-code` backfill; ba6f0d9).
   the 30-question check 8 of 30), context, answers, run_dev.score.md.
   Next: repeat the 30-question check on questions_dev2 (blinded Sonnet
   reviewer), read the dev score, tune on dev, freeze, then held out.
+- 2026-10-23 04:20: dev done once (prereg dev log has the numbers). Records
+  alone 30/111, plain retrieval 75; session excerpts added (61a1164): ours
+  67, native-qwen 26. Questions: questions_dev2.jsonl (111), Sonnet-vetted
+  questions_dev2_sonnetvet.jsonl (53, check 5 of 30). JP approved the
+  held-out changes (Sonnet vet step, bench/coding/VET_SONNET.md; 12 question
+  sessions per repo via CODING_PER_REPO=12; JP reads 30 vetted held-out
+  questions). Running: run_dev_variants.sh (e8r4m2, e10r0m0) and
+  run_dev_out300.sh (excerpts with 300 chars of command output, stores in
+  run_dev/stores_out300) -> run_dev.score3*.md / score4*.md; then pick the
+  setting, freeze, `bash fetch.sh held_out` in swechat/. ~/jpwork/sdr-cm/
+  cm_both.sh (log ~/jpwork/cm_both.log): LoCoMo native + ours together on
+  :8091, about 11 h. Memory page /history added (df2a910). Not done: the
+  "not stored" list (needs the parser to report why it skipped a sentence).
 
 ## 2026-10-21 IN FLIGHT
 
