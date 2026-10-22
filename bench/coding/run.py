@@ -22,7 +22,7 @@ from common import HERE, append, chat, claim, condensed, fitted, jsonl, sessions
 
 sys.path.insert(0, os.path.dirname(HERE))      # bench/, for claude_memory
 OWNER = "Dev"
-K_RECORDS, K_MESSAGES, K_RAG, K_EXCERPTS = 8, 4, 10, 6
+K_RECORDS, K_MESSAGES, K_RAG, K_EXCERPTS = 0, 0, 10, 10   # frozen from dev 2026-10-23
 
 
 def _state(out, repo):
@@ -76,7 +76,7 @@ def ours_context(out, repo, q, system="sourcedrecall"):
     pm = _use_store(out, repo) if os.environ.get("SOURCEDRECALL_STATE") != _state(out, repo) else \
         __import__("sourcedrecall.profile_memory", fromlist=["x"])
     ke, kr, km = _variant(system)
-    recs = pm.profile_history(q, k=kr, all_projects=True, excerpts=ke)["results"] if ke or kr else []
+    recs = pm.profile_history(q, k=ke, all_projects=True, records=kr)["results"] if ke or kr else []
     if not kr:
         recs = [r for r in recs if r["kind"] == "excerpt"]
     msgs = pm._messages_for(q, k=km) if km else []

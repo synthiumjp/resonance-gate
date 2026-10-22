@@ -2504,17 +2504,20 @@ def project_brief(scope, max_chars=1800):
 _RECORD_KINDS = ("fixed", "unresolved", "command", "commit", "decision", "session")
 
 
-def profile_history(query, scope=None, k=8, all_projects=False, excerpts=6):
-    """Search past coding sessions: what failed and what fixed it, commands
-    that worked, commits, decisions, each with its date, project and
-    session, then the passages of the sessions that match best (what was
-    said and done). `scope` defaults to the project Claude Code is running
-    in; all_projects=True searches every project."""
+def profile_history(query, scope=None, k=10, all_projects=False, records=0):
+    """Search past coding sessions: the k passages of the sessions that match
+    best (what was said and done, a failed command with its error lines),
+    each with its date, project and session; records=n puts the n best
+    records (what failed and what fixed it, commands, commits, decisions)
+    first. `scope` defaults to the project Claude Code is running in;
+    all_projects=True searches every project. Passages alone answered more
+    of the coding recall dev questions than passages after records (71 and
+    65 of 111); the records feed the session start and the memory page."""
     from sourcedrecall.paths import current_scope
     sc = None if all_projects else current_scope(scope)
-    hits = _episodes_for(query, k=k, scope=sc, kinds=_RECORD_KINDS) if k else []
-    if excerpts:
-        hits += _episodes_for(query, k=excerpts, scope=sc, kinds=("excerpt",))
+    hits = _episodes_for(query, k=records, scope=sc, kinds=_RECORD_KINDS) if records else []
+    if k:
+        hits += _episodes_for(query, k=k, scope=sc, kinds=("excerpt",))
     return {"query": query, "project": sc or "all",
             "results": [{"id": h["id"], "kind": h["kind"], "text": h["text"],
                          "date": h.get("date"), "project": h.get("scope"),

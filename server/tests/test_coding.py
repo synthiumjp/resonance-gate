@@ -181,7 +181,7 @@ def test_stored_at_session_end_searchable_in_its_project_and_forgettable(home):
                         owner="Dana Cole", sync=True)
     assert out["coding_records"] >= 5, out
     import sourcedrecall.profile_memory as pm
-    r = pm.profile_history("KeyError tokens in the parser test", scope=str(home))
+    r = pm.profile_history("KeyError tokens in the parser test", scope=str(home), records=3)
     top = r["results"][0]
     assert top["kind"] == "fixed" and top["date"] == "2026-10-01"
     assert top["session"] == "claude-code:s1"
@@ -192,7 +192,8 @@ def test_stored_at_session_end_searchable_in_its_project_and_forgettable(home):
     assert len(pm._load_episodes()) == out["coding_records"]
     assert pm.profile_forget(top["id"])["forgotten"]
     assert all(x["id"] != top["id"] for x in
-               pm.profile_history("KeyError", all_projects=True)["results"])
+               pm.profile_history("KeyError", all_projects=True, records=8)["results"])
+    assert all(x["kind"] == "excerpt" for x in pm.profile_history("KeyError", scope=str(home))["results"])
 
 
 def test_the_session_start_shows_the_projects_history(home):

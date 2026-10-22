@@ -1,9 +1,10 @@
-# Pre-registration: coding recall v1 (approved by JP 2026-10-22)
+# Pre-registration: coding recall v1 (approved by JP 2026-10-22, frozen 2026-10-23)
 
 JP approved this design on 2026-10-22 evening, with the history at 40
-sessions. The question writer, the extractor and retrieval may still change
-on dev; the file is committed as frozen, with the writer prompt and the code
-commit, before any held-out session is fetched. Nothing in "Held out" is
+sessions. Frozen 2026-10-23 in the commit that adds this line, with the
+question writer prompt (bench/coding/make_questions.py), the Sonnet vet
+prompt (bench/coding/VET_SONNET.md), the extractor and retrieval as they
+are in that commit; no held-out session had been fetched. Nothing in "Held out" is
 read, tuned on or looked at before then. Plan: docs/PLAN_GAPS_2026-10-22.md, G1.
 
 Dev log:
@@ -26,6 +27,16 @@ Dev log:
   rag 75 / 41. With session excerpts (61a1164): sourcedrecall 67 / 35
   (2,493 context tokens), both 66 / 37, native-qwen 26 / 12 (7,545), rag
   75 / 41 (2,581); ours vs rag 5 to 13, p=0.10; ours vs native 46 to 5.
+- 2026-10-23, dev variants of what sourcedrecall gives the reader (111 / 53):
+  10 passages, no records or messages 70 / 37 (vs rag 5 to 10, p=0.30);
+  8 passages, 4 records, 2 messages 68 / 36; passages with the first 300
+  characters of each command's output 67 / 34 (not kept: no gain, more
+  untrusted text). Of the 5 fix questions rag answered and passages-only
+  missed, 2 had the answer in a linter's error lines, which excerpts dropped;
+  a failed command now keeps up to three problem lines (4b9dfca).
+  With that: 10 passages 71 / 38, 8 passages and 3 records 65 / 33.
+  Frozen: 10 passages, no records, no messages; history_search returns
+  this by default.
 
 Approved by JP 2026-10-23 for held out: the Sonnet vet as a step of the
 question protocol, after the automatic drops; 12 question sessions per
@@ -90,15 +101,17 @@ reported as failed on question quality, and the writer is fixed on dev.
 
 All get the same reader prompt and a context budget reported per question.
 
-1. sourcedrecall: what Claude would get for the question: the top 8
-   coding records (history_search) and the top 4 of the user's messages
-   (profile_context).
+1. sourcedrecall: what Claude would get for the question from
+   history_search with its defaults: the 10 best-matching passages of the
+   history's sessions (what the user and the assistant said, each tool call
+   by command or file, a failed command with up to three error lines; no
+   other tool output).
 2. native memory, simulated with Qwen3-14B as the writer
    (bench/claude_memory.py's instructions, run after each session on the
    condensed transcript). Labelled: Claude Code's memory is written by
    Claude, so this is unfair to it. The Sonnet 5.5 writer is run as the
    main comparison when API credit is back (about 3 weeks), unchanged.
-3. native memory and sourcedrecall together (both contexts).
+3. native memory and sourcedrecall together (both contexts, native first).
 4. plain retrieval: the top 10 chunks of the condensed transcripts (same
    embedder), the baseline any memory must beat.
 

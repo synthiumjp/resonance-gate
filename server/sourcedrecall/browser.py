@@ -211,7 +211,7 @@ def _render_history(q="", per_project=20):
                     f"<code>{e(command('import claude-code'))}</code> stores past ones.</p>")
     result = ""
     if q:
-        hits = pm.profile_history(q, all_projects=True)["results"]
+        hits = pm.profile_history(q, all_projects=True, records=5)["results"]
         items = "".join(f"<li><span class='tag'>{e(h['kind'])}</span> "
                         f"{'<br>'.join(e(x) for x in h['text'].splitlines())}"
                         f"<div class='meta'>{e(str(h.get('date') or ''))} · {e(str(h.get('project') or ''))}"
