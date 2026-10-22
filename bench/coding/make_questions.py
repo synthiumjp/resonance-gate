@@ -2,9 +2,12 @@
 history sessions per repository, spread evenly, Qwen3-14B writes up to 3
 questions each (fix / how / why / where) with a gold answer and an evidence
 quote. Dropped: evidence not in the condensed transcript; questions answered
-right with no memory at all; duplicates.
+right with no memory at all; duplicates; "where" answers that only repeat
+the question; questions Qwen vets out (vague, the gold not what was asked,
+trivia), added after the first two dev sets failed the 30-question check.
 
     python make_questions.py dev OUT.jsonl
+    python make_questions.py vet IN.jsonl OUT.jsonl   # the last two drops only
 """
 import json
 import re
@@ -24,7 +27,7 @@ Weeks later, the same developer, starting a new session on this project, wants t
 
 Rules:
 - Each question must be answerable only from this session's specifics, not from general knowledge.
-- Ask as the developer would, naturally ("What broke the Docker image build when we added the ffmpeg step, and how did we fix it?"). Do not mention "the session", "the transcript" or dates.
+- Ask as the developer would, naturally, in the form "What broke <which build, test or command> when we <which change>, and how did we fix it?" with this session's specifics filled in. Do not mention "the session", "the transcript" or dates.
 - Name the specific thing the question is about: which test, build, command, feature, error or document. Never "the test", "the build", "the article", "the fix" or "last time" without saying which; the project has many.
 - The answer must answer exactly that question, and only one answer may fit it.
 - The answer: short (at most 25 words), specific (names, commands, files, errors). Give paths relative to the repository, not the developer's own folders.
@@ -48,6 +51,36 @@ GOLD: {gold}
 ANSWER: {a}
 
 Reply with one word: CORRECT or WRONG. /no_think"""
+
+
+VET = """A developer, weeks after a coding session on {repo}, asks a memory of past sessions the QUESTION below. The GOLD answer was drawn from that session; the EVIDENCE is a quote from it.
+
+Keep the question only if all of these hold:
+- the question names what it is about, so it has one right answer in a project with many tests, builds, files and documents;
+- the GOLD answers exactly that question, and the EVIDENCE supports it;
+- the GOLD says something the question does not already say;
+- it is something a developer would want to recall, not a detail (one CSS property, a generated file name).
+
+QUESTION: {q}
+GOLD: {gold}
+EVIDENCE: {ev}
+
+Reply with one word: KEEP or DROP. /no_think"""
+
+_NAME = re.compile(r"[\w./-]+\.[a-z]{1,5}\b|`[^`]+`")
+
+
+def echoes(q):
+    """A "where" question whose answer names only what the question named."""
+    if q["type"] != "where":
+        return False
+    names = {n.strip("`").rsplit("/", 1)[-1] for n in _NAME.findall(q["answer"])}
+    return bool(names) and all(n in q["question"] for n in names)
+
+
+def vet(repo, q):
+    v = chat(VET.format(repo=repo, q=q["question"], gold=q["answer"], ev=q.get("evidence", "")), max_tokens=8)
+    return "KEEP" in v.upper() and "DROP" not in v.upper()
 
 
 def _norm(s):
@@ -110,6 +143,12 @@ def _repo(repo, ss, out, done, seen):
             if _norm(q["question"]) in seen:
                 reasons.append("duplicate")
                 continue
+            if echoes(q):
+                reasons.append("answer repeats the question")
+                continue
+            if not vet(repo, q):
+                reasons.append("vetted out")
+                continue
             cb = chat(CLOSED.format(q=q["question"]), max_tokens=80)
             if judge(q["question"], q["answer"], cb):
                 reasons.append("answered without memory")
@@ -124,5 +163,23 @@ def _repo(repo, ss, out, done, seen):
         print(repo, sid[:8], len(got), "written", kept, "kept", reasons, flush=True)
 
 
+def vet_file(src, out):
+    """The echo and vet drops applied to a question file written before them
+    (dev, 2026-10-23)."""
+    kept = []
+    for q in jsonl(src):
+        why = "answer repeats the question" if echoes(q) else None if vet(q["repo"], q) else "vetted out"
+        print(why or "kept", "|", q["question"][:100], flush=True)
+        if not why:
+            kept.append(q)
+    with open(out, "w") as fh:
+        for q in kept:
+            fh.write(json.dumps(q, ensure_ascii=False) + "\n")
+    print(len(kept), "of", len(jsonl(src)), "kept")
+
+
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2])
+    if sys.argv[1] == "vet":
+        vet_file(sys.argv[2], sys.argv[3])
+    else:
+        main(sys.argv[1], sys.argv[2])
