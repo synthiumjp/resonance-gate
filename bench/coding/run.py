@@ -7,7 +7,7 @@ OUT (outside the repo). Resumable: each step skips what is already done.
     python run.py native  dev OUT    # native memory with a Qwen writer (labelled)
     python run.py context dev OUT QUESTIONS   # each system's context per question
     python run.py answer  dev OUT [system ...]
-    python run.py score   dev OUT
+    python run.py score   dev OUT [QUESTIONS]   # QUESTIONS: only these (a vetted subset)
 
 Systems: sourcedrecall, native-qwen, both-qwen (native then ours), rag.
 """
@@ -180,14 +180,17 @@ def native_context(out, repo, q):
 SYSTEMS = ["sourcedrecall", "native-qwen", "both-qwen", "rag"]
 
 
+def _qid(q):
+    return f"{q['repo']}#{q['session'][:8]}#{q['type']}#" + \
+        hashlib.sha1(q["question"].encode()).hexdigest()[:6]
+
+
 def context(split, out, questions):
     qs = jsonl(questions)
     path = os.path.join(out, "context.jsonl")
     have = {(r["system"], r["qid"]) for r in jsonl(path)}
     for i, q in enumerate(sorted(qs, key=lambda r: r["repo"])):
-        qid = f"{q['repo']}#{q['session'][:8]}#{q['type']}#" + \
-            hashlib.sha1(q["question"].encode()).hexdigest()[:6]
-        q["qid"] = qid
+        qid = q["qid"] = _qid(q)
         got = {}
         for s in SYSTEMS:
             if (s, qid) in have:
@@ -229,9 +232,13 @@ def answer(split, out, systems=None):
         print(r["system"], r["qid"], ok, flush=True)
 
 
-def score(split, out):
+def score(split, out, questions=None):
+    """questions: score only the questions in this file (a vetted subset)."""
     from math import comb
     rows = jsonl(os.path.join(out, "answers.jsonl"))
+    if questions:
+        keep = {_qid(q) for q in jsonl(questions)}
+        rows = [r for r in rows if r["qid"] in keep]
     by = {}
     for r in rows:
         by.setdefault(r["system"], {})[r["qid"]] = r
@@ -264,7 +271,9 @@ if __name__ == "__main__":
     os.makedirs(out, exist_ok=True)
     if cmd == "context":
         context(split, out, sys.argv[4])
+    elif cmd == "score":
+        score(split, out, sys.argv[4] if len(sys.argv) > 4 else None)
     elif cmd == "answer":
         answer(split, out, sys.argv[4:] or None)
     else:
-        {"ours": ours, "rag": rag, "native": native, "score": score}[cmd](split, out)
+        {"ours": ours, "rag": rag, "native": native}[cmd](split, out)

@@ -13,6 +13,20 @@ Dev log:
   asks for the specific thing by name, one possible answer, repository
   paths, no generated names, and "where" as where a change was made. The
   question set is rewritten and the check repeated.
+- 2026-10-23: the rewritten set (111) failed again, 9 of 30 (trivial "which
+  file was modified" questions whose answer repeats the question; one copied
+  the prompt's example). A Qwen vetting pass agreed with the reviewer on 1 of
+  the 9. A Sonnet subagent then vetted all 111 with the question, gold and
+  evidence (never any system's output), on the reviewer's criteria: 53 kept
+  (fix 21, how 16, where 13, why 3). A fresh blinded Sonnet reviewer on 30 of
+  the 53: 5 fail, at the limit.
+
+Proposed for held out (needs JP's review): the Sonnet vet as a step of the
+question protocol, after the automatic drops; 12 question sessions per
+repository instead of 6, since about half the questions survive the vet
+(about 200 held-out questions); the 30-question check by JP on the
+vetted held-out set, as a vet and a check by the same model family are not
+independent.
 
 ## Question
 
