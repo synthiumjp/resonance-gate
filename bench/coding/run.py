@@ -68,7 +68,7 @@ def ours_context(out, repo, q):
         __import__("sourcedrecall.profile_memory", fromlist=["x"])
     recs = pm.profile_history(q, k=K_RECORDS, all_projects=True)["results"]
     msgs = pm._messages_for(q, k=K_MESSAGES)
-    lines = [f"[{r['date']}] {r['kind']}: {r['text']}" for r in recs]
+    lines = [f"[{r['date']}] {r['kind']}: " + " | ".join(r["text"].splitlines()) for r in recs]
     lines += [f"[{m.get('date')}] the user said: {m['text'][:600]}" for m in msgs]
     return lines
 

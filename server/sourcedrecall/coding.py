@@ -14,7 +14,12 @@ From a Claude Code transcript it keeps, per session:
   * commits, with their messages;
   * decisions, from what the user or the assistant said ("let's use X
     instead of Y", "don't add Z");
-  * the session itself: its first request, branch and files edited.
+  * the session itself: its first request, branch and files edited;
+  * excerpts (2026-10-23, from the coding recall dev set: the answer to
+    "why did we ..." is usually in the assistant's own explanation): the
+    session as short searchable passages, what the user and the assistant
+    said and each tool call by its command or file, a failed command with
+    its error line only.
 
 Tool output is untrusted text: only the command (written by the assistant),
 its status and one error line (cut short, secrets scrubbed) are kept, never
@@ -506,8 +511,49 @@ def branch_and_cwd(path):
     return branch, cwd
 
 
+_EXCERPT_CHARS = 1200
+_SAY_CHARS = 800
+
+
+def excerpts(evs, cwd=None, size=_EXCERPT_CHARS):
+    """-> [{"kind": "excerpt", "text"}]: the session in passages of about
+    `size` characters, one line per thing said or done. Tool output is not
+    kept, except a failed command's error line."""
+    lines = []
+    for e in evs:
+        if "say" in e:
+            t = " ".join(scrub(e["text"]).split())
+            if t:
+                who = "USER" if e["say"] == "user" else "ASSISTANT"
+                lines.append(f"{who}: " + (t if len(t) <= _SAY_CHARS else t[:_SAY_CHARS - 3] + "..."))
+            continue
+        inp = e["input"] or {}
+        if e["tool"] == "Bash":
+            what = _clean_command(inp.get("command"))
+        else:
+            what = (_rel(inp.get("file_path") or inp.get("notebook_path"), cwd)
+                    or scrub(" ".join(str(inp.get("pattern") or inp.get("url")
+                                          or inp.get("description") or "").split()))[:_MAX_CMD])
+        if not what:
+            continue
+        line = f"TOOL {e['tool']}: {what}"
+        if e["error"]:
+            line += f" -> failed: {error_line(e['output']) or 'no error line'}"
+        lines.append(line)
+    out, cur = [], ""
+    for line in lines:
+        if cur and len(cur) + len(line) > size:
+            out.append(cur.rstrip())
+            cur = ""
+        cur += line + "\n"
+    if cur.strip():
+        out.append(cur.rstrip())
+    return [{"kind": "excerpt", "text": t} for t in out]
+
+
 def session_records(path, classify, cwd=None):
     branch, rec_cwd = branch_and_cwd(path)
     cwd = cwd or rec_cwd
-    return records(events(path, classify), cwd=cwd,
-                   branch=None if branch in (None, "HEAD") else branch)
+    evs = events(path, classify)
+    return records(evs, cwd=cwd, branch=None if branch in (None, "HEAD") else branch) \
+        + excerpts(evs, cwd=cwd)

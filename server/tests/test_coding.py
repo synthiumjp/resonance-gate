@@ -81,7 +81,7 @@ def test_tool_output_beyond_the_error_line_is_not_kept(tmp_path):
 
 
 def test_exploration_is_not_recorded_and_working_commands_are(tmp_path):
-    recs = _recs(tmp_path)
+    recs = [r for r in _recs(tmp_path) if r["kind"] != "excerpt"]
     assert not any("ls src" in r["text"] for r in recs)
     cmds = [r["text"] for r in recs if r["kind"] == "command"]
     assert any("uv run pytest tests/test_parser.py" in c for c in cmds)
@@ -92,6 +92,18 @@ def test_a_failure_not_fixed_by_the_end_is_unresolved_and_secrets_are_removed(tm
     assert len(un) == 1 and "No module named 'httpx'" in un[0]
     assert "sk-abcdef" not in json.dumps(_recs(tmp_path))
     assert "`python scripts/smoke.py`" in un[0] or "`uv run python scripts/smoke.py`" in un[0]
+
+
+def test_the_session_is_kept_as_excerpts_without_tool_output(tmp_path):
+    ex = [r["text"] for r in _recs(tmp_path) if r["kind"] == "excerpt"]
+    text = "\n".join(ex)
+    assert ex and all(len(t) <= 1200 + 800 for t in ex)
+    assert "ASSISTANT: The failure is because parse() reads tokens" in text
+    assert "TOOL Edit: src/parser.py" in text
+    assert "failed: FAILED tests/test_parser.py::test_empty - KeyError: 'tokens'" in text \
+        or "failed: KeyError: 'tokens'" in text
+    assert "3 passed" not in text and "Narnia" not in text      # output is not kept
+    assert "sk-abcdef" not in text
 
 
 def test_a_secret_in_a_command_is_removed():

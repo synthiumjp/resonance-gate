@@ -2501,14 +2501,20 @@ def project_brief(scope, max_chars=1800):
     return text.rstrip()
 
 
-def profile_history(query, scope=None, k=8, all_projects=False):
+_RECORD_KINDS = ("fixed", "unresolved", "command", "commit", "decision", "session")
+
+
+def profile_history(query, scope=None, k=8, all_projects=False, excerpts=6):
     """Search past coding sessions: what failed and what fixed it, commands
     that worked, commits, decisions, each with its date, project and
-    session. `scope` defaults to the project Claude Code is running in;
-    all_projects=True searches every project."""
+    session, then the passages of the sessions that match best (what was
+    said and done). `scope` defaults to the project Claude Code is running
+    in; all_projects=True searches every project."""
     from sourcedrecall.paths import current_scope
     sc = None if all_projects else current_scope(scope)
-    hits = _episodes_for(query, k=k, scope=sc)
+    hits = _episodes_for(query, k=k, scope=sc, kinds=_RECORD_KINDS)
+    if excerpts:
+        hits += _episodes_for(query, k=excerpts, scope=sc, kinds=("excerpt",))
     return {"query": query, "project": sc or "all",
             "results": [{"id": h["id"], "kind": h["kind"], "text": h["text"],
                          "date": h.get("date"), "project": h.get("scope"),

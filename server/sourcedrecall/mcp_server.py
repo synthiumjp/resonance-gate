@@ -110,7 +110,7 @@ def profile_status(reload: bool = False) -> dict:
 @_tool(read_only=True)
 def history_search(query: str, all_projects: bool = False, max_results: int = 8,
                    scope: str = None) -> dict:
-    """Search past coding sessions in this project: what failed and what fixed it (command, error, files edited), commands that worked, commits and decisions, each dated. Use it when the user says "last time", "before", "again", "how did we", "why did we", or an error looks familiar. all_projects=True searches every project; profile_rehydrate reads a whole session."""
+    """Search past coding sessions in this project: what failed and what fixed it (command, error, files edited), commands that worked, commits and decisions, each dated, then passages of the sessions (what was said and done). Use it when the user says "last time", "before", "again", "how did we", "why did we", or an error looks familiar. all_projects=True searches every project; profile_rehydrate reads a whole session."""
     return pmem.profile_history(query, scope, max(1, min(int(max_results), 25)),
                                 all_projects)
 
