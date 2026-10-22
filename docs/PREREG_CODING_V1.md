@@ -1,7 +1,18 @@
-# Pre-registration: coding recall v1 (DRAFT for JP's review, 2026-10-22)
+# Pre-registration: coding recall v1 (approved by JP 2026-10-22)
 
-Nothing in "Held out" is read, tuned on or looked at until JP approves this
-file and it is committed as frozen. Plan: docs/PLAN_GAPS_2026-10-22.md, G1.
+JP approved this design on 2026-10-22 evening, with the history at 40
+sessions. The question writer, the extractor and retrieval may still change
+on dev; the file is committed as frozen, with the writer prompt and the code
+commit, before any held-out session is fetched. Nothing in "Held out" is
+read, tuned on or looked at before then. Plan: docs/PLAN_GAPS_2026-10-22.md, G1.
+
+Dev log:
+- 2026-10-22: first dev question set (107 questions) failed the 30-question
+  check, 8 of 30 by a blinded Sonnet reviewer (vague: "the test", "the
+  article"; generated file names; absolute paths). The writer prompt now
+  asks for the specific thing by name, one possible answer, repository
+  paths, no generated names, and "where" as where a change was made. The
+  question set is rewritten and the check repeated.
 
 ## Question
 

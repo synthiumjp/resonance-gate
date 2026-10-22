@@ -16,7 +16,7 @@ import os
 import re
 import sys
 
-from common import HERE, append, chat, condensed, fitted, jsonl, sessions
+from common import HERE, append, chat, claim, condensed, fitted, jsonl, sessions
 
 sys.path.insert(0, os.path.dirname(HERE))      # bench/, for claude_memory
 OWNER = "Dev"
@@ -29,6 +29,9 @@ def _state(out, repo):
 
 def _use_store(out, repo):
     os.environ["SOURCEDRECALL_STATE"] = _state(out, repo)
+    # paths.default_memory_dir keeps an RG_MEMORY_DIR already set, so without
+    # this every repository after the first went into the first one's store
+    os.environ["RG_MEMORY_DIR"] = os.path.join(_state(out, repo), "conversations")
     os.environ["SOURCEDRECALL_SCOPING"] = "0"     # one store per repo
     os.environ["SOURCEDRECALL_OWNER"] = OWNER
     os.environ.setdefault("RG_NLI", "0")
@@ -123,38 +126,47 @@ def native(split, out):
         p = os.path.join(out, "native", repo.replace("/", "__") + ".json")
         st = json.load(open(p)) if os.path.exists(p) else {"done": 0, "files": {}}
         os.makedirs(os.path.dirname(p), exist_ok=True)
-        for i in range(st["done"], len(ss)):
-            sid, ts, path = ss[i]
-            build = lambda tr, st=st, ts=ts: (CM.INSTRUCTIONS  # noqa: E731
-                      + '\n\nReply with JSON only: {"changes": [{"action": "write" or "delete", '
-                        '"file": "name.md", "content": "..."}]}'
-                      + f"\n\nThe conversation's date: {ts[:10]}.\n\nThe memory folder:\n\n"
-                      + CM._folder(st["files"])
-                      + f"\n\nThe conversation that just ended (a coding session in {repo}, condensed: "
-                        "USER, ASSISTANT, and TOOL calls with the start of their results):\n\n<transcript>\n"
-                      + tr + "\n</transcript> /no_think")
-            changes = None
-            for _ in range(2):
-                reply, _n = fitted(build, path, sizes=(NATIVE_CHARS, 18000, 10000), max_tokens=2500)
-                m = re.search(r"\{.*\}", reply or "", re.S)
-                try:
-                    changes = json.loads(m.group(0))["changes"] if m else None
-                    break
-                except (ValueError, KeyError, TypeError):
-                    changes = None
-            files = dict(st["files"])
-            for ch in changes or []:
-                if not isinstance(ch, dict) or not ch.get("file"):
-                    continue
-                n = CM._safe(ch["file"])
-                if ch.get("action") == "delete":
-                    files.pop(n, None)
-                elif ch.get("content"):
-                    files[n] = str(ch["content"]).strip()
-            st = {"done": i + 1, "files": files, "unreadable": st.get("unreadable", 0) + (changes is None)}
-            json.dump(st, open(p + ".tmp", "w"))
-            os.replace(p + ".tmp", p)
-            print(repo, i + 1, len(ss), len(files), "files", "" if changes is not None else "UNREADABLE", flush=True)
+        if st["done"] >= len(ss) or not claim(p):
+            continue
+        try:
+            _native_repo(CM, repo, ss, p, st)
+        finally:
+            os.remove(p + ".lock")
+
+
+def _native_repo(CM, repo, ss, p, st):
+    for i in range(st["done"], len(ss)):
+        sid, ts, path = ss[i]
+        build = lambda tr, st=st, ts=ts: (CM.INSTRUCTIONS  # noqa: E731
+                  + '\n\nReply with JSON only: {"changes": [{"action": "write" or "delete", '
+                    '"file": "name.md", "content": "..."}]}'
+                  + f"\n\nThe conversation's date: {ts[:10]}.\n\nThe memory folder:\n\n"
+                  + CM._folder(st["files"])
+                  + f"\n\nThe conversation that just ended (a coding session in {repo}, condensed: "
+                    "USER, ASSISTANT, and TOOL calls with the start of their results):\n\n<transcript>\n"
+                  + tr + "\n</transcript> /no_think")
+        changes = None
+        for _ in range(2):
+            reply, _n = fitted(build, path, sizes=(NATIVE_CHARS, 18000, 10000), max_tokens=2500)
+            m = re.search(r"\{.*\}", reply or "", re.S)
+            try:
+                changes = json.loads(m.group(0))["changes"] if m else None
+                break
+            except (ValueError, KeyError, TypeError):
+                changes = None
+        files = dict(st["files"])
+        for ch in changes or []:
+            if not isinstance(ch, dict) or not ch.get("file"):
+                continue
+            n = CM._safe(ch["file"])
+            if ch.get("action") == "delete":
+                files.pop(n, None)
+            elif ch.get("content"):
+                files[n] = str(ch["content"]).strip()
+        st = {"done": i + 1, "files": files, "unreadable": st.get("unreadable", 0) + (changes is None)}
+        json.dump(st, open(p + ".tmp", "w"))
+        os.replace(p + ".tmp", p)
+        print(repo, i + 1, len(ss), len(files), "files", "" if changes is not None else "UNREADABLE", flush=True)
 
 
 def native_context(out, repo, q):

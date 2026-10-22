@@ -24,9 +24,34 @@ MODEL = os.environ.get("CODING_LLM_MODEL", "qwen3-14b-a8cc1361.gguf")
 HISTORY = 40          # sessions of history per repository, at most
 
 
+def _jp_sessions():
+    """JP's own Claude Code sessions (copied to CODING_JP, private, never
+    committed): one project per folder, sessions by their first timestamp."""
+    import glob
+    root = os.path.expanduser(os.environ.get("CODING_JP", "~/jpwork/coding_data/jp_sessions"))
+    out = {}
+    for p in glob.glob(os.path.join(root, "*", "*.jsonl")):
+        ts = None
+        with open(p, encoding="utf-8", errors="replace") as fh:
+            for line in fh:
+                if '"timestamp"' in line:
+                    try:
+                        ts = json.loads(line).get("timestamp")
+                    except ValueError:
+                        continue
+                    if ts:
+                        break
+        if ts:
+            proj = os.path.basename(os.path.dirname(p))
+            out.setdefault(proj, []).append((os.path.splitext(os.path.basename(p))[0], ts, p))
+    return {k: sorted(v, key=lambda x: x[1])[:HISTORY] for k, v in out.items()}
+
+
 def sessions(split):
     """-> {repo: [(session_id, created_at, transcript path)]} in time order,
     only those whose transcript was fetched, the first HISTORY."""
+    if split == "jp":
+        return _jp_sessions()
     out = {}
     with open(os.path.join(DATA, f"{split}_sessions.csv")) as fh:
         for r in csv.DictReader(fh):
@@ -60,6 +85,16 @@ def condensed(path, max_chars=36000):
     if len(text) > max_chars:   # the start and the end of a long session
         text = text[:max_chars * 2 // 3] + "\n[...]\n" + text[-max_chars // 3:]
     return text
+
+
+def claim(p):
+    """One process per Qwen server, sharing the repositories: a repository
+    is taken by whoever creates its lock first (p + ".lock")."""
+    try:
+        os.close(os.open(p + ".lock", os.O_CREAT | os.O_EXCL | os.O_WRONLY))
+        return True
+    except FileExistsError:
+        return False
 
 
 class TooLong(Exception):
