@@ -55,6 +55,18 @@ project history at session start, `import claude-code` backfill; ba6f0d9).
   cm_both.sh (log ~/jpwork/cm_both.log): LoCoMo native + ours together on
   :8091, about 11 h. Memory page /history added (df2a910). Not done: the
   "not stored" list (needs the parser to report why it skipped a sentence).
+- 2026-10-23 07:40: FROZEN (77e89a5). Dev variants: 10 passages, no records
+  71/111 (38/53 vetted), rag 75 (41); a failed command keeps up to three
+  error lines (4b9dfca). history_search now returns 10 passages by default
+  (records=n asks for records; /history search asks for 5). Running:
+  ~/jpwork/coding_data/run_held_chain.sh (log run_held_chain.out): fetch
+  held_out, questions_held.jsonl from 12 sessions per repo on 8090 + 8091,
+  run_held/ stores and rag on CPU, native writer on both servers. It stops
+  there. Next, in order: Sonnet vet of questions_held.jsonl in batches of
+  ~120 with bench/coding/VET_SONNET.md (never shows any system's output) ->
+  questions_held_sonnetvet.jsonl; 30 random vetted questions to JP (more
+  than 5 bad = failed on question quality); context + answers on the vetted
+  set; score only after JP's check. cm_both.sh still running on :8091.
 
 ## 2026-10-21 IN FLIGHT
 
