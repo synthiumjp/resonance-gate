@@ -21,6 +21,12 @@ Dev log:
   (fix 21, how 16, where 13, why 3). A fresh blinded Sonnet reviewer on 30 of
   the 53: 5 fail, at the limit.
 
+- 2026-10-23, dev scores (Qwen reader, 111 questions / the 53 vetted):
+  records only: sourcedrecall 30 / 14, native-qwen 26 / 12, both 40 / 23,
+  rag 75 / 41. With session excerpts (61a1164): sourcedrecall 67 / 35
+  (2,493 context tokens), both 66 / 37, native-qwen 26 / 12 (7,545), rag
+  75 / 41 (2,581); ours vs rag 5 to 13, p=0.10; ours vs native 46 to 5.
+
 Proposed for held out (needs JP's review): the Sonnet vet as a step of the
 question protocol, after the automatic drops; 12 question sessions per
 repository instead of 6, since about half the questions survive the vet
