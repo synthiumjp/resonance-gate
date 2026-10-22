@@ -19,7 +19,31 @@ bench/false_memory/results_v10/SUMMARY.md, docs/PREREG_HELDOUT_V11.md (DRAFT, un
 waiting for JP), docs/REVIEW_2026-10-12.md (the second adversarial review;
 items fixed and open are listed below), docs/REVIEW_2026-10-09.md.
 
-## 2026-10-21 IN FLIGHT (read this first)
+## 2026-10-22 night: LAUNCH HELD, closing the gaps (read this first)
+
+JP 2026-10-22: no launch until the gaps in docs/PLAN_GAPS_2026-10-22.md
+close. No API credit for about 3 weeks: make no paid calls. Working on G1,
+coding history (sourcedrecall/coding.py, episodes.jsonl, history_search,
+project history at session start, `import claude-code` backfill; ba6f0d9).
+
+- Claude Code memory on LoCoMo (simulated, done 20:33): Qwen reader
+  claude-memory 76.6%, ours 65.6%, Mem0 64.6%, rag 56.6%; Claude reader
+  86.5% / 77.2% / 70.9% / 69.6%. It reads 10,784 tokens a question, ours
+  683. We cannot claim better recall than native memory; the pitch is a
+  complement (docs/PLAN_GAPS G3/G6).
+- Coding recall v1 (docs/PREREG_CODING_V1.md, approved by JP with 40
+  sessions; dev only so far, held out not fetched). Mac:
+  ~/jpwork/coding_data (swechat/ transcripts, jp_sessions/ JP's own,
+  chmod 700, never committed or quoted), code in ~/jpwork/sdr-coding
+  (macsync.sh), tests in ~/jpwork/sdr-coding-test. run_dev_chain3.sh:
+  per-repo stores rebuilt (the first build put every repo in one store:
+  stores_bad_onestore), native writer finishing on both Qwen servers,
+  then questions_dev2.jsonl with the tightened writer (the first set failed
+  the 30-question check 8 of 30), context, answers, run_dev.score.md.
+  Next: repeat the 30-question check on questions_dev2 (blinded Sonnet
+  reviewer), read the dev score, tune on dev, freeze, then held out.
+
+## 2026-10-21 IN FLIGHT
 
 - 2026-10-22 03:50: release run at step 5 (strict judge, small and standard
   left). Step 5's "without the audit wrong gold answers" line failed for
