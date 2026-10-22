@@ -259,6 +259,7 @@ _ERROR_LINE = re.compile(
     r"|.*Permission denied.*|.*Segmentation fault.*|Killed\b.*"
     r"|.*\b\d+ failed\b.*)", re.M)
 _EXIT = re.compile(r"\bExit code (\d+)\b")
+_CANCELLED = "Sibling tool call errored"
 _EXPLAIN = re.compile(
     r"\b(because|caused by|the (problem|issue|bug|cause|culprit|failure|error) "
     r"(is|was)|root cause|that's why|fails? (since|when)|the fix (is|was))\b", re.I)
@@ -350,6 +351,23 @@ def _sentences(text, rx, limit=2):
     return out
 
 
+def _explanation(text):
+    """The assistant's first sentence that explains a failure. One that only
+    announces it ("I found the root cause.", "It was caused by:") gives way
+    to the sentence after it, where the cause is."""
+    sents = [" ".join(re.sub(r"\*\*|__|^\s*(?:[-*+]|\d+\.)\s+", "", x).split())
+             for x in _SENT.split(str(text or ""))]
+    sents = [x for x in sents if x]
+    for i, t in enumerate(sents):
+        if not _EXPLAIN.search(t):
+            continue
+        if t.endswith(":") or len(t.split()) < 6:
+            t = sents[i + 1] if i + 1 < len(sents) else ""
+        if 4 <= len(t.split()) <= 60 and not t.startswith("`"):
+            return scrub(t)
+    return None
+
+
 def events(path, classify):
     """-> [event] in transcript order. classify(line_obj) -> (role, text) or
     None is the hook's own filter for what the person typed and the
@@ -385,6 +403,10 @@ def events(path, classify):
                             c = "\n".join(x.get("text", "") for x in c
                                           if isinstance(x, dict))
                         ev["output"] = str(c or "")
+                        if _CANCELLED in ev["output"][:200]:
+                            # Claude Code cancelled it when a parallel call failed:
+                            # it never ran, so it neither failed nor worked
+                            ev["cancelled"] = True
                         m = _EXIT.search(ev["output"][:200])
                         ev["error"] = bool(it.get("is_error")) or bool(m and m.group(1) != "0")
             said = classify(o)
@@ -404,10 +426,12 @@ def records(evs, cwd=None, branch=None):
             recs.append({"kind": kind, "text": text})
 
     for e in evs:
+        if e.get("cancelled"):
+            continue
         if "say" in e:
             for ep in open_eps.values():
                 if e["say"] == "assistant" and not ep["why"]:
-                    ep["why"] = (_sentences(e["text"], _EXPLAIN, 1) or [None])[0]
+                    ep["why"] = _explanation(e["text"])
                 if e["say"] == "user" and not ep["user"]:
                     ep["user"] = " ".join(e["text"].split())[:160]
             who = "the user" if e["say"] == "user" else "the assistant"
@@ -486,7 +510,7 @@ def _episode(ep, fixed_cmd, fixed):
         s += "; still failing when the session ended" + (
             f" (files edited meanwhile: {', '.join(ep['files'][:6])})" if ep["files"] else "")
     if ep["why"]:
-        s += f". The assistant's explanation: {ep['why']}"
+        s += f". The assistant's explanation: {ep['why'].rstrip('.')}"
     if ep["user"]:
         s += f". The user said meanwhile: {ep['user']}"
     return s
@@ -524,6 +548,8 @@ def excerpts(evs, cwd=None, size=_EXCERPT_CHARS):
     kept, except a failed command's error line."""
     lines = []
     for e in evs:
+        if e.get("cancelled"):
+            continue
         if "say" in e:
             t = " ".join(scrub(e["text"]).split())
             if t:

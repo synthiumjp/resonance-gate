@@ -215,3 +215,40 @@ def test_past_claude_code_sessions_are_imported_once(home, capsys):
     n = len(pm._load_episodes())
     assert I.main(["claude-code", str(root), "--owner", "Dana Cole", "--json"]) == 0
     assert len(pm._load_episodes()) == n                     # again: nothing doubled
+
+
+def test_the_memory_page_shows_the_coding_history(home):
+    pytest.importorskip("stanza", reason="ingest needs the rgx parser (stanza)")
+    from sourcedrecall import browser
+    from sourcedrecall.paths import default_memory_dir
+    default_memory_dir()                   # as the server does before serving the page
+    assert "No coding sessions stored yet" in browser._render_history()
+    t = _transcript(home / "t.jsonl")
+    H.session_end({"transcript_path": t, "session_id": "s1", "cwd": str(home)},
+                  owner="Dana Cole", sync=True)
+    page = browser._render_history()
+    assert "The parser tests fail on empty input" in page
+    assert "still failing at the end:" in page and "fixed:" in page
+    assert "Narnia" not in page and "sk-abcdef" not in page
+    found = browser._render_history("KeyError tokens")
+    assert "KeyError: &#x27;tokens&#x27;" in found and "Nothing found" not in found
+
+
+def test_a_cancelled_call_is_not_a_failure_and_an_empty_explanation_is_skipped(tmp_path):
+    rows = [
+        _say("user", "Run the build please."),
+        _use("a", "Bash", command="npm run build"),
+        _result("a", "Exit code 1\nerror: Cannot find module 'left-pad'", error=True),
+        _use("b", "Bash", command="npm test"),
+        _result("b", "<tool_use_error>Sibling tool call errored</tool_use_error>", error=True),
+        _say("assistant", "I found the root cause. The lockfile pins a version of left-pad "
+                          "that was removed from the registry."),
+    ]
+    p = tmp_path / "c.jsonl"
+    p.write_text("".join(rows))
+    recs = C.session_records(str(p), H._classify)
+    un = [r["text"] for r in recs if r["kind"] == "unresolved"]
+    assert len(un) == 1 and "npm run build" in un[0]
+    assert "The lockfile pins a version of left-pad" in un[0] and "root cause.." not in un[0]
+    assert "Sibling" not in json.dumps(recs)
+    assert not any("npm test" in r["text"] for r in recs if r["kind"] == "command")

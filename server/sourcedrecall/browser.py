@@ -3,6 +3,9 @@
   /          what the memory holds about you, grouped as in MEMORY.md, each
              fact with your exact words, the date and its id; a search box
              shows what recall returns for a question (2026-10-03)
+  /history   past coding sessions per project: what failed and what fixed
+             it, decisions, commits; a search box runs history_search
+             (2026-10-23)
   /triples   the explicit triples written with `remember`, with provenance,
              confidence (b,d,u) and any active conflict
 
@@ -94,7 +97,7 @@ MEM_PAGE = """<!doctype html><html><head><meta charset="utf-8">
  a{{color:var(--acc)}}
 </style></head><body>
 <header><h1>{title}</h1>
-<div class="sub">{n} facts · read-only · <a href="/">refresh</a> · <a href="/triples">explicit triples</a></div>
+<div class="sub">{n} facts · read-only · <a href="/">refresh</a> · <a href="/history">coding history</a> · <a href="/triples">explicit triples</a></div>
 <form method="get" action="/"><input name="q" value="{q}" placeholder="Ask what it remembers, e.g. Where do I live?">
 <button>Recall</button></form>{result}</header>
 <main>{body}</main>
@@ -157,6 +160,67 @@ def _render_memory(owner, groups, q="", rec=None):
     from sourcedrecall.paths import command
     return MEM_PAGE.format(title=title, n=n, q=e(q), result=result, body=body,
                            forget=e(command("memory forget <id>")))
+
+
+HIST_PAGE = MEM_PAGE.replace('{n} facts · read-only · <a href="/">refresh</a>',
+                             '{n} coding sessions · read-only · <a href="/">memory</a>') \
+    .replace('action="/"', 'action="/history"') \
+    .replace("e.g. Where do I live?", "e.g. How did we fix the Docker build?") \
+    .replace(">Recall<", ">Search<") \
+    .replace("Each line is a short summary, then your exact words and the date.",
+             "Read from each session's tool calls and what was said, with no model call; "
+             "tool output is not kept beyond a failed command's error line.")
+
+_HIST_KINDS = (("unresolved", "still failing at the end"), ("fixed", "fixed"),
+               ("decision", "decided"), ("commit", "committed"))
+
+
+def _render_history(q="", per_project=20):
+    """2026-10-23 (docs/PLAN_GAPS G4): each project's past coding sessions,
+    newest first, with what failed and what fixed it, decisions and commits;
+    the search box shows what history_search returns."""
+    from sourcedrecall import profile_memory as pm
+    from sourcedrecall.paths import command
+    e = html.escape
+    keys = pm._forgotten_keys()
+    rows = [r for r in pm._load_episodes() if not pm._is_forgotten(r.get("text", ""), keys)]
+    by = {}
+    for r in rows:
+        by.setdefault(r.get("scope") or "(no project)", {}).setdefault(r["conv"], []).append(r)
+    body = ""
+    for scope in sorted(by, key=lambda s: max((r.get("date") or "") for c in by[s].values() for r in c),
+                        reverse=True):
+        convs = sorted(by[scope].values(), key=lambda c: max(r.get("date") or "" for r in c),
+                       reverse=True)
+        n_ex = sum(r["kind"] == "excerpt" for c in convs for r in c)
+        body += (f"<h2>{e(scope)}</h2><div class='sub'>{len(convs)} session(s), "
+                 f"{n_ex} searchable passage(s)</div><ul>")
+        for c in convs[:per_project]:
+            sess = next((r for r in c if r["kind"] == "session"), None)
+            head = sess["text"].removeprefix("session: ") if sess else c[0]["conv"]
+            items = "".join(
+                f"<div class='meta'><span class='tag'>{label}:</span> {e(r['text'])} "
+                f"<code>{e(pm._episode_id(r))}</code></div>"
+                for kind, label in _HIST_KINDS for r in c if r["kind"] == kind)
+            body += (f"<li>{e(head)}<div class='meta'>{e(str(c[0].get('date') or ''))}</div>"
+                     f"{items}</li>")
+        if len(convs) > per_project:
+            body += f"<li class='sub'>and {len(convs) - per_project} older session(s)</li>"
+        body += "</ul>"
+    body = body or (f"<p class='sub'>No coding sessions stored yet. "
+                    f"<code>{e(command('import claude-code'))}</code> stores past ones.</p>")
+    result = ""
+    if q:
+        hits = pm.profile_history(q, all_projects=True)["results"]
+        items = "".join(f"<li><span class='tag'>{e(h['kind'])}</span> "
+                        f"{'<br>'.join(e(x) for x in h['text'].splitlines())}"
+                        f"<div class='meta'>{e(str(h.get('date') or ''))} · {e(str(h.get('project') or ''))}"
+                        f" · <code>{e(h['id'])}</code></div></li>" for h in hits)
+        result = (f"<div class='result'><ul>{items}</ul></div>" if hits
+                  else "<div class='result sub'>Nothing found.</div>")
+    return HIST_PAGE.format(title="Coding history", n=sum(len(v) for v in by.values()),
+                            q=e(q), result=result, body=body,
+                            forget=e(command("memory forget <id>")))
 
 
 # 2026-10-09 (security review): the browser answered any Host header (a web
@@ -234,6 +298,9 @@ def make_handler(service, token=None):
                            "application/json")
             elif u.path == "/triples" and service is not None:
                 self._send(_render(service.all_records()))
+            elif u.path == "/history":
+                q = (parse_qs(u.query).get("q") or [""])[0].strip()[:300]
+                self._send(_render_history(q))
             elif u.path == "/":
                 from sourcedrecall import profile_memory as pm
                 q = (parse_qs(u.query).get("q") or [""])[0].strip()[:300]
