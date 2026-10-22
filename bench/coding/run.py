@@ -5,7 +5,8 @@ OUT (outside the repo). Resumable: each step skips what is already done.
     python run.py ours    dev OUT    # store each repo's history in its own memory
     python run.py rag     dev OUT    # plain retrieval index: transcript chunks
     python run.py native  dev OUT    # native memory with a Qwen writer (labelled)
-    python run.py context dev OUT QUESTIONS   # each system's context per question
+    python run.py context dev OUT QUESTIONS [system ...]   # each system's context per question
+                                     # (sourcedrecall-e8r4m2: a dev variant)
     python run.py answer  dev OUT [system ...]
     python run.py score   dev OUT [QUESTIONS]   # QUESTIONS: only these (a vetted subset)
 
@@ -21,11 +22,12 @@ from common import HERE, append, chat, claim, condensed, fitted, jsonl, sessions
 
 sys.path.insert(0, os.path.dirname(HERE))      # bench/, for claude_memory
 OWNER = "Dev"
-K_RECORDS, K_MESSAGES, K_RAG = 8, 4, 10
+K_RECORDS, K_MESSAGES, K_RAG, K_EXCERPTS = 8, 4, 10, 6
 
 
 def _state(out, repo):
-    return os.path.join(out, "stores", repo.replace("/", "__"))
+    # CODING_STORES: another set of stores (a dev variant built another way)
+    return os.path.join(out, os.environ.get("CODING_STORES", "stores"), repo.replace("/", "__"))
 
 
 def _use_store(out, repo):
@@ -63,11 +65,21 @@ def ours(split, out):
             print(repo, sid[:8], {k: r.get(k) for k in ("facts", "coding_records", "coding_error")}, flush=True)
 
 
-def ours_context(out, repo, q):
+def _variant(system):
+    """"sourcedrecall-e8r4m2": 8 excerpts, 4 records, 2 of the user's
+    messages (dev tuning); plain "sourcedrecall" is the default."""
+    m = re.fullmatch(r"sourcedrecall-e(\d+)r(\d+)m(\d+)", system)
+    return tuple(int(x) for x in m.groups()) if m else (K_EXCERPTS, K_RECORDS, K_MESSAGES)
+
+
+def ours_context(out, repo, q, system="sourcedrecall"):
     pm = _use_store(out, repo) if os.environ.get("SOURCEDRECALL_STATE") != _state(out, repo) else \
         __import__("sourcedrecall.profile_memory", fromlist=["x"])
-    recs = pm.profile_history(q, k=K_RECORDS, all_projects=True)["results"]
-    msgs = pm._messages_for(q, k=K_MESSAGES)
+    ke, kr, km = _variant(system)
+    recs = pm.profile_history(q, k=kr, all_projects=True, excerpts=ke)["results"] if ke or kr else []
+    if not kr:
+        recs = [r for r in recs if r["kind"] == "excerpt"]
+    msgs = pm._messages_for(q, k=km) if km else []
     lines = [f"[{r['date']}] {r['kind']}: " + " | ".join(r["text"].splitlines()) for r in recs]
     lines += [f"[{m.get('date')}] the user said: {m['text'][:600]}" for m in msgs]
     return lines
@@ -185,18 +197,18 @@ def _qid(q):
         hashlib.sha1(q["question"].encode()).hexdigest()[:6]
 
 
-def context(split, out, questions):
+def context(split, out, questions, systems=None):
     qs = jsonl(questions)
     path = os.path.join(out, "context.jsonl")
     have = {(r["system"], r["qid"]) for r in jsonl(path)}
     for i, q in enumerate(sorted(qs, key=lambda r: r["repo"])):
         qid = q["qid"] = _qid(q)
         got = {}
-        for s in SYSTEMS:
+        for s in systems or SYSTEMS:
             if (s, qid) in have:
                 continue
-            if s == "sourcedrecall":
-                got[s] = ours_context(out, q["repo"], q["question"])
+            if s.startswith("sourcedrecall"):
+                got[s] = ours_context(out, q["repo"], q["question"], s)
             elif s == "rag":
                 got[s] = rag_context(out, q["repo"], q["question"])
             elif s == "native-qwen":
@@ -243,7 +255,7 @@ def score(split, out, questions=None):
     for r in rows:
         by.setdefault(r["system"], {})[r["qid"]] = r
     common = set.intersection(*(set(v) for v in by.values())) if by else set()
-    systems = [s for s in SYSTEMS if s in by]
+    systems = [s for s in SYSTEMS if s in by] + sorted(s for s in by if s not in SYSTEMS)
     print(f"questions answered by every system: {len(common)}\n")
     print("| | n | " + " | ".join(systems) + " |")
     print("|---|---|" + "---|" * len(systems))
@@ -270,7 +282,7 @@ if __name__ == "__main__":
     cmd, split, out = sys.argv[1], sys.argv[2], os.path.expanduser(sys.argv[3])
     os.makedirs(out, exist_ok=True)
     if cmd == "context":
-        context(split, out, sys.argv[4])
+        context(split, out, sys.argv[4], sys.argv[5:] or None)
     elif cmd == "score":
         score(split, out, sys.argv[4] if len(sys.argv) > 4 else None)
     elif cmd == "answer":

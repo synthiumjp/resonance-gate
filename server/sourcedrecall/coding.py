@@ -513,6 +513,9 @@ def branch_and_cwd(path):
 
 _EXCERPT_CHARS = 1200
 _SAY_CHARS = 800
+# the start of a command's output in excerpts; 0 (the default) keeps none.
+# A dev experiment (coding recall v1), not a setting for users yet.
+_OUTPUT_CHARS = int(os.environ.get("SOURCEDRECALL_EXCERPT_OUTPUT", "0") or 0)
 
 
 def excerpts(evs, cwd=None, size=_EXCERPT_CHARS):
@@ -539,6 +542,9 @@ def excerpts(evs, cwd=None, size=_EXCERPT_CHARS):
         line = f"TOOL {e['tool']}: {what}"
         if e["error"]:
             line += f" -> failed: {error_line(e['output']) or 'no error line'}"
+        elif _OUTPUT_CHARS and e["tool"] == "Bash" and e["output"]:
+            o = " ".join(scrub(_ANSI.sub("", e["output"])).split())
+            line += " -> " + (o if len(o) <= _OUTPUT_CHARS else o[:_OUTPUT_CHARS - 3] + "...")
         lines.append(line)
     out, cur = [], ""
     for line in lines:

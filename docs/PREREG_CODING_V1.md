@@ -27,12 +27,12 @@ Dev log:
   (2,493 context tokens), both 66 / 37, native-qwen 26 / 12 (7,545), rag
   75 / 41 (2,581); ours vs rag 5 to 13, p=0.10; ours vs native 46 to 5.
 
-Proposed for held out (needs JP's review): the Sonnet vet as a step of the
+Approved by JP 2026-10-23 for held out: the Sonnet vet as a step of the
 question protocol, after the automatic drops; 12 question sessions per
 repository instead of 6, since about half the questions survive the vet
 (about 200 held-out questions); the 30-question check by JP on the
 vetted held-out set, as a vet and a check by the same model family are not
-independent.
+independent. Written into the sections below.
 
 ## Question
 
@@ -63,7 +63,7 @@ the first 40. Questions are asked as if at the start of the session after
 the history.
 
 Questions are written by Qwen3-14B from one history session at a time
-(6 sessions per repository, spread evenly over the history), from a
+(12 sessions per repository, spread evenly over the history; 6 on dev), from a
 condensed transcript: what the user typed, the assistant's text, each tool
 call with its command or file and the first 300 characters of its result.
 Up to 3 per session, each of one type:
@@ -77,10 +77,14 @@ Up to 3 per session, each of one type:
 Each comes with a short gold answer and an evidence quote. Dropped
 automatically: evidence not found verbatim in the condensed transcript;
 questions Qwen3-14B answers correctly with no memory at all (general
-knowledge); near-duplicates. The question writer never sees any system's
-memory. Before the held-out run, JP or a blinded reviewer reads 30 random
-dev questions; if more than 5 are not questions a developer would ask,
-the writer prompt is fixed on dev and the check repeated.
+knowledge); near-duplicates; "where" answers that only repeat the question;
+questions a Qwen vetting pass drops. Then a Sonnet subagent vets every
+question from its question, gold answer and evidence, on the criteria in
+bench/coding/VET_SONNET.md, and only the kept ones are asked. The question
+writer and the vet never see any system's memory or answers. Before the
+held-out answers are read, JP reads 30 random vetted held-out questions;
+if more than 5 are not questions a developer would ask, the result is
+reported as failed on question quality, and the writer is fixed on dev.
 
 ## Systems
 

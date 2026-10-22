@@ -2512,7 +2512,7 @@ def profile_history(query, scope=None, k=8, all_projects=False, excerpts=6):
     in; all_projects=True searches every project."""
     from sourcedrecall.paths import current_scope
     sc = None if all_projects else current_scope(scope)
-    hits = _episodes_for(query, k=k, scope=sc, kinds=_RECORD_KINDS)
+    hits = _episodes_for(query, k=k, scope=sc, kinds=_RECORD_KINDS) if k else []
     if excerpts:
         hits += _episodes_for(query, k=excerpts, scope=sc, kinds=("excerpt",))
     return {"query": query, "project": sc or "all",

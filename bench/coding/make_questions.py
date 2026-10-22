@@ -16,7 +16,7 @@ import sys
 from common import DATA, append, chat, claim, condensed, fitted, jsonl, sessions  # noqa: F401
 import os
 
-PER_REPO = 6
+PER_REPO = int(os.environ.get("CODING_PER_REPO", "6"))   # 12 on held out (prereg)
 WRITE = """Below is a transcript of one coding session in the repository {repo}, condensed: what the user typed (USER), the assistant's replies (ASSISTANT), and each tool call with its command or file and the start of its result (TOOL; "[failed]" marks a command that failed).
 
 Weeks later, the same developer, starting a new session on this project, wants to recall something from it. Write up to 3 such questions, each of a different type:
