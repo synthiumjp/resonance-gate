@@ -71,13 +71,14 @@ def judge(q, gold, a):
 
 
 def main(split, out):
-    done = {(r["repo"], r["session"]) for r in jsonl(out + ".log")}
-    seen = {_norm(r["question"]) for r in jsonl(out)}
     for repo, ss in sorted(sessions(split).items()):
         lock = out + "." + repo.replace("/", "__")
         if not claim(lock):          # another process (the other Qwen server) has it
             continue
         try:
+            # re-read: the other process may have done this repository already
+            done = {(r["repo"], r["session"]) for r in jsonl(out + ".log")}
+            seen = {_norm(r["question"]) for r in jsonl(out)}
             _repo(repo, ss, out, done, seen)
         finally:
             os.remove(lock + ".lock")

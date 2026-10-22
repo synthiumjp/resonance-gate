@@ -11,6 +11,7 @@ OUT (outside the repo). Resumable: each step skips what is already done.
 
 Systems: sourcedrecall, native-qwen, both-qwen (native then ours), rag.
 """
+import hashlib
 import json
 import os
 import re
@@ -184,7 +185,8 @@ def context(split, out, questions):
     path = os.path.join(out, "context.jsonl")
     have = {(r["system"], r["qid"]) for r in jsonl(path)}
     for i, q in enumerate(sorted(qs, key=lambda r: r["repo"])):
-        qid = f"{q['repo']}#{q['session'][:8]}#{q['type']}"
+        qid = f"{q['repo']}#{q['session'][:8]}#{q['type']}#" + \
+            hashlib.sha1(q["question"].encode()).hexdigest()[:6]
         q["qid"] = qid
         got = {}
         for s in SYSTEMS:
