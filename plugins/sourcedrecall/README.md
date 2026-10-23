@@ -21,8 +21,11 @@ and type `! sourcedrecall-run memory status`; `! sourcedrecall-run memory
 show` prints what is stored.
 
 What it adds:
-- an MCP server with `profile_recall`, `profile_context`, `profile_correct`
-  and related tools
+- an MCP server with `profile_recall`, `profile_context`, `profile_correct`,
+  `history_search` (past coding sessions in this project: what failed, what
+  fixed it, why) and related tools
+- `/recall <what>`: search your memory and past sessions yourself;
+  `! sourcedrecall-run memory history <what>` does the same in a terminal
 - a SessionEnd hook that stores the session
 - a SessionStart hook that adds the memory summary (the `briefing` option
   turns it off; the tools still work) and shows you what was saved since

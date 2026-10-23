@@ -7,6 +7,8 @@ agent or model -- no MCP client needed.
     sourcedrecall-memory confirm <id>         mark a fact as confirmed
     sourcedrecall-memory context [question]   the text to put in any model's prompt
     sourcedrecall-memory recall <question>    what is stored about a question
+    sourcedrecall-memory history <question>   search past coding sessions in this
+                                              project (--all: every project)
     sourcedrecall-memory ingest [file]        store a conversation
     sourcedrecall-memory view [--port N]      browse it at http://127.0.0.1:7071
     sourcedrecall-memory notes-backfill       notes for conversations stored before notes were on
@@ -62,7 +64,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(prog="sourcedrecall-memory",
                                  description="Use the memory from a terminal.")
     ap.add_argument("command", choices=["show", "path", "forget", "confirm",
-                                        "context", "recall", "check", "ingest", "view",
+                                        "context", "recall", "check", "history", "ingest", "view",
                                         "notes-backfill", "status", "last", "rebuild"])
     ap.add_argument("arg", nargs="*", help="a fact id, a question, or a file")
     ap.add_argument("--owner", default=os.environ.get("SOURCEDRECALL_OWNER"))
@@ -70,6 +72,8 @@ def main(argv=None):
     ap.add_argument("--date")
     ap.add_argument("--scope")
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--all", dest="all_projects", action="store_true",
+                    help="history: search every project")
     ap.add_argument("--port", type=int, default=int(os.environ.get(
         "SOURCEDRECALL_BROWSER_PORT", "7071") or 7071))
     a = ap.parse_args(argv)
@@ -165,6 +169,20 @@ def main(argv=None):
                 print(_line(f))
         else:
             print("Nothing stored about this.")
+        return 0
+    if a.command == "history":
+        if not arg:
+            ap.error("history needs a question, e.g. \"how did we fix the login test\"")
+        out = pm.profile_history(arg, scope=a.scope, all_projects=a.all_projects, records=3)
+        if a.json:
+            print(json.dumps(out, indent=2, default=str))
+            return 0
+        if not out["results"]:
+            print(f"Nothing in the coding history of {out['project']} matches this.")
+        for r in out["results"]:
+            where = f" {r['project']}" if a.all_projects and r.get("project") else ""
+            print(f"[{r.get('date') or '?'}]{where} {r['kind']} ({r['id']})")
+            print("  " + "\n  ".join(r["text"].splitlines()) + "\n")
         return 0
     if a.command == "check":
         if not arg:

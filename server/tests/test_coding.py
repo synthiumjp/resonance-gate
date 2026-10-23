@@ -196,6 +196,18 @@ def test_stored_at_session_end_searchable_in_its_project_and_forgettable(home):
     assert all(x["kind"] == "excerpt" for x in pm.profile_history("KeyError", scope=str(home))["results"])
 
 
+def test_the_history_is_searched_from_a_terminal(home, capsys):
+    pytest.importorskip("stanza", reason="ingest needs the rgx parser (stanza)")
+    H.session_end({"transcript_path": _transcript(home / "t.jsonl"), "session_id": "s1",
+                   "cwd": str(home)}, owner="Dana Cole", sync=True)
+    from sourcedrecall import memory_cli
+    assert memory_cli.main(["history", "KeyError", "tokens", "--scope", str(home)]) == 0
+    out = capsys.readouterr().out
+    assert "[2026-10-01] fixed (" in out and "excerpt (" in out
+    assert memory_cli.main(["history", "parser", "--scope", str(home / "elsewhere")]) == 0
+    assert "Nothing in the coding history" in capsys.readouterr().out
+
+
 def test_the_session_start_shows_the_projects_history(home):
     pytest.importorskip("stanza", reason="ingest needs the rgx parser (stanza)")
     t = _transcript(home / "t.jsonl")
