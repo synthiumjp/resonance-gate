@@ -21,6 +21,9 @@ sys.path[:0] = [os.path.join(ROOT, "server"), ROOT, os.path.join(ROOT, "experime
 DATA = os.path.expanduser(os.environ.get("CODING_DATA", "~/jpwork/coding_data/swechat"))
 LLM = os.environ.get("CODING_LLM", "http://127.0.0.1:8091/v1")
 MODEL = os.environ.get("CODING_LLM_MODEL", "qwen3-14b-a8cc1361.gguf")
+# the second reader (Phi-4): reads the memory; the judge stays on CODING_LLM
+READER = os.environ.get("CODING_READER", LLM)
+READER_MODEL = os.environ.get("CODING_READER_MODEL", MODEL)
 HISTORY = 40          # sessions of history per repository, at most
 
 
@@ -112,12 +115,13 @@ def fitted(build, path, sizes=(30000, 20000, 12000), **kw):
     return None, None
 
 
-def chat(prompt, max_tokens=1200, temperature=0.0, json_mode=False, timeout=900):
-    body = {"model": MODEL, "temperature": temperature, "max_tokens": max_tokens, "seed": 0,
+def chat(prompt, max_tokens=1200, temperature=0.0, json_mode=False, timeout=900,
+         base=None, model=None):
+    body = {"model": model or MODEL, "temperature": temperature, "max_tokens": max_tokens, "seed": 0,
             "messages": [{"role": "user", "content": prompt}]}
     if json_mode:
         body["response_format"] = {"type": "json_object"}
-    req = urllib.request.Request(LLM.rstrip("/") + "/chat/completions",
+    req = urllib.request.Request((base or LLM).rstrip("/") + "/chat/completions",
                                  json.dumps(body).encode(), {"Content-Type": "application/json"})
     for attempt in range(3):
         try:

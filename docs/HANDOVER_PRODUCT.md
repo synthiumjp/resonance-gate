@@ -79,6 +79,14 @@ project history at session start, `import claude-code` backfill; ba6f0d9).
   not tried in Claude Code yet). Not done, needs JP: importing a native
   memory folder (it is Claude's writing, not the user's words; how should
   it be sourced?).
+- 2026-10-24 05:30: HELD-OUT RESULT in docs/PREREG_CODING_V1.md (main gate
+  passed: both 70.9% vs native-qwen 23.1%; ours 67.9% vs rag 70.9%, not
+  met, p=0.36; Sonnet audit agrees with the Qwen judge 218/240). LoCoMo
+  G3 (cm_both done 04:50): Claude Code memory + ours 81.9% vs Claude Code
+  memory alone 76.6%, 121 to 51, p=1e-7 (ours 65.6%; context about 11,467
+  tokens for both, the score table's 683 is only ours). Running:
+  run_held_phi4.sh (Phi-4 reads on 8091, Qwen judges on 8090,
+  answers_phi4.jsonl, score_phi4.md; puts Qwen back on 8091 when done).
 
 ## 2026-10-21 IN FLIGHT
 

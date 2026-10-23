@@ -231,13 +231,15 @@ QUESTION: {q} /no_think"""
 
 def answer(split, out, systems=None):
     from make_questions import judge
-    path = os.path.join(out, "answers.jsonl")
+    path = os.path.join(out, os.environ.get("CODING_ANSWERS", "answers.jsonl"))
     have = {(r["system"], r["qid"]) for r in jsonl(path)}
+    from common import READER, READER_MODEL
     for r in jsonl(os.path.join(out, "context.jsonl")):
         if (systems and r["system"] not in systems) or (r["system"], r["qid"]) in have:
             continue
         mem = "\n".join(f"- {l}" for l in r["lines"]) or "(nothing)"
-        a = chat(READ.format(repo=r["repo"], memory=mem, q=r["question"]), max_tokens=160)
+        a = chat(READ.format(repo=r["repo"], memory=mem, q=r["question"]), max_tokens=160,
+                 base=READER, model=READER_MODEL)
         ok = judge(r["question"], r["answer"], a)
         append(path, {"qid": r["qid"], "system": r["system"], "type": r["type"], "pred": a,
                       "correct": ok, "ctx_tokens": r["ctx_tokens"]})
@@ -247,7 +249,7 @@ def answer(split, out, systems=None):
 def score(split, out, questions=None):
     """questions: score only the questions in this file (a vetted subset)."""
     from math import comb
-    rows = jsonl(os.path.join(out, "answers.jsonl"))
+    rows = jsonl(os.path.join(out, os.environ.get("CODING_ANSWERS", "answers.jsonl")))
     if questions:
         keep = {_qid(q) for q in jsonl(questions)}
         rows = [r for r in rows if r["qid"] in keep]
