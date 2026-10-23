@@ -43,6 +43,30 @@ Sonnet vet kept 268 (where 94, fix 89, how 78, why 7). JP read 30 random
 vetted ones (seed 20261023) before any answer was read and marked none bad
 ("looks good ... concise without waffling"): the check passed.
 
+Held-out result, 2026-10-24 (Qwen reader and judge, 268 vetted questions,
+20 repositories; native memory written by Qwen, unfair to it):
+
+| | n | sourcedrecall | native-qwen | both | rag |
+|---|---|---|---|---|---|
+| fix | 89 | 54 | 19 | 56 | 58 |
+| how | 78 | 43 | 18 | 47 | 49 |
+| where | 94 | 79 | 23 | 81 | 78 |
+| why | 7 | 6 | 2 | 6 | 5 |
+| all | 268 | 182 (67.9%) | 62 (23.1%) | 190 (70.9%) | 190 (70.9%) |
+| context tokens | | 2,694 | 5,637 | 8,331 | 2,571 |
+
+- Main gate (both at least 10 points above native, p < 0.05): passed,
+  70.9% vs 23.1%, 133 to 5, p = 2e-33.
+- sourcedrecall at least matches native on fix: passed, 54 vs 19.
+- sourcedrecall at least matches plain retrieval overall: not met, 182 vs
+  190 (25 to 33, p = 0.36, not a significant difference).
+- The Qwen writer wiped one repository's native memory (forge, at session
+  25) and cut another's from 21 files to 8; without those two repositories
+  (241 questions): native 57, sourcedrecall 158, both 165, rag 170.
+- Still to do: Phi-4 as second reader; the blinded audit of 60 judged
+  answers per system; the Sonnet writer for native memory when credit is
+  back.
+
 Approved by JP 2026-10-23 for held out: the Sonnet vet as a step of the
 question protocol, after the automatic drops; 12 question sessions per
 repository instead of 6, since about half the questions survive the vet
