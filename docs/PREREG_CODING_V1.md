@@ -69,8 +69,23 @@ Held-out result, 2026-10-24 (Qwen reader and judge, 268 vetted questions,
   Sonnet / Qwen correct: sourcedrecall 41 / 39, native 15 / 12, both
   48 / 45, rag 45 / 45. The Qwen judge is if anything stricter on the
   memory systems; it does not favour sourcedrecall.
-- Still to do: Phi-4 as second reader; the Sonnet writer for native memory
-  when credit is back.
+- Second reader, Phi-4 (2026-10-24, same prompt, contexts and Qwen judge;
+  Phi-4's answers are long and some are cut at the 160-token limit, for
+  every system alike):
+
+  | | n | sourcedrecall | native-qwen | both | rag |
+  |---|---|---|---|---|---|
+  | fix | 89 | 49 | 11 | 43 | 51 |
+  | how | 78 | 46 | 17 | 41 | 45 |
+  | where | 94 | 74 | 21 | 79 | 74 |
+  | why | 7 | 6 | 2 | 4 | 5 |
+  | all | 268 | 175 (65.3%) | 51 (19.0%) | 167 (62.3%) | 175 (65.3%) |
+
+  both vs native 121 to 5 (p = 6e-30); sourcedrecall vs native 129 to 5
+  (p = 3e-32); sourcedrecall vs rag 30 to 30 (p = 1). With Phi-4, both is
+  below sourcedrecall alone: the longer context (8,331 tokens, native
+  first) costs this reader more than native adds.
+- Still to do: the Sonnet writer for native memory when credit is back.
 
 Approved by JP 2026-10-23 for held out: the Sonnet vet as a step of the
 question protocol, after the automatic drops; 12 question sessions per
