@@ -38,6 +38,11 @@ Dev log:
   Frozen: 10 passages, no records, no messages; history_search returns
   this by default.
 
+Held out, 2026-10-23: 485 questions written from 20 repositories, the
+Sonnet vet kept 268 (where 94, fix 89, how 78, why 7). JP read 30 random
+vetted ones (seed 20261023) before any answer was read and marked none bad
+("looks good ... concise without waffling"): the check passed.
+
 Approved by JP 2026-10-23 for held out: the Sonnet vet as a step of the
 question protocol, after the automatic drops; 12 question sessions per
 repository instead of 6, since about half the questions survive the vet
