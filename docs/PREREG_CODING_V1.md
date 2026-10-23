@@ -63,9 +63,14 @@ Held-out result, 2026-10-24 (Qwen reader and judge, 268 vetted questions,
 - The Qwen writer wiped one repository's native memory (forge, at session
   25) and cut another's from 21 files to 8; without those two repositories
   (241 questions): native 57, sourcedrecall 158, both 165, rag 170.
-- Still to do: Phi-4 as second reader; the blinded audit of 60 judged
-  answers per system; the Sonnet writer for native memory when credit is
-  back.
+- Blinded audit (2026-10-24): two Sonnet subagents re-judged 60 random
+  answers per system (240, shuffled, no system named) from question, gold,
+  evidence and answer. Agreement with the Qwen judge 218 of 240 (91%);
+  Sonnet / Qwen correct: sourcedrecall 41 / 39, native 15 / 12, both
+  48 / 45, rag 45 / 45. The Qwen judge is if anything stricter on the
+  memory systems; it does not favour sourcedrecall.
+- Still to do: Phi-4 as second reader; the Sonnet writer for native memory
+  when credit is back.
 
 Approved by JP 2026-10-23 for held out: the Sonnet vet as a step of the
 question protocol, after the automatic drops; 12 question sessions per
