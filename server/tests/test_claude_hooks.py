@@ -5,6 +5,7 @@ results, thinking, meta and sidechain lines, slash-command echoes, injected
 system reminders -- because the transcript format is not a documented
 contract and anything unknown must be ignored, never stored."""
 import json
+import re
 
 import pytest
 
@@ -125,6 +126,40 @@ def test_session_start_briefs_the_agent_once_there_is_memory(home):
     assert ctx["hookEventName"] == "SessionStart"
     assert "I live in Fitzroy" in ctx["additionalContext"]
     assert len(ctx["additionalContext"]) <= 10000      # Claude Code's cap
+
+
+def test_a_fact_native_memory_already_shows_is_left_out(home, monkeypatch):
+    block = ("[MEMORY: what the user has told you]\n"
+             '- Dana Cole lives in Fitzroy  ["I live in Fitzroy." \u00b7 2026-09-20]\n'
+             '- Dana Cole has a dog called Biscuit  ["My dog Biscuit is two." \u00b7 2026-09-20]\n'
+             "[MEMORY RULES] ...")
+    native = "# Memory index\n- [Where the user lives](home.md) \u2014 lives in Fitzroy, Melbourne\n"
+    out, n = H._skip_native(block, native, "Dana Cole")
+    assert n == 1 and "Fitzroy" not in out and "Biscuit" in out
+    assert "1 fact already in the user's Claude Code memory" in out
+    assert out.index("left out") < out.index("[MEMORY RULES]")
+    assert H._skip_native(block, "# Memory index\n", "Dana Cole") == (block, 0)
+    rule = '- (standing instruction) [2026-09-21] "Always run the tests before you commit."  (run tests before committing)'
+    assert H._skip_native(rule, "- [Testing](t.md) \u2014 always run the tests before a commit", "Dana Cole")[1] == 1
+    moved = block.replace("- Dana Cole lives", "- (no longer true) Dana Cole lives")
+    assert H._skip_native(moved, native, "Dana Cole")[1] == 0     # the index may be stale
+    # end to end: the project's index in Claude Code's folder
+    H.session_end({"transcript_path": _transcript(home / "t.jsonl"),
+                   "session_id": "abc"}, owner="Dana Cole", sync=True)
+    proj = home / "proj"
+    proj.mkdir()
+    mem = home / "claude" / "projects" / re.sub(r"[^A-Za-z0-9]", "-", str(proj)) / "memory"
+    mem.mkdir(parents=True)
+    (mem / "MEMORY.md").write_text(native)
+    monkeypatch.setenv("CLAUDE_CONFIG_DIR", str(home / "claude"))
+    ctx = H.session_start({"source": "startup", "cwd": str(proj)},
+                          owner="Dana Cole")["hookSpecificOutput"]["additionalContext"]
+    assert "(Dana Cole lives in Fitzroy)" not in ctx and "Claude Code memory" in ctx
+    assert "(Dana Cole works as a nurse at St Vincent's)" in ctx      # same words, a new fact
+    monkeypatch.setenv("SOURCEDRECALL_NATIVE_DEDUP", "off")
+    ctx = H.session_start({"source": "startup", "cwd": str(proj)},
+                          owner="Dana Cole")["hookSpecificOutput"]["additionalContext"]
+    assert "(Dana Cole lives in Fitzroy)" in ctx
 
 
 def test_session_end_without_a_transcript_does_nothing(home):

@@ -268,6 +268,66 @@ def _fit_block(block, limit=9500):
     return ("\n".join(lines) + "\n" + rules)[:limit]
 
 
+def _native_index(cwd):
+    """The project's Claude Code memory index (MEMORY.md in
+    ~/.claude/projects/<the path with every other character a dash>/memory),
+    the part of native memory Claude Code puts in every session: its first
+    200 lines. None when there is none."""
+    if not cwd:
+        return None
+    slug = re.sub(r"[^A-Za-z0-9]", "-", os.path.abspath(cwd))
+    home = os.environ.get("CLAUDE_CONFIG_DIR") or os.path.join(os.path.expanduser("~"), ".claude")
+    try:
+        with open(os.path.join(home, "projects", slug, "memory", "MEMORY.md"),
+                  encoding="utf-8", errors="replace") as fh:
+            return "".join(fh.readlines()[:200])
+    except OSError:
+        return None
+
+
+_KEEP_LINE = re.compile(r"(?i)\((no longer true|may have changed since|said in passing)\)"
+                        r"|\b(not|no|never|none|nobody|nothing|neither|nor)\b|n't\b")
+
+
+def _fact_parts(line):
+    """The summary and the quote of a fact line: `[date] "their words"
+    (summary)`, or `summary  ["their words" \u00b7 date]`."""
+    m = re.fullmatch(r'(?:\((?:standing instruction)\)\s*)?(?:\[[^\]]*\]\s*)?"(.*)"\s*\(([^()]*)\)\s*',
+                     line)
+    if m:
+        return [m.group(2), m.group(1)]
+    summary, _, rest = line.partition("[")
+    return [summary, rest.split("\u00b7")[0]] if rest else [summary]
+
+
+def _skip_native(block, native, owner=None, share=0.75):
+    """2026-10-23 (docs/PLAN_GAPS G3: beside native memory, not against it):
+    the fact lines of the block that Claude Code's own memory index already
+    states, left out. A line is a repeat when its words are in the index
+    (all of them when it has two or three, else 75%): the summary's (the
+    user's name aside) or the quote's. A line that corrects or negates
+    ("no longer true", "not", "never") is always kept: the index may be the
+    stale one. -> (block, how many were left out)."""
+    from sourcedrecall.notes import _stems
+    have = _stems(native)
+    name = _stems(owner or "")
+    out, n = [], 0
+
+    def covered(w):
+        return len(w) >= 2 and len(w & have) >= (len(w) if len(w) <= 3 else share * len(w))
+    for line in block.split("\n"):
+        if line.startswith("- ") and not _KEEP_LINE.search(line) and \
+                any(covered(_stems(p) - name) for p in _fact_parts(line[2:])):
+            n += 1
+            continue
+        out.append(line)
+    if n:
+        i = next((j for j, l in enumerate(out) if l.startswith("[MEMORY RULES]")), len(out))
+        out.insert(i, f"({n} fact{'s' if n != 1 else ''} already in the user's Claude Code "
+                      f"memory {'is' if n == 1 else 'are'} left out here.)")
+    return "\n".join(out), n
+
+
 def _hook_log():
     # 2026-10-09 (security review): in the private state dir, not a
     # predictable /tmp path anyone can read or pre-create as a symlink
@@ -428,6 +488,10 @@ def _session_start(event, owner=None, max_facts=15, agent="claude",
     if briefing:
         block = pm.profile_context(None, max_facts, scope=scope)["block"] \
             if (st.get("asserted") or st.get("provisional")) else ""
+        native = _native_index(event.get("cwd")) if agent == "claude" and \
+            os.environ.get("SOURCEDRECALL_NATIVE_DEDUP", "on").lower() not in off else None
+        if native and block:
+            block, _n = _skip_native(block, native, owner or os.environ.get("SOURCEDRECALL_OWNER"))
         block = (brief + "\n\n" + block).strip() if brief else block
         out["hookSpecificOutput"] = {"hookEventName": "SessionStart",
                                      "additionalContext": _fit_block(block)}
