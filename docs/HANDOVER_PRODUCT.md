@@ -67,6 +67,18 @@ project history at session start, `import claude-code` backfill; ba6f0d9).
   questions_held_sonnetvet.jsonl; 30 random vetted questions to JP (more
   than 5 bad = failed on question quality); context + answers on the vetted
   set; score only after JP's check. cm_both.sh still running on :8091.
+- 2026-10-23 21:10: held-out questions 485, Sonnet vet kept 268
+  (questions_held_sonnetvet.jsonl), JP's check passed (none bad; my own
+  count 2 bad, 3 weak, recorded for the write-up). Native writer done 21:04
+  (it wiped forge's memory at session 25 and cut agent-skills-shaper from
+  21 files to 8: report native with and without those two). Running:
+  run_held_answers.sh (context, answers; log run_held_answers.out), then
+  score with `run.py score held_out run_held` and the vetted file. Also
+  done today: session start leaves out facts the project's MEMORY.md
+  already states (2b8c667); `memory history` and /recall (261c745, /recall
+  not tried in Claude Code yet). Not done, needs JP: importing a native
+  memory folder (it is Claude's writing, not the user's words; how should
+  it be sourced?).
 
 ## 2026-10-21 IN FLIGHT
 
