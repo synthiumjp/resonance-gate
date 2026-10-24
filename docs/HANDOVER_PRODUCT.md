@@ -87,6 +87,15 @@ project history at session start, `import claude-code` backfill; ba6f0d9).
   tokens for both, the score table's 683 is only ours). Running:
   run_held_phi4.sh (Phi-4 reads on 8091, Qwen judges on 8090,
   answers_phi4.jsonl, score_phi4.md; puts Qwen back on 8091 when done).
+- 2026-10-25 01:10: Sonnet native writer on 10 held-out repositories (Sonnet
+  subagents in Claude Code, no API credit, ~4.5M tokens; folders in
+  ~/jpwork/coding_data/sonnet_writer/, converted to run_held/native_sonnet/;
+  answers_sonnet10.jsonl, score_sonnet10.md). 136 questions: native-sonnet
+  56.6%, ours 72.1%, rag 74.3%, both-sonnet 80.9% (40 to 7 over
+  native-sonnet, p=1e-6). Both Qwen servers on 8090/8091 now run with
+  --n_ctx 32768 (were 16384) so the largest folders fit. Phi-4 has not read
+  the native-sonnet contexts. Native memory import: my recommendation to JP
+  was leave it out for launch (maybe a later opt-in import); no answer yet.
 
 ## 2026-10-21 IN FLIGHT
 

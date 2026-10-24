@@ -94,8 +94,32 @@ Held-out result, 2026-10-24 (Qwen reader and judge, 268 vetted questions,
   12/17, both-sonnet 14/17 (8 to 0 over native-sonnet), rag 13/17.
   native-sonnet's context is 10,538 tokens (the whole folder; Claude Code
   itself loads only MEMORY.md and opens files as needed).
-- Still to do: the Sonnet writer on more repositories (from the pilot,
-  about 16k Claude Code tokens per session).
+- Sonnet writer on 10 repositories (2026-10-25): the pilot's plus 9 more
+  drawn by the same seed (random.Random(20261024): the pilot's choice, then
+  sample(rest, 9)); 311 sessions, 136 vetted questions; about 4.5M Claude
+  Code tokens in all; every folder covers every session, 4 to 32 files.
+  The two largest folders (about 20k tokens) do not fit Qwen's 16k window,
+  so both Qwen servers were restarted at 32k for this run, same model and
+  settings. Qwen reader and judge:
+
+  | | n | sourcedrecall | native-qwen | both-qwen | rag | native-sonnet | both-sonnet |
+  |---|---|---|---|---|---|---|---|
+  | fix | 43 | 30 | 11 | 32 | 30 | 21 | 30 |
+  | how | 36 | 19 | 12 | 19 | 22 | 20 | 26 |
+  | where | 53 | 46 | 13 | 45 | 46 | 34 | 50 |
+  | why | 4 | 3 | 2 | 3 | 3 | 2 | 4 |
+  | all | 136 | 98 (72.1%) | 38 (27.9%) | 99 (72.8%) | 101 (74.3%) | 77 (56.6%) | 110 (80.9%) |
+  | context tokens | | 2,697 | 5,363 | 8,060 | 2,578 | 9,600 | 12,298 |
+
+  both-sonnet vs native-sonnet 40 to 7 (p = 1e-6), 24 points: the main
+  gate's margin holds against the Sonnet writer on these 10 repositories.
+  sourcedrecall vs native-sonnet 41 to 20 (p = 0.01); native-sonnet vs
+  native-qwen 45 to 6 (the Qwen writer was far below Claude's).
+  both-sonnet vs sourcedrecall 18 to 6 (p = 0.02); both-sonnet vs rag 18 to
+  9 (p = 0.12). native-sonnet reads the whole folder, which is generous to
+  it; Claude Code loads only MEMORY.md and opens files when it chooses.
+- Still to do: the Sonnet writer on the other 10 held-out repositories
+  (about 6M Claude Code tokens); a Claude reader when API credit is back.
 
 Approved by JP 2026-10-23 for held out: the Sonnet vet as a step of the
 question protocol, after the automatic drops; 12 question sessions per
