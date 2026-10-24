@@ -85,7 +85,17 @@ Held-out result, 2026-10-24 (Qwen reader and judge, 268 vetted questions,
   (p = 3e-32); sourcedrecall vs rag 30 to 30 (p = 1). With Phi-4, both is
   below sourcedrecall alone: the longer context (8,331 tokens, native
   first) costs this reader more than native adds.
-- Still to do: the Sonnet writer for native memory when credit is back.
+- Sonnet writer pilot (2026-10-24, not a result): Sonnet subagents in
+  Claude Code (no API credit) kept the native memory folder for one
+  repository picked by seed 20261024 (tpmjs/tpmjs, 27 sessions, 17
+  questions), same instructions and transcripts as the Qwen writer, a
+  fresh agent every 9 sessions; 429k tokens in all, 24 memories. Qwen
+  reader and judge: native-sonnet 6/17 (native-qwen 1/17), sourcedrecall
+  12/17, both-sonnet 14/17 (8 to 0 over native-sonnet), rag 13/17.
+  native-sonnet's context is 10,538 tokens (the whole folder; Claude Code
+  itself loads only MEMORY.md and opens files as needed).
+- Still to do: the Sonnet writer on more repositories (from the pilot,
+  about 16k Claude Code tokens per session).
 
 Approved by JP 2026-10-23 for held out: the Sonnet vet as a step of the
 question protocol, after the automatic drops; 12 question sessions per
