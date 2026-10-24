@@ -10,7 +10,9 @@ OUT (outside the repo). Resumable: each step skips what is already done.
     python run.py answer  dev OUT [system ...]
     python run.py score   dev OUT [QUESTIONS]   # QUESTIONS: only these (a vetted subset)
 
-Systems: sourcedrecall, native-qwen, both-qwen (native then ours), rag.
+Systems: sourcedrecall, native-qwen, both-qwen (native then ours), rag; native-sonnet
+and both-sonnet read OUT/native_sonnet/, a memory folder kept by Sonnet subagents
+(the native writer, same instructions), converted to the same JSON.
 """
 import hashlib
 import json
@@ -182,9 +184,9 @@ def _native_repo(CM, repo, ss, p, st):
         print(repo, i + 1, len(ss), len(files), "files", "" if changes is not None else "UNREADABLE", flush=True)
 
 
-def native_context(out, repo, q):
+def native_context(out, repo, q, writer="native"):
     import claude_memory as CM
-    st = json.load(open(os.path.join(out, "native", repo.replace("/", "__") + ".json")))
+    st = json.load(open(os.path.join(out, writer, repo.replace("/", "__") + ".json")))
     return CM.lines(st["files"])
 
 
@@ -215,6 +217,11 @@ def context(split, out, questions, systems=None):
                 got[s] = native_context(out, q["repo"], q["question"])
             elif s == "both-qwen":
                 got[s] = (native_context(out, q["repo"], q["question"])
+                          + ours_context(out, q["repo"], q["question"]))
+            elif s == "native-sonnet":
+                got[s] = native_context(out, q["repo"], q["question"], "native_sonnet")
+            elif s == "both-sonnet":
+                got[s] = (native_context(out, q["repo"], q["question"], "native_sonnet")
                           + ours_context(out, q["repo"], q["question"]))
         for s, lines in got.items():
             append(path, dict(q, system=s, lines=lines, ctx_tokens=len("\n".join(lines)) // 4))
@@ -274,7 +281,8 @@ def score(split, out, questions=None):
         y = sum(by[b][q]["correct"] and not by[a][q]["correct"] for q in common)
         n = x + y
         return x, y, (min(1.0, 2 * sum(comb(n, i) for i in range(min(x, y) + 1)) / 2 ** n) if n else 1.0)
-    for a, b in (("both-qwen", "native-qwen"), ("sourcedrecall", "native-qwen"), ("sourcedrecall", "rag")):
+    for a, b in (("both-qwen", "native-qwen"), ("sourcedrecall", "native-qwen"), ("sourcedrecall", "rag"),
+                 ("both-sonnet", "native-sonnet"), ("sourcedrecall", "native-sonnet")):
         if a in by and b in by:
             x, y, pv = p(a, b)
             print(f"\n{a} vs {b}: {x} to {y}, McNemar p={pv:.3g}")
