@@ -20,7 +20,7 @@ import os
 import re
 import sys
 
-from common import HERE, append, chat, claim, condensed, fitted, jsonl, sessions
+from common import HERE, TooLong, append, chat, claim, condensed, fitted, jsonl, sessions
 
 sys.path.insert(0, os.path.dirname(HERE))      # bench/, for claude_memory
 OWNER = "Dev"
@@ -246,8 +246,12 @@ def answer(split, out, systems=None):
         if (systems and r["system"] not in systems) or (r["system"], r["qid"]) in have:
             continue
         mem = "\n".join(f"- {l}" for l in r["lines"]) or "(nothing)"
-        a = chat(READ.format(repo=r["repo"], memory=mem, q=r["question"]), max_tokens=160,
-                 base=READER, model=READER_MODEL)
+        try:
+            a = chat(READ.format(repo=r["repo"], memory=mem, q=r["question"]), max_tokens=160,
+                     base=READER, model=READER_MODEL)
+        except TooLong:   # past the reader's window: no row, so score leaves the question out for all
+            print(r["system"], r["qid"], "too long", flush=True)
+            continue
         ok = judge(r["question"], r["answer"], a)
         append(path, {"qid": r["qid"], "system": r["system"], "type": r["type"], "pred": a,
                       "correct": ok, "ctx_tokens": r["ctx_tokens"]})
