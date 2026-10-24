@@ -185,6 +185,7 @@ def _native_repo(CM, repo, ss, p, st):
 
 
 def native_context(out, repo, q, writer="native"):
+    import retrieve  # noqa: F401  experiments/p2's, before claude_memory puts bench/locomo first
     import claude_memory as CM
     st = json.load(open(os.path.join(out, writer, repo.replace("/", "__") + ".json")))
     return CM.lines(st["files"])
