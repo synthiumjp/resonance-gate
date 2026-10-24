@@ -93,8 +93,10 @@ project history at session start, `import claude-code` backfill; ba6f0d9).
   answers_sonnet10.jsonl, score_sonnet10.md). 136 questions: native-sonnet
   56.6%, ours 72.1%, rag 74.3%, both-sonnet 80.9% (40 to 7 over
   native-sonnet, p=1e-6). Both Qwen servers on 8090/8091 now run with
-  --n_ctx 32768 (were 16384) so the largest folders fit. Phi-4 has not read
-  the native-sonnet contexts. Native memory import: my recommendation to JP
+  --n_ctx 32768 (were 16384) so the largest folders fit. Phi-4 (09:24,
+  answers_phi4_sonnet10.jsonl, score_phi4_sonnet10.md; 102 questions that
+  fit its 16k window): ours 74.5%, native-sonnet 51.0%, both-sonnet 66.7%
+  (27 to 11, p=0.014), rag 70.6%; Qwen back on 8091 at 32k. Native memory import: my recommendation to JP
   was leave it out for launch (maybe a later opt-in import); no answer yet.
 
 ## 2026-10-21 IN FLIGHT

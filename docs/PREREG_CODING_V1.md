@@ -118,6 +118,25 @@ Held-out result, 2026-10-24 (Qwen reader and judge, 268 vetted questions,
   both-sonnet vs sourcedrecall 18 to 6 (p = 0.02); both-sonnet vs rag 18 to
   9 (p = 0.12). native-sonnet reads the whole folder, which is generous to
   it; Claude Code loads only MEMORY.md and opens files when it chooses.
+- Phi-4 as reader on the same 10 repositories (2026-10-25, Qwen judge;
+  Phi-4's window is 16k tokens: 50 native-sonnet or both-sonnet contexts
+  did not fit, so 34 questions, mostly from the three repositories with
+  the largest folders, are left out for every system; 102 questions):
+
+  | | n | sourcedrecall | native-qwen | both-qwen | rag | native-sonnet | both-sonnet |
+  |---|---|---|---|---|---|---|---|
+  | fix | 29 | 18 | 5 | 13 | 17 | 15 | 13 |
+  | how | 29 | 19 | 7 | 18 | 17 | 14 | 17 |
+  | where | 42 | 37 | 12 | 38 | 36 | 21 | 36 |
+  | why | 2 | 2 | 2 | 2 | 2 | 2 | 2 |
+  | all | 102 | 76 (74.5%) | 26 (25.5%) | 71 (69.6%) | 72 (70.6%) | 52 (51.0%) | 68 (66.7%) |
+  | context tokens | | 2,674 | 4,830 | 7,505 | 2,566 | 7,583 | 10,257 |
+
+  both-sonnet vs native-sonnet 27 to 11 (p = 0.014), 16 points;
+  sourcedrecall vs native-sonnet 33 to 9 (p = 0.0003). As in the Qwen-writer
+  run, with Phi-4 both is below sourcedrecall alone (9 to 17, p = 0.17).
+  The Qwen reader on the same 102: sourcedrecall 74, native-sonnet 59,
+  both-sonnet 83 (30 to 6 over native-sonnet), rag 77.
 - Still to do: the Sonnet writer on the other 10 held-out repositories
   (about 6M Claude Code tokens); a Claude reader when API credit is back.
 
