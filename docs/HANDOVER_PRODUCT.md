@@ -96,7 +96,14 @@ project history at session start, `import claude-code` backfill; ba6f0d9).
   --n_ctx 32768 (were 16384) so the largest folders fit. Phi-4 (09:24,
   answers_phi4_sonnet10.jsonl, score_phi4_sonnet10.md; 102 questions that
   fit its 16k window): ours 74.5%, native-sonnet 51.0%, both-sonnet 66.7%
-  (27 to 11, p=0.014), rag 70.6%; Qwen back on 8091 at 32k. Native memory import: my recommendation to JP
+  (27 to 11, p=0.014), rag 70.6%; Qwen back on 8091 at 32k.
+- 2026-10-25: dev ordering test running (run_dev_order.sh, ~/jpwork/coding_data/
+  run_dev_order/: ours, both-qwen, both-qwen-oursfirst; Qwen and Phi-4 readers).
+  MemoryAgentBench FactConsolidation (ai-hyz/MemoryAgentBench rev 7ea0669, MIT;
+  ~/jpwork/mab_data) probed on sh_6k: 455 world facts, the later of two
+  conflicting facts is the answer. sourcedrecall stores no profile facts from
+  them (rgx keeps facts about the user), so it only quotes the user's messages
+  back: the run would measure message search, not supersession. Not run. Native memory import: my recommendation to JP
   was leave it out for launch (maybe a later opt-in import); no answer yet.
 
 ## 2026-10-21 IN FLIGHT
