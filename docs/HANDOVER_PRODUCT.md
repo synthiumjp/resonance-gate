@@ -101,9 +101,11 @@ project history at session start, `import claude-code` backfill; ba6f0d9).
   run_dev_order/: ours, both-qwen, both-qwen-oursfirst; Qwen and Phi-4 readers).
   MemoryAgentBench FactConsolidation (ai-hyz/MemoryAgentBench rev 7ea0669, MIT;
   ~/jpwork/mab_data) probed on sh_6k: 455 world facts, the later of two
-  conflicting facts is the answer. sourcedrecall stores no profile facts from
-  them (rgx keeps facts about the user), so it only quotes the user's messages
-  back: the run would measure message search, not supersession. Not run. Native memory import: my recommendation to JP
+  conflicting facts is the answer. Fed as user messages (25 facts a session,
+  a day apart; scratchpad fc_probe.py), sourcedrecall keeps them as facts
+  (MEMORY.md lists 203) but marks only 3 "no longer true", one of them
+  wrongly (both Chanel founders). Supersession hardly engages on facts about
+  third parties. Not scored; proposed to JP as a test. Native memory import: my recommendation to JP
   was leave it out for launch (maybe a later opt-in import); no answer yet.
 
 ## 2026-10-21 IN FLIGHT
