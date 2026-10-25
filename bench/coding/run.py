@@ -13,6 +13,7 @@ OUT (outside the repo). Resumable: each step skips what is already done.
 Systems: sourcedrecall, native-qwen, both-qwen (native then ours), rag; native-sonnet
 and both-sonnet read OUT/native_sonnet/, a memory folder kept by Sonnet subagents
 (the native writer, same instructions), converted to the same JSON.
+both-qwen-oursfirst and both-sonnet-oursfirst: the same two contexts, ours first.
 """
 import hashlib
 import json
@@ -224,6 +225,10 @@ def context(split, out, questions, systems=None):
             elif s == "both-sonnet":
                 got[s] = (native_context(out, q["repo"], q["question"], "native_sonnet")
                           + ours_context(out, q["repo"], q["question"]))
+            elif s in ("both-qwen-oursfirst", "both-sonnet-oursfirst"):
+                writer = "native_sonnet" if "sonnet" in s else "native"
+                got[s] = (ours_context(out, q["repo"], q["question"])
+                          + native_context(out, q["repo"], q["question"], writer))
         for s, lines in got.items():
             append(path, dict(q, system=s, lines=lines, ctx_tokens=len("\n".join(lines)) // 4))
         print(i, qid, {s: len(v) for s, v in got.items()}, flush=True)
