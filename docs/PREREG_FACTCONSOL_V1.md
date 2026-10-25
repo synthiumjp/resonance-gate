@@ -1,6 +1,11 @@
-# Pre-registration: updated facts v1 (draft for JP, 2026-10-25)
+# Pre-registration: updated facts v1 (approved by JP 2026-10-25)
 
-Not approved yet. Nothing held out is scored until JP approves.
+Approved by JP 2026-10-25 ("advance with it"). The baseline is
+sourcedrecall as of commit 6ad96bb, with the bench in bench/factcons/.
+Added at approval, a detail the draft left open: the native writer runs
+until its folder no longer fits Qwen's 32k window; where that happens
+before the last session, the session is reported and native is not scored
+on that list.
 
 ## Question
 
