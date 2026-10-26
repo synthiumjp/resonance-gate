@@ -80,6 +80,28 @@ def _load_assistant_stream(path):
     return stream
 
 
+# 2026-10-26 (updated-facts bench): the parser names a fact about someone
+# else by one word of their name ("thomas_bear_in"), so "Thomas Kyd was born
+# in London" and "Thomas Arne was born in London" became one fact, with one
+# of the two sentences. When the sentence opens with a longer name holding
+# that word, the slot takes the whole name ("thomas_kyd_bear_in").
+_NAME_RUN = re.compile(r"^(?:The\s+)?((?:[A-Z][\w'.-]*)(?:\s+(?:(?:of|von|van|de|du|da|del|"
+                       r"der|la|le|bin|al)\s+)?[A-Z][\w'.-]*)+)")
+
+
+def _name_slot(a, text):
+    if os.environ.get("RG_SLOT_CLUSTER") != "1" or not text or ":" in a:
+        return a
+    m = _NAME_RUN.match(text.strip())
+    if not m:
+        return a
+    name = re.findall(r"[a-z0-9]+", m.group(1).lower())
+    head, _, rest = a.partition("_")
+    if len(name) < 2 or head not in name or not rest:
+        return a
+    return "_".join(name) + "_" + rest
+
+
 def _keep_text(slot, new_text, new_source=None):
     """Choose the proposition text for a (key, value) slot.
 
@@ -178,6 +200,7 @@ def build_facts(path, min_mentions=2, sources=None):
             if (not v or a in PF._EXCLUDE_ATTR or PF._EXCLUDE_ATTR_RX.search(a)
                     or PF._reject_value(a, v)):
                 continue
+            a = _name_slot(a, fct.get("text"))
             subj = fct.get("subject")   # v3 world facts namespace the slot
             key = f"{subj}:{a}" if subj else a
             # HEARSAY TIER (entry 246): a clause the rgx parser tagged
@@ -247,6 +270,7 @@ def build_facts(path, min_mentions=2, sources=None):
             if (not v or a in PF._EXCLUDE_ATTR or PF._EXCLUDE_ATTR_RX.search(a)
                     or PF._reject_value(a, v)):
                 continue
+            a = _name_slot(a, fct.get("text"))
             subj = fct.get("subject")
             key = f"{subj}:{a}" if subj else a
             _sl = slots[key][v]

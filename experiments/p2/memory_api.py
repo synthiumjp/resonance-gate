@@ -1337,6 +1337,9 @@ def _mark_ceased(g, titles=None):
     # 2026-10-05: soft links by domain (graduated -> was a student)
     if os.environ.get("RG_DOMAIN_CHANGES", "1") != "0":
         currency.mark_domain_changes(g, order=order or None)
+    # 2026-10-26: facts about other people and things, by sentence frame
+    if os.environ.get("RG_FRAME_CHANGES") == "1":
+        currency.mark_frame_changes(g, order=order or None)
 
 
 class Memory:

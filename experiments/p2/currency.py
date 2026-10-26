@@ -520,6 +520,13 @@ def _about_person(text, owner):
                          text, re.I))
 
 
+# a completed event in the passive: "was founded by", "was born in", "were
+# written by"
+_DONE = re.compile(r"\b(?:was|were)\s+(?:\w+ed|born|written|made|built|drawn|"
+                   r"sung|known|given|taken|won|begun|done|shot|held|led|run|"
+                   r"thrown|grown|sold|bought)\b", re.I)
+
+
 def mark_ceased(g, owner=None, order=None):
     """Mark nodes a later cessation statement has ended. Returns the list of
     (ceased_node_id, cessation_node_id) pairs it set, for the caller to log.
@@ -559,6 +566,8 @@ def mark_ceased(g, owner=None, order=None):
                     cess.append((nid, nd, toks, _latest(nd, order), False))
     if not cess:
         return ceased
+    import os
+    done_check = os.environ.get("RG_FRAME_CHANGES") == "1"
     for st in stores:
         for nid, nd in st.items():
             ndate = _latest(nd, order)
@@ -571,6 +580,12 @@ def mark_ceased(g, owner=None, order=None):
                 # place in the same fact ("...a trip to Japan") is not a
                 # second person (false-memory bench b05)
                 if by_name and _named_others(nd.get("text"), owner) - toks:
+                    continue
+                # 2026-10-26 (updated-facts bench): "Coco Chanel died" ended
+                # "Chanel was founded by Coco Chanel". A death ends what the
+                # person IS, not what was done or was already past.
+                if by_name and done_check and (_DONE.search(nd.get("text") or "")
+                                or _PAST_STATE.search(nd.get("text") or "")):
                     continue
                 # 2026-10-04 (wheel smoke test): "I left my home country"
                 # ended "my grandma lives in my home country, Sweden". The
@@ -1281,4 +1296,93 @@ def mark_decision_changes(g, order=None):
                 old["current"] = False
                 old["superseded_by"] = nid
                 out.append((oid, nid))
+    return out
+
+
+# 2026-10-26 (updated-facts bench, MemoryAgentBench FactConsolidation dev):
+# facts about other people and things were never linked to the facts that
+# replaced them. "Nobuhiro Watsuki is famous for The Fairly OddParents" told
+# after "... is famous for Rurouni Kenshin" left both unmarked, and the
+# reader picked the older one, which matches what it already knew. The
+# state families above are about the user's own life and key on the
+# parser's shortened slot ("watsuki_be"), which would also put Thomas Kyd's
+# and Thomas Arne's birthplaces in one slot. The FRAME is the fact's whole
+# sentence up to its last name: the subject, the verb and the slot words
+# ("Nobuhiro Watsuki is famous for", "Thomas Kyd was born in the city of").
+# Two facts in one frame, told at different times, with different fillers:
+# the older may have changed. Soft, like the domain links: the old fact
+# stays and is marked "may have changed since".
+_FRAME_PREPS = frozenset("of for by to in with at from as on".split())
+# stative and relational verbs, the ones whose frame holds one value at a
+# time; events ("went to", "visited", "met") and likes repeat with new values
+_FRAME_VERBS = frozenset("""be bear die live work play locate associate
+affiliate found create develop employ perform write speak marry belong base
+headquarter own lead head run manage coach captain represent direct produce
+compose design invent publish release make study teach attend sign star
+""".split())
+
+
+def _frame(nd):
+    """-> (frame, filler tokens) for a fact whose sentence ends with its
+    value, else None. The slot is the value's lower-case lead up to its
+    last preposition: 'a citizen of United States of America' -> slot 'a
+    citizen of', filler 'United States of America'. A value with no slot
+    must be a name ('The Prime Minister of Sweden is Stefan Lofven'), so
+    'Sam is tired' and 'Sam is happy' are not one frame."""
+    t = re.sub(r"\s+", " ", nd.get("text") or "").strip(" .!")
+    v = re.sub(r"\s+", " ", str(nd.get("value") or "")).strip(" .!")
+    if not t or not v or len(v) >= len(t) or not t.lower().endswith(v.lower()):
+        return None
+    a = (nd.get("attr") or "").lower().split(":")[-1].split("_")
+    if len(a) < 2 or not any(w in _FRAME_VERBS for w in a[1:]):
+        return None
+    # the stored value may be lower-cased; the sentence keeps the names' case
+    words = t[len(t) - len(v):].split()
+    cut = 0
+    for i, w in enumerate(words):
+        if not w.islower():
+            break
+        if w in _FRAME_PREPS and i + 1 < len(words):
+            cut = i + 1
+    filler = words[cut:]
+    if not filler or (cut == 0 and not filler[0][:1].isupper()):
+        return None
+    head = t[:len(t) - len(v)] + " ".join(words[:cut])
+    frame = " ".join(re.findall(r"[a-z0-9']+", head.lower()))
+    toks = frozenset(re.findall(r"[a-z0-9']+", " ".join(filler).lower())) - _PLACE_NOISE
+    return (frame, toks) if frame and toks else None
+
+
+def mark_frame_changes(g, order=None):
+    """Soft links within a frame: an older fact whose frame a LATER fact
+    fills differently gets maybe_changed_by = the latest such fact.
+    A frame filled two ways at the same time holds several values ("Sam is
+    allergic to peanuts" and "... to shellfish" in one message) and is left
+    alone. Returns [(old, new)]."""
+    groups = {}
+    for st in (g.nodes, g.provisional):
+        for nid, nd in st.items():
+            if nd.get("current") is False or passing(
+                    nd.get("text"), nd.get("source"), nd.get("attr"), nd.get("value")):
+                continue
+            fr = _frame(nd)
+            if fr:
+                groups.setdefault(fr[0], []).append((nid, nd, fr[1], _latest(nd, order)))
+    out = []
+    for items in groups.values():
+        if len(items) < 2:
+            continue
+        diff = lambda x, y: not (x <= y or y <= x)
+        if any(w1 == w2 and diff(t1, t2) for i, (_, _, t1, w1) in enumerate(items)
+               for _, _, t2, w2 in items[i + 1:]):
+            continue
+        for oid, old, otoks, owhen in items:
+            if owhen in ("", None) or old.get("maybe_changed_by"):
+                continue
+            later = [(w, nid) for nid, nd, toks, w in items
+                     if w not in ("", None) and w > owhen and diff(otoks, toks)
+                     and not _ADDITIVE.search((nd.get("text") or "").lower())]
+            if later:
+                old["maybe_changed_by"] = max(later)[1]
+                out.append((oid, old["maybe_changed_by"]))
     return out

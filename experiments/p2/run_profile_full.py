@@ -210,6 +210,23 @@ def _polarity(val):
     return 0 if any(m in v for m in _NEG_MARKERS) else 1
 
 
+# 2026-10-26 (updated-facts bench): "the position of wide receiver" and "the
+# position of cornerback" share "position", half the smaller set, so the
+# newer value was absorbed as a second mention of the older; "in the city of
+# London" took in Leeds and Bengaluru the same way. The words before the last
+# preposition name the slot, not the value: two values that each end in a
+# prepositional phrase are one value only if those phrases share a word.
+_SLOT_PREPS = frozenset("of for by to in with at from as on".split())
+
+
+def _tail(val):
+    words = re.findall(r"[a-z0-9]+", (val or "").lower())
+    cut = max((i for i, w in enumerate(words[:-1]) if w in _SLOT_PREPS), default=None)
+    if cut is None:
+        return None
+    return {t for t in words[cut + 1:] if t not in _STOP and len(t) > 1} or None
+
+
 def _cluster(entries, trace=False):
     """Merge one slot's values by content-token overlap; sum mentions and receipts.
     entries: {value: {"n": int, "recs": [(date, uuid)]}}. Returns list of dicts.
@@ -242,6 +259,7 @@ def _cluster(entries, trace=False):
     with the cluster's ORIGINAL value. cl["core"] stays fixed at the first
     variant, so every candidate is judged against the same original meaning."""
     items = sorted(entries.items(), key=lambda kv: -kv[1]["n"])
+    slot_check = os.environ.get("RG_SLOT_CLUSTER") == "1"
     clusters = []
     vmap = {} if trace else None
     for val, d in items:
@@ -261,6 +279,10 @@ def _cluster(entries, trace=False):
             # same algorithm deciding what the store believes.
             if cl["pol"] != pol:
                 continue
+            if slot_check:
+                ta, tb = _tail(val), _tail(cl["label"])
+                if ta and tb and not (ta & tb):
+                    continue
             smaller = min(len(toks), len(cl["core"])) or 1
             if len(toks & cl["core"]) / smaller >= 0.5:
                 cl["n"] += d["n"]

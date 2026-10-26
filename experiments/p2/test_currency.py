@@ -554,3 +554,51 @@ def test_the_users_own_ending_does_not_end_someone_elses_fact():
     out = C.mark_ceased(g, owner="Sam Reed", order=ORDER)
     assert ("a", "b") not in out
     assert ("c", "b") in out
+
+
+def _fn(nid, attr, value, conv, text):
+    return _n(nid, attr, value, conv, text=text)
+
+
+def test_a_later_fact_in_the_same_frame_may_have_changed_the_older():
+    g = _G({"a": _fn("a", "watsuki_be", "famous for Rurouni Kenshin", "c1",
+                     "Nobuhiro Watsuki is famous for Rurouni Kenshin"),
+            "b": _fn("b", "watsuki_be", "famous for The Fairly OddParents", "c2",
+                     "Nobuhiro Watsuki is famous for The Fairly OddParents")})
+    assert C.mark_frame_changes(g, order=ORDER) == [("a", "b")]
+    assert g.nodes["b"].get("maybe_changed_by") is None
+
+
+def test_frames_keep_the_whole_subject():
+    """The parser files both under 'thomas_bear_in'; they are two people."""
+    g = _G({"a": _fn("a", "thomas_bear_in", "in the city of London", "c1",
+                     "Thomas Kyd was born in the city of London"),
+            "b": _fn("b", "thomas_bear_in", "in the city of Bristol", "c2",
+                     "Thomas Arne was born in the city of Bristol")})
+    assert C.mark_frame_changes(g, order=ORDER) == []
+
+
+def test_a_slot_ends_at_the_first_name():
+    g = _G({"a": _fn("a", "henry_be", "a citizen of United States of America", "c1",
+                     "Henry Ford is a citizen of United States of America"),
+            "b": _fn("b", "henry_be", "a citizen of Canada", "c2",
+                     "Henry Ford is a citizen of Canada")})
+    assert C.mark_frame_changes(g, order=ORDER) == [("a", "b")]
+
+
+@pytest.mark.parametrize("old,new", [
+    (("sam_be", "tired", "Sam is tired"), ("sam_be", "happy", "Sam is happy")),
+    (("sam_visit", "Paris", "Sam visited Paris"), ("sam_visit", "Rome", "Sam visited Rome")),
+    (("sam_live_in", "in Paris", "Sam lives in Paris"),
+     ("sam_live_in", "in Rome", "Sam also lives in Rome")),
+])
+def test_not_a_frame_change(old, new):
+    g = _G({"a": _fn("a", *old[:2], "c1", old[2]), "b": _fn("b", *new[:2], "c2", new[2])})
+    assert C.mark_frame_changes(g, order=ORDER) == []
+
+
+def test_a_frame_filled_twice_at_once_holds_several_values():
+    g = _G({"a": _fn("a", "sam_be", "allergic to peanuts", "c1", "Sam is allergic to peanuts"),
+            "b": _fn("b", "sam_be", "allergic to shellfish", "c1", "Sam is allergic to shellfish"),
+            "c": _fn("c", "sam_be", "allergic to dust", "c2", "Sam is allergic to dust")})
+    assert C.mark_frame_changes(g, order=ORDER) == []

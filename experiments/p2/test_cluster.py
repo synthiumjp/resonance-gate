@@ -32,6 +32,8 @@ for p in (_HERE, _ROOT):
     if p not in sys.path:
         sys.path.insert(0, p)
 
+import pytest  # noqa: E402
+
 from run_profile_full import _cluster
 
 
@@ -233,3 +235,19 @@ def test_exclude_attr_rx_keeps_career_paths_drops_model_path():
         assert not _EXCLUDE_ATTR_RX.search(attr), attr
     for attr in dropped:
         assert _EXCLUDE_ATTR_RX.search(attr), attr
+
+
+# --------------------------------------------------------------------------
+# 2026-10-26: slot words are not the value (RG_SLOT_CLUSTER)
+
+@pytest.mark.parametrize("a,b,n", [
+    ("the position of wide receiver", "the position of cornerback", 2),
+    ("in the city of london", "in the city of leeds", 2),
+    ("a citizen of united states of america", "a citizen of canada", 2),
+    ("a nurse at the alfred", "a senior nurse at the alfred", 1),
+    ("in fitzroy", "in fitzroy now", 1),
+    ("melbourne", "melbourne australia", 1),
+])
+def test_slot_words_do_not_merge_values(monkeypatch, a, b, n):
+    monkeypatch.setenv("RG_SLOT_CLUSTER", "1")
+    assert len(_cluster(_entries((a, 2), (b, 1)))) == n
