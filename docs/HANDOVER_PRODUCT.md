@@ -110,6 +110,38 @@ project history at session start, `import claude-code` backfill; ba6f0d9).
   wrongly (both Chanel founders). Supersession hardly engages on facts about
   third parties. Not scored; proposed to JP as a test. Native memory import: my recommendation to JP
   was leave it out for launch (maybe a later opt-in import); no answer yet.
+- 2026-10-26 evening, updated facts v1 (docs/PREREG_FACTCONSOL_V1.md,
+  approved). JP: "we need to fix before launch" -- supersession of facts
+  about others is now a launch item. Held-out baseline (~/jpwork/fc_held,
+  held2.sh) running: sourcedrecall/rag/full answered (800 rows); the Qwen
+  native writer on 8091 is slow (32k list, 23 of 93 sessions at 20:20).
+  Dev (Qwen reader): baseline sourcedrecall sh 35 / mh 4, rag 84 / 11,
+  native-qwen 66 / 27, full list 28 / 3. Three causes found, each fixed
+  behind a flag (off by default; 2c4c62a, 505c791, 578b184):
+  1. RG_TRIM_LONG: a 25-fact message showed its first 800 characters; now
+     a long message keeps its best-matching sentences. sh 35 -> 64.
+  2. RG_SLOT_CLUSTER: the value clusterer merged "the position of wide
+     receiver" with "... of cornerback" (shared slot word "position"), so a
+     newer value became a second mention of the older; and the parser's
+     one-word subject ("thomas_bear_in") merged Thomas Kyd and Thomas Arne.
+     Now values ending in a prepositional phrase merge only if those phrases
+     share a word, and the slot takes the whole leading name.
+  3. RG_FRAME_CHANGES: currency.mark_frame_changes links a later fact in the
+     same sentence frame ("Nobuhiro Watsuki is famous for ___") as "may have
+     changed"; and a death no longer ends past events ("Chanel was founded by
+     Coco Chanel" was marked no longer true when Coco Chanel died).
+  With 2+3, 78 of the 114 changed facts in sh_6k are linked (was 3); most
+  of the rest are sentences the parser does not extract (lower-case
+  subjects: "quarterback is associated with ...") or both values in one
+  message. Dev score with all three: ~/jpwork/fc_dev_frame (running).
+  Regression check (base = all off, new = all on; frozen tree
+  ~/jpwork/sdr-dev27; 14 false-memory dev sets then LoCoMo dev; Qwen on 8090
+  only) chained after it: ~/jpwork/dev27.sh, log ~/jpwork/dev27.log.
+  Then: Phi-4 on the changed sets once 8091 is free; make the flags default
+  if they hold; rerun the release measurement (tools/release_measure2.sh)
+  since README figures would move; held-out updated-facts rerun once.
+  Two-step (mh) questions need a second lookup on names found in the first
+  results ("the spouse of the author of X"); not started.
 
 ## 2026-10-21 IN FLIGHT
 
