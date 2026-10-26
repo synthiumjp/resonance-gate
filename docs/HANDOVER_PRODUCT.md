@@ -97,8 +97,11 @@ project history at session start, `import claude-code` backfill; ba6f0d9).
   answers_phi4_sonnet10.jsonl, score_phi4_sonnet10.md; 102 questions that
   fit its 16k window): ours 74.5%, native-sonnet 51.0%, both-sonnet 66.7%
   (27 to 11, p=0.014), rag 70.6%; Qwen back on 8091 at 32k.
-- 2026-10-25: dev ordering test running (run_dev_order.sh, ~/jpwork/coding_data/
-  run_dev_order/: ours, both-qwen, both-qwen-oursfirst; Qwen and Phi-4 readers).
+- 2026-10-26: dev ordering test (run_dev_order/score.md, 111 dev questions):
+  ours first makes no difference. Qwen: ours 71, native first 70, ours first
+  69; Phi-4: 64, 60, 61. Native first stays. (The script hung 13 h on a
+  `wait` that also waited for the Phi-4 server it had started: never start
+  a server with & in a script that then calls a bare `wait`.)
   MemoryAgentBench FactConsolidation (ai-hyz/MemoryAgentBench rev 7ea0669, MIT;
   ~/jpwork/mab_data) probed on sh_6k: 455 world facts, the later of two
   conflicting facts is the answer. Fed as user messages (25 facts a session,
