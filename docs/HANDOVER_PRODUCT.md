@@ -154,8 +154,16 @@ project history at session start, `import claude-code` backfill; ba6f0d9).
   Held-out baseline so far (6ad96bb, Qwen): sourcedrecall sh_32k 49, sh_64k
   40, mh_32k 2, mh_64k 7; rag 89, 94, 8, 10; full list too long for 32k.
   Native-qwen still writing (record all in the pre-registration when done).
-  Regression check, first set: stale base and new identical (false 1/50,
-  true state 44/50).
+  Regression check done 23:50 (Qwen, base -> new): 12 of 14 false-memory
+  sets identical (false memories unchanged on all 14: stale 1/50, stale2
+  3/64, real 3/30, real2 3/30, pasted 1/34, decisions 1/14, rest 0);
+  stale2 true state 58 -> 60 of 64; own2 controls 27 -> 26 of 30 (long
+  pasted texts now quoted by their best sentences: dw22 gained, dw24 and
+  dw29 lost; dw24's answer was in the shorter quote, dw29's "Frankfurt"
+  sentence was cut). LoCoMo dev identical (63.3%, 570 tokens). Phi-4 on
+  own, own2, stale2, pasted_long and FactConsolidation dev started 00:00:
+  ~/jpwork/phi_dev27.sh, log ~/jpwork/phi_dev27.log (Phi-4 on 8090, Qwen
+  back on 8090 for the judging).
   Not fixed, a known limit: the parser keeps a common-noun subject only if
   the user introduced it ("The deadline moved to Friday", "rugby union was
   created in ..." store nothing; the messages are still found and shown).
