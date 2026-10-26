@@ -133,10 +133,19 @@ project history at session start, `import claude-code` backfill; ba6f0d9).
   With 2+3, 78 of the 114 changed facts in sh_6k are linked (was 3); most
   of the rest are sentences the parser does not extract (lower-case
   subjects: "quarterback is associated with ...") or both values in one
-  message. Dev score with all three: ~/jpwork/fc_dev_frame (running).
-  Regression check (base = all off, new = all on; frozen tree
-  ~/jpwork/sdr-dev27; 14 false-memory dev sets then LoCoMo dev; Qwen on 8090
-  only) chained after it: ~/jpwork/dev27.sh, log ~/jpwork/dev27.log.
+  message. Dev scores (Qwen, sh / mh of 100, mean tokens):
+    trim only (fc_dev_trim2)                         64 / 4   349 / 643
+    + slot cluster + frame links (fc_dev_frame)      60 / 2   784 / 1179
+      (every marked fact in a 25-fact message pulled in its replacement:
+      16 lines a question instead of 9)
+    + replacements only for facts shown (fc_dev_frame2) 79 / 8  432 / 857
+    + RG_NOTE_LATER, the note names the replacement and its date
+      (fc_dev_frame3; 545804b)                       87 / 13  496 / 988
+    rag 84 / 11, native-qwen 66 / 27, baseline sourcedrecall 35 / 4.
+  Regression check of the frame3 settings (base = all four flags off, new =
+  all on; frozen tree ~/jpwork/sdr-dev27 at 545804b; 14 false-memory dev
+  sets then LoCoMo dev; Qwen on 8090 only) started 21:05: ~/jpwork/dev27.sh,
+  log ~/jpwork/dev27.log.
   Then: Phi-4 on the changed sets once 8091 is free; make the flags default
   if they hold; rerun the release measurement (tools/release_measure2.sh)
   since README figures would move; held-out updated-facts rerun once.
