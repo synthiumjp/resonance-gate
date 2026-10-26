@@ -171,6 +171,11 @@ project history at session start, `import claude-code` backfill; ba6f0d9).
   off); suite 1,494 passed. Held-out rerun (the one the prereg allows)
   started 01:30 at 8d14d39: ~/jpwork/fc_held_fix.sh, log
   ~/jpwork/fc_held_fix.log, out ~/jpwork/fc_held_fix (baseline stores).
+  Held-out run 2 (Qwen, 02:02): sourcedrecall sh_32k 49 -> 84, sh_64k
+  40 -> 80, mh_32k 2 -> 10, mh_64k 7 -> 7 (rag 89, 94, 8, 10); context
+  ~900-1,500 tokens (rag ~170). In docs/PREREG_FACTCONSOL_V1.md. Phi-4
+  held-out reads (both runs) on 8090: ~/jpwork/phi_held.sh, log
+  ~/jpwork/phi_held.log; native-qwen writer still on 8091 (65/93).
   Not fixed, a known limit: the parser keeps a common-noun subject only if
   the user introduced it ("The deadline moved to Friday", "rugby union was
   created in ..." store nothing; the messages are still found and shown).

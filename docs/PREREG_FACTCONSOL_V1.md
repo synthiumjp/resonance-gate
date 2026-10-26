@@ -64,3 +64,37 @@ gold answer appears in the normalised answer. No LLM judge.
   reported.
 - No launch gate. Reported whatever the outcome, per set, with context
   size. If sourcedrecall is below plain retrieval, the README says so.
+
+## Results (Qwen3-14B reader; correct of 100, mean context tokens)
+
+Held-out run 1, sourcedrecall at 6ad96bb (as approved), 2026-10-26:
+
+| set | sourcedrecall | plain retrieval |
+|---|---|---|
+| sh_32k | 49 (2,206) | 89 (166) |
+| sh_64k | 40 (2,260) | 94 (165) |
+| mh_32k | 2 (2,559) | 8 (171) |
+| mh_64k | 7 (2,294) | 10 (168) |
+
+Whole list: too long for the 32k window on every held-out set.
+
+The fix, built and tuned on dev only (the 6k lists; HANDOVER_PRODUCT.md
+2026-10-26 evening): long messages quoted by their best sentences, values
+that share only slot words kept apart, later facts in the same sentence
+frame linked as "may have changed", and the note names the later fact and
+its date. Dev sh / mh: Qwen 35 / 4 -> 87 / 13, Phi-4 56 / 7 -> 96 / 16
+(plain retrieval 84 / 11 and 88 / 14). On by default from 8d14d39.
+
+Held-out run 2, sourcedrecall at 8d14d39, same stored memories (the fix is
+on the read side), 2026-10-27:
+
+| set | sourcedrecall | plain retrieval |
+|---|---|---|
+| sh_32k | 84 (884) | 89 (166) |
+| sh_64k | 80 (949) | 94 (165) |
+| mh_32k | 10 (1,151) | 8 (171) |
+| mh_64k | 7 (1,501) | 10 (168) |
+
+sourcedrecall is still below plain retrieval on three of the four sets,
+with five to nine times the context. Native memory and the Phi-4 reads to
+follow.
