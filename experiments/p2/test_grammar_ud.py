@@ -23,7 +23,9 @@ OWNER = "Martin Mark"
 @pytest.fixture(scope="module")
 def nlp():
     return stanza.Pipeline("en", processors="tokenize,pos,lemma,depparse",
-                           use_gpu=False, verbose=False)
+                           use_gpu=False, verbose=False,
+                           # no network: the default fetched a fresh resources.json
+                           download_method=stanza.DownloadMethod.REUSE_RESOURCES)
 
 
 def props(t, nlp, role="user"):

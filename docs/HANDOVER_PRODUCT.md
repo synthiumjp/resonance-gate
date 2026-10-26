@@ -169,11 +169,12 @@ project history at session start, `import claude-code` backfill; ba6f0d9).
   g4_check.py, counts only): 20/20 quoted on a dated line. Caveats: two
   months, not several; the questions use the message's words, so this shows
   storage and sourcing, not paraphrase recall. Store deleted after.
-  Suite on the Mac (sdr-coding, defaults): 1,493 passed, 1 failed
-  (rgx/test_backend.py one-at-a-time vs bulk parse of "I moved to Lisbon in
-  2019 and my sister still lives in Leeds."; rgx unchanged since 012fcca, so
-  the test environment, RGX_PARSER_MODELS=parser_models/ours; check with
-  the installed EWT models before release).
+  Suite on the Mac (sdr-coding, defaults, with the reference-model settings
+  of tools/release_measure.sh): 1,494 passed, 3 skipped. (Without
+  STANZA_PACKAGES=ours and the model paths, rgx/test_backend.py compares
+  against Stanza's combined models and fails: not a regression.)
+  experiments/p2/test_grammar_ud.py now builds Stanza with REUSE_RESOURCES;
+  its default fetched a fresh resources.json from the network on every run.
 
 ## 2026-10-21 IN FLIGHT
 
