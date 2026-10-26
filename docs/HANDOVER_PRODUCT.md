@@ -163,7 +163,14 @@ project history at session start, `import claude-code` backfill; ba6f0d9).
   sentence was cut). LoCoMo dev identical (63.3%, 570 tokens). Phi-4 on
   own, own2, stale2, pasted_long and FactConsolidation dev started 00:00:
   ~/jpwork/phi_dev27.sh, log ~/jpwork/phi_dev27.log (Phi-4 on 8090, Qwen
-  back on 8090 for the judging).
+  back on 8090 for the judging). Phi-4, base -> new: FactConsolidation dev
+  sh 56 -> 96, mh 7 -> 16 (rag 88 / 14, native-qwen 71 / 26); own 34/40
+  and FM 3/20 both arms; own2 26 -> 25 (FM 0 both); stale2 true state
+  59 -> 60, FM 4/64 both; pasted_long 37/40 both. own2 -1 on both readers
+  is the one cost. 8d14d39: the four flags on by default (=0 turns each
+  off); suite 1,494 passed. Held-out rerun (the one the prereg allows)
+  started 01:30 at 8d14d39: ~/jpwork/fc_held_fix.sh, log
+  ~/jpwork/fc_held_fix.log, out ~/jpwork/fc_held_fix (baseline stores).
   Not fixed, a known limit: the parser keeps a common-noun subject only if
   the user introduced it ("The deadline moved to Friday", "rugby union was
   created in ..." store nothing; the messages are still found and shown).
