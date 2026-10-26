@@ -2260,6 +2260,18 @@ class Memory:
         flat = _mark_later_changes([f for fs in per for f in fs],
                                    getattr(self, "owner", None))
         later = {f.get("id") for f in flat if f.get("changed_later")}
+        # 2026-10-26 (RG_NOTE_LATER=1, experiment; updated-facts dev): the
+        # note names what replaced the fact and when
+        name_later = os.environ.get("RG_NOTE_LATER") == "1"
+        nodes, prov = self.g.nodes, self.g.provisional
+
+        def by(f):
+            rid = f.get("superseded_by") or f.get("maybe_changed_by")
+            nd = (nodes.get(rid) or prov.get(rid)) if (rid and name_later) else None
+            if not nd or not nd.get("text"):
+                return ""
+            when = max((str(d)[:10] for d in (nd.get("convs") or {}).values()), default="")
+            return f"; later{', on ' + when if when else ''}: {nd['text']}"
         notes = []
         for fs in per:
             n = []
@@ -2268,25 +2280,33 @@ class Memory:
                     pre = "no longer true: " if f.get("current") is False else ""
                     n.append(f"{pre}decided with the assistant: {f.get('value')}")
                 elif f.get("current") is False:
-                    n.append(f"no longer true: {f.get('text')}")
+                    n.append(f"no longer true: {f.get('text')}{by(f)}")
                 elif f.get("passing"):
                     n.append(f"said in passing: {f.get('text')}")
                 elif f.get("id") in later or f.get("maybe_changed_by"):
-                    n.append(f"may have changed since: {f.get('text')}")
+                    n.append(f"may have changed since: {f.get('text')}{by(f)}")
             notes.append(n)
         return notes
 
-    def _with_replacements(self, msgs):
+    def _with_replacements(self, msgs, query=None):
         """A returned message whose fact the parser knows was replaced
-        brings the replacing message with it, if retrieval missed it."""
+        brings the replacing message with it, if retrieval missed it.
+        With RG_TRIM_LONG, a long message brings only the replacements of
+        facts in the sentences it will show."""
         mo = getattr(self, "message_of", None)
         if mo is None:
             return msgs
         have = {re.sub(r"\W+", " ", m["text"]).strip().lower() for m in msgs}
         nodes, prov = self.g.nodes, self.g.provisional
         extra = []
-        for fs in self._facts_in(msgs):
+        cut = os.environ.get("RG_TRIM_LONG") == "1"
+        for m, fs in zip(msgs, self._facts_in(msgs)):
+            shown = None
+            if cut and len(" ".join(m["text"].split())) > _MSG_WINDOW:
+                shown = re.sub(r"\W+", " ", _trim_best(m["text"], query or "", _MSG_WINDOW)).lower()
             for f in fs:
+                if shown is not None and re.sub(r"\W+", " ", f.get("text") or "").strip().lower() not in shown:
+                    continue
                 rid = f.get("superseded_by") or f.get("maybe_changed_by")
                 nd = nodes.get(rid) or prov.get(rid) if rid else None
                 if not nd or not nd.get("source"):
@@ -2428,7 +2448,7 @@ class Memory:
                     continue
                 seen.add(key)
                 msgs.append(m)
-            msgs = self._with_replacements(msgs[:k])
+            msgs = self._with_replacements(msgs[:k], query)
         if not msgs:
             return ("[MEMORY] Nothing stored matches this topic. The user's "
                     "details on this are UNKNOWN: say so rather than "
@@ -2469,7 +2489,7 @@ class Memory:
             if n and os.environ.get("RG_TRIM_LONG") == "1" and len(" ".join(m["text"].split())) > _MSG_WINDOW:
                 # a note about a fact whose sentence the cut left out is noise
                 shown = re.sub(r"\W+", " ", quote).lower()
-                n = [x for x in n if re.sub(r"\W+", " ", x.split(": ", 1)[-1]).strip().lower() in shown]
+                n = [x for x in n if re.sub(r"\W+", " ", x.split(": ", 1)[-1].split("; later")[0]).strip().lower() in shown]
             if n:
                 line += "  (" + "; ".join(n) + ")"
             lines.append(line)
