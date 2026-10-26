@@ -567,7 +567,7 @@ def mark_ceased(g, owner=None, order=None):
     if not cess:
         return ceased
     import os
-    done_check = os.environ.get("RG_FRAME_CHANGES") == "1"
+    done_check = os.environ.get("RG_FRAME_CHANGES") != "0"
     for st in stores:
         for nid, nd in st.items():
             ndate = _latest(nd, order)

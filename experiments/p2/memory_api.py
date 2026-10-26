@@ -791,8 +791,8 @@ def _trim_q(text, query, limit):
 
 
 def _trim_best(text, query, limit):
-    """2026-10-26 (RG_TRIM_LONG=1, experiment): a message too long for the
-    window, cut to the sentences that share the most words with the
+    """2026-10-26 (RG_TRIM_LONG; on by default since 2026-10-27, =0 turns
+    it off): a message too long for the window, cut to the sentences that share the most words with the
     question, names included (a long list of facts about other people and
     things: "official language of Japan" kept every sentence with
     "language" in it when names did not count). No sentence shares a word:
@@ -829,12 +829,12 @@ def _quote_own(text, owner=None, query=None, after=None, trim=False):
     flat = " ".join((text or "").split())
     own = " ".join(_drop_pasted(text or "", owner, after).split())
     if len(own) >= len(flat):
-        # 2026-10-26 (RG_TRIM_LONG=1, experiment; updated-facts dev): a
+        # 2026-10-26 (RG_TRIM_LONG, default on since 2026-10-27; updated-facts dev): a
         # message too long for the window is cut to the sentences that share
         # a word with the question, not to its opening and one passage (a list
         # of 25 facts showed its first 800 characters and lost the one asked
         # about); shorter messages are quoted whole as before
-        if os.environ.get("RG_TRIM_LONG") == "1" and len(flat) > _MSG_WINDOW and not trim:
+        if os.environ.get("RG_TRIM_LONG") != "0" and len(flat) > _MSG_WINDOW and not trim:
             return f'"{_trim_best(text, query, _MSG_WINDOW)}"'
         if trim:
             return f'"{_trim_q(text, query, _MSG_WINDOW)}"'
@@ -1338,7 +1338,8 @@ def _mark_ceased(g, titles=None):
     if os.environ.get("RG_DOMAIN_CHANGES", "1") != "0":
         currency.mark_domain_changes(g, order=order or None)
     # 2026-10-26: facts about other people and things, by sentence frame
-    if os.environ.get("RG_FRAME_CHANGES") == "1":
+    # (default on since 2026-10-27; RG_FRAME_CHANGES=0 turns it off)
+    if os.environ.get("RG_FRAME_CHANGES") != "0":
         currency.mark_frame_changes(g, order=order or None)
 
 
@@ -2260,9 +2261,9 @@ class Memory:
         flat = _mark_later_changes([f for fs in per for f in fs],
                                    getattr(self, "owner", None))
         later = {f.get("id") for f in flat if f.get("changed_later")}
-        # 2026-10-26 (RG_NOTE_LATER=1, experiment; updated-facts dev): the
+        # 2026-10-26 (RG_NOTE_LATER, default on since 2026-10-27; updated-facts dev): the
         # note names what replaced the fact and when
-        name_later = os.environ.get("RG_NOTE_LATER") == "1"
+        name_later = os.environ.get("RG_NOTE_LATER") != "0"
         nodes, prov = self.g.nodes, self.g.provisional
 
         def by(f):
@@ -2299,7 +2300,7 @@ class Memory:
         have = {re.sub(r"\W+", " ", m["text"]).strip().lower() for m in msgs}
         nodes, prov = self.g.nodes, self.g.provisional
         extra = []
-        cut = os.environ.get("RG_TRIM_LONG") == "1"
+        cut = os.environ.get("RG_TRIM_LONG") != "0"
         for m, fs in zip(msgs, self._facts_in(msgs)):
             shown = None
             if cut and len(" ".join(m["text"].split())) > _MSG_WINDOW:
@@ -2486,7 +2487,7 @@ class Memory:
             after = after_of(m.get("conv"), m["text"]) if after_of and m.get("conv") else None
             quote = _quote_own(m["text"], self.owner, query, after, trim=trim)
             line = (f"- [{m.get('date')}] " if m.get("date") else "- ") + asked + quote
-            if n and os.environ.get("RG_TRIM_LONG") == "1" and len(" ".join(m["text"].split())) > _MSG_WINDOW:
+            if n and os.environ.get("RG_TRIM_LONG") != "0" and len(" ".join(m["text"].split())) > _MSG_WINDOW:
                 # a note about a fact whose sentence the cut left out is noise
                 shown = re.sub(r"\W+", " ", quote).lower()
                 n = [x for x in n if re.sub(r"\W+", " ", x.split(": ", 1)[-1].split("; later")[0]).strip().lower() in shown]

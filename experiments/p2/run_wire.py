@@ -90,7 +90,7 @@ _NAME_RUN = re.compile(r"^(?:The\s+)?((?:[A-Z][\w'.-]*)(?:\s+(?:(?:of|von|van|de
 
 
 def _name_slot(a, text):
-    if os.environ.get("RG_SLOT_CLUSTER") != "1" or not text or ":" in a:
+    if os.environ.get("RG_SLOT_CLUSTER") == "0" or not text or ":" in a:
         return a
     m = _NAME_RUN.match(text.strip())
     if not m:

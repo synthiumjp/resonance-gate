@@ -259,7 +259,7 @@ def _cluster(entries, trace=False):
     with the cluster's ORIGINAL value. cl["core"] stays fixed at the first
     variant, so every candidate is judged against the same original meaning."""
     items = sorted(entries.items(), key=lambda kv: -kv[1]["n"])
-    slot_check = os.environ.get("RG_SLOT_CLUSTER") == "1"
+    slot_check = os.environ.get("RG_SLOT_CLUSTER") != "0"
     clusters = []
     vmap = {} if trace else None
     for val, d in items:
