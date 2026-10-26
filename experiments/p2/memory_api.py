@@ -790,6 +790,30 @@ def _trim_q(text, query, limit):
     return _window(" ... ".join(keep), "", limit)
 
 
+def _trim_best(text, query, limit):
+    """2026-10-26 (RG_TRIM_LONG=1, experiment): a message too long for the
+    window, cut to the sentences that share the most words with the
+    question, names included (a long list of facts about other people and
+    things: "official language of Japan" kept every sentence with
+    "language" in it when names did not count). No sentence shares a word:
+    the opening, as _trim_q."""
+    flat = " ".join((text or "").split())
+    q = {w.lower() for w in re.findall(r"[A-Za-z]+", query or "")
+         if len(w) >= 4 and w.lower() not in _TRIM_STOP}
+    sents = [x for x in _SENT_SPLIT.split(flat) if x.strip()]
+    if not q or len(sents) < 2:
+        return _window(flat, "", limit)
+
+    def score(sent):
+        words = set(re.findall(r"[a-z]{4,}", sent.lower()))
+        return sum(any(v.startswith(w[:5]) or (w.startswith(v[:5]) and len(v) >= 5)
+                       for v in words) for w in q)
+    best = max(score(x) for x in sents)
+    if not best:
+        return _window(flat, "", 240)
+    return _window(" ... ".join(x for x in sents if score(x) == best), "", limit)
+
+
 def _quote_own(text, owner=None, query=None, after=None, trim=False):
     """A message quoted for the reader, with text the user pasted in for the
     assistant (an email, a README, a web page; prose._drop_pasted) set apart
@@ -810,7 +834,9 @@ def _quote_own(text, owner=None, query=None, after=None, trim=False):
         # a word with the question, not to its opening and one passage (a list
         # of 25 facts showed its first 800 characters and lost the one asked
         # about); shorter messages are quoted whole as before
-        if trim or (os.environ.get("RG_TRIM_LONG") == "1" and len(flat) > _MSG_WINDOW):
+        if os.environ.get("RG_TRIM_LONG") == "1" and len(flat) > _MSG_WINDOW and not trim:
+            return f'"{_trim_best(text, query, _MSG_WINDOW)}"'
+        if trim:
             return f'"{_trim_q(text, query, _MSG_WINDOW)}"'
         return f'"{_window_q(text, query, _MSG_WINDOW)}"'
     k = 0                       # the user's words before the paste ...
@@ -2435,8 +2461,12 @@ class Memory:
             asked = (f'(in reply to "{_window(asked, "", 160)}") '
                      if asked and asked.rstrip().endswith("?") else "")
             after = after_of(m.get("conv"), m["text"]) if after_of and m.get("conv") else None
-            line = (f"- [{m.get('date')}] " if m.get("date") else "- ") + \
-                asked + _quote_own(m["text"], self.owner, query, after, trim=trim)
+            quote = _quote_own(m["text"], self.owner, query, after, trim=trim)
+            line = (f"- [{m.get('date')}] " if m.get("date") else "- ") + asked + quote
+            if n and os.environ.get("RG_TRIM_LONG") == "1" and len(" ".join(m["text"].split())) > _MSG_WINDOW:
+                # a note about a fact whose sentence the cut left out is noise
+                shown = re.sub(r"\W+", " ", quote).lower()
+                n = [x for x in n if re.sub(r"\W+", " ", x.split(": ", 1)[-1]).strip().lower() in shown]
             if n:
                 line += "  (" + "; ".join(n) + ")"
             lines.append(line)
