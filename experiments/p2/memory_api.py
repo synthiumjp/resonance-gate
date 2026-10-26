@@ -772,8 +772,10 @@ def _trim_q(text, query, limit):
     characters, since the search found it for a reason the words don't show."""
     flat = " ".join((text or "").split())
     toks = re.findall(r"[A-Za-z]+", query or "")
+    # RG_TRIM_NAMES=1 (experiment): names count too, for facts about others
+    names = os.environ.get("RG_TRIM_NAMES") == "1"
     q = {w.lower() for k, w in enumerate(toks)
-         if len(w) >= 4 and not (k and w[0].isupper()) and w.lower() not in _TRIM_STOP}
+         if len(w) >= 4 and (names or not (k and w[0].isupper())) and w.lower() not in _TRIM_STOP}
     sents = [x for x in _SENT_SPLIT.split(flat) if x.strip()]
     if not q or len(sents) < 2:
         return _window(flat, "", limit)
@@ -803,7 +805,12 @@ def _quote_own(text, owner=None, query=None, after=None, trim=False):
     flat = " ".join((text or "").split())
     own = " ".join(_drop_pasted(text or "", owner, after).split())
     if len(own) >= len(flat):
-        if trim:
+        # 2026-10-26 (RG_TRIM_LONG=1, experiment; updated-facts dev): a
+        # message too long for the window is cut to the sentences that share
+        # a word with the question, not to its opening and one passage (a list
+        # of 25 facts showed its first 800 characters and lost the one asked
+        # about); shorter messages are quoted whole as before
+        if trim or (os.environ.get("RG_TRIM_LONG") == "1" and len(flat) > _MSG_WINDOW):
             return f'"{_trim_q(text, query, _MSG_WINDOW)}"'
         return f'"{_window_q(text, query, _MSG_WINDOW)}"'
     k = 0                       # the user's words before the paste ...
@@ -2322,6 +2329,9 @@ class Memory:
         # (24) in the space 16 took
         listy = _listy(query)
         trim = bool(listy) and os.environ.get("RG_LIST_TRIM") == "1"
+        # 2026-10-26 (RG_TRIM_ALL=1, experiment; updated-facts dev): every
+        # question, so a long message of many facts shows the one that counts
+        trim = trim or os.environ.get("RG_TRIM_ALL") == "1"
         k = (max(max_facts * 2, int(os.environ.get("RG_LIST_K_TRIM" if trim else "RG_LIST_K",
                                                    "24" if trim else "16"))) if listy
              else max_facts)
