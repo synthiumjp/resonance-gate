@@ -151,6 +151,29 @@ project history at session start, `import claude-code` backfill; ba6f0d9).
   since README figures would move; held-out updated-facts rerun once.
   Two-step (mh) questions need a second lookup on names found in the first
   results ("the spouse of the author of X"); not started.
+  Held-out baseline so far (6ad96bb, Qwen): sourcedrecall sh_32k 49, sh_64k
+  40, mh_32k 2, mh_64k 7; rag 89, 94, 8, 10; full list too long for 32k.
+  Native-qwen still writing (record all in the pre-registration when done).
+  Regression check, first set: stale base and new identical (false 1/50,
+  true state 44/50).
+  Not fixed, a known limit: the parser keeps a common-noun subject only if
+  the user introduced it ("The deadline moved to Friday", "rugby union was
+  created in ..." store nothing; the messages are still found and shown).
+  Loosening that guard risks generic statements as facts.
+- 2026-10-26 G4 gate check (plan: backfill under 30 min on CPU, an old
+  session answered with its source): JP's 23 sessions (382 MB, Sep-Oct;
+  ~/jpwork/coding_data/jp_sessions) imported with `importers claude-code`
+  into a private store in 256 s, during the regression run: 1,325 facts,
+  6,095 coding records, 0 skipped. Then 20 of JP's messages from the older
+  half, each asked with 8 of its own content words (scratchpad
+  g4_check.py, counts only): 20/20 quoted on a dated line. Caveats: two
+  months, not several; the questions use the message's words, so this shows
+  storage and sourcing, not paraphrase recall. Store deleted after.
+  Suite on the Mac (sdr-coding, defaults): 1,493 passed, 1 failed
+  (rgx/test_backend.py one-at-a-time vs bulk parse of "I moved to Lisbon in
+  2019 and my sister still lives in Leeds."; rgx unchanged since 012fcca, so
+  the test environment, RGX_PARSER_MODELS=parser_models/ours; check with
+  the installed EWT models before release).
 
 ## 2026-10-21 IN FLIGHT
 
