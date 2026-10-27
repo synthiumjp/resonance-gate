@@ -176,6 +176,15 @@ project history at session start, `import claude-code` backfill; ba6f0d9).
   ~900-1,500 tokens (rag ~170). In docs/PREREG_FACTCONSOL_V1.md. Phi-4
   held-out reads (both runs) on 8090: ~/jpwork/phi_held.sh, log
   ~/jpwork/phi_held.log; native-qwen writer still on 8091 (65/93).
+  Phi-4 held out, run 1 -> run 2: sh_32k 68 -> 85, sh_64k 62 -> 82,
+  mh_32k 4 -> 8, mh_64k 7 -> 6 (rag 89, 87, 7, 7). Native-qwen (Qwen
+  reader, run 1 timeline): 19, 14, 1, 1 at ~28,600 tokens. All in the
+  prereg. 2026-10-28 02:02: release measurement on b6ec4a4 (code as
+  8d14d39): tree ~/jpwork/sdr-release-b6ec4a4, log ~/jpwork/release7.log
+  (overwrote 012fcca's log of that name; its results stay in
+  ~/jpwork/sdr-release-012fcca), RGX_PARSER_MODELS=~/jpwork/parser_models/ours,
+  sentinel polled from WSL every 10 min. ~12-14 h. Then README/FAQ figures
+  and the updated-facts results in the README.
   Not fixed, a known limit: the parser keeps a common-noun subject only if
   the user introduced it ("The deadline moved to Friday", "rugby union was
   created in ..." store nothing; the messages are still found and shown).

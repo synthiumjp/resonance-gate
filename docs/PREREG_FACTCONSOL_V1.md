@@ -96,5 +96,19 @@ on the read side), 2026-10-27:
 | mh_64k | 7 (1,501) | 10 (168) |
 
 sourcedrecall is still below plain retrieval on three of the four sets,
-with five to nine times the context. Native memory and the Phi-4 reads to
-follow.
+with five to nine times the context. With Phi-4 reading, run 2 is within
+4 to 5 points of plain retrieval on simple questions and level on
+two-step ones.
+
+Native memory (Qwen3-14B writer, Qwen reader; labelled unfair to it), on
+run 1's timeline: sh_32k 19, sh_64k 14, mh_32k 1, mh_64k 1, its folder
+~28,600 tokens.
+
+Phi-4 second reader (contexts that fit 16k; native memory does not):
+
+| set | run 1 | run 2 | plain retrieval |
+|---|---|---|---|
+| sh_32k | 68 | 85 | 89 |
+| sh_64k | 62 | 82 | 87 |
+| mh_32k | 4 | 8 | 7 |
+| mh_64k | 7 | 6 | 7 |
