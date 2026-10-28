@@ -147,3 +147,24 @@ def test_many_key_headers_without_an_end_are_fast_and_removed():
 def test_a_key_block_between_text_is_removed_and_the_text_kept():
     out = scrub("before\n-----BEGIN RSA PRIVATE KEY-----\nMIIEow\n-----END RSA PRIVATE KEY-----\nafter")
     assert "MIIEow" not in out and "before" in out and "after" in out
+
+
+# 2026-10-28 (review M8)
+@pytest.mark.parametrize("text", [
+    "psql --password hunter2xy -h db", "run it with --token=abc123def",
+    "deploy --api-key sk9f8e7d6c", "connect to admin:s3cretpw@db.example.com",
+    "the webhook secret is whsec_AbCdEfGhIjKlMnOpQr", "mypassword is hunter2",
+])
+def test_more_credential_shapes_are_removed(text):
+    from sourcedrecall.secrets import scrub
+    assert "[secret removed]" in scrub(text)
+
+
+@pytest.mark.parametrize("text", [
+    "docker run -p 8080:80 nginx", "git clone git@github.com:org/repo.git",
+    "email me at dana@example.com", "the meeting is at 10:30 tomorrow",
+    "use --password-file instead of a flag",
+])
+def test_shapes_like_them_are_kept(text):
+    from sourcedrecall.secrets import scrub
+    assert scrub(text) == text

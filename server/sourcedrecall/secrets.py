@@ -29,7 +29,7 @@ MARK = "[secret removed]"
 # character, so DB_PASSWORD=hunter2 and STRIPE_SECRET_KEY=... got through;
 # the edges are now "not a letter or digit".
 _KEYWORD = re.compile(
-    r"(?<![A-Za-z0-9])(?:pass(?:word|words|wd|code|codes|phrase|phrases)|pass(?=\s*[:=])|pw|pwd|mdp|"
+    r"(?<![A-Za-z0-9])(?:(?:my)?pass(?:word|words|wd|code|codes|phrase|phrases)|pass(?=\s*[:=])|pw|pwd|mdp|"
     # 2026-10-12 (review 3.17): "my pass is hunter2", and the common words
     # for a password in other languages (the filter is otherwise English)
     r"pass(?=\s+(?:is|was)\s+(?=\w*\d)(?=\w*[A-Za-z])\w{4,}\b)|passwort|kennwort|mot de passe|contrase[ñn]a|senha|wachtwoord|"
@@ -115,6 +115,12 @@ _FORMATS = [
                r"(?=['\"]?[^\s'\"]*[A-Za-z]|['\"]?[^\s'\"]{6,})"
                r"(?:'[^'\n]*'|\"[^\"\n]*\"|[^\s,;]+)"),
     re.compile(r"\b[a-z][a-z0-9+.-]{0,30}://[^\s/:@]+:[^\s/@]+@\S+", re.I),
+    # 2026-10-28 (review M8): command-line flags ("--password hunter2",
+    # "--token=abc"), user:password@host without a scheme, webhook secrets
+    re.compile(r"(?i)(?<![\w-])--(?:password|passwd|pass|pwd|token|auth-token|api[-_]?key|secret|"
+               r"access[-_]?key|client[-_]secret)(?:=|\s+)(?!-)\S+"),
+    re.compile(r"(?<![\w/:@.-])[A-Za-z0-9._-]{1,40}:[^\s/@:]{3,}@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+"),
+    re.compile(r"\bwhsec_[A-Za-z0-9+/=]{16,}"),
     re.compile(r"\b(?:sk|pk|rk)[-_](?:proj-|live[-_]|test[-_])?[A-Za-z0-9_-]{16,}"),
     re.compile(r"\b(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{20,}\b"),
     re.compile(r"\bgithub_pat_[A-Za-z0-9_]{20,}\b"),
