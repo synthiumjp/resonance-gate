@@ -1073,8 +1073,22 @@ def memory_status():
     return out
 
 
+def _log_change(action, via, **what):
+    """2026-10-28 (review H5): changes.jsonl, one line per change to the
+    memory: when, through what ("mcp" for an agent's tool call, "local" for
+    the user's own command) and which fact, never its words (forgetting
+    must leave none behind)."""
+    rec = dict(at=datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
+               via=via or "local", action=action, **what)
+    try:
+        with open(os.path.join(_data_dir(), "changes.jsonl"), "a") as f:
+            f.write(json.dumps(rec) + "\n")
+    except OSError:
+        pass
+
+
 def profile_correct(action, attribute, value, new_attribute=None, exact=False,
-                    said=None):
+                    said=None, via=None):
     """Append one correction to corrections.jsonl (owner-authored ground
     truth, per wire.correct_facts). deny/confirm apply immediately to the live
     graph (Memory.apply_corrections is node-level -- retype is not, it needs a
@@ -1104,6 +1118,7 @@ def profile_correct(action, attribute, value, new_attribute=None, exact=False,
         mem = _ensure_loaded()          # current before this write
         with open(path, "a") as f:
             f.write(json.dumps(correction) + "\n")
+        _log_change(action, via, attribute=attribute)
         if action == "deny":
             _drop_embeddings()
             _drop_notes(said or (value if attribute == "said" else None))
@@ -2203,7 +2218,7 @@ def _erase_spools(keys):
             os.replace(tmp, p)
 
 
-def profile_forget(fact_id):
+def profile_forget(fact_id, via=None):
     """Remove one fact by its id (as shown in recall results and MEMORY.md).
     A quoted sentence ("their words", ids starting with "u") can be
     forgotten the same way, and so can a note written by the user's model
@@ -2214,6 +2229,7 @@ def profile_forget(fact_id):
             gone = [r for r in rows if _episode_id(r) == fact_id]
             if gone:
                 _write_episodes_file([r for r in rows if _episode_id(r) != fact_id])
+                _log_change("forget", via, id=fact_id)
         if gone:
             return {"forgotten": True, "fact": {"id": fact_id, "text": gone[0]["text"],
                                                 "said": None}, "applied": "live"}
@@ -2224,6 +2240,7 @@ def profile_forget(fact_id):
             if len(kept) != len(rows):
                 gone = [r for r in rows if _note_id(r) == fact_id][0]
                 _write_notes_file(kept)
+                _log_change("forget", via, id=fact_id)
                 _drop_embeddings()      # its vector must not stay on disk
         if len(kept) != len(rows):
             _export_quietly()
@@ -2236,14 +2253,15 @@ def profile_forget(fact_id):
                   if x.get("id") == fact_id), None)
         if u is None:
             return {"forgotten": False, "error": f"no fact with id {fact_id}"}
-        profile_correct("deny", "said", u["value"], exact=True, said=u["value"])
+        profile_correct("deny", "said", u["value"], exact=True, said=u["value"], via=via)
         n = _erase(u["value"])
+        _log_change("forget", via, id=fact_id)
         _export_quietly()
         return {"forgotten": True, "fact": {"id": fact_id, "text": None,
                                             "said": u["value"]},
                 "erased_from": n or 0, "applied": "live"}
     out = profile_correct("deny", f["attribute"], f["value"], exact=True,
-                          said=f.get("said"))
+                          said=f.get("said"), via=via)
     # 2026-10-03: forgetting removes what the fact left behind. A rebuild
     # (from the cache; nothing is re-parsed) recomputes "no longer true"
     # without it -- forgetting "moved to Brunswick" makes "lives in Fitzroy"
@@ -2251,6 +2269,7 @@ def profile_forget(fact_id):
     # introduced ("my dog Biscuit") leave the parser's saved world.
     _forget_names(f.get("said"))
     n = _erase(f.get("said"))
+    _log_change("forget", via, id=fact_id)
     if n is None:
         with _lock:
             _reload_locked()
@@ -2568,11 +2587,11 @@ def _forget_names(sentence):
                 ex._world.pop(k, None)
 
 
-def profile_confirm(fact_id):
+def profile_confirm(fact_id, via=None):
     """Mark one fact as confirmed by the user, by its id."""
     f = _find(fact_id)
     if f is None:
         return {"confirmed": False, "error": f"no fact with id {fact_id}"}
-    out = profile_correct("confirm", f["attribute"], f["value"], exact=True)
+    out = profile_correct("confirm", f["attribute"], f["value"], exact=True, via=via)
     return {"confirmed": True, "fact": {k: f[k] for k in ("id", "text", "said")},
             "applied": out.get("applied")}

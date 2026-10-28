@@ -98,7 +98,7 @@ def profile_context(query: str = None, max_facts: int = None,
 def profile_correct(action: str, attribute: str, value: str,
                      new_attribute: str = None, exact: bool = False) -> dict:
     """Record the user's correction of a stored fact: deny (it is wrong, drop it), confirm (the user vouches for it) or retype (right value, wrong kind of fact; needs new_attribute). Use only when the user asks."""
-    return pmem.profile_correct(action, attribute, value, new_attribute, exact)
+    return pmem.profile_correct(action, attribute, value, new_attribute, exact, via="mcp")
 
 
 @_tool(read_only=True, extra=True)
@@ -122,14 +122,16 @@ def profile_rehydrate(conversation_id: str, max_turns: int = 40,
     return pmem.rehydrate(conversation_id, max_turns, include_assistant, scope)
 
 
-@_tool(read_only=False)
-def profile_ingest(turns: list[dict], conversation_id: str = None,
-                    title: str = None, owner_name: str = None,
+# 2026-10-28 (review H5): marked destructive so the host asks the user
+# first (it stores words as the user's); always a new conversation, never
+# turns added to one the hooks stored
+@_tool(read_only=False, destructive=True)
+def profile_ingest(turns: list[dict], title: str = None, owner_name: str = None,
                     date: str = None, scope: str = None) -> dict:
     """Store a conversation the hooks did not capture. turns is [{"role": "user"|"assistant", "content": str}, ...], oldest first; date is when it happened (ISO; not in the future). Nothing is generated: a grammar parser reads the user's own words. Standing instructions are not stored from this tool."""
     from sourcedrecall.paths import current_scope
     pmem._not_future(date)
-    return pmem.profile_ingest(turns, conversation_id, title, owner_name,
+    return pmem.profile_ingest(turns, None, title, owner_name,
                                date=date, scope=current_scope(scope),
                                instructions=False)
 
@@ -178,13 +180,13 @@ def _prewarm():
 @_tool(read_only=False, destructive=True, idempotent=True)
 def profile_forget(fact_id: str) -> dict:
     """Forget one stored fact by its id (shown in profile_recall results and MEMORY.md): the sentence it came from is erased. Use when the user asks for something to be forgotten."""
-    return pmem.profile_forget(fact_id)
+    return pmem.profile_forget(fact_id, via="mcp")
 
 
-@_tool(read_only=False, idempotent=True)
+@_tool(read_only=False, destructive=True, idempotent=True)
 def profile_confirm(fact_id: str) -> dict:
     """Mark one stored fact as confirmed by the user, by its id."""
-    return pmem.profile_confirm(fact_id)
+    return pmem.profile_confirm(fact_id, via="mcp")
 
 
 @_tool(read_only=False, idempotent=True, extra=True)

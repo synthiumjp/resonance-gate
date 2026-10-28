@@ -743,3 +743,17 @@ def test_check_compares_the_value_not_only_the_attribute(pm):
     assert pm.profile_check("The user is allergic to peanuts.")["verdict"] != "said"
     assert pm.profile_check("The user drinks coffee.")["verdict"] != "said"
     assert pm.profile_check("The user is allergic to penicillin.")["verdict"] == "said"
+
+
+def test_every_change_is_logged_with_when_and_through_what(pm):
+    """2026-10-28 (review H5)."""
+    import json
+    _seed(pm)
+    hit = pm.profile_recall("Am I allergic to anything?")["ranked"][0]
+    pm.profile_forget(hit["id"], via="mcp")
+    import os
+    log = os.path.join(os.path.dirname(pm._corrections_path()), "changes.jsonl")
+    last = json.loads(open(log).read().splitlines()[-1])
+    assert last["via"] == "mcp" and last["at"][:2] == "20"
+    assert last == {**last, "action": "forget", "id": hit["id"]}
+    assert "penicillin" not in open(log).read()

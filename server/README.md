@@ -438,7 +438,8 @@ It grew out of the Resonance Gate research project, a pre-registered study:
 
 ## How `profile_ingest` reads a conversation
 
-`profile_ingest(turns, conversation_id=None, title=None, owner_name=None, date=None)`
+`profile_ingest(turns, title=None, owner_name=None, date=None)` (each call is a new
+conversation; it is marked destructive, so a host that reads the hint asks you first)
 turns a conversation into facts. The extractor, rgx, is a set of grammar
 rules over a dependency parse.
 

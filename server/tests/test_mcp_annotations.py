@@ -13,6 +13,6 @@ def test_tools_say_whether_they_change_the_memory(tmp_path, monkeypatch):
     tools = {t.name: t.annotations for t in asyncio.run(m.mcp.list_tools())}
     for name in ("profile_recall", "profile_check", "profile_context", "profile_rehydrate"):
         assert tools[name].readOnlyHint is True
-    for name in ("profile_forget", "profile_correct"):
+    # 2026-10-28 (review H5): ingest and confirm too
+    for name in ("profile_forget", "profile_correct", "profile_ingest", "profile_confirm"):
         assert tools[name].readOnlyHint is False and tools[name].destructiveHint is True
-    assert tools["profile_ingest"].readOnlyHint is False
