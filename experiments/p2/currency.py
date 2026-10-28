@@ -527,6 +527,14 @@ _DONE = re.compile(r"\b(?:was|were)\s+(?:\w+ed|born|written|made|built|drawn|"
                    r"thrown|grown|sold|bought)\b", re.I)
 
 
+def _own_clause(text, value):
+    """The clause of `text` that holds `value` (the whole text if none
+    does, or it has one clause)."""
+    text, v = text or "", str(value or "").lower()
+    parts = re.split(r",\s+|;\s+|\s+and\s+|\s+but\s+", text)
+    return next((p for p in parts if v and v in p.lower()), text)
+
+
 def mark_ceased(g, owner=None, order=None):
     """Mark nodes a later cessation statement has ended. Returns the list of
     (ceased_node_id, cessation_node_id) pairs it set, for the caller to log.
@@ -584,8 +592,10 @@ def mark_ceased(g, owner=None, order=None):
                 # 2026-10-26 (updated-facts bench): "Coco Chanel died" ended
                 # "Chanel was founded by Coco Chanel". A death ends what the
                 # person IS, not what was done or was already past.
-                if by_name and done_check and (_DONE.search(nd.get("text") or "")
-                                or _PAST_STATE.search(nd.get("text") or "")):
+                # 2026-10-28 (review M2): read in the fact's own clause ("was
+                # born in Sweden and lives in Malmo": the death ends Malmo)
+                own = _own_clause(nd.get("text"), nd.get("value"))
+                if by_name and done_check and (_DONE.search(own) or _PAST_STATE.search(own)):
                     continue
                 # 2026-10-04 (wheel smoke test): "I left my home country"
                 # ended "my grandma lives in my home country, Sweden". The

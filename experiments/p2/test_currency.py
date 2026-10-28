@@ -624,3 +624,18 @@ def test_a_frame_filled_twice_at_once_holds_several_values():
             "b": _fn("b", "sam_be", "allergic to shellfish", "c1", "Sam is allergic to shellfish"),
             "c": _fn("c", "sam_be", "allergic to dust", "c2", "Sam is allergic to dust")})
     assert C.mark_frame_changes(g, order=ORDER) == []
+
+
+def test_a_death_reads_the_facts_own_clause():
+    """2026-10-28 (review M2): the past tense of another clause does not
+    keep the fact current."""
+    g = _G({"a": _n("a", "watsuki_live_in", "in osaka", "c1",
+                    text="Nobuhiro Watsuki was born in Tokyo and lives in Osaka"),
+            "c": _n("c", "chanel_found_by", "by coco chanel", "c1",
+                    text="Chanel was founded by Coco Chanel"),
+            "b": _n("b", "watsuki_die", "", "c2", text="Nobuhiro Watsuki died")})
+    assert ("a", "b") in C.mark_ceased(g, owner="Dana Cole", order=ORDER)
+    g = _G({"c": _n("c", "chanel_found_by", "by coco chanel", "c1",
+                    text="Chanel was founded by Coco Chanel"),
+            "b": _n("b", "coco_die", "", "c2", text="Coco Chanel died")})
+    assert C.mark_ceased(g, owner="Dana Cole", order=ORDER) == []
