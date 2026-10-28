@@ -275,6 +275,18 @@ def _shown_material(text, fact):
     return not (src and src in intro)
 
 
+def _buried(text, fact):
+    """2026-10-28 (review H6): a rule deep inside a long message is more
+    likely a pasted document's than the user's own (the paste classifier
+    misses some), and a standing instruction leads every session. The
+    user's own rules are short, or open the message."""
+    t = " ".join(str(text or "").split())
+    if len(t) <= 600:
+        return False
+    src = " ".join((fact.get("source") or "").split())
+    return not (src and src in t[:300])
+
+
 def _store_stamp():
     """When each file the memory is built from was last written. 2026-10-21
     (review): a running MCP server loaded the memory once, so a forget, or
@@ -634,7 +646,7 @@ def profile_ingest(turns, conversation_id=None, title=None, owner_name=None,
                      # instruction that leads every later session
                      and (instructions or f.get("attribute") != "instruction")
                      and not (f.get("attribute") == "instruction"
-                              and _shown_material(ptext, f))]
+                              and (_shown_material(ptext, f) or _buried(ptext, f)))]
             parsed.append((h, facts))
             texts[h] = text
             seen.add(h)

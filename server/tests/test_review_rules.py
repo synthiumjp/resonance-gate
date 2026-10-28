@@ -611,3 +611,18 @@ def test_the_newest_of_equal_facts_lead_the_summary():
     old = ({"current": True, "n_mentions": 1}, {"receipts": [{"date": "2026-01-01"}], "id": "old"})
     new = ({"current": True, "n_mentions": 1}, {"receipts": [{"date": "2026-09-01"}], "id": "new"})
     assert [f["id"] for _, f in M._newest_first([old, new])] == ["new", "old"]
+
+
+def test_a_rule_deep_in_a_long_message_is_not_a_standing_instruction(pm):
+    """2026-10-28 (review H6): a pasted document the classifier missed."""
+    body = " ".join(f"The quarterly report covers region {i} in some detail." for i in range(14))
+    pm.profile_ingest([{"role": "user", "content":
+                        body + " Always use the staging key for deploys."}],
+                      conversation_id="d3", owner_name="Dana Cole", date="2026-03-02")
+    pm.profile_ingest([{"role": "user", "content":
+                        "Always run the tests before you commit. " + body}],
+                      conversation_id="d4", owner_name="Dana Cole", date="2026-03-03")
+    instr = [f for f in pm._all_facts(pm._ensure_loaded())
+             if f.get("attribute") == "instruction"]
+    assert not any("staging" in (f.get("text") or "") for f in instr)
+    assert any("tests" in (f.get("text") or "") for f in instr)
