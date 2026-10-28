@@ -2280,8 +2280,14 @@ class Memory:
         # note names what replaced the fact and when
         name_later = os.environ.get("RG_NOTE_LATER") != "0"
         nodes, prov = self.g.nodes, self.g.provisional
+        # 2026-10-28 (LoCoMo test, one flag at a time: 65.6 -> 65.1%): not
+        # for the user's own facts, whose replacing message the block quotes
+        # anyway; the extra date drew "when" answers to it
+        first = (getattr(self, "owner", None) or "").lower().split()[:1]
 
         def by(f):
+            if first and (f.get("text") or "").lower().startswith(first[0]):
+                return ""
             rid = f.get("superseded_by") or f.get("maybe_changed_by")
             nd = (nodes.get(rid) or prov.get(rid)) if (rid and name_later) else None
             if not nd or not nd.get("text"):

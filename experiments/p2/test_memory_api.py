@@ -521,3 +521,20 @@ def test_a_long_message_keeps_the_note_on_the_users_own_fact(monkeypatch):
     line = next(l for l in m.context_block("Where does Dana work?").splitlines()
                 if "Lumen" in l)
     assert "no longer true" not in line
+
+
+def test_the_later_note_names_the_replacement_only_for_others_facts():
+    """2026-10-28 (LoCoMo test 65.6 -> 65.1% with RG_NOTE_LATER alone)."""
+    m = Memory(WireGraph.from_facts([], n_convs=1))
+    m.owner = "Dana Cole"
+    m.g.nodes["r1"] = {"text": "Dana Cole works at Acme", "convs": {"c2": "2026-04-01"}}
+    m.g.nodes["r2"] = {"text": "Watsuki is famous for Busou Renkin", "convs": {"c2": "2026-04-01"}}
+    m._facts_in = lambda msgs: [[
+        {"id": "a", "current": False, "superseded_by": "r1",
+         "text": "Dana Cole works at Lumen Health"},
+        {"id": "b", "maybe_changed_by": "r2",
+         "text": "Watsuki is famous for Rurouni Kenshin"}]]
+    (n,) = m._message_notes([{"text": "x", "conv": "c1"}])
+    assert n[0] == "no longer true: Dana Cole works at Lumen Health"
+    assert n[1] == ("may have changed since: Watsuki is famous for Rurouni Kenshin"
+                    "; later, on 2026-04-01: Watsuki is famous for Busou Renkin")
