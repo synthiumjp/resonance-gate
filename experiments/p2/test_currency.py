@@ -597,6 +597,28 @@ def test_not_a_frame_change(old, new):
     assert C.mark_frame_changes(g, order=ORDER) == []
 
 
+@pytest.mark.parametrize("old,new", [
+    # 2026-10-28 (review H4): subjects that hold many values
+    (("nolan_direct", "Inception", "Christopher Nolan directed Inception"),
+     ("nolan_direct", "Oppenheimer", "Christopher Nolan directed Oppenheimer")),
+    (("sam_study_at", "at Oxford", "Sam Reed studied at Oxford"),
+     ("sam_study_at", "at Harvard", "Sam Reed studied at Harvard")),
+    (("sam_be", "allergic to peanuts", "Sam Reed is allergic to peanuts"),
+     ("sam_be", "allergic to dust", "Sam Reed is allergic to dust")),
+])
+def test_many_valued_frames_are_not_changes(old, new):
+    g = _G({"a": _fn("a", *old[:2], "c1", old[2]), "b": _fn("b", *new[:2], "c2", new[2])})
+    assert C.mark_frame_changes(g, order=ORDER) == []
+
+
+def test_a_passive_frame_of_a_many_valued_verb_holds_one_value():
+    g = _G({"a": _fn("a", "inception_direct_by", "by Christopher Nolan", "c1",
+                     "Inception was directed by Christopher Nolan"),
+            "b": _fn("b", "inception_direct_by", "by Denis Villeneuve", "c2",
+                     "Inception was directed by Denis Villeneuve")})
+    assert C.mark_frame_changes(g, order=ORDER) == [("a", "b")]
+
+
 def test_a_frame_filled_twice_at_once_holds_several_values():
     g = _G({"a": _fn("a", "sam_be", "allergic to peanuts", "c1", "Sam is allergic to peanuts"),
             "b": _fn("b", "sam_be", "allergic to shellfish", "c1", "Sam is allergic to shellfish"),

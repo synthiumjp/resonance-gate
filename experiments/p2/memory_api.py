@@ -790,6 +790,12 @@ def _trim_q(text, query, limit):
     return _window(" ... ".join(keep), "", limit)
 
 
+def _norm_said(f):
+    """A fact's source sentence (its text if none), normalised as the
+    shown-quote checks compare it."""
+    return re.sub(r"\W+", " ", f.get("said") or f.get("text") or "").strip().lower()
+
+
 def _trim_best(text, query, limit):
     """2026-10-26 (RG_TRIM_LONG; on by default since 2026-10-27, =0 turns
     it off): a message too long for the window, cut to the sentences that share the most words with the
@@ -2253,11 +2259,20 @@ class Memory:
             out.append(f)
         return out
 
-    def _message_notes(self, msgs):
+    def _message_notes(self, msgs, shown=None):
         """Parser notes for messages (messages-first evidence): for each
         message, the facts made from it whose status a reader should know --
-        ended, tied to its moment, or possibly changed by a later message."""
+        ended, tied to its moment, or possibly changed by a later message.
+        shown: per message, the quoted text when a long message was cut
+        (else None); only facts whose source sentence is in it get a note."""
         per = self._facts_in(msgs)
+        if shown:
+            # 2026-10-28 (review C1): matched on the sentence the fact came
+            # from, not its text -- the user's own facts are stored in the
+            # third person ("Dana Cole works at ..."), so matching the text
+            # dropped every note about them in a long message
+            per = [fs if s is None else [f for f in fs if _norm_said(f) in s]
+                   for fs, s in zip(per, shown)]
         flat = _mark_later_changes([f for fs in per for f in fs],
                                    getattr(self, "owner", None))
         later = {f.get("id") for f in flat if f.get("changed_later")}
@@ -2272,7 +2287,7 @@ class Memory:
             if not nd or not nd.get("text"):
                 return ""
             when = max((str(d)[:10] for d in (nd.get("convs") or {}).values()), default="")
-            return f"; later{', on ' + when if when else ''}: {nd['text']}"
+            return f"; later{', on ' + when if when else ''}: {_inert(nd['text'])}"
         notes = []
         for fs in per:
             n = []
@@ -2306,7 +2321,7 @@ class Memory:
             if cut and len(" ".join(m["text"].split())) > _MSG_WINDOW:
                 shown = re.sub(r"\W+", " ", _trim_best(m["text"], query or "", _MSG_WINDOW)).lower()
             for f in fs:
-                if shown is not None and re.sub(r"\W+", " ", f.get("text") or "").strip().lower() not in shown:
+                if shown is not None and _norm_said(f) not in shown:
                     continue
                 rid = f.get("superseded_by") or f.get("maybe_changed_by")
                 nd = nodes.get(rid) or prov.get(rid) if rid else None
@@ -2466,7 +2481,16 @@ class Memory:
                                 key=lambda m: str(m.get("date") or ""))
         else:
             msgs.sort(key=lambda m: str(m.get("date") or ""))
-        notes = self._message_notes(msgs)
+        after_of = getattr(self, "after_of", None)
+        quotes = []
+        for m in msgs:
+            after = after_of(m.get("conv"), m["text"]) if after_of and m.get("conv") else None
+            quotes.append(_quote_own(m["text"], self.owner, query, after, trim=trim))
+        cut = os.environ.get("RG_TRIM_LONG") != "0"
+        notes = self._message_notes(msgs, shown=[
+            re.sub(r"\W+", " ", q).lower()
+            if cut and len(" ".join(m["text"].split())) > _MSG_WINDOW else None
+            for m, q in zip(msgs, quotes)])
         # a phrase the user linked to a name ("my home country, Sweden"),
         # used without the name: the name goes in the note
         for m, n in zip(msgs, notes):
@@ -2479,18 +2503,11 @@ class Memory:
         if self.owner:
             head += f" {self.owner} is the user you are talking to."
         lines = []
-        after_of = getattr(self, "after_of", None)
-        for m, n in zip(msgs, notes):
+        for m, n, quote in zip(msgs, notes, quotes):
             asked = m.get("asked")
             asked = (f'(in reply to "{_window(asked, "", 160)}") '
                      if asked and asked.rstrip().endswith("?") else "")
-            after = after_of(m.get("conv"), m["text"]) if after_of and m.get("conv") else None
-            quote = _quote_own(m["text"], self.owner, query, after, trim=trim)
             line = (f"- [{m.get('date')}] " if m.get("date") else "- ") + asked + quote
-            if n and os.environ.get("RG_TRIM_LONG") != "0" and len(" ".join(m["text"].split())) > _MSG_WINDOW:
-                # a note about a fact whose sentence the cut left out is noise
-                shown = re.sub(r"\W+", " ", quote).lower()
-                n = [x for x in n if re.sub(r"\W+", " ", x.split(": ", 1)[-1].split("; later")[0]).strip().lower() in shown]
             if n:
                 line += "  (" + "; ".join(n) + ")"
             lines.append(line)

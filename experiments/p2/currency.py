@@ -1320,6 +1320,16 @@ affiliate found create develop employ perform write speak marry belong base
 headquarter own lead head run manage coach captain represent direct produce
 compose design invent publish release make study teach attend sign star
 """.split())
+# 2026-10-28 (review H4): a subject of these verbs holds many values at
+# once ("Nolan directed Inception", later "... Oppenheimer"); their frame
+# counts only with the object as the subject ("Inception was directed by
+# ___") or a slot noun ("plays the position of ___")
+_MANY_VERBS = frozenset("""play found create develop employ perform write speak
+represent direct produce compose design invent publish release make study
+teach attend sign star""".split())
+# slots that take several values over time ("allergic to peanuts", a year
+# later "allergic to dust")
+_MANY_SLOT = re.compile(r"\b(?:allergic|interested|fluent|fans?|friends?|afraid|good at)\b")
 
 
 def _frame(nd):
@@ -1334,8 +1344,10 @@ def _frame(nd):
     if not t or not v or len(v) >= len(t) or not t.lower().endswith(v.lower()):
         return None
     a = (nd.get("attr") or "").lower().split(":")[-1].split("_")
-    if len(a) < 2 or not any(w in _FRAME_VERBS for w in a[1:]):
+    verbs = [w for w in a[1:] if w in _FRAME_VERBS]
+    if len(a) < 2 or not verbs:
         return None
+    many = all(w in _MANY_VERBS for w in verbs)
     # the stored value may be lower-cased; the sentence keeps the names' case
     words = t[len(t) - len(v):].split()
     cut = 0
@@ -1347,8 +1359,12 @@ def _frame(nd):
     filler = words[cut:]
     if not filler or (cut == 0 and not filler[0][:1].isupper()):
         return None
+    if many and not (cut and words[cut - 1] in ("by", "of")):
+        return None
     head = t[:len(t) - len(v)] + " ".join(words[:cut])
     frame = " ".join(re.findall(r"[a-z0-9']+", head.lower()))
+    if _MANY_SLOT.search(frame):
+        return None
     toks = frozenset(re.findall(r"[a-z0-9']+", " ".join(filler).lower())) - _PLACE_NOISE
     return (frame, toks) if frame and toks else None
 

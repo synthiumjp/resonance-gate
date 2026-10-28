@@ -488,3 +488,36 @@ def test_a_pasted_texts_writer_is_named_from_the_introduction():
     assert _source("this email from my landlord:", "Dana Cole") == "Dana's landlord"
     assert _source("got this from Monday's meeting", "Dana Cole") == "someone else"
     assert _source("a note from Dana to herself", "Dana Cole") == "someone else"
+
+
+def test_a_long_message_keeps_the_note_on_the_users_own_fact(monkeypatch):
+    """2026-10-28 (review C1): with a long message cut to its best sentences,
+    a note is kept when the fact's source sentence is shown. The user's own
+    facts are stored in the third person, so matching on the fact's text
+    dropped every note about them."""
+    monkeypatch.setenv("RG_EVIDENCE", "messages")
+    monkeypatch.delenv("RG_TRIM_LONG", raising=False)
+    m = Memory(WireGraph.from_facts([], n_convs=1))
+    m.owner = "Dana Cole"
+    m.conflicts = lambda: []
+    filler = " ".join(f"The garden had {w} roses along the fence this spring." for w in
+                      ("red", "white", "pink", "yellow", "orange", "purple", "tall", "small",
+                       "old", "new", "wild", "climbing", "potted", "scented"))
+    text = "I work at Lumen Health as a data analyst. " + filler
+    assert len(text) > 800
+    msg = {"text": text, "date": "2026-03-01", "score": 1.0, "conv": None}
+    m.messages_for = lambda q, k=3: [dict(msg)]
+    monkeypatch.setattr(m, "_recall_for_context", lambda q: {"found": False})
+    fact = {"id": "f1", "attribute": "employer", "current": False,
+            "text": "Dana Cole works at Lumen Health as a data analyst",
+            "said": "I work at Lumen Health as a data analyst."}
+    m._facts_in = lambda msgs: [[dict(fact)] for _ in msgs]
+    line = next(l for l in m.context_block("Where does Dana work?").splitlines()
+                if "Lumen" in l)
+    assert "no longer true: Dana Cole works at Lumen Health" in line
+    # a fact whose sentence the cut left out gets no note
+    fact["said"] = "The garden had climbing roses along the fence this spring."
+    fact["text"] = "Dana Cole has climbing roses"
+    line = next(l for l in m.context_block("Where does Dana work?").splitlines()
+                if "Lumen" in l)
+    assert "no longer true" not in line
