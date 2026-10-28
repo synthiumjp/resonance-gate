@@ -185,6 +185,20 @@ project history at session start, `import claude-code` backfill; ba6f0d9).
   ~/jpwork/sdr-release-012fcca), RGX_PARSER_MODELS=~/jpwork/parser_models/ours,
   sentinel polled from WSL every 10 min. ~12-14 h. Then README/FAQ figures
   and the updated-facts results in the README.
+- 2026-10-28: LoCoMo test at b6ec4a4 64.7% (was 65.6%): with the four
+  flags off the contexts equal 012fcca's on all 1,307; one flag at a time
+  (locomo_only_*): note-later 65.1%, slot 65.6%, frame 65.6%. Independent
+  Opus review (docs/REVIEW_2026-10-28.md): C1 notes on the user's own facts
+  dropped in long messages (fixed c641cdd), H4 many-valued frames, M4,
+  H5 MCP writes (01300ce: destructive hints, no conversation_id,
+  changes.jsonl), H6 buried rules (d94f41d), M8 secrets (23ae8bd), M2
+  (3671a09); note-later only for others' facts (279af74). dev28/dev29: FC
+  dev 88 / 12, FM unchanged on stale/own/own2/pasted_long, stale2 true
+  state 60 -> 58 (the note on own facts had given +2); LoCoMo test 65.4%
+  (685 tokens). Release run b6ec4a4 stopped (superseded). Release
+  measurement at 3671a09 started 23:15: ~/jpwork/sdr-release-3671a09, log
+  ~/jpwork/release8.log, sentinel polled. Then the README/FAQ rewrite
+  (review H1-H3, M5) with every claim checked against its file.
   Not fixed, a known limit: the parser keeps a common-noun subject only if
   the user introduced it ("The deadline moved to Friday", "rugby union was
   created in ..." store nothing; the messages are still found and shown).
