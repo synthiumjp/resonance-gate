@@ -88,6 +88,19 @@ _EXCLUDE_ATTR = {"current_task", "current_activity", "current_directory",
 _GENERIC_PLACE = {"house", "home", "apartment", "flat", "unit", "room"}
 # an occupation value must NAME the occupation, not restate having one
 _VACUOUS_OCC = {"day job", "job", "work", "full-time job", "full time job"}
+# 2026-10-29 (LoCoMo): how or on what someone works is not what they work as.
+# "John worked hard", "working on supporting youth sports", "Calvin is
+# working together", "John's work is all about dedication" were each stored
+# as John's occupation, a one-value slot, so each ended the one before.
+_NOT_OCC = re.compile(r"^(?:on|with|towards?|hard|harder|together|all about|the perfect|"
+                      r"out|through|around|really|so|very|late|long|overtime|nonstop|"
+                      r"non-stop|tirelessly|closely|alongside|well|great|fine)\b")
+
+
+def how_one_works(attr, v):
+    """"occupation" for what someone works AS; "work_on" (many values) for
+    how or on what they work (_NOT_OCC)."""
+    return "work_on" if attr == "occupation" and _NOT_OCC.match(v or "") else attr
 
 
 # --- subject/slot hygiene (found by reading a store, not by scoring one) ---

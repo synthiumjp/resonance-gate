@@ -730,6 +730,15 @@ _NOT_A_PLACE = frozenset("""a an the need good bad great nice terrible decent
 fine poor perfect excellent awful total complete such process state shape
 order disrepair desperate dire much some""".split())
 _EMP_PREDS = {"work_at", "work_for", "join", "start_at", "employ_by"}
+# 2026-10-29 (LoCoMo): joining a club, a gym or a forum is not changing jobs,
+# and people belong to several ("joined a travel club" was ended by "joined
+# a group of globetrotters", "joined a nearby church" by "joined a gym")
+_NOT_EMPLOYER = re.compile(r"\b(?:club|clubs|group|groups|forum|gym|church|tournament|"
+                           r"platform|community|class|classes|course|league|society|"
+                           r"choir|band|program|programme|server|discord|subreddit|"
+                           r"movement|campaign|meetup|circle|committee|board|union|"
+                           r"association|crew|squad|chat|newsletter|challenge|retreat|"
+                           r"workshop|camp|forces|you|us|them|me|least)\b")
 _JOB_PREDS = {"get", "start", "land", "take", "accept", "work_as"}
 
 
@@ -757,7 +766,7 @@ def _families(attr, value, weak=False):
         t = _place_tokens(home or v)
         if t:
             out.append(("residence", frozenset(t)))
-    if a in _EMP_PREDS:
+    if a in _EMP_PREDS and not (a in ("join", "start_at") and _NOT_EMPLOYER.search(v)):
         t = _place_tokens(v)
         if t:
             out.append(("employer", frozenset(t)))
@@ -1316,9 +1325,17 @@ def mark_decision_changes(g, order=None):
             shared = (_content(old.get("value")) & _content(new.get("value"))) - _DEC_GENERIC
             close = False
             if not shared:
+                # 2026-10-29 (LoCoMo): unrelated decisions in chat ("get
+                # planning for next month", "find something just as nice
+                # for our hike") are 0.62-0.66 apart with bge-small, so a
+                # pair this close counts only when the later one says it
+                # changes something ("use sqlite instead", 0.66); without a
+                # change word it must be very close
                 try:
                     va, vb = _decision_vec(old["value"]), _decision_vec(new["value"])
-                    close = float(va @ vb) >= 0.6
+                    sim = float(va @ vb)
+                    close = sim >= 0.72 or (sim >= 0.6 and bool(
+                        _DECISION_CHANGE.search(new.get("value") or "")))
                 except Exception:
                     close = False
             if shared or close:

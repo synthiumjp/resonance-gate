@@ -209,6 +209,7 @@ def build_facts(path, min_mentions=2, sources=None):
         for fct in cache[h]:
             a = canon_attr(fct["attribute"])
             v = re.sub(r"\s+", " ", str(fct["value"]).strip().lower())
+            a = PF.how_one_works(a, v)
             # LEARNED WRITE POLICY (entry 140): the owner's corrections shape
             # the rule, not just the fact. Denied writes are QUARANTINED (kept
             # with the rule that blocked them) -- never silently destroyed, so
@@ -283,6 +284,7 @@ def build_facts(path, min_mentions=2, sources=None):
                 continue
             a = canon_attr(fct["attribute"])
             v = re.sub(r"\s+", " ", str(fct["value"]).strip().lower())
+            a = PF.how_one_works(a, v)
             if _WRITE_RULES is not None and v:
                 _act, _det = WR.decide(_WRITE_RULES, a, v)
                 if _act == "deny":

@@ -666,3 +666,46 @@ def test_a_named_persons_death_still_ends_their_facts():
     g = _G({"a": _n("a", "sam_live_in", "in york", "c1", text="Sam lives in York"),
             "b": _n("b", "die", "", "c2", text="Sam died in the spring")})
     assert ("a", "b") in C.mark_ceased(g, owner="Jolene", order=ORDER)
+
+
+# ---- 2026-10-29: LoCoMo's "no longer true" notes, read one by one --------
+
+@pytest.mark.parametrize("old,new", [
+    (("join", "a travel club"), ("join", "a group of globetrotters")),
+    (("join", "just yesterday a nearby church"), ("join", "a gym last week")),
+    (("join", "a new platform"), ("join", "an online gaming tournament yesterday")),
+    (("join", "forces to create a safe environment"), ("join", "a gym last week")),
+    (("start_at", "at least going for a run"), ("join", "a programming group online")),
+])
+def test_joining_a_club_is_not_a_new_job(old, new):
+    assert C.mark_state_changes(_pair(*old, *new), order=ORDER) == []
+
+
+def test_joining_a_company_still_replaces_the_old_one():
+    assert C.mark_state_changes(_pair("join", "Acme", "join", "Globex"), order=ORDER)
+
+
+def _dec(nid, value, conv):
+    return _n(nid, "decision", value, conv, text=f"Sam decided with the assistant: {value}")
+
+
+@pytest.mark.parametrize("old,new,changed", [
+    ("get planning for next month", "find something just as nice for our hike", False),
+    ("keep me posted and let me know if you need any suggestions or help",
+     "get planning for next month", False),
+    ("use postgres for the jobs table", "use sqlite instead", True),
+    ("switching the build to pnpm for the workspaces", "switch back to npm", True),
+])
+def test_a_decision_ends_another_only_on_the_same_topic(old, new, changed):
+    g = _G({"a": _dec("a", old, "c1"), "b": _dec("b", new, "c2")})
+    assert bool(C.mark_decision_changes(g, order=ORDER)) is changed
+
+
+@pytest.mark.parametrize("value,attr", [
+    ("hard", "work_on"), ("on supporting youth sports", "work_on"),
+    ("together", "work_on"), ("all about dedication", "work_on"),
+    ("a nurse", "occupation"), ("teaching", "occupation"),
+])
+def test_how_someone_works_is_not_their_occupation(value, attr):
+    import run_profile_full as PF
+    assert PF.how_one_works("occupation", value) == attr
