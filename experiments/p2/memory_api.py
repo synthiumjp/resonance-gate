@@ -802,13 +802,14 @@ def _trim_best(text, query, limit):
     question, names included (a long list of facts about other people and
     things: "official language of Japan" kept every sentence with
     "language" in it when names did not count). No sentence shares a word:
-    the opening, as _trim_q."""
+    the window shown before this cut existed (review 2026-10-28 M1: the
+    first 240 characters lost an answer on own2)."""
     flat = " ".join((text or "").split())
     q = {w.lower() for w in re.findall(r"[A-Za-z]+", query or "")
          if len(w) >= 4 and w.lower() not in _TRIM_STOP}
     sents = [x for x in _SENT_SPLIT.split(flat) if x.strip()]
     if not q or len(sents) < 2:
-        return _window(flat, "", limit)
+        return _window_q(text, query, limit)
 
     def score(sent):
         words = set(re.findall(r"[a-z]{4,}", sent.lower()))
@@ -816,7 +817,7 @@ def _trim_best(text, query, limit):
                        for v in words) for w in q)
     best = max(score(x) for x in sents)
     if not best:
-        return _window(flat, "", 240)
+        return _window_q(text, query, limit)
     return _window(" ... ".join(x for x in sents if score(x) == best), "", limit)
 
 

@@ -538,3 +538,15 @@ def test_the_later_note_names_the_replacement_only_for_others_facts():
     assert n[0] == "no longer true: Dana Cole works at Lumen Health"
     assert n[1] == ("may have changed since: Watsuki is famous for Rurouni Kenshin"
                     "; later, on 2026-04-01: Watsuki is famous for Busou Renkin")
+
+
+def test_a_long_message_with_no_word_of_the_question_keeps_its_full_window():
+    # review 2026-10-28 M1: with no sentence sharing a word, the long-message
+    # cut showed only the first 240 characters (own2 lost an answer); it
+    # falls back to the window shown before the cut existed
+    import memory_api
+    text = " ".join(f"Sentence number {i} talks about the garden and the weather today."
+                    for i in range(40))
+    out = memory_api._trim_best(text, "Where did Priya study?", memory_api._MSG_WINDOW)
+    assert out == memory_api._window_q(text, "Where did Priya study?", memory_api._MSG_WINDOW)
+    assert len(out) > 600

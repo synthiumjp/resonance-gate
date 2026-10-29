@@ -220,7 +220,8 @@ _SLOT_PREPS = frozenset("of for by to in with at from as on".split())
 
 
 def _tail(val):
-    words = re.findall(r"[a-z0-9]+", (val or "").lower())
+    # review M3: letters of any script ("in São Paulo" kept "paulo" only)
+    words = re.findall(r"[^\W_]+", (val or "").lower())
     cut = max((i for i, w in enumerate(words[:-1]) if w in _SLOT_PREPS), default=None)
     if cut is None:
         return None

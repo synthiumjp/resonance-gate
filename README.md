@@ -54,7 +54,9 @@ any answer was read; Qwen3-14B reading and judging):
 | plain search over the same session passages | 101 (74.3%) |
 
 Both together answered 40 that the memory folder alone missed and missed 7
-it answered (p<0.001). sourcedrecall alone is not better than a plain
+it answered (p<0.001). The pre-registration planned a Sonnet writer through
+the API; with no API credit it ran as Claude Code subagents with the same
+instructions, on 10 of the 20 held-out repositories drawn at random. sourcedrecall alone is not better than a plain
 search over the session passages (98 against 101): what helps is that the
 sessions are kept and searched at all, which Claude Code does not do. With
 Phi-4 as the reader, on the 102 questions whose context fits its window:
@@ -203,7 +205,8 @@ instruction was given back as the user's own:
 v12 also held 20 real emails from the public Enron corpus with a writer's
 claim in them: given as the user's 7 of 20 when new, 5 of 20 on 3671a09
 with either reader (plain retrieval 14). A separate held-out set of 20 real
-pasted emails: 1 of 20 on 3671a09 (plain retrieval 16 and 17). Rules were
+pasted emails (counts only, not pre-registered or audited): 7 of 20 when
+first run end to end, 1 of 20 on 3671a09 (plain retrieval 16 and 17). Rules were
 added after v12 from the kinds of text it missed, so on 3671a09 these sets
 are no longer unseen. ai-memory's low counts come from keeping only the
 first line of a message: it answered 5 to 11 of 30 of the user's own pasted

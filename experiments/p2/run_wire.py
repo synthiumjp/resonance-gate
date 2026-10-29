@@ -25,6 +25,7 @@ import json
 import os
 import re
 import sys
+import unicodedata
 from collections import defaultdict
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
@@ -85,19 +86,43 @@ def _load_assistant_stream(path):
 # in London" and "Thomas Arne was born in London" became one fact, with one
 # of the two sentences. When the sentence opens with a longer name holding
 # that word, the slot takes the whole name ("thomas_kyd_bear_in").
-_NAME_RUN = re.compile(r"^(?:The\s+)?((?:[A-Z][\w'.-]*)(?:\s+(?:(?:of|von|van|de|du|da|del|"
-                       r"der|la|le|bin|al)\s+)?[A-Z][\w'.-]*)+)")
+# 2026-10-29 (review M3): names read with any capital letter ("Émile Zola"),
+# the run stops at a comma ("Thomas Kyd, the playwright"), and starts at the
+# slot's word, so an opener or title before it ("Yesterday", "Dr.") is not
+# part of the name.
+_NAME_JOIN = frozenset("of von van de du da del der la le bin al".split())
+
+
+def _fold(w):
+    return unicodedata.normalize("NFKD", w).encode("ascii", "ignore").decode()
+
+
+def _name_run(text):
+    run = []
+    for w in text.split():
+        core = w.strip("\"'()[]")
+        bare = core.rstrip(",;:!?")
+        if bare[:1].isupper() or (run and bare in _NAME_JOIN):
+            run.append(bare)
+        else:
+            break
+        if bare != core:
+            break
+    while run and run[-1] in _NAME_JOIN:
+        run.pop()
+    return [t for t in re.findall(r"[^\W_]+", " ".join(run).lower())]
 
 
 def _name_slot(a, text):
     if os.environ.get("RG_SLOT_CLUSTER") == "0" or not text or ":" in a:
         return a
-    m = _NAME_RUN.match(text.strip())
-    if not m:
-        return a
-    name = re.findall(r"[a-z0-9]+", m.group(1).lower())
+    name = _name_run(text.strip())
     head, _, rest = a.partition("_")
-    if len(name) < 2 or head not in name or not rest:
+    folded = [_fold(t) for t in name]
+    if not rest or _fold(head) not in folded:
+        return a
+    name = name[folded.index(_fold(head)):]
+    if len(name) < 2:
         return a
     return "_".join(name) + "_" + rest
 

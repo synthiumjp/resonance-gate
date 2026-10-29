@@ -251,3 +251,27 @@ def test_exclude_attr_rx_keeps_career_paths_drops_model_path():
 def test_slot_words_do_not_merge_values(monkeypatch, a, b, n):
     monkeypatch.setenv("RG_SLOT_CLUSTER", "1")
     assert len(_cluster(_entries((a, 2), (b, 1)))) == n
+
+
+# review 2026-10-28 M3: slot names and tails beyond plain ASCII sentences
+
+@pytest.mark.parametrize("attr,text,want", [
+    ("thomas_bear_in", "Thomas Kyd was born in London", "thomas_kyd_bear_in"),
+    ("thomas_bear_in", "Thomas Kyd, the playwright, was born in London", "thomas_kyd_bear_in"),
+    ("thomas_bear_in", "Yesterday Thomas Kyd was born in London", "thomas_kyd_bear_in"),
+    ("john_work_at", "Dr. John Smith works at Acme", "john_smith_work_at"),
+    ("émile_bear_in", "Émile Zola was born in Paris", "émile_zola_bear_in"),
+    ("emile_bear_in", "Émile Zola was born in Paris", "émile_zola_bear_in"),
+    ("thomas_bear_in", "Thomas was born in London", "thomas_bear_in"),
+    ("sam_live_in", "Paris, France is where Sam lives", "sam_live_in"),
+])
+def test_a_slot_takes_the_whole_name(monkeypatch, attr, text, want):
+    from run_wire import _name_slot
+    monkeypatch.delenv("RG_SLOT_CLUSTER", raising=False)
+    assert _name_slot(attr, text) == want
+
+
+def test_a_tail_keeps_letters_of_any_script():
+    from run_profile_full import _tail
+    assert _tail("born in São Paulo") == {"são", "paulo"}
+    assert _tail("a citizen of Österreich") == {"österreich"}

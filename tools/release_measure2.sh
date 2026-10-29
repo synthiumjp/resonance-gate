@@ -70,6 +70,14 @@ for set in v11 v12 realpaste; do
     FM_RESULTS=$R FM_OVERRIDES=$PWD/$ov $P score.py > $R/score.log 2>&1
     echo "-- $set $rd (overrides $ov)"; FM_RESULTS=$R $P v5_parts.py | tee $R/parts.txt
     [ -f ${set}_tests.py ] && FM_RESULTS=$R FM_OVERRIDES=$PWD/$ov $P ${set}_tests.py > $R/tests.txt 2>&1
+    # review 2026-10-28 M9: the audit overrides fit the other systems' old
+    # answers and only those of sourcedrecall's that did not change, so the
+    # counts above mix audited and judge-only verdicts. The same answers,
+    # every system judge-only:
+    N=$R/noaudit; mkdir -p $N; cp $R/raw_*.jsonl $R/answers_*.jsonl $N/
+    [ -f $R/judge_log.jsonl ] && cp $R/judge_log.jsonl $N/
+    FM_RESULTS=$N FM_OVERRIDES=$PWD/no_overrides_release.json $P score.py > $N/score.log 2>&1
+    echo "-- $set $rd, judge only, no overrides"; FM_RESULTS=$N $P v5_parts.py | tee $N/parts.txt
   done
 done
 pkill -f "llama_cpp.server.*--port 8091"; echo "  Phi-4 stopped"
