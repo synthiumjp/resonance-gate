@@ -376,6 +376,9 @@ sourcedrecall-memory context "Where do I live?"
 
 Needs Python 3.10 to 3.13. The install takes a few minutes and about 1.3 GB
 of disk (0.7 GB of it models); no PyTorch. After setup it runs offline.
+`server/constraints.txt` lists the versions a fresh install was tested with
+(`pip install -c server/constraints.txt -e ./server`); the plugin uses them
+where they install.
 
 Notes, optional:
 

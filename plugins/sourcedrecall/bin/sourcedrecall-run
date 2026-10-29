@@ -145,16 +145,27 @@ do_install() {
     }
   fi
   "$VBIN/python$EXE" -m pip install -q --upgrade pip || return 1
-  "$VBIN/python$EXE" -m pip install -q -e "$SRC/server" || return 1
+  pip_server "$SRC/server" || return 1
   "$VBIN/sourcedrecall-setup$EXE" || return 1
   echo "$REF" > "$STAMP"
   do_notes || return 1
   echo "== done $(date)"
 }
 
+# 2026-10-29 (review M7): the versions a fresh install was tested with, and
+# the newest pyproject.toml allows where one of them does not install here
+pip_server() {
+  local c="$SRC/server/constraints.txt"
+  if [ -f "$c" ] && "$VBIN/python$EXE" -m pip install -q -c "$c" -e "$1"; then
+    return 0
+  fi
+  [ -f "$c" ] && echo "the tested versions did not all install here; using the newest allowed"
+  "$VBIN/python$EXE" -m pip install -q -e "$1"
+}
+
 do_notes() {
   notes_ready && return 0
-  "$VBIN/python$EXE" -m pip install -q -e "$SRC/server[notes]" || return 1
+  pip_server "$SRC/server[notes]" || return 1
   "$VBIN/sourcedrecall-setup$EXE" --notes "$NOTES" || return 1
   echo "$REF $NOTES" > "$DATA/notes-installed"
 }

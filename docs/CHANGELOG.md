@@ -42,6 +42,10 @@ has the details behind each change.
   its words.
 - An "always" or "never" rule deep inside a message over 600 characters
   (likely a pasted document) no longer becomes a standing instruction.
+- The plugin installs the versions a fresh install was tested with
+  (`server/constraints.txt`), and the newest allowed where one of them does
+  not install. A Cursor turn appended while a forget rewrites the spool is
+  no longer lost.
 - The credential filter also removes `--password`, `--token` and
   `--api-key` flags, `user:password@host` without a scheme, `whsec_`
   webhook secrets and "mypassword is ...".

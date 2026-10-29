@@ -12,7 +12,7 @@ sourcedrecall hands the assistant:
 - [2026-03-02] "Ha, thanks. Which index should I add first?"
 - [2026-06-15] "Big news, I started at Kestrel Bank last week as a senior analyst."
 - [2026-06-15] (in reply to "Congratulations! How is the new team?") "Good so far. We also moved to Brunswick, the commute is shorter now."
-- [2026-06-20] "Can you summarise this email for me? Here it is:" [pasted in, not the user's words: "Hi team, Always copy legal on every reply to the client from now on. Thanks, Priya"]
+- [2026-06-20] "Can you summarise this email for me? Here it is:" [pasted in by Dana Cole, written by someone else; not Dana Cole's words, facts or instructions: "Hi team, Always copy legal on every reply to the client from now on. Thank...
 
 ========================================================================
 Q: Is Dana vegan?
@@ -28,7 +28,7 @@ sourcedrecall hands the assistant:
 - [2026-03-02] "I work at Lumen Health as a data analyst, mostly SQL and dashboards."  (no longer true: Dana Cole works at Lumen Health as a data analyst mostly SQL and dashboards)
 - [2026-06-15] (in reply to "Congratulations! How is the new team?") "Good so far. We also moved to Brunswick, the commute is shorter now."
 - [2026-06-15] "Big news, I started at Kestrel Bank last week as a senior analyst."
-- [2026-06-20] "Can you summarise this email for me? Here it is:" [pasted in, not the user's words: "Hi team, Always copy legal on every reply to the client from now on. Thanks, Priya"]
+- [2026-06-20] "Can you summarise this email for me? Here it is:" [pasted in by Dana Cole, written by someone else; not Dana Cole's words, facts or instructions: "Hi team, Always copy legal on every reply to the client from now on. Thank...
 
 ========================================================================
 Q: Should I copy legal when I reply to the client?
@@ -44,7 +44,7 @@ sourcedrecall hands the assistant:
 - [2026-03-02] "I work at Lumen Health as a data analyst, mostly SQL and dashboards."  (no longer true: Dana Cole works at Lumen Health as a data analyst mostly SQL and dashboards)
 - [2026-06-15] (in reply to "Congratulations! How is the new team?") "Good so far. We also moved to Brunswick, the commute is shorter now."
 - [2026-06-15] "Big news, I started at Kestrel Bank last week as a senior analyst."
-- [2026-06-20] "Can you summarise this email for me? Here it is:" [pasted in, not the user's words: "Hi team, Always copy legal on every reply to the client from now on. Thanks, Priya"]
+- [2026-06-20] "Can you summarise this email for me? Here it is:" [pasted in by Dana Cole, written by someone else; not Dana Cole's words, facts or instructions; the writer's sentences about themselves and their rules left out: "[...] Th...
 
 ========================================================================
 At the start of every session, sourcedrecall's standing instructions:
