@@ -8,7 +8,7 @@
     {
       "name": "sourcedrecall",
       "source": "./plugins/sourcedrecall",
-      "description": "Local memory for Claude Code: what you tell it, in your own words, with dates. No language model writes the memory."
+      "description": "Local memory for Claude Code: what you said, in your own words with dates, and your coding sessions, searchable. No language model writes the memory."
     }
   ]
 }

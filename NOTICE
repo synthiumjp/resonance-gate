@@ -49,3 +49,10 @@ Benchmark files in bench/ (not part of the software; not installed):
 - Some cases in bench/false_memory quote messages from the Enron email
   corpus, made public by the US Federal Energy Regulatory Commission.
 - bench/halumem holds only scores from HaluMem (MemTensor/HaluMem).
+- bench/native_memory/locomo holds questions and answers from LoCoMo, as
+  above (CC BY-NC 4.0); bench/native_memory/false_memory quotes the
+  false-memory cases, some of them Enron emails.
+- bench/factcons holds answers on MemoryAgentBench's FactConsolidation sets
+  (ai-hyz/MemoryAgentBench), MIT License.
+- bench/coding holds only scores and question ids from sessions in SWE-chat,
+  not the sessions or the questions.

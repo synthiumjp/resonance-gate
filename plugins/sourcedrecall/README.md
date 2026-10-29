@@ -1,10 +1,13 @@
 # sourcedrecall plugin for Claude Code
 
-Local memory for Claude Code. When a session ends, the facts you stated about
-yourself are stored with the sentence and date they came from. When the next
-session starts, Claude gets a short summary. A grammar parser extracts the
-facts; no language model writes the memory, and the memory stays on your
-machine (the summary Claude is given goes to Claude like any other context).
+Local memory for Claude Code that keeps the record. When a session ends,
+what you said is stored in your words with its date, and what the session
+did (failed and passing commands, fixes, commits, decisions) is kept per
+project. When the next session starts, Claude gets a short summary, leaving
+out what the project's own MEMORY.md already says; `/recall how did we fix
+the login test` searches past sessions. A grammar parser reads your
+messages; no language model writes the memory, and the memory stays on
+your machine (what Claude is given goes to Claude like any other context).
 
 Install:
 

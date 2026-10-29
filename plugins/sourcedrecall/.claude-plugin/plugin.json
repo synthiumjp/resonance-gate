@@ -1,7 +1,7 @@
 {
   "name": "sourcedrecall",
   "version": "0.6.0",
-  "description": "Local memory for Claude Code. Stores the facts you state about yourself, with your exact words and dates, and gives Claude a short summary at the start of each session. No language model is used to write the memory, and the memory stays on your machine.",
+  "description": "Local memory for Claude Code that keeps the record: what you said, in your own words with dates, and what each coding session did (commands, failures, fixes, decisions), searchable with /recall. Runs beside Claude Code's own memory. No language model writes the memory, and it stays on your machine.",
   "author": {
     "name": "Jon-Paul Cacioli"
   },

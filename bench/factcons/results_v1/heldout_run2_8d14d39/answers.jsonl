@@ -1,0 +1,400 @@
+{"qid": "factconsolidation_sh_32k#0", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Basketball.", "correct": true, "ctx_tokens": 1408}
+{"qid": "factconsolidation_sh_32k#1", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Flanker.", "correct": true, "ctx_tokens": 395}
+{"qid": "factconsolidation_sh_32k#2", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "basketball", "correct": false, "ctx_tokens": 1255}
+{"qid": "factconsolidation_sh_32k#3", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Methodism.", "correct": true, "ctx_tokens": 1445}
+{"qid": "factconsolidation_sh_32k#4", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "association football.", "correct": true, "ctx_tokens": 1357}
+{"qid": "factconsolidation_sh_32k#5", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "London.", "correct": false, "ctx_tokens": 661}
+{"qid": "factconsolidation_sh_32k#6", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "United States of America.", "correct": true, "ctx_tokens": 2766}
+{"qid": "factconsolidation_sh_32k#7", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Montanus of Phrygia.", "correct": true, "ctx_tokens": 623}
+{"qid": "factconsolidation_sh_32k#8", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Washington, D.C.", "correct": false, "ctx_tokens": 327}
+{"qid": "factconsolidation_sh_32k#9", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Watertown.", "correct": false, "ctx_tokens": 739}
+{"qid": "factconsolidation_sh_32k#10", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Kingdom of Ireland.", "correct": true, "ctx_tokens": 2932}
+{"qid": "factconsolidation_sh_32k#11", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Israel.", "correct": true, "ctx_tokens": 2140}
+{"qid": "factconsolidation_sh_32k#12", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Apple Inc.", "correct": true, "ctx_tokens": 243}
+{"qid": "factconsolidation_sh_32k#13", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "baseball.", "correct": true, "ctx_tokens": 1077}
+{"qid": "factconsolidation_sh_32k#14", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Beirut.", "correct": true, "ctx_tokens": 499}
+{"qid": "factconsolidation_sh_32k#15", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Italy.", "correct": true, "ctx_tokens": 2046}
+{"qid": "factconsolidation_sh_32k#16", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "association football", "correct": true, "ctx_tokens": 1105}
+{"qid": "factconsolidation_sh_32k#17", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Amala Paul.", "correct": true, "ctx_tokens": 376}
+{"qid": "factconsolidation_sh_32k#18", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Charles Darwin.", "correct": true, "ctx_tokens": 535}
+{"qid": "factconsolidation_sh_32k#19", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Church of Greece.", "correct": true, "ctx_tokens": 1056}
+{"qid": "factconsolidation_sh_32k#20", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Shooting guard.", "correct": true, "ctx_tokens": 294}
+{"qid": "factconsolidation_sh_32k#21", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Rugby union.", "correct": true, "ctx_tokens": 949}
+{"qid": "factconsolidation_sh_32k#22", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Spanish.", "correct": true, "ctx_tokens": 481}
+{"qid": "factconsolidation_sh_32k#23", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Charlie Hebdo.", "correct": true, "ctx_tokens": 288}
+{"qid": "factconsolidation_sh_32k#24", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Olga of Kiev.", "correct": true, "ctx_tokens": 379}
+{"qid": "factconsolidation_sh_32k#25", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "United States of America.", "correct": true, "ctx_tokens": 1532}
+{"qid": "factconsolidation_sh_32k#26", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Ireland.", "correct": true, "ctx_tokens": 2063}
+{"qid": "factconsolidation_sh_32k#27", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "association football", "correct": false, "ctx_tokens": 1244}
+{"qid": "factconsolidation_sh_32k#28", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "United States of America.", "correct": true, "ctx_tokens": 1004}
+{"qid": "factconsolidation_sh_32k#29", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Baseball.", "correct": true, "ctx_tokens": 1333}
+{"qid": "factconsolidation_sh_32k#30", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Apple Inc.", "correct": true, "ctx_tokens": 388}
+{"qid": "factconsolidation_sh_32k#31", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Beverly Hills.", "correct": true, "ctx_tokens": 390}
+{"qid": "factconsolidation_sh_32k#32", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Catholicism.", "correct": true, "ctx_tokens": 1263}
+{"qid": "factconsolidation_sh_32k#33", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Washington, D.C.", "correct": true, "ctx_tokens": 589}
+{"qid": "factconsolidation_sh_32k#34", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "United States of America.", "correct": true, "ctx_tokens": 1397}
+{"qid": "factconsolidation_sh_32k#35", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Baseball.", "correct": true, "ctx_tokens": 1658}
+{"qid": "factconsolidation_sh_32k#36", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "University of Calcutta.", "correct": true, "ctx_tokens": 410}
+{"qid": "factconsolidation_sh_32k#37", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "NBC.", "correct": true, "ctx_tokens": 243}
+{"qid": "factconsolidation_sh_32k#38", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Goaltender.", "correct": true, "ctx_tokens": 375}
+{"qid": "factconsolidation_sh_32k#39", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Tehran.", "correct": true, "ctx_tokens": 203}
+{"qid": "factconsolidation_sh_32k#40", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Don't know.", "correct": false, "ctx_tokens": 279}
+{"qid": "factconsolidation_sh_32k#41", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Don't know.", "correct": false, "ctx_tokens": 212}
+{"qid": "factconsolidation_sh_32k#42", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Superhero.", "correct": true, "ctx_tokens": 146}
+{"qid": "factconsolidation_sh_32k#43", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Ghana.", "correct": true, "ctx_tokens": 1890}
+{"qid": "factconsolidation_sh_32k#44", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Scientology.", "correct": true, "ctx_tokens": 2344}
+{"qid": "factconsolidation_sh_32k#45", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Ford Motor Company.", "correct": true, "ctx_tokens": 332}
+{"qid": "factconsolidation_sh_32k#46", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Don't know.", "correct": false, "ctx_tokens": 470}
+{"qid": "factconsolidation_sh_32k#47", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Africa.", "correct": true, "ctx_tokens": 1113}
+{"qid": "factconsolidation_sh_32k#48", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "baseball.", "correct": true, "ctx_tokens": 1171}
+{"qid": "factconsolidation_sh_32k#49", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "association football.", "correct": true, "ctx_tokens": 586}
+{"qid": "factconsolidation_sh_32k#50", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Defensive end.", "correct": true, "ctx_tokens": 282}
+{"qid": "factconsolidation_sh_32k#51", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Roch Marc Christian Kabor\u00e9.", "correct": true, "ctx_tokens": 265}
+{"qid": "factconsolidation_sh_32k#52", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Madonna.", "correct": true, "ctx_tokens": 422}
+{"qid": "factconsolidation_sh_32k#53", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "association football", "correct": true, "ctx_tokens": 1344}
+{"qid": "factconsolidation_sh_32k#54", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Japan.", "correct": false, "ctx_tokens": 2024}
+{"qid": "factconsolidation_sh_32k#55", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Finnish.", "correct": true, "ctx_tokens": 548}
+{"qid": "factconsolidation_sh_32k#56", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Maharishi Mahesh Yogi", "correct": false, "ctx_tokens": 851}
+{"qid": "factconsolidation_sh_32k#57", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Connachta.", "correct": true, "ctx_tokens": 370}
+{"qid": "factconsolidation_sh_32k#58", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Apple Inc.", "correct": true, "ctx_tokens": 234}
+{"qid": "factconsolidation_sh_32k#59", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Asia.", "correct": true, "ctx_tokens": 1150}
+{"qid": "factconsolidation_sh_32k#60", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Roger Ebert.", "correct": false, "ctx_tokens": 434}
+{"qid": "factconsolidation_sh_32k#61", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "University of Chicago.", "correct": false, "ctx_tokens": 307}
+{"qid": "factconsolidation_sh_32k#62", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "United Kingdom.", "correct": true, "ctx_tokens": 2747}
+{"qid": "factconsolidation_sh_32k#63", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Dax Shepard.", "correct": true, "ctx_tokens": 600}
+{"qid": "factconsolidation_sh_32k#64", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Neuromancer.", "correct": true, "ctx_tokens": 251}
+{"qid": "factconsolidation_sh_32k#65", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Catholic Church.", "correct": true, "ctx_tokens": 1066}
+{"qid": "factconsolidation_sh_32k#66", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Sundar Pichai.", "correct": true, "ctx_tokens": 276}
+{"qid": "factconsolidation_sh_32k#67", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Ukraine.", "correct": true, "ctx_tokens": 2057}
+{"qid": "factconsolidation_sh_32k#68", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Google.", "correct": true, "ctx_tokens": 216}
+{"qid": "factconsolidation_sh_32k#69", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Thomas Kyd.", "correct": true, "ctx_tokens": 726}
+{"qid": "factconsolidation_sh_32k#70", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Allen Ginsberg.", "correct": true, "ctx_tokens": 334}
+{"qid": "factconsolidation_sh_32k#71", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Arabic.", "correct": true, "ctx_tokens": 550}
+{"qid": "factconsolidation_sh_32k#72", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "London.", "correct": true, "ctx_tokens": 1035}
+{"qid": "factconsolidation_sh_32k#73", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "William Shakespeare.", "correct": true, "ctx_tokens": 920}
+{"qid": "factconsolidation_sh_32k#74", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Pop music.", "correct": false, "ctx_tokens": 228}
+{"qid": "factconsolidation_sh_32k#75", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Epic Games.", "correct": true, "ctx_tokens": 367}
+{"qid": "factconsolidation_sh_32k#76", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Scotland.", "correct": true, "ctx_tokens": 468}
+{"qid": "factconsolidation_sh_32k#77", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Malaysia.", "correct": true, "ctx_tokens": 1444}
+{"qid": "factconsolidation_sh_32k#78", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Eug\u00e8ne Schneider", "correct": true, "ctx_tokens": 859}
+{"qid": "factconsolidation_sh_32k#79", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Basketball.", "correct": true, "ctx_tokens": 1367}
+{"qid": "factconsolidation_sh_32k#80", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Israel.", "correct": true, "ctx_tokens": 619}
+{"qid": "factconsolidation_sh_32k#81", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Philippines.", "correct": true, "ctx_tokens": 650}
+{"qid": "factconsolidation_sh_32k#82", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Sue Grafton.", "correct": true, "ctx_tokens": 786}
+{"qid": "factconsolidation_sh_32k#83", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Great Britain.", "correct": true, "ctx_tokens": 2387}
+{"qid": "factconsolidation_sh_32k#84", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "French.", "correct": true, "ctx_tokens": 351}
+{"qid": "factconsolidation_sh_32k#85", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Bob Bradley.", "correct": true, "ctx_tokens": 219}
+{"qid": "factconsolidation_sh_32k#86", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Aston Martin Lagonda.", "correct": true, "ctx_tokens": 378}
+{"qid": "factconsolidation_sh_32k#87", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "interdenominational organization", "correct": true, "ctx_tokens": 1383}
+{"qid": "factconsolidation_sh_32k#88", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Stirling Silliphanta.", "correct": true, "ctx_tokens": 924}
+{"qid": "factconsolidation_sh_32k#89", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Midfielder.", "correct": true, "ctx_tokens": 344}
+{"qid": "factconsolidation_sh_32k#90", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "United States of America.", "correct": true, "ctx_tokens": 2713}
+{"qid": "factconsolidation_sh_32k#91", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Goldust", "correct": true, "ctx_tokens": 532}
+{"qid": "factconsolidation_sh_32k#92", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Blue Origin.", "correct": true, "ctx_tokens": 332}
+{"qid": "factconsolidation_sh_32k#93", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Don't know.", "correct": false, "ctx_tokens": 775}
+{"qid": "factconsolidation_sh_32k#94", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "basketball", "correct": false, "ctx_tokens": 748}
+{"qid": "factconsolidation_sh_32k#95", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "India.", "correct": true, "ctx_tokens": 425}
+{"qid": "factconsolidation_sh_32k#96", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Constantinople.", "correct": true, "ctx_tokens": 309}
+{"qid": "factconsolidation_sh_32k#97", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Germany.", "correct": true, "ctx_tokens": 2290}
+{"qid": "factconsolidation_sh_32k#98", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Don't know.", "correct": false, "ctx_tokens": 311}
+{"qid": "factconsolidation_sh_32k#99", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Midfielder.", "correct": true, "ctx_tokens": 242}
+{"qid": "factconsolidation_mh_32k#0", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Christianity.", "correct": false, "ctx_tokens": 2971}
+{"qid": "factconsolidation_mh_32k#1", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Europe.", "correct": false, "ctx_tokens": 3109}
+{"qid": "factconsolidation_mh_32k#2", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Catholic Church", "correct": false, "ctx_tokens": 1667}
+{"qid": "factconsolidation_mh_32k#3", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Don't know.", "correct": false, "ctx_tokens": 253}
+{"qid": "factconsolidation_mh_32k#4", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Chairperson of Palestine Liberation Organization.", "correct": false, "ctx_tokens": 198}
+{"qid": "factconsolidation_mh_32k#5", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Europe.", "correct": false, "ctx_tokens": 1323}
+{"qid": "factconsolidation_mh_32k#6", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Ukrainian.", "correct": true, "ctx_tokens": 232}
+{"qid": "factconsolidation_mh_32k#7", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Unknown.", "correct": false, "ctx_tokens": 1713}
+{"qid": "factconsolidation_mh_32k#8", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "English.", "correct": false, "ctx_tokens": 1330}
+{"qid": "factconsolidation_mh_32k#9", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Islamabad", "correct": false, "ctx_tokens": 1135}
+{"qid": "factconsolidation_mh_32k#10", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Don't know.", "correct": false, "ctx_tokens": 322}
+{"qid": "factconsolidation_mh_32k#11", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Brunswick.", "correct": false, "ctx_tokens": 350}
+{"qid": "factconsolidation_mh_32k#12", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "The author of \"The Andromeda Strain\" is Multatuli. However, the country where the work originated is not provided in the memory. Therefore, I don't know.", "correct": false, "ctx_tokens": 1416}
+{"qid": "factconsolidation_mh_32k#13", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Iraq.", "correct": false, "ctx_tokens": 1935}
+{"qid": "factconsolidation_mh_32k#14", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Catholic Church.", "correct": false, "ctx_tokens": 1222}
+{"qid": "factconsolidation_mh_32k#15", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Don't know.", "correct": false, "ctx_tokens": 1319}
+{"qid": "factconsolidation_mh_32k#16", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "University of Glasgow.", "correct": false, "ctx_tokens": 247}
+{"qid": "factconsolidation_mh_32k#17", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "American Broadcasting Company.", "correct": false, "ctx_tokens": 227}
+{"qid": "factconsolidation_mh_32k#18", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Wide receiver.", "correct": false, "ctx_tokens": 1276}
+{"qid": "factconsolidation_mh_32k#19", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Omsk.", "correct": false, "ctx_tokens": 618}
+{"qid": "factconsolidation_mh_32k#20", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Portugal", "correct": false, "ctx_tokens": 495}
+{"qid": "factconsolidation_mh_32k#21", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "French.", "correct": true, "ctx_tokens": 284}
+{"qid": "factconsolidation_mh_32k#22", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "United States.", "correct": false, "ctx_tokens": 1071}
+{"qid": "factconsolidation_mh_32k#23", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Australia", "correct": true, "ctx_tokens": 797}
+{"qid": "factconsolidation_mh_32k#24", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Don't know.", "correct": false, "ctx_tokens": 453}
+{"qid": "factconsolidation_mh_32k#25", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "English and French.", "correct": false, "ctx_tokens": 1402}
+{"qid": "factconsolidation_mh_32k#26", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Asia.", "correct": true, "ctx_tokens": 4642}
+{"qid": "factconsolidation_mh_32k#27", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Religious Society of Friends", "correct": false, "ctx_tokens": 1717}
+{"qid": "factconsolidation_mh_32k#28", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Duchy of Lorraine", "correct": false, "ctx_tokens": 2996}
+{"qid": "factconsolidation_mh_32k#29", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Don't know.", "correct": false, "ctx_tokens": 195}
+{"qid": "factconsolidation_mh_32k#30", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "rock music", "correct": false, "ctx_tokens": 586}
+{"qid": "factconsolidation_mh_32k#31", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Don't know.", "correct": false, "ctx_tokens": 798}
+{"qid": "factconsolidation_mh_32k#32", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Narendra Modi.", "correct": false, "ctx_tokens": 232}
+{"qid": "factconsolidation_mh_32k#33", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Philadelphia.", "correct": false, "ctx_tokens": 2509}
+{"qid": "factconsolidation_mh_32k#34", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Paris.", "correct": false, "ctx_tokens": 1428}
+{"qid": "factconsolidation_mh_32k#35", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Don't know.", "correct": false, "ctx_tokens": 706}
+{"qid": "factconsolidation_mh_32k#36", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "English.", "correct": false, "ctx_tokens": 263}
+{"qid": "factconsolidation_mh_32k#37", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "United States of America.", "correct": false, "ctx_tokens": 1934}
+{"qid": "factconsolidation_mh_32k#38", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Greek.", "correct": false, "ctx_tokens": 1150}
+{"qid": "factconsolidation_mh_32k#39", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Daphne du Maurier.", "correct": false, "ctx_tokens": 3146}
+{"qid": "factconsolidation_mh_32k#40", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Paris.", "correct": false, "ctx_tokens": 609}
+{"qid": "factconsolidation_mh_32k#41", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "The chairperson of the institution where the Chicago Boys received their education is Robert Zimmer.", "correct": false, "ctx_tokens": 556}
+{"qid": "factconsolidation_mh_32k#42", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Bowdoin College.", "correct": false, "ctx_tokens": 238}
+{"qid": "factconsolidation_mh_32k#43", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Hinduism.", "correct": false, "ctx_tokens": 983}
+{"qid": "factconsolidation_mh_32k#44", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Toronto", "correct": false, "ctx_tokens": 1080}
+{"qid": "factconsolidation_mh_32k#45", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Google.", "correct": false, "ctx_tokens": 320}
+{"qid": "factconsolidation_mh_32k#46", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "United States of America", "correct": false, "ctx_tokens": 531}
+{"qid": "factconsolidation_mh_32k#47", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Methodism.", "correct": false, "ctx_tokens": 1894}
+{"qid": "factconsolidation_mh_32k#48", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "American football.", "correct": false, "ctx_tokens": 392}
+{"qid": "factconsolidation_mh_32k#49", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "The question asks for the birthplace of the writer of \"L.A. Confidential.\" The memory provided does not contain any information about the writer of \"L.A. Confidential\" or their birthplace.\n\nTherefore, the answer is: Don't know.", "correct": false, "ctx_tokens": 834}
+{"qid": "factconsolidation_mh_32k#50", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Europe.", "correct": false, "ctx_tokens": 1129}
+{"qid": "factconsolidation_mh_32k#51", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Birmingham", "correct": false, "ctx_tokens": 653}
+{"qid": "factconsolidation_mh_32k#52", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "New York City.", "correct": false, "ctx_tokens": 1054}
+{"qid": "factconsolidation_mh_32k#53", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Philippines.", "correct": false, "ctx_tokens": 312}
+{"qid": "factconsolidation_mh_32k#54", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "United Kingdom.", "correct": false, "ctx_tokens": 640}
+{"qid": "factconsolidation_mh_32k#55", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "The author of \"Beyond Good and Evil\" is Friedrich Nietzsche. However, the provided memory does not contain information about the country of origin of Friedrich Nietzsche or the capital city of that country. Therefore, I don't know.", "correct": false, "ctx_tokens": 1857}
+{"qid": "factconsolidation_mh_32k#56", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "London", "correct": false, "ctx_tokens": 1459}
+{"qid": "factconsolidation_mh_32k#57", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Federico Garc\u00eda Lorca speaks the language of Spanish.", "correct": true, "ctx_tokens": 322}
+{"qid": "factconsolidation_mh_32k#58", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "United Kingdom", "correct": false, "ctx_tokens": 1503}
+{"qid": "factconsolidation_mh_32k#59", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "English.", "correct": false, "ctx_tokens": 931}
+{"qid": "factconsolidation_mh_32k#60", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Johnny Depp speaks the language of Danish.", "correct": true, "ctx_tokens": 730}
+{"qid": "factconsolidation_mh_32k#61", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Oceania.", "correct": false, "ctx_tokens": 730}
+{"qid": "factconsolidation_mh_32k#62", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Christian Science.", "correct": false, "ctx_tokens": 7536}
+{"qid": "factconsolidation_mh_32k#63", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Don't know.", "correct": false, "ctx_tokens": 415}
+{"qid": "factconsolidation_mh_32k#64", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Henri Gr\u00e9goire", "correct": false, "ctx_tokens": 348}
+{"qid": "factconsolidation_mh_32k#65", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "London.", "correct": false, "ctx_tokens": 524}
+{"qid": "factconsolidation_mh_32k#66", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Finnish.", "correct": false, "ctx_tokens": 304}
+{"qid": "factconsolidation_mh_32k#67", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Don't know.", "correct": false, "ctx_tokens": 448}
+{"qid": "factconsolidation_mh_32k#68", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Stuttgart.", "correct": false, "ctx_tokens": 357}
+{"qid": "factconsolidation_mh_32k#69", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "American Broadcasting Company.", "correct": false, "ctx_tokens": 474}
+{"qid": "factconsolidation_mh_32k#70", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "American football.", "correct": false, "ctx_tokens": 764}
+{"qid": "factconsolidation_mh_32k#71", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "English.", "correct": false, "ctx_tokens": 1046}
+{"qid": "factconsolidation_mh_32k#72", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Spain.", "correct": false, "ctx_tokens": 3123}
+{"qid": "factconsolidation_mh_32k#73", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Warsaw", "correct": false, "ctx_tokens": 1409}
+{"qid": "factconsolidation_mh_32k#74", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Italy", "correct": false, "ctx_tokens": 442}
+{"qid": "factconsolidation_mh_32k#75", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "University of Michigan, Ann Arbor.", "correct": false, "ctx_tokens": 783}
+{"qid": "factconsolidation_mh_32k#76", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "United States of America.", "correct": false, "ctx_tokens": 1714}
+{"qid": "factconsolidation_mh_32k#77", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Don't know.", "correct": false, "ctx_tokens": 299}
+{"qid": "factconsolidation_mh_32k#78", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Methodism.", "correct": false, "ctx_tokens": 1398}
+{"qid": "factconsolidation_mh_32k#79", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Catholic Church.", "correct": false, "ctx_tokens": 2173}
+{"qid": "factconsolidation_mh_32k#80", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Don't know.", "correct": false, "ctx_tokens": 310}
+{"qid": "factconsolidation_mh_32k#81", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "American football.", "correct": false, "ctx_tokens": 1745}
+{"qid": "factconsolidation_mh_32k#82", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "San Francisco is located in the continent of Africa.", "correct": true, "ctx_tokens": 843}
+{"qid": "factconsolidation_mh_32k#83", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "London.", "correct": false, "ctx_tokens": 327}
+{"qid": "factconsolidation_mh_32k#84", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Prime Minister of England.", "correct": false, "ctx_tokens": 1729}
+{"qid": "factconsolidation_mh_32k#85", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "The author of the Luther Bible is Martin Luther, and he was employed by the British Broadcasting Corporation.", "correct": true, "ctx_tokens": 419}
+{"qid": "factconsolidation_mh_32k#86", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Vienna", "correct": true, "ctx_tokens": 3672}
+{"qid": "factconsolidation_mh_32k#87", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Don't know.", "correct": false, "ctx_tokens": 1172}
+{"qid": "factconsolidation_mh_32k#88", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Unknown.", "correct": false, "ctx_tokens": 486}
+{"qid": "factconsolidation_mh_32k#89", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Don't know.", "correct": false, "ctx_tokens": 235}
+{"qid": "factconsolidation_mh_32k#90", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "London", "correct": false, "ctx_tokens": 1133}
+{"qid": "factconsolidation_mh_32k#91", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Denmark.", "correct": false, "ctx_tokens": 945}
+{"qid": "factconsolidation_mh_32k#92", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Austin.", "correct": true, "ctx_tokens": 1182}
+{"qid": "factconsolidation_mh_32k#93", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "German.", "correct": false, "ctx_tokens": 470}
+{"qid": "factconsolidation_mh_32k#94", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "The memory does not answer the question.", "correct": false, "ctx_tokens": 744}
+{"qid": "factconsolidation_mh_32k#95", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "United States", "correct": false, "ctx_tokens": 1219}
+{"qid": "factconsolidation_mh_32k#96", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "United Kingdom", "correct": false, "ctx_tokens": 2648}
+{"qid": "factconsolidation_mh_32k#97", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "San Francisco", "correct": false, "ctx_tokens": 2094}
+{"qid": "factconsolidation_mh_32k#98", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Goldust.", "correct": false, "ctx_tokens": 603}
+{"qid": "factconsolidation_mh_32k#99", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "United States of America.", "correct": false, "ctx_tokens": 1165}
+{"qid": "factconsolidation_sh_64k#0", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Ancient Greek.", "correct": true, "ctx_tokens": 679}
+{"qid": "factconsolidation_sh_64k#1", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Charles Dickens.", "correct": false, "ctx_tokens": 310}
+{"qid": "factconsolidation_sh_64k#2", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Denmark.", "correct": true, "ctx_tokens": 2094}
+{"qid": "factconsolidation_sh_64k#3", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Lord Voldemort.", "correct": true, "ctx_tokens": 1147}
+{"qid": "factconsolidation_sh_64k#4", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "United Kingdom.", "correct": true, "ctx_tokens": 2169}
+{"qid": "factconsolidation_sh_64k#5", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Jazz.", "correct": false, "ctx_tokens": 85}
+{"qid": "factconsolidation_sh_64k#6", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Greece.", "correct": true, "ctx_tokens": 1023}
+{"qid": "factconsolidation_sh_64k#7", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Church of Scotland.", "correct": true, "ctx_tokens": 1091}
+{"qid": "factconsolidation_sh_64k#8", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Filipino.", "correct": true, "ctx_tokens": 214}
+{"qid": "factconsolidation_sh_64k#9", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Hiroshige.", "correct": true, "ctx_tokens": 858}
+{"qid": "factconsolidation_sh_64k#10", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "London.", "correct": true, "ctx_tokens": 846}
+{"qid": "factconsolidation_sh_64k#11", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Mahidol Adulyadej", "correct": true, "ctx_tokens": 177}
+{"qid": "factconsolidation_sh_64k#12", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Madonna.", "correct": true, "ctx_tokens": 739}
+{"qid": "factconsolidation_sh_64k#13", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Paris.", "correct": true, "ctx_tokens": 204}
+{"qid": "factconsolidation_sh_64k#14", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Fabiola Gianotti.", "correct": false, "ctx_tokens": 46}
+{"qid": "factconsolidation_sh_64k#15", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Natalie Portman.", "correct": true, "ctx_tokens": 186}
+{"qid": "factconsolidation_sh_64k#16", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "The head coach of Burnley F.C. is not specified in the memory.", "correct": false, "ctx_tokens": 154}
+{"qid": "factconsolidation_sh_64k#17", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "American Broadcasting Company.", "correct": true, "ctx_tokens": 300}
+{"qid": "factconsolidation_sh_64k#18", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Torquato Tasso.", "correct": false, "ctx_tokens": 266}
+{"qid": "factconsolidation_sh_64k#19", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Russian.", "correct": false, "ctx_tokens": 348}
+{"qid": "factconsolidation_sh_64k#20", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Asia.", "correct": false, "ctx_tokens": 942}
+{"qid": "factconsolidation_sh_64k#21", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "D\u014dgen.", "correct": true, "ctx_tokens": 842}
+{"qid": "factconsolidation_sh_64k#22", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "United Kingdom.", "correct": true, "ctx_tokens": 903}
+{"qid": "factconsolidation_sh_64k#23", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Australian rules football.", "correct": true, "ctx_tokens": 1112}
+{"qid": "factconsolidation_sh_64k#24", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "United Kingdom.", "correct": true, "ctx_tokens": 1760}
+{"qid": "factconsolidation_sh_64k#25", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Os Lus\u00edadas.", "correct": true, "ctx_tokens": 544}
+{"qid": "factconsolidation_sh_64k#26", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Eric Garcetti.", "correct": true, "ctx_tokens": 274}
+{"qid": "factconsolidation_sh_64k#27", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "American Broadcasting Company.", "correct": true, "ctx_tokens": 351}
+{"qid": "factconsolidation_sh_64k#28", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Basketball.", "correct": true, "ctx_tokens": 1786}
+{"qid": "factconsolidation_sh_64k#29", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Microsoft.", "correct": true, "ctx_tokens": 342}
+{"qid": "factconsolidation_sh_64k#30", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "English.", "correct": true, "ctx_tokens": 574}
+{"qid": "factconsolidation_sh_64k#31", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Austrian Empire.", "correct": true, "ctx_tokens": 613}
+{"qid": "factconsolidation_sh_64k#32", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Don't know.", "correct": false, "ctx_tokens": 742}
+{"qid": "factconsolidation_sh_64k#33", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Nepal.", "correct": true, "ctx_tokens": 4389}
+{"qid": "factconsolidation_sh_64k#34", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Nobuaki Kurumatani.", "correct": true, "ctx_tokens": 294}
+{"qid": "factconsolidation_sh_64k#35", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Montana State University - Bozeman.", "correct": true, "ctx_tokens": 453}
+{"qid": "factconsolidation_sh_64k#36", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Watership Down.", "correct": true, "ctx_tokens": 1198}
+{"qid": "factconsolidation_sh_64k#37", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Yoweri Kaguta Museveni.", "correct": true, "ctx_tokens": 302}
+{"qid": "factconsolidation_sh_64k#38", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Antarctica.", "correct": true, "ctx_tokens": 722}
+{"qid": "factconsolidation_sh_64k#39", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Arabic.", "correct": true, "ctx_tokens": 313}
+{"qid": "factconsolidation_sh_64k#40", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Michael Crichton.", "correct": false, "ctx_tokens": 289}
+{"qid": "factconsolidation_sh_64k#41", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Narendra Modi.", "correct": true, "ctx_tokens": 317}
+{"qid": "factconsolidation_sh_64k#42", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "United Kingdom.", "correct": true, "ctx_tokens": 3327}
+{"qid": "factconsolidation_sh_64k#43", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Denmark.", "correct": true, "ctx_tokens": 3765}
+{"qid": "factconsolidation_sh_64k#44", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Helsinki.", "correct": true, "ctx_tokens": 1036}
+{"qid": "factconsolidation_sh_64k#45", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Blizzard Entertainment.", "correct": true, "ctx_tokens": 359}
+{"qid": "factconsolidation_sh_64k#46", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "South Korea.", "correct": false, "ctx_tokens": 4477}
+{"qid": "factconsolidation_sh_64k#47", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Microsoft.", "correct": false, "ctx_tokens": 188}
+{"qid": "factconsolidation_sh_64k#48", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Old Turkic.", "correct": true, "ctx_tokens": 286}
+{"qid": "factconsolidation_sh_64k#49", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "The Thorn Birds.", "correct": true, "ctx_tokens": 642}
+{"qid": "factconsolidation_sh_64k#50", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Church of Scotland.", "correct": true, "ctx_tokens": 1178}
+{"qid": "factconsolidation_sh_64k#51", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Madonna.", "correct": true, "ctx_tokens": 183}
+{"qid": "factconsolidation_sh_64k#52", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Manchester.", "correct": true, "ctx_tokens": 279}
+{"qid": "factconsolidation_sh_64k#53", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Cricket.", "correct": true, "ctx_tokens": 1855}
+{"qid": "factconsolidation_sh_64k#54", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Brazil.", "correct": true, "ctx_tokens": 4287}
+{"qid": "factconsolidation_sh_64k#55", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Catholic Church.", "correct": true, "ctx_tokens": 2141}
+{"qid": "factconsolidation_sh_64k#56", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Midfielder.", "correct": true, "ctx_tokens": 1176}
+{"qid": "factconsolidation_sh_64k#57", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Italy.", "correct": true, "ctx_tokens": 1073}
+{"qid": "factconsolidation_sh_64k#58", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "country rock", "correct": true, "ctx_tokens": 102}
+{"qid": "factconsolidation_sh_64k#59", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "The memory contains conflicting information about the country where bluegrass music was created. Initially, on 2026-03-14, it was stated that bluegrass music was created in the United States of America. However, later on 2026-", "correct": false, "ctx_tokens": 614}
+{"qid": "factconsolidation_sh_64k#60", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Cricket.", "correct": true, "ctx_tokens": 751}
+{"qid": "factconsolidation_sh_64k#61", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Elon Musk.", "correct": false, "ctx_tokens": 292}
+{"qid": "factconsolidation_sh_64k#62", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Pierre Omidyar.", "correct": true, "ctx_tokens": 553}
+{"qid": "factconsolidation_sh_64k#63", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Boston.", "correct": true, "ctx_tokens": 417}
+{"qid": "factconsolidation_sh_64k#64", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Prague.", "correct": false, "ctx_tokens": 291}
+{"qid": "factconsolidation_sh_64k#65", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "United States of America.", "correct": true, "ctx_tokens": 3539}
+{"qid": "factconsolidation_sh_64k#66", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "United Kingdom.", "correct": true, "ctx_tokens": 1937}
+{"qid": "factconsolidation_sh_64k#67", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "William Blake.", "correct": true, "ctx_tokens": 308}
+{"qid": "factconsolidation_sh_64k#68", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "British Broadcasting Corporation.", "correct": true, "ctx_tokens": 273}
+{"qid": "factconsolidation_sh_64k#69", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "California State University, Long Beach.", "correct": true, "ctx_tokens": 462}
+{"qid": "factconsolidation_sh_64k#70", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Arvind Kejriwal.", "correct": false, "ctx_tokens": 205}
+{"qid": "factconsolidation_sh_64k#71", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Madonna.", "correct": true, "ctx_tokens": 410}
+{"qid": "factconsolidation_sh_64k#72", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "basketball.", "correct": true, "ctx_tokens": 315}
+{"qid": "factconsolidation_sh_64k#73", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Jazz.", "correct": false, "ctx_tokens": 16}
+{"qid": "factconsolidation_sh_64k#74", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "San Salvador.", "correct": true, "ctx_tokens": 277}
+{"qid": "factconsolidation_sh_64k#75", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "University of Edinburgh.", "correct": true, "ctx_tokens": 469}
+{"qid": "factconsolidation_sh_64k#76", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Brigham Young University.", "correct": true, "ctx_tokens": 426}
+{"qid": "factconsolidation_sh_64k#77", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "John Milton.", "correct": true, "ctx_tokens": 314}
+{"qid": "factconsolidation_sh_64k#78", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Madonna.", "correct": true, "ctx_tokens": 295}
+{"qid": "factconsolidation_sh_64k#79", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Spanish.", "correct": true, "ctx_tokens": 341}
+{"qid": "factconsolidation_sh_64k#80", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Don't know.", "correct": false, "ctx_tokens": 741}
+{"qid": "factconsolidation_sh_64k#81", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Don't know.", "correct": false, "ctx_tokens": 1165}
+{"qid": "factconsolidation_sh_64k#82", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "South America.", "correct": true, "ctx_tokens": 577}
+{"qid": "factconsolidation_sh_64k#83", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Basketball.", "correct": true, "ctx_tokens": 758}
+{"qid": "factconsolidation_sh_64k#84", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Ireland.", "correct": true, "ctx_tokens": 2210}
+{"qid": "factconsolidation_sh_64k#85", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "James Badge Dale.", "correct": true, "ctx_tokens": 336}
+{"qid": "factconsolidation_sh_64k#86", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "baseball", "correct": true, "ctx_tokens": 1372}
+{"qid": "factconsolidation_sh_64k#87", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Lady Gaga.", "correct": true, "ctx_tokens": 385}
+{"qid": "factconsolidation_sh_64k#88", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Lutheranism.", "correct": true, "ctx_tokens": 2001}
+{"qid": "factconsolidation_sh_64k#89", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Don't know.", "correct": false, "ctx_tokens": 316}
+{"qid": "factconsolidation_sh_64k#90", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Linebacker.", "correct": true, "ctx_tokens": 1152}
+{"qid": "factconsolidation_sh_64k#91", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Robert A.", "correct": false, "ctx_tokens": 288}
+{"qid": "factconsolidation_sh_64k#92", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Pune.", "correct": true, "ctx_tokens": 405}
+{"qid": "factconsolidation_sh_64k#93", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Esperanto.", "correct": true, "ctx_tokens": 491}
+{"qid": "factconsolidation_sh_64k#94", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Denmark.", "correct": true, "ctx_tokens": 3591}
+{"qid": "factconsolidation_sh_64k#95", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Google.", "correct": true, "ctx_tokens": 200}
+{"qid": "factconsolidation_sh_64k#96", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Eve Ensler.", "correct": true, "ctx_tokens": 319}
+{"qid": "factconsolidation_sh_64k#97", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Field hockey.", "correct": true, "ctx_tokens": 1415}
+{"qid": "factconsolidation_sh_64k#98", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "England", "correct": true, "ctx_tokens": 496}
+{"qid": "factconsolidation_sh_64k#99", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "United States of America.", "correct": true, "ctx_tokens": 5855}
+{"qid": "factconsolidation_mh_64k#0", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Swedish.", "correct": false, "ctx_tokens": 447}
+{"qid": "factconsolidation_mh_64k#1", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Association football.", "correct": false, "ctx_tokens": 535}
+{"qid": "factconsolidation_mh_64k#2", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Europe", "correct": false, "ctx_tokens": 5602}
+{"qid": "factconsolidation_mh_64k#3", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Country music.", "correct": false, "ctx_tokens": 328}
+{"qid": "factconsolidation_mh_64k#4", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Zeki \u00d6zt\u00fcrk.", "correct": true, "ctx_tokens": 356}
+{"qid": "factconsolidation_mh_64k#5", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "France", "correct": false, "ctx_tokens": 779}
+{"qid": "factconsolidation_mh_64k#6", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Europe", "correct": false, "ctx_tokens": 920}
+{"qid": "factconsolidation_mh_64k#7", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Soccer.", "correct": false, "ctx_tokens": 855}
+{"qid": "factconsolidation_mh_64k#8", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Billie Holiday.", "correct": false, "ctx_tokens": 2564}
+{"qid": "factconsolidation_mh_64k#9", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "United States of America.", "correct": false, "ctx_tokens": 2040}
+{"qid": "factconsolidation_mh_64k#10", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Italy.", "correct": false, "ctx_tokens": 2246}
+{"qid": "factconsolidation_mh_64k#11", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Dante Alighieri.", "correct": false, "ctx_tokens": 1738}
+{"qid": "factconsolidation_mh_64k#12", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "South Africa", "correct": false, "ctx_tokens": 846}
+{"qid": "factconsolidation_mh_64k#13", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Canada.", "correct": false, "ctx_tokens": 6072}
+{"qid": "factconsolidation_mh_64k#14", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "English.", "correct": false, "ctx_tokens": 363}
+{"qid": "factconsolidation_mh_64k#15", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "The Sopranos", "correct": false, "ctx_tokens": 837}
+{"qid": "factconsolidation_mh_64k#16", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Islamabad", "correct": false, "ctx_tokens": 960}
+{"qid": "factconsolidation_mh_64k#17", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "London.", "correct": false, "ctx_tokens": 1099}
+{"qid": "factconsolidation_mh_64k#18", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Baseball.", "correct": false, "ctx_tokens": 804}
+{"qid": "factconsolidation_mh_64k#19", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "United States of America.", "correct": false, "ctx_tokens": 671}
+{"qid": "factconsolidation_mh_64k#20", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "German.", "correct": true, "ctx_tokens": 224}
+{"qid": "factconsolidation_mh_64k#21", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Don't know.", "correct": false, "ctx_tokens": 1156}
+{"qid": "factconsolidation_mh_64k#22", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "The question is asking for the city of origin of the musical genre \"All Shook Up.\" From the memory, we have two conflicting pieces of information about this genre:\n\n- On [2026-05-19], it says: \"The type of music", "correct": false, "ctx_tokens": 666}
+{"qid": "factconsolidation_mh_64k#23", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Vietnam.", "correct": false, "ctx_tokens": 3463}
+{"qid": "factconsolidation_mh_64k#24", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "University of Dublin.", "correct": true, "ctx_tokens": 332}
+{"qid": "factconsolidation_mh_64k#25", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Howard University.", "correct": false, "ctx_tokens": 413}
+{"qid": "factconsolidation_mh_64k#26", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "United States of America.", "correct": false, "ctx_tokens": 1395}
+{"qid": "factconsolidation_mh_64k#27", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Europe.", "correct": true, "ctx_tokens": 1049}
+{"qid": "factconsolidation_mh_64k#28", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Russian Empire.", "correct": false, "ctx_tokens": 855}
+{"qid": "factconsolidation_mh_64k#29", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Europe.", "correct": false, "ctx_tokens": 780}
+{"qid": "factconsolidation_mh_64k#30", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Catholic Church.", "correct": false, "ctx_tokens": 2227}
+{"qid": "factconsolidation_mh_64k#31", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Association football.", "correct": false, "ctx_tokens": 1698}
+{"qid": "factconsolidation_mh_64k#32", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "London", "correct": false, "ctx_tokens": 3959}
+{"qid": "factconsolidation_mh_64k#33", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "India.", "correct": false, "ctx_tokens": 1231}
+{"qid": "factconsolidation_mh_64k#34", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Spanish.", "correct": true, "ctx_tokens": 447}
+{"qid": "factconsolidation_mh_64k#35", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "The place of death is not provided in the memory.", "correct": false, "ctx_tokens": 940}
+{"qid": "factconsolidation_mh_64k#36", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "New York City", "correct": false, "ctx_tokens": 553}
+{"qid": "factconsolidation_mh_64k#37", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "United States of America.", "correct": false, "ctx_tokens": 1276}
+{"qid": "factconsolidation_mh_64k#38", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Asia.", "correct": false, "ctx_tokens": 396}
+{"qid": "factconsolidation_mh_64k#39", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Vienna.", "correct": false, "ctx_tokens": 2206}
+{"qid": "factconsolidation_mh_64k#40", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Paris.", "correct": false, "ctx_tokens": 949}
+{"qid": "factconsolidation_mh_64k#41", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Don't know.", "correct": false, "ctx_tokens": 1225}
+{"qid": "factconsolidation_mh_64k#42", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Europe.", "correct": false, "ctx_tokens": 727}
+{"qid": "factconsolidation_mh_64k#43", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Europe.", "correct": false, "ctx_tokens": 526}
+{"qid": "factconsolidation_mh_64k#44", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Danish.", "correct": false, "ctx_tokens": 327}
+{"qid": "factconsolidation_mh_64k#45", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Tunis.", "correct": false, "ctx_tokens": 544}
+{"qid": "factconsolidation_mh_64k#46", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Aleksandar Vu\u010di\u0107", "correct": false, "ctx_tokens": 1230}
+{"qid": "factconsolidation_mh_64k#47", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Buddhism.", "correct": false, "ctx_tokens": 1280}
+{"qid": "factconsolidation_mh_64k#48", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Europe", "correct": false, "ctx_tokens": 925}
+{"qid": "factconsolidation_mh_64k#49", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Don't know.", "correct": false, "ctx_tokens": 789}
+{"qid": "factconsolidation_mh_64k#50", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Methodism.", "correct": false, "ctx_tokens": 1790}
+{"qid": "factconsolidation_mh_64k#51", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Hartford", "correct": false, "ctx_tokens": 4098}
+{"qid": "factconsolidation_mh_64k#52", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Baseball.", "correct": false, "ctx_tokens": 2116}
+{"qid": "factconsolidation_mh_64k#53", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Don't know.", "correct": false, "ctx_tokens": 1231}
+{"qid": "factconsolidation_mh_64k#54", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Europe", "correct": false, "ctx_tokens": 1163}
+{"qid": "factconsolidation_mh_64k#55", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "English.", "correct": false, "ctx_tokens": 2936}
+{"qid": "factconsolidation_mh_64k#56", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Country of United States of America.", "correct": false, "ctx_tokens": 2740}
+{"qid": "factconsolidation_mh_64k#57", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "defenceman", "correct": false, "ctx_tokens": 1371}
+{"qid": "factconsolidation_mh_64k#58", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "United States of America.", "correct": false, "ctx_tokens": 2017}
+{"qid": "factconsolidation_mh_64k#59", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "CBS", "correct": false, "ctx_tokens": 244}
+{"qid": "factconsolidation_mh_64k#60", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Sony Interactive Entertainment's office is situated in the city of San Mateo.", "correct": false, "ctx_tokens": 328}
+{"qid": "factconsolidation_mh_64k#61", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Finnish.", "correct": false, "ctx_tokens": 417}
+{"qid": "factconsolidation_mh_64k#62", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Giordano Bruno is affiliated with the religion of Religious Society of Friends (Quakers). However, there is no information in the memory about the birthplace of the founder of this religion. Therefore, I don't know.", "correct": false, "ctx_tokens": 1677}
+{"qid": "factconsolidation_mh_64k#63", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "India.", "correct": false, "ctx_tokens": 4882}
+{"qid": "factconsolidation_mh_64k#64", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Don't know.", "correct": false, "ctx_tokens": 354}
+{"qid": "factconsolidation_mh_64k#65", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "United States of America", "correct": false, "ctx_tokens": 1511}
+{"qid": "factconsolidation_mh_64k#66", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Europe.", "correct": false, "ctx_tokens": 1188}
+{"qid": "factconsolidation_mh_64k#67", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "bossa nova", "correct": false, "ctx_tokens": 2282}
+{"qid": "factconsolidation_mh_64k#68", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "English.", "correct": false, "ctx_tokens": 559}
+{"qid": "factconsolidation_mh_64k#69", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Russian.", "correct": false, "ctx_tokens": 464}
+{"qid": "factconsolidation_mh_64k#70", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Oscar Wilde.", "correct": false, "ctx_tokens": 1301}
+{"qid": "factconsolidation_mh_64k#71", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Apple Inc.", "correct": false, "ctx_tokens": 6018}
+{"qid": "factconsolidation_mh_64k#72", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Oceania.", "correct": false, "ctx_tokens": 1094}
+{"qid": "factconsolidation_mh_64k#73", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "basketball.", "correct": false, "ctx_tokens": 921}
+{"qid": "factconsolidation_mh_64k#74", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "association football", "correct": false, "ctx_tokens": 739}
+{"qid": "factconsolidation_mh_64k#75", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Europe", "correct": false, "ctx_tokens": 5672}
+{"qid": "factconsolidation_mh_64k#76", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Ann Arbor is located in the continent of North America.", "correct": true, "ctx_tokens": 710}
+{"qid": "factconsolidation_mh_64k#77", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Don't know.", "correct": false, "ctx_tokens": 1760}
+{"qid": "factconsolidation_mh_64k#78", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Finnish", "correct": false, "ctx_tokens": 510}
+{"qid": "factconsolidation_mh_64k#79", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "The continent where the headquarters of the institution where Rodney Peete received education is located cannot be determined from the given information.", "correct": false, "ctx_tokens": 537}
+{"qid": "factconsolidation_mh_64k#80", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Europe", "correct": true, "ctx_tokens": 3839}
+{"qid": "factconsolidation_mh_64k#81", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Libya", "correct": false, "ctx_tokens": 590}
+{"qid": "factconsolidation_mh_64k#82", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Don't know.", "correct": false, "ctx_tokens": 368}
+{"qid": "factconsolidation_mh_64k#83", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "German Empire", "correct": false, "ctx_tokens": 2873}
+{"qid": "factconsolidation_mh_64k#84", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Austria.", "correct": false, "ctx_tokens": 1569}
+{"qid": "factconsolidation_mh_64k#85", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "England.", "correct": false, "ctx_tokens": 2042}
+{"qid": "factconsolidation_mh_64k#86", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "London", "correct": false, "ctx_tokens": 851}
+{"qid": "factconsolidation_mh_64k#87", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "University of Oslo.", "correct": false, "ctx_tokens": 277}
+{"qid": "factconsolidation_mh_64k#88", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Jazz.", "correct": false, "ctx_tokens": 193}
+{"qid": "factconsolidation_mh_64k#89", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "United Kingdom", "correct": false, "ctx_tokens": 6427}
+{"qid": "factconsolidation_mh_64k#90", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Argentina.", "correct": false, "ctx_tokens": 685}
+{"qid": "factconsolidation_mh_64k#91", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "P.", "correct": false, "ctx_tokens": 472}
+{"qid": "factconsolidation_mh_64k#92", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "basketball.", "correct": false, "ctx_tokens": 1151}
+{"qid": "factconsolidation_mh_64k#93", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Baltimore.", "correct": false, "ctx_tokens": 1232}
+{"qid": "factconsolidation_mh_64k#94", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Rock.", "correct": false, "ctx_tokens": 1142}
+{"qid": "factconsolidation_mh_64k#95", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Don't know.", "correct": false, "ctx_tokens": 5753}
+{"qid": "factconsolidation_mh_64k#96", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "British Broadcasting Corporation.", "correct": false, "ctx_tokens": 567}
+{"qid": "factconsolidation_mh_64k#97", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "London.", "correct": false, "ctx_tokens": 433}
+{"qid": "factconsolidation_mh_64k#98", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Xi Jinping.", "correct": false, "ctx_tokens": 1027}
+{"qid": "factconsolidation_mh_64k#99", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Russia", "correct": false, "ctx_tokens": 2217}

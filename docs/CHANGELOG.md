@@ -6,6 +6,45 @@ has the details behind each change.
 
 ## 0.6.0
 
+- Coding history. Each Claude Code session's record is kept per project:
+  failed test, build and run commands with up to three of their error
+  lines, what was edited after and whether the command passed later,
+  commands that worked, commits, decisions, and the session as short dated
+  passages. `history_search` (MCP), `/recall` in Claude Code and
+  `sourcedrecall-memory history` search it; the session-start summary
+  names the project's recent history. `sourcedrecall-import claude-code`
+  stores past sessions from `~/.claude/projects`. On the pre-registered
+  coding set (`docs/PREREG_CODING_V1.md`), 72.1% of 136 questions against
+  56.6% for Claude Code's memory simulated with a Sonnet writer, 80.9% for
+  both together, 74.3% for a plain search over the same passages.
+- The session-start summary leaves out facts the project's Claude Code
+  `MEMORY.md` already states.
+- Facts about other people and things that a later fact replaces are now
+  marked "may have changed since" when the two fill the same sentence frame
+  with different names, and for facts not about you the note names the
+  later fact and its date. Long messages are quoted by their best sentences
+  around the question, and values that share only slot words are kept
+  apart. All on by default (`RG_FRAME_CHANGES`, `RG_NOTE_LATER`,
+  `RG_TRIM_LONG`, `RG_SLOT_CLUSTER` set to 0 turn them off). On
+  MemoryAgentBench's held-out FactConsolidation lists, single facts 49 -> 84
+  and 40 -> 80 of 100, still below plain retrieval (89 and 94); LoCoMo
+  65.6% -> 65.4%.
+- A death ends only what its own clause says; verbs whose subject holds
+  many values at once ("directed", "wrote") and slots like "allergic to"
+  are not read as changes.
+- A note on a long message that is cut is kept only when the quoted part
+  shows the fact it is about.
+- Through MCP, `profile_ingest` and `profile_confirm` are marked
+  destructive, so a client that reads the hint asks first, and
+  `profile_ingest` always starts a new conversation. Every forget,
+  correction and confirmation is logged in `changes.jsonl` with its time,
+  whether it came through MCP or the command line, and the fact's id, never
+  its words.
+- An "always" or "never" rule deep inside a message over 600 characters
+  (likely a pasted document) no longer becomes a standing instruction.
+- The credential filter also removes `--password`, `--token` and
+  `--api-key` flags, `user:password@host` without a scheme, `whsec_`
+  webhook secrets and "mypassword is ...".
 - A session whose storing was cut off (the computer slept, or on WSL the
   Linux side stopped after the terminal closed) is stored at the next
   session start, up to three tries. Before, its conversation was kept but

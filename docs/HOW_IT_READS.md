@@ -193,6 +193,30 @@ Fitzroy" / "I moved the sofa", cosine above 0.5), and it was removed.
   in 20 no-change scenarios, but labelled only 2 of 25 implied changes:
   refuted as a signal of implied change; the answers did not need it.
 
+**A second way to "may have changed since", for facts about other people
+and things (on by default since 2026-10-27, `RG_FRAME_CHANGES=0` turns it
+off)**: two facts that fill the same sentence frame with different names,
+the later one dated later, are linked even without a change word or the
+user as subject ("The capital of Freedonia is Ruritania" and, a month
+later, "The capital of Freedonia is Sylvania"). The frame is the sentence
+up to the value's last preposition, and only a value that is a name counts,
+so "Sam is tired" and "Sam is happy" are not one frame. Not linked: a frame
+filled two ways at once (several values in one message), facts that add
+rather than replace ("also", "as well", "on the side"), events and likes
+("went to", "visited"; only stative and relational verbs such as live,
+work, found, lead count), verbs whose subject holds many
+values at once ("Nolan directed Inception" and "... Oppenheimer"; the
+passive "was directed by" holds one), and slots like "allergic to" or
+"friends with". A death ends only what its own clause says ("was born in
+Tokyo and lives in Osaka": the death ends Osaka, not the birthplace). For
+facts not about the user the note names the later fact and its date.
+- Status: built and tuned on MemoryAgentBench's development lists (sh_6k,
+  mh_6k) only, then measured once on the held-out lists
+  (`docs/PREREG_FACTCONSOL_V1.md`): single facts 49 -> 84 and 40 -> 80 of
+  100, still below plain retrieval (89 and 94). Its precision on ordinary
+  conversations has not been measured; on LoCoMo it changed 27 contexts and
+  no score.
+
 ## Decisions made with the assistant
 
 **An accepted proposal is the user's decision.** In dialogue-act terms the

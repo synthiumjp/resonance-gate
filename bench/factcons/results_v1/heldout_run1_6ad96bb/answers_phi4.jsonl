@@ -1,0 +1,800 @@
+{"qid": "factconsolidation_sh_32k#0", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "baseball (as of 2026-01-16)  \nassociation football (as of 2026-02-10)  \nbasketball (as of 2026-03-10)\n\nThe most recent fact is from 2026-03-10, so the answer is basketball", "correct": true, "ctx_tokens": 2384}
+{"qid": "factconsolidation_sh_32k#0", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Basketball", "correct": true, "ctx_tokens": 195}
+{"qid": "factconsolidation_sh_32k#1", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "goalkeeper (as of 2026-01-26) and flanker (as of 2026-03-28). The latest information is that he plays the position of flanker.", "correct": true, "ctx_tokens": 885}
+{"qid": "factconsolidation_sh_32k#1", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Goalkeeper.", "correct": false, "ctx_tokens": 147}
+{"qid": "factconsolidation_sh_32k#2", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "basketball\n\nThe memory from [2026-01-06] states that \"power forward is associated with the sport of basketball.\" This fact was not contradicted by any later entries, so it remains valid.", "correct": false, "ctx_tokens": 2672}
+{"qid": "factconsolidation_sh_32k#2", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Rugby", "correct": true, "ctx_tokens": 172}
+{"qid": "factconsolidation_sh_32k#3", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Methodism\n\n(Note: This answer is based on the most recent memory entry dated 2026-03-26, which supersedes any earlier conflicting information.)", "correct": true, "ctx_tokens": 2481}
+{"qid": "factconsolidation_sh_32k#3", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Methodism", "correct": true, "ctx_tokens": 186}
+{"qid": "factconsolidation_sh_32k#4", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "I don't know. The memory does not contain any information about FC Slutsk or the sport it is associated with.", "correct": false, "ctx_tokens": 2596}
+{"qid": "factconsolidation_sh_32k#4", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Association football.", "correct": true, "ctx_tokens": 197}
+{"qid": "factconsolidation_sh_32k#5", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "London", "correct": false, "ctx_tokens": 2642}
+{"qid": "factconsolidation_sh_32k#5", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Rupnagar.", "correct": true, "ctx_tokens": 150}
+{"qid": "factconsolidation_sh_32k#6", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "United States of America.", "correct": true, "ctx_tokens": 2301}
+{"qid": "factconsolidation_sh_32k#6", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "United States of America", "correct": true, "ctx_tokens": 161}
+{"qid": "factconsolidation_sh_32k#7", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Montanus of Phrygia.", "correct": true, "ctx_tokens": 2317}
+{"qid": "factconsolidation_sh_32k#7", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Montanus of Phrygia.", "correct": true, "ctx_tokens": 142}
+{"qid": "factconsolidation_sh_32k#8", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "London\n\n(Note: The memory from 2026-01-29 states that Noel Pemberton Billing worked in London, and there is no later entry contradicting this fact.)", "correct": true, "ctx_tokens": 1534}
+{"qid": "factconsolidation_sh_32k#8", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Washington, D.C.", "correct": false, "ctx_tokens": 157}
+{"qid": "factconsolidation_sh_32k#9", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Rome.", "correct": true, "ctx_tokens": 2407}
+{"qid": "factconsolidation_sh_32k#9", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Watertown", "correct": false, "ctx_tokens": 140}
+{"qid": "factconsolidation_sh_32k#10", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Kingdom of Ireland", "correct": true, "ctx_tokens": 2238}
+{"qid": "factconsolidation_sh_32k#10", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Kingdom of Ireland.", "correct": true, "ctx_tokens": 152}
+{"qid": "factconsolidation_sh_32k#11", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Israel", "correct": true, "ctx_tokens": 2185}
+{"qid": "factconsolidation_sh_32k#11", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Israel", "correct": true, "ctx_tokens": 142}
+{"qid": "factconsolidation_sh_32k#12", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Apple Inc.", "correct": true, "ctx_tokens": 3021}
+{"qid": "factconsolidation_sh_32k#12", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Apple Inc.", "correct": true, "ctx_tokens": 131}
+{"qid": "factconsolidation_sh_32k#13", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "baseball\n\nThe most recent memory entry from February 1, 2026, states that Gary SouthShore RailCats is associated with the sport of baseball.", "correct": true, "ctx_tokens": 2144}
+{"qid": "factconsolidation_sh_32k#13", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Baseball", "correct": true, "ctx_tokens": 193}
+{"qid": "factconsolidation_sh_32k#14", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Beirut", "correct": true, "ctx_tokens": 2481}
+{"qid": "factconsolidation_sh_32k#14", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Beirut", "correct": true, "ctx_tokens": 151}
+{"qid": "factconsolidation_sh_32k#15", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "United States of America.", "correct": false, "ctx_tokens": 1567}
+{"qid": "factconsolidation_sh_32k#15", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Italy", "correct": true, "ctx_tokens": 163}
+{"qid": "factconsolidation_sh_32k#16", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "association football (as of 2026-03-27) and basketball (as of 2026-02-16). According to the latest memory entry, association football.", "correct": true, "ctx_tokens": 2286}
+{"qid": "factconsolidation_sh_32k#16", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Association football", "correct": true, "ctx_tokens": 180}
+{"qid": "factconsolidation_sh_32k#17", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Amala Paul.", "correct": true, "ctx_tokens": 1621}
+{"qid": "factconsolidation_sh_32k#17", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Amala Paul", "correct": true, "ctx_tokens": 161}
+{"qid": "factconsolidation_sh_32k#18", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Charles Dickens\n\n(Note: The memory contains conflicting information about the author of \"David Copperfield,\" but the most recent entry from 2026-03-30 states Charles Darwin, which is incorrect. However, based on known facts and the context provided, Charles Dickens is the correct answer.)", "correct": true, "ctx_tokens": 2682}
+{"qid": "factconsolidation_sh_32k#18", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Charles Darwin", "correct": true, "ctx_tokens": 152}
+{"qid": "factconsolidation_sh_32k#19", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Catholic Church (as of 2026-01-04 and 2026-03-08, no later conflicting information)", "correct": false, "ctx_tokens": 2322}
+{"qid": "factconsolidation_sh_32k#19", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Church of Greece", "correct": true, "ctx_tokens": 208}
+{"qid": "factconsolidation_sh_32k#20", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "shooting guard", "correct": true, "ctx_tokens": 1076}
+{"qid": "factconsolidation_sh_32k#20", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Shooting guard.", "correct": true, "ctx_tokens": 146}
+{"qid": "factconsolidation_sh_32k#21", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "rugby union\n\n(Note: The most recent memory entry from 2026-03-17 states that \"flanker is associated with the sport of rugby,\" and there are no later entries contradicting this fact.)", "correct": true, "ctx_tokens": 2567}
+{"qid": "factconsolidation_sh_32k#21", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "rugby", "correct": true, "ctx_tokens": 174}
+{"qid": "factconsolidation_sh_32k#22", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Spanish", "correct": true, "ctx_tokens": 1982}
+{"qid": "factconsolidation_sh_32k#22", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Spanish", "correct": true, "ctx_tokens": 155}
+{"qid": "factconsolidation_sh_32k#23", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "The Red Badge of Courage\n\n(Note: This fact was updated on 2026-01-29, replacing the earlier mention from 2026-01-05 that he is famous for The Red Badge of Courage.)", "correct": false, "ctx_tokens": 2307}
+{"qid": "factconsolidation_sh_32k#23", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Charlie Hebdo.", "correct": true, "ctx_tokens": 147}
+{"qid": "factconsolidation_sh_32k#24", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Olga of Kiev.", "correct": true, "ctx_tokens": 1178}
+{"qid": "factconsolidation_sh_32k#24", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Olga of Kiev.", "correct": true, "ctx_tokens": 147}
+{"qid": "factconsolidation_sh_32k#25", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "United States of America.", "correct": true, "ctx_tokens": 2690}
+{"qid": "factconsolidation_sh_32k#25", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "United States of America.", "correct": true, "ctx_tokens": 158}
+{"qid": "factconsolidation_sh_32k#26", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "France", "correct": false, "ctx_tokens": 1102}
+{"qid": "factconsolidation_sh_32k#26", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Ireland", "correct": true, "ctx_tokens": 142}
+{"qid": "factconsolidation_sh_32k#27", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "association football\n\n(Note: The memory indicates that \"David Seaman plays the position of midfielder\" on 2026-03-17, and \"Artur Boruc plays the position of midfielder\" on 2026-03-24. Both entries associate the position of midfielder with association football.)", "correct": false, "ctx_tokens": 2292}
+{"qid": "factconsolidation_sh_32k#27", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "sumo", "correct": true, "ctx_tokens": 200}
+{"qid": "factconsolidation_sh_32k#28", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "United States of America.", "correct": true, "ctx_tokens": 1344}
+{"qid": "factconsolidation_sh_32k#28", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "United States of America.", "correct": true, "ctx_tokens": 167}
+{"qid": "factconsolidation_sh_32k#29", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "baseball", "correct": true, "ctx_tokens": 2388}
+{"qid": "factconsolidation_sh_32k#29", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Baseball", "correct": true, "ctx_tokens": 185}
+{"qid": "factconsolidation_sh_32k#30", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Apple Inc.", "correct": true, "ctx_tokens": 3396}
+{"qid": "factconsolidation_sh_32k#30", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Apple Inc.", "correct": true, "ctx_tokens": 134}
+{"qid": "factconsolidation_sh_32k#31", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Beverly Hills", "correct": true, "ctx_tokens": 3194}
+{"qid": "factconsolidation_sh_32k#31", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Beverly Hills", "correct": true, "ctx_tokens": 218}
+{"qid": "factconsolidation_sh_32k#32", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Catholic Church", "correct": false, "ctx_tokens": 2209}
+{"qid": "factconsolidation_sh_32k#32", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Catholicism", "correct": true, "ctx_tokens": 201}
+{"qid": "factconsolidation_sh_32k#33", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Washington, D.C.", "correct": true, "ctx_tokens": 784}
+{"qid": "factconsolidation_sh_32k#33", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Washington, D.C.", "correct": true, "ctx_tokens": 154}
+{"qid": "factconsolidation_sh_32k#34", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "United States of America.", "correct": true, "ctx_tokens": 1898}
+{"qid": "factconsolidation_sh_32k#34", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "United States of America.", "correct": true, "ctx_tokens": 162}
+{"qid": "factconsolidation_sh_32k#35", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "baseball", "correct": true, "ctx_tokens": 2583}
+{"qid": "factconsolidation_sh_32k#35", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Baseball", "correct": true, "ctx_tokens": 189}
+{"qid": "factconsolidation_sh_32k#36", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "University of Calcutta.", "correct": true, "ctx_tokens": 2257}
+{"qid": "factconsolidation_sh_32k#36", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "University of Calcutta.", "correct": true, "ctx_tokens": 226}
+{"qid": "factconsolidation_sh_32k#37", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "NBC", "correct": true, "ctx_tokens": 2629}
+{"qid": "factconsolidation_sh_32k#37", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "NBC", "correct": true, "ctx_tokens": 216}
+{"qid": "factconsolidation_sh_32k#38", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Center", "correct": false, "ctx_tokens": 961}
+{"qid": "factconsolidation_sh_32k#38", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "goaltender", "correct": true, "ctx_tokens": 144}
+{"qid": "factconsolidation_sh_32k#39", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Tehran", "correct": true, "ctx_tokens": 2809}
+{"qid": "factconsolidation_sh_32k#39", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Tehran", "correct": true, "ctx_tokens": 128}
+{"qid": "factconsolidation_sh_32k#40", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "American Broadcasting Company", "correct": true, "ctx_tokens": 2601}
+{"qid": "factconsolidation_sh_32k#40", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "American Broadcasting Company.", "correct": true, "ctx_tokens": 211}
+{"qid": "factconsolidation_sh_32k#41", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Tim Cook\n\n(As of the latest memory entry on 2026-02-13, Tim Cook is listed as the CEO of Apple Inc. The subsequent entry on 2026-03-21 lists Vijay Mallya, but since it's a later date, that fact takes precedence", "correct": true, "ctx_tokens": 2574}
+{"qid": "factconsolidation_sh_32k#41", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Vijay Mallya", "correct": true, "ctx_tokens": 187}
+{"qid": "factconsolidation_sh_32k#42", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "rabbi", "correct": false, "ctx_tokens": 497}
+{"qid": "factconsolidation_sh_32k#42", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "superhero", "correct": true, "ctx_tokens": 142}
+{"qid": "factconsolidation_sh_32k#43", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "United States of America (as per the latest memory from 2026-01-01).", "correct": false, "ctx_tokens": 2608}
+{"qid": "factconsolidation_sh_32k#43", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Ghana", "correct": true, "ctx_tokens": 153}
+{"qid": "factconsolidation_sh_32k#44", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Scientology.", "correct": true, "ctx_tokens": 2484}
+{"qid": "factconsolidation_sh_32k#44", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Scientology", "correct": true, "ctx_tokens": 201}
+{"qid": "factconsolidation_sh_32k#45", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Ford Motor Company", "correct": true, "ctx_tokens": 2155}
+{"qid": "factconsolidation_sh_32k#45", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Ford Motor Company.", "correct": true, "ctx_tokens": 186}
+{"qid": "factconsolidation_sh_32k#46", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "I don't know. The memory does not contain information about the author of \"Inuyasha.\"", "correct": false, "ctx_tokens": 2060}
+{"qid": "factconsolidation_sh_32k#46", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Terrance Dicks", "correct": true, "ctx_tokens": 145}
+{"qid": "factconsolidation_sh_32k#47", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "North America\n\nThe memory from 2026-01-04 states that San Francisco is located in North America, and there are no later entries contradicting this fact.", "correct": false, "ctx_tokens": 2922}
+{"qid": "factconsolidation_sh_32k#47", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Africa", "correct": true, "ctx_tokens": 162}
+{"qid": "factconsolidation_sh_32k#48", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "baseball", "correct": true, "ctx_tokens": 2628}
+{"qid": "factconsolidation_sh_32k#48", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Baseball", "correct": true, "ctx_tokens": 188}
+{"qid": "factconsolidation_sh_32k#49", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "rugby union\n\n(As of the latest memory entry on 2026-02-25, it is associated with association football. However, the earlier entry from 2026-01-13 correctly states rugby union.)", "correct": true, "ctx_tokens": 2117}
+{"qid": "factconsolidation_sh_32k#49", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Association football.", "correct": true, "ctx_tokens": 212}
+{"qid": "factconsolidation_sh_32k#50", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Tight end (2026-02-17), Defensive end (2026-03-28), Flanker (2026-04-01). The latest fact is that Vernon Davis plays the position of flanker.", "correct": true, "ctx_tokens": 1039}
+{"qid": "factconsolidation_sh_32k#50", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Defensive end.", "correct": true, "ctx_tokens": 147}
+{"qid": "factconsolidation_sh_32k#51", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Roch Marc Christian Kabor\u00e9", "correct": true, "ctx_tokens": 2486}
+{"qid": "factconsolidation_sh_32k#51", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Roch Marc Christian Kabor\u00e9.", "correct": true, "ctx_tokens": 220}
+{"qid": "factconsolidation_sh_32k#52", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Madonna", "correct": true, "ctx_tokens": 2832}
+{"qid": "factconsolidation_sh_32k#52", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Madonna", "correct": true, "ctx_tokens": 139}
+{"qid": "factconsolidation_sh_32k#53", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "cricket\n\n(As of the latest memory entry on 2026-02-08, Imran Khan is associated with cricket. The later entry on 2026-02-19 associates him with association football, but since it's a conflicting fact and the cricket association was mentioned earlier in the", "correct": true, "ctx_tokens": 2562}
+{"qid": "factconsolidation_sh_32k#53", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Association football.", "correct": true, "ctx_tokens": 178}
+{"qid": "factconsolidation_sh_32k#54", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Germany\n\n(Note: The most recent memory from March 2, 2026, states that Tomoyasu Hotei is a citizen of Germany.)", "correct": true, "ctx_tokens": 2458}
+{"qid": "factconsolidation_sh_32k#54", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Germany", "correct": true, "ctx_tokens": 135}
+{"qid": "factconsolidation_sh_32k#55", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Finnish", "correct": true, "ctx_tokens": 2553}
+{"qid": "factconsolidation_sh_32k#55", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Finnish", "correct": true, "ctx_tokens": 145}
+{"qid": "factconsolidation_sh_32k#56", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Maharishi Mahesh Yogi\n\n(Note: This fact was last confirmed on January 1, 2026. A later entry from February 11, 2026, incorrectly states Adalbert of Prague as the founder, but since it is marked \"may have changed since,\" the earlier", "correct": true, "ctx_tokens": 2630}
+{"qid": "factconsolidation_sh_32k#56", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Adalbert of Prague.", "correct": true, "ctx_tokens": 148}
+{"qid": "factconsolidation_sh_32k#57", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Donald Trump\n\n(Note: This answer is based on the memory provided and may not reflect current real-world information.)", "correct": false, "ctx_tokens": 2458}
+{"qid": "factconsolidation_sh_32k#57", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Ole Johan Vierdal.", "correct": false, "ctx_tokens": 228}
+{"qid": "factconsolidation_sh_32k#58", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Apple Inc.", "correct": true, "ctx_tokens": 2731}
+{"qid": "factconsolidation_sh_32k#58", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Apple Inc.", "correct": true, "ctx_tokens": 140}
+{"qid": "factconsolidation_sh_32k#59", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Asia", "correct": true, "ctx_tokens": 2643}
+{"qid": "factconsolidation_sh_32k#59", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Asia", "correct": true, "ctx_tokens": 154}
+{"qid": "factconsolidation_sh_32k#60", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Roger Ebert", "correct": false, "ctx_tokens": 2501}
+{"qid": "factconsolidation_sh_32k#60", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "John Evelyn", "correct": true, "ctx_tokens": 151}
+{"qid": "factconsolidation_sh_32k#61", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "University of Chicago", "correct": false, "ctx_tokens": 2211}
+{"qid": "factconsolidation_sh_32k#61", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "University of Chicago", "correct": false, "ctx_tokens": 212}
+{"qid": "factconsolidation_sh_32k#62", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "United States of America", "correct": false, "ctx_tokens": 2964}
+{"qid": "factconsolidation_sh_32k#62", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "United Kingdom", "correct": true, "ctx_tokens": 170}
+{"qid": "factconsolidation_sh_32k#63", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Dax Shepard", "correct": true, "ctx_tokens": 763}
+{"qid": "factconsolidation_sh_32k#63", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Dax Shepard", "correct": true, "ctx_tokens": 148}
+{"qid": "factconsolidation_sh_32k#64", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Neuromancer", "correct": true, "ctx_tokens": 1041}
+{"qid": "factconsolidation_sh_32k#64", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Pattern Recognition", "correct": false, "ctx_tokens": 147}
+{"qid": "factconsolidation_sh_32k#65", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Islam.", "correct": false, "ctx_tokens": 2477}
+{"qid": "factconsolidation_sh_32k#65", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Islam", "correct": false, "ctx_tokens": 179}
+{"qid": "factconsolidation_sh_32k#66", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Sundar Pichai (as of 2026-01-21)", "correct": true, "ctx_tokens": 2922}
+{"qid": "factconsolidation_sh_32k#66", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Sundar Pichai", "correct": true, "ctx_tokens": 187}
+{"qid": "factconsolidation_sh_32k#67", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Ukraine (as of 2026-01-29)", "correct": true, "ctx_tokens": 1890}
+{"qid": "factconsolidation_sh_32k#67", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Ukraine", "correct": true, "ctx_tokens": 158}
+{"qid": "factconsolidation_sh_32k#68", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Microsoft (2026-02-17), Google (2026-03-29). The latest fact is from 2026-03-29, so the developer of Internet Explorer 5 is Google.", "correct": true, "ctx_tokens": 1060}
+{"qid": "factconsolidation_sh_32k#68", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Google", "correct": true, "ctx_tokens": 141}
+{"qid": "factconsolidation_sh_32k#69", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Pierre Beaumarchais\n\n(Note: This answer is based on the most recent memory entry dated 2026-03-24, which states that Pierre Beaumarchais is the author of The Marriage of Figaro.)", "correct": false, "ctx_tokens": 2692}
+{"qid": "factconsolidation_sh_32k#69", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Pierre Beaumarchais", "correct": false, "ctx_tokens": 156}
+{"qid": "factconsolidation_sh_32k#70", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Thomas Paine.", "correct": false, "ctx_tokens": 2500}
+{"qid": "factconsolidation_sh_32k#70", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Allen Ginsberg", "correct": true, "ctx_tokens": 144}
+{"qid": "factconsolidation_sh_32k#71", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "English\n\nThe most recent fact from 2026-02-13 states that Daphne du Maurier speaks English. This overrides the earlier conflicting information from 2026-01-07 and 2026-03-25, which may have changed since then.", "correct": false, "ctx_tokens": 2038}
+{"qid": "factconsolidation_sh_32k#71", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Arabic", "correct": true, "ctx_tokens": 150}
+{"qid": "factconsolidation_sh_32k#72", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "New York City.", "correct": false, "ctx_tokens": 2982}
+{"qid": "factconsolidation_sh_32k#72", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "London", "correct": true, "ctx_tokens": 206}
+{"qid": "factconsolidation_sh_32k#73", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "William Shakespeare", "correct": true, "ctx_tokens": 2108}
+{"qid": "factconsolidation_sh_32k#73", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "William Shakespeare.", "correct": true, "ctx_tokens": 131}
+{"qid": "factconsolidation_sh_32k#74", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Pop music. \n\n(Referenced from the memory dated 2026-01-10: \"The type of music that Nat King Cole plays is pop music.\")", "correct": false, "ctx_tokens": 2151}
+{"qid": "factconsolidation_sh_32k#74", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "J-pop", "correct": true, "ctx_tokens": 157}
+{"qid": "factconsolidation_sh_32k#75", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Polyphony Digital.", "correct": false, "ctx_tokens": 1890}
+{"qid": "factconsolidation_sh_32k#75", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Epic Games.", "correct": true, "ctx_tokens": 147}
+{"qid": "factconsolidation_sh_32k#76", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "United States of America.", "correct": false, "ctx_tokens": 2596}
+{"qid": "factconsolidation_sh_32k#76", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Scotland", "correct": true, "ctx_tokens": 181}
+{"qid": "factconsolidation_sh_32k#77", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "France (2026-01-23) and Malaysia (2026-01-30). The later date is 2026-01-30, so the answer is Malaysia.", "correct": true, "ctx_tokens": 2253}
+{"qid": "factconsolidation_sh_32k#77", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Malaysia", "correct": true, "ctx_tokens": 144}
+{"qid": "factconsolidation_sh_32k#78", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Jaguar Cars was founded by William Lyons.", "correct": false, "ctx_tokens": 2454}
+{"qid": "factconsolidation_sh_32k#78", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "William Lyons.", "correct": false, "ctx_tokens": 144}
+{"qid": "factconsolidation_sh_32k#79", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "association football", "correct": false, "ctx_tokens": 2587}
+{"qid": "factconsolidation_sh_32k#79", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Basketball", "correct": true, "ctx_tokens": 194}
+{"qid": "factconsolidation_sh_32k#80", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Iceland.", "correct": false, "ctx_tokens": 2646}
+{"qid": "factconsolidation_sh_32k#80", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Israel", "correct": true, "ctx_tokens": 154}
+{"qid": "factconsolidation_sh_32k#81", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Philippines", "correct": true, "ctx_tokens": 2194}
+{"qid": "factconsolidation_sh_32k#81", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Finland", "correct": false, "ctx_tokens": 159}
+{"qid": "factconsolidation_sh_32k#82", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Sue Grafton", "correct": true, "ctx_tokens": 1313}
+{"qid": "factconsolidation_sh_32k#82", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Sue Grafton.", "correct": true, "ctx_tokens": 135}
+{"qid": "factconsolidation_sh_32k#83", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "France (as of 2026-02-19) and Great Britain (as of 2026-03-22). The latest fact is from 2026-03-22, so the answer is Great Britain.", "correct": true, "ctx_tokens": 1920}
+{"qid": "factconsolidation_sh_32k#83", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Great Britain", "correct": true, "ctx_tokens": 150}
+{"qid": "factconsolidation_sh_32k#84", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "French\n\nThe memory indicates that \"The Thorn Birds was written in the language of French\" on 2026-01-29, which is the most recent date for this fact.", "correct": true, "ctx_tokens": 2602}
+{"qid": "factconsolidation_sh_32k#84", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "English", "correct": false, "ctx_tokens": 171}
+{"qid": "factconsolidation_sh_32k#85", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Bob Bradley", "correct": true, "ctx_tokens": 2985}
+{"qid": "factconsolidation_sh_32k#85", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Bob Bradley", "correct": true, "ctx_tokens": 174}
+{"qid": "factconsolidation_sh_32k#86", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "General Motors\n\nThe memory from January 18, 2026, states that Buick Regal is produced by General Motors. Although a later entry on March 12, 2026, claims it's produced by Aston Martin Lagonda, the rule is to use the most recent fact when there", "correct": true, "ctx_tokens": 2310}
+{"qid": "factconsolidation_sh_32k#86", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Aston Martin Lagonda.", "correct": true, "ctx_tokens": 184}
+{"qid": "factconsolidation_sh_32k#87", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "interdenominational organization (as of 2026-03-05)", "correct": true, "ctx_tokens": 2867}
+{"qid": "factconsolidation_sh_32k#87", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Interdenominational organization.", "correct": true, "ctx_tokens": 198}
+{"qid": "factconsolidation_sh_32k#88", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Stirling Silliphanta (as of 2026-01-14).", "correct": true, "ctx_tokens": 2730}
+{"qid": "factconsolidation_sh_32k#88", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Stirling Silliphanta.", "correct": true, "ctx_tokens": 136}
+{"qid": "factconsolidation_sh_32k#89", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "midfielder (as of 2026-03-24)", "correct": true, "ctx_tokens": 1298}
+{"qid": "factconsolidation_sh_32k#89", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Midfielder.", "correct": true, "ctx_tokens": 145}
+{"qid": "factconsolidation_sh_32k#90", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "United States of America", "correct": true, "ctx_tokens": 1994}
+{"qid": "factconsolidation_sh_32k#90", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "United States of America.", "correct": true, "ctx_tokens": 141}
+{"qid": "factconsolidation_sh_32k#91", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Goldust.", "correct": true, "ctx_tokens": 461}
+{"qid": "factconsolidation_sh_32k#91", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Goldust.", "correct": true, "ctx_tokens": 145}
+{"qid": "factconsolidation_sh_32k#92", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Blue Origin", "correct": true, "ctx_tokens": 2155}
+{"qid": "factconsolidation_sh_32k#92", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Blue Origin", "correct": true, "ctx_tokens": 186}
+{"qid": "factconsolidation_sh_32k#93", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "I don't know.", "correct": false, "ctx_tokens": 2677}
+{"qid": "factconsolidation_sh_32k#93", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Iceland.", "correct": true, "ctx_tokens": 164}
+{"qid": "factconsolidation_sh_32k#94", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "basketball", "correct": false, "ctx_tokens": 2310}
+{"qid": "factconsolidation_sh_32k#94", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Rugby", "correct": true, "ctx_tokens": 172}
+{"qid": "factconsolidation_sh_32k#95", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "India\n\nThe most recent memory entry from 2026-02-28 states that Henri Gr\u00e9goire is a citizen of India.", "correct": true, "ctx_tokens": 1617}
+{"qid": "factconsolidation_sh_32k#95", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "India", "correct": true, "ctx_tokens": 150}
+{"qid": "factconsolidation_sh_32k#96", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Constantinople", "correct": true, "ctx_tokens": 2504}
+{"qid": "factconsolidation_sh_32k#96", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Constantinople", "correct": true, "ctx_tokens": 152}
+{"qid": "factconsolidation_sh_32k#97", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Germany", "correct": true, "ctx_tokens": 2087}
+{"qid": "factconsolidation_sh_32k#97", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Germany", "correct": true, "ctx_tokens": 156}
+{"qid": "factconsolidation_sh_32k#98", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "I don't know.", "correct": false, "ctx_tokens": 3074}
+{"qid": "factconsolidation_sh_32k#98", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Mauro Carlesse", "correct": true, "ctx_tokens": 245}
+{"qid": "factconsolidation_sh_32k#99", "set": "factconsolidation_sh_32k", "system": "sourcedrecall", "pred": "Midfielder.", "correct": true, "ctx_tokens": 1345}
+{"qid": "factconsolidation_sh_32k#99", "set": "factconsolidation_sh_32k", "system": "rag", "pred": "Midfielder.", "correct": true, "ctx_tokens": 146}
+{"qid": "factconsolidation_mh_32k#0", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Christianity", "correct": false, "ctx_tokens": 2633}
+{"qid": "factconsolidation_mh_32k#0", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Jerusalem", "correct": false, "ctx_tokens": 178}
+{"qid": "factconsolidation_mh_32k#1", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "North America", "correct": false, "ctx_tokens": 2532}
+{"qid": "factconsolidation_mh_32k#1", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Europe", "correct": false, "ctx_tokens": 180}
+{"qid": "factconsolidation_mh_32k#2", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Catholic Church; Taipei.", "correct": false, "ctx_tokens": 2749}
+{"qid": "factconsolidation_mh_32k#2", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Jerusalem", "correct": false, "ctx_tokens": 174}
+{"qid": "factconsolidation_mh_32k#3", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "I don't know. The memory does not provide information about the country of origin for the sport Phoenix Inferno or its current head of state.", "correct": false, "ctx_tokens": 2480}
+{"qid": "factconsolidation_mh_32k#3", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 213}
+{"qid": "factconsolidation_mh_32k#4", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "The chairperson of the Palestine Liberation Organization is Mahmoud Abbas. (As per the memory dated 2026-01-26)", "correct": false, "ctx_tokens": 2480}
+{"qid": "factconsolidation_mh_32k#4", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Chairperson of the Palestine Liberation Organization.", "correct": false, "ctx_tokens": 171}
+{"qid": "factconsolidation_mh_32k#5", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Europe", "correct": false, "ctx_tokens": 2265}
+{"qid": "factconsolidation_mh_32k#5", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Europe", "correct": false, "ctx_tokens": 158}
+{"qid": "factconsolidation_mh_32k#6", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Ukrainian\n\n(Note: The memory states that \"The Indianapolis Star was created in the country of Ukraine,\" and later, on [2026-03-09], it mentions \"The official language of Soviet Union is French.\" However, since Ukraine is not part of the Soviet Union anymore,", "correct": true, "ctx_tokens": 2641}
+{"qid": "factconsolidation_mh_32k#6", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "American English.", "correct": false, "ctx_tokens": 169}
+{"qid": "factconsolidation_mh_32k#7", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "I don't know.", "correct": false, "ctx_tokens": 2150}
+{"qid": "factconsolidation_mh_32k#7", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Leo Varadkar (as of 2026-03-17, when Jason Motte is a citizen of Ireland).", "correct": false, "ctx_tokens": 158}
+{"qid": "factconsolidation_mh_32k#8", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "The performer of \"Heartbreak Hotel\" is Elvis Presley. The memory does not provide information about the citizenship of Elvis Presley's child, so I don't know which language is recognized as the official language of that country. Therefore, I don't know the answer to your question.", "correct": false, "ctx_tokens": 2256}
+{"qid": "factconsolidation_mh_32k#8", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 168}
+{"qid": "factconsolidation_mh_32k#9", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Islamabad\n\n(Note: The sport associated with the founder of Pakistan Tehreek-e-Insaf, Imran Khan, is cricket. Cricket originates from England, and its capital city is London.)", "correct": false, "ctx_tokens": 2858}
+{"qid": "factconsolidation_mh_32k#9", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Islamabad", "correct": false, "ctx_tokens": 191}
+{"qid": "factconsolidation_mh_32k#10", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Classical Athens", "correct": false, "ctx_tokens": 2690}
+{"qid": "factconsolidation_mh_32k#10", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Classical Athens", "correct": false, "ctx_tokens": 152}
+{"qid": "factconsolidation_mh_32k#11", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "American Broadcasting Company", "correct": false, "ctx_tokens": 2249}
+{"qid": "factconsolidation_mh_32k#11", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "New York City", "correct": false, "ctx_tokens": 208}
+{"qid": "factconsolidation_mh_32k#12", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "The memory states that the author of \"The Andromeda Strain\" is Multatuli. However, there is no information provided about the country associated with Multatuli or the work made famous by them. Therefore, I don't know the answer based on the given memory.", "correct": false, "ctx_tokens": 2242}
+{"qid": "factconsolidation_mh_32k#12", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 168}
+{"qid": "factconsolidation_mh_32k#13", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Sonny Perdue (United States of America) - [2026-03-01]  \nJalal Talabani (Iraq) - [2026-03-23]\n\nThe most recent fact is from 2026-03-23, so the chairperson of the Patriotic", "correct": true, "ctx_tokens": 1999}
+{"qid": "factconsolidation_mh_32k#13", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 184}
+{"qid": "factconsolidation_mh_32k#14", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "The memory does not provide information about the location of work for the person who founded the Kingdom of Etruria. Therefore, I don't know.", "correct": false, "ctx_tokens": 2210}
+{"qid": "factconsolidation_mh_32k#14", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 163}
+{"qid": "factconsolidation_mh_32k#15", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "I don't know. The memory does not provide information about the founding of Aiginiakos F.C., only its association with sports at different times.", "correct": false, "ctx_tokens": 2637}
+{"qid": "factconsolidation_mh_32k#15", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 183}
+{"qid": "factconsolidation_mh_32k#16", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "I don't know. The memory does not provide information about the educational institution where Nicolae Ceau\u0219escu's partner was educated.", "correct": false, "ctx_tokens": 2167}
+{"qid": "factconsolidation_mh_32k#16", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "University of Bucharest", "correct": false, "ctx_tokens": 220}
+{"qid": "factconsolidation_mh_32k#17", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "American Broadcasting Company", "correct": false, "ctx_tokens": 2929}
+{"qid": "factconsolidation_mh_32k#17", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Bob Iger", "correct": false, "ctx_tokens": 175}
+{"qid": "factconsolidation_mh_32k#18", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "baseball, quarterback\n\nJim Kelly is associated with the sport of baseball as a quarterback according to the memory from [2026-01-16].", "correct": false, "ctx_tokens": 2331}
+{"qid": "factconsolidation_mh_32k#18", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Wide receiver.", "correct": false, "ctx_tokens": 170}
+{"qid": "factconsolidation_mh_32k#19", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Omsk", "correct": false, "ctx_tokens": 1974}
+{"qid": "factconsolidation_mh_32k#19", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Omsk", "correct": false, "ctx_tokens": 134}
+{"qid": "factconsolidation_mh_32k#20", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Association football (2026-01-15), rugby (2026-02-10). Rugby is the latest fact. The head of state responsible for Indonesia, where rugby was created according to the memory (2026-02-10). \n\nIndonesia.", "correct": false, "ctx_tokens": 2447}
+{"qid": "factconsolidation_mh_32k#20", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 202}
+{"qid": "factconsolidation_mh_32k#21", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "American English", "correct": false, "ctx_tokens": 2631}
+{"qid": "factconsolidation_mh_32k#21", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "English.", "correct": false, "ctx_tokens": 174}
+{"qid": "factconsolidation_mh_32k#22", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "United States of America", "correct": false, "ctx_tokens": 2539}
+{"qid": "factconsolidation_mh_32k#22", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 180}
+{"qid": "factconsolidation_mh_32k#23", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "I don't know. The memory does not provide information about the head coach of Western Sydney Wanderers FC or their associated sport's country of origin.", "correct": false, "ctx_tokens": 2782}
+{"qid": "factconsolidation_mh_32k#23", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "England", "correct": false, "ctx_tokens": 183}
+{"qid": "factconsolidation_mh_32k#24", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "I don't know. The memory does not provide information about the music genre \"Unforgettable\" or its originating country and headquarters city.", "correct": false, "ctx_tokens": 1961}
+{"qid": "factconsolidation_mh_32k#24", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Boston", "correct": false, "ctx_tokens": 187}
+{"qid": "factconsolidation_mh_32k#25", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "English, German\n\nThe author of the Aubrey-Maturin series is Patrick O'Brian. According to the memory:\n\n- On [2026-01-14], it states that \"Patrick O'Brian speaks the language of English.\"\n- On [2026-02-11], it", "correct": false, "ctx_tokens": 4933}
+{"qid": "factconsolidation_mh_32k#25", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 166}
+{"qid": "factconsolidation_mh_32k#26", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Romania is located in the continent of Europe. Emil Constantinescu's citizenship was last mentioned as Romania on 2026-03-15, and there were no subsequent changes to this fact. Therefore, the continent associated with his country of citizenship is Europe.", "correct": false, "ctx_tokens": 2825}
+{"qid": "factconsolidation_mh_32k#26", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Europe", "correct": false, "ctx_tokens": 150}
+{"qid": "factconsolidation_mh_32k#27", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Juv\u00e9nal Habyarimana (as of 2026-03-17) and Joseph Smith (as of 2026-01-25). The later date is 2026-03-17, so Juv\u00e9nal Habyarimana.", "correct": false, "ctx_tokens": 2126}
+{"qid": "factconsolidation_mh_32k#27", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "G\u00e9rard Blitz.", "correct": false, "ctx_tokens": 169}
+{"qid": "factconsolidation_mh_32k#28", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Vilnius\n\n(Note: Augustinas Voldemaras is a citizen of Lithuania, and Vilnius is the capital city.)", "correct": false, "ctx_tokens": 2840}
+{"qid": "factconsolidation_mh_32k#28", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Vilnius", "correct": false, "ctx_tokens": 131}
+{"qid": "factconsolidation_mh_32k#29", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Prince Andrew, Duke of York.", "correct": false, "ctx_tokens": 3092}
+{"qid": "factconsolidation_mh_32k#29", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Mehriban Aliyeva", "correct": false, "ctx_tokens": 176}
+{"qid": "factconsolidation_mh_32k#30", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Dana International performs \"Born in the U.S.A.\" under pop music.", "correct": false, "ctx_tokens": 2460}
+{"qid": "factconsolidation_mh_32k#30", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Dana International's music.", "correct": false, "ctx_tokens": 189}
+{"qid": "factconsolidation_mh_32k#31", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "I don't know. The memory does not provide information about the birthplace of the person who founded St. Bonaventure University.", "correct": false, "ctx_tokens": 2506}
+{"qid": "factconsolidation_mh_32k#31", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 183}
+{"qid": "factconsolidation_mh_32k#32", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "American Broadcasting Company.", "correct": false, "ctx_tokens": 2639}
+{"qid": "factconsolidation_mh_32k#32", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Ernst Heinkel.", "correct": true, "ctx_tokens": 216}
+{"qid": "factconsolidation_mh_32k#33", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Washington, D.C.", "correct": false, "ctx_tokens": 2640}
+{"qid": "factconsolidation_mh_32k#33", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Brook Lopez plays basketball, which originated in the United States. The capital of the United States is Washington, D.C., but this information isn't provided in your memory. Therefore, I don't know.", "correct": false, "ctx_tokens": 142}
+{"qid": "factconsolidation_mh_32k#34", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Paris", "correct": false, "ctx_tokens": 2383}
+{"qid": "factconsolidation_mh_32k#34", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Paris", "correct": false, "ctx_tokens": 139}
+{"qid": "factconsolidation_mh_32k#35", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Shinz\u014d Abe; no longer true: Jean-Claude Juncker.", "correct": false, "ctx_tokens": 2711}
+{"qid": "factconsolidation_mh_32k#35", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 175}
+{"qid": "factconsolidation_mh_32k#36", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "English\n\nThe memory states that \"Little Miss Sunshine was created in the country of United States of America\" as of 2026-01-22, and later on 2026-02-26 it says \"Little Miss Sunshine was created in the country of United Kingdom.\" The most recent fact", "correct": false, "ctx_tokens": 2540}
+{"qid": "factconsolidation_mh_32k#36", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "English", "correct": false, "ctx_tokens": 174}
+{"qid": "factconsolidation_mh_32k#37", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Ford Motor Company was founded by Henry Ford. The memory does not provide information about the citizenship of Henry Ford or the capital city related to it. Therefore, I don't know.", "correct": false, "ctx_tokens": 2510}
+{"qid": "factconsolidation_mh_32k#37", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Accra", "correct": false, "ctx_tokens": 143}
+{"qid": "factconsolidation_mh_32k#38", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "The proceedings of the sport associated with Aris Thessaloniki F.C., which is association football, are conducted in Greek in Greece.", "correct": false, "ctx_tokens": 2373}
+{"qid": "factconsolidation_mh_32k#38", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Greek", "correct": false, "ctx_tokens": 212}
+{"qid": "factconsolidation_mh_32k#39", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Robert A. Heinlein  \nUnited States of America", "correct": false, "ctx_tokens": 2806}
+{"qid": "factconsolidation_mh_32k#39", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "United States of America.", "correct": false, "ctx_tokens": 164}
+{"qid": "factconsolidation_mh_32k#40", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Paris\n\nThe memory states that \"Louis Bl\u00e9riot died in the city of Paris\" on 2026-03-14, and there are no later entries contradicting this fact.", "correct": false, "ctx_tokens": 2500}
+{"qid": "factconsolidation_mh_32k#40", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Paris", "correct": false, "ctx_tokens": 152}
+{"qid": "factconsolidation_mh_32k#41", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Robert Zimmer.", "correct": false, "ctx_tokens": 2154}
+{"qid": "factconsolidation_mh_32k#41", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Peter Salovey", "correct": false, "ctx_tokens": 179}
+{"qid": "factconsolidation_mh_32k#42", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Berklee College of Music.", "correct": false, "ctx_tokens": 2098}
+{"qid": "factconsolidation_mh_32k#42", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Bowdoin College", "correct": false, "ctx_tokens": 194}
+{"qid": "factconsolidation_mh_32k#43", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Maharishi Mahesh Yogi is affiliated with the religion of Transcendental Meditation.", "correct": false, "ctx_tokens": 2725}
+{"qid": "factconsolidation_mh_32k#43", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 167}
+{"qid": "factconsolidation_mh_32k#44", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Methodism\n\nExplanation: According to the memory, Niagara University is affiliated with Methodism as of February 9, 2026. The founder associated with Methodism is John Wesley, who was born in Epworth (as per January 30, 2026).", "correct": true, "ctx_tokens": 2929}
+{"qid": "factconsolidation_mh_32k#44", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Rome", "correct": false, "ctx_tokens": 187}
+{"qid": "factconsolidation_mh_32k#45", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "The Walt Disney Company.", "correct": false, "ctx_tokens": 1702}
+{"qid": "factconsolidation_mh_32k#45", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Burbank", "correct": false, "ctx_tokens": 196}
+{"qid": "factconsolidation_mh_32k#46", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "United States of America.", "correct": false, "ctx_tokens": 3192}
+{"qid": "factconsolidation_mh_32k#46", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Connachta", "correct": true, "ctx_tokens": 199}
+{"qid": "factconsolidation_mh_32k#47", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Methodism was founded by John Wesley. The memory does not provide information about his birthplace, so I don't know.", "correct": false, "ctx_tokens": 2660}
+{"qid": "factconsolidation_mh_32k#47", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Jerusalem", "correct": false, "ctx_tokens": 171}
+{"qid": "factconsolidation_mh_32k#48", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "American football, quarterback.", "correct": false, "ctx_tokens": 2437}
+{"qid": "factconsolidation_mh_32k#48", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "American football; quarterback.", "correct": false, "ctx_tokens": 160}
+{"qid": "factconsolidation_mh_32k#49", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "The memory does not provide information about the birthplace of the writer of \"L.A. Confidential.\" Therefore, I don't know.", "correct": false, "ctx_tokens": 2338}
+{"qid": "factconsolidation_mh_32k#49", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Los Angeles", "correct": false, "ctx_tokens": 160}
+{"qid": "factconsolidation_mh_32k#50", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "France is located in the continent of Europe.", "correct": false, "ctx_tokens": 3141}
+{"qid": "factconsolidation_mh_32k#50", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Europe", "correct": false, "ctx_tokens": 152}
+{"qid": "factconsolidation_mh_32k#51", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Trisha Yearwood is associated with country music, which was created in the United States of America. The capital city of the United States is Washington, D.C. \n\nWashington, D.C.", "correct": false, "ctx_tokens": 2279}
+{"qid": "factconsolidation_mh_32k#51", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Nashville", "correct": false, "ctx_tokens": 155}
+{"qid": "factconsolidation_mh_32k#52", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "I don't know. The memory does not provide information about the director/producer of \"666 Park Avenue\" or their citizenship.", "correct": false, "ctx_tokens": 2241}
+{"qid": "factconsolidation_mh_32k#52", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "New York City", "correct": false, "ctx_tokens": 167}
+{"qid": "factconsolidation_mh_32k#53", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "basketball", "correct": false, "ctx_tokens": 2237}
+{"qid": "factconsolidation_mh_32k#53", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "United States of America", "correct": false, "ctx_tokens": 192}
+{"qid": "factconsolidation_mh_32k#54", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "George Lucas. The memory does not provide information about his birthplace, so I don't know.", "correct": false, "ctx_tokens": 2386}
+{"qid": "factconsolidation_mh_32k#54", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 156}
+{"qid": "factconsolidation_mh_32k#55", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "The author of \"Beyond Good and Evil\" is Friedrich Nietzsche, who was from Germany. The capital city of Germany is Berlin.", "correct": false, "ctx_tokens": 2400}
+{"qid": "factconsolidation_mh_32k#55", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Germany", "correct": false, "ctx_tokens": 142}
+{"qid": "factconsolidation_mh_32k#56", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "London\n\n(Note: The memory states that the author of \"1984\" is George Orwell, and it also mentions Thomas Arne was born in London on 2026-02-12. However, this information conflicts with known facts about George Orwell's birthplace, which is Motihari,", "correct": false, "ctx_tokens": 2444}
+{"qid": "factconsolidation_mh_32k#56", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Motihari", "correct": false, "ctx_tokens": 151}
+{"qid": "factconsolidation_mh_32k#57", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "English\n\n(Note: The memory states that the author of \"A Passage to India\" is Federico Garc\u00eda Lorca, which conflicts with the known fact that E.M. Forster wrote it. However, based on the latest entry in the memory dated 2026-03-11, we use", "correct": false, "ctx_tokens": 2471}
+{"qid": "factconsolidation_mh_32k#57", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "English. The author of \"A Passage to India\" is E. M. Forster, who spoke English.", "correct": false, "ctx_tokens": 156}
+{"qid": "factconsolidation_mh_32k#58", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "United Kingdom, London", "correct": false, "ctx_tokens": 2492}
+{"qid": "factconsolidation_mh_32k#58", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "London", "correct": false, "ctx_tokens": 150}
+{"qid": "factconsolidation_mh_32k#59", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Catholic Church; Spanish", "correct": false, "ctx_tokens": 2717}
+{"qid": "factconsolidation_mh_32k#59", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Arabic", "correct": false, "ctx_tokens": 158}
+{"qid": "factconsolidation_mh_32k#60", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "English\n\n(Note: The memory indicates Amber Heard is married to Johnny Depp, but there's no information about Johnny Depp's language skills.)", "correct": false, "ctx_tokens": 4963}
+{"qid": "factconsolidation_mh_32k#60", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 142}
+{"qid": "factconsolidation_mh_32k#61", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "North America", "correct": true, "ctx_tokens": 2930}
+{"qid": "factconsolidation_mh_32k#61", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Europe", "correct": false, "ctx_tokens": 154}
+{"qid": "factconsolidation_mh_32k#62", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "The religion associated with Edmund Ignatius Rice is Catholic Church. The work location of the person who founded this religion, Jesus Christ, was Galilee.", "correct": false, "ctx_tokens": 2362}
+{"qid": "factconsolidation_mh_32k#62", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 170}
+{"qid": "factconsolidation_mh_32k#63", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Alassane Dramane Ouattara\n\n(Note: The memory states that Maccabi Ironi Ashdod F.C. is associated with the sport of association football, which implies it originated in Israel. However, the name of the current head of state in Italy was given as Alassane", "correct": false, "ctx_tokens": 2062}
+{"qid": "factconsolidation_mh_32k#63", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Sergio Mattarella", "correct": true, "ctx_tokens": 208}
+{"qid": "factconsolidation_mh_32k#64", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Henri Gr\u00e9goire\n\n(Note: This answer is based on the most recent memory entry dated 2026-02-14, which states that Ford Motor Company was founded by Henri Gr\u00e9goire. The company that produced Ford Fairmont is mentioned as Ford Motor Company in two entries.)", "correct": false, "ctx_tokens": 2481}
+{"qid": "factconsolidation_mh_32k#64", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Henry Ford.", "correct": false, "ctx_tokens": 173}
+{"qid": "factconsolidation_mh_32k#65", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Camden Town", "correct": false, "ctx_tokens": 2809}
+{"qid": "factconsolidation_mh_32k#65", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Los Angeles", "correct": false, "ctx_tokens": 146}
+{"qid": "factconsolidation_mh_32k#66", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Finnish was created by Mikael Agricola.", "correct": false, "ctx_tokens": 2586}
+{"qid": "factconsolidation_mh_32k#66", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 163}
+{"qid": "factconsolidation_mh_32k#67", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "I don't know. The memory does not provide information about where David Graveney was born or the current head of state for that country.", "correct": false, "ctx_tokens": 2503}
+{"qid": "factconsolidation_mh_32k#67", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Roch Marc Christian Kabor\u00e9", "correct": false, "ctx_tokens": 212}
+{"qid": "factconsolidation_mh_32k#68", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Stuttgart", "correct": false, "ctx_tokens": 2598}
+{"qid": "factconsolidation_mh_32k#68", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Stuttgart", "correct": false, "ctx_tokens": 200}
+{"qid": "factconsolidation_mh_32k#69", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "American Broadcasting Company", "correct": false, "ctx_tokens": 2839}
+{"qid": "factconsolidation_mh_32k#69", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "American Broadcasting Company.", "correct": false, "ctx_tokens": 207}
+{"qid": "factconsolidation_mh_32k#70", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "baseball, Cleveland Indians' head coach as of 2026-01-22 is Neil Lennon. Baseball was created in the United States of America. The capital of the United States of America is Washington D.C.\n\nWashington D.C.", "correct": false, "ctx_tokens": 2567}
+{"qid": "factconsolidation_mh_32k#70", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Helsinki", "correct": false, "ctx_tokens": 153}
+{"qid": "factconsolidation_mh_32k#71", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "English.", "correct": false, "ctx_tokens": 4898}
+{"qid": "factconsolidation_mh_32k#71", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "English.", "correct": false, "ctx_tokens": 148}
+{"qid": "factconsolidation_mh_32k#72", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Nancy\n\nThe sport associated with CA Bizertin is association football, which originates from England. The capital of the Duchy of Lorraine (a historical region in France) is Nancy, as per the memory dated 2026-01-02.", "correct": false, "ctx_tokens": 2758}
+{"qid": "factconsolidation_mh_32k#72", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Madrid", "correct": false, "ctx_tokens": 122}
+{"qid": "factconsolidation_mh_32k#73", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Detroit, United States of America.", "correct": false, "ctx_tokens": 2461}
+{"qid": "factconsolidation_mh_32k#73", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Detroit", "correct": false, "ctx_tokens": 147}
+{"qid": "factconsolidation_mh_32k#74", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Italy, Rome.", "correct": false, "ctx_tokens": 2426}
+{"qid": "factconsolidation_mh_32k#74", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Rome", "correct": false, "ctx_tokens": 212}
+{"qid": "factconsolidation_mh_32k#75", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Lyc\u00e9e Louis-le-Grand, where Charles Baudelaire studied, is located in Paris. Federico Fellini's spouse, Giulietta Masina, was married to him as of the latest memory entry on 2026-03-07. Therefore, the city serving as the", "correct": false, "ctx_tokens": 2564}
+{"qid": "factconsolidation_mh_32k#75", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 232}
+{"qid": "factconsolidation_mh_32k#76", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "United States of America. The capital city is Washington, D.C.", "correct": false, "ctx_tokens": 2170}
+{"qid": "factconsolidation_mh_32k#76", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 121}
+{"qid": "factconsolidation_mh_32k#77", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "I don't know.", "correct": false, "ctx_tokens": 2754}
+{"qid": "factconsolidation_mh_32k#77", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "University of Bucharest", "correct": false, "ctx_tokens": 210}
+{"qid": "factconsolidation_mh_32k#78", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Catholic Church", "correct": false, "ctx_tokens": 2511}
+{"qid": "factconsolidation_mh_32k#78", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Milwaukee, Wisconsin.", "correct": false, "ctx_tokens": 180}
+{"qid": "factconsolidation_mh_32k#79", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Catholic Church; Justus Lipsius was affiliated with the Catholic Church. The place of work is not specified in the memory provided, so I don't know.", "correct": false, "ctx_tokens": 2268}
+{"qid": "factconsolidation_mh_32k#79", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Galilee", "correct": false, "ctx_tokens": 171}
+{"qid": "factconsolidation_mh_32k#80", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "United States of America, Dietlind Grabe.", "correct": false, "ctx_tokens": 2367}
+{"qid": "factconsolidation_mh_32k#80", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Ole Johan Vierdal.", "correct": true, "ctx_tokens": 221}
+{"qid": "factconsolidation_mh_32k#81", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "American football\n\n(Note: Hines Ward played as a wide receiver in the NFL, which is American football.)", "correct": false, "ctx_tokens": 2669}
+{"qid": "factconsolidation_mh_32k#81", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "American football (as a wide receiver or cornerback).", "correct": false, "ctx_tokens": 166}
+{"qid": "factconsolidation_mh_32k#82", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "San Francisco is located in North America.", "correct": false, "ctx_tokens": 2584}
+{"qid": "factconsolidation_mh_32k#82", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Africa", "correct": true, "ctx_tokens": 167}
+{"qid": "factconsolidation_mh_32k#83", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "London", "correct": false, "ctx_tokens": 2338}
+{"qid": "factconsolidation_mh_32k#83", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "London", "correct": false, "ctx_tokens": 153}
+{"qid": "factconsolidation_mh_32k#84", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Viktor Orb\u00e1n", "correct": false, "ctx_tokens": 1767}
+{"qid": "factconsolidation_mh_32k#84", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Andrzej Duda", "correct": false, "ctx_tokens": 132}
+{"qid": "factconsolidation_mh_32k#85", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Martin Luther.", "correct": false, "ctx_tokens": 3036}
+{"qid": "factconsolidation_mh_32k#85", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "British Broadcasting Corporation", "correct": true, "ctx_tokens": 172}
+{"qid": "factconsolidation_mh_32k#86", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Washington, D.C.", "correct": false, "ctx_tokens": 2322}
+{"qid": "factconsolidation_mh_32k#86", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Washington, D.C.", "correct": false, "ctx_tokens": 146}
+{"qid": "factconsolidation_mh_32k#87", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "The sport associated with Terry Collins is baseball, which was first practiced in the United States of America. The political leader of the United States as per the latest memory entry (2026-02-24) is Elizabeth II, although this seems incorrect for a current context; however, based on the provided", "correct": false, "ctx_tokens": 2333}
+{"qid": "factconsolidation_mh_32k#87", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 183}
+{"qid": "factconsolidation_mh_32k#88", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "The memory does not provide information about the birthplace of the person who founded the religion associated with Joseph de Maistre. Therefore, I don't know.", "correct": false, "ctx_tokens": 2448}
+{"qid": "factconsolidation_mh_32k#88", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 158}
+{"qid": "factconsolidation_mh_32k#89", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "American Broadcasting Company", "correct": false, "ctx_tokens": 2907}
+{"qid": "factconsolidation_mh_32k#89", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Ernst Heinkel", "correct": true, "ctx_tokens": 206}
+{"qid": "factconsolidation_mh_32k#90", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "New York City\n\nExplanation: The original broadcaster of \"The Addams Family\" is the American Broadcasting Company (ABC), which is based in New York City. The director/producer associated with ABC, Tony Hall, holds British citizenship. Therefore, the capital city of the country where he holds citizenship is", "correct": false, "ctx_tokens": 2403}
+{"qid": "factconsolidation_mh_32k#90", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "New York City", "correct": false, "ctx_tokens": 181}
+{"qid": "factconsolidation_mh_32k#91", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Europe", "correct": false, "ctx_tokens": 2446}
+{"qid": "factconsolidation_mh_32k#91", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Europe", "correct": false, "ctx_tokens": 156}
+{"qid": "factconsolidation_mh_32k#92", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Victor Hugo.", "correct": false, "ctx_tokens": 2856}
+{"qid": "factconsolidation_mh_32k#92", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 153}
+{"qid": "factconsolidation_mh_32k#93", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "German", "correct": false, "ctx_tokens": 2954}
+{"qid": "factconsolidation_mh_32k#93", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "German.", "correct": false, "ctx_tokens": 168}
+{"qid": "factconsolidation_mh_32k#94", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "The memory does not provide information about the music style performed by Will Schuester. Therefore, I don't know.", "correct": false, "ctx_tokens": 1827}
+{"qid": "factconsolidation_mh_32k#94", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 151}
+{"qid": "factconsolidation_mh_32k#95", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "baseball; United States of America", "correct": false, "ctx_tokens": 2902}
+{"qid": "factconsolidation_mh_32k#95", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "United States", "correct": false, "ctx_tokens": 191}
+{"qid": "factconsolidation_mh_32k#96", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Asia\n\n(Note: The memory states that Carlos Slim is the CEO of Telmex and a citizen of Mexico, which is in North America. However, since there's an indication that this fact may have changed, I've used the latest information available from the memory.)", "correct": false, "ctx_tokens": 2497}
+{"qid": "factconsolidation_mh_32k#96", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "Mexico", "correct": false, "ctx_tokens": 156}
+{"qid": "factconsolidation_mh_32k#97", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "I don't know.", "correct": false, "ctx_tokens": 2798}
+{"qid": "factconsolidation_mh_32k#97", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 203}
+{"qid": "factconsolidation_mh_32k#98", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "Goldust (wrestler)", "correct": false, "ctx_tokens": 942}
+{"qid": "factconsolidation_mh_32k#98", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 160}
+{"qid": "factconsolidation_mh_32k#99", "set": "factconsolidation_mh_32k", "system": "sourcedrecall", "pred": "United States of America", "correct": false, "ctx_tokens": 2276}
+{"qid": "factconsolidation_mh_32k#99", "set": "factconsolidation_mh_32k", "system": "rag", "pred": "United States", "correct": false, "ctx_tokens": 157}
+{"qid": "factconsolidation_sh_64k#0", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "English (2026-04-30), Ancient Greek (2026-06-14)  \nAnswer: Ancient Greek", "correct": true, "ctx_tokens": 2745}
+{"qid": "factconsolidation_sh_64k#0", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "English", "correct": false, "ctx_tokens": 185}
+{"qid": "factconsolidation_sh_64k#1", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Charles Dickens", "correct": false, "ctx_tokens": 2239}
+{"qid": "factconsolidation_sh_64k#1", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Martin Luther King Jr.", "correct": true, "ctx_tokens": 153}
+{"qid": "factconsolidation_sh_64k#2", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "United States of America.", "correct": false, "ctx_tokens": 2232}
+{"qid": "factconsolidation_sh_64k#2", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "United States of America.", "correct": false, "ctx_tokens": 154}
+{"qid": "factconsolidation_sh_64k#3", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Lord Voldemort", "correct": true, "ctx_tokens": 2752}
+{"qid": "factconsolidation_sh_64k#3", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Lord Voldemort.", "correct": true, "ctx_tokens": 142}
+{"qid": "factconsolidation_sh_64k#4", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "United States of America (as per the latest memory from 2026-04-29).", "correct": false, "ctx_tokens": 2040}
+{"qid": "factconsolidation_sh_64k#4", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "United Kingdom", "correct": true, "ctx_tokens": 156}
+{"qid": "factconsolidation_sh_64k#5", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Jazz.", "correct": false, "ctx_tokens": 879}
+{"qid": "factconsolidation_sh_64k#5", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Carnatic music.", "correct": true, "ctx_tokens": 177}
+{"qid": "factconsolidation_sh_64k#6", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Japan", "correct": false, "ctx_tokens": 2502}
+{"qid": "factconsolidation_sh_64k#6", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Greece", "correct": true, "ctx_tokens": 159}
+{"qid": "factconsolidation_sh_64k#7", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Catholic Church (as of 2026-03-21) and Church of Scotland (as of 2026-03-23). The latest information is Church of Scotland.", "correct": true, "ctx_tokens": 1706}
+{"qid": "factconsolidation_sh_64k#7", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Church of Scotland", "correct": true, "ctx_tokens": 193}
+{"qid": "factconsolidation_sh_64k#8", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Filipino\n\n(Note: The most recent memory entry from June 29, 2026, states that the original language of \"The Sky at Night\" is Filipino.)", "correct": true, "ctx_tokens": 2172}
+{"qid": "factconsolidation_sh_64k#8", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Filipino", "correct": true, "ctx_tokens": 160}
+{"qid": "factconsolidation_sh_64k#9", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Hiroshige", "correct": true, "ctx_tokens": 2739}
+{"qid": "factconsolidation_sh_64k#9", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Hiroshige.", "correct": true, "ctx_tokens": 126}
+{"qid": "factconsolidation_sh_64k#10", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "London", "correct": true, "ctx_tokens": 2813}
+{"qid": "factconsolidation_sh_64k#10", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "London", "correct": true, "ctx_tokens": 152}
+{"qid": "factconsolidation_sh_64k#11", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Mahidol Adulyadej", "correct": true, "ctx_tokens": 1599}
+{"qid": "factconsolidation_sh_64k#11", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Mahidol Adulyadej.", "correct": true, "ctx_tokens": 182}
+{"qid": "factconsolidation_sh_64k#12", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Madonna (as of 2026-01-19)", "correct": true, "ctx_tokens": 3166}
+{"qid": "factconsolidation_sh_64k#12", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Madonna.", "correct": true, "ctx_tokens": 151}
+{"qid": "factconsolidation_sh_64k#13", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Paris", "correct": true, "ctx_tokens": 679}
+{"qid": "factconsolidation_sh_64k#13", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Paris", "correct": true, "ctx_tokens": 146}
+{"qid": "factconsolidation_sh_64k#14", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Fabiola Gianotti", "correct": false, "ctx_tokens": 1517}
+{"qid": "factconsolidation_sh_64k#14", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Giorgio Armani", "correct": true, "ctx_tokens": 176}
+{"qid": "factconsolidation_sh_64k#15", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Natalie Portman", "correct": true, "ctx_tokens": 1541}
+{"qid": "factconsolidation_sh_64k#15", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Natalie Portman", "correct": true, "ctx_tokens": 145}
+{"qid": "factconsolidation_sh_64k#16", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Sean Dyche (as of 2026-01-19) and Jeff Hornacek (as of 2026-02-11). The most recent fact is from 2026-02-11, so the answer is Jeff Hornacek.", "correct": true, "ctx_tokens": 2501}
+{"qid": "factconsolidation_sh_64k#16", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Jeff Hornacek", "correct": true, "ctx_tokens": 162}
+{"qid": "factconsolidation_sh_64k#17", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "American Broadcasting Company", "correct": true, "ctx_tokens": 2246}
+{"qid": "factconsolidation_sh_64k#17", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "American Broadcasting Company.", "correct": true, "ctx_tokens": 213}
+{"qid": "factconsolidation_sh_64k#18", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Tom Clancy\n\n(Note: The authorship of \"Red Storm Rising\" changed from Tom Clancy to Torquato Tasso on 2026-02-18, but the latest fact is that it was authored by Tom Clancy as per the entry on 2026-05-06", "correct": true, "ctx_tokens": 2481}
+{"qid": "factconsolidation_sh_64k#18", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Torquato Tasso", "correct": false, "ctx_tokens": 153}
+{"qid": "factconsolidation_sh_64k#19", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Russian.", "correct": false, "ctx_tokens": 2071}
+{"qid": "factconsolidation_sh_64k#19", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Russian.", "correct": false, "ctx_tokens": 157}
+{"qid": "factconsolidation_sh_64k#20", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Europe\n\n(Note: The memory contains conflicting information about Great Britain's location, but the most recent entry from 2026-04-05 states it is in Europe.)", "correct": true, "ctx_tokens": 2410}
+{"qid": "factconsolidation_sh_64k#20", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Europe", "correct": true, "ctx_tokens": 164}
+{"qid": "factconsolidation_sh_64k#21", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "I don't know.", "correct": false, "ctx_tokens": 2438}
+{"qid": "factconsolidation_sh_64k#21", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "D\u014dgen.", "correct": true, "ctx_tokens": 139}
+{"qid": "factconsolidation_sh_64k#22", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "United States of America.", "correct": false, "ctx_tokens": 2493}
+{"qid": "factconsolidation_sh_64k#22", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "United States of America", "correct": false, "ctx_tokens": 184}
+{"qid": "factconsolidation_sh_64k#23", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "racing video game is associated with the sport of Australian rules football. (Based on the most recent memory from 2026-03-07, which supersedes the earlier association with racing.)", "correct": true, "ctx_tokens": 2171}
+{"qid": "factconsolidation_sh_64k#23", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Australian rules football.", "correct": true, "ctx_tokens": 193}
+{"qid": "factconsolidation_sh_64k#24", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Spain\n\n(Note: The memory contains conflicting information about Philip II of Spain's citizenship, but the most recent entry from 2026-06-13 states he is a citizen of Spain.)", "correct": false, "ctx_tokens": 2574}
+{"qid": "factconsolidation_sh_64k#24", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "United Kingdom", "correct": true, "ctx_tokens": 140}
+{"qid": "factconsolidation_sh_64k#25", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Os Lus\u00edadas.", "correct": true, "ctx_tokens": 1464}
+{"qid": "factconsolidation_sh_64k#25", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Os Lus\u00edadas.", "correct": true, "ctx_tokens": 149}
+{"qid": "factconsolidation_sh_64k#26", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Pebbles Flintstone\n\n(Note: The memory states that this fact may have changed since the last update on 2026-02-03, but no later information is provided to contradict it.)", "correct": false, "ctx_tokens": 2303}
+{"qid": "factconsolidation_sh_64k#26", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Eric Garcetti", "correct": true, "ctx_tokens": 136}
+{"qid": "factconsolidation_sh_64k#27", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "American Broadcasting Company", "correct": true, "ctx_tokens": 2393}
+{"qid": "factconsolidation_sh_64k#27", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "American Broadcasting Company.", "correct": true, "ctx_tokens": 226}
+{"qid": "factconsolidation_sh_64k#28", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "basketball", "correct": true, "ctx_tokens": 2181}
+{"qid": "factconsolidation_sh_64k#28", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Basketball", "correct": true, "ctx_tokens": 188}
+{"qid": "factconsolidation_sh_64k#29", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Apple Inc.", "correct": false, "ctx_tokens": 1695}
+{"qid": "factconsolidation_sh_64k#29", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Microsoft.", "correct": true, "ctx_tokens": 137}
+{"qid": "factconsolidation_sh_64k#30", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "English\n\nThe memory indicates that \"Os Lus\u00edadas was written in the language of English\" on 2026-04-24, which is the most recent entry regarding this fact.", "correct": true, "ctx_tokens": 2240}
+{"qid": "factconsolidation_sh_64k#30", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "English", "correct": true, "ctx_tokens": 167}
+{"qid": "factconsolidation_sh_64k#31", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Austrian Empire (as of 2026-02-27)", "correct": true, "ctx_tokens": 3049}
+{"qid": "factconsolidation_sh_64k#31", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "German Empire", "correct": false, "ctx_tokens": 175}
+{"qid": "factconsolidation_sh_64k#32", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "St Leonards-on-Sea", "correct": true, "ctx_tokens": 2044}
+{"qid": "factconsolidation_sh_64k#32", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "St Leonards-on-Sea", "correct": true, "ctx_tokens": 170}
+{"qid": "factconsolidation_sh_64k#33", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Nepal", "correct": true, "ctx_tokens": 1703}
+{"qid": "factconsolidation_sh_64k#33", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Nepal", "correct": true, "ctx_tokens": 144}
+{"qid": "factconsolidation_sh_64k#34", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Nobuaki Kurumatani", "correct": true, "ctx_tokens": 2712}
+{"qid": "factconsolidation_sh_64k#34", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Nobuaki Kurumatani", "correct": true, "ctx_tokens": 192}
+{"qid": "factconsolidation_sh_64k#35", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Montana State University - Bozeman.", "correct": true, "ctx_tokens": 2217}
+{"qid": "factconsolidation_sh_64k#35", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Montana State University - Bozeman.", "correct": true, "ctx_tokens": 221}
+{"qid": "factconsolidation_sh_64k#36", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Watership Down", "correct": true, "ctx_tokens": 2617}
+{"qid": "factconsolidation_sh_64k#36", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Watership Down.", "correct": true, "ctx_tokens": 137}
+{"qid": "factconsolidation_sh_64k#37", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Mary Barra\n\nThe most recent fact from [2026-04-17] states that the chairperson of General Motors is Mary Barra.", "correct": false, "ctx_tokens": 3371}
+{"qid": "factconsolidation_sh_64k#37", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Yoweri Kaguta Museveni", "correct": true, "ctx_tokens": 174}
+{"qid": "factconsolidation_sh_64k#38", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Europe\n\nThe memory from [2026-02-14] states that Z\u00fcrich is located in Europe. Although there are later entries suggesting it might be in Antarctica, the earlier entry holds as no subsequent date confirms this change.", "correct": true, "ctx_tokens": 3012}
+{"qid": "factconsolidation_sh_64k#38", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Europe", "correct": false, "ctx_tokens": 156}
+{"qid": "factconsolidation_sh_64k#39", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "English", "correct": false, "ctx_tokens": 2170}
+{"qid": "factconsolidation_sh_64k#39", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Arabic", "correct": true, "ctx_tokens": 148}
+{"qid": "factconsolidation_sh_64k#40", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Michael Crichton\n\n(Note: The memory from 2026-04-10 states this, and the conflicting information from 2026-03-06 is overridden by the later date.)", "correct": false, "ctx_tokens": 2431}
+{"qid": "factconsolidation_sh_64k#40", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Multatuli", "correct": true, "ctx_tokens": 147}
+{"qid": "factconsolidation_sh_64k#41", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Narendra Modi", "correct": true, "ctx_tokens": 2125}
+{"qid": "factconsolidation_sh_64k#41", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Narendra Modi.", "correct": true, "ctx_tokens": 235}
+{"qid": "factconsolidation_sh_64k#42", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Sweden", "correct": false, "ctx_tokens": 1754}
+{"qid": "factconsolidation_sh_64k#42", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "United Kingdom", "correct": true, "ctx_tokens": 140}
+{"qid": "factconsolidation_sh_64k#43", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Denmark.", "correct": true, "ctx_tokens": 2938}
+{"qid": "factconsolidation_sh_64k#43", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Denmark", "correct": true, "ctx_tokens": 142}
+{"qid": "factconsolidation_sh_64k#44", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Helsinki", "correct": true, "ctx_tokens": 2640}
+{"qid": "factconsolidation_sh_64k#44", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Helsinki", "correct": true, "ctx_tokens": 155}
+{"qid": "factconsolidation_sh_64k#45", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Blizzard Entertainment. (As of the latest memory update on 2026-05-11, this fact supersedes the previous one from 2026-04-30.)", "correct": true, "ctx_tokens": 2188}
+{"qid": "factconsolidation_sh_64k#45", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Blizzard Entertainment.", "correct": true, "ctx_tokens": 141}
+{"qid": "factconsolidation_sh_64k#46", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "South Korea", "correct": false, "ctx_tokens": 2975}
+{"qid": "factconsolidation_sh_64k#46", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "United States of America", "correct": true, "ctx_tokens": 147}
+{"qid": "factconsolidation_sh_64k#47", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Microsoft.", "correct": false, "ctx_tokens": 2978}
+{"qid": "factconsolidation_sh_64k#47", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "BlackBerry", "correct": true, "ctx_tokens": 141}
+{"qid": "factconsolidation_sh_64k#48", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Dutch", "correct": false, "ctx_tokens": 2070}
+{"qid": "factconsolidation_sh_64k#48", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Old Turkic", "correct": true, "ctx_tokens": 195}
+{"qid": "factconsolidation_sh_64k#49", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "The Thorn Birds", "correct": true, "ctx_tokens": 856}
+{"qid": "factconsolidation_sh_64k#49", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "The Thorn Birds.", "correct": true, "ctx_tokens": 148}
+{"qid": "factconsolidation_sh_64k#50", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Church of Scotland\n\n(Note: The affiliation changed from Catholic Church on 2026-01-06 to Church of Scotland on 2026-02-06, and the latest date is considered.)", "correct": true, "ctx_tokens": 2138}
+{"qid": "factconsolidation_sh_64k#50", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Church of Scotland", "correct": true, "ctx_tokens": 192}
+{"qid": "factconsolidation_sh_64k#51", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "The Beatles", "correct": false, "ctx_tokens": 1616}
+{"qid": "factconsolidation_sh_64k#51", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Madonna", "correct": true, "ctx_tokens": 140}
+{"qid": "factconsolidation_sh_64k#52", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Manchester", "correct": true, "ctx_tokens": 2810}
+{"qid": "factconsolidation_sh_64k#52", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Manchester", "correct": true, "ctx_tokens": 230}
+{"qid": "factconsolidation_sh_64k#53", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "basketball\n\nThe most recent memory entry from 2026-06-11 states that Texas Legends is associated with the sport of basketball.", "correct": false, "ctx_tokens": 2737}
+{"qid": "factconsolidation_sh_64k#53", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Cricket", "correct": true, "ctx_tokens": 182}
+{"qid": "factconsolidation_sh_64k#54", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Spain", "correct": false, "ctx_tokens": 1992}
+{"qid": "factconsolidation_sh_64k#54", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Brazil", "correct": true, "ctx_tokens": 137}
+{"qid": "factconsolidation_sh_64k#55", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Islam.", "correct": false, "ctx_tokens": 2404}
+{"qid": "factconsolidation_sh_64k#55", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Catholic Church", "correct": true, "ctx_tokens": 206}
+{"qid": "factconsolidation_sh_64k#56", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "midfielder", "correct": true, "ctx_tokens": 1710}
+{"qid": "factconsolidation_sh_64k#56", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Midfielder", "correct": true, "ctx_tokens": 151}
+{"qid": "factconsolidation_sh_64k#57", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Italy (as of the latest memory entry on 2026-05-21).", "correct": true, "ctx_tokens": 2085}
+{"qid": "factconsolidation_sh_64k#57", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Italy", "correct": true, "ctx_tokens": 214}
+{"qid": "factconsolidation_sh_64k#58", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Country rock.", "correct": true, "ctx_tokens": 880}
+{"qid": "factconsolidation_sh_64k#58", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Country rock.", "correct": true, "ctx_tokens": 168}
+{"qid": "factconsolidation_sh_64k#59", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Indonesia\n\n(Note: The latest memory entry from 2026-06-14 states that bluegrass music was created in Indonesia, which supersedes the earlier entry from 2026-04-18 stating it was created in the United States of America.)", "correct": true, "ctx_tokens": 2879}
+{"qid": "factconsolidation_sh_64k#59", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Indonesia", "correct": true, "ctx_tokens": 189}
+{"qid": "factconsolidation_sh_64k#60", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "association football\n\nThe most recent memory entry from 2026-05-30 states that North East Stars is associated with the sport of association football. This overrides any previous conflicting information.", "correct": false, "ctx_tokens": 2182}
+{"qid": "factconsolidation_sh_64k#60", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Cricket", "correct": true, "ctx_tokens": 196}
+{"qid": "factconsolidation_sh_64k#61", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Elon Musk", "correct": false, "ctx_tokens": 2118}
+{"qid": "factconsolidation_sh_64k#61", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Adam Sandler", "correct": true, "ctx_tokens": 180}
+{"qid": "factconsolidation_sh_64k#62", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Pierre Omidyar.", "correct": true, "ctx_tokens": 1747}
+{"qid": "factconsolidation_sh_64k#62", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Pierre Omidyar.", "correct": true, "ctx_tokens": 147}
+{"qid": "factconsolidation_sh_64k#63", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Boston", "correct": true, "ctx_tokens": 2386}
+{"qid": "factconsolidation_sh_64k#63", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Boston", "correct": true, "ctx_tokens": 226}
+{"qid": "factconsolidation_sh_64k#64", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Prague", "correct": false, "ctx_tokens": 2156}
+{"qid": "factconsolidation_sh_64k#64", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Przeworsk", "correct": true, "ctx_tokens": 134}
+{"qid": "factconsolidation_sh_64k#65", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "United States of America", "correct": true, "ctx_tokens": 3193}
+{"qid": "factconsolidation_sh_64k#65", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "United States of America", "correct": true, "ctx_tokens": 165}
+{"qid": "factconsolidation_sh_64k#66", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "United Kingdom", "correct": true, "ctx_tokens": 2090}
+{"qid": "factconsolidation_sh_64k#66", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "United Kingdom", "correct": true, "ctx_tokens": 145}
+{"qid": "factconsolidation_sh_64k#67", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Petronius\n\n(Note: The memory from 2026-04-28 states that the author of \"Satyricon\" is Petronius, and there are no later entries contradicting this fact.)", "correct": false, "ctx_tokens": 2240}
+{"qid": "factconsolidation_sh_64k#67", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Petronius.", "correct": false, "ctx_tokens": 135}
+{"qid": "factconsolidation_sh_64k#68", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "American Broadcasting Company (as of 2026-03-09), British Broadcasting Corporation (as of 2026-06-25). The most recent fact is from 2026-06-25, so the original broadcaster of \"Revenge\" is the British Broadcasting Corporation.", "correct": true, "ctx_tokens": 2418}
+{"qid": "factconsolidation_sh_64k#68", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "American Broadcasting Company.", "correct": false, "ctx_tokens": 196}
+{"qid": "factconsolidation_sh_64k#69", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "University of Arizona (2026-01-22)  \nCalifornia State University, Long Beach (2026-06-30)\n\nThe most recent fact is from 2026-06-30. Therefore, Stewart Udall was educated at California State University, Long Beach.", "correct": true, "ctx_tokens": 2275}
+{"qid": "factconsolidation_sh_64k#69", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "University of Arizona", "correct": false, "ctx_tokens": 220}
+{"qid": "factconsolidation_sh_64k#70", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Arvind Kejriwal", "correct": false, "ctx_tokens": 3929}
+{"qid": "factconsolidation_sh_64k#70", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Lamar Alexander", "correct": true, "ctx_tokens": 183}
+{"qid": "factconsolidation_sh_64k#71", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "The Beatles", "correct": false, "ctx_tokens": 2872}
+{"qid": "factconsolidation_sh_64k#71", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Madonna.", "correct": true, "ctx_tokens": 145}
+{"qid": "factconsolidation_sh_64k#72", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "basketball", "correct": true, "ctx_tokens": 2169}
+{"qid": "factconsolidation_sh_64k#72", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Basketball.", "correct": true, "ctx_tokens": 196}
+{"qid": "factconsolidation_sh_64k#73", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "jazz", "correct": false, "ctx_tokens": 256}
+{"qid": "factconsolidation_sh_64k#73", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "J-pop", "correct": true, "ctx_tokens": 164}
+{"qid": "factconsolidation_sh_64k#74", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "San Salvador", "correct": true, "ctx_tokens": 2143}
+{"qid": "factconsolidation_sh_64k#74", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "San Salvador", "correct": true, "ctx_tokens": 133}
+{"qid": "factconsolidation_sh_64k#75", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Google.", "correct": false, "ctx_tokens": 1528}
+{"qid": "factconsolidation_sh_64k#75", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "University of Edinburgh", "correct": true, "ctx_tokens": 157}
+{"qid": "factconsolidation_sh_64k#76", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Brigham Young University.", "correct": true, "ctx_tokens": 2512}
+{"qid": "factconsolidation_sh_64k#76", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Brigham Young University.", "correct": true, "ctx_tokens": 216}
+{"qid": "factconsolidation_sh_64k#77", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "John Milton", "correct": true, "ctx_tokens": 2382}
+{"qid": "factconsolidation_sh_64k#77", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "John Milton", "correct": true, "ctx_tokens": 141}
+{"qid": "factconsolidation_sh_64k#78", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "The Beatles", "correct": false, "ctx_tokens": 1704}
+{"qid": "factconsolidation_sh_64k#78", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Madonna", "correct": true, "ctx_tokens": 140}
+{"qid": "factconsolidation_sh_64k#79", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Spanish.", "correct": true, "ctx_tokens": 2449}
+{"qid": "factconsolidation_sh_64k#79", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Spanish", "correct": true, "ctx_tokens": 150}
+{"qid": "factconsolidation_sh_64k#80", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "I don't know.", "correct": false, "ctx_tokens": 2805}
+{"qid": "factconsolidation_sh_64k#80", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Persian", "correct": true, "ctx_tokens": 165}
+{"qid": "factconsolidation_sh_64k#81", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "association football", "correct": true, "ctx_tokens": 2240}
+{"qid": "factconsolidation_sh_64k#81", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Association football.", "correct": true, "ctx_tokens": 206}
+{"qid": "factconsolidation_sh_64k#82", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "South America", "correct": true, "ctx_tokens": 2270}
+{"qid": "factconsolidation_sh_64k#82", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "South America", "correct": true, "ctx_tokens": 161}
+{"qid": "factconsolidation_sh_64k#83", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "basketball", "correct": true, "ctx_tokens": 2772}
+{"qid": "factconsolidation_sh_64k#83", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "basketball", "correct": true, "ctx_tokens": 180}
+{"qid": "factconsolidation_sh_64k#84", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Ireland.", "correct": true, "ctx_tokens": 1750}
+{"qid": "factconsolidation_sh_64k#84", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Ireland", "correct": true, "ctx_tokens": 144}
+{"qid": "factconsolidation_sh_64k#85", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Shapur I. Jigoro\n\n(Note: This answer is based on the provided memory, which contains fictional or incorrect information.)", "correct": false, "ctx_tokens": 2581}
+{"qid": "factconsolidation_sh_64k#85", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "James Badge Dale.", "correct": true, "ctx_tokens": 144}
+{"qid": "factconsolidation_sh_64k#86", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "association football", "correct": false, "ctx_tokens": 2811}
+{"qid": "factconsolidation_sh_64k#86", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "baseball", "correct": true, "ctx_tokens": 205}
+{"qid": "factconsolidation_sh_64k#87", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Lady Gaga", "correct": true, "ctx_tokens": 1629}
+{"qid": "factconsolidation_sh_64k#87", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Lady Gaga", "correct": true, "ctx_tokens": 151}
+{"qid": "factconsolidation_sh_64k#88", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Lutheranism\n\nThe most recent entry regarding Denis Thatcher's religion is from [2026-04-10], stating he is affiliated with Lutheranism.", "correct": true, "ctx_tokens": 3494}
+{"qid": "factconsolidation_sh_64k#88", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Lutheranism", "correct": true, "ctx_tokens": 184}
+{"qid": "factconsolidation_sh_64k#89", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "I don't know. The memory does not contain information about the author of \"Rerum Novarum.\"", "correct": false, "ctx_tokens": 2202}
+{"qid": "factconsolidation_sh_64k#89", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Leo XIII.", "correct": true, "ctx_tokens": 145}
+{"qid": "factconsolidation_sh_64k#90", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "I don't know.", "correct": false, "ctx_tokens": 1973}
+{"qid": "factconsolidation_sh_64k#90", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "goalkeeper", "correct": false, "ctx_tokens": 155}
+{"qid": "factconsolidation_sh_64k#91", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Larry McMurtry\n\n(Note: The memory from 2026-01-25 states Larry McMurtry as the author, and although a later entry on 2026-05-28 mentions Robert A. Heinlein, the earlier date takes precedence.)", "correct": true, "ctx_tokens": 2257}
+{"qid": "factconsolidation_sh_64k#91", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Robert A. Heinlein", "correct": true, "ctx_tokens": 155}
+{"qid": "factconsolidation_sh_64k#92", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Pune.", "correct": true, "ctx_tokens": 2636}
+{"qid": "factconsolidation_sh_64k#92", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Pune", "correct": true, "ctx_tokens": 143}
+{"qid": "factconsolidation_sh_64k#93", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Esperanto (as of the latest memory entry on 2026-03-23).", "correct": true, "ctx_tokens": 2364}
+{"qid": "factconsolidation_sh_64k#93", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Finnish.", "correct": false, "ctx_tokens": 146}
+{"qid": "factconsolidation_sh_64k#94", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Denmark", "correct": true, "ctx_tokens": 2677}
+{"qid": "factconsolidation_sh_64k#94", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Denmark", "correct": true, "ctx_tokens": 140}
+{"qid": "factconsolidation_sh_64k#95", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Apple Inc. (2026-01-09), Google (2026-02-04). The later date is 2026-02-04, so the developer of iPad Pro is Google.", "correct": true, "ctx_tokens": 2548}
+{"qid": "factconsolidation_sh_64k#95", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Google.", "correct": true, "ctx_tokens": 124}
+{"qid": "factconsolidation_sh_64k#96", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "Eve Ensler", "correct": true, "ctx_tokens": 2274}
+{"qid": "factconsolidation_sh_64k#96", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Eve Ensler", "correct": true, "ctx_tokens": 146}
+{"qid": "factconsolidation_sh_64k#97", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "baseball (as of 2026-05-16) and field hockey (as of 2026-05-16). The most recent fact is that it's associated with the sport of field hockey.", "correct": true, "ctx_tokens": 2207}
+{"qid": "factconsolidation_sh_64k#97", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "Baseball", "correct": false, "ctx_tokens": 181}
+{"qid": "factconsolidation_sh_64k#98", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "London", "correct": false, "ctx_tokens": 1538}
+{"qid": "factconsolidation_sh_64k#98", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "England", "correct": true, "ctx_tokens": 144}
+{"qid": "factconsolidation_sh_64k#99", "set": "factconsolidation_sh_64k", "system": "sourcedrecall", "pred": "United States of America", "correct": true, "ctx_tokens": 2228}
+{"qid": "factconsolidation_sh_64k#99", "set": "factconsolidation_sh_64k", "system": "rag", "pred": "United States of America", "correct": true, "ctx_tokens": 161}
+{"qid": "factconsolidation_mh_64k#0", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Sweden's official language is Swedish.", "correct": false, "ctx_tokens": 2402}
+{"qid": "factconsolidation_mh_64k#0", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Swedish.", "correct": false, "ctx_tokens": 164}
+{"qid": "factconsolidation_mh_64k#1", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "association football", "correct": false, "ctx_tokens": 2436}
+{"qid": "factconsolidation_mh_64k#1", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "American football", "correct": false, "ctx_tokens": 187}
+{"qid": "factconsolidation_mh_64k#2", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "I don't know. The memory does not provide information about the director/manager who worked with the performer of \"Anthology 1.\"", "correct": false, "ctx_tokens": 1710}
+{"qid": "factconsolidation_mh_64k#2", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Africa", "correct": false, "ctx_tokens": 145}
+{"qid": "factconsolidation_mh_64k#3", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "I don't know.", "correct": false, "ctx_tokens": 778}
+{"qid": "factconsolidation_mh_64k#3", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Country music.", "correct": false, "ctx_tokens": 171}
+{"qid": "factconsolidation_mh_64k#4", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Zeki \u00d6zt\u00fcrk", "correct": true, "ctx_tokens": 3121}
+{"qid": "factconsolidation_mh_64k#4", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Zeki \u00d6zt\u00fcrk", "correct": true, "ctx_tokens": 178}
+{"qid": "factconsolidation_mh_64k#5", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Henri Gr\u00e9goire was affiliated with the religion of Catholic Church. The person who established Christianity, which is the same as the Catholic Church in this context, worked in Jerusalem.", "correct": false, "ctx_tokens": 1802}
+{"qid": "factconsolidation_mh_64k#5", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 182}
+{"qid": "factconsolidation_mh_64k#6", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Europe", "correct": false, "ctx_tokens": 2127}
+{"qid": "factconsolidation_mh_64k#6", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Europe", "correct": false, "ctx_tokens": 132}
+{"qid": "factconsolidation_mh_64k#7", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "association football\n\n(Note: Giovani dos Santos is associated with two positions in the memory, but the most recent entry from 2026-06-07 states he plays as a goaltender. However, this conflicts with earlier entries where he is noted to play as a midfielder. According to the rule", "correct": false, "ctx_tokens": 2787}
+{"qid": "factconsolidation_mh_64k#7", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Soccer (football)", "correct": false, "ctx_tokens": 155}
+{"qid": "factconsolidation_mh_64k#8", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Billie Holiday", "correct": false, "ctx_tokens": 2720}
+{"qid": "factconsolidation_mh_64k#8", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 157}
+{"qid": "factconsolidation_mh_64k#9", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Washington, D.C.", "correct": false, "ctx_tokens": 2135}
+{"qid": "factconsolidation_mh_64k#9", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Washington, D.C.", "correct": false, "ctx_tokens": 169}
+{"qid": "factconsolidation_mh_64k#10", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Rome", "correct": false, "ctx_tokens": 2142}
+{"qid": "factconsolidation_mh_64k#10", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Rome", "correct": false, "ctx_tokens": 129}
+{"qid": "factconsolidation_mh_64k#11", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Catholicism\n\n(Note: The memory from 2026-01-14 states that Dante Alighieri is affiliated with Catholicism, and the memory from 2026-02-20 confirms he is affiliated with the Catholic Church. Both are consistent.)", "correct": true, "ctx_tokens": 2449}
+{"qid": "factconsolidation_mh_64k#11", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Catholic.", "correct": false, "ctx_tokens": 160}
+{"qid": "factconsolidation_mh_64k#12", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "The memory contains conflicting information about the sport associated with FNB Stadium. On January 8, 2026, it is linked to baseball, and on January 30, 2026, it is linked to baseball again. Since there are no later entries that change this association, we can conclude", "correct": false, "ctx_tokens": 2210}
+{"qid": "factconsolidation_mh_64k#12", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 195}
+{"qid": "factconsolidation_mh_64k#13", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Europe\n\n(Note: The memory states that Erich Koch is a citizen of Germany, which is located in Europe. This fact was mentioned on 2026-06-13 and has not been contradicted by any later entries.)", "correct": false, "ctx_tokens": 2230}
+{"qid": "factconsolidation_mh_64k#13", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Africa", "correct": false, "ctx_tokens": 142}
+{"qid": "factconsolidation_mh_64k#14", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "English", "correct": false, "ctx_tokens": 2659}
+{"qid": "factconsolidation_mh_64k#14", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "English. The author of \"A Passage to India\" is E. M. Forster, who speaks English.", "correct": false, "ctx_tokens": 153}
+{"qid": "factconsolidation_mh_64k#15", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Vito Corleone was created by Mario Puzo.", "correct": false, "ctx_tokens": 2544}
+{"qid": "factconsolidation_mh_64k#15", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Vito Corleone.", "correct": false, "ctx_tokens": 141}
+{"qid": "factconsolidation_mh_64k#16", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Islamabad\n\n(Note: The sport associated with the founder of Pakistan Tehreek-e-Insaf, Imran Khan, is cricket. Cricket originates from England, and its capital city is London.)", "correct": false, "ctx_tokens": 2414}
+{"qid": "factconsolidation_mh_64k#16", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Islamabad", "correct": false, "ctx_tokens": 182}
+{"qid": "factconsolidation_mh_64k#17", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "London\n\nExplanation:\n- \"Tomorrow Never Knows\" was performed by Madonna (2026-03-06).\n- The director/manager associated with Madonna is not explicitly mentioned, but the closest relevant information is that the chairperson of MSNBC is Phil Griffin (2026-03-06), who", "correct": false, "ctx_tokens": 3136}
+{"qid": "factconsolidation_mh_64k#17", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Mexico City", "correct": false, "ctx_tokens": 151}
+{"qid": "factconsolidation_mh_64k#18", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "American football", "correct": false, "ctx_tokens": 2338}
+{"qid": "factconsolidation_mh_64k#18", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Baseball", "correct": false, "ctx_tokens": 172}
+{"qid": "factconsolidation_mh_64k#19", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "United States of America\n\nPaddy Keenan's nationality changed to United States of America on March 7, 2026. The current head of the U.S. government as of June 18, 2026, is Mike Duggan (head of Detroit), but for national governance,", "correct": false, "ctx_tokens": 2671}
+{"qid": "factconsolidation_mh_64k#19", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "United States of America", "correct": false, "ctx_tokens": 213}
+{"qid": "factconsolidation_mh_64k#20", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "English", "correct": false, "ctx_tokens": 2374}
+{"qid": "factconsolidation_mh_64k#20", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "English", "correct": false, "ctx_tokens": 170}
+{"qid": "factconsolidation_mh_64k#21", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "I don't know. The memory does not provide information about the organization Benjamin Mazar was part of or its founder.", "correct": false, "ctx_tokens": 2420}
+{"qid": "factconsolidation_mh_64k#21", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 152}
+{"qid": "factconsolidation_mh_64k#22", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "The memory does not provide information about the city of origin for the musical genre \"All Shook Up.\" Therefore, I don't know.", "correct": false, "ctx_tokens": 2374}
+{"qid": "factconsolidation_mh_64k#22", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 181}
+{"qid": "factconsolidation_mh_64k#23", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Vietnam\n\n(Note: The memory states that Travis Tritt is a citizen of Vietnam as of the latest update on 2026-04-06.)", "correct": false, "ctx_tokens": 2379}
+{"qid": "factconsolidation_mh_64k#23", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Washington, D.C.", "correct": false, "ctx_tokens": 142}
+{"qid": "factconsolidation_mh_64k#24", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "University of Southern California, Los Angeles.", "correct": false, "ctx_tokens": 2519}
+{"qid": "factconsolidation_mh_64k#24", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "University of Dublin, Dublin.", "correct": true, "ctx_tokens": 226}
+{"qid": "factconsolidation_mh_64k#25", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "University of Tartu, no city specified.", "correct": false, "ctx_tokens": 2199}
+{"qid": "factconsolidation_mh_64k#25", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Tartu", "correct": false, "ctx_tokens": 231}
+{"qid": "factconsolidation_mh_64k#26", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "United Kingdom (Darren Fletcher plays the position of midfielder, and association football originated in the United Kingdom.)", "correct": false, "ctx_tokens": 2190}
+{"qid": "factconsolidation_mh_64k#26", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "England", "correct": false, "ctx_tokens": 162}
+{"qid": "factconsolidation_mh_64k#27", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Europe\n\n(Note: \"Master of Puppets\" was performed by Metallica, who were formed in Los Angeles, United States. However, the memory states that it was performed by The Beatles, which is incorrect based on known facts. According to the latest date in the memory, 2026", "correct": true, "ctx_tokens": 2280}
+{"qid": "factconsolidation_mh_64k#27", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "North America", "correct": false, "ctx_tokens": 147}
+{"qid": "factconsolidation_mh_64k#28", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Russian Empire", "correct": false, "ctx_tokens": 2649}
+{"qid": "factconsolidation_mh_64k#28", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Alexander I of Russia.", "correct": false, "ctx_tokens": 149}
+{"qid": "factconsolidation_mh_64k#29", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "I don't know. The memory contains conflicting information about the developer of Windows Update, and there is no information on the birthplace of its CEO.", "correct": false, "ctx_tokens": 2421}
+{"qid": "factconsolidation_mh_64k#29", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Europe", "correct": false, "ctx_tokens": 149}
+{"qid": "factconsolidation_mh_64k#30", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Catholic Church", "correct": false, "ctx_tokens": 1951}
+{"qid": "factconsolidation_mh_64k#30", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Catholic Church", "correct": false, "ctx_tokens": 185}
+{"qid": "factconsolidation_mh_64k#31", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "association football (as of the latest memory update on 2026-06-04, where he is listed as playing midfielder)", "correct": false, "ctx_tokens": 2438}
+{"qid": "factconsolidation_mh_64k#31", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "American football", "correct": false, "ctx_tokens": 157}
+{"qid": "factconsolidation_mh_64k#32", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "United States of America; Washington, D.C.", "correct": false, "ctx_tokens": 2303}
+{"qid": "factconsolidation_mh_64k#32", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Soccer (association football) was developed in England. The capital of the United Kingdom is London, but according to your memory, it's listed as Rupnagar on 2026-05-22. Therefore, based on the latest information provided: Rupnagar.", "correct": false, "ctx_tokens": 127}
+{"qid": "factconsolidation_mh_64k#33", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Europe", "correct": false, "ctx_tokens": 2115}
+{"qid": "factconsolidation_mh_64k#33", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Europe", "correct": false, "ctx_tokens": 157}
+{"qid": "factconsolidation_mh_64k#34", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Spanish (as of the latest memory, Louis Henri Loison is a citizen of Mexico).", "correct": true, "ctx_tokens": 1346}
+{"qid": "factconsolidation_mh_64k#34", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Spanish", "correct": true, "ctx_tokens": 144}
+{"qid": "factconsolidation_mh_64k#35", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "New York City", "correct": true, "ctx_tokens": 2906}
+{"qid": "factconsolidation_mh_64k#35", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 145}
+{"qid": "factconsolidation_mh_64k#36", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "The sport played by Matt Harrison is not explicitly mentioned in the memory. Therefore, I don't know the answer to this question based on the provided information.", "correct": false, "ctx_tokens": 2271}
+{"qid": "factconsolidation_mh_64k#36", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "London", "correct": false, "ctx_tokens": 154}
+{"qid": "factconsolidation_mh_64k#37", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "United States of America.", "correct": false, "ctx_tokens": 2131}
+{"qid": "factconsolidation_mh_64k#37", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "United States of America", "correct": false, "ctx_tokens": 156}
+{"qid": "factconsolidation_mh_64k#38", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Asia", "correct": false, "ctx_tokens": 2230}
+{"qid": "factconsolidation_mh_64k#38", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Asia", "correct": false, "ctx_tokens": 195}
+{"qid": "factconsolidation_mh_64k#39", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "I don't know. The memory does not provide information about the author of \"Tender Is the Night\" or their spouse's citizenship.", "correct": false, "ctx_tokens": 2441}
+{"qid": "factconsolidation_mh_64k#39", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 158}
+{"qid": "factconsolidation_mh_64k#40", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Paris", "correct": false, "ctx_tokens": 2745}
+{"qid": "factconsolidation_mh_64k#40", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Paris", "correct": false, "ctx_tokens": 151}
+{"qid": "factconsolidation_mh_64k#41", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "English\n\n(Note: The memory states that \"The univeristy where Lu\u00eds de Cam\u00f5es was educated is University of Coimbra\" on 2026-04-06, and \"The author of Os Lus\u00edadas is Lu\u00eds de Cam\u00f5es\" on 2026-05", "correct": true, "ctx_tokens": 2591}
+{"qid": "factconsolidation_mh_64k#41", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Portuguese.", "correct": false, "ctx_tokens": 172}
+{"qid": "factconsolidation_mh_64k#42", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Europe\n\n(Note: Monty Norman was born in the city of London, which is located in Europe.)", "correct": false, "ctx_tokens": 2338}
+{"qid": "factconsolidation_mh_64k#42", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Europe", "correct": false, "ctx_tokens": 161}
+{"qid": "factconsolidation_mh_64k#43", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "North America\n\nThe chief executive officer of BlackBerry is Carlos Slim, and Windows Phone was developed by Microsoft. Both are associated with North America.", "correct": true, "ctx_tokens": 2601}
+{"qid": "factconsolidation_mh_64k#43", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "North America", "correct": true, "ctx_tokens": 178}
+{"qid": "factconsolidation_mh_64k#44", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "French\n\nExplanation: According to the memory, Cleo Laine plays jazz music (as of 2026-05-15). Jazz was created in the United States of America (as of 2026-05-07). The official language of the French Third Republic is French (as of", "correct": false, "ctx_tokens": 2678}
+{"qid": "factconsolidation_mh_64k#44", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "English", "correct": false, "ctx_tokens": 152}
+{"qid": "factconsolidation_mh_64k#45", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Tunisia national football team is associated with the sport of association football. The country of origin for Tunisia is Tunisia, and its capital city is Tunis.", "correct": false, "ctx_tokens": 2052}
+{"qid": "factconsolidation_mh_64k#45", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Tunis", "correct": false, "ctx_tokens": 226}
+{"qid": "factconsolidation_mh_64k#46", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "The current head of state in the country where Santiago Morning is associated with association football (Chile) is not provided in the memory. Therefore, I don't know.", "correct": false, "ctx_tokens": 2395}
+{"qid": "factconsolidation_mh_64k#46", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Emmanuel Macron", "correct": false, "ctx_tokens": 200}
+{"qid": "factconsolidation_mh_64k#47", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "The memory does not provide information about who founded the religious movement that Lakhdar Brahimi is affiliated with. Therefore, I don't know.", "correct": false, "ctx_tokens": 2570}
+{"qid": "factconsolidation_mh_64k#47", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 177}
+{"qid": "factconsolidation_mh_64k#48", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Europe", "correct": false, "ctx_tokens": 2542}
+{"qid": "factconsolidation_mh_64k#48", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Europe", "correct": false, "ctx_tokens": 163}
+{"qid": "factconsolidation_mh_64k#49", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "I don't know. The memory does not provide information about the head coach of the Germany national football team or their country of origin.", "correct": false, "ctx_tokens": 2095}
+{"qid": "factconsolidation_mh_64k#49", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Berlin", "correct": false, "ctx_tokens": 149}
+{"qid": "factconsolidation_mh_64k#50", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "I don't know.", "correct": false, "ctx_tokens": 1517}
+{"qid": "factconsolidation_mh_64k#50", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 191}
+{"qid": "factconsolidation_mh_64k#51", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Colt's Manufacturing Company, the manufacturer of Colt Single Action Army, was founded in Hartford, Connecticut.", "correct": false, "ctx_tokens": 2552}
+{"qid": "factconsolidation_mh_64k#51", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Hartford, Connecticut.", "correct": false, "ctx_tokens": 187}
+{"qid": "factconsolidation_mh_64k#52", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Starting pitcher.", "correct": false, "ctx_tokens": 2451}
+{"qid": "factconsolidation_mh_64k#52", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Baseball", "correct": false, "ctx_tokens": 196}
+{"qid": "factconsolidation_mh_64k#53", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Islam", "correct": false, "ctx_tokens": 2779}
+{"qid": "factconsolidation_mh_64k#53", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 164}
+{"qid": "factconsolidation_mh_64k#54", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "The memory does not provide information about FK P\u0159\u00edbram or the continent it belongs to. Therefore, I don't know.", "correct": false, "ctx_tokens": 2253}
+{"qid": "factconsolidation_mh_64k#54", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Europe", "correct": false, "ctx_tokens": 152}
+{"qid": "factconsolidation_mh_64k#55", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "English\n\nExplanation: \"Free as a Bird\" was performed by The Beatles, who are citizens of the United Kingdom. According to the memory dated 2026-06-17, Howard W. Hunter is a citizen of the United Kingdom. On 2026-05-16, it's", "correct": false, "ctx_tokens": 2425}
+{"qid": "factconsolidation_mh_64k#55", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "English", "correct": false, "ctx_tokens": 148}
+{"qid": "factconsolidation_mh_64k#56", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "United States of America, Nashville", "correct": false, "ctx_tokens": 2564}
+{"qid": "factconsolidation_mh_64k#56", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Washington, D.C.", "correct": false, "ctx_tokens": 163}
+{"qid": "factconsolidation_mh_64k#57", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "basketball", "correct": false, "ctx_tokens": 2177}
+{"qid": "factconsolidation_mh_64k#57", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Point guard, basketball.", "correct": false, "ctx_tokens": 184}
+{"qid": "factconsolidation_mh_64k#58", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "United States of America", "correct": false, "ctx_tokens": 2925}
+{"qid": "factconsolidation_mh_64k#58", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "United States of America", "correct": false, "ctx_tokens": 161}
+{"qid": "factconsolidation_mh_64k#59", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "American Broadcasting Company (ABC) [2026-01-20]  \nNBC [2026-01-29]  \n\nThe memory contains conflicting information about the original broadcaster of \"The Monkees.\" The later date, 2026-01-29, states NBC. Therefore, according to the", "correct": false, "ctx_tokens": 2568}
+{"qid": "factconsolidation_mh_64k#59", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "CBS.", "correct": false, "ctx_tokens": 209}
+{"qid": "factconsolidation_mh_64k#60", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "The memory does not provide information about the location of the office for the company that developed Crysis 2. Therefore, I don't know.", "correct": false, "ctx_tokens": 2143}
+{"qid": "factconsolidation_mh_64k#60", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Frankfurt", "correct": false, "ctx_tokens": 211}
+{"qid": "factconsolidation_mh_64k#61", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "The official language of the headquarters location of Housemarque (Helsinki) is Finnish. Daisaku Ikeda speaks Japanese, but there's no mention of him creating a language. Therefore, I don't know which individual is credited with creating Finnish.", "correct": false, "ctx_tokens": 2324}
+{"qid": "factconsolidation_mh_64k#61", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "L. L. Zamenhof (Esperanto)", "correct": true, "ctx_tokens": 158}
+{"qid": "factconsolidation_mh_64k#62", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Catholic Church; no specific birthplace provided for its founder.", "correct": false, "ctx_tokens": 1888}
+{"qid": "factconsolidation_mh_64k#62", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 175}
+{"qid": "factconsolidation_mh_64k#63", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "India; New Delhi.", "correct": false, "ctx_tokens": 1516}
+{"qid": "factconsolidation_mh_64k#63", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "New Delhi", "correct": false, "ctx_tokens": 169}
+{"qid": "factconsolidation_mh_64k#64", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Jaguar Cars was founded by William Lyons.", "correct": false, "ctx_tokens": 1372}
+{"qid": "factconsolidation_mh_64k#64", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Jaguar Cars.", "correct": false, "ctx_tokens": 160}
+{"qid": "factconsolidation_mh_64k#65", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "The chief of state is not mentioned in the memory provided. Therefore, I don't know.", "correct": false, "ctx_tokens": 2539}
+{"qid": "factconsolidation_mh_64k#65", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Emmerson Mnangagwa", "correct": false, "ctx_tokens": 197}
+{"qid": "factconsolidation_mh_64k#66", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Europe\n\n(Note: The author of \"Troilus and Criseyde\" is Geoffrey Chaucer, who was from England, which is in Europe. This fact remains consistent across the memory entries.)", "correct": false, "ctx_tokens": 2602}
+{"qid": "factconsolidation_mh_64k#66", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Europe", "correct": false, "ctx_tokens": 157}
+{"qid": "factconsolidation_mh_64k#67", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Samba (implied by \"The Girl from Ipanema\")", "correct": false, "ctx_tokens": 1100}
+{"qid": "factconsolidation_mh_64k#67", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "The Girl from Ipanema (bossa nova)", "correct": false, "ctx_tokens": 160}
+{"qid": "factconsolidation_mh_64k#68", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "I don't know. The memory does not contain information about the author of \"The Witcher\" or their language abilities.", "correct": false, "ctx_tokens": 2696}
+{"qid": "factconsolidation_mh_64k#68", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 156}
+{"qid": "factconsolidation_mh_64k#69", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Spanish\n\n(Maksim Chmerkovskiy's spouse is Peta Murgatroyd, and David Stirling speaks Spanish as of the latest memory update on 2026-05-16.)", "correct": false, "ctx_tokens": 2635}
+{"qid": "factconsolidation_mh_64k#69", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 153}
+{"qid": "factconsolidation_mh_64k#70", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "I don't know.", "correct": false, "ctx_tokens": 2851}
+{"qid": "factconsolidation_mh_64k#70", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 160}
+{"qid": "factconsolidation_mh_64k#71", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "United States of America; Washington, D.C.", "correct": false, "ctx_tokens": 2115}
+{"qid": "factconsolidation_mh_64k#71", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Cupertino", "correct": false, "ctx_tokens": 141}
+{"qid": "factconsolidation_mh_64k#72", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Australia", "correct": false, "ctx_tokens": 2179}
+{"qid": "factconsolidation_mh_64k#72", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Oceania", "correct": false, "ctx_tokens": 169}
+{"qid": "factconsolidation_mh_64k#73", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "association football", "correct": false, "ctx_tokens": 2735}
+{"qid": "factconsolidation_mh_64k#73", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 199}
+{"qid": "factconsolidation_mh_64k#74", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "I don't know. The memory does not provide information about Home United FC or the continent of its origin.", "correct": false, "ctx_tokens": 2403}
+{"qid": "factconsolidation_mh_64k#74", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Europe", "correct": false, "ctx_tokens": 157}
+{"qid": "factconsolidation_mh_64k#75", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "United Kingdom, Europe", "correct": false, "ctx_tokens": 2315}
+{"qid": "factconsolidation_mh_64k#75", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Europe", "correct": false, "ctx_tokens": 154}
+{"qid": "factconsolidation_mh_64k#76", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Ann Arbor.", "correct": false, "ctx_tokens": 2169}
+{"qid": "factconsolidation_mh_64k#76", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Europe", "correct": false, "ctx_tokens": 162}
+{"qid": "factconsolidation_mh_64k#77", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "I don't know. The memory does not provide information about the educational institution associated with C. N. Annadurai, the founder of Dravida Munnetra Kazhagam.", "correct": false, "ctx_tokens": 1014}
+{"qid": "factconsolidation_mh_64k#77", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 187}
+{"qid": "factconsolidation_mh_64k#78", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "I don't know. The memory does not provide information about the spouse of the creator of WWE Main Event or their country of citizenship and its official language.", "correct": false, "ctx_tokens": 2543}
+{"qid": "factconsolidation_mh_64k#78", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 147}
+{"qid": "factconsolidation_mh_64k#79", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "North America\n\n(Note: The memory states that Rodney Peete was educated at University of Southern California on 2026-02-09 and Paris Dauphine University on 2026-04-01. Since the latter date is more recent, we use Paris Dauphine University,", "correct": false, "ctx_tokens": 2339}
+{"qid": "factconsolidation_mh_64k#79", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "North America", "correct": false, "ctx_tokens": 238}
+{"qid": "factconsolidation_mh_64k#80", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "North America\n\nExplanation:\n- Gran Turismo 5 was developed by Polyphony Digital (2026-06-13).\n- The director/manager of Polyphony Digital is Kazunori Yamauchi, who is a citizen of Japan.\n- Japan is located in the continent of Asia. However", "correct": false, "ctx_tokens": 1888}
+{"qid": "factconsolidation_mh_64k#80", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 153}
+{"qid": "factconsolidation_mh_64k#81", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Association football.", "correct": false, "ctx_tokens": 2094}
+{"qid": "factconsolidation_mh_64k#81", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Association football.", "correct": false, "ctx_tokens": 226}
+{"qid": "factconsolidation_mh_64k#82", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "The author of Executive Order 6102 is Franklin D. Roosevelt, and his partner was Eleanor Roosevelt. Eleanor Roosevelt was a citizen of the United States of America. According to the memory from [2026-03-17], the official language of the United States of America is German. Therefore,", "correct": false, "ctx_tokens": 2284}
+{"qid": "factconsolidation_mh_64k#82", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 156}
+{"qid": "factconsolidation_mh_64k#83", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Washington, D.C.", "correct": false, "ctx_tokens": 1972}
+{"qid": "factconsolidation_mh_64k#83", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Berlin", "correct": true, "ctx_tokens": 149}
+{"qid": "factconsolidation_mh_64k#84", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Taipei", "correct": false, "ctx_tokens": 2192}
+{"qid": "factconsolidation_mh_64k#84", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 201}
+{"qid": "factconsolidation_mh_64k#85", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "association football, United Kingdom", "correct": false, "ctx_tokens": 2275}
+{"qid": "factconsolidation_mh_64k#85", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Italy", "correct": false, "ctx_tokens": 196}
+{"qid": "factconsolidation_mh_64k#86", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "I don't know. The memory does not provide consistent or clear information about Eddard Stark's partner, nor the creator of that character.", "correct": false, "ctx_tokens": 2630}
+{"qid": "factconsolidation_mh_64k#86", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Edinburgh", "correct": false, "ctx_tokens": 141}
+{"qid": "factconsolidation_mh_64k#87", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "University of Oslo", "correct": false, "ctx_tokens": 1214}
+{"qid": "factconsolidation_mh_64k#87", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Azusa Pacific University", "correct": true, "ctx_tokens": 207}
+{"qid": "factconsolidation_mh_64k#88", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Jazz originated in the United States of America, and its official language is English.", "correct": false, "ctx_tokens": 2251}
+{"qid": "factconsolidation_mh_64k#88", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "English", "correct": false, "ctx_tokens": 174}
+{"qid": "factconsolidation_mh_64k#89", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "I don't know.", "correct": false, "ctx_tokens": 2326}
+{"qid": "factconsolidation_mh_64k#89", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "United Kingdom", "correct": false, "ctx_tokens": 134}
+{"qid": "factconsolidation_mh_64k#90", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Canada\n\nMaurice Strong is a citizen of Canada, which is located in North America. However, the memory states on February 8, 2026, that he is a citizen of Canada, and on March 9, 2026, it says he is a citizen of Argentina.", "correct": false, "ctx_tokens": 2272}
+{"qid": "factconsolidation_mh_64k#90", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "North America.", "correct": false, "ctx_tokens": 152}
+{"qid": "factconsolidation_mh_64k#91", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "P. G. Wodehouse speaks the language of English.", "correct": false, "ctx_tokens": 2696}
+{"qid": "factconsolidation_mh_64k#91", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "English.", "correct": false, "ctx_tokens": 169}
+{"qid": "factconsolidation_mh_64k#92", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "power forward", "correct": false, "ctx_tokens": 2584}
+{"qid": "factconsolidation_mh_64k#92", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Association football", "correct": false, "ctx_tokens": 209}
+{"qid": "factconsolidation_mh_64k#93", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "New York City.", "correct": false, "ctx_tokens": 2167}
+{"qid": "factconsolidation_mh_64k#93", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Baltimore", "correct": false, "ctx_tokens": 154}
+{"qid": "factconsolidation_mh_64k#94", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Rock opera", "correct": false, "ctx_tokens": 2296}
+{"qid": "factconsolidation_mh_64k#94", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Naoki Urasawa", "correct": false, "ctx_tokens": 176}
+{"qid": "factconsolidation_mh_64k#95", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "I don't know.", "correct": false, "ctx_tokens": 2644}
+{"qid": "factconsolidation_mh_64k#95", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 158}
+{"qid": "factconsolidation_mh_64k#96", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "British Broadcasting Corporation", "correct": false, "ctx_tokens": 2114}
+{"qid": "factconsolidation_mh_64k#96", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Lucasfilm", "correct": false, "ctx_tokens": 166}
+{"qid": "factconsolidation_mh_64k#97", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "London\n\nExplanation: The creator of \"Jabberwocky\" is Lewis Carroll, who was associated with Christ Church, Oxford. However, the memory states that the headquarters of Italia Conti Academy of Theatre Arts (not directly related to Carroll) is located in London. Since no direct information", "correct": false, "ctx_tokens": 2235}
+{"qid": "factconsolidation_mh_64k#97", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 185}
+{"qid": "factconsolidation_mh_64k#98", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "Philippe P\u00e9tain (as of 2026-05-26)", "correct": false, "ctx_tokens": 2013}
+{"qid": "factconsolidation_mh_64k#98", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "Donald Trump", "correct": false, "ctx_tokens": 195}
+{"qid": "factconsolidation_mh_64k#99", "set": "factconsolidation_mh_64k", "system": "sourcedrecall", "pred": "I don't know. The memory does not provide information about the birthplace of the sport that Timofey Mozgov specialized in, which is basketball.", "correct": false, "ctx_tokens": 2237}
+{"qid": "factconsolidation_mh_64k#99", "set": "factconsolidation_mh_64k", "system": "rag", "pred": "I don't know.", "correct": false, "ctx_tokens": 136}

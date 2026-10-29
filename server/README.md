@@ -91,6 +91,7 @@ Add it to your MCP client, e.g. `.mcp.json` for Claude Code or
 | `profile_context(query=None)` | the summary to put in your agent's prompt: everything, or only what relates to `query` |
 | `profile_recall(query)` | look something up. Returns the matching facts with quotes and dates, or "never seen". |
 | `profile_check(claim)` | did the user say this? For something an agent is about to rely on ("The user lives in Fitzroy", a tool argument): whether the user said it, said otherwise, or only the assistant did, with the user's dated words; see below |
+| `history_search(query, all_projects=False)` | search past coding sessions in this project: dated passages of what was said and done (what failed and what fixed it, commands, files edited, why something was decided). `sourcedrecall-memory history "..."` does the same from the command line, and `/recall` in Claude Code asks Claude to use it. |
 | `profile_forget(fact_id)` | remove a fact by the id shown in results and `MEMORY.md` |
 
 The agent has to call `profile_ingest` for a conversation to be stored. In
