@@ -1,45 +1,55 @@
-# Testers-wanted post (draft, 2026-10-21)
+# Testers-wanted post (draft, 2026-10-29)
 
-Not exported to the product repo. LoCoMo figures checked against the
-012fcca release run (2026-10-22).
+Not exported to the product repo. Figures checked against the README of
+a65e7b0 and the files it names (3671a09 release run; bench/native_memory;
+docs/PREREG_CODING_V1.md).
 
 ## Long version (Reddit, forums)
 
-Title: sourcedrecall: local memory for Claude Code that keeps your own words (looking for testers)
+Title: sourcedrecall: a record of your Claude Code sessions, beside Claude's own memory (looking for testers)
 
 I've been building a memory plugin for Claude Code and I'm looking for
 people to try it and tell me where it goes wrong.
 
-What it does: when you tell Claude something about yourself or your work,
-sourcedrecall keeps the message as you wrote it, with its date. At the
-start of a session, and when a question comes up, it hands Claude the few
-messages that matter, oldest first, and marks what has changed since ("I
-moved to Brunswick" after "I live in Fitzroy").
+Claude Code's memory is notes Claude writes for itself. sourcedrecall keeps
+what those notes are written from: your messages in your own words with
+their dates, and what each coding session did (the commands that failed,
+what was changed after, whether it then passed, commits, the reasons
+given). `/recall how did we fix the login test` searches past sessions and
+answers with the date and session of each thing it uses. At the start of a
+session it gives Claude a short summary, leaving out what the project's
+MEMORY.md already says.
 
 What's different about it:
 
 - No language model writes or reads the memory. A grammar parser decides
-  what is stored and what has gone out of date. The small models it uses
-  (parser, search embedder, re-ranker, a contradiction check) run on your
-  CPU. No API key; once installed, nothing leaves your machine.
+  what is stored and what a later message replaced; the small models it
+  uses (parser, search embedder, re-ranker, a contradiction check) run on
+  your CPU. No API key; once installed, nothing leaves your machine.
 - Text you paste in from someone else (an email, a review, a chat) is kept
-  as theirs. Tools that store whatever was said will take a friend's "I'm
-  allergic to nuts" for yours.
-- Your memory is a folder of plain files on your machine. You can read it,
-  correct it and forget single sentences.
+  as theirs, not as something you said.
+- Your memory is a folder of plain files. You can read it, correct it and
+  forget single sentences.
 
-How it measures: on LoCoMo, with the same local reader and judge for
-every system, it answers about as many questions as Mem0 (65.6% against
-64.6%) without any model call to store anything; with Claude Sonnet 5.5
-reading, 77.0% against 72.1%. Its lead comes from questions about dates
-and time; on the other questions Mem0 is ahead. Everything, including
-where it loses, is in the repo with the commands to rerun it.
+How it measures, against a simulation of Claude Code's memory (Claude
+Sonnet writing the memory folder session by session; the reader given the
+whole folder): on 136 pre-registered questions about earlier sessions in 10
+public repositories, the folder alone answered 56.6%, sourcedrecall 72.1%,
+both together 80.9%. A plain search over the same session passages did
+about as well as sourcedrecall alone (74.3%): the gain is from keeping the
+sessions and searching them at all. On personal facts in long chats
+(LoCoMo) Claude Code's memory is better, 76.6% against 65.6%; the two
+together 81.9%. It is not better memory of you than Claude's own; it is the
+record beside it. Everything, including where it loses, is in the repo with
+the commands to rerun it.
 
 What it doesn't do well yet: English only. A fact you change within the
-same session is not marked as replaced until the session is stored. Pasted
-text whose source is named in ways its rules don't read can still pass as
-yours. The Codex CLI, Gemini CLI and Cursor hooks are included but not
-tested in those apps, and native Windows is untested.
+same session is not marked as replaced until the session is stored. On
+facts about other things that change (long lists of world facts), plain
+retrieval does better. Pasted text whose source is named in ways its rules
+don't read can still pass as yours. The Codex CLI, Gemini CLI and Cursor
+hooks are included but not tested in those apps, and native Windows is
+untested.
 
 Install (Claude Code 2.1.83 or later, about 1.3 GB of disk):
 
@@ -48,26 +58,28 @@ Install (Claude Code 2.1.83 or later, about 1.3 GB of disk):
 
 It asks for your name, then sets itself up in the background during your
 first session. To check it works, start a new session and type
-`! sourcedrecall-run memory status`.
+`! sourcedrecall-run memory status`. To bring in past sessions:
+`! sourcedrecall-run import claude-code`.
 
-What I'd like to hear: anything it stored that you didn't say, anything
-it missed, anything it showed Claude that was out of date, install
-problems (with your OS and Python version), and whether the start-of-session
-summary helps or gets in the way. Issues on GitHub, or reply here.
+What I'd like to hear: whether /recall finds what you were looking for,
+anything it stored that you didn't say, anything it showed Claude that was
+out of date, install problems (with your OS and Python version), and
+whether the start-of-session summary helps or gets in the way. Issues on
+GitHub, or reply here.
 
 https://github.com/synthiumjp/sourcedrecall
 
 ## Short version (X, Bluesky, Discord)
 
-sourcedrecall: local memory for Claude Code. It keeps what you tell Claude
-in your own words, with dates, and marks what has changed. A grammar
-parser writes the memory, not an LLM; it runs on your CPU with no API key.
-Pasted emails and chats stay someone else's. Looking for testers:
+sourcedrecall: a local record of your Claude Code sessions, beside Claude's
+own memory. What you said in your words with dates, and what each session
+did (failed commands, fixes, decisions), searchable with /recall. No LLM
+writes it; it runs on your CPU. Looking for testers:
 https://github.com/synthiumjp/sourcedrecall
 
 ## Show HN
 
-Title: Show HN: sourcedrecall – Claude Code memory written by a grammar parser, not an LLM
+Title: Show HN: sourcedrecall – a searchable record of your Claude Code sessions, written by a parser, not an LLM
 
-Body: the first three paragraphs of the long version, the LoCoMo paragraph,
-the limits paragraph and the link.
+Body: the first two paragraphs of the long version, the measurement
+paragraph, the limits paragraph and the link.
