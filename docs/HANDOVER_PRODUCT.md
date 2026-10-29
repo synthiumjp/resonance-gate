@@ -223,6 +223,25 @@ project history at session start, `import claude-code` backfill; ba6f0d9).
   plugin here predates history_search), G5 (test Codex/Gemini/Cursor or
   drop them from the README), native-folder import (recommended: leave
   out), then export, tag, public.
+- 2026-10-29 evening: dev30 (8dfa861, M1/M3): own 29 -> 31/40, own2
+  26 -> 27/30, pasted_long 38 -> 36/40, FC dev 88/12 -> 86/11, LoCoMo
+  65.3%; kept. LoCoMo change-note precision (review H4): 186 "no longer
+  true" (about 140 from one death cascading in conv 7) and about 430 "may
+  have changed since" from the block-time rule, nearly all wrong in samples.
+  Fixed: a relative's or pet's death and clauses after "when/after/that"
+  no longer end the person's facts (754a3c7); joining a club is not a job,
+  "worked hard/on" is not an occupation, decisions replace only on the
+  same topic (75363a9). dev31 (75363a9): "no longer true" 186 -> 4, LoCoMo
+  65.4% (669 tokens), FM and FC dev unchanged. dev32 (RG_LATER_CHANGES=0):
+  "may have changed since" 449 -> 0, LoCoMo 65.6% (651 tokens), FC sh 87,
+  every FM dev set identical. Off entirely, two review-rule tests failed
+  ("I don't live in Fitzroy any more" no longer marked "I live in
+  Fitzroy"), so by default only the polarity flip marks now; the change
+  words need RG_LATER_CHANGES=1 (0 = off). dev33 counts the flip notes on
+  LoCoMo. Everything after 3671a09 needs the
+  final release measurement at the new commit (release9) before the README
+  figures can be called current; release8 is left to finish HaluMem and
+  the strict judge at 3671a09.
 - 2026-10-26 G4 gate check (plan: backfill under 30 min on CPU, an old
   session answered with its source): JP's 23 sessions (382 MB, Sep-Oct;
   ~/jpwork/coding_data/jp_sessions) imported with `importers claude-code`

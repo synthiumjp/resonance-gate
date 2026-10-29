@@ -479,10 +479,11 @@ def test_dense_grounding_counts_only_the_facts_returned():
         M._RV3._models = orig
 
 
-def test_marking_later_changes_never_loses_or_crashes():
+def test_marking_later_changes_never_loses_or_crashes(monkeypatch):
     """2026-10-03: the first version replaced items with copies and then
     looked the originals up -- ValueError, silently turned into "never
     seen" by the fallback retriever."""
+    monkeypatch.setenv("RG_LATER_CHANGES", "1")   # off by default since 2026-10-29
     import memory_api as MA
     mk = lambda i, t, d, a, v: {"id": i, "text": t, "said": t, "current": True,
                                 "attribute": a, "value": v, "receipts": [{"date": d}]}

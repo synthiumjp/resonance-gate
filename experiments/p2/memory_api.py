@@ -499,8 +499,17 @@ def _newest_first(pairs):
 
 
 def _mark_later_changes(facts, owner=None):
-    if os.environ.get("RG_LATER_CHANGES") == "0" or len(facts) < 2:
+    # 2026-10-29: by default only a flip of polarity about the same thing
+    # ("I don't live in Fitzroy any more") marks; a change word alone does
+    # not (RG_LATER_CHANGES=1 brings it back, 0 turns the rule off). On
+    # LoCoMo the change words marked about 450 facts "may have changed
+    # since", nearly all wrong in a sample, and turning the rule off changed
+    # no dev set (stale 44/50, stale2 58/64, own 31/40, own2 27/30,
+    # updated-facts 87/11; LoCoMo 65.4 -> 65.6%)
+    mode = os.environ.get("RG_LATER_CHANGES")
+    if mode == "0" or len(facts) < 2:
         return facts
+    words = mode == "1"
     own = (owner or "").lower()
 
     def users(f):
@@ -553,7 +562,7 @@ def _mark_later_changes(facts, owner=None):
         import currency
         # 2026-10-09 (adversarial review): "I might move to Brunswick", "I
         # didn't move to Brunswick after all" marked "I live in Fitzroy"
-        changes = bool(_CHANGE.search(nclause)) and not currency._not_a_change(
+        changes = words and bool(_CHANGE.search(nclause)) and not currency._not_a_change(
             {"text": nclause})
         for old in out:
             if old is new or not about_user(old) or old.get("current") is False \

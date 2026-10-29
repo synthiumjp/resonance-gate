@@ -29,6 +29,12 @@ has the details behind each change.
   MemoryAgentBench's held-out FactConsolidation lists, single facts 49 -> 84
   and 40 -> 80 of 100, still below plain retrieval (89 and 94); LoCoMo
   65.6% -> 65.4%.
+- A later statement of yours with a change word ("now", "switched", "new")
+  no longer marks an earlier related one "may have changed since"; a later
+  statement that says the opposite about the same thing ("I don't live in
+  Fitzroy any more") still does. `RG_LATER_CHANGES=1` brings the change
+  words back. On LoCoMo they marked about 450 facts, nearly all wrongly,
+  and no development set needed them.
 - A death ends only what its own clause says; verbs whose subject holds
   many values at once ("directed", "wrote") and slots like "allergic to"
   are not read as changes.

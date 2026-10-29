@@ -159,7 +159,9 @@ marked "may have changed since", not "no longer true".
   22 now are, with 0 false marks in 136 scenarios where nothing changed.
   Held out (v2-v4): 4 more of 27, 0 false marks in 92.
 - Status: supported, with a known gap: brand names (ThinkPad, Kia,
-  Symbicort, futsal) are not in WordNet.
+  Symbicort, futsal) are not in WordNet. Since 2026-10-29 a change word
+  alone does not mark (`RG_LATER_CHANGES=1` turns it back on): see the
+  next rule.
 
 **Presupposition triggers state a new situation without asserting it.** An
 ordinal with a time unit ("Fourth week as a paramedic", "First week at
@@ -192,6 +194,18 @@ Fitzroy" / "I moved the sofa", cosine above 0.5), and it was removed.
   on v4), the cost of not crying wolf. Held out (v5): no false change label
   in 20 no-change scenarios, but labelled only 2 of 25 implied changes:
   refuted as a signal of implied change; the answers did not need it.
+- Since 2026-10-29 a change word alone no longer marks; only a flip of
+  polarity about the same thing does ("I don't live in Fitzroy any more"
+  after "I live in Fitzroy"). `RG_LATER_CHANGES=1` brings the change words
+  back, `0` turns the rule off. On LoCoMo's eight test conversations,
+  which are mostly about the speakers' lives, the change words marked
+  about 450 facts "may have changed since"; in a sample of nine, none had
+  changed ("finally finished my first full screenplay", marked by a later
+  "I just started writing another one"). With the whole rule off, no
+  development set moved: changes of state 44/50 and 58/64 new state given,
+  own material 31/40 and 27/30, updated facts 87 and 11 of 100, LoCoMo
+  65.4% -> 65.6% with 18 fewer tokens per answer. The closed families, the
+  frame rule below and the later-message notes still mark changes.
 
 **A second way to "may have changed since", for facts about other people
 and things (on by default since 2026-10-27, `RG_FRAME_CHANGES=0` turns it
