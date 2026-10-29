@@ -478,6 +478,8 @@ _CHANGE = re.compile(
     r"instead|these days|no more|from now on)\b", re.I)
 _NEGATED = re.compile(r"\b(not|no|never|don't|doesn't|didn't|isn't|aren't|"
                       r"haven't|hasn't|none|nothing)\b", re.I)
+_NOW_SO = re.compile(r"\b(any ?more|no longer|now|these days|nowadays|"
+                     r"not any longer)\b", re.I)
 
 
 def _f_date(f):
@@ -574,8 +576,13 @@ def _mark_later_changes(facts, owner=None):
                 continue
             # a change of polarity about the SAME thing ("I don't live in
             # Fitzroy any more"), not a negation about something else
+            # 2026-10-29: and the newer one says it is now so ("any more",
+            # "no longer", "now"); on LoCoMo a shared word alone ("I've had
+            # them for 3 years now" / "books I haven't read in years")
+            # marked about 135 facts, none of 15 sampled a change
             flip = (bool(_NEGATED.search(old.get("text") or "")) != bool(_NEGATED.search(nclause))
-                    and bool(currency._content(old.get("value")) & currency._content(new.get("value"))))
+                    and bool(currency._content(old.get("value")) & currency._content(new.get("value")))
+                    and (words or bool(_NOW_SO.search(nclause))))
             if changes or flip:
                 old["changed_later"] = new.get("id")
     # the later statement before the earlier one it updates

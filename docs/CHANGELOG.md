@@ -31,8 +31,8 @@ has the details behind each change.
   65.6% -> 65.4%.
 - A later statement of yours with a change word ("now", "switched", "new")
   no longer marks an earlier related one "may have changed since"; a later
-  statement that says the opposite about the same thing ("I don't live in
-  Fitzroy any more") still does. `RG_LATER_CHANGES=1` brings the change
+  statement that says the opposite about the same thing and that it is so
+  now ("I don't live in Fitzroy any more") still does. `RG_LATER_CHANGES=1` brings the change
   words back. On LoCoMo they marked about 450 facts, nearly all wrongly,
   and no development set needed them.
 - A death ends only what its own clause says; verbs whose subject holds

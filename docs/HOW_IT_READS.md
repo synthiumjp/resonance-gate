@@ -195,9 +195,13 @@ Fitzroy" / "I moved the sofa", cosine above 0.5), and it was removed.
   in 20 no-change scenarios, but labelled only 2 of 25 implied changes:
   refuted as a signal of implied change; the answers did not need it.
 - Since 2026-10-29 a change word alone no longer marks; only a flip of
-  polarity about the same thing does ("I don't live in Fitzroy any more"
-  after "I live in Fitzroy"). `RG_LATER_CHANGES=1` brings the change words
-  back, `0` turns the rule off. On LoCoMo's eight test conversations,
+  polarity about the same thing, in a later statement that says it is so
+  now ("any more", "no longer", "now"), does: "I don't live in Fitzroy any
+  more" after "I live in Fitzroy". `RG_LATER_CHANGES=1` brings back the
+  change words and the flip without "now", `0` turns the rule off. A flip
+  that shared one word was enough before: on LoCoMo it marked about 135
+  facts, none of 15 sampled a change ("I've had them for 3 years now" by a
+  later "books I haven't read in years"). On LoCoMo's eight test conversations,
   which are mostly about the speakers' lives, the change words marked
   about 450 facts "may have changed since"; in a sample of nine, none had
   changed ("finally finished my first full screenplay", marked by a later

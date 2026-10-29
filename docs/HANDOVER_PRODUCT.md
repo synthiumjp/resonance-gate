@@ -237,8 +237,11 @@ project history at session start, `import claude-code` backfill; ba6f0d9).
   every FM dev set identical. Off entirely, two review-rule tests failed
   ("I don't live in Fitzroy any more" no longer marked "I live in
   Fitzroy"), so by default only the polarity flip marks now; the change
-  words need RG_LATER_CHANGES=1 (0 = off). dev33 counts the flip notes on
-  LoCoMo. Everything after 3671a09 needs the
+  words need RG_LATER_CHANGES=1 (0 = off). dev33 (3000523): LoCoMo 65.6%
+  (655 tokens), but the flip still made 135 notes, none of 15 sampled
+  right (a shared word like "years"). Now the later statement must also
+  say it is so now ("any more", "no longer", "now"); dev34 counts again.
+  Everything after 3671a09 needs the
   final release measurement at the new commit (release9) before the README
   figures can be called current; release8 is left to finish HaluMem and
   the strict judge at 3671a09.

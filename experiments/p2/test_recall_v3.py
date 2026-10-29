@@ -499,3 +499,26 @@ def test_marking_later_changes_never_loses_or_crashes(monkeypatch):
     assert marked["a"] and marked["d"]
     ids = [f["id"] for f in out]
     assert ids.index(marked["a"]) < ids.index("a")
+
+
+def test_by_default_only_a_flip_that_says_it_is_now_so_marks(monkeypatch):
+    """2026-10-29: a change word alone, or an opposite polarity sharing a
+    word ("years"), marked about 450 and 135 LoCoMo facts, nearly all
+    wrongly; "I don't live in Fitzroy any more" still marks."""
+    monkeypatch.delenv("RG_LATER_CHANGES", raising=False)
+    import memory_api as MA
+    mk = lambda i, t, d, a, v: {"id": i, "text": t, "said": t, "current": True,
+                                "attribute": a, "value": v, "receipts": [{"date": d}]}
+    facts = [mk("a", "Alex Reyes lives in Fitzroy", "2026-01-01", "live_in", "in fitzroy"),
+             mk("b", "Alex Reyes does not live in Fitzroy any more", "2026-03-01",
+                "live_in", "in fitzroy any more"),
+             mk("c", "Alex Reyes has had the turtles for 3 years now", "2026-01-01",
+                "have", "the turtles for 3 years now"),
+             mk("d", "Alex Reyes has not read those books in years", "2026-03-01",
+                "read", "those books in years"),
+             mk("e", "Alex Reyes works at Acme", "2026-01-01", "work_at", "at acme"),
+             mk("f", "Alex Reyes started a new job at Acme Freight now", "2026-03-01",
+                "start", "a new job at acme freight now")]
+    marked = {f["id"]: f.get("changed_later") for f in MA._mark_later_changes(facts, "Alex Reyes")}
+    assert marked["a"] == "b"
+    assert not marked["c"] and not marked["e"]
