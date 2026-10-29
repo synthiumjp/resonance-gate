@@ -431,3 +431,20 @@ def test_interruptions_and_unknown_origins(pm, tmp_path):
     texts = [x["content"] for x in pm.ingested[0]["turns"]]
     assert texts == ["I live in Fitzroy."]
     assert out["skipped_unknown_origin"] == {"voice": 1}
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX lock")
+def test_a_turn_waits_while_a_forget_rewrites_the_spool(pm):
+    # review 2026-10-28: forget replaced the spool file while a turn could be
+    # appended to the old one; the append now waits for the rewrite
+    import threading
+    import time
+    C._append("c-lock", "user", "first line")
+    p = C.spool_path("c-lock")
+    with C.spool_lock(p):
+        t = threading.Thread(target=C._append, args=("c-lock", "user", "second line"))
+        t.start()
+        time.sleep(0.3)
+        assert "second line" not in open(p).read()
+    t.join(5)
+    assert "second line" in open(p).read()

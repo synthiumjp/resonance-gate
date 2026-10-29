@@ -65,6 +65,32 @@ def _now():
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+class spool_lock:
+    """Exclusive lock on <spool>.lock while a turn is appended or a forget
+    rewrites the spool (review 2026-10-28: a turn appended while forget
+    replaced the file went to the old file and was lost). A separate lock
+    file, since the rewrite replaces the spool's inode. POSIX only."""
+
+    def __init__(self, path):
+        self.path = path + ".lock"
+        self.fh = None
+
+    def __enter__(self):
+        try:
+            import fcntl
+        except ImportError:
+            return self
+        fd = os.open(self.path, os.O_WRONLY | os.O_CREAT, 0o600)
+        self.fh = os.fdopen(fd, "w")
+        fcntl.flock(self.fh.fileno(), fcntl.LOCK_EX)
+        return self
+
+    def __exit__(self, *exc):
+        if self.fh is not None:
+            self.fh.close()          # closing releases the lock
+        return False
+
+
 def _append(conversation_id, role, text, cwd=None):
     text = (text or "").strip()
     if not text:
@@ -75,9 +101,11 @@ def _append(conversation_id, role, text, cwd=None):
     rec = {"role": role, "content": scrub(text), "ts": _now()}
     if cwd:
         rec["cwd"] = cwd
-    fd = os.open(spool_path(conversation_id), os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
-    with os.fdopen(fd, "a", encoding="utf-8") as f:
-        f.write(json.dumps(rec) + "\n")
+    path = spool_path(conversation_id)
+    with spool_lock(path):
+        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
+        with os.fdopen(fd, "a", encoding="utf-8") as f:
+            f.write(json.dumps(rec) + "\n")
 
 
 def _forget_old_spools():
@@ -86,7 +114,7 @@ def _forget_old_spools():
     for name in os.listdir(d):
         p = os.path.join(d, name)
         try:
-            if name.endswith(".jsonl") and os.path.getmtime(p) < cutoff:
+            if name.endswith((".jsonl", ".jsonl.lock")) and os.path.getmtime(p) < cutoff:
                 os.unlink(p)
         except OSError:
             pass

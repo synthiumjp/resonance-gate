@@ -2204,6 +2204,7 @@ def _erase_spools(keys):
     """The Cursor spool keeps a session's turns until it is stored (up to
     30 days if it never is): take the forgotten sentences out there too
     (2026-10-12, review 3.4)."""
+    from sourcedrecall.cursor_hooks import spool_lock
     from sourcedrecall.paths import state_dir
     d = os.path.join(state_dir(), "cursor-spool")
     if not os.path.isdir(d):
@@ -2212,22 +2213,23 @@ def _erase_spools(keys):
         p = os.path.join(d, name)
         if not name.endswith(".jsonl"):
             continue
-        try:
-            rows = [json.loads(l) for l in open(p, encoding="utf-8") if l.strip()]
-        except (OSError, ValueError):
-            continue
-        changed = False
-        for r in rows:
-            if isinstance(r.get("content"), str):
-                new = _strip_forgotten(r["content"], keys)
-                changed |= new != r["content"]
-                r["content"] = new
-        if changed:
-            tmp = p + f".{os.getpid()}.tmp"
-            fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-            with os.fdopen(fd, "w", encoding="utf-8") as fh:
-                fh.write("".join(json.dumps(r) + "\n" for r in rows))
-            os.replace(tmp, p)
+        with spool_lock(p):          # a turn appended meanwhile is not lost
+            try:
+                rows = [json.loads(l) for l in open(p, encoding="utf-8") if l.strip()]
+            except (OSError, ValueError):
+                continue
+            changed = False
+            for r in rows:
+                if isinstance(r.get("content"), str):
+                    new = _strip_forgotten(r["content"], keys)
+                    changed |= new != r["content"]
+                    r["content"] = new
+            if changed:
+                tmp = p + f".{os.getpid()}.tmp"
+                fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+                with os.fdopen(fd, "w", encoding="utf-8") as fh:
+                    fh.write("".join(json.dumps(r) + "\n" for r in rows))
+                os.replace(tmp, p)
 
 
 def profile_forget(fact_id, via=None):
