@@ -113,7 +113,9 @@ for x in default small standard; do
     cp results/strict_release_test_default/ans_${s}_strict.jsonl $D/
     [ -e $D/ctx_${s}_strict.jsonl ] || ln -s ctx_$s.jsonl $D/ctx_${s}_strict.jsonl
   done
-  for au in "" $W/bench/locomo/results/locomo_audit_errors.json; do
+  # the audit file is not in git (bench/locomo/results/locomo_audit_*.json
+  # is ignored): copied to ~/jpwork by hand
+  for au in "" $HOME/jpwork/locomo_audit_errors.json; do
     echo "-- strict $x ${au:+without the audit wrong gold answers}"
     LOCOMO_AUDIT=$au LOCOMO_JUDGE= /usr/bin/python3 score.py $D sourcedrecall_strict mem0_strict rag_strict | grep -E "^\| (overall|1 multi|2 temporal|3 open|4 single)"
   done
