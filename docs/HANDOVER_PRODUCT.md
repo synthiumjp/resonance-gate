@@ -203,6 +203,26 @@ project history at session start, `import claude-code` backfill; ba6f0d9).
   the user introduced it ("The deadline moved to Friday", "rugby union was
   created in ..." store nothing; the messages are still found and shown).
   Loosening that guard risks generic statements as facts.
+- 2026-10-29: release run 3671a09 steps 1-3 done (suite 1,514; LoCoMo
+  65.4 / 67.8 / 71.0, 685 tokens; McNemar vs Mem0 p=0.61, without temporal
+  0.03 Mem0 ahead; LME any@5 98.8; KU 63/78, temporal 72/133; pasted text
+  same as 012fcca except v12 R Phi-4 5/20 and realpaste own 8/10). HaluMem
+  and the strict judge still running at 16:30. README/FAQ rewritten
+  (ea65ed3): pitch beside Claude Code's memory with the native, coding and
+  FC results, losses included; v5-v12 history to docs/RESULTS_HISTORY.md;
+  result files committed (bench/native_memory, bench/coding/results_v1
+  scores and verdicts only, bench/factcons/results_v1). Review M1, M3, M9
+  (8dfa861), Cursor spool lock (5f91607), M7 constraints file with fallback
+  (a65e7b0; fresh install with huggingface_hub 2.3 passed tests, setup and
+  an identical demo), testers post (71383ce). These come after 3671a09:
+  dev30 (~/jpwork/dev30.sh, out ~/jpwork/dev30.out, own Qwen on 8091)
+  checks M1/M3 on LoCoMo test, FC dev and the FM dev sets against 3671a09
+  / dev29. To fill when the release run ends: HaluMem and strict LoCoMo in
+  the README, commit bench/RELEASE_3671a09.log and result dirs. Open for
+  JP: G2 check of /recall and history_search in Claude Code itself (JP's
+  plugin here predates history_search), G5 (test Codex/Gemini/Cursor or
+  drop them from the README), native-folder import (recommended: leave
+  out), then export, tag, public.
 - 2026-10-26 G4 gate check (plan: backfill under 30 min on CPU, an old
   session answered with its source): JP's 23 sessions (382 MB, Sep-Oct;
   ~/jpwork/coding_data/jp_sessions) imported with `importers claude-code`
