@@ -639,3 +639,30 @@ def test_a_death_reads_the_facts_own_clause():
                     text="Chanel was founded by Coco Chanel"),
             "b": _n("b", "coco_die", "", "c2", text="Coco Chanel died")})
     assert C.mark_ceased(g, owner="Dana Cole", order=ORDER) == []
+
+
+@pytest.mark.parametrize("cess_text", [
+    "Deborah's dad passed away two days ago",
+    "Deborah took him when Deborah's mother passed away",
+    "Deborah was heartbroken after her dog died",
+])
+def test_a_relatives_death_does_not_end_the_persons_own_facts(cess_text):
+    """2026-10-29 (LoCoMo conversation 7): these ended 140 of Deborah's
+    facts, read as her own death."""
+    g = _G({"a": _n("a", "deborah_teach", "yoga", "c1", text="Deborah teaches yoga"),
+            "b": _n("b", "die", "", "c2", text=cess_text)})
+    assert C.mark_ceased(g, owner="Jolene", order=ORDER) == []
+
+
+def test_a_death_named_after_the_relation_ends_that_persons_facts():
+    g = _G({"a": _n("a", "tom_live_in", "in leeds", "c1", text="Tom lives in Leeds"),
+            "d": _n("d", "sam_live_in", "in york", "c1", text="Sam lives in York"),
+            "b": _n("b", "die", "", "c2", text="Sam's friend Tom died last week")})
+    out = C.mark_ceased(g, owner="Jolene", order=ORDER)
+    assert ("a", "b") in out and ("d", "b") not in out
+
+
+def test_a_named_persons_death_still_ends_their_facts():
+    g = _G({"a": _n("a", "sam_live_in", "in york", "c1", text="Sam lives in York"),
+            "b": _n("b", "die", "", "c2", text="Sam died in the spring")})
+    assert ("a", "b") in C.mark_ceased(g, owner="Jolene", order=ORDER)

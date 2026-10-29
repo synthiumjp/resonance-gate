@@ -402,6 +402,12 @@ _CESSATION_PHRASES = ("no longer", "not any more", "not anymore",
 # one -- "My friend died in Leeds" ended "I live in Leeds" when the place was
 # what got matched.
 _EVENT_END = (" died", "passed away", "split up", "broke up", "broken up")
+# the clause an ending verb is in, and a subject that is someone's relative,
+# pet or thing ("Deborah's mother", "his dog"), not a named person
+_DEATH_CLAUSE = re.compile(r"\b(?:when|after|before|because|since|while|until|that|who|which)\b|[,;:]",
+                           re.I)
+_POSSESSED = re.compile(r"(?:'s?|\b(?:his|her|their|my|our|your|its))\s+(?:[\w-]+\s+){1,3}$",
+                        re.I)
 # the cessation's own words, never what it ends ("Biscuit died" ends what
 # mentions Biscuit, not what mentions "died")
 _CESSATION_WORDS = frozenset("""died dies passed away split broke broken
@@ -561,7 +567,20 @@ def mark_ceased(g, owner=None, order=None):
                 raw = nd.get("text") or ""
                 cut = min(raw.lower().find(p.strip()) for p in _EVENT_END
                           if p.strip() in raw.lower())
-                names = _names(raw[:cut], owner)
+                # 2026-10-29 (LoCoMo, conversation 7): "Deborah's dad passed
+                # away" and "Deborah took him when Deborah's mother passed
+                # away" read Deborah as the one who died and ended 140 of
+                # her facts. Who died is the subject of the verb's own
+                # clause, and someone's relative or pet is not them.
+                pre = re.split(_DEATH_CLAUSE, raw[:cut])[-1]
+                m = _POSSESSED.search(pre + " ")
+                if m:
+                    # "Sam's friend Tom died": Tom, named after the relation
+                    tail = pre[m.start():].split()[1:]
+                    pre = " ".join(w for w in tail if w[:1].isupper())
+                    if not pre:
+                        continue
+                names = _names(pre, owner)
                 if names:
                     cess.append((nid, nd, names, _latest(nd, order), True))
                 continue
