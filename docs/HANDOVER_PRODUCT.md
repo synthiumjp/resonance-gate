@@ -240,7 +240,17 @@ project history at session start, `import claude-code` backfill; ba6f0d9).
   words need RG_LATER_CHANGES=1 (0 = off). dev33 (3000523): LoCoMo 65.6%
   (655 tokens), but the flip still made 135 notes, none of 15 sampled
   right (a shared word like "years"). Now the later statement must also
-  say it is so now ("any more", "no longer", "now"); dev34 counts again.
+  say it is so now ("any more", "no longer", "now"). dev34 (1b5cc32):
+  LoCoMo 65.6%, 651 tokens (same as the rule off), change notes on the
+  test contexts 6 (2 "may have changed since" from one pair in conv 3, 4
+  "no longer true"; mostly wrong, but 6 against about 635 before).
+  HaluMem at 3671a09: updates 157/304 (012fcca 155), QA 190/352 (186);
+  strict LoCoMo default 50.7% (Mem0 48.5, rag 42.5); the strict score
+  without the audit's wrong golds failed (audit file not in git; script
+  fixed in 7a83a79 to read ~/jpwork/locomo_audit_errors.json). Final
+  release measurement release9 at 7a83a79 started 22:51
+  (~/jpwork/sdr-release-7a83a79, ~/jpwork/release9.log, sentinel polled):
+  its figures replace 3671a09's in the README.
   Everything after 3671a09 needs the
   final release measurement at the new commit (release9) before the README
   figures can be called current; release8 is left to finish HaluMem and
