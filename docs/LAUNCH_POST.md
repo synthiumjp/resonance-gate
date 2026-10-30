@@ -1,7 +1,7 @@
 # Testers-wanted post (draft, 2026-10-29)
 
-Not exported to the product repo. Figures checked against the README of
-a65e7b0 and the files it names (3671a09 release run; bench/native_memory;
+Not exported to the product repo. Figures checked against the README after
+the 7a83a79 release run and the files it names (bench/native_memory;
 docs/PREREG_CODING_V1.md).
 
 ## Long version (Reddit, forums)

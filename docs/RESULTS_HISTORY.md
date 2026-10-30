@@ -163,4 +163,6 @@ smaller models (`bench/false_memory/results_release2_*`, `results_claude_*`).
 On commit 3671a09 (2026-10-28, after the review fixes and the updated-facts
 change) the counts are the same except v12's real emails with Phi-4 (5 of
 20) and the separate real-email set's own emails (8 of 10, was 9);
-`bench/RELEASE_3671a09.log`.
+`bench/RELEASE_3671a09.log`. On 7a83a79 (2026-10-29/30, the final changes
+to what is marked as changed) every held-out count is the same as on
+3671a09; `bench/RELEASE_7a83a79.log`.

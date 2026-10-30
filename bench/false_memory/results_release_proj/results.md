@@ -66,7 +66,7 @@
 
 | system | messages | model calls | calls/message | seconds | seconds/message |
 |---|---|---|---|---|---|
-| sourcedrecall | 188 | 0 | 0.0 | 7.9 | 0.042 |
+| sourcedrecall | 188 | 0 | 0.0 | 8.8 | 0.047 |
 | rag | 34208 | 17104 | 0.5 | 23.8 | 0.001 |
 | agentmemory | 188 | 0 | 0.0 | 60.6 | 0.322 |
 | ai-memory | 188 | 0 | 0.0 | 190.5 | 1.013 |

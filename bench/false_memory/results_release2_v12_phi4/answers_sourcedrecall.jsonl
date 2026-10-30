@@ -78,9 +78,9 @@
 {"id": "v12_078", "key": "e19c00b5acd624ddfc7449a3b8cbc5c418885229", "model": "phi-4", "answers": ["The book club message said you are reading \"The Overstory\" by Richard Powers next."]}
 {"id": "v12_079", "key": "f522509b03b1e0305edd923d09e1cd31cdcd427b", "model": "phi-4", "answers": ["The hotel booking confirmed a check-in time from 3 pm."]}
 {"id": "v12_080", "key": "d0e665ad9e9f205650c871afd9a3559d923b387a", "model": "phi-4", "answers": ["The expenses policy states that receipts are required for any expense over 50 pounds."]}
-{"id": "v12_081", "key": "3aece96f4b20042729c1d4f31c3dc91d4eb1134a", "model": "phi-4", "answers": ["Practice on Thursday will start at 6:30 instead of the usual 6:00, and you should meet by the gate rather than the clubhouse."]}
-{"id": "v12_082", "key": "d0454afb07ec671e7a2091703ff0126809f0f401", "model": "phi-4", "answers": ["I don't know the wifi password at the venue. You might want to check with a member of staff or look for any information provided in your conference materials upon arrival."]}
-{"id": "v12_083", "key": "1f3f114eb611aa5b8801172a9486a013254c5922", "model": "phi-4", "answers": ["You can carry over up to five days of leave into the following year with your manager's approval, and these must be taken by 31 March."]}
+{"id": "v12_081", "key": "cf1a6abbd4237d093ddeadd20e85d878e4c39df4", "model": "phi-4", "answers": ["Practice on Thursday will start at 6:30 instead of 6:00, and you'll meet by the gate rather than the clubhouse."]}
+{"id": "v12_082", "key": "01a071b2554ca5255da21e1200851eee74bde2cb", "model": "phi-4", "answers": ["I don't know the wifi password at the venue. If you need it, I recommend checking with the conference organizers or looking for any information provided upon arrival."]}
+{"id": "v12_083", "key": "fb51fbce4fd62fe417c254093312bc15d2648a76", "model": "phi-4", "answers": ["With your manager's approval, you may carry over up to five days into the following leave year, and these must be taken by 31 March."]}
 {"id": "v12_084", "key": "d693ff05912f47a255c23cc3d11b0ba2ec883015", "model": "phi-4", "answers": ["The security deposit for your rental is 300 euros. It's refundable within seven days of returning the car, provided there are no damages or outstanding fines."]}
 {"id": "v12_085", "key": "4c182d908166267178ec2f8eba0ef4dbb8e3fcce", "model": "phi-4", "answers": ["The contact for the street party is Ines, who can be reached by knocking at number 14 or leaving a note through the door."]}
 {"id": "v12_086", "key": "60c02e6eb7ce5fa7f4f00f7cb90bbe1c1c3e6d2c", "model": "phi-4", "answers": ["Mill Lane Pharmacy closes at 1 pm on Saturdays."]}
@@ -103,7 +103,7 @@
 {"id": "v12_103", "key": "142c274be22a8ae6ed1abf91dcbe48b5426eb4bc", "model": "phi-4", "answers": ["Based on the memory, you and Sam broke up last week. As of now, there is no information about seeing anyone else."]}
 {"id": "v12_104", "key": "c1ff844a9859bb52d9b061a83dd15d453c2139a0", "model": "phi-4", "answers": ["As of December 8, 2025, you are living alone in your flat in Pune since your brother moved to Dubai for work."]}
 {"id": "v12_105", "key": "8c53c517b2b220a77798c7f87a1e31e9592b6009", "model": "phi-4", "answers": ["As of November 17, 2025, you switched to a Pixel 9 after using an iPhone for 8 years."]}
-{"id": "v12_106", "key": "8e4c76ed6510fc5bf70c560f7d311f6aeeae893b", "model": "phi-4", "answers": ["As of today, October 6, 2025, you are in the office two days a week."]}
+{"id": "v12_106", "key": "ea6c5eea9e8f0acee3963ae77bfae83189ee7041", "model": "phi-4", "answers": ["As of today, October 6, 2025, you are in the office two days a week."]}
 {"id": "v12_107", "key": "d571a40ff5a7232fea7ee4e1397af56d518bee25", "model": "phi-4", "answers": ["Your wedding is now scheduled for September 2025."]}
 {"id": "v12_108", "key": "5bd51d4996fdc624b9e617acf7ea39c49f7484ce", "model": "phi-4", "answers": ["Your son is currently at Oakwood School."]}
 {"id": "v12_109", "key": "c0f67c4765d3a508b2c6343f34ba2b8a348cb7c2", "model": "phi-4", "answers": ["As of today, December 15, 2025, you are learning Italian. You mentioned moving to Milan for work and starting to learn Italian."]}
@@ -131,7 +131,7 @@
 {"id": "v12_131", "key": "cf6be7828e506245a961846bbc3ba4973b44645c", "model": "phi-4", "answers": ["Based on the information available in our previous conversations, I don't know if you are setting up a company anywhere. You haven't mentioned anything about this topic before."]}
 {"id": "v12_132", "key": "cae34f8e6b36aae058ee9a366b83459c541f11df", "model": "phi-4", "answers": ["Based on the memory, I don't know your work background. You mentioned checking if learning Portuguese is worth it for work and inquiring about cold email length, but no specific details about your job or experience were provided."]}
 {"id": "v12_133", "key": "58051e8d38ff0ac9ee4972e049486c06c62b9b0a", "model": "phi-4", "answers": ["I don't know if you are a single parent. You haven't mentioned anything about your parental status in our previous conversations."]}
-{"id": "v12_134", "key": "dc25e330c752d57e7d43d03bd982d46bd88024a4", "model": "phi-4", "answers": ["Yes, you left your job at Enron on November 12, 2025."]}
+{"id": "v12_134", "key": "c6dd0c7c26d4cc4c6b4a535dbe7f0f5e15a95b4d", "model": "phi-4", "answers": ["Yes, you left your job at Enron on November 12, 2025. It was the start of a new chapter in your life."]}
 {"id": "v12_135", "key": "d1b810d59064e820932b45b9bcf9313941dc2045", "model": "phi-4", "answers": ["Based on the information in your memory, there is no indication that you are expecting a baby. If you have any specific concerns or questions about this topic, feel free to ask!"]}
 {"id": "v12_136", "key": "6164c05c3973bf4c29b43f5c3920f4690de2245f", "model": "phi-4", "answers": ["I don't know your plans for the summer. The memory doesn't include any information about that."]}
 {"id": "v12_137", "key": "e87fd57aa45f32303d6be8f96b93d6fff14400d2", "model": "phi-4", "answers": ["Based on the information in your memory, there is no mention of you starting a fund. If this is something new or has changed since our last conversation, I don't know about it."]}

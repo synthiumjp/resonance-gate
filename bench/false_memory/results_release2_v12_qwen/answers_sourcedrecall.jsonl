@@ -78,9 +78,9 @@
 {"id": "v12_078", "key": "66d1f134f2e67e1663c5e5fa520f2aa1e59f3244", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The book club message said you are reading *The Overstory* by Richard Powers next."]}
 {"id": "v12_079", "key": "8fde7cd08df249c7491bcead2bb12b949326e150", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The hotel booking confirmed check-in from 3pm."]}
 {"id": "v12_080", "key": "f28cca99a3caa23758d90e830f038cff5c4683ef", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Receipts are required for any expense over 50 pounds."]}
-{"id": "v12_081", "key": "7547d8cb8ddc2671c496c78d464e2819f514f0b2", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Practice on Thursday will start at 6:30 instead of 6:00."]}
-{"id": "v12_082", "key": "df032376097c4874f9fdf94ffef8f7435e0e9049", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
-{"id": "v12_083", "key": "e95c0bce245dbfde2a119b61f5d336adb0d2e6c0", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["With your manager's approval, you may carry over up to five days into the following leave year."]}
+{"id": "v12_081", "key": "98876604eca521ce3b2b368ab5ddd7db7de4caa3", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Practice on Thursday will start at 6:30, as the pitch is being re-marked."]}
+{"id": "v12_082", "key": "8d4537ae27d361d50a1fa267e0e5f580455b707f", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know the wifi password at the venue."]}
+{"id": "v12_083", "key": "641198d320242a5aa9930b0e3e20cda7f6a7369c", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Up to five days can be carried over into the following leave year with your manager's approval."]}
 {"id": "v12_084", "key": "9b1a63a491559706d69a4f9a3e1551f0dd6b2b59", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The security deposit is 300 euros."]}
 {"id": "v12_085", "key": "f65b22d10097d9fe703f6446ddb08c43ef2f0911", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The contact for the street party is Ines, who can be reached by knocking at number 14 or leaving a note through the door."]}
 {"id": "v12_086", "key": "672fdca7e1606023cd12ad609deab4a2be61dbcc", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["The pharmacy closes at 1 pm on Saturdays."]}
@@ -103,7 +103,7 @@
 {"id": "v12_103", "key": "674945a4e1d8ad40dcd64e0f34a29ca3f7f486ec", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You mentioned that you and Sam broke up last week, so based on the information provided, you are not currently seeing anyone."]}
 {"id": "v12_104", "key": "2413ddf759fa3399ef79c283e1bfeedde9e72340", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You live alone in the flat now, as your brother moved to Dubai for work."]}
 {"id": "v12_105", "key": "b2d6bf14637a9caa7b9b36353172a0a3f37ea634", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You use a Pixel 9, as you mentioned switching to it last week."]}
-{"id": "v12_106", "key": "3c8396a16f14a903108cd561dd876f32375c0c76", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are in the office two days a week now."]}
+{"id": "v12_106", "key": "6b49d84c918a06ee5db77ad912b8821eff4a6c25", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are in the office two days a week now."]}
 {"id": "v12_107", "key": "5bdeda304dc3123632f145df39b85062a76ee20b", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Your wedding has been postponed to September."]}
 {"id": "v12_108", "key": "fd6c0b7430b446c3df1cd94406e3a885f45603cf", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Your son goes to Oakwood School."]}
 {"id": "v12_109", "key": "eb60bf548220fef318a0b83ef886332cd5a8b7aa", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["You are learning Italian."]}
@@ -131,7 +131,7 @@
 {"id": "v12_131", "key": "3e55b8f18462b23df96fff1721736c3d3099100c", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
 {"id": "v12_132", "key": "41e8954d56c14d8851f4fe2d2008c2847b9e4904", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
 {"id": "v12_133", "key": "df48c3828aa3c64f7d372f84f83153f7a335b714", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
-{"id": "v12_134", "key": "24b753416be417570cc56836ae944cfc0536c051", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Yes, you mentioned that today is your last day at Enron."]}
+{"id": "v12_134", "key": "c0c4de2f643a7adf1437606fff2f4799e3e8a47f", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["Yes, you recently left your job at Enron, as mentioned in your message from November 12, 2025."]}
 {"id": "v12_135", "key": "19b6e5584244bf3d91c14711a7362c564874f9fa", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
 {"id": "v12_136", "key": "8abf03f3192e43a07c5cd3959630fb4e93263c24", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}
 {"id": "v12_137", "key": "9965e4417f7c108f1ca47a2669cc1b9ac5602958", "model": "qwen3-14b-a8cc1361.gguf", "answers": ["I don't know."]}

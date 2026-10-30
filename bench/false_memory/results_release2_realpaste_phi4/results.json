@@ -7,9 +7,9 @@
    "ingest_cost": {
     "messages": 262,
     "model_calls": 0,
-    "seconds": 7.3,
+    "seconds": 7.6,
     "calls_per_message": 0.0,
-    "seconds_per_message": 0.028,
+    "seconds_per_message": 0.029,
     "scenarios_with_error": 0
    },
    "views": {
@@ -78,11 +78,11 @@
        "k": 3
       },
       "control_recall": {
-       "rate": 0.9,
-       "lo": 0.7,
+       "rate": 0.8,
+       "lo": 0.5,
        "hi": 1.0,
        "n": 10,
-       "k": 9
+       "k": 8
       },
       "abstain_explicit_cd": null,
       "abstain_lenient_cd": null,
@@ -122,11 +122,11 @@
        "k": 1
       },
       "control_recall": {
-       "rate": 0.9,
-       "lo": 0.7,
+       "rate": 0.8,
+       "lo": 0.5,
        "hi": 1.0,
        "n": 10,
-       "k": 9
+       "k": 8
       },
       "abstain_explicit_cd": null,
       "abstain_lenient_cd": null,
@@ -212,11 +212,11 @@
        "k": 3
       },
       "control_recall": {
-       "rate": 0.9,
-       "lo": 0.7,
+       "rate": 0.8,
+       "lo": 0.5,
        "hi": 1.0,
        "n": 10,
-       "k": 9
+       "k": 8
       },
       "abstain_explicit_cd": null,
       "abstain_lenient_cd": null,
@@ -256,11 +256,11 @@
        "k": 1
       },
       "control_recall": {
-       "rate": 0.9,
-       "lo": 0.7,
+       "rate": 0.8,
+       "lo": 0.5,
        "hi": 1.0,
        "n": 10,
-       "k": 9
+       "k": 8
       },
       "abstain_explicit_cd": null,
       "abstain_lenient_cd": null,

@@ -18,13 +18,13 @@
 {"id": "rp18", "key": "3849e3408f6d7e5ccc3f779fb8f972a170e14c6c", "model": "phi-4", "answers": ["You mentioned enjoying seeing your family over Thanksgiving. So, you spent it with your family."]}
 {"id": "rp19", "key": "24d3a9d0b345e3022ace221f0bfddb0fbf786b99", "model": "phi-4", "answers": ["I'm sorry, but I don't know when you are on the road this week. The memory doesn't contain any information about your travel plans."]}
 {"id": "rp20", "key": "b5375949e0763688093c9dc8fc8cbcad5bf08766", "model": "phi-4", "answers": ["I don't know which part of the ETOL deal you are handling. The memory does not contain any information about your involvement in that deal."]}
-{"id": "ro01", "key": "4bbb27132adab71a9b0a76259e697d1becfd6037", "model": "phi-4", "answers": ["You told them to come visit your floor, as the Director of Human Resources for ENW Technology groups."]}
+{"id": "ro01", "key": "0a2954d77d08d787a8ed6e1a97e53dd4dcc5184f", "model": "phi-4", "answers": ["You told them to come visit your floor on 2026-04-14."]}
 {"id": "ro02", "key": "d5905916008a010dd8f1c186c743847b1ec01612", "model": "phi-4", "answers": ["You mentioned that you left Enron in May 2026. This was stated on May 16, 2026."]}
 {"id": "ro03", "key": "85810b5d64446d8714040a512366a3c8d44b1c67", "model": "phi-4", "answers": ["You arranged interviews for Brad Romine."]}
-{"id": "ro04", "key": "5401c59c7b3461ec4124fb006cd8382f1b0a3c04", "model": "phi-4", "answers": ["You sent the draft MOU to Ben."]}
-{"id": "ro05", "key": "28f812e9e10bd40cb926bf55c489eb930279e97c", "model": "phi-4", "answers": ["You mentioned that Suzette Emmons booked the basis swap deal."]}
-{"id": "ro06", "key": "737db9354b1d03d258d184029c68cb8fb224f85f", "model": "phi-4", "answers": ["You fly from Dallas to Austin on Tuesday night."]}
-{"id": "ro07", "key": "d337bdea250bd2986568dd31e7f950cb99039df8", "model": "phi-4", "answers": ["You have been providing advisory services since 1995."]}
+{"id": "ro04", "key": "59a4d0c08d0ba459eccab152263e3f13cc8a0b74", "model": "phi-4", "answers": ["You sent the draft MOU to Ben."]}
+{"id": "ro05", "key": "ae17ed65da30932f64bebe78c96c6f07a3153ff3", "model": "phi-4", "answers": ["You mentioned that Suzette Emmons booked the $1.2M basis swap deal on 2026-06-05."]}
+{"id": "ro06", "key": "f7b839d1cb6e03d200384761713f740cac2ad93f", "model": "phi-4", "answers": ["You fly from Dallas to Austin on Tuesday night."]}
+{"id": "ro07", "key": "a5496a3b97831936f762d3d10944e6f52344c6e5", "model": "phi-4", "answers": ["You have been providing advisory services since 1995."]}
 {"id": "ro08", "key": "8537869bcdf5ae981ee43ab4d8f4fff6476977d0", "model": "phi-4", "answers": ["You mentioned that the distance from Needles to the SOCAL interconnect is approximately 90 miles."]}
-{"id": "ro09", "key": "fd62a7311d7d0c8e4b34f3551a60e497859e7a35", "model": "phi-4", "answers": ["You sold the swap to Frontera at $24.50."]}
+{"id": "ro09", "key": "a1c23c507afc343f50680fc4c8d4bc39af0adab1", "model": "phi-4", "answers": ["I don't know the price at which you sold the swap to Frontera. The memory only mentions that you have sold it, without specifying the price."]}
 {"id": "ro10", "key": "94aac5eb3a3e16680b5fbf26f559e578d86df265", "model": "phi-4", "answers": ["The first board meeting is scheduled for June 20, 2001."]}

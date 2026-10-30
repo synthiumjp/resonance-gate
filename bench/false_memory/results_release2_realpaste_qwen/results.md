@@ -10,7 +10,7 @@
 | c invention | n/a | n/a | n/a | n/a | n/a |
 | d attribute absent | n/a | n/a | n/a | n/a | n/a |
 | e assistant-injected | 20% [5-40] (4/20) | 15% [0-30] (3/20) | 5% [0-15] (1/20) | 95% [85-100] (19/20) | 80% [60-95] (16/20) |
-| CONTROL RECALL, class f (higher is better) | 50% [20-80] (5/10) | 90% [70-100] (9/10) | 90% [70-100] (9/10) | 100% [100-100] (10/10) | 100% [100-100] (10/10) |
+| CONTROL RECALL, class f (higher is better) | 50% [20-80] (5/10) | 80% [50-100] (8/10) | 80% [50-100] (8/10) | 100% [100-100] (10/10) | 100% [100-100] (10/10) |
 | explicit abstention, c+d (returned nothing) | n/a | n/a | n/a | n/a | n/a |
 | no false assertion, c+d | n/a | n/a | n/a | n/a | n/a |
 | true-fact side recall, a/b/e (secondary) | n/a | n/a | n/a | n/a | n/a |
@@ -42,7 +42,7 @@
 | c invention | n/a | n/a | n/a | n/a | n/a |
 | d attribute absent | n/a | n/a | n/a | n/a | n/a |
 | e assistant-injected | 20% [5-40] (4/20) | 15% [0-30] (3/20) | 5% [0-15] (1/20) | 95% [85-100] (19/20) | 80% [60-95] (16/20) |
-| CONTROL RECALL, class f (higher is better) | 50% [20-80] (5/10) | 90% [70-100] (9/10) | 90% [70-100] (9/10) | 100% [100-100] (10/10) | 100% [100-100] (10/10) |
+| CONTROL RECALL, class f (higher is better) | 50% [20-80] (5/10) | 80% [50-100] (8/10) | 80% [50-100] (8/10) | 100% [100-100] (10/10) | 100% [100-100] (10/10) |
 | explicit abstention, c+d (returned nothing) | n/a | n/a | n/a | n/a | n/a |
 | no false assertion, c+d | n/a | n/a | n/a | n/a | n/a |
 | true-fact side recall, a/b/e (secondary) | n/a | n/a | n/a | n/a | n/a |
@@ -66,7 +66,7 @@
 
 | system | messages | model calls | calls/message | seconds | seconds/message |
 |---|---|---|---|---|---|
-| sourcedrecall | 262 | 0 | 0.0 | 7.3 | 0.028 |
+| sourcedrecall | 262 | 0 | 0.0 | 7.6 | 0.029 |
 | rag | 262 | 135 | 0.515 | 1.6 | 0.006 |
 
 Cells: rate [95% CI] (k/n). Cluster bootstrap over scenarios, seed 20261002, 10000 resamples. Judge: qwen3-14b-a8cc1361.gguf, temperature 0.

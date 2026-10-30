@@ -66,7 +66,7 @@
 
 | system | messages | model calls | calls/message | seconds | seconds/message |
 |---|---|---|---|---|---|
-| sourcedrecall | 72 | 0 | 0.0 | 1.6 | 0.022 |
+| sourcedrecall | 72 | 0 | 0.0 | 1.7 | 0.024 |
 | mem0 | 72 | 114 | 1.583 | 12913.1 | 179.349 |
 | rag | 72 | 65 | 0.903 | 0.9 | 0.012 |
 

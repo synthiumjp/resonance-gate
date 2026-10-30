@@ -255,6 +255,21 @@ project history at session start, `import claude-code` backfill; ba6f0d9).
   final release measurement at the new commit (release9) before the README
   figures can be called current; release8 is left to finish HaluMem and
   the strict judge at 3671a09.
+- 2026-10-31: release9 at 7a83a79 done (bench/RELEASE_7a83a79.log; the
+  Mac panicked 2026-10-30 23:12 in step 5, a watchdog timeout after an
+  hour of memory pressure, the largest processes Chris's at ~180 and ~95
+  GB, ours ~23 GB; step 5 rerun alone with ~/jpwork/step5_release9.sh).
+  Suite 1,547. LoCoMo 65.6 / 68.3 / 70.8 (651 / 999 / 992 tokens),
+  McNemar vs Mem0 p=0.54 overall, 0.04 without temporal (Mem0 ahead);
+  small 0.01 / 0.95, standard <0.001 / 0.22. LME any@5 98.7, KU 63/78,
+  temporal 74/133. Every held-out false-memory and pasted-text count as on
+  3671a09. HaluMem updates 153/304, QA 190/352. Strict LoCoMo 50.5 (51.3 /
+  54.3), Mem0 48.5, rag 42.5; without the audit's wrong golds 52.2 / 50.4 /
+  43.9. README, FAQ, results history and the post updated; result files
+  and both release logs committed. Code is final for launch unless G2/G5
+  find something. Left for JP: G2 (/recall and history_search in Claude
+  Code itself), G5 (Codex/Gemini/Cursor: test or drop from README),
+  native-folder import (recommended: leave out), then export, tag, public.
 - 2026-10-26 G4 gate check (plan: backfill under 30 min on CPU, an old
   session answered with its source): JP's 23 sessions (382 MB, Sep-Oct;
   ~/jpwork/coding_data/jp_sessions) imported with `importers claude-code`
