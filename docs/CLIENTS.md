@@ -9,7 +9,7 @@ sourcedrecall is a local MCP server over stdio. The command is `sourcedrecall`, 
 }
 ```
 
-If the client cannot find `sourcedrecall` on its PATH (GUI apps often have a shorter PATH than your shell), use the absolute path to the executable as `command`. The sections below were checked against each vendor's documentation on 2026-10-03. Where a detail could not be confirmed, the section says so.
+If the client cannot find `sourcedrecall` on its PATH (GUI apps often have a shorter PATH than your shell), use the absolute path to the executable as `command`. The sections below were checked against each vendor's documentation on 2026-10-03. Where a detail could not be confirmed, the section says so. None of these clients has been tried with sourcedrecall; it has only been tested in Claude Code. If you try one, an issue saying whether it worked is welcome.
 
 ## Claude Desktop
 

@@ -47,9 +47,8 @@ What it doesn't do well yet: English only. A fact you change within the
 same session is not marked as replaced until the session is stored. On
 facts about other things that change (long lists of world facts), plain
 retrieval does better. Pasted text whose source is named in ways its rules
-don't read can still pass as yours. The Codex CLI, Gemini CLI and Cursor
-hooks are included but not tested in those apps, and native Windows is
-untested.
+don't read can still pass as yours. It has only been tested in Claude Code,
+and native Windows is untested.
 
 Install (Claude Code 2.1.83 or later, about 1.3 GB of disk):
 

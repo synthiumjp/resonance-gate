@@ -333,10 +333,10 @@ not become a standing instruction.
   ask about that text by its source, the writer's sentences about
   themselves and their general rules are left out; dates, times and places
   stay. It is not reliable (above).
-- Sessions are stored automatically in Claude Code. Its memory tools work in
-  any MCP client. Hooks for Codex CLI, Gemini CLI and Cursor are included
-  but have not yet been tested inside those apps. A ChatGPT or Claude.ai
-  data export can be imported.
+- Sessions are stored automatically in Claude Code, the only app it has
+  been tested in. Its memory tools use MCP, so other MCP clients should be
+  able to use them (see [CLIENTS.md](docs/CLIENTS.md)). A ChatGPT or
+  Claude.ai data export can be imported.
 
 ## Install
 

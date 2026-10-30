@@ -47,9 +47,9 @@ memory simulated by Claude Sonnet 5.5 following its published guidance
   (about as rarely as sourcedrecall), but lost more of the detail inside it.
 
 So it is meant to run beside Claude Code's memory: the session-start
-summary leaves out what the project's `MEMORY.md` already says. Its tools
-also work in any MCP client; hooks for Codex CLI, Gemini CLI and Cursor are
-included but not yet tested in those apps.
+summary leaves out what the project's `MEMORY.md` already says. It has only
+been tested in Claude Code; its tools use MCP, so other MCP clients should
+be able to use them.
 
 ## Does it use a language model?
 
