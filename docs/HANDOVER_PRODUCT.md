@@ -270,6 +270,9 @@ project history at session start, `import claude-code` backfill; ba6f0d9).
   find something. Left for JP: G2 (/recall and history_search in Claude
   Code itself), G5 (Codex/Gemini/Cursor: test or drop from README),
   native-folder import (recommended: leave out), then export, tag, public.
+  G5 closed 2026-10-31 (5ec4df4): JP has no access to Codex, Gemini or
+  Cursor, so README, FAQ and post now say it has only been tested in
+  Claude Code; the hook code and CLIENTS.md stay, CLIENTS.md says untested.
 - 2026-10-26 G4 gate check (plan: backfill under 30 min on CPU, an old
   session answered with its source): JP's 23 sessions (382 MB, Sep-Oct;
   ~/jpwork/coding_data/jp_sessions) imported with `importers claude-code`
